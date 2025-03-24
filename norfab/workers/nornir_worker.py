@@ -876,6 +876,8 @@ class NornirWorker(NFPWorker):
         log.debug(f"{self.name} - running Nornir task '{plugin}', kwargs '{kwargs}'")
         with self.connections_lock:
             result = nr.run(task=task_function, **kwargs)
+
+        ret.failed = result.failed
         ret.result = ResultSerializer(result, to_dict=to_dict, add_details=add_details)
 
         self.watchdog.connections_clean()
@@ -994,6 +996,7 @@ class NornirWorker(NFPWorker):
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)
 
+        ret.failed = result.failed
         ret.result = ResultSerializer(result, to_dict=to_dict, add_details=add_details)
 
         # remove __task__ data
@@ -1096,6 +1099,7 @@ class NornirWorker(NFPWorker):
                 result = nr.run(task=task_plugin, **kwargs)
             ret.changed = True
 
+        ret.failed = result.failed
         ret.result = ResultSerializer(result, to_dict=to_dict, add_details=add_details)
 
         # remove __task__ data
@@ -1363,6 +1367,7 @@ class NornirWorker(NFPWorker):
             ret.result = ResultSerializer(
                 result, to_dict=to_dict, add_details=add_details
             )
+            ret.failed = result.failed
         elif plugin == "ttp":
             result = self.cli(
                 commands=commands or [],
@@ -1464,6 +1469,7 @@ class NornirWorker(NFPWorker):
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)
 
+        ret.failed = result.failed
         ret.result = ResultSerializer(result, to_dict=to_dict, add_details=add_details)
 
         self.watchdog.connections_update(nr, plugin)

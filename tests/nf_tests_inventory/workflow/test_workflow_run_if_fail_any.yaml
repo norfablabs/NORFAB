@@ -1,0 +1,43 @@
+name: test_workflow_run_if_fail_any
+description: Test workflow that has one of the steps failed
+
+step1:
+  service: nornir
+  task: task
+  kwargs:
+    FC: spine
+    plugin: nornir_salt.plugins.tasks.nr_test
+    excpt: True # raise exception
+      
+step2:
+  service: nornir
+  task: task
+  kwargs:
+    FC: spine
+    plugin: nornir_salt.plugins.tasks.nr_test
+    ret_data: True
+
+# this step should run as step1 failed
+step3:
+  service: nornir
+  task: cli
+  kwargs:
+    FC: leaf
+    commands:
+      - show hostname
+      - show ntp status
+  run_if_fail_any: 
+    - step1
+    - step2
+
+# this step should not run as step2 did not fail
+step4:
+  service: nornir
+  task: cli
+  kwargs:
+    FC: leaf
+    commands:
+      - show hostname
+      - show ntp status
+  run_if_fail_any: 
+    - step2

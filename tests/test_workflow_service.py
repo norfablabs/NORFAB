@@ -99,3 +99,13 @@ class TestWorkflowRunTask:
         ]["result"]["ceos-leaf-3"][
             "show ntp status"
         ], f"test_workflow_1 step2 nornir-worker-2 ceos-leaf-3 show ntp status has no output"
+
+    def test_workflow_run_if_fail_any__failed(self, nfclient):
+        ret = nfclient.run_job(
+            "workflow",
+            "run",
+            kwargs={
+                "workflow": "nf://workflow/test_workflow_run_if_fail_any__failed.yaml",
+            },
+        )
+        pprint.pprint(ret)

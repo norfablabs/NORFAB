@@ -162,6 +162,7 @@ class Result:
         messages (Optional[List[str]]): List of messages produced by the task.
         juuid (Optional[str]): Job UUID associated with the task.
         resources (Optional[List[str]]): list of resources names worked on by the task.
+        status (Optional[str]): Status of the job.
 
     Methods:
         __repr__(): Returns a string representation of the Result object.
@@ -175,10 +176,11 @@ class Result:
         result: Any = None,
         failed: bool = False,
         errors: Optional[List[str]] = None,
-        task: str = None,
+        task: Optional[str] = None,
         messages: Optional[List[str]] = None,
         juuid: Optional[str] = None,
         resources: Optional[List[str]] = None,
+        status: Optional[str] = None,
     ) -> None:
         self.task = task
         self.result = result
@@ -187,6 +189,7 @@ class Result:
         self.messages = messages or []
         self.juuid = juuid
         self.resources = resources or []
+        self.status = status
 
     def __repr__(self) -> str:
         """
@@ -248,6 +251,7 @@ class Result:
                 - result: The result of the task.
                 - messages: A list of messages related to the task.
                 - juuid: The unique identifier for the job.
+                - status: The status of the job.
         """
         if not isinstance(self.errors, list):
             self.errors = [self.errors]
@@ -261,6 +265,7 @@ class Result:
             "result": self.result,
             "messages": self.messages,
             "juuid": self.juuid,
+            "status": self.status,
         }
 
 
@@ -1368,6 +1373,8 @@ class NFPWorker:
                     )
                 if not getattr(result, "task"):
                     result.task = f"{self.name}:{task}"
+                if not getattr(result, "status"):
+                    result.status = "completed"
                 if not getattr(result, "juuid"):
                     result.juuid = juuid.decode("utf-8")
             except Exception as e:

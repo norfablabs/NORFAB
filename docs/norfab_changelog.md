@@ -1,3 +1,13 @@
+## 0.7.0
+
+### FEATURES
+
+1. Added new `workflow` service to run simple workflows described using YAML DSL
+
+### CHANGES
+
+1. Updated picle shells to use nested outputter
+
 ## 0.6.0
 
 ### FEATURES
