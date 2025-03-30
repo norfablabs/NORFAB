@@ -5,7 +5,7 @@ import importlib.metadata
 import yaml
 import os
 from norfab.core.worker import NFPWorker, Result
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Tuple
 
 SERVICE = "workflow"
 
@@ -115,7 +115,7 @@ class WorkflowWorker(NFPWorker):
                     ret[step][worker_name] = worker_result
         return ret
 
-    def skip_step(self, results: dict, step: str, data: dict) -> bool:
+    def skip_step_check(self, results: dict, step: str, data: dict) -> Tuple[bool, str]:
         """
         Determines whether a step should be skipped based on the provided conditions.
 
@@ -130,7 +130,7 @@ class WorkflowWorker(NFPWorker):
                          - "run_if_pass_all": List of step names. Skip if all of these steps have passed.
 
         Returns:
-            bool: True if the step should be skipped, False otherwise.
+            tuple: tuple of boolean status and message, if status is true step should be skipped.
         """
         if data.get("run_if_fail_any"):
             # check if have results for all needed steps
@@ -141,13 +141,17 @@ class WorkflowWorker(NFPWorker):
                     )
             # check if any of the steps failed
             for step_name in data["run_if_fail_any"]:
-                for worker_result in results[step_name].values():
+                for worker_name, worker_result in results[step_name].items():
                     if worker_result["failed"] is True:
                         return (
-                            False  # do not skip this step since one of the steps failed
+                            False,  # do not skip this step since one of the steps failed
+                            None,
                         )
             else:
-                return True  # skip this step since none of the steps failed
+                return (
+                    True,  # skip this step since none of the steps failed
+                    f"Skipping {step}, no workers failed any of run_if_fail_any steps: {', '.join(data['run_if_fail_any'])}",
+                )
         if data.get("run_if_pass_any"):
             # check if have results for all needed steps
             for k in data["run_if_pass_any"]:
@@ -162,10 +166,14 @@ class WorkflowWorker(NFPWorker):
                 for worker_name, worker_result in job_results.items():
                     if worker_result["failed"] is False:
                         return (
-                            False  # do not skip this step since one of the steps passed
+                            False,  # do not skip this step since one of the steps passed
+                            None,
                         )
                 else:
-                    return True  # skip this step since none of the steps passed
+                    return (
+                        True,  # skip this step since none of the steps passed
+                        f"Skipping {step}, no workers passed any of run_if_pass_any steps: {', '.join(data['run_if_pass_any'])}",
+                    )
         if data.get("run_if_fail_all"):
             # check if have results for all needed steps
             for k in data["run_if_fail_all"]:
@@ -178,7 +186,10 @@ class WorkflowWorker(NFPWorker):
                     continue
                 for worker_name, worker_result in job_results.items():
                     if worker_result["failed"] is False:
-                        return True  # skip this step since not all steps failed
+                        return (
+                            True,  # skip this step since not all steps failed
+                            f"Skipping {step}, worker {worker_name} not failed run_if_fail_all {step_name} step.",
+                        )
         if data.get("run_if_pass_all"):
             # check if have results for all needed steps
             for k in data["run_if_pass_all"]:
@@ -191,9 +202,12 @@ class WorkflowWorker(NFPWorker):
                     continue
                 for worker_name, worker_result in job_results.items():
                     if worker_result["failed"] is True:
-                        return True  # skip this step since not all steps passed
+                        return (
+                            True,  # skip this step since not all steps passed
+                            f"Skipping {step}, worker {worker_name} not passed run_if_pass_all {step_name} step.",
+                        )
 
-        return False  # do not skip this step
+        return False, None  # do not skip this step
 
     def stop_workflow(self, result: dict, step: str, data: dict) -> bool:
         """
@@ -255,15 +269,18 @@ class WorkflowWorker(NFPWorker):
         for step, data in workflow.items():
 
             # check if need to skip step based on run_if_x flags
-            if self.skip_step(ret.result[workflow_name], step, data):
+            skip_status, message = self.skip_step_check(
+                ret.result[workflow_name], step, data
+            )
+            if skip_status is True:
                 ret.result[workflow_name][step] = {
-                    "all": {
+                    "all-workers": {
                         "failed": True,
                         "result": None,
                         "status": "skipped",
                         "task": data["task"],
                         "errors": [],
-                        "messages": [],
+                        "messages": [message],
                         "juuid": None,
                     }
                 }

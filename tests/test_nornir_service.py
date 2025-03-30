@@ -1438,7 +1438,9 @@ class TestNornirParse:
 
         for worker, results in ret.items():
             assert results["result"], f"{worker} returned no results"
-            assert results["failed"] is False, f"{worker} failed to run the task"
+            assert (
+                results["failed"] is True
+            ), f"{worker} should have failed to run the task"
             for host, res in results["result"].items():
                 assert "NotImplementedError" in res["napalm_get"]
 

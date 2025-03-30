@@ -100,12 +100,25 @@ class TestWorkflowRunTask:
             "show ntp status"
         ], f"test_workflow_1 step2 nornir-worker-2 ceos-leaf-3 show ntp status has no output"
 
-    def test_workflow_run_if_fail_any__failed(self, nfclient):
+    def test_workflow_run_if_fail_any(self, nfclient):
         ret = nfclient.run_job(
             "workflow",
             "run",
             kwargs={
-                "workflow": "nf://workflow/test_workflow_run_if_fail_any__failed.yaml",
+                "workflow": "nf://workflow/test_workflow_run_if_fail_any.yaml",
             },
         )
         pprint.pprint(ret)
+
+        assert (
+            ret["workflow-worker-1"]["result"]["test_workflow_run_if_fail_any"][
+                "step3"
+            ]["nornir-worker-2"]["status"]
+            == "completed"
+        ), f"test_workflow_run_if_fail_any step3 should be completed"
+        assert (
+            ret["workflow-worker-1"]["result"]["test_workflow_run_if_fail_any"][
+                "step4"
+            ]["all-workers"]["status"]
+            == "skipped"
+        ), f"test_workflow_run_if_fail_any step3 should be skipped"

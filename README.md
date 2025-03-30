@@ -16,7 +16,7 @@ NORFAB is a tool for extreme network automations.
 
 Interested? read [documentation](https://docs.norfablabs.com) or welcome to [#norfab](https://networktocode.slack.com/archives/C0894SVH7BQ) to have a chat.
 
-# The IDEA
+# The IDEA 💡
 
 Most of the software to manage networks falls into one of the two categories: 
 
@@ -29,7 +29,7 @@ doing any use cases without the need to throw gazillions of dollars and man hour
 it. Always ready to serve the purpose of unlocking engineers superpowers managing
 modern network and making their life better.
 
-# Key Features
+# Key Features 🚀
 
 - Run Anywhere - Windows, MAC, Linux, in a container or VM, on-prem or in cloud, centralized or distributed
 - Extend Anything - extendability is in the core of NORFAB
@@ -38,18 +38,18 @@ modern network and making their life better.
 - Model and data driven - Pydantic models for API, validation and documentation
 - Automate Anything - we mean it, sky is the limit on what you can do with NORFAB automating your networks
 
-# Architecture
+# Architecture 🏦
 
 **TLDR** Service-Oriented Architecture (SOA)
 
 Clients communicate with broker to run the jobs, broker distributes jobs across workers comprising the service.
 
-# History
+# History 📜
 
 NORFAB is a successor of Salt-Nornir SaltStack proxy minion aiming 
 to surpass its limitations.
 
-# Use Cases (Eye Catching ASCII Cinema Staff)
+# Use Cases 🔧
 
 **Collect show commands**
 ![collect show commands](docs/images/nornir_cli_demo.gif)
