@@ -73,9 +73,6 @@ class FastAPIShowCommandsModel(BaseModel):
 
 
 class FastAPIServiceCommands(BaseModel):
-    show: FastAPIShowCommandsModel = Field(
-        None, description="Show FastAPI service parameters"
-    )
     auth: FastAPIAuthCommandsModel = Field(None, description="Manage auth tokens")
 
     class PicleConfig:

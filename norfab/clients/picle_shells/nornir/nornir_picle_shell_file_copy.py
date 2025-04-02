@@ -27,7 +27,7 @@ class SCPDirection(str, Enum):
 
 class NrFileCopyPluginNetmiko(BaseModel):
     dest_file: StrictStr = Field(
-        None, description="Destination file to copy", alias="dest-file"
+        None, description="Destination file to copy", alias="destination-file"
     )
     file_system: StrictStr = Field(
         None, description="Destination file system", alias="file-system"
@@ -74,7 +74,7 @@ class NornirFileCopyShell(
     NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
 ):
     source_file: StrictStr = Field(
-        ..., description="Source file to copy", mandatory=True
+        ..., description="Source file to copy", mandatory=True, alias="source-file"
     )
     plugin: NrFileCopyPlugins = Field(None, description="Connection plugin parameters")
     dry_run: StrictBool = Field(

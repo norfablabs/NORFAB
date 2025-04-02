@@ -30,27 +30,35 @@ class NrCliPluginNetmiko(BaseModel):
         None,
         description="switch to send command timing method",
         json_schema_extra={"presence": True},
+        alias="use-timing",
     )
     # netmiko send_command methods arguments
     expect_string: Optional[StrictStr] = Field(
         None,
         description="Regular expression pattern to use for determining end of output",
+        alias="expect-string",
     )
     read_timeout: Optional[StrictInt] = Field(
-        None, description="Maximum time to wait looking for pattern"
+        None,
+        description="Maximum time to wait looking for pattern",
+        alias="read-timeout",
     )
     auto_find_prompt: Optional[StrictBool] = Field(
-        None, description="Use find_prompt() to override base prompt"
+        None,
+        description="Use find_prompt() to override base prompt",
+        alias="auto-find-prompt",
     )
     strip_prompt: Optional[StrictBool] = Field(
         None,
         description="Remove the trailing router prompt from the output",
         json_schema_extra={"presence": True},
+        alias="strip-prompt",
     )
     strip_command: Optional[StrictBool] = Field(
         None,
         description="Remove the echo of the command from the output",
         json_schema_extra={"presence": True},
+        alias="strip-command",
     )
     normalize: Optional[StrictBool] = Field(
         None,
@@ -61,29 +69,33 @@ class NrCliPluginNetmiko(BaseModel):
         None,
         description="Process command output through TextFSM template",
         json_schema_extra={"presence": True},
+        alias="use-textfsm",
     )
     textfsm_template: Optional[StrictStr] = Field(
         None,
         description="Name of template to parse output with",
+        alias="textfsm-template",
     )
     use_ttp: Optional[StrictBool] = Field(
         None,
         description="Process command output through TTP template",
         json_schema_extra={"presence": True},
+        alias="use-ttp",
     )
     ttp_template: Optional[StrictBool] = Field(
-        None,
-        description="Name of template to parse output with",
+        None, description="Name of template to parse output with", alias="ttp-template"
     )
     use_genie: Optional[StrictBool] = Field(
         None,
         description="Process command output through PyATS/Genie parser",
         json_schema_extra={"presence": True},
+        alias="use-genie",
     )
     cmd_verify: Optional[StrictBool] = Field(
         None,
         description="Verify command echo before proceeding",
         json_schema_extra={"presence": True},
+        alias="cmd-verify",
     )
     # nornir_salt.plugins.tasks.netmiko_send_commands arguments
     interval: Optional[StrictInt] = Field(
@@ -94,20 +106,24 @@ class NrCliPluginNetmiko(BaseModel):
         None,
         description="Use send command promptless method",
         json_schema_extra={"presence": True},
+        alias="use-ps",
     )
     use_ps_timeout: Optional[StrictInt] = Field(
         None,
         description="Promptless mode absolute timeout",
         json_schema_extra={"presence": True},
+        alias="use-ps-timeout",
     )
     split_lines: Optional[StrictBool] = Field(
         None,
         description="Split multiline string to individual commands",
         json_schema_extra={"presence": True},
+        alias="split-lines",
     )
     new_line_char: Optional[StrictStr] = Field(
         None,
         description="Character to replace with new line before sending to device, default is _br_",
+        alias="new-line-char",
     )
     repeat: Optional[StrictInt] = Field(
         None,
@@ -116,14 +132,17 @@ class NrCliPluginNetmiko(BaseModel):
     stop_pattern: Optional[StrictStr] = Field(
         None,
         description="Stop commands repeat if output matches provided glob pattern",
+        alias="stop-pattern",
     )
     repeat_interval: Optional[StrictInt] = Field(
         None,
         description="Time in seconds to wait between repeating commands",
+        alias="repeat-interval",
     )
     return_last: Optional[StrictInt] = Field(
         None,
         description="Returns requested last number of commands outputs",
+        alias="return-last",
     )
 
     @staticmethod
@@ -141,14 +160,15 @@ class NrCliPluginScrapli(BaseModel):
         None,
         description="Strip prompt from returned output",
         json_schema_extra={"presence": True},
+        alias="strip-prompt",
     )
     failed_when_contains: Optional[StrictStr] = Field(
         None,
         description="String or list of strings indicating failure if found in response",
+        alias="failed-when-contains",
     )
     timeout_ops: Optional[StrictInt] = Field(
-        None,
-        description="Timeout ops value for this operation",
+        None, description="Timeout ops value for this operation", alias="timeout-ops"
     )
     # nornir_salt.plugins.tasks.scrapli_send_commands arguments
     interval: Optional[StrictInt] = Field(
@@ -159,10 +179,12 @@ class NrCliPluginScrapli(BaseModel):
         None,
         description="Split multiline string to individual commands",
         json_schema_extra={"presence": True},
+        alias="split-lines",
     )
     new_line_char: Optional[StrictStr] = Field(
         None,
         description="Character to replace with new line before sending to device, default is _br_",
+        alias="new-line-char",
     )
     repeat: Optional[StrictInt] = Field(
         None,
@@ -171,14 +193,17 @@ class NrCliPluginScrapli(BaseModel):
     stop_pattern: Optional[StrictStr] = Field(
         None,
         description="Stop commands repeat if output matches provided glob pattern",
+        alias="stop-pattern",
     )
     repeat_interval: Optional[StrictInt] = Field(
         None,
         description="Time in seconds to wait between repeating commands",
+        alias="repeat-interval",
     )
     return_last: Optional[StrictInt] = Field(
         None,
         description="Returns requested last number of commands outputs",
+        alias="return-last",
     )
 
     @staticmethod
@@ -200,10 +225,12 @@ class NrCliPluginNapalm(BaseModel):
         None,
         description="Split multiline string to individual commands",
         json_schema_extra={"presence": True},
+        alias="split-lines",
     )
     new_line_char: Optional[StrictStr] = Field(
         None,
         description="Character to replace with new line before sending to device, default is _br_",
+        alias="new-line-char",
     )
 
     @staticmethod
@@ -237,15 +264,20 @@ class NornirCliShell(
         required=True,
     )
     plugin: NrCliPlugins = Field(None, description="Connection plugin parameters")
-    cli_dry_run: Optional[StrictBool] = Field(
-        None, description="Dry run the commands", json_schema_extra={"presence": True}
+    dry_run: Optional[StrictBool] = Field(
+        None,
+        description="Dry run the commands",
+        json_schema_extra={"presence": True},
+        alias="dry-run",
     )
     enable: Optional[StrictBool] = Field(
         None, description="Enter exec mode", json_schema_extra={"presence": True}
     )
-    run_ttp: Optional[StrictStr] = Field(None, description="TTP Template to run")
+    run_ttp: Optional[StrictStr] = Field(
+        None, description="TTP Template to run", alias="run-ttp"
+    )
     job_data: Optional[StrictStr] = Field(
-        None, description="Path to YAML file with job data"
+        None, description="Path to YAML file with job data", alias="job-data"
     )
 
     @staticmethod

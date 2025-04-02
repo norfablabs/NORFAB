@@ -209,15 +209,6 @@ class NornirServiceCommands(BaseModel):
         None, description="Work with Nornir inventory"
     )
 
-    # netconf:
-    # file:
-    # gnmi:
-    # snmp:
-
-    show: NornirShowCommandsModel = Field(
-        None, description="Show Nornir service parameters"
-    )
-
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir]#"

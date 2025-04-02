@@ -888,7 +888,7 @@ class NornirWorker(NFPWorker):
         self,
         commands: list = None,
         plugin: str = "netmiko",
-        cli_dry_run: bool = False,
+        dry_run: bool = False,
         run_ttp: str = None,
         job_data: str = None,
         to_dict: bool = True,
@@ -902,7 +902,7 @@ class NornirWorker(NFPWorker):
             commands (list, optional): List of commands to send to devices.
             plugin (str, optional): Plugin name to use. Valid options are
                 ``netmiko``, ``scrapli``, ``napalm``.
-            cli_dry_run (bool, optional): If True, do not send commands to devices,
+            dry_run (bool, optional): If True, do not send commands to devices,
                 just return them.
             run_ttp (str, optional): TTP Template to run.
             job_data (str, optional): URL to YAML file with data or dictionary/list
@@ -986,11 +986,11 @@ class NornirWorker(NFPWorker):
 
         # run task
         log.debug(
-            f"{self.name} - running cli commands '{commands}', kwargs '{kwargs}', is cli dry run - '{cli_dry_run}'"
+            f"{self.name} - running cli commands '{commands}', kwargs '{kwargs}', is cli dry run - '{dry_run}'"
         )
-        if cli_dry_run is True:
+        if dry_run is True:
             result = nr.run(
-                task=nr_test, use_task_data="commands", name="cli_dry_run", **kwargs
+                task=nr_test, use_task_data="commands", name="dry_run", **kwargs
             )
         else:
             with self.connections_lock:
@@ -1012,7 +1012,7 @@ class NornirWorker(NFPWorker):
         self,
         config: list,
         plugin: str = "netmiko",
-        cfg_dry_run: bool = False,
+        dry_run: bool = False,
         to_dict: bool = True,
         add_details: bool = False,
         job_data: str = None,
@@ -1029,7 +1029,7 @@ class NornirWorker(NFPWorker):
                 - scrapli - use Scrapli to configure devices
                 - napalm - use NAPALM to configure devices
 
-            cfg_dry_run (bool, optional): If True, will not send commands to devices but just return them.
+            dry_run (bool, optional): If True, will not send commands to devices but just return them.
             to_dict (bool, optional): If True, returns results as a dictionary. Defaults to True.
             add_details (bool, optional): If True, adds task execution details to the results.
             job_data (str, optional): URL to YAML file with data or dictionary/list of data to pass on to Jinja2 rendering context.
@@ -1088,11 +1088,11 @@ class NornirWorker(NFPWorker):
 
         # run task
         log.debug(
-            f"{self.name} - sending config commands '{config}', kwargs '{kwargs}', is cfg_dry_run - '{cfg_dry_run}'"
+            f"{self.name} - sending config commands '{config}', kwargs '{kwargs}', is dry_run - '{dry_run}'"
         )
-        if cfg_dry_run is True:
+        if dry_run is True:
             result = nr.run(
-                task=nr_test, use_task_data="config", name="cfg_dry_run", **kwargs
+                task=nr_test, use_task_data="config", name="dry_run", **kwargs
             )
         else:
             with self.connections_lock:

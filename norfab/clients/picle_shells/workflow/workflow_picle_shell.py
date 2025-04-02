@@ -42,56 +42,35 @@ class WorkflowShowInventoryModel(ClientRunJobArgs):
         return log_error_or_result(result)
 
 
-class WorkflowShowCommandsModel(BaseModel):
-    inventory: WorkflowShowInventoryModel = Field(
-        None,
-        description="show workflow workers inventory data",
-    )
-    version: Callable = Field(
-        "get_version",
-        description="show workflow service workers version report",
-        json_schema_extra={
-            "outputter": Outputters.outputter_rich_yaml,
-            "initial_indent": 2,
-        },
-    )
-
+class WorkflowShowVersionModel(ClientRunJobArgs):
     class PicleConfig:
-        outputter = Outputters.outputter_nested
+        outputter = Outputters.outputter_rich_yaml
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def get_version(**kwargs):
+    def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("workflow", "get_version", workers=workers)
-        return log_error_or_result(result)
-
-    @staticmethod
-    def source_workflow():
-        workflow_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return workflow_files["results"]
-
-    @staticmethod
-    @listen_events
-    def run(uuid, *args, **kwargs):
-        workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
 
         result = NFCLIENT.run_job(
             "workflow",
-            "workflow_run",
-            workers=workers,
-            args=args,
+            "get_version",
             kwargs=kwargs,
-            uuid=uuid,
+            workers=workers,
             timeout=timeout,
         )
+        return log_error_or_result(result)
 
-        result = log_error_or_result(result)
 
-        return result
+class WorkflowShowCommandsModel(BaseModel):
+    inventory: WorkflowShowInventoryModel = Field(
+        None,
+        description="Show workflow workers inventory data",
+    )
+    version: WorkflowShowVersionModel = Field(
+        None,
+        description="Show workflow service workers version report",
+    )
 
 
 # ---------------------------------------------------------------------------------------------
@@ -101,9 +80,6 @@ class WorkflowShowCommandsModel(BaseModel):
 
 class WorkflowServiceCommands(BaseModel):
     run: WorkflowRunShell = Field(None, description="Run workflows")
-    show: WorkflowShowCommandsModel = Field(
-        None, description="Show workflow service workers parameters"
-    )
 
     class PicleConfig:
         subshell = True

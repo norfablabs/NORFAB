@@ -36,6 +36,7 @@ class NornirTestShell(
         None,
         description="Return produced per-host tests suite content without running tests",
         json_schema_extra={"presence": True},
+        alias="dry-run",
     )
     subset: Optional[StrictStr] = Field(
         None,
@@ -45,14 +46,16 @@ class NornirTestShell(
         None,
         description="Return test results for failed tests only",
         json_schema_extra={"presence": True},
+        alias="failed-only",
     )
     remove_tasks: Optional[StrictBool] = Field(
         None,
         description="Include/Exclude tested task results",
         json_schema_extra={"presence": True},
+        alias="remove-tasks",
     )
     job_data: Optional[StrictStr] = Field(
-        None, description="Path to YAML file with job data"
+        None, description="Path to YAML file with job data", alias="job-data"
     )
     table: Union[EnumTableTypes, Dict, StrictBool] = Field(
         "brief",

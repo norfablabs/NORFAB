@@ -119,36 +119,49 @@ class NornirCommonArgs(BaseModel):
         False,
         description="Add task details to results",
         json_schema_extra={"presence": True},
+        alias="add-details",
     )
     run_num_workers: Optional[StrictInt] = Field(
-        None, description="RetryRunner number of threads for tasks execution"
+        None,
+        description="RetryRunner number of threads for tasks execution",
+        alias="num-workers",
     )
     run_num_connectors: Optional[StrictInt] = Field(
-        None, description="RetryRunner number of threads for device connections"
+        None,
+        description="RetryRunner number of threads for device connections",
+        alias="num-connectors",
     )
     run_connect_retry: Optional[StrictInt] = Field(
-        None, description="RetryRunner number of connection attempts"
+        None,
+        description="RetryRunner number of connection attempts",
+        alias="connect-retry",
     )
     run_task_retry: Optional[StrictInt] = Field(
-        None, description="RetryRunner number of attempts to run task"
+        None,
+        description="RetryRunner number of attempts to run task",
+        alias="task-retry",
     )
     run_reconnect_on_fail: Optional[StrictBool] = Field(
         None,
         description="RetryRunner perform reconnect to host on task failure",
         json_schema_extra={"presence": True},
+        alias="reconnect-on-fail",
     )
     run_connect_check: Optional[StrictBool] = Field(
         None,
         description="RetryRunner test TCP connection before opening actual connection",
         json_schema_extra={"presence": True},
+        alias="connect-check",
     )
     run_connect_timeout: Optional[StrictInt] = Field(
         None,
         description="RetryRunner timeout in seconds to wait for test TCP connection to establish",
+        alias="connect-timeout",
     )
     run_creds_retry: Optional[List] = Field(
         None,
         description="RetryRunner list of connection credentials and parameters to retry",
+        alias="creds-retry",
     )
     tf: Optional[StrictStr] = Field(
         None,
@@ -158,6 +171,7 @@ class NornirCommonArgs(BaseModel):
         None,
         description="Save results to file for failed tasks",
         json_schema_extra={"presence": True},
+        alias="tf-skip-failed",
     )
     diff: Optional[StrictStr] = Field(
         None,
@@ -166,6 +180,7 @@ class NornirCommonArgs(BaseModel):
     diff_last: Optional[Union[StrictStr, StrictInt]] = Field(
         None,
         description="File version number to diff, default is 1 (last)",
+        alias="diff-last",
     )
     progress: Optional[StrictBool] = Field(
         True,
@@ -190,7 +205,7 @@ class TabulateTableModel(BaseModel):
         None, description="Table headers"
     )
     headers_exclude: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="Table headers to exclude"
+        None, description="Table headers to exclude", alias="headers-exclude"
     )
     sortby: StrictStr = Field(None, description="Table header column to sort by")
     reverse: StrictBool = Field(

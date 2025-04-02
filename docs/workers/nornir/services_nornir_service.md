@@ -37,3 +37,84 @@ Ncclient, Scrapli NETCONF, pygnmi, puresnmp, TextFSM, TTP etc.
 | **[diagram](services_nornir_service_tasks_diagram.md)** | Produce Network L2,  L3, OSPF or ISIS routing diagrams in DrawIO or yED formats. | Automated network documentation, network validation. |
 | **[file_copy](services_nornir_service_tasks_file_copy.md)** | Copy files to network devices over SCP. | Device software upgrades, certificates or license renewal. |
 | **[runtime_inventory](services_nornir_service_tasks_runtime_inventory.md)** | Modify Nornir service runtime inventory. | Add, update or remove Nornir hosts at a runtime. |
+
+## Nornir Service Shell Show Commands
+
+Nornir service shell comes with this set of show commands to query various information:
+
+```
+nf#man tree show.nornir
+root
+└── show:    NorFab show commands
+    └── nornir:    Show Nornir service
+        ├── inventory:    show Nornir inventory data
+        │   ├── timeout:    Job timeout
+        │   ├── workers:    Filter worker to target, default 'all'
+        │   ├── FO:    Filter hosts using Filter Object
+        │   ├── FB:    Filter hosts by name using Glob Patterns
+        │   ├── FH:    Filter hosts by hostname
+        │   ├── FC:    Filter hosts containment of pattern in name
+        │   ├── FR:    Filter hosts by name using Regular Expressions
+        │   ├── FG:    Filter hosts by group
+        │   ├── FP:    Filter hosts by hostname using IP Prefix
+        │   ├── FL:    Filter hosts by names list
+        │   ├── FM:    Filter hosts by platform
+        │   ├── FX:    Filter hosts excluding them by name
+        │   ├── FN:    Negate the match
+        │   └── hosts:    Filter hosts to target
+        ├── hosts:    show Nornir hosts
+        │   ├── table:    Table format (brief, terse, extend) or parameters or True
+        │   ├── headers:    Table headers
+        │   ├── headers-exclude:    Table headers to exclude
+        │   ├── sortby:    Table header column to sort by
+        │   ├── reverse:    Table reverse the sort by order
+        │   ├── FO:    Filter hosts using Filter Object
+        │   ├── FB:    Filter hosts by name using Glob Patterns
+        │   ├── FH:    Filter hosts by hostname
+        │   ├── FC:    Filter hosts containment of pattern in name
+        │   ├── FR:    Filter hosts by name using Regular Expressions
+        │   ├── FG:    Filter hosts by group
+        │   ├── FP:    Filter hosts by hostname using IP Prefix
+        │   ├── FL:    Filter hosts by names list
+        │   ├── FM:    Filter hosts by platform
+        │   ├── FX:    Filter hosts excluding them by name
+        │   ├── FN:    Negate the match
+        │   ├── hosts:    Filter hosts to target
+        │   ├── workers:    Filter worker to target, default 'all'
+        │   └── details:    show hosts details
+        ├── version:    show Nornir service version report
+        ├── watchdog:    show Nornir service version report
+        │   ├── FO:    Filter hosts using Filter Object
+        │   ├── FB:    Filter hosts by name using Glob Patterns
+        │   ├── FH:    Filter hosts by hostname
+        │   ├── FC:    Filter hosts containment of pattern in name
+        │   ├── FR:    Filter hosts by name using Regular Expressions
+        │   ├── FG:    Filter hosts by group
+        │   ├── FP:    Filter hosts by hostname using IP Prefix
+        │   ├── FL:    Filter hosts by names list
+        │   ├── FM:    Filter hosts by platform
+        │   ├── FN:    Negate the match
+        │   ├── hosts:    Filter hosts to target
+        │   ├── workers:    Filter worker to target, default 'all'
+        │   ├── statistics:    show Nornir watchdog statistics
+        │   ├── configuration:    show Nornir watchdog configuration
+        │   └── connections:    show Nornir watchdog connections monitoring data
+        └── jobs:    Show Nornir Jobs
+            ├── summary:    List jobs
+            │   ├── timeout:    Job timeout
+            │   ├── workers:    Workers to return jobs for, default 'all'
+            │   ├── last:    Return last N completed and last N pending jobs
+            │   ├── pending:    Return pending jobs, default 'True'
+            │   ├── completed:    Return completed jobs, default 'True'
+            │   ├── client:    Client name to return jobs for
+            │   ├── uuid:    Job UUID to return
+            │   └── task:    Task name to return jobs for
+            └── details:    Show job details
+                ├── timeout:    Job timeout
+                ├── workers:    Workers to return jobs for, default 'all'
+                ├── *uuid:    Job UUID
+                ├── data:    Return job data received from client, default 'True'
+                ├── result:    Return job result, default 'True'
+                └── events:    Return job events, default 'True'
+nf# 
+```

@@ -119,23 +119,23 @@ root
     └── cfg:    Configure devices over CLI interface
         ├── timeout:    Job timeout
         ├── workers:    Filter worker to target, default 'all'
-        ├── add_details:    Add task details to results, default 'False'
-        ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        ├── run_num_connectors:    RetryRunner number of threads for device connections
-        ├── run_connect_retry:    RetryRunner number of connection attempts
-        ├── run_task_retry:    RetryRunner number of attempts to run task
-        ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        ├── add-details:    Add task details to results, default 'False'
+        ├── num-workers:    RetryRunner number of threads for tasks execution
+        ├── num-connectors:    RetryRunner number of threads for device connections
+        ├── connect-retry:    RetryRunner number of connection attempts
+        ├── task-retry:    RetryRunner number of attempts to run task
+        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         ├── tf:    File group name to save task results to on worker file system
-        ├── tf_skip_failed:    Save results to file for failed tasks
+        ├── tf-skip-failed:    Save results to file for failed tasks
         ├── diff:    File group name to run the diff for
-        ├── diff_last:    File version number to diff, default is 1 (last)
+        ├── diff-last:    File version number to diff, default is 1 (last)
         ├── progress:    Display progress events, default 'True'
         ├── table:    Table format (brief, terse, extend) or parameters or True
         ├── headers:    Table headers
-        ├── headers_exclude:    Table headers to exclude
+        ├── headers-exclude:    Table headers to exclude
         ├── sortby:    Table header column to sort by
         ├── reverse:    Table reverse the sort by order
         ├── FO:    Filter hosts using Filter Object
@@ -150,20 +150,20 @@ root
         ├── FX:    Filter hosts excluding them by name
         ├── FN:    Negate the match
         ├── hosts:    Filter hosts to target
-        ├── cfg_dry_run:    Dry run cfg function
+        ├── dry-run:    Dry run cfg function
         ├── *config:    List of configuration commands to send to devices
         ├── plugin:    Configuration plugin parameters
         │   ├── netmiko:    Use Netmiko plugin to configure devices
         │   │   ├── enable:    Attempt to enter enable-mode
-        │   │   ├── exit_config_mode:    Determines whether or not to exit config mode after complete
-        │   │   ├── strip_prompt:    Determines whether or not to strip the prompt
-        │   │   ├── strip_command:    Determines whether or not to strip the command
-        │   │   ├── read_timeout:    Absolute timer to send to read_channel_timing
-        │   │   ├── config_mode_command:    The command to enter into config mode
-        │   │   ├── enter_config_mode:    Do you enter config mode before sending config commands
-        │   │   ├── error_pattern:    Regular expression pattern to detect config errors in the output
+        │   │   ├── exit-config-mode:    Determines whether or not to exit config mode after complete
+        │   │   ├── strip-command:    Determines whether or not to strip the command
+        │   │   ├── read-timeout:    Absolute timer to send to read_channel_timing
+        │   │   ├── config-mode-command:    The command to enter into config mode
+        │   │   ├── cmd-verify:    Whether or not to verify command echo for each command in config_set
+        │   │   ├── enter-config-mode:    Do you enter config mode before sending config commands
+        │   │   ├── error-pattern:    Regular expression pattern to detect config errors in the output
         │   │   ├── terminator:    Regular expression pattern to use as an alternate terminator
-        │   │   ├── bypass_commands:    Regular expression pattern indicating configuration commands, cmd_verify is automatically disabled
+        │   │   ├── bypass-commands:    Regular expression pattern indicating configuration commands, cmd_verify is automatically disabled
         │   │   ├── commit:    Commit configuration, default 'True'
         │   │   ├── commit-confirm:    Perform commit confirm on supported platforms
         │   │   ├── commit-confirm-delay:    Confirmed commit rollback timeout in minutes, used with commit-confirm
@@ -171,18 +171,18 @@ root
         │   │   ├── commit-comment:    Commit operation comment
         │   │   └── batch:    Commands count to send in batches
         │   ├── scrapli:    Use Scrapli plugin to configure devices
-        │   │   ├── dry_run:    Apply changes or not, also tests if possible to enter config mode
-        │   │   ├── strip_prompt:    Strip prompt from returned output
-        │   │   ├── failed_when_contains:    String or list of strings indicating failure if found in response
-        │   │   ├── stop_on_failed:    Stop executing commands if command fails
-        │   │   ├── privilege_level:    Name of configuration privilege level to acquire
+        │   │   ├── dry-run:    Apply changes or not, also tests if possible to enter config mode
+        │   │   ├── strip-prompt:    Strip prompt from returned output
+        │   │   ├── failed-when-contains:    String or list of strings indicating failure if found in response
+        │   │   ├── stop-on-failed:    Stop executing commands if command fails
+        │   │   ├── privilege-level:    Name of configuration privilege level to acquire
         │   │   ├── eager:    Do not read until prompt is seen at each command sent to the channel
-        │   │   └── timeout_ops:    Timeout ops value for this operation
+        │   │   └── timeout-ops:    Timeout ops value for this operation
         │   └── napalm:    Use NAPALM plugin to configure devices
         │       ├── replace:    Whether to replace or merge the configuration
-        │       ├── dry_run:    Apply changes or not, also tests if possible to enter config mode
-        │       └── revert_in:    Amount of time in seconds after which to revert the commit
-        └── job_data:    Path to YAML file with job data
+        │       ├── dry-run:    Apply changes or not, also tests if possible to enter config mode
+        │       └── revert-in:    Amount of time in seconds after which to revert the commit
+        └── job-data:    Path to YAML file with job data
 nf#
 ```
 

@@ -85,12 +85,12 @@ root
         │   ├── *name:    Name of the host
         │   ├── username:    Host connections username
         │   ├── password:    Host connections password
+        │   ├── platform:    Host platform recognized by connection plugin
         │   ├── hostname:    Hostname of the host to initiate connection with, IP address or FQDN
         │   ├── port:    TCP port to initiate connection with, default '22'
         │   ├── connection-options:    JSON string with connection options
         │   ├── groups:    List of groups to associate with this host
         │   ├── groups-action:    Action to perform with groups, default 'append'
-        │   ├── data:    JSON string with arbitrary host data
         │   └── progress:    Display progress events, default 'True'
         ├── delete-host:    Delete host from inventory
         │   ├── timeout:    Job timeout

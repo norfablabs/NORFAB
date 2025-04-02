@@ -44,6 +44,7 @@ class GrapQLCommands(NetboxClientRunJobArgs, NetboxCommonArgs):
         None,
         description="Only return query content, do not run it",
         json_schema_extra={"presence": True},
+        alias="dry-run",
     )
     obj: Optional[StrictStr] = Field(
         None,
@@ -64,6 +65,7 @@ class GrapQLCommands(NetboxClientRunJobArgs, NetboxCommonArgs):
     query_string: Optional[StrictStr] = Field(
         None,
         description="Complete GraphQL query string to send as is",
+        alias="query-string",
     )
 
     @staticmethod
@@ -159,16 +161,19 @@ class GetInterfaces(NetboxClientRunJobArgs, NetboxCommonArgs):
         None,
         description="Retrieves interface IP addresses",
         json_schema_extra={"presence": True},
+        alias="ip-addresses",
     )
     inventory_items: Optional[StrictBool] = Field(
         None,
         description="Retrieves interface inventory items",
         json_schema_extra={"presence": True},
+        alias="inventory-items",
     )
     dry_run: Optional[StrictBool] = Field(
         None,
         description="Only return query content, do not run it",
         json_schema_extra={"presence": True},
+        alias="dry-run",
     )
 
     @staticmethod
@@ -226,9 +231,6 @@ class UpdateCommands(BaseModel):
 
 
 class NetboxServiceCommands(BaseModel):
-    show: NetboxShowCommandsModel = Field(
-        None, description="Show Netbox service parameters"
-    )
     graphql: GrapQLCommands = Field(None, description="Query Netbox GrapQL API")
     get: GetCommands = Field(None, description="Query data from Netbox")
     update: UpdateCommands = Field(None, description="Update Netbox data")

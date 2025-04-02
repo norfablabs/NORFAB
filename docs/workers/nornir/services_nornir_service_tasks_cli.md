@@ -366,23 +366,23 @@ root
     └── cli:    Send CLI commands to devices
         ├── timeout:    Job timeout
         ├── workers:    Filter worker to target, default 'all'
-        ├── add_details:    Add task details to results
-        ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        ├── run_num_connectors:    RetryRunner number of threads for device connections
-        ├── run_connect_retry:    RetryRunner number of connection attempts
-        ├── run_task_retry:    RetryRunner number of attempts to run task
-        ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        ├── add-details:    Add task details to results, default 'False'
+        ├── num-workers:    RetryRunner number of threads for tasks execution
+        ├── num-connectors:    RetryRunner number of threads for device connections
+        ├── connect-retry:    RetryRunner number of connection attempts
+        ├── task-retry:    RetryRunner number of attempts to run task
+        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         ├── tf:    File group name to save task results to on worker file system
-        ├── tf_skip_failed:    Save results to file for failed tasks
+        ├── tf-skip-failed:    Save results to file for failed tasks
         ├── diff:    File group name to run the diff for
-        ├── diff_last:    File version number to diff, default is 1 (last)
-        ├── progress:    Emit execution progress, default 'True'
+        ├── diff-last:    File version number to diff, default is 1 (last)
+        ├── progress:    Display progress events, default 'True'
         ├── table:    Table format (brief, terse, extend) or parameters or True
         ├── headers:    Table headers
-        ├── headers_exclude:    Table headers to exclude
+        ├── headers-exclude:    Table headers to exclude
         ├── sortby:    Table header column to sort by
         ├── reverse:    Table reverse the sort by order
         ├── FO:    Filter hosts using Filter Object
@@ -397,49 +397,50 @@ root
         ├── FX:    Filter hosts excluding them by name
         ├── FN:    Negate the match
         ├── hosts:    Filter hosts to target
-        ├── *commands:    List of commands to collect form devices, default 'PydanticUndefined'
+        ├── *commands:    List of commands to collect form devices
         ├── plugin:    Connection plugin parameters
         │   ├── netmiko:    Use Netmiko plugin to configure devices
         │   │   ├── enable:    Attempt to enter enable-mode
-        │   │   ├── use_timing:    switch to send command timing method
-        │   │   ├── expect_string:    Regular expression pattern to use for determining end of output
-        │   │   ├── read_timeout:    Maximum time to wait looking for pattern
-        │   │   ├── auto_find_prompt:    Use find_prompt() to override base prompt
-        │   │   ├── strip_prompt:    Remove the trailing router prompt from the output
-        │   │   ├── strip_command:    Remove the echo of the command from the output
+        │   │   ├── use-timing:    switch to send command timing method
+        │   │   ├── expect-string:    Regular expression pattern to use for determining end of output
+        │   │   ├── read-timeout:    Maximum time to wait looking for pattern
+        │   │   ├── auto-find-prompt:    Use find_prompt() to override base prompt
+        │   │   ├── strip-prompt:    Remove the trailing router prompt from the output
+        │   │   ├── strip-command:    Remove the echo of the command from the output
         │   │   ├── normalize:    Ensure the proper enter is sent at end of command
-        │   │   ├── use_textfsm:    Process command output through TextFSM template
-        │   │   ├── textfsm_template:    Name of template to parse output with
-        │   │   ├── use_ttp:    Process command output through TTP template
-        │   │   ├── ttp_template:    Name of template to parse output with
-        │   │   ├── use_genie:    Process command output through PyATS/Genie parser
-        │   │   ├── cmd_verify:    Verify command echo before proceeding
-        │   │   ├── interval:    Interval between sending commands
-        │   │   ├── use_ps:    Use send command promptless method
-        │   │   ├── use_ps_timeout:    Promptless mode absolute timeout
-        │   │   ├── new_line_char:    Character to replace with new line before sending to device, default is _br_
+        │   │   ├── use-textfsm:    Process command output through TextFSM template
+        │   │   ├── textfsm-template:    Name of template to parse output with
+        │   │   ├── use-ttp:    Process command output through TTP template
+        │   │   ├── ttp-template:    Name of template to parse output with
+        │   │   ├── use-genie:    Process command output through PyATS/Genie parser
+        │   │   ├── cmd-verify:    Verify command echo before proceeding
+        │   │   ├── use-ps:    Use send command promptless method
+        │   │   ├── use-ps-timeout:    Promptless mode absolute timeout
+        │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
         │   │   ├── repeat:    Number of times to repeat the commands
-        │   │   ├── stop_pattern:    Stop commands repeat if output matches provided glob pattern
-        │   │   ├── repeat_interval:    Time in seconds to wait between repeating commands
-        │   │   └── return_last:    Returns requested last number of commands outputs
+        │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   └── return-last:    Returns requested last number of commands outputs
         │   ├── scrapli:    Use Scrapli plugin to configure devices
-        │   │   ├── failed_when_contains:    String or list of strings indicating failure if found in response
-        │   │   ├── timeout_ops:    Timeout ops value for this operation
+        │   │   ├── strip-prompt:    Strip prompt from returned output
+        │   │   ├── failed-when-contains:    String or list of strings indicating failure if found in response
+        │   │   ├── timeout-ops:    Timeout ops value for this operation
         │   │   ├── interval:    Interval between sending commands
-        │   │   ├── split_lines:    Split multiline string to individual commands
-        │   │   ├── new_line_char:    Character to replace with new line before sending to device, default is _br_
+        │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
         │   │   ├── repeat:    Number of times to repeat the commands
-        │   │   ├── stop_pattern:    Stop commands repeat if output matches provided glob pattern
-        │   │   ├── repeat_interval:    Time in seconds to wait between repeating commands
-        │   │   └── return_last:    Returns requested last number of commands outputs
+        │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   └── return-last:    Returns requested last number of commands outputs
         │   └── napalm:    Use NAPALM plugin to configure devices
         │       ├── interval:    Interval between sending commands
-        │       ├── split_lines:    Split multiline string to individual commands
-        │       └── new_line_char:    Character to replace with new line before sending to device, default is _br_
-        ├── cli_dry_run:    Dry run the commands
+        │       ├── split-lines:    Split multiline string to individual commands
+        │       └── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        ├── dry-run:    Dry run the commands
         ├── enable:    Enter exec mode
-        ├── run_ttp:    TTP Template to run
-        └── job_data:    Path to YAML file with job data
+        ├── run-ttp:    TTP Template to run
+        └── job-data:    Path to YAML file with job data
 nf#
 ```
 

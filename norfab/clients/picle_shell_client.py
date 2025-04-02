@@ -120,6 +120,21 @@ class ShowCommandsModel(BaseModel):
         description="Show NorFab inventory",
         json_schema_extra={"outputter": Outputters.outputter_rich_yaml},
     )
+    nornir: nornir_picle_shell.NornirShowCommandsModel = Field(
+        None, description="Show Nornir service"
+    )
+    netbox: netbox_picle_shell.NetboxShowCommandsModel = Field(
+        None, description="Show Netbox service"
+    )
+    fastapi: fastapi_picle_shell.FastAPIShowCommandsModel = Field(
+        None, description="Show FastAPI service"
+    )
+    agent: agent_picle_shell.AgentShowCommandsModel = Field(
+        None, description="Show AI Agent service"
+    )
+    workflow: workflow_picle_shell.WorkflowShowCommandsModel = Field(
+        None, description="Show Workflow service"
+    )
 
     class PicleConfig:
         pipe = PipeFunctionsModel

@@ -2,11 +2,16 @@
 
 ### FEATURES
 
-1. Added new `workflow` service to run simple workflows described using YAML DSL
+1. Added new `workflow` service to run simple workflows constructed using YAML DSL
 
 ### CHANGES
 
-1. Updated picle shells to use nested outputter
+1. NFCLI shells - updated to use nested outputter where appropriate
+2. Nornir worker - updated to set failed flag for its tasks according to test results
+3. Worker - Added `status` filed to worker result object to reflect job execution status
+4. Nornir Service - replaced `cfg_dry_run` and `cli_dry_run` arguments with `dry_run` argument
+5. NFCLI shell - added aliases to use dash instead of underscore
+6. NFCLI shell - Moved Nornir service show commands under `show nornir xyz` path  
 
 ## 0.6.0
 

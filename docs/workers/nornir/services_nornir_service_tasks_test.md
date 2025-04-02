@@ -184,22 +184,22 @@ root
     └── test:    Run network tests
         ├── timeout:    Job timeout
         ├── workers:    Filter worker to target, default 'all'
-        ├── add_details:    Add task details to results
-        ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        ├── run_num_connectors:    RetryRunner number of threads for device connections
-        ├── run_connect_retry:    RetryRunner number of connection attempts
-        ├── run_task_retry:    RetryRunner number of attempts to run task
-        ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        ├── add-details:    Add task details to results, default 'False'
+        ├── num-workers:    RetryRunner number of threads for tasks execution
+        ├── num-connectors:    RetryRunner number of threads for device connections
+        ├── connect-retry:    RetryRunner number of connection attempts
+        ├── task-retry:    RetryRunner number of attempts to run task
+        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         ├── tf:    File group name to save task results to on worker file system
-        ├── tf_skip_failed:    Save results to file for failed tasks
+        ├── tf-skip-failed:    Save results to file for failed tasks
         ├── diff:    File group name to run the diff for
-        ├── diff_last:    File version number to diff, default is 1 (last)
-        ├── progress:    Emit execution progress
+        ├── diff-last:    File version number to diff, default is 1 (last)
+        ├── table:    Table format (brief, terse, extend) or parameters or True, default 'brief'
         ├── headers:    Table headers
-        ├── headers_exclude:    Table headers to exclude
+        ├── headers-exclude:    Table headers to exclude
         ├── sortby:    Table header column to sort by
         ├── reverse:    Table reverse the sort by order
         ├── FO:    Filter hosts using Filter Object
@@ -214,12 +214,12 @@ root
         ├── FX:    Filter hosts excluding them by name
         ├── FN:    Negate the match
         ├── hosts:    Filter hosts to target
-        ├── *suite:    Nornir suite nf://path/to/file.py, default 'PydanticUndefined'
-        ├── dry_run:    Return produced per-host tests suite content without running tests
+        ├── *suite:    Nornir suite nf://path/to/file.py
+        ├── dry-run:    Return produced per-host tests suite content without running tests
         ├── subset:    Filter tests by name
-        ├── failed_only:    Return test results for failed tests only
-        ├── remove_tasks:    Include/Exclude tested task results
-        └── job_data:    Path to YAML file with job data
+        ├── failed-only:    Return test results for failed tests only
+        ├── remove-tasks:    Include/Exclude tested task results
+        └── job-data:    Path to YAML file with job data
 nf#
 ```
 

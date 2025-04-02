@@ -54,7 +54,7 @@ class AgentShowCommandsModel(BaseModel):
     @staticmethod
     def get_inventory(**kwargs):
         workers = kwargs.pop("workers", "all")
-        _ = kwargs.pop("progress")
+        _ = kwargs.pop("progress", None)
         result = NFCLIENT.run_job("agent", "get_inventory", workers=workers)
         result = log_error_or_result(result)
         return result
@@ -62,7 +62,7 @@ class AgentShowCommandsModel(BaseModel):
     @staticmethod
     def get_version(**kwargs):
         workers = kwargs.pop("workers", "all")
-        _ = kwargs.pop("progress")
+        _ = kwargs.pop("progress", None)
         result = NFCLIENT.run_job("agent", "get_version", workers=workers)
         result = log_error_or_result(result)
         return result
@@ -70,7 +70,7 @@ class AgentShowCommandsModel(BaseModel):
     @staticmethod
     def get_status(**kwargs):
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress")
+        _ = kwargs.pop("progress", None)
         result = NFCLIENT.run_job("agent", "get_status", workers=workers, kwargs=kwargs)
         result = log_error_or_result(result)
         return result
@@ -82,9 +82,6 @@ class AgentShowCommandsModel(BaseModel):
 
 
 class AgentServiceCommands(ClientRunJobArgs):
-    show: AgentShowCommandsModel = Field(
-        None, description="Show Agent service parameters"
-    )
     chat: StrictStr = Field(
         None,
         description="Chat with the agent",

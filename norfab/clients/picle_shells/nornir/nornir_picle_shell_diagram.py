@@ -59,35 +59,42 @@ class N2GLayer3Diagram(NorniHostsFilters, NornirCommonArgs):
         None,
         description="Add IP nodes from ARP cache parsing results",
         json_schema_extra={"presence": True},
+        alias="add-arp",
     )
     label_interface: StrictBool = Field(
         None,
         description="Add interface name to the link’s source and target labels",
         json_schema_extra={"presence": True},
+        alias="label-interface",
     )
     label_vrf: StrictBool = Field(
         None,
         description="Add VRF name to the link’s source and target labels",
         json_schema_extra={"presence": True},
+        alias="label-vrf",
     )
     collapse_ptp: StrictBool = Field(
         None,
         description="Combines links for /31 and /30 IPv4 and /127 IPv6 subnets into a single link",
         json_schema_extra={"presence": True},
+        alias="collapse-ptp",
     )
     add_fhrp: StrictBool = Field(
         None,
         description="Add HSRP and VRRP IP addresses to the diagram",
         json_schema_extra={"presence": True},
+        alias="add-fhrp",
     )
     bottom_label_length: StrictInt = Field(
         None,
         description="Length of interface description to use for subnet labels, if 0, label not set",
+        alias="bottom-label-length",
     )
     lbl_next_to_subnet: StrictBool = Field(
         None,
         description="Put link port:vrf:ip label next to subnet node",
         json_schema_extra={"presence": True},
+        alias="lbl-next-to-subnet",
     )
 
     @staticmethod
@@ -123,31 +130,37 @@ class N2GLayer2Diagram(NorniHostsFilters, NornirCommonArgs):
         None,
         description="Add interfaces configuration and state data to links",
         json_schema_extra={"presence": True},
+        alias="add-interfaces-data",
     )
     group_links: StrictBool = Field(
         None,
         description="Group links between nodes",
         json_schema_extra={"presence": True},
+        alias="group-links",
     )
     add_lag: StrictBool = Field(
         None,
         description="Add LAG/MLAG links to diagram",
         json_schema_extra={"presence": True},
+        alias="add-lag",
     )
     add_all_connected: StrictBool = Field(
         None,
         description="Add all nodes connected to devices based on interfaces state",
         json_schema_extra={"presence": True},
+        alias="add-all-connected",
     )
     combine_peers: StrictBool = Field(
         None,
         description="Combine CDP/LLDP peers behind same interface by adding L2 node",
         json_schema_extra={"presence": True},
+        alias="combine-peers",
     )
     skip_lag: StrictBool = Field(
         None,
         description="Skip CDP peers for LAG, some platforms send CDP/LLDP PDU from LAG ports",
         json_schema_extra={"presence": True},
+        alias="skip-lag",
     )
 
     @staticmethod
@@ -178,20 +191,24 @@ class N2GISISDiagram(NorniHostsFilters, NornirCommonArgs):
     ip_lookup_data: StrictStr = Field(
         None,
         description="IP Lookup dictionary or OS path to CSV file",
+        alias="ip-lookup-data",
     )
     add_connected: StrictBool = Field(
         None,
         description="Add connected subnets as nodes",
         json_schema_extra={"presence": True},
+        alias="add-connected",
     )
     ptp_filter: Union[StrictStr, List[StrictStr]] = Field(
         None,
         description="List of glob patterns to filter point-to-point links based on link IP",
+        alias="ptp-filter",
     )
     add_data: StrictBool = Field(
         None,
         description="Add data information to nodes and links",
         json_schema_extra={"presence": True},
+        alias="add-data",
     )
 
     @staticmethod
@@ -218,20 +235,24 @@ class N2GOSPFDiagram(NorniHostsFilters, NornirCommonArgs):
     ip_lookup_data: StrictStr = Field(
         None,
         description="IP Lookup dictionary or OS path to CSV file",
+        alias="ip-lookup-data",
     )
     add_connected: StrictBool = Field(
         None,
         description="Add connected subnets as nodes",
         json_schema_extra={"presence": True},
+        alias="add-connected",
     )
     ptp_filter: Union[StrictStr, List[StrictStr]] = Field(
         None,
         description="List of glob patterns to filter point-to-point links based on link IP",
+        alias="ptp-filter",
     )
     add_data: StrictBool = Field(
         None,
         description="Add data information to nodes and links",
         json_schema_extra={"presence": True},
+        alias="add-data",
     )
 
     @staticmethod

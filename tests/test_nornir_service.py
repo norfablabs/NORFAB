@@ -73,19 +73,18 @@ class TestNornirCli:
                     "show version" in res and "Traceback" not in res["show version"]
                 ), f"{worker}:{host} show clock output is wrong"
 
-    def test_commands_cli_dry_run(self, nfclient):
+    def test_commands_dry_run(self, nfclient):
         ret = nfclient.run_job(
             b"nornir",
             "cli",
-            kwargs={"commands": ["show version", "show clock"], "cli_dry_run": True},
+            kwargs={"commands": ["show version", "show clock"], "dry_run": True},
         )
         pprint.pprint(ret)
 
         for worker, results in ret.items():
             for host, res in results["result"].items():
                 assert (
-                    "cli_dry_run" in res
-                    and res["cli_dry_run"] == "show version\nshow clock"
+                    "dry_run" in res and res["dry_run"] == "show version\nshow clock"
                 ), f"{worker}:{host} dry run output is wrong"
 
     @pytest.mark.skip(reason="TBD")
@@ -120,13 +119,13 @@ class TestNornirCli:
     def test_commands_plugin_napalm(self, nfclient):
         pass
 
-    def test_commands_from_file_cli_dry_run(self, nfclient):
+    def test_commands_from_file_dry_run(self, nfclient):
         ret = nfclient.run_job(
             b"nornir",
             "cli",
             kwargs={
                 "commands": "nf://cli/commands.txt",
-                "cli_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -134,8 +133,8 @@ class TestNornirCli:
         for worker, results in ret.items():
             for host, res in results["result"].items():
                 assert (
-                    "cli_dry_run" in res
-                    and res["cli_dry_run"]
+                    "dry_run" in res
+                    and res["dry_run"]
                     == "show version\nshow clock\nshow int description"
                 ), f"{worker}:{host} output is wrong"
 
@@ -157,7 +156,7 @@ class TestNornirCli:
             "cli",
             kwargs={
                 "commands": "nf://cli/show_interfaces.j2",
-                "cli_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -169,11 +168,11 @@ class TestNornirCli:
             for host, res in results["result"].items():
                 if host == "ceos-spine-1":
                     found_ceos_spine_1 = True
-                    assert "loopback0" in res["cli_dry_run"]
-                    assert "ethernet1" in res["cli_dry_run"]
+                    assert "loopback0" in res["dry_run"]
+                    assert "ethernet1" in res["dry_run"]
                 elif host == "ceos-spine-2":
-                    assert "loopback0" not in res["cli_dry_run"]
-                    assert "ethernet1" in res["cli_dry_run"]
+                    assert "loopback0" not in res["dry_run"]
+                    assert "ethernet1" in res["dry_run"]
                     found_ceos_spine_2 = True
 
         assert found_ceos_spine_1, "No results for ceos-spine-1"
@@ -207,7 +206,7 @@ class TestNornirCli:
             workers="nornir-worker-1",
             kwargs={
                 "commands": "nf://cli/test_commands_template_with_norfab_call.j2",
-                "cli_dry_run": True,
+                "dry_run": True,
                 "FL": ["ceos-spine-1"],
             },
         )
@@ -216,7 +215,7 @@ class TestNornirCli:
         for worker, results in ret.items():
             for host, res in results["result"].items():
                 assert all(
-                    k in res["cli_dry_run"]
+                    k in res["dry_run"]
                     for k in [
                         "nornir-worker-2",
                         "ceos-leaf-1",
@@ -233,7 +232,7 @@ class TestNornirCli:
             workers="nornir-worker-1",
             kwargs={
                 "commands": "nf://cli/test_commands_template_with_nornir_worker_call.j2",
-                "cli_dry_run": True,
+                "dry_run": True,
                 "FL": ["ceos-spine-1", "ceos-spine-2"],
             },
         )
@@ -242,7 +241,7 @@ class TestNornirCli:
         for worker, results in ret.items():
             for host, res in results["result"].items():
                 assert all(
-                    k in res["cli_dry_run"]
+                    k in res["dry_run"]
                     for k in [
                         "updated by norfab 1234",
                         "interface Ethernet",
@@ -298,7 +297,7 @@ class TestNornirCli:
             kwargs={
                 "job_data": {"commands": ["show version", "show clock"]},
                 "FL": ["ceos-spine-1", "ceos-spine-2"],
-                "cli_dry_run": True,
+                "dry_run": True,
                 "commands": "nf://cli/template_with_job_data.txt",
             },
         )
@@ -307,8 +306,7 @@ class TestNornirCli:
         for worker, results in ret.items():
             for host, res in results["result"].items():
                 assert (
-                    "show version" in res["cli_dry_run"]
-                    and "show clock" in res["cli_dry_run"]
+                    "show version" in res["dry_run"] and "show clock" in res["dry_run"]
                 ), f"{worker}:{host} output is wrong"
 
     def test_commands_template_with_job_data_file(self, nfclient):
@@ -318,7 +316,7 @@ class TestNornirCli:
             kwargs={
                 "job_data": "nf://cli/job_data_1.txt",
                 "FL": ["ceos-spine-1", "ceos-spine-2"],
-                "cli_dry_run": True,
+                "dry_run": True,
                 "commands": "nf://cli/template_with_job_data.txt",
             },
         )
@@ -327,8 +325,7 @@ class TestNornirCli:
         for worker, results in ret.items():
             for host, res in results["result"].items():
                 assert (
-                    "show version" in res["cli_dry_run"]
-                    and "show clock" in res["cli_dry_run"]
+                    "show version" in res["dry_run"] and "show clock" in res["dry_run"]
                 ), f"{worker}:{host} output is wrong"
 
     def test_commands_template_with_job_data_wrong_file(self, nfclient):
@@ -339,7 +336,7 @@ class TestNornirCli:
             kwargs={
                 "job_data": "nf://cli/job_data_non_exist.txt",
                 "FL": ["ceos-spine-1", "ceos-spine-2"],
-                "cli_dry_run": True,
+                "dry_run": True,
                 "commands": "nf://cli/template_with_job_data.txt",
             },
         )
@@ -357,7 +354,7 @@ class TestNornirCli:
             kwargs={
                 "job_data": "nf://cli/job_data_wrong_yaml.txt",
                 "FL": ["ceos-spine-1", "ceos-spine-2"],
-                "cli_dry_run": True,
+                "dry_run": True,
                 "commands": "nf://cli/template_with_job_data.txt",
             },
         )
@@ -526,23 +523,23 @@ class TestNornirCfg:
                     "Traceback" not in res["netmiko_send_config"]
                 ), f"{worker}:{host} cfg output is wrong"
 
-    def test_config_cfg_dry_run(self, nfclient):
+    def test_config_dry_run(self, nfclient):
         ret = nfclient.run_job(
             b"nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": ["interface loopback 0", "description RID"],
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
 
         for worker, results in ret.items():
             for host, res in results["result"].items():
-                assert "cfg_dry_run" in res, f"{worker}:{host} no cfg dry run output"
+                assert "dry_run" in res, f"{worker}:{host} no cfg dry run output"
                 assert (
-                    res["cfg_dry_run"] == "interface loopback 0\ndescription RID"
+                    res["dry_run"] == "interface loopback 0\ndescription RID"
                 ), f"{worker}:{host} cfg dry run output is wrong"
 
     def test_config_with_hosts_filters(self, nfclient):
@@ -553,7 +550,7 @@ class TestNornirCfg:
             kwargs={
                 "config": ["interface loopback 0", "description RID"],
                 "FL": ["ceos-leaf-1", "ceos-spine-1"],
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -579,7 +576,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1"],
             kwargs={
                 "config": ["interface loopback 0", "description RID"],
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -595,19 +592,19 @@ class TestNornirCfg:
             kwargs={
                 "config": ["interface loopback 0", "description RID"],
                 "add_details": True,
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
 
         for worker, results in ret.items():
             for host, res in results["result"].items():
-                assert "cfg_dry_run" in res, f"{worker}:{host} no cfg_dry_run output"
+                assert "dry_run" in res, f"{worker}:{host} no dry_run output"
                 assert isinstance(
-                    res["cfg_dry_run"], dict
+                    res["dry_run"], dict
                 ), f"{worker}:{host} no detailed output produced"
                 assert all(
-                    k in res["cfg_dry_run"]
+                    k in res["dry_run"]
                     for k in [
                         "changed",
                         "connection_retry",
@@ -627,7 +624,7 @@ class TestNornirCfg:
             kwargs={
                 "config": ["interface loopback 0", "description RID"],
                 "to_dict": False,
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -652,7 +649,7 @@ class TestNornirCfg:
             kwargs={
                 "config": ["interface loopback 0", "description RID"],
                 "to_dict": False,
-                "cfg_dry_run": True,
+                "dry_run": True,
                 "add_details": True,
             },
         )
@@ -688,7 +685,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": ["interface loopback 0", "description RID"],
-                "cfg_dry_run": True,
+                "dry_run": True,
                 "plugin": "wrong_plugin",
             },
         )
@@ -699,23 +696,23 @@ class TestNornirCfg:
                 "UnsupportedPluginError" in results["errors"][0]
             ), f"{worker} did not raise error"
 
-    def test_config_from_file_cfg_dry_run(self, nfclient):
+    def test_config_from_file_dry_run(self, nfclient):
         ret = nfclient.run_job(
             b"nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_1.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
 
         for worker, results in ret.items():
             for host, res in results["result"].items():
-                assert "cfg_dry_run" in res, f"{worker}:{host} no cfg dry run output"
+                assert "dry_run" in res, f"{worker}:{host} no cfg dry run output"
                 assert (
-                    res["cfg_dry_run"] == "interface Loopback0\ndescription RID"
+                    res["dry_run"] == "interface Loopback0\ndescription RID"
                 ), f"{worker}:{host} cfg dry run output is wrong"
 
     def test_config_from_nonexisting_file(self, nfclient):
@@ -725,7 +722,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_non_existing.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -740,21 +737,19 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_2.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
 
         for worker, results in ret.items():
             for host_name, res in results["result"].items():
+                assert "dry_run" in res, f"{worker}:{host_name} no cfg dry run output"
                 assert (
-                    "cfg_dry_run" in res
-                ), f"{worker}:{host_name} no cfg dry run output"
-                assert (
-                    "interface Loopback0\ndescription RID for " in res["cfg_dry_run"]
+                    "interface Loopback0\ndescription RID for " in res["dry_run"]
                 ), f"{worker}:{host_name} cfg dry run output is wrong"
                 assert (
-                    host_name in res["cfg_dry_run"]
+                    host_name in res["dry_run"]
                 ), f"{worker}:{host_name} cfg dry run output is not rendered"
 
     def test_config_plugin_napalm(self, nfclient):
@@ -834,7 +829,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_with_includes.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -842,15 +837,15 @@ class TestNornirCfg:
         for worker, results in ret.items():
             assert results["failed"] == False, f"{worker} results failed"
             for host, res in results["result"].items():
-                assert "cfg_dry_run" in res, f"{worker}:{host} no cfg_dry_run output"
+                assert "dry_run" in res, f"{worker}:{host} no dry_run output"
                 assert (
-                    "interface Loopback1" in res["cfg_dry_run"]
+                    "interface Loopback1" in res["dry_run"]
                 ), f"{worker}:{host} no config_with_includes.txt config"
                 assert (
-                    "interface Loopback0" in res["cfg_dry_run"]
+                    "interface Loopback0" in res["dry_run"]
                 ), f"{worker}:{host} no config_with_includes_2.txt config"
                 assert (
-                    "ntp server 1.1.1.1" in res["cfg_dry_run"]
+                    "ntp server 1.1.1.1" in res["dry_run"]
                 ), f"{worker}:{host} no config_with_includes_2.txt config"
 
     def test_config_from_file_template_with_include_non_exist(self, nfclient):
@@ -860,7 +855,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_with_includes_non_exist.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -876,7 +871,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_with_if_and_includes.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -884,9 +879,9 @@ class TestNornirCfg:
         for worker, results in ret.items():
             assert results["failed"] == False, f"{worker} results failed"
             for host, res in results["result"].items():
-                assert "cfg_dry_run" in res, f"{worker}:{host} no cfg_dry_run output"
+                assert "dry_run" in res, f"{worker}:{host} no dry_run output"
                 assert (
-                    "interface Loopback1" in res["cfg_dry_run"]
+                    "interface Loopback1" in res["dry_run"]
                 ), f"{worker}:{host} no config_with_includes.txt config"
 
     def test_config_from_file_template_with_job_data_dict(self, nfclient):
@@ -896,7 +891,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_with_job_data.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
                 "job_data": {
                     "commands": ["interface loopback 555", "description foobar"]
                 },
@@ -907,8 +902,8 @@ class TestNornirCfg:
             assert results["failed"] == False, f"{worker} results failed"
             for host, res in results["result"].items():
                 assert (
-                    "interface loopback 555" in res["cfg_dry_run"]
-                    and "description foobar" in res["cfg_dry_run"]
+                    "interface loopback 555" in res["dry_run"]
+                    and "description foobar" in res["dry_run"]
                 ), f"{worker}:{host} config is wrong"
 
     def test_config_from_file_template_with_job_data_file(self, nfclient):
@@ -918,7 +913,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_with_job_data.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
                 "job_data": "nf://cfg/config_job_data_1.txt",
             },
         )
@@ -927,8 +922,8 @@ class TestNornirCfg:
             assert results["failed"] == False, f"{worker} results failed"
             for host, res in results["result"].items():
                 assert (
-                    "interface loopback 555" in res["cfg_dry_run"]
-                    and "description foobar" in res["cfg_dry_run"]
+                    "interface loopback 555" in res["dry_run"]
+                    and "description foobar" in res["dry_run"]
                 ), f"{worker}:{host} config is wrong"
 
     def test_config_from_file_template_with_job_data_wrong_file(self, nfclient):
@@ -938,7 +933,7 @@ class TestNornirCfg:
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "config": "nf://cfg/config_with_job_data.txt",
-                "cfg_dry_run": True,
+                "dry_run": True,
                 "job_data": "nf://cfg/config_job_data_non_exist.txt",
             },
         )
@@ -1586,7 +1581,7 @@ class TestNornirJinja2Filters:
             workers=["nornir-worker-1"],
             kwargs={
                 "commands": "nf://cli/test_network_hosts.txt",
-                "cli_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -1595,8 +1590,8 @@ class TestNornirJinja2Filters:
             assert results["result"], f"{worker} returned no results"
             assert results["failed"] is False, f"{worker} failed to run the task"
             for host, res in results["result"].items():
-                assert "192.168.1.1" in res["cli_dry_run"]
-                assert "192.168.1.2" in res["cli_dry_run"]
+                assert "192.168.1.1" in res["dry_run"]
+                assert "192.168.1.2" in res["dry_run"]
 
     def test_network_hosts_with_prefixlen(self, nfclient):
         ret = nfclient.run_job(
@@ -1605,7 +1600,7 @@ class TestNornirJinja2Filters:
             workers=["nornir-worker-1"],
             kwargs={
                 "commands": "nf://cli/test_network_hosts_with_prefixlen.txt",
-                "cli_dry_run": True,
+                "dry_run": True,
             },
         )
         pprint.pprint(ret)
@@ -1614,8 +1609,8 @@ class TestNornirJinja2Filters:
             assert results["result"], f"{worker} returned no results"
             assert results["failed"] is False, f"{worker} failed to run the task"
             for host, res in results["result"].items():
-                assert "192.168.1.1/30" in res["cli_dry_run"]
-                assert "192.168.1.2/30" in res["cli_dry_run"]
+                assert "192.168.1.1/30" in res["dry_run"]
+                assert "192.168.1.2/30" in res["dry_run"]
 
 
 # ----------------------------------------------------------------------------

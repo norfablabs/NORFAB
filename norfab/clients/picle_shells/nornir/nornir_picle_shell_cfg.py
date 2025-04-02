@@ -28,36 +28,46 @@ class NrCfgPluginNetmiko(BaseModel):
         None,
         description="Determines whether or not to exit config mode after complete",
         json_schema_extra={"presence": True},
+        alias="exit-config-mode",
     )
     strip_prompt: Optional[StrictBool] = Field(
         None,
         description="Determines whether or not to strip the prompt",
         json_schema_extra={"presence": True},
+        alias="strip-prompt",
     )
     strip_command: Optional[StrictBool] = Field(
         None,
         description="Determines whether or not to strip the command",
         json_schema_extra={"presence": True},
+        alias="strip-command",
     )
     read_timeout: Optional[StrictInt] = Field(
-        None, description="Absolute timer to send to read_channel_timing"
+        None,
+        description="Absolute timer to send to read_channel_timing",
+        alias="read-timeout",
     )
     config_mode_command: Optional[StrictStr] = Field(
-        None, description="The command to enter into config mode"
+        None,
+        description="The command to enter into config mode",
+        alias="config-mode-command",
     )
     cmd_verify: Optional[StrictBool] = Field(
         None,
         description="Whether or not to verify command echo for each command in config_set",
         json_schema_extra={"presence": True},
+        alias="cmd-verify",
     )
     enter_config_mode: Optional[StrictBool] = Field(
         None,
         description="Do you enter config mode before sending config commands",
         json_schema_extra={"presence": True},
+        alias="enter-config-mode",
     )
     error_pattern: Optional[StrictStr] = Field(
         None,
         description="Regular expression pattern to detect config errors in the output",
+        alias="error-pattern",
     )
     terminator: Optional[StrictStr] = Field(
         None, description="Regular expression pattern to use as an alternate terminator"
@@ -65,6 +75,7 @@ class NrCfgPluginNetmiko(BaseModel):
     bypass_commands: Optional[StrictStr] = Field(
         None,
         description="Regular expression pattern indicating configuration commands, cmd_verify is automatically disabled",
+        alias="bypass-commands",
     )
     commit: Optional[Union[StrictBool, StrictStr]] = Field(
         True,
@@ -121,24 +132,29 @@ class NrCfgPluginScrapli(BaseModel):
         None,
         description="Apply changes or not, also tests if possible to enter config mode",
         json_schema_extra={"presence": True},
+        alias="dry-run",
     )
     strip_prompt: Optional[StrictBool] = Field(
         None,
         description="Strip prompt from returned output",
         json_schema_extra={"presence": True},
+        alias="strip-prompt",
     )
     failed_when_contains: Optional[StrictStr] = Field(
         None,
         description="String or list of strings indicating failure if found in response",
+        alias="failed-when-contains",
     )
     stop_on_failed: Optional[StrictBool] = Field(
         None,
         description="Stop executing commands if command fails",
         json_schema_extra={"presence": True},
+        alias="stop-on-failed",
     )
     privilege_level: Optional[StrictStr] = Field(
         None,
         description="Name of configuration privilege level to acquire",
+        alias="privilege-level",
     )
     eager: Optional[StrictBool] = Field(
         None,
@@ -148,6 +164,7 @@ class NrCfgPluginScrapli(BaseModel):
     timeout_ops: Optional[StrictInt] = Field(
         None,
         description="Timeout ops value for this operation",
+        alias="timeout-ops",
     )
 
     @staticmethod
@@ -169,10 +186,12 @@ class NrCfgPluginNapalm(BaseModel):
         None,
         description="Apply changes or not, also tests if possible to enter config mode",
         json_schema_extra={"presence": True},
+        alias="dry-run",
     )
     revert_in: Optional[StrictInt] = Field(
         None,
         description="Amount of time in seconds after which to revert the commit",
+        alias="revert-in",
     )
 
     @staticmethod
@@ -199,8 +218,11 @@ class NrCfgPlugins(BaseModel):
 class NornirCfgShell(
     NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
 ):
-    cfg_dry_run: Optional[StrictBool] = Field(
-        None, description="Dry run cfg function", json_schema_extra={"presence": True}
+    dry_run: Optional[StrictBool] = Field(
+        None,
+        description="Dry run cfg function",
+        json_schema_extra={"presence": True},
+        alias="dry-run",
     )
     config: Union[StrictStr, List[StrictStr]] = Field(
         ...,
@@ -210,7 +232,9 @@ class NornirCfgShell(
     )
     plugin: NrCfgPlugins = Field(None, description="Configuration plugin parameters")
     job_data: Optional[StrictStr] = Field(
-        None, description="Path to YAML file with job data"
+        None,
+        description="Path to YAML file with job data",
+        alias="job-data",
     )
 
     @staticmethod

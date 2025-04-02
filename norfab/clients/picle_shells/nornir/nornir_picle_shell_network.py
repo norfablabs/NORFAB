@@ -26,11 +26,13 @@ class NornirNetworkPing(
         None,
         description="Ping host's name instead of host's hostname",
         json_schema_extra={"presence": True},
+        alias="use-host-name",
     )
     count: StrictInt = Field(None, description="Number of pings to run")
     ping_timeout: StrictInt = Field(
         None,
         description="Time in seconds before considering each non-arrived reply permanently lost",
+        alias="ping-timeout",
     )
     size: StrictInt = Field(None, description="Size of the entire packet to send")
     interval: Union[int, float] = Field(
@@ -38,10 +40,14 @@ class NornirNetworkPing(
     )
     payload: str = Field(None, description="Payload content if size is not set")
     sweep_start: StrictInt = Field(
-        None, description="If size is not set, initial size in a sweep of sizes"
+        None,
+        description="If size is not set, initial size in a sweep of sizes",
+        alias="sweep-start",
     )
     sweep_end: StrictInt = Field(
-        None, description="If size is not set, final size in a sweep of sizes"
+        None,
+        description="If size is not set, final size in a sweep of sizes",
+        alias="sweep-end",
     )
     df: StrictBool = Field(
         None,
@@ -122,12 +128,15 @@ class NornirNetworkDns(
         None,
         description="Ping host's name instead of host's hostname",
         json_schema_extra={"presence": True},
+        alias="use-host-name",
     )
     servers: Union[StrictStr, List[StrictStr]] = Field(
         None, description="List of DNS servers to use"
     )
     dns_timeout: StrictInt = Field(
-        None, description="Time in seconds before considering request lost"
+        None,
+        description="Time in seconds before considering request lost",
+        alias="dns-timeout",
     )
     ipv4: StrictBool = Field(
         None, description="Resolve 'A' record", json_schema_extra={"presence": True}
