@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://docs.norfablabs.com/api_reference_clients_nfcli_client/">
       
       
-        <link rel="prev" href="../workers/agent/api_reference_workers_agent_worker/">
+        <link rel="prev" href="../workers/workflow/api_reference_workers_workflow_worker/">
       
       
         <link rel="next" href="../api_reference_clients_robot_client/">
@@ -1674,7 +1674,7 @@
             
   
   <span class="md-ellipsis">
-    NORFAB Services
+    Workflow Service
     
   </span>
   
@@ -1684,6 +1684,170 @@
         
         <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            Workflow Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/workflow/services_workflow_service/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Inventory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_6_3" id="__nav_1_8_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tasks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tasks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Run
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_7" id="__nav_1_8_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    NORFAB Services
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_7">
             <span class="md-nav__icon md-icon"></span>
             NORFAB Services
           </label>
@@ -2591,6 +2755,28 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Worker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3234,10 +3420,10 @@ file details url nf://
 
             <details class="quote">
               <summary>Source code in <code>norfab\clients\picle_shell_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cmd_preloop_override</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This method called before CMD loop starts&quot;&quot;&quot;</span>
     <span class="k">pass</span>
@@ -3345,28 +3531,28 @@ those that have an "nfcli" configuration to the shell application.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\clients\picle_shell_client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
-<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mount_shell_plugins</span><span class="p">(</span><span class="n">shell</span><span class="p">:</span> <span class="n">App</span><span class="p">,</span> <span class="n">inventory</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mount_shell_plugins</span><span class="p">(</span><span class="n">shell</span><span class="p">:</span> <span class="n">App</span><span class="p">,</span> <span class="n">inventory</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mounts shell plugins to the given shell application.</span>
 

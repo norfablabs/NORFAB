@@ -1765,7 +1765,7 @@
             
   
   <span class="md-ellipsis">
-    NORFAB Services
+    Workflow Service
     
   </span>
   
@@ -1775,6 +1775,170 @@
         
         <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            Workflow Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Inventory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_6_3" id="__nav_1_8_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tasks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tasks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Run
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_7" id="__nav_1_8_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    NORFAB Services
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_7">
             <span class="md-nav__icon md-icon"></span>
             NORFAB Services
           </label>
@@ -2678,6 +2842,28 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Worker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3027,23 +3213,23 @@ root
         ├── ping:    Ping devices
         │   ├── timeout:    Job timeout
         │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── add_details:    Add task details to results
-        │   ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        │   ├── run_num_connectors:    RetryRunner number of threads for device connections
-        │   ├── run_connect_retry:    RetryRunner number of connection attempts
-        │   ├── run_task_retry:    RetryRunner number of attempts to run task
-        │   ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        │   ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        │   ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        │   ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        │   ├── add-details:    Add task details to results, default &#39;False&#39;
+        │   ├── num-workers:    RetryRunner number of threads for tasks execution
+        │   ├── num-connectors:    RetryRunner number of threads for device connections
+        │   ├── connect-retry:    RetryRunner number of connection attempts
+        │   ├── task-retry:    RetryRunner number of attempts to run task
+        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         │   ├── tf:    File group name to save task results to on worker file system
-        │   ├── tf_skip_failed:    Save results to file for failed tasks
+        │   ├── tf-skip-failed:    Save results to file for failed tasks
         │   ├── diff:    File group name to run the diff for
-        │   ├── diff_last:    File version number to diff, default is 1 (last)
-        │   ├── progress:    Emit execution progress
+        │   ├── diff-last:    File version number to diff, default is 1 (last)
+        │   ├── progress:    Display progress events, default &#39;True&#39;
         │   ├── table:    Table format (brief, terse, extend) or parameters or True
         │   ├── headers:    Table headers
-        │   ├── headers_exclude:    Table headers to exclude
+        │   ├── headers-exclude:    Table headers to exclude
         │   ├── sortby:    Table header column to sort by
         │   ├── reverse:    Table reverse the sort by order
         │   ├── FO:    Filter hosts using Filter Object
@@ -3058,36 +3244,36 @@ root
         │   ├── FX:    Filter hosts excluding them by name
         │   ├── FN:    Negate the match
         │   ├── hosts:    Filter hosts to target
-        │   ├── use_host_name:    Ping host&#39;s name instead of host&#39;s hostname
+        │   ├── use-host-name:    Ping host&#39;s name instead of host&#39;s hostname
         │   ├── count:    Number of pings to run
-        │   ├── ping_timeout:    Time in seconds before considering each non-arrived reply permanently lost
+        │   ├── ping-timeout:    Time in seconds before considering each non-arrived reply permanently lost
         │   ├── size:    Size of the entire packet to send
         │   ├── interval:    Interval to wait between pings
         │   ├── payload:    Payload content if size is not set
-        │   ├── sweep_start:    If size is not set, initial size in a sweep of sizes
-        │   ├── sweep_end:    If size is not set, final size in a sweep of sizes
+        │   ├── sweep-start:    If size is not set, initial size in a sweep of sizes
+        │   ├── sweep-end:    If size is not set, final size in a sweep of sizes
         │   ├── df:    Don&#39;t Fragment flag value for IP Header
         │   ├── match:    Do payload matching between request and reply
         │   └── source:    Source IP address
         └── dns:    Resolve DNS
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default &#39;all&#39;
-            ├── add_details:    Add task details to results
-            ├── run_num_workers:    RetryRunner number of threads for tasks execution
-            ├── run_num_connectors:    RetryRunner number of threads for device connections
-            ├── run_connect_retry:    RetryRunner number of connection attempts
-            ├── run_task_retry:    RetryRunner number of attempts to run task
-            ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-            ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-            ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-            ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+            ├── add-details:    Add task details to results, default &#39;False&#39;
+            ├── num-workers:    RetryRunner number of threads for tasks execution
+            ├── num-connectors:    RetryRunner number of threads for device connections
+            ├── connect-retry:    RetryRunner number of connection attempts
+            ├── task-retry:    RetryRunner number of attempts to run task
+            ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+            ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+            ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+            ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
             ├── tf:    File group name to save task results to on worker file system
-            ├── tf_skip_failed:    Save results to file for failed tasks
+            ├── tf-skip-failed:    Save results to file for failed tasks
             ├── diff:    File group name to run the diff for
-            ├── diff_last:    File version number to diff, default is 1 (last)
+            ├── progress:    Display progress events, default &#39;True&#39;
             ├── table:    Table format (brief, terse, extend) or parameters or True
             ├── headers:    Table headers
-            ├── headers_exclude:    Table headers to exclude
+            ├── headers-exclude:    Table headers to exclude
             ├── sortby:    Table header column to sort by
             ├── reverse:    Table reverse the sort by order
             ├── FO:    Filter hosts using Filter Object
@@ -3102,9 +3288,9 @@ root
             ├── FX:    Filter hosts excluding them by name
             ├── FN:    Negate the match
             ├── hosts:    Filter hosts to target
-            ├── use_host_name:    Ping host&#39;s name instead of host&#39;s hostname
+            ├── use-host-name:    Ping host&#39;s name instead of host&#39;s hostname
             ├── servers:    List of DNS servers to use
-            ├── dns_timeout:    Time in seconds before considering request lost
+            ├── dns-timeout:    Time in seconds before considering request lost
             ├── ipv4:    Resolve &#39;A&#39; record
             └── ipv6:    Resolve &#39;AAAA&#39; record
 nf#
@@ -3224,32 +3410,32 @@ nf#
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1319</span>
-<span class="normal">1320</span>
-<span class="normal">1321</span>
-<span class="normal">1322</span>
-<span class="normal">1323</span>
-<span class="normal">1324</span>
-<span class="normal">1325</span>
-<span class="normal">1326</span>
-<span class="normal">1327</span>
-<span class="normal">1328</span>
-<span class="normal">1329</span>
-<span class="normal">1330</span>
-<span class="normal">1331</span>
-<span class="normal">1332</span>
-<span class="normal">1333</span>
-<span class="normal">1334</span>
-<span class="normal">1335</span>
-<span class="normal">1336</span>
-<span class="normal">1337</span>
-<span class="normal">1338</span>
-<span class="normal">1339</span>
-<span class="normal">1340</span>
-<span class="normal">1341</span>
-<span class="normal">1342</span>
-<span class="normal">1343</span>
-<span class="normal">1344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1397</span>
+<span class="normal">1398</span>
+<span class="normal">1399</span>
+<span class="normal">1400</span>
+<span class="normal">1401</span>
+<span class="normal">1402</span>
+<span class="normal">1403</span>
+<span class="normal">1404</span>
+<span class="normal">1405</span>
+<span class="normal">1406</span>
+<span class="normal">1407</span>
+<span class="normal">1408</span>
+<span class="normal">1409</span>
+<span class="normal">1410</span>
+<span class="normal">1411</span>
+<span class="normal">1412</span>
+<span class="normal">1413</span>
+<span class="normal">1414</span>
+<span class="normal">1415</span>
+<span class="normal">1416</span>
+<span class="normal">1417</span>
+<span class="normal">1418</span>
+<span class="normal">1419</span>
+<span class="normal">1420</span>
+<span class="normal">1421</span>
+<span class="normal">1422</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Task to call various network-related utility functions.</span>
 

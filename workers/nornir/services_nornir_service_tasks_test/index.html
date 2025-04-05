@@ -1810,7 +1810,7 @@
             
   
   <span class="md-ellipsis">
-    NORFAB Services
+    Workflow Service
     
   </span>
   
@@ -1820,6 +1820,170 @@
         
         <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            Workflow Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Inventory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_6_3" id="__nav_1_8_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tasks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tasks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Run
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_7" id="__nav_1_8_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    NORFAB Services
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_7">
             <span class="md-nav__icon md-icon"></span>
             NORFAB Services
           </label>
@@ -2723,6 +2887,28 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Worker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3243,22 +3429,22 @@ root
     └── test:    Run network tests
         ├── timeout:    Job timeout
         ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── add_details:    Add task details to results
-        ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        ├── run_num_connectors:    RetryRunner number of threads for device connections
-        ├── run_connect_retry:    RetryRunner number of connection attempts
-        ├── run_task_retry:    RetryRunner number of attempts to run task
-        ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        ├── add-details:    Add task details to results, default &#39;False&#39;
+        ├── num-workers:    RetryRunner number of threads for tasks execution
+        ├── num-connectors:    RetryRunner number of threads for device connections
+        ├── connect-retry:    RetryRunner number of connection attempts
+        ├── task-retry:    RetryRunner number of attempts to run task
+        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         ├── tf:    File group name to save task results to on worker file system
-        ├── tf_skip_failed:    Save results to file for failed tasks
+        ├── tf-skip-failed:    Save results to file for failed tasks
         ├── diff:    File group name to run the diff for
-        ├── diff_last:    File version number to diff, default is 1 (last)
-        ├── progress:    Emit execution progress
+        ├── diff-last:    File version number to diff, default is 1 (last)
+        ├── table:    Table format (brief, terse, extend) or parameters or True, default &#39;brief&#39;
         ├── headers:    Table headers
-        ├── headers_exclude:    Table headers to exclude
+        ├── headers-exclude:    Table headers to exclude
         ├── sortby:    Table header column to sort by
         ├── reverse:    Table reverse the sort by order
         ├── FO:    Filter hosts using Filter Object
@@ -3273,12 +3459,12 @@ root
         ├── FX:    Filter hosts excluding them by name
         ├── FN:    Negate the match
         ├── hosts:    Filter hosts to target
-        ├── *suite:    Nornir suite nf://path/to/file.py, default &#39;PydanticUndefined&#39;
-        ├── dry_run:    Return produced per-host tests suite content without running tests
+        ├── *suite:    Nornir suite nf://path/to/file.py
+        ├── dry-run:    Return produced per-host tests suite content without running tests
         ├── subset:    Filter tests by name
-        ├── failed_only:    Return test results for failed tests only
-        ├── remove_tasks:    Include/Exclude tested task results
-        └── job_data:    Path to YAML file with job data
+        ├── failed-only:    Return test results for failed tests only
+        ├── remove-tasks:    Include/Exclude tested task results
+        └── job-data:    Path to YAML file with job data
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>
@@ -3464,6 +3650,11 @@ the dictionary will contain both the test results and the rendered test suite.</
     </table>
 
 
+<details class="note" open>
+  <summary>Note</summary>
+  <p>Result <code>failed</code> attribute is set to True if any of the tests failed for any of the hosts.</p>
+</details>
+
 <p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
@@ -3488,71 +3679,7 @@ the dictionary will contain both the test results and the rendered test suite.</
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1144</span>
-<span class="normal">1145</span>
-<span class="normal">1146</span>
-<span class="normal">1147</span>
-<span class="normal">1148</span>
-<span class="normal">1149</span>
-<span class="normal">1150</span>
-<span class="normal">1151</span>
-<span class="normal">1152</span>
-<span class="normal">1153</span>
-<span class="normal">1154</span>
-<span class="normal">1155</span>
-<span class="normal">1156</span>
-<span class="normal">1157</span>
-<span class="normal">1158</span>
-<span class="normal">1159</span>
-<span class="normal">1160</span>
-<span class="normal">1161</span>
-<span class="normal">1162</span>
-<span class="normal">1163</span>
-<span class="normal">1164</span>
-<span class="normal">1165</span>
-<span class="normal">1166</span>
-<span class="normal">1167</span>
-<span class="normal">1168</span>
-<span class="normal">1169</span>
-<span class="normal">1170</span>
-<span class="normal">1171</span>
-<span class="normal">1172</span>
-<span class="normal">1173</span>
-<span class="normal">1174</span>
-<span class="normal">1175</span>
-<span class="normal">1176</span>
-<span class="normal">1177</span>
-<span class="normal">1178</span>
-<span class="normal">1179</span>
-<span class="normal">1180</span>
-<span class="normal">1181</span>
-<span class="normal">1182</span>
-<span class="normal">1183</span>
-<span class="normal">1184</span>
-<span class="normal">1185</span>
-<span class="normal">1186</span>
-<span class="normal">1187</span>
-<span class="normal">1188</span>
-<span class="normal">1189</span>
-<span class="normal">1190</span>
-<span class="normal">1191</span>
-<span class="normal">1192</span>
-<span class="normal">1193</span>
-<span class="normal">1194</span>
-<span class="normal">1195</span>
-<span class="normal">1196</span>
-<span class="normal">1197</span>
-<span class="normal">1198</span>
-<span class="normal">1199</span>
-<span class="normal">1200</span>
-<span class="normal">1201</span>
-<span class="normal">1202</span>
-<span class="normal">1203</span>
-<span class="normal">1204</span>
-<span class="normal">1205</span>
-<span class="normal">1206</span>
-<span class="normal">1207</span>
-<span class="normal">1208</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1208</span>
 <span class="normal">1209</span>
 <span class="normal">1210</span>
 <span class="normal">1211</span>
@@ -3652,7 +3779,85 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">1305</span>
 <span class="normal">1306</span>
 <span class="normal">1307</span>
-<span class="normal">1308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span>
+<span class="normal">1308</span>
+<span class="normal">1309</span>
+<span class="normal">1310</span>
+<span class="normal">1311</span>
+<span class="normal">1312</span>
+<span class="normal">1313</span>
+<span class="normal">1314</span>
+<span class="normal">1315</span>
+<span class="normal">1316</span>
+<span class="normal">1317</span>
+<span class="normal">1318</span>
+<span class="normal">1319</span>
+<span class="normal">1320</span>
+<span class="normal">1321</span>
+<span class="normal">1322</span>
+<span class="normal">1323</span>
+<span class="normal">1324</span>
+<span class="normal">1325</span>
+<span class="normal">1326</span>
+<span class="normal">1327</span>
+<span class="normal">1328</span>
+<span class="normal">1329</span>
+<span class="normal">1330</span>
+<span class="normal">1331</span>
+<span class="normal">1332</span>
+<span class="normal">1333</span>
+<span class="normal">1334</span>
+<span class="normal">1335</span>
+<span class="normal">1336</span>
+<span class="normal">1337</span>
+<span class="normal">1338</span>
+<span class="normal">1339</span>
+<span class="normal">1340</span>
+<span class="normal">1341</span>
+<span class="normal">1342</span>
+<span class="normal">1343</span>
+<span class="normal">1344</span>
+<span class="normal">1345</span>
+<span class="normal">1346</span>
+<span class="normal">1347</span>
+<span class="normal">1348</span>
+<span class="normal">1349</span>
+<span class="normal">1350</span>
+<span class="normal">1351</span>
+<span class="normal">1352</span>
+<span class="normal">1353</span>
+<span class="normal">1354</span>
+<span class="normal">1355</span>
+<span class="normal">1356</span>
+<span class="normal">1357</span>
+<span class="normal">1358</span>
+<span class="normal">1359</span>
+<span class="normal">1360</span>
+<span class="normal">1361</span>
+<span class="normal">1362</span>
+<span class="normal">1363</span>
+<span class="normal">1364</span>
+<span class="normal">1365</span>
+<span class="normal">1366</span>
+<span class="normal">1367</span>
+<span class="normal">1368</span>
+<span class="normal">1369</span>
+<span class="normal">1370</span>
+<span class="normal">1371</span>
+<span class="normal">1372</span>
+<span class="normal">1373</span>
+<span class="normal">1374</span>
+<span class="normal">1375</span>
+<span class="normal">1376</span>
+<span class="normal">1377</span>
+<span class="normal">1378</span>
+<span class="normal">1379</span>
+<span class="normal">1380</span>
+<span class="normal">1381</span>
+<span class="normal">1382</span>
+<span class="normal">1383</span>
+<span class="normal">1384</span>
+<span class="normal">1385</span>
+<span class="normal">1386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">suite</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">subset</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3683,6 +3888,9 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="sd">        dict: A dictionary containing the test results. If `return_tests_suite` is True,</span>
 <span class="sd">            the dictionary will contain both the test results and the rendered test suite.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        Result `failed` attribute is set to True if any of the tests failed for any of the hosts.</span>
+
 <span class="sd">    Raises:</span>
 <span class="sd">        RuntimeError: If there is an error in rendering the Jinja2 templates or loading the YAML.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3703,6 +3911,7 @@ the dictionary will contain both the test results and the rendered test suite.</
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;no_match&quot;</span>
         <span class="k">if</span> <span class="n">return_tests_suite</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;test_results&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="p">{}}</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -3714,7 +3923,7 @@ the dictionary will contain both the test results and the rendered test suite.</
     <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">filtered_nornir</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># render suite using Jinja2</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">rendered_suite</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_jinja2_templates</span><span class="p">(</span>
+            <span class="n">rendered_suite</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_render_templates</span><span class="p">(</span>
                 <span class="n">templates</span><span class="o">=</span><span class="p">[</span><span class="n">suite</span><span class="p">],</span>
                 <span class="n">context</span><span class="o">=</span><span class="p">{</span>
                     <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
@@ -3809,8 +4018,18 @@ the dictionary will contain both the test results and the rendered test suite.</
                 <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host_res</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">host_name</span><span class="p">,</span> <span class="p">{})</span>
                     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">host_name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">host_res</span><span class="p">)</span>
+                    <span class="c1"># set return result failed to true if any of the tests failed</span>
+                    <span class="k">for</span> <span class="n">test_res</span> <span class="ow">in</span> <span class="n">host_res</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">add_details</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">test_res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;PASS&quot;</span><span class="p">:</span>
+                                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">elif</span> <span class="n">test_res</span> <span class="o">!=</span> <span class="s2">&quot;PASS&quot;</span><span class="p">:</span>
+                            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+                <span class="c1"># set return result failed to true if any of the tests failed</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;PASS&quot;</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">):</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># check if need to return tests suite content</span>
     <span class="k">if</span> <span class="n">return_tests_suite</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>

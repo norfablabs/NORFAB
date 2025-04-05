@@ -1882,7 +1882,7 @@
             
   
   <span class="md-ellipsis">
-    NORFAB Services
+    Workflow Service
     
   </span>
   
@@ -1892,6 +1892,170 @@
         
         <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            Workflow Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Inventory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_6_3" id="__nav_1_8_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tasks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tasks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Run
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_7" id="__nav_1_8_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    NORFAB Services
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_7">
             <span class="md-nav__icon md-icon"></span>
             NORFAB Services
           </label>
@@ -2795,6 +2959,28 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Worker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3547,23 +3733,23 @@ root
     └── cli:    Send CLI commands to devices
         ├── timeout:    Job timeout
         ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── add_details:    Add task details to results
-        ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        ├── run_num_connectors:    RetryRunner number of threads for device connections
-        ├── run_connect_retry:    RetryRunner number of connection attempts
-        ├── run_task_retry:    RetryRunner number of attempts to run task
-        ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        ├── add-details:    Add task details to results, default &#39;False&#39;
+        ├── num-workers:    RetryRunner number of threads for tasks execution
+        ├── num-connectors:    RetryRunner number of threads for device connections
+        ├── connect-retry:    RetryRunner number of connection attempts
+        ├── task-retry:    RetryRunner number of attempts to run task
+        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         ├── tf:    File group name to save task results to on worker file system
-        ├── tf_skip_failed:    Save results to file for failed tasks
+        ├── tf-skip-failed:    Save results to file for failed tasks
         ├── diff:    File group name to run the diff for
-        ├── diff_last:    File version number to diff, default is 1 (last)
-        ├── progress:    Emit execution progress, default &#39;True&#39;
+        ├── diff-last:    File version number to diff, default is 1 (last)
+        ├── progress:    Display progress events, default &#39;True&#39;
         ├── table:    Table format (brief, terse, extend) or parameters or True
         ├── headers:    Table headers
-        ├── headers_exclude:    Table headers to exclude
+        ├── headers-exclude:    Table headers to exclude
         ├── sortby:    Table header column to sort by
         ├── reverse:    Table reverse the sort by order
         ├── FO:    Filter hosts using Filter Object
@@ -3578,49 +3764,50 @@ root
         ├── FX:    Filter hosts excluding them by name
         ├── FN:    Negate the match
         ├── hosts:    Filter hosts to target
-        ├── *commands:    List of commands to collect form devices, default &#39;PydanticUndefined&#39;
+        ├── *commands:    List of commands to collect form devices
         ├── plugin:    Connection plugin parameters
         │   ├── netmiko:    Use Netmiko plugin to configure devices
         │   │   ├── enable:    Attempt to enter enable-mode
-        │   │   ├── use_timing:    switch to send command timing method
-        │   │   ├── expect_string:    Regular expression pattern to use for determining end of output
-        │   │   ├── read_timeout:    Maximum time to wait looking for pattern
-        │   │   ├── auto_find_prompt:    Use find_prompt() to override base prompt
-        │   │   ├── strip_prompt:    Remove the trailing router prompt from the output
-        │   │   ├── strip_command:    Remove the echo of the command from the output
+        │   │   ├── use-timing:    switch to send command timing method
+        │   │   ├── expect-string:    Regular expression pattern to use for determining end of output
+        │   │   ├── read-timeout:    Maximum time to wait looking for pattern
+        │   │   ├── auto-find-prompt:    Use find_prompt() to override base prompt
+        │   │   ├── strip-prompt:    Remove the trailing router prompt from the output
+        │   │   ├── strip-command:    Remove the echo of the command from the output
         │   │   ├── normalize:    Ensure the proper enter is sent at end of command
-        │   │   ├── use_textfsm:    Process command output through TextFSM template
-        │   │   ├── textfsm_template:    Name of template to parse output with
-        │   │   ├── use_ttp:    Process command output through TTP template
-        │   │   ├── ttp_template:    Name of template to parse output with
-        │   │   ├── use_genie:    Process command output through PyATS/Genie parser
-        │   │   ├── cmd_verify:    Verify command echo before proceeding
-        │   │   ├── interval:    Interval between sending commands
-        │   │   ├── use_ps:    Use send command promptless method
-        │   │   ├── use_ps_timeout:    Promptless mode absolute timeout
-        │   │   ├── new_line_char:    Character to replace with new line before sending to device, default is _br_
+        │   │   ├── use-textfsm:    Process command output through TextFSM template
+        │   │   ├── textfsm-template:    Name of template to parse output with
+        │   │   ├── use-ttp:    Process command output through TTP template
+        │   │   ├── ttp-template:    Name of template to parse output with
+        │   │   ├── use-genie:    Process command output through PyATS/Genie parser
+        │   │   ├── cmd-verify:    Verify command echo before proceeding
+        │   │   ├── use-ps:    Use send command promptless method
+        │   │   ├── use-ps-timeout:    Promptless mode absolute timeout
+        │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
         │   │   ├── repeat:    Number of times to repeat the commands
-        │   │   ├── stop_pattern:    Stop commands repeat if output matches provided glob pattern
-        │   │   ├── repeat_interval:    Time in seconds to wait between repeating commands
-        │   │   └── return_last:    Returns requested last number of commands outputs
+        │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   └── return-last:    Returns requested last number of commands outputs
         │   ├── scrapli:    Use Scrapli plugin to configure devices
-        │   │   ├── failed_when_contains:    String or list of strings indicating failure if found in response
-        │   │   ├── timeout_ops:    Timeout ops value for this operation
+        │   │   ├── strip-prompt:    Strip prompt from returned output
+        │   │   ├── failed-when-contains:    String or list of strings indicating failure if found in response
+        │   │   ├── timeout-ops:    Timeout ops value for this operation
         │   │   ├── interval:    Interval between sending commands
-        │   │   ├── split_lines:    Split multiline string to individual commands
-        │   │   ├── new_line_char:    Character to replace with new line before sending to device, default is _br_
+        │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
         │   │   ├── repeat:    Number of times to repeat the commands
-        │   │   ├── stop_pattern:    Stop commands repeat if output matches provided glob pattern
-        │   │   ├── repeat_interval:    Time in seconds to wait between repeating commands
-        │   │   └── return_last:    Returns requested last number of commands outputs
+        │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   └── return-last:    Returns requested last number of commands outputs
         │   └── napalm:    Use NAPALM plugin to configure devices
         │       ├── interval:    Interval between sending commands
-        │       ├── split_lines:    Split multiline string to individual commands
-        │       └── new_line_char:    Character to replace with new line before sending to device, default is _br_
-        ├── cli_dry_run:    Dry run the commands
+        │       ├── split-lines:    Split multiline string to individual commands
+        │       └── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        ├── dry-run:    Dry run the commands
         ├── enable:    Enter exec mode
-        ├── run_ttp:    TTP Template to run
-        └── job_data:    Path to YAML file with job data
+        ├── run-ttp:    TTP Template to run
+        └── job-data:    Path to YAML file with job data
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>
@@ -3683,7 +3870,7 @@ nf#
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>cli_dry_run</code>
+                <code>dry_run</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
@@ -3841,69 +4028,7 @@ cannot be downloaded.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 917</span>
-<span class="normal"> 918</span>
-<span class="normal"> 919</span>
-<span class="normal"> 920</span>
-<span class="normal"> 921</span>
-<span class="normal"> 922</span>
-<span class="normal"> 923</span>
-<span class="normal"> 924</span>
-<span class="normal"> 925</span>
-<span class="normal"> 926</span>
-<span class="normal"> 927</span>
-<span class="normal"> 928</span>
-<span class="normal"> 929</span>
-<span class="normal"> 930</span>
-<span class="normal"> 931</span>
-<span class="normal"> 932</span>
-<span class="normal"> 933</span>
-<span class="normal"> 934</span>
-<span class="normal"> 935</span>
-<span class="normal"> 936</span>
-<span class="normal"> 937</span>
-<span class="normal"> 938</span>
-<span class="normal"> 939</span>
-<span class="normal"> 940</span>
-<span class="normal"> 941</span>
-<span class="normal"> 942</span>
-<span class="normal"> 943</span>
-<span class="normal"> 944</span>
-<span class="normal"> 945</span>
-<span class="normal"> 946</span>
-<span class="normal"> 947</span>
-<span class="normal"> 948</span>
-<span class="normal"> 949</span>
-<span class="normal"> 950</span>
-<span class="normal"> 951</span>
-<span class="normal"> 952</span>
-<span class="normal"> 953</span>
-<span class="normal"> 954</span>
-<span class="normal"> 955</span>
-<span class="normal"> 956</span>
-<span class="normal"> 957</span>
-<span class="normal"> 958</span>
-<span class="normal"> 959</span>
-<span class="normal"> 960</span>
-<span class="normal"> 961</span>
-<span class="normal"> 962</span>
-<span class="normal"> 963</span>
-<span class="normal"> 964</span>
-<span class="normal"> 965</span>
-<span class="normal"> 966</span>
-<span class="normal"> 967</span>
-<span class="normal"> 968</span>
-<span class="normal"> 969</span>
-<span class="normal"> 970</span>
-<span class="normal"> 971</span>
-<span class="normal"> 972</span>
-<span class="normal"> 973</span>
-<span class="normal"> 974</span>
-<span class="normal"> 975</span>
-<span class="normal"> 976</span>
-<span class="normal"> 977</span>
-<span class="normal"> 978</span>
-<span class="normal"> 979</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 979</span>
 <span class="normal"> 980</span>
 <span class="normal"> 981</span>
 <span class="normal"> 982</span>
@@ -3962,11 +4087,75 @@ cannot be downloaded.</p>
 <span class="normal">1035</span>
 <span class="normal">1036</span>
 <span class="normal">1037</span>
-<span class="normal">1038</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span>
+<span class="normal">1070</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span>
+<span class="normal">1086</span>
+<span class="normal">1087</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span>
+<span class="normal">1091</span>
+<span class="normal">1092</span>
+<span class="normal">1093</span>
+<span class="normal">1094</span>
+<span class="normal">1095</span>
+<span class="normal">1096</span>
+<span class="normal">1097</span>
+<span class="normal">1098</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">commands</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-    <span class="n">cli_dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">run_ttp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">job_data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -3980,7 +4169,7 @@ cannot be downloaded.</p>
 <span class="sd">        commands (list, optional): List of commands to send to devices.</span>
 <span class="sd">        plugin (str, optional): Plugin name to use. Valid options are</span>
 <span class="sd">            ``netmiko``, ``scrapli``, ``napalm``.</span>
-<span class="sd">        cli_dry_run (bool, optional): If True, do not send commands to devices,</span>
+<span class="sd">        dry_run (bool, optional): If True, do not send commands to devices,</span>
 <span class="sd">            just return them.</span>
 <span class="sd">        run_ttp (str, optional): TTP Template to run.</span>
 <span class="sd">        job_data (str, optional): URL to YAML file with data or dictionary/list</span>
@@ -4028,6 +4217,7 @@ cannot be downloaded.</p>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;no_match&quot;</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># download TTP template</span>
@@ -4050,7 +4240,7 @@ cannot be downloaded.</p>
     <span class="k">if</span> <span class="n">commands</span><span class="p">:</span>
         <span class="n">commands</span> <span class="o">=</span> <span class="n">commands</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">commands</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">commands</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">rendered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_jinja2_templates</span><span class="p">(</span>
+            <span class="n">rendered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_render_templates</span><span class="p">(</span>
                 <span class="n">templates</span><span class="o">=</span><span class="n">commands</span><span class="p">,</span>
                 <span class="n">context</span><span class="o">=</span><span class="p">{</span>
                     <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
@@ -4064,16 +4254,17 @@ cannot be downloaded.</p>
 
     <span class="c1"># run task</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running cli commands &#39;</span><span class="si">{</span><span class="n">commands</span><span class="si">}</span><span class="s2">&#39;, kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, is cli dry run - &#39;</span><span class="si">{</span><span class="n">cli_dry_run</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - running cli commands &#39;</span><span class="si">{</span><span class="n">commands</span><span class="si">}</span><span class="s2">&#39;, kwargs &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&#39;, is cli dry run - &#39;</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="n">cli_dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">use_task_data</span><span class="o">=</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;cli_dry_run&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">use_task_data</span><span class="o">=</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dry_run&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_lock</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task_plugin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span>  <span class="c1"># failed is true if any of the hosts failed</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ResultSerializer</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span> <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">)</span>
 
     <span class="c1"># remove __task__ data</span>

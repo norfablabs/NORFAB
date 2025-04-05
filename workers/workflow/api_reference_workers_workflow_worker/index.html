@@ -12,13 +12,13 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/agent/api_reference_workers_agent_worker/">
+        <link rel="canonical" href="https://docs.norfablabs.com/workers/workflow/api_reference_workers_workflow_worker/">
       
       
-        <link rel="prev" href="../../fastapi/api_reference_workers_fastapi_worker/">
+        <link rel="prev" href="../../agent/api_reference_workers_agent_worker/">
       
       
-        <link rel="next" href="../../workflow/api_reference_workers_workflow_worker/">
+        <link rel="next" href="../../../api_reference_clients_nfcli_client/">
       
       
       <link rel="icon" href="../../../images/logo.jpg">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Ollama Agent Worker - Network Automations Fabric [NORFAB]</title>
+        <title>Workflow Worker - Network Automations Fabric [NORFAB]</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#norfab.workers.agent_worker.AgentWorker" class="md-skip">
+        <a href="#norfab.workers.workflow_worker.WorkflowWorker" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Ollama Agent Worker
+              Workflow Worker
             
           </span>
         </div>
@@ -1368,7 +1368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_agent_service/" class="md-nav__link">
+      <a href="../../agent/services_agent_service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1390,7 +1390,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_agent_service_inventory/" class="md-nav__link">
+      <a href="../../agent/services_agent_service_inventory/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1453,7 +1453,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_agent_service_tasks_chat/" class="md-nav__link">
+      <a href="../../agent/services_agent_service_tasks_chat/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1696,7 +1696,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
+      <a href="../services_workflow_service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1718,7 +1718,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
+      <a href="../services_workflow_service_inventory/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1781,7 +1781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+      <a href="../services_workflow_service_tasks_run/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2739,6 +2739,28 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agent/api_reference_workers_agent_worker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ollama Agent Worker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -2753,7 +2775,7 @@
           
   
   <span class="md-ellipsis">
-    Ollama Agent Worker
+    Workflow Worker
     
   </span>
   
@@ -2765,7 +2787,7 @@
         
   
   <span class="md-ellipsis">
-    Ollama Agent Worker
+    Workflow Worker
     
   </span>
   
@@ -2786,17 +2808,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker" class="md-nav__link">
     <span class="md-ellipsis">
-      AgentWorker
+      WorkflowWorker
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="AgentWorker">
+    <nav class="md-nav" aria-label="WorkflowWorker">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.get_version" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.get_version" class="md-nav__link">
     <span class="md-ellipsis">
       get_version
     </span>
@@ -2805,7 +2827,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.get_inventory" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.get_inventory" class="md-nav__link">
     <span class="md-ellipsis">
       get_inventory
     </span>
@@ -2814,27 +2836,36 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.get_status" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.remove_no_match_results" class="md-nav__link">
     <span class="md-ellipsis">
-      get_status
+      remove_no_match_results
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker._chat_ollama" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.skip_step_check" class="md-nav__link">
     <span class="md-ellipsis">
-      _chat_ollama
+      skip_step_check
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.chat" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.stop_workflow_check" class="md-nav__link">
     <span class="md-ellipsis">
-      chat
+      stop_workflow_check
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      run
     </span>
   </a>
   
@@ -2849,28 +2880,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Workflow Worker
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -3134,17 +3143,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker" class="md-nav__link">
     <span class="md-ellipsis">
-      AgentWorker
+      WorkflowWorker
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="AgentWorker">
+    <nav class="md-nav" aria-label="WorkflowWorker">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.get_version" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.get_version" class="md-nav__link">
     <span class="md-ellipsis">
       get_version
     </span>
@@ -3153,7 +3162,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.get_inventory" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.get_inventory" class="md-nav__link">
     <span class="md-ellipsis">
       get_inventory
     </span>
@@ -3162,27 +3171,36 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.get_status" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.remove_no_match_results" class="md-nav__link">
     <span class="md-ellipsis">
-      get_status
+      remove_no_match_results
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker._chat_ollama" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.skip_step_check" class="md-nav__link">
     <span class="md-ellipsis">
-      _chat_ollama
+      skip_step_check
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#norfab.workers.agent_worker.AgentWorker.chat" class="md-nav__link">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.stop_workflow_check" class="md-nav__link">
     <span class="md-ellipsis">
-      chat
+      stop_workflow_check
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#norfab.workers.workflow_worker.WorkflowWorker.run" class="md-nav__link">
+    <span class="md-ellipsis">
+      run
     </span>
   </a>
   
@@ -3212,7 +3230,7 @@
   
 
 
-  <h1>Ollama Agent Worker</h1>
+  <h1>Workflow Worker</h1>
 
 <div class="doc doc-object doc-module">
 
@@ -3241,10 +3259,10 @@
 
 
 
-<h2 id="norfab.workers.agent_worker.AgentWorker" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">AgentWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">,</span> <span class="n">log_queue</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+<h2 id="norfab.workers.workflow_worker.WorkflowWorker" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">WorkflowWorker</span><span class="p">(</span><span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init_done_event</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">,</span> <span class="n">log_queue</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
 
-<a href="#norfab.workers.agent_worker.AgentWorker" class="headerlink" title="Permanent link">¤</a></h2>
+<a href="#norfab.workers.workflow_worker.WorkflowWorker" class="headerlink" title="Permanent link">¤</a></h2>
 
 
     <div class="doc doc-contents ">
@@ -3252,9 +3270,45 @@
               Bases: <code><a class="autorefs autorefs-internal" title="norfab.core.worker.NFPWorker" href="../../../api_reference_core_norfab_worker/#norfab.core.worker.NFPWorker">NFPWorker</a></code></p>
 
 
-        <p>This class represents a worker that interacts with a language model to
-handle various tasks such as chatting with users, retrieving inventory,
-and producing version reports of Python packages.</p>
+        <p>WorkflowWorker class for managing and executing workflows.</p>
+<p>This class extends the NFPWorker class and provides methods to load inventory,
+retrieve version information, manage workflow results, and execute workflows.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="norfab.workers.workflow_worker.WorkflowWorker.init_done_event">init_done_event</span></code></td>
+            <td>
+                  <code><span title="threading.Event">Event</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Event to signal the completion of initialization.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="norfab.workers.workflow_worker.WorkflowWorker.workflow_worker_inventory">workflow_worker_inventory</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Inventory loaded from the broker.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3292,7 +3346,7 @@ and producing version reports of Python packages.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The broker URL to connect to.</p>
+                <p>The broker address.</p>
               </div>
             </td>
             <td>
@@ -3308,7 +3362,7 @@ and producing version reports of Python packages.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The name of this worker.</p>
+                <p>The name of the worker.</p>
               </div>
             </td>
             <td>
@@ -3320,10 +3374,11 @@ and producing version reports of Python packages.</p>
                 <code>exit_event</code>
             </td>
             <td>
+                  <code><span title="threading.Event">Event</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An event that, if set, indicates the worker needs to stop/exit.</p>
+                <p>Event to signal the worker to exit. Defaults to None.</p>
               </div>
             </td>
             <td>
@@ -3335,10 +3390,11 @@ and producing version reports of Python packages.</p>
                 <code>init_done_event</code>
             </td>
             <td>
+                  <code><span title="threading.Event">Event</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An event to set when the worker has finished initializing.</p>
+                <p>Event to signal that initialization is done. Defaults to None.</p>
               </div>
             </td>
             <td>
@@ -3354,7 +3410,7 @@ and producing version reports of Python packages.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The logging level of this worker. Defaults to "WARNING".</p>
+                <p>The logging level. Defaults to "WARNING".</p>
               </div>
             </td>
             <td>
@@ -3370,7 +3426,7 @@ and producing version reports of Python packages.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The logging queue object.</p>
+                <p>The logging queue. Defaults to None.</p>
               </div>
             </td>
             <td>
@@ -3381,152 +3437,23 @@ and producing version reports of Python packages.</p>
     </table>
 
 
-<p><span class="doc-section-title">Attributes:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td><code><span title="norfab.workers.agent_worker.AgentWorker.agent_inventory">agent_inventory</span></code></td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The inventory loaded from the broker.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="norfab.workers.agent_worker.AgentWorker.llm_model">llm_model</span></code></td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The language model to be used. Defaults to "llama3.1:8b".</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="norfab.workers.agent_worker.AgentWorker.llm_temperature">llm_temperature</span></code></td>
-            <td>
-                  <code><span title="float">float</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The temperature setting for the language model. Defaults to 0.5.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="norfab.workers.agent_worker.AgentWorker.llm_base_url">llm_base_url</span></code></td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The base URL for the language model. Defaults to "http://127.0.0.1:11434".</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="norfab.workers.agent_worker.AgentWorker.llm_flavour">llm_flavour</span></code></td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The flavour of the language model. Defaults to "ollama".</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="norfab.workers.agent_worker.AgentWorker.llm">llm</span></code></td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The language model instance.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Methods:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-            <tr class="doc-section-item">
-              <td><code><span title="norfab.workers.agent_worker.AgentWorker.worker_exit">worker_exit</span></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Placeholder method for worker exit logic.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="norfab.workers.agent_worker.AgentWorker.get_version" href="#norfab.workers.agent_worker.AgentWorker.get_version">get_version</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Produces a report of the versions of Python packages.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="norfab.workers.agent_worker.AgentWorker.get_inventory" href="#norfab.workers.agent_worker.AgentWorker.get_inventory">get_inventory</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Returns the agent's inventory.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="norfab.workers.agent_worker.AgentWorker.get_status" href="#norfab.workers.agent_worker.AgentWorker.get_status">get_status</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Returns the status of the worker.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="norfab.workers.agent_worker.AgentWorker._chat_ollama" href="#norfab.workers.agent_worker.AgentWorker._chat_ollama">_chat_ollama</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Handles the chat interaction with the Ollama LLM.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="norfab.workers.agent_worker.AgentWorker.chat" href="#norfab.workers.agent_worker.AgentWorker.chat">chat</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Handles the chat interaction with the user by processing the input through a language model.</p>
-                </div>
-              </td>
-            </tr>
-      </tbody>
-    </table>
-
-
 
 
 
 
                   <details class="quote">
-                    <summary>Source code in <code>norfab\workers\agent_worker.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
+                    <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
@@ -3535,30 +3462,7 @@ and producing version reports of Python packages.</p>
 <span class="normal">52</span>
 <span class="normal">53</span>
 <span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">inventory</span><span class="p">,</span>
     <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -3574,20 +3478,7 @@ and producing version reports of Python packages.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span> <span class="o">=</span> <span class="n">init_done_event</span>
 
     <span class="c1"># get inventory from broker</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">agent_inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_inventory</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">llm_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;llm_model&quot;</span><span class="p">,</span> <span class="s2">&quot;llama3.1:8b&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">llm_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;llm_temperature&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">llm_base_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;llm_base_url&quot;</span><span class="p">,</span> <span class="s2">&quot;http://127.0.0.1:11434&quot;</span>
-    <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">llm_flavour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_inventory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;llm_flavour&quot;</span><span class="p">,</span> <span class="s2">&quot;ollama&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm_flavour</span> <span class="o">==</span> <span class="s2">&quot;ollama&quot;</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">llm</span> <span class="o">=</span> <span class="n">OllamaLLM</span><span class="p">(</span>
-            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_model</span><span class="p">,</span>
-            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_temperature</span><span class="p">,</span>
-            <span class="n">base_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_base_url</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">workflow_worker_inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_inventory</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started&quot;</span><span class="p">)</span>
@@ -3609,16 +3500,16 @@ and producing version reports of Python packages.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="norfab.workers.agent_worker.AgentWorker.get_version" class="doc doc-heading">
+<h3 id="norfab.workers.workflow_worker.WorkflowWorker.get_version" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_version</span><span class="p">()</span></code>
 
-<a href="#norfab.workers.agent_worker.AgentWorker.get_version" class="headerlink" title="Permanent link">¤</a></h3>
+<a href="#norfab.workers.workflow_worker.WorkflowWorker.get_version" class="headerlink" title="Permanent link">¤</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Generate a report of the versions of specific Python packages and system information.
-This method collects the version information of several Python packages and system details,
+        <p>Generate a report of the versions of specific Python packages and system information.</p>
+<p>This method collects the version information of several Python packages and system details,
 including the Python version, platform, and a specified language model.</p>
 
 
@@ -3646,39 +3537,35 @@ including the Python version, platform, and a specified language model.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>norfab\workers\agent_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a report of the versions of specific Python packages and system information.</span>
+
 <span class="sd">    This method collects the version information of several Python packages and system details,</span>
 <span class="sd">    including the Python version, platform, and a specified language model.</span>
 
@@ -3689,14 +3576,8 @@ including the Python version, platform, and a specified language model.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain-community&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain-core&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;langchain-ollama&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ollama&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
         <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span>
-        <span class="s2">&quot;llm_model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm_model</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="c1"># get version of packages installed</span>
     <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="n">libs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -3715,15 +3596,15 @@ including the Python version, platform, and a specified language model.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="norfab.workers.agent_worker.AgentWorker.get_inventory" class="doc doc-heading">
+<h3 id="norfab.workers.workflow_worker.WorkflowWorker.get_inventory" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_inventory</span><span class="p">()</span></code>
 
-<a href="#norfab.workers.agent_worker.AgentWorker.get_inventory" class="headerlink" title="Permanent link">¤</a></h3>
+<a href="#norfab.workers.workflow_worker.WorkflowWorker.get_inventory" class="headerlink" title="Permanent link">¤</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>NorFab task to retrieve the agent's inventory.</p>
+        <p>NorFab task to retrieve the workflow's worker inventory.</p>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -3740,7 +3621,7 @@ including the Python version, platform, and a specified language model.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An instance of the Result class containing the agent's inventory.</p>
+                <p>An instance of the Result class containing the workflow's worker inventory.</p>
               </div>
             </td>
           </tr>
@@ -3748,22 +3629,22 @@ including the Python version, platform, and a specified language model.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>norfab\workers\agent_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NorFab task to retrieve the agent&#39;s inventory.</span>
+<span class="sd">    NorFab task to retrieve the workflow&#39;s worker inventory.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: An instance of the Result class containing the agent&#39;s inventory.</span>
+<span class="sd">        Result: An instance of the Result class containing the workflow&#39;s worker inventory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_inventory</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_worker_inventory</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3773,73 +3654,16 @@ including the Python version, platform, and a specified language model.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="norfab.workers.agent_worker.AgentWorker.get_status" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_status</span><span class="p">()</span></code>
+<h3 id="norfab.workers.workflow_worker.WorkflowWorker.remove_no_match_results" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">remove_no_match_results</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span></code>
 
-<a href="#norfab.workers.agent_worker.AgentWorker.get_status" class="headerlink" title="Permanent link">¤</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>NorFab Task that retrieves the status of the agent worker.</p>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>Result</code></td>            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>An object containing the status result with a value of "OK".</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-            <details class="quote">
-              <summary>Source code in <code>norfab\workers\agent_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NorFab Task that retrieves the status of the agent worker.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Result: An object containing the status result with a value of &quot;OK&quot;.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="norfab.workers.agent_worker.AgentWorker._chat_ollama" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_chat_ollama</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span></code>
-
-<a href="#norfab.workers.agent_worker.AgentWorker._chat_ollama" class="headerlink" title="Permanent link">¤</a></h3>
+<a href="#norfab.workers.workflow_worker.WorkflowWorker.remove_no_match_results" class="headerlink" title="Permanent link">¤</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>NorFab Task that handles the chat interaction with Ollama LLM.</p>
+        <p>Remove results from the workflow results for workers that did not
+have any resources matched by given task.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3855,34 +3679,18 @@ including the Python version, platform, and a specified language model.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>user_input</code>
+                <code>results</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="typing.Dict">Dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The input provided by the user.</p>
+                <p>The workflow results.</p>
               </div>
             </td>
             <td>
                 <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>template</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The template for generating the prompt. Defaults to a predefined template.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -3899,12 +3707,12 @@ including the Python version, platform, and a specified language model.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>str</code></td>            <td>
-                  <code><span title="str">str</span></code>
+<td><code>Dict</code></td>            <td>
+                  <code><span title="typing.Dict">Dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The result of the chat interaction.</p>
+                <p>The workflow results with empty results removed.</p>
               </div>
             </td>
           </tr>
@@ -3912,8 +3720,179 @@ including the Python version, platform, and a specified language model.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>norfab\workers\agent_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
+              <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_no_match_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove results from the workflow results for workers that did not</span>
+<span class="sd">    have any resources matched by given task.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        results (Dict): The workflow results.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: The workflow results with empty results removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">task_results</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ret</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">task_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># check results for tasks that did not fail</span>
+            <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">worker_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">worker_result</span>
+            <span class="c1"># add failed tasks irregardless of status content</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">worker_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">worker_result</span>
+    <span class="k">return</span> <span class="n">ret</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="norfab.workers.workflow_worker.WorkflowWorker.skip_step_check" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">skip_step_check</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
+
+<a href="#norfab.workers.workflow_worker.WorkflowWorker.skip_step_check" class="headerlink" title="Permanent link">¤</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Determines whether a step should be skipped based on the provided conditions.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>results</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The results of previous steps.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>step</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the current step.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing conditions for skipping the step. Possible keys are:</p>
+<ul>
+<li>"run_if_fail_any": List of step names. Skip if any of the workers have failed these steps.</li>
+<li>"run_if_pass_any": List of step names. Skip if any of the workers have passed these steps.</li>
+<li>"run_if_fail_all": List of step names. Skip if all of the workers have failed these steps.</li>
+<li>"run_if_pass_all": List of step names. Skip if all of the workers have passed these steps.</li>
+</ul>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>tuple</code></td>            <td>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="bool">bool</span>, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>tuple of boolean status and message, if status is true step should be skipped.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
@@ -3938,32 +3917,185 @@ including the Python version, platform, and a specified language model.</p>
 <span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
-<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_chat_ollama</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">skip_step_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NorFab Task that handles the chat interaction with Ollama LLM.</span>
+<span class="sd">    Determines whether a step should be skipped based on the provided conditions.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        user_input (str): The input provided by the user.</span>
-<span class="sd">        template (str, optional): The template for generating the prompt. Defaults to a predefined template.</span>
+<span class="sd">        results (dict): The results of previous steps.</span>
+<span class="sd">        step (str): The name of the current step.</span>
+<span class="sd">        data (dict): A dictionary containing conditions for skipping the step. Possible keys are:</span>
+
+<span class="sd">            - &quot;run_if_fail_any&quot;: List of step names. Skip if any of the workers have failed these steps.</span>
+<span class="sd">            - &quot;run_if_pass_any&quot;: List of step names. Skip if any of the workers have passed these steps.</span>
+<span class="sd">            - &quot;run_if_fail_all&quot;: List of step names. Skip if all of the workers have failed these steps.</span>
+<span class="sd">            - &quot;run_if_pass_all&quot;: List of step names. Skip if all of the workers have passed these steps.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        str: The result of the chat interaction.</span>
+<span class="sd">        tuple: tuple of boolean status and message, if status is true step should be skipped.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received user input &#39;</span><span class="si">{</span><span class="n">user_input</span><span class="p">[:</span><span class="mi">50</span><span class="p">]</span><span class="si">}</span><span class="s2">..&#39;&quot;</span><span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:chat&quot;</span><span class="p">)</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">template</span>
-        <span class="ow">or</span> <span class="s2">&quot;&quot;&quot;Question: </span><span class="si">{user_input}</span><span class="s2">; Answer: Let&#39;s think step by step. Provide answer in markdown format.&quot;&quot;&quot;</span>
-    <span class="p">)</span>
-    <span class="n">prompt</span> <span class="o">=</span> <span class="n">ChatPromptTemplate</span><span class="o">.</span><span class="n">from_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
-    <span class="n">chain</span> <span class="o">=</span> <span class="n">prompt</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_fail_any&quot;</span><span class="p">):</span>
+        <span class="c1"># check if have results for all needed steps</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_any&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;run_if_fail_any check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="c1"># check if any of the steps failed</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_any&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                <span class="p">):</span>
+                    <span class="c1"># do not skip this step since one of the steps failed</span>
+                    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="kc">True</span><span class="p">,</span>  <span class="c1"># skip this step since none of the steps failed</span>
+                <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, no workers failed any of run_if_fail_any steps: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_if_fail_any&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_pass_any&quot;</span><span class="p">):</span>
+        <span class="c1"># check if have results for all needed steps</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_any&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;run_if_pass_any check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="c1"># check if any of the steps passed</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_any&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                <span class="p">):</span>
+                    <span class="c1"># do not skip this step since one of the steps passed</span>
+                    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="kc">True</span><span class="p">,</span>  <span class="c1"># skip this step since none of the steps passed</span>
+                <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, no workers passed any of run_if_pass_any steps: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_if_pass_any&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_fail_all&quot;</span><span class="p">):</span>
+        <span class="c1"># check if have results for all needed steps</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_all&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;run_if_fail_all check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="c1"># check if all workers failed the step(s)</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_fail_all&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                <span class="p">):</span>
+                    <span class="c1"># skip this step since one of the workers passed this step</span>
+                    <span class="k">return</span> <span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, worker </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> not failed one of run_if_fail_all steps: </span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># do not skip this step since all steps failed</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;run_if_pass_all&quot;</span><span class="p">):</span>
+        <span class="c1"># check if have results for all needed steps</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_all&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;run_if_pass_all check failed for &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; results not found&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="c1"># check if all workers passed the step(s)</span>
+        <span class="k">for</span> <span class="n">step_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;run_if_pass_all&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">step_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+                    <span class="ow">and</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span>
+                <span class="p">):</span>
+                    <span class="c1"># skip this step since one of the workers failed this step</span>
+                    <span class="k">return</span> <span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, worker </span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> not passed one of run_if_pass_all steps: </span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># do not skip this step since all steps passed</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;Thinking...&quot;</span><span class="p">)</span>
-    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">invoke</span><span class="p">({</span><span class="s2">&quot;user_input&quot;</span><span class="p">:</span> <span class="n">user_input</span><span class="p">})</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;Done thinking, sending result back to user&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># do not skip this step</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3973,15 +4105,16 @@ including the Python version, platform, and a specified language model.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="norfab.workers.agent_worker.AgentWorker.chat" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">chat</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span></code>
+<h3 id="norfab.workers.workflow_worker.WorkflowWorker.stop_workflow_check" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">stop_workflow_check</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
-<a href="#norfab.workers.agent_worker.AgentWorker.chat" class="headerlink" title="Permanent link">¤</a></h3>
+<a href="#norfab.workers.workflow_worker.WorkflowWorker.stop_workflow_check" class="headerlink" title="Permanent link">¤</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>NorFab Task that handles the chat interaction with the user by processing the input through a language model.</p>
+        <p>Determines whether to stop the workflow based on the result of
+a specific step and provided data.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3997,14 +4130,14 @@ including the Python version, platform, and a specified language model.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>user_input</code>
+                <code>result</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The input provided by the user.</p>
+                <p>The results dictionary for given step.</p>
               </div>
             </td>
             <td>
@@ -4013,18 +4146,35 @@ including the Python version, platform, and a specified language model.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>template</code>
+                <code>step</code>
             </td>
             <td>
                   <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A template string for formatting the prompt. Defaults to</p>
+                <p>The specific step to check within the result.</p>
               </div>
             </td>
             <td>
-                  <code>None</code>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing step data, including a flag
+to stop if a failure occurs.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -4041,12 +4191,143 @@ including the Python version, platform, and a specified language model.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>str</code></td>            <td>
-                  <code><span title="str">str</span></code>
+<td><code>bool</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Language model's response.</p>
+                <p>True if the workflow should be stopped due to a failure in
+the specified step and the stop_on_failure flag is set; otherwise, False.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">stop_workflow_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines whether to stop the workflow based on the result of</span>
+<span class="sd">    a specific step and provided data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        result (dict): The results dictionary for given step.</span>
+<span class="sd">        step (str): The specific step to check within the result.</span>
+<span class="sd">        data (dict): A dictionary containing step data, including a flag</span>
+<span class="sd">            to stop if a failure occurs.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the workflow should be stopped due to a failure in</span>
+<span class="sd">            the specified step and the stop_on_failure flag is set; otherwise, False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stop_on_failure&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_result</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># stop the workflow since a failure occurred</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="norfab.workers.workflow_worker.WorkflowWorker.run" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">workflow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span></code>
+
+<a href="#norfab.workers.workflow_worker.WorkflowWorker.run" class="headerlink" title="Permanent link">¤</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Executes a workflow defined by a dictionary.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>workflow</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="typing.Dict">Dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The workflow to execute. This can be a URL to a YAML file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>remove_no_match_results</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to remove empty results from the final output. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Dict</code></td>            <td>
+                  <code><span title="typing.Dict">Dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing the results of the workflow execution.</p>
               </div>
             </td>
           </tr>
@@ -4065,11 +4346,11 @@ including the Python version, platform, and a specified language model.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="Exception">Exception</span></code>
+                  <code><span title="ValueError">ValueError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the llm_flavour is unsupported.</p>
+                <p>If the workflow is not a valid URL or dictionary.</p>
               </div>
             </td>
           </tr>
@@ -4077,42 +4358,200 @@ including the Python version, platform, and a specified language model.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>norfab\workers\agent_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    NorFab Task that handles the chat interaction with the user by processing the input through a language model.</span>
+<span class="sd">    Executes a workflow defined by a dictionary.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        user_input (str): The input provided by the user.</span>
-<span class="sd">        template (str, optional): A template string for formatting the prompt. Defaults to</span>
+<span class="sd">        workflow (Union[str, Dict]): The workflow to execute. This can be a URL to a YAML file.</span>
+<span class="sd">        remove_no_match_results (bool, optional): Whether to remove empty results from the final output. Defaults to True.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        str: Language model&#39;s response.</span>
+<span class="sd">        Dict: A dictionary containing the results of the workflow execution.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        Exception: If the llm_flavour is unsupported.</span>
+<span class="sd">        ValueError: If the workflow is not a valid URL or dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm_flavour</span> <span class="o">==</span> <span class="s2">&quot;ollama&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chat_ollama</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported llm flavour </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_flavour</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="c1"># load workflow from URL</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">workflow</span><span class="p">):</span>
+        <span class="n">workflow_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">workflow</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_render_templates</span><span class="p">([</span><span class="n">workflow</span><span class="p">])</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+
+    <span class="c1"># extract workflow parameters</span>
+    <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;workflow&quot;</span><span class="p">)</span>
+    <span class="n">workflow_description</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">remove_no_match_results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;remove_no_match_results&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">workflow_description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># run each step in the workflow</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">workflow</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># check if need to skip step based on run_if_x flags</span>
+        <span class="n">skip_status</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_step_check</span><span class="p">(</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">],</span> <span class="n">step</span><span class="p">,</span> <span class="n">data</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">skip_status</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;all-workers&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;skipped&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
+                    <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Skipping workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, one of run_if_x conditions not satisfied&quot;</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="c1"># stop workflow execution on error</span>
+        <span class="k">elif</span> <span class="n">skip_status</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;all-workers&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">message</span><span class="p">],</span>
+                    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Doing workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+            <span class="n">service</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">],</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span>
+            <span class="n">workers</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">),</span>
+            <span class="n">kwargs</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># check if need to stop workflow based on stop_if_fail flag</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_workflow_check</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">],</span> <span class="n">step</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="ow">is</span> <span class="kc">True</span>
+        <span class="p">):</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">remove_no_match_results</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_no_match_results</span><span class="p">(</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
