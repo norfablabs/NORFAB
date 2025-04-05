@@ -27,6 +27,16 @@ class TestNornirWorker:
             ), "{worker_name} did not return a list of hosts"
             assert len(data) > 0 or data == []
 
+    def test_get_nornir_hosts_check_validation(self, nfclient):
+        ret = nfclient.run_job(b"nornir", "get_nornir_hosts", kwargs={"FZ": "spine"})
+        pprint.pprint(ret)
+
+        for worker_name, results in ret.items():
+            assert results["failed"] == True, f"{worker_name} did not fail"
+            assert (
+                "ValidationError" in results["errors"][0]
+            ), f"{worker_name} did not raise ValidationError"
+
     def test_get_nornir_version(self, nfclient):
         ret = nfclient.run_job(b"nornir", "get_version")
         pprint.pprint(ret)
@@ -959,6 +969,9 @@ class TestNornirTest:
         pprint.pprint(ret)
 
         for worker, results in ret.items():
+            assert results[
+                "failed"
+            ], f"{worker} some tests failed, result should be failed as well"
             assert results["result"], f"{worker} returned no test results"
             for host, res in results["result"].items():
                 for test_name, test_res in res.items():
@@ -970,6 +983,85 @@ class TestNornirTest:
                         "FAIL",
                     ], f"{worker}:{host}:{test_name} unexpected test result"
 
+    def test_nornir_test_suite_with_details(self, nfclient):
+        ret = nfclient.run_job(
+            b"nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "add_details": True,
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results[
+                "failed"
+            ], f"{worker} some tests failed, result should be failed as well"
+            assert results["result"], f"{worker} returned no test results"
+            for host, res in results["result"].items():
+                for test_name, test_res in res.items():
+                    assert isinstance(test_res, dict)
+                    assert test_res["result"] in [
+                        "PASS",
+                        "FAIL",
+                    ], f"{worker}:{host}:{test_name} unexpected test result"
+
+    def test_nornir_test_suite_list_result(self, nfclient):
+        ret = nfclient.run_job(
+            b"nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={"suite": "nf://nornir_test_suites/suite_1.txt", "to_dict": False},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results[
+                "failed"
+            ], f"{worker} some tests failed, result should be failed as well"
+            assert results["result"], f"{worker} returned no test results"
+            assert isinstance(
+                results["result"], list
+            ), f"{worker} did not return list result"
+            for host_res in results["result"]:
+                assert isinstance(host_res, dict)
+                assert host_res["result"] in [
+                    "PASS",
+                    "FAIL",
+                ], f"{worker} unexpected test result - {host_res}"
+
+    def test_nornir_test_suite_list_result_with_details(self, nfclient):
+        ret = nfclient.run_job(
+            b"nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "to_dict": False,
+                "add_details": True,
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results[
+                "failed"
+            ], f"{worker} some tests failed, result should be failed as well"
+            assert results["result"], f"{worker} returned no test results"
+            assert isinstance(
+                results["result"], list
+            ), f"{worker} did not return list result"
+            for host_res in results["result"]:
+                assert isinstance(host_res, dict)
+                assert host_res["result"] in [
+                    "PASS",
+                    "FAIL",
+                ], f"{worker} unexpected test result - {host_res}"
+                assert "exception" in host_res
+                assert "diff" in host_res, f"{worker} details added"
+
     def test_nornir_test_suite_template(self, nfclient):
         ret = nfclient.run_job(
             b"nornir",
@@ -980,6 +1072,9 @@ class TestNornirTest:
         pprint.pprint(ret)
 
         for worker, results in ret.items():
+            assert (
+                results["failed"] is False
+            ), f"{worker} no tests failed, result should not be failed as well"
             assert results["result"], f"{worker} returned no test results"
             for host, res in results["result"].items():
                 for test_name, test_res in res.items():

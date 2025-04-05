@@ -262,12 +262,6 @@ class NorniHostsFilters(BaseModel):
     FN: Optional[StrictBool] = Field(
         None, title="Filter Negate", description="Negate the match"
     )
-    hosts: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="Filter hosts to target"
-    )
-    workers: Union[StrictStr, List[StrictStr]] = Field(
-        "all", description="Filter worker to target"
-    )
 
     @staticmethod
     def source_workers():
@@ -306,10 +300,3 @@ class NorniHostsFilters(BaseModel):
         )
         result = log_error_or_result(result)
         return result
-
-    @model_validator(mode="before")
-    def convert_filters_to_strings(cls, data: Any) -> Any:
-        for k in list(data.keys()):
-            if k.startswith("F"):
-                data[k] = str(data[k])
-        return data

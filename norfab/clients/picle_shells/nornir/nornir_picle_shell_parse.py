@@ -62,9 +62,6 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
 
-        if kwargs.get("hosts"):
-            kwargs["FL"] = kwargs.pop("hosts")
-
         result = NFCLIENT.run_job(
             "nornir",
             "parse",
@@ -101,9 +98,6 @@ class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
-
-        if kwargs.get("hosts"):
-            kwargs["FL"] = kwargs.pop("hosts")
 
         result = NFCLIENT.run_job(
             "nornir",

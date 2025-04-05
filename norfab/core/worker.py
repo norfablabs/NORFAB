@@ -27,6 +27,126 @@ from jinja2 import Environment, FileSystemLoader
 log = logging.getLogger(__name__)
 
 signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+import logging
+import inspect
+
+from functools import wraps
+from pydantic import BaseModel
+
+log = logging.getLogger(__name__)
+
+# --------------------------------------------------------------------------------------------
+# NORFAB Worker Task Object
+# --------------------------------------------------------------------------------------------
+
+
+class Task:
+    """
+    Task is a class-based decorator designed to validate the input arguments of a function
+    using a specified Pydantic model. It ensures that the arguments passed to the decorated
+    function conform to the schema defined in the model.
+
+    Attributes:
+        model (Optional[BaseModel]): A Pydantic model used to validate the function arguments.
+            By default, arguments named "self" are skipped during validation.
+
+    Methods:
+        __call__(function: Callable) -> Callable:
+            Wraps the target function and validates its arguments before execution.
+
+        merge_args_to_kwargs(args: List, kwargs: Dict) -> Dict:
+            Merges positional arguments (`args`) and keyword arguments (`kwargs`) into a single
+            dictionary, mapping positional arguments to their corresponding parameter names
+            based on the function's signature.
+
+        validate(args: List, kwargs: Dict) -> None:
+            Validates the merged arguments against the Pydantic model. If validation fails,
+            an exception is raised.
+
+    Usage:
+        @Task(model=YourPydanticModel)
+        def your_function(arg1, arg2, ...):
+            # Function implementation
+            pass
+
+    Notes:
+        - All fields in the Pydantic model derived from mixins are forced to be optional.
+          Required arguments must be explicitly defined in the model.
+        - The decorator uses `inspect.getfullargspec` to analyze the function's signature
+          and properly map arguments for validation.
+    """
+
+    def __init__(
+        self,
+        model: Optional[BaseModel] = None,
+    ) -> None:
+        self.model = model
+
+    def __call__(self, function: Callable) -> Callable:
+
+        self.function = function
+
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            self.validate(args, kwargs)
+            return self.function(*args, **kwargs)
+
+        return wrapper
+
+    def merge_args_to_kwargs(self, args: List, kwargs: Dict) -> Dict:
+        """
+        Merges positional arguments (`args`) and keyword arguments (`kwargs`) into a single dictionary.
+
+        This function uses the argument specification of the decorated function to ensure that
+        all arguments are properly combined into a dictionary. This is particularly useful for
+        scenarios where **kwargs need to be passed to another function or model (e.g., for
+        validation purposes).
+
+        Arguments:
+            args (list): A list of positional arguments passed to the decorated function.
+            kwargs (dict): A dictionary of keyword arguments passed to the decorated function.
+
+        Return:
+            dict: A dictionary containing the merged arguments, where positional arguments
+                  are mapped to their corresponding parameter names.
+        """
+        merged_kwargs = {}
+
+        (
+            fun_args,  # list of the positional parameter names
+            fun_varargs,  # name of the * parameter or None
+            fun_varkw,  # name of the ** parameter or None
+            fun_defaults,  # tuple of default argument values of the last n positional parameters
+            fun_kwonlyargs,  # list of keyword-only parameter names
+            fun_kwonlydefaults,  # dictionary mapping kwonlyargs parameter names to default values
+            fun_annotations,  # dictionary mapping parameter names to annotations
+        ) = inspect.getfullargspec(self.function)
+
+        # "def foo(a, b):" - combine "foo(1, 2)" args with "a, b" fun_args
+        args_to_kwargs = dict(zip(fun_args, args))
+
+        # "def foo(a, *b):" - combine "foo(1, 2, 3)" 2|3 args with "*b" fun_varargs
+        if fun_varargs:
+            args_to_kwargs[fun_varargs] = args[len(fun_args) :]
+
+        merged_kwargs = {**kwargs, **args_to_kwargs}
+
+        # remove reference to self if decorating class method
+        _ = merged_kwargs.pop("self", None)
+
+        return merged_kwargs
+
+    def validate(self, args: List, kwargs: Dict) -> None:
+        """Function to validate provided arguments against model"""
+        merged_kwargs = self.merge_args_to_kwargs(args, kwargs)
+        # if below step succeeds, kwargs passed model validation
+        _ = self.model(**merged_kwargs)
+        log.debug(
+            f"Validated input kwargs: {merged_kwargs} for function {self.function} using model {self.model}"
+        )
+
+
 # --------------------------------------------------------------------------------------------
 # NORFAB Worker watchdog Object
 # --------------------------------------------------------------------------------------------
@@ -162,7 +282,13 @@ class Result:
         messages (Optional[List[str]]): List of messages produced by the task.
         juuid (Optional[str]): Job UUID associated with the task.
         resources (Optional[List[str]]): list of resources names worked on by the task.
-        status (Optional[str]): Status of the job.
+        status (Optional[str]): Status of the job, `status` attribute values:
+
+            - 'completed' - task was executed successfully and resources were found
+            - 'no_match' - task was executed, but no resources matched the criteria or filters provided
+            - 'failed' - task was executed, but failed
+            - 'skipped' - task was not executed, but skipped for some reason
+            - `error` - attempted to execute the task, but an error occurred
 
     Methods:
         __repr__(): Returns a string representation of the Result object.

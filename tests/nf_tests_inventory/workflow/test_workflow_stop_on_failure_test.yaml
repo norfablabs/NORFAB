@@ -1,0 +1,28 @@
+name: test_workflow_stop_on_failure_test
+description: Test workflow that should stop on failure
+
+step1:
+  service: nornir
+  task: task
+  kwargs:
+    FC: spine
+    plugin: nornir_salt.plugins.tasks.nr_test
+      
+step2_failed:
+  service: nornir
+  task: task
+  stop_on_failure: True # stop on failure
+  kwargs:
+    FC: leaf
+    plugin: nornir_salt.plugins.tasks.nr_test
+    excpt: True # raise exception
+
+# this step should not run as step2_failed should trigger exit
+step3-should-not-run:
+  service: nornir
+  task: cli
+  kwargs:
+    FC: leaf
+    commands:
+      - show hostname
+      - show ntp status

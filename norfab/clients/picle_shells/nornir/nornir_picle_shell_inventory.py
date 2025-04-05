@@ -199,9 +199,6 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "read_host_data"
 
-        if kwargs.get("hosts"):
-            kwargs["FL"] = kwargs.pop("hosts")
-
         if isinstance(kwargs["keys"], str):
             kwargs["keys"] = [kwargs["keys"]]
 

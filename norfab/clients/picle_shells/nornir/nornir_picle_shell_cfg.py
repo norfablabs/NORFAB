@@ -272,9 +272,6 @@ class NornirCfgShell(
             kwargs["add_details"] = True
             kwargs["to_dict"] = False
 
-        if kwargs.get("hosts"):
-            kwargs["FL"] = kwargs.pop("hosts")
-
         result = NFCLIENT.run_job(
             "nornir",
             "cfg",

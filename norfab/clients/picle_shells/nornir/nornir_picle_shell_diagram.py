@@ -309,9 +309,6 @@ class NornirDiagramShell(ClientRunJobArgs):
         n2g_kwargs = kwargs.pop("n2g_kwargs")
         hosts_processed = set()
 
-        if kwargs.get("hosts"):
-            kwargs["FL"] = kwargs.pop("hosts")
-
         drawing_plugin, ext = {
             "yed": (N2G.yed_diagram, "graphml"),
             "drawio": (N2G.drawio_diagram, "drawio"),

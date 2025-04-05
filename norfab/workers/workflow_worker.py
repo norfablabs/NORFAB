@@ -92,9 +92,10 @@ class WorkflowWorker(NFPWorker):
         """
         return Result(result=self.workflow_worker_inventory)
 
-    def remove_empty_results(self, results: Dict) -> Dict:
+    def remove_no_match_results(self, results: Dict) -> Dict:
         """
-        Remove empty results from the workflow results.
+        Remove results from the workflow results for workers that did not
+        have any resources matched by given task.
 
         Args:
             results (Dict): The workflow results.
@@ -106,11 +107,11 @@ class WorkflowWorker(NFPWorker):
         for step, task_results in results.items():
             ret[step] = {}
             for worker_name, worker_result in task_results.items():
-                # add non empty results for tasks that did not fail
+                # check results for tasks that did not fail
                 if worker_result["failed"] is False:
-                    if worker_result["result"]:
+                    if worker_result["status"] != "no_match":
                         ret[step][worker_name] = worker_result
-                # add failed tasks irregardless of result content
+                # add failed tasks irregardless of status content
                 else:
                     ret[step][worker_name] = worker_result
         return ret
@@ -124,10 +125,10 @@ class WorkflowWorker(NFPWorker):
             step (str): The name of the current step.
             data (dict): A dictionary containing conditions for skipping the step. Possible keys are:
 
-                         - "run_if_fail_any": List of step names. Skip if any of these steps have failed.
-                         - "run_if_pass_any": List of step names. Skip if any of these steps have passed.
-                         - "run_if_fail_all": List of step names. Skip if all of these steps have failed.
-                         - "run_if_pass_all": List of step names. Skip if all of these steps have passed.
+                - "run_if_fail_any": List of step names. Skip if any of the workers have failed these steps.
+                - "run_if_pass_any": List of step names. Skip if any of the workers have passed these steps.
+                - "run_if_fail_all": List of step names. Skip if all of the workers have failed these steps.
+                - "run_if_pass_all": List of step names. Skip if all of the workers have passed these steps.
 
         Returns:
             tuple: tuple of boolean status and message, if status is true step should be skipped.
@@ -136,17 +137,19 @@ class WorkflowWorker(NFPWorker):
             # check if have results for all needed steps
             for k in data["run_if_fail_any"]:
                 if k not in results:
-                    raise KeyError(
-                        f"run_if_fail_any check failed for '{step}', '{k}' results not found"
+                    return (
+                        "error",
+                        f"run_if_fail_any check failed for '{step}', '{k}' results not found",
                     )
             # check if any of the steps failed
             for step_name in data["run_if_fail_any"]:
                 for worker_name, worker_result in results[step_name].items():
-                    if worker_result["failed"] is True:
-                        return (
-                            False,  # do not skip this step since one of the steps failed
-                            None,
-                        )
+                    if (
+                        worker_result["failed"] is True
+                        and worker_result["status"] != "no_match"
+                    ):
+                        # do not skip this step since one of the steps failed
+                        return False, None
             else:
                 return (
                     True,  # skip this step since none of the steps failed
@@ -156,60 +159,74 @@ class WorkflowWorker(NFPWorker):
             # check if have results for all needed steps
             for k in data["run_if_pass_any"]:
                 if k not in results:
-                    raise KeyError(
-                        f"run_if_pass_any check failed for '{step}', '{k}' results not found"
+                    return (
+                        "error",
+                        f"run_if_pass_any check failed for '{step}', '{k}' results not found",
                     )
             # check if any of the steps passed
-            for step_name, job_results in results.items():
-                if step_name not in data["run_if_pass_any"]:
-                    continue
-                for worker_name, worker_result in job_results.items():
-                    if worker_result["failed"] is False:
-                        return (
-                            False,  # do not skip this step since one of the steps passed
-                            None,
-                        )
-                else:
-                    return (
-                        True,  # skip this step since none of the steps passed
-                        f"Skipping {step}, no workers passed any of run_if_pass_any steps: {', '.join(data['run_if_pass_any'])}",
-                    )
+            for step_name in data["run_if_pass_any"]:
+                for worker_name, worker_result in results[step_name].items():
+                    if (
+                        worker_result["failed"] is False
+                        and worker_result["status"] != "no_match"
+                    ):
+                        # do not skip this step since one of the steps passed
+                        return False, None
+            else:
+                return (
+                    True,  # skip this step since none of the steps passed
+                    f"Skipping {step}, no workers passed any of run_if_pass_any steps: {', '.join(data['run_if_pass_any'])}",
+                )
         if data.get("run_if_fail_all"):
             # check if have results for all needed steps
             for k in data["run_if_fail_all"]:
                 if k not in results:
-                    raise KeyError(
-                        f"run_if_fail_all check failed for '{step}', '{k}' results not found"
+                    return (
+                        "error",
+                        f"run_if_fail_all check failed for '{step}', '{k}' results not found",
                     )
-            for step_name, job_results in results.items():
-                if step_name not in data["run_if_fail_all"]:
-                    continue
-                for worker_name, worker_result in job_results.items():
-                    if worker_result["failed"] is False:
+            # check if all workers failed the step(s)
+            for step_name in data["run_if_fail_all"]:
+                for worker_name, worker_result in results[step_name].items():
+                    if (
+                        worker_result["failed"] is False
+                        and worker_result["status"] != "no_match"
+                    ):
+                        # skip this step since one of the workers passed this step
                         return (
-                            True,  # skip this step since not all steps failed
-                            f"Skipping {step}, worker {worker_name} not failed run_if_fail_all {step_name} step.",
+                            True,
+                            f"Skipping {step}, worker {worker_name} not failed one of run_if_fail_all steps: {step_name}.",
                         )
+            else:
+                # do not skip this step since all steps failed
+                return False, None
         if data.get("run_if_pass_all"):
             # check if have results for all needed steps
             for k in data["run_if_pass_all"]:
                 if k not in results:
-                    raise KeyError(
-                        f"run_if_pass_all check failed for '{step}', '{k}' results not found"
+                    return (
+                        "error",
+                        f"run_if_pass_all check failed for '{step}', '{k}' results not found",
                     )
-            for step_name, job_results in results.items():
-                if step_name not in data["run_if_pass_all"]:
-                    continue
-                for worker_name, worker_result in job_results.items():
-                    if worker_result["failed"] is True:
+            # check if all workers passed the step(s)
+            for step_name in data["run_if_pass_all"]:
+                for worker_name, worker_result in results[step_name].items():
+                    if (
+                        worker_result["failed"] is True
+                        and worker_result["status"] != "no_match"
+                    ):
+                        # skip this step since one of the workers failed this step
                         return (
-                            True,  # skip this step since not all steps passed
-                            f"Skipping {step}, worker {worker_name} not passed run_if_pass_all {step_name} step.",
+                            True,
+                            f"Skipping {step}, worker {worker_name} not passed one of run_if_pass_all steps: {step_name}.",
                         )
+            else:
+                # do not skip this step since all steps passed
+                return False, None
 
         return False, None  # do not skip this step
 
-    def stop_workflow(self, result: dict, step: str, data: dict) -> bool:
+    def stop_workflow_check(self, result: dict, step: str, data: dict) -> bool:
         """
         Determines whether to stop the workflow based on the result of
         a specific step and provided data.
@@ -225,10 +242,9 @@ class WorkflowWorker(NFPWorker):
                 the specified step and the stop_on_failure flag is set; otherwise, False.
         """
         if data.get("stop_on_failure") is True:
-            for step_name, job_results in result.items():
-                for worker_name, worker_result in job_results.items():
-                    if worker_result["failed"] is True:
-                        return True  # stop the workflow since a failure occurred
+            for worker_name, worker_result in result.items():
+                if worker_result["failed"] is True:
+                    return True  # stop the workflow since a failure occurred
         return False
 
     def run(self, workflow: Union[str, Dict]) -> Dict:
@@ -237,7 +253,7 @@ class WorkflowWorker(NFPWorker):
 
         Args:
             workflow (Union[str, Dict]): The workflow to execute. This can be a URL to a YAML file.
-            remove_empty_results (bool, optional): Whether to remove empty results from the final output. Defaults to True.
+            remove_no_match_results (bool, optional): Whether to remove empty results from the final output. Defaults to True.
 
         Returns:
             Dict: A dictionary containing the results of the workflow execution.
@@ -258,7 +274,7 @@ class WorkflowWorker(NFPWorker):
         # extract workflow parameters
         workflow_name = workflow.pop("name", "workflow")
         workflow_description = workflow.pop("description", "")
-        remove_empty_results = workflow.pop("remove_empty_results", True)
+        remove_no_match_results = workflow.pop("remove_no_match_results", True)
 
         self.event(f"Starting workflow '{workflow_name}'")
         log.info(f"Starting workflow '{workflow_name}': {workflow_description}")
@@ -267,7 +283,6 @@ class WorkflowWorker(NFPWorker):
 
         # run each step in the workflow
         for step, data in workflow.items():
-
             # check if need to skip step based on run_if_x flags
             skip_status, message = self.skip_step_check(
                 ret.result[workflow_name], step, data
@@ -275,7 +290,7 @@ class WorkflowWorker(NFPWorker):
             if skip_status is True:
                 ret.result[workflow_name][step] = {
                     "all-workers": {
-                        "failed": True,
+                        "failed": False,
                         "result": None,
                         "status": "skipped",
                         "task": data["task"],
@@ -288,6 +303,22 @@ class WorkflowWorker(NFPWorker):
                     f"Skipping workflow step '{step}', one of run_if_x conditions not satisfied"
                 )
                 continue
+            # stop workflow execution on error
+            elif skip_status == "error":
+                ret.result[workflow_name][step] = {
+                    "all-workers": {
+                        "failed": True,
+                        "result": None,
+                        "status": "error",
+                        "task": data["task"],
+                        "errors": [message],
+                        "messages": [],
+                        "juuid": None,
+                    }
+                }
+                self.event(message)
+                log.error(message)
+                break
 
             self.event(f"Doing workflow step '{step}'")
 
@@ -301,11 +332,14 @@ class WorkflowWorker(NFPWorker):
             )
 
             # check if need to stop workflow based on stop_if_fail flag
-            if self.stop_workflow(ret.result[workflow_name][step], step, data):
+            if (
+                self.stop_workflow_check(ret.result[workflow_name][step], step, data)
+                is True
+            ):
                 break
 
-        if remove_empty_results:
-            ret.result[workflow_name] = self.remove_empty_results(
+        if remove_no_match_results:
+            ret.result[workflow_name] = self.remove_no_match_results(
                 ret.result[workflow_name]
             )
 

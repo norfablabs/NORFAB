@@ -1,0 +1,33 @@
+name: test_workflow_run_if_error
+description: Test workflow that should fail with error cause run_if_x refers to non existing step
+
+step1_failed:
+  service: nornir
+  task: task
+  kwargs:
+    FC: spine,leaf
+    plugin: nornir_salt.plugins.tasks.nr_test
+    excpt: True # raise exception
+      
+# this step should fail
+step2:
+  service: nornir
+  task: cli
+  kwargs:
+    FC: leaf
+    commands:
+      - show hostname
+      - show ntp status
+  run_if_fail_any: 
+    - step1_failed
+    - step_non_existing
+
+# this step should be not in results
+step3:
+  service: nornir
+  task: cli
+  kwargs:
+    FC: spine
+    commands:
+      - show hostname
+      - show ntp status
