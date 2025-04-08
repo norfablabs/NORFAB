@@ -10,10 +10,7 @@
 ---
 **Documentation**: [NorFab Docs](https://docs.norfablabs.com)
 
-**Contact**: 
-- [Networktocode Slack](https://app.slack.com/client/T09LQ7E9E/C0894SVH7BQ)
-- [NetDev Community Slack](https://netdev-community.slack.com/archives/C08MAVA3492)
-- [GitHub Discussions](https://github.com/norfablabs/NORFAB/discussions)
+**Contact**: [Networktocode Slack](https://app.slack.com/client/T09LQ7E9E/C0894SVH7BQ) | [NetDev Community Slack](https://netdev-community.slack.com/archives/C08MAVA3492) | [GitHub Discussions](https://github.com/norfablabs/NORFAB/discussions)
 
 ---
 
