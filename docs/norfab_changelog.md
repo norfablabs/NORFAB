@@ -13,6 +13,7 @@
 5. NFCLI shell - added aliases to use dash instead of underscore
 6. NFCLI shell - Moved Nornir service show commands under `show nornir xyz` path  
 
+
 ## 0.6.0
 
 ### FEATURES
