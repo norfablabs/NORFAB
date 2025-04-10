@@ -3468,11 +3468,15 @@
 <li><strong><code>any steps</code></strong> (<em>dict</em>, required): A dictionary of steps, where each key is the step name and the value defines the step's configuration.</li>
 </ul>
 <h3 id="step-configuration">Step Configuration<a class="headerlink" href="#step-configuration" title="Permanent link">¤</a></h3>
-<p>Each step is defined as a dictionary with the following fields:</p>
+<p>Each step is defined as a dictionary with the following fields.</p>
+<p><strong>Common FIelds</strong></p>
 <ul>
 <li><strong><code>service</code></strong> (<em>string</em>, required): The service to be used for the step (e.g., <code>nornir</code>).</li>
 <li><strong><code>task</code></strong> (<em>string</em>, required): The task to be executed by the service (e.g., <code>cli</code>, <code>task</code>).</li>
 <li><strong><code>kwargs</code></strong> (<em>dict</em>, optional): A dictionary of arguments to pass to the task. These arguments are task-specific.</li>
+</ul>
+<p><strong>Step Conditionals</strong></p>
+<ul>
 <li><strong><code>run_if_fail_any</code></strong> (<em>list</em>, optional): A list of step names. The current step will only run if any of the specified steps have failed.</li>
 <li><strong><code>run_if_pass_any</code></strong> (<em>list</em>, optional): A list of step names. The current step will only run if any of the specified steps have passed.</li>
 <li><strong><code>run_if_fail_all</code></strong> (<em>list</em>, optional): A list of step names. The current step will only run if all the specified steps have failed.</li>
