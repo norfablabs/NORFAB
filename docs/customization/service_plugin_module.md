@@ -17,7 +17,7 @@ mkdir -p /path/to/norfab/plugins/my_custom_plugin
 Create a Python file for your plugin and implement the necessary functionality. Here is an example of a simple custom plugin:
 
 ```
-
+TBD
 ```
 
 ### Step 4: Register the Plugin
@@ -25,7 +25,7 @@ Create a Python file for your plugin and implement the necessary functionality. 
 Register your custom plugin with Norfab by updating entrypoint in pyproject file.
 
 ```
-
+TBD
 ```
 
 ### Step 5: Configure the Plugin
@@ -33,7 +33,7 @@ Register your custom plugin with Norfab by updating entrypoint in pyproject file
 Configure your custom plugin by adding any necessary parameters to the Norfab inventory. 
 
 ```
-
+TBD
 ```
 
 ### Step 6: Use the Plugin
@@ -41,5 +41,5 @@ Configure your custom plugin by adding any necessary parameters to the Norfab in
 Use your custom plugin in your Norfab tasks and workflows. Here is an example of how to call the custom plugin from a Norfab task:
 
 ```
-
+TBD
 ```

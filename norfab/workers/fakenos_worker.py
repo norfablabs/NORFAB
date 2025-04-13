@@ -45,6 +45,7 @@ import time
 import threading
 
 from norfab.core.worker import NFPWorker
+from norfab.models import Result
 from fakenos import FakeNOS
 
 SERVICE = "fakenos"

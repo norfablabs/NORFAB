@@ -1,7 +1,8 @@
 import logging
 import sys
 import importlib.metadata
-from norfab.core.worker import NFPWorker, Result
+from norfab.core.worker import NFPWorker
+from norfab.models import Result
 from pydantic import (
     BaseModel,
     Field,

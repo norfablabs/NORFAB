@@ -8,8 +8,13 @@ import signal
 import importlib.metadata
 import uvicorn
 
-from norfab.core.worker import NFPWorker, Result
-from norfab.core.models import WorkerResult, ClientPostJobResponse, ClientGetJobResponse
+from norfab.core.worker import NFPWorker
+from norfab.models import Result
+from norfab.models.fastapi import (
+    WorkerResult,
+    ClientPostJobResponse,
+    ClientGetJobResponse,
+)
 from typing import Union, List, Dict, Any, Annotated, Optional
 from diskcache import FanoutCache
 from pydantic import BaseModel

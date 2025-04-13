@@ -23,6 +23,7 @@ Norfab services are the core components that provide the functionality and value
 Norfab provides a range of network automation services that enable you to manage and automate network devices and configurations. These services include:
 
 - **Nornir Service**: Based on the Nornir library, this service allows you to automate network device operations using popular libraries like Netmiko, NAPALM, and Scrapli. It supports tasks such as configuration management, device diagnostics, and network monitoring.
+- **Workflow Service**: Enables users to define workflows as YAML files, where each workflow consists of multiple steps. It supports conditional execution, error handling, and integration with other Norfab services, making it ideal for automating complex processes.
 - **Agent Service**: Leverages AI-based agents to enhance network automation and management. These agents can perform tasks such as configuration compliance checks, fault detection, and performance optimization.
 
 ### Data Management Services
@@ -33,7 +34,7 @@ Norfab also provides services for managing and automating data-related tasks. Th
 
 ### REST API Services
 
-- **FastAPi Service** - The FastAPI Service created to serve a set of REST API endpoints to interact with NorFab to start, run, list and retrieve jobs result.
+- **FastAPI Service**: Provides a set of REST API endpoints to interact with Norfab. It allows users to start, run, list, and retrieve job results, offering a scalable and efficient way to integrate Norfab with external systems.
 
 ## Getting Started with Norfab Services
 

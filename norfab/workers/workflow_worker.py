@@ -4,7 +4,8 @@ import sys
 import importlib.metadata
 import yaml
 import os
-from norfab.core.worker import NFPWorker, Result
+from norfab.core.worker import NFPWorker
+from norfab.models import Result
 from typing import Union, Dict, List, Tuple
 
 SERVICE = "workflow"

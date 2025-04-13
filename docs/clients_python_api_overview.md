@@ -1,6 +1,8 @@
 # NORFAB Python API
- 
-NorFab Python API can be used to interact with automations fabric To start working with Python API need to import `NorFab` object and instantiate it.
+
+The NORFAB Python API provides a programmatic interface to interact with the NORFAB automation fabric. It is designed for developers who want to integrate NORFAB capabilities into their Python applications for advanced network automation and management tasks.
+
+NorFab Python API can be used to interact with automations fabric. To start working with Python API need to import `NorFab` object and instantiate it.
 
 ```
 from norfab.core.nfapi import NorFab

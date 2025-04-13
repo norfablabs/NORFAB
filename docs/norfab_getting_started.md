@@ -131,13 +131,14 @@ nf[nornir]#?
  help    Print help message
  pwd     Print current shell path
  top     Exit to top shell
-nf[nornir]#show hosts table details
+nf[nornir]#top
+nf#show nornir hosts table details
 +-----------------+--------------+------------+-------------+--------+----------+------------+
 | worker          | host         | platform   | hostname    | port   | groups   | username   |
 +=================+==============+============+=============+========+==========+============+
 | nornir-worker-1 | ios-device-1 | cisco_ios  | 192.168.1.1 | None   | []       | admin      |
 +-----------------+--------------+------------+-------------+--------+----------+------------+
-nf[nornir]# end
+nf# end
 Exiting...
 ```
 

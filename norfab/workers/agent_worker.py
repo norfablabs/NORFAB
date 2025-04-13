@@ -2,7 +2,8 @@ import json
 import logging
 import sys
 import importlib.metadata
-from norfab.core.worker import NFPWorker, Result
+from norfab.core.worker import NFPWorker
+from norfab.models import Result
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
 

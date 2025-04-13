@@ -10,16 +10,13 @@ import pickle
 import psutil
 import signal
 
-from .zhelpers import dump
 from . import NFP
-from uuid import uuid4
 from .client import NFPClient
 from .keepalives import KeepAliver
 from .security import generate_certificates
 from .inventory import logging_config_producer
 from typing import Any, Callable, Dict, List, Optional, Union
-from .exceptions import NorfabJobFailedError
-from .models import NorFabEvent
+from norfab.models import NorFabEvent, Result
 from norfab.core.inventory import NorFabInventory
 from jinja2.nodes import Include
 from jinja2 import Environment, FileSystemLoader
@@ -71,8 +68,6 @@ class Task:
             pass
 
     Notes:
-        - All fields in the Pydantic model derived from mixins are forced to be optional.
-          Required arguments must be explicitly defined in the model.
         - The decorator uses `inspect.getfullargspec` to analyze the function's signature
           and properly map arguments for validation.
     """
@@ -263,136 +258,6 @@ class WorkerWatchDog(threading.Thread):
             self.runs += 1
 
             slept = 0  # reset to go to sleep
-
-
-# --------------------------------------------------------------------------------------------
-# NORFAB Worker Results Object
-# --------------------------------------------------------------------------------------------
-
-
-class Result:
-    """
-    NorFab Task Result class.
-
-    Args:
-        result (Any): Result of the task execution, see task's documentation for details.
-        failed (bool): Whether the execution failed or not.
-        errors (Optional[List[str]]): Exception thrown during the execution of the task (if any).
-        task (str): Task function name that produced the results.
-        messages (Optional[List[str]]): List of messages produced by the task.
-        juuid (Optional[str]): Job UUID associated with the task.
-        resources (Optional[List[str]]): list of resources names worked on by the task.
-        status (Optional[str]): Status of the job, `status` attribute values:
-
-            - 'completed' - task was executed successfully and resources were found
-            - 'no_match' - task was executed, but no resources matched the criteria or filters provided
-            - 'failed' - task was executed, but failed
-            - 'skipped' - task was not executed, but skipped for some reason
-            - `error` - attempted to execute the task, but an error occurred
-
-    Methods:
-        __repr__(): Returns a string representation of the Result object.
-        __str__(): Returns a string representation of the result or errors.
-        raise_for_status(message=""): Raises an error if the job failed.
-        dictionary(): Serializes the result to a dictionary.
-    """
-
-    def __init__(
-        self,
-        result: Any = None,
-        failed: bool = False,
-        errors: Optional[List[str]] = None,
-        task: Optional[str] = None,
-        messages: Optional[List[str]] = None,
-        juuid: Optional[str] = None,
-        resources: Optional[List[str]] = None,
-        status: Optional[str] = None,
-    ) -> None:
-        self.task = task
-        self.result = result
-        self.failed = failed
-        self.errors = errors or []
-        self.messages = messages or []
-        self.juuid = juuid
-        self.resources = resources or []
-        self.status = status
-
-    def __repr__(self) -> str:
-        """
-        Return a string representation of the object.
-
-        The string representation includes the class name and the task attribute.
-
-        Returns:
-            str: A string in the format 'ClassName: "task"'.
-        """
-        return '{}: "{}"'.format(self.__class__.__name__, self.task)
-
-    def __str__(self) -> str:
-        """
-        Returns a string representation of the object.
-
-        If there are errors, it joins them with two newline characters and returns the result.
-        Otherwise, it returns the string representation of the result.
-
-        Returns:
-            str: The string representation of the errors or the result.
-        """
-        if self.errors:
-            return str("\n\n".join(self.errors))
-
-        return str(self.result)
-
-    def raise_for_status(self, message=""):
-        """
-        Raises a NorfabJobFailedError if the job has failed.
-
-        Parameters:
-            message (str): Optional. Additional message to include in the error. Default is an empty string.
-
-        Raises:
-            NorfabJobFailedError: If the job has failed, this error is raised with the provided message and the list of errors.
-        """
-        if self.failed:
-            if message:
-                raise NorfabJobFailedError(
-                    f"{message}; Errors: {'; '.join(self.errors)}"
-                )
-            else:
-                raise NorfabJobFailedError(f"Errors: {'; '.join(self.errors)}")
-
-    def dictionary(self):
-        """
-        Serialize the result to a dictionary.
-
-        This method converts the instance attributes to a dictionary format.
-        It ensures that the `errors` and `messages` attributes are lists.
-
-        Returns:
-            dict: A dictionary containing the following keys:
-
-                - task: The task associated with the worker.
-                - failed: A boolean indicating if the task failed.
-                - errors: A list of errors encountered during the task.
-                - result: The result of the task.
-                - messages: A list of messages related to the task.
-                - juuid: The unique identifier for the job.
-                - status: The status of the job.
-        """
-        if not isinstance(self.errors, list):
-            self.errors = [self.errors]
-        if not isinstance(self.messages, list):
-            self.messages = [self.messages]
-
-        return {
-            "task": self.task,
-            "failed": self.failed,
-            "errors": self.errors,
-            "result": self.result,
-            "messages": self.messages,
-            "juuid": self.juuid,
-            "status": self.status,
-        }
 
 
 # --------------------------------------------------------------------------------------------
@@ -1497,12 +1362,9 @@ class NFPWorker:
                         f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "
                         f"kwargs: '{kwargs}', client: '{client_address}', job uuid: '{juuid}'"
                     )
-                if not getattr(result, "task"):
-                    result.task = f"{self.name}:{task}"
-                if not getattr(result, "status"):
-                    result.status = "completed"
-                if not getattr(result, "juuid"):
-                    result.juuid = juuid.decode("utf-8")
+                result.task = result.task or f"{self.name}:{task}"
+                result.status = result.status or "completed"
+                result.juuid = result.juuid or juuid.decode("utf-8")
             except Exception as e:
                 result = Result(
                     task=f"{self.name}:{task}",
@@ -1521,7 +1383,7 @@ class NFPWorker:
                     b"",
                     suuid.encode("utf-8"),
                     b"200",
-                    json.dumps({self.name: result.dictionary()}).encode("utf-8"),
+                    json.dumps({self.name: result.dict()}).encode("utf-8"),
                 ],
                 reply_filename(suuid, self.base_dir_jobs),
             )

@@ -1,3 +1,13 @@
+## 0.8.0
+
+### CHANGES
+
+1. Restructuring pydantic models structures for better following DRY principles:
+    1. Moved FatAPI models under norfab.models.fastapi
+    2. Added norfab.models.nornir pydantic models
+    3. Events and results models moved under norfab.models
+2. 
+
 ## 0.7.0
 
 ### FEATURES

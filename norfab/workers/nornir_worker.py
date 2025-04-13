@@ -9,20 +9,12 @@ import os
 import hashlib
 import ipaddress
 
-from pydantic import (
-    BaseModel,
-    StrictBool,
-    StrictInt,
-    StrictFloat,
-    StrictStr,
-    Field,
-    ConfigDict,
-    model_validator,
-)
 from typing import Union, Dict, List, Optional, Any
-from norfab.core.worker import NFPWorker, Result, WorkerWatchDog, Task
+from norfab.models import Result
+from norfab.core.worker import NFPWorker, WorkerWatchDog, Task
 from norfab.core.inventory import merge_recursively
 from norfab.core.exceptions import UnsupportedPluginError
+from norfab.models.nornir import NornirTaskGetNornirHosts
 from nornir import InitNornir
 from nornir_salt.plugins.tasks import (
     netmiko_send_commands,
@@ -56,81 +48,6 @@ from threading import Lock
 SERVICE = "nornir"
 
 log = logging.getLogger(__name__)
-
-# ----------------------------------------------------------------------
-# Nornir Service Pydantic Models
-# -----------------------------------------------------------------------
-
-
-class NorniHostsFilters(BaseModel):
-    """
-    Model to list common filter arguments for FFun function
-    """
-
-    model_config = ConfigDict(extra="forbid")
-    FO: Optional[Union[Dict, List[Dict]]] = Field(
-        None, title="Filter Object", description="Filter hosts using Filter Object"
-    )
-    FB: Optional[Union[List[str], str]] = Field(
-        None,
-        title="Filter gloB",
-        description="Filter hosts by name using Glob Patterns",
-    )
-    FH: Optional[Union[List[StrictStr], StrictStr]] = Field(
-        None, title="Filter Hostname", description="Filter hosts by hostname"
-    )
-    FC: Optional[Union[List[str], str]] = Field(
-        None,
-        title="Filter Contains",
-        description="Filter hosts containment of pattern in name",
-    )
-    FR: Optional[Union[List[str], str]] = Field(
-        None,
-        title="Filter Regex",
-        description="Filter hosts by name using Regular Expressions",
-    )
-    FG: Optional[StrictStr] = Field(
-        None, title="Filter Group", description="Filter hosts by group"
-    )
-    FP: Optional[Union[List[StrictStr], StrictStr]] = Field(
-        None,
-        title="Filter Prefix",
-        description="Filter hosts by hostname using IP Prefix",
-    )
-    FL: Optional[Union[List[StrictStr], StrictStr]] = Field(
-        None, title="Filter List", description="Filter hosts by names list"
-    )
-    FM: Optional[Union[List[StrictStr], StrictStr]] = Field(
-        None, title="Filter platforM", description="Filter hosts by platform"
-    )
-    FX: Optional[Union[List[str], str]] = Field(
-        None, title="Filter eXclude", description="Filter hosts excluding them by name"
-    )
-    FN: Optional[StrictBool] = Field(
-        None,
-        title="Filter Negate",
-        description="Negate the match",
-        json_schema_extra={"presence": True},
-    )
-
-    @model_validator(mode="before")
-    def convert_filters_to_strings(cls, data: Any) -> Any:
-        """Converts filters values to strings."""
-        for k in list(data.keys()):
-            if k.startswith("F"):
-                data[k] = str(data[k])
-        return data
-
-
-class NornirGetNornirHosts(NorniHostsFilters):
-    """
-    Pydantic model for Nornir get_nornir_hosts task.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-    details: Optional[StrictBool] = Field(
-        None, description="show hosts details", json_schema_extra={"presence": True}
-    )
 
 
 # ----------------------------------------------------------------------
@@ -534,7 +451,7 @@ class NornirWorker(NFPWorker):
         else:
             log.warning(
                 f"{self.name} - '{kwargs.get('instance', 'default')}' Netbox "
-                f"instance returned no hosts data, worker '{wname}'"
+                f"instance returned no hosts data, worker '{wname}', result: {wdata}"
             )
 
     def _add_processors(self, nr, kwargs: Dict):
@@ -750,7 +667,7 @@ class NornirWorker(NFPWorker):
     # Nornir Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task(model=NornirGetNornirHosts)
+    @Task(model=NornirTaskGetNornirHosts)
     def get_nornir_hosts(
         self, details: bool = False, **kwargs: dict
     ) -> List[Union[str, Dict]]:
@@ -1191,7 +1108,6 @@ class NornirWorker(NFPWorker):
         else:
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)
-            ret.changed = True
 
         ret.failed = result.failed  # failed is true if any of the hosts failed
         ret.result = ResultSerializer(result, to_dict=to_dict, add_details=add_details)

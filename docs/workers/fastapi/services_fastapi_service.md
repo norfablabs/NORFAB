@@ -52,6 +52,8 @@ headers = {"Authorization": "Bearer f343ff34r3fg4g5g34gf34g34g3g34g4"}
 
 Where token is an arbitrary string with no constraints imposed on length or complexity of the token. By default FastAPI Service does not have any bearer tokens stored, instead, every user willing to access REST API need to have token explicitly recorded in FastAPI Service database using nfcli auth commands.
 
+> **Note**: Proper token management is critical to ensure secure access to the FastAPI Service. Always store tokens securely and revoke unused or compromised tokens promptly.
+
 To create token run this command from nfcli shell:
 
 ```

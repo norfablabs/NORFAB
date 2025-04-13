@@ -79,9 +79,7 @@ nav:
     - Introduction: index.md
     - Why use NORFAB: norfab_why_use_norfab.md
     - Getting Started: norfab_getting_started.md
-    - Docker Deployment: norfab_docker_deployment.md
-    - Distributed Deployment: norfab_distributed_deployment.md
-    - Installation Extras: norfab_installation.md
+    - Installation: norfab_installation.md
     - Help with NORFAB: norfab_help_with_norfab.md
     - Services:
         - Services Overview: services_overview.md
@@ -146,6 +144,9 @@ nav:
           - Service Plugins Overview: customization/service_plugin_overview.md
           - Local Plugin: customization/service_plugin_local.md
           - Python Module Plugin: customization/service_plugin_module.md
+- Tutorials:
+  - Docker Deployment: norfab_docker_deployment.md
+  - Distributed Deployment: norfab_distributed_deployment.md
 - References:
     - NORFAB Inventory: reference_norfab_inventory.md
     - Changelog: norfab_changelog.md

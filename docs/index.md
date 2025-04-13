@@ -2,73 +2,64 @@
 
 ---
 
-## Network Automations Fabric
+# Network Automations Fabric (NorFab)
 
-![Network Automations Fabric](images/norfab_overview_top_image.webp)
+Welcome to NorFab, a platform designed to simplify and enhance network automation. 
 
+---
 
-Hi :smile:, thank you for getting here.
+## Why NorFab? :book:
 
-## Why - The Story :book:
+Without automation, network engineers face a relentless cycle of manual configurations and troubleshooting. Hours are spent accessing devices, patching systems, and resolving outages. This repetitive work stifles innovation and leads to burnout.
 
-In a world devoid of network automations, the streets were silent 
-and grey. Without network automations, network engineers' lives 
-became a grueling cycle of manual configurations and endless 
-troubleshooting. They spent hours accessing each and every device, 
-manually configuring and patching systems. Nights were sleepless, 
-filled with frantic calls to resolve outages that could no longer 
-be preemptively detected or resolved. Overwhelmed and exhausted, 
-their innovative spirit was stifled by the sheer volume of 
-repetitive tasks...
+NorFab changes this by introducing a framework that empowers engineers with automation capabilities, freeing them from mundane tasks and enabling them to focus on innovation.
 
-Let us introduce you to the world of Network Automations Fabric.
+---
 
-## What - The Idea :bulb:
+## What is NorFab? :bulb:
 
-NorFab is a task execution framework focused on network automations.
+NorFab is a task execution framework built for network automation. It bridges the gap between heavyweight platforms requiring dedicated infrastructure and lightweight scripts run locally. NorFab is:
 
-NorFab purpose is to augment network engineers capabilities with 
-automation superpowers i.e. Iron Man Suite.
+- **Flexible**: Run it on a laptop, server, container, or in the cloud—centralized or distributed.
+- **Feature-Rich**: Lightweight yet powerful, capable of handling diverse use cases without excessive costs or complexity.
+- **Empowering**: Designed to unlock engineers' potential by automating modern network management.
 
-Most of the solutions to manage networks falls into one of the two 
-categories: 
+---
 
-- heavyweight platforms running on dedicated infrastructure
-- lightweight scripts or tools developed and run locally
+## How NorFab Works :gear:
 
-NorFab can be both - software you can run equally well from
-your laptop or on a server, centralized or fully distributed, 
-lightweight and feature reach. Capable of doing any use cases 
-without the need to throw unreasonable amounts of dollars and 
-man hours at it. Always ready to serve the purpose of unlocking 
-engineers superpowers managing modern networks and making 
-engineers life better.
+- **Run Anywhere**: Operates on Windows, macOS, Linux, containers, VMs, or in the cloud—centralized or distributed.
+- **Extend Anything**: Built with extensibility at its core, allowing you to adapt it to your needs.
+- **Integrate Everything**: Offers Python API, REST API, and CLI interfaces for seamless integration.
+- **Manage Anything**: Use built-in services or create your own to manage network infrastructure.
+- **Model and Data-Driven**: Leverages Pydantic models for API validation and documentation.
+- **Automate Anything**: From simple tasks to complex workflows, NorFab is built to handle it all.
 
-## How - The Vision :gear:
+---
 
-- **Run Anywhere** - locally on Windows, MAC or Linux, in a container, on a VM, in the cloud, centralized or distributed
-- **Extend Anything** - extendability is in the core of NorFab
-- **Integrate with Everything** - Python API, REST API, CLI northbound interfaces
-- **Manage Anything** - develop your own services or use built-in to manage your network infrastructure
-- **Model and data driven** - Pydantic models for API, validation and documentation
-- **Automate Anything** - we mean it, sky is the limit on what you can do with NorFab automating your networks
+## Architecture
 
-## Architecture 
+NorFab's architecture consists of the following key components:
 
-Key actors of the system include
+- **Clients**: Processes running on client machines that connect to the broker to consume services.
+- **Broker**: Acts as the central hub, providing access to services for clients.
+- **Services**: Collections of workers managing specific resources.
+- **Workers**: Processes that act as resource proxies, running anywhere to form services.
+- **Resources**: Entities managed by workers, such as network devices, databases, or file systems.
 
-- **CLIENTS** - consume services, processes that run on client machine and connect to broker
-- **BROKER** - provides access to services for clients
-- **SERVICES** - a collection of workers and resources they manage
-- **WORKERS** - form services, processes that run anywhere and act as resource proxy agents
-- **RESOURCES** - entities managed by workers, e.g. network devices, databases, file systems
+### How It Works:
+1. Clients submit jobs to the broker.
+2. The broker distributes jobs to workers within the relevant service.
+3. Workers execute the jobs and return results to the clients.
 
-Clients communicate with broker to submit jobs, broker distributes 
-jobs across workers comprising the service, workers run jobs producing 
-results retrieved by clients. In other words, *Services* 
-hosted by *Workers* and expose functionality consumed by *Clients* 
-via *Broker*.
+In essence, *Services* are hosted by *Workers* and accessed by *Clients* via the *Broker*.
 
 ![Network Automations Fabric Architecture](images/Overview_Architecture.jpg)
 
-For more information or to schedule a demo, [send us an email](mailto:dmulyalin@gmail.com).
+---
+
+## Next Steps
+
+Continue to [getting started tutorial](norfab_getting_started.md) or read [why to use NorFab](norfab_why_use_norfab.md)
+
+For more information or to schedule a demo, [contact us](mailto:dmulyalin@gmail.com).

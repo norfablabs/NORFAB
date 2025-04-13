@@ -16,8 +16,6 @@
 
 NORFAB is a tool for extreme network automations.
 
-Interested? read [documentation](https://docs.norfablabs.com) or welcome to [#norfab](https://networktocode.slack.com/archives/C0894SVH7BQ) to have a chat.
-
 # The IDEA 💡
 
 Most of the software to manage networks falls into one of the two categories: 

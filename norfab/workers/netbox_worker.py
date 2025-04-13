@@ -10,7 +10,8 @@ import pynetbox
 
 from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
-from norfab.core.worker import NFPWorker, Result
+from norfab.core.worker import NFPWorker
+from norfab.models import Result
 from typing import Union
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from norfab.core.exceptions import UnsupportedServiceError

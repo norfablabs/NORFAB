@@ -50,11 +50,16 @@ Notes:
 
 ### Step Configuration
 
-Each step is defined as a dictionary with the following fields:
+Each step is defined as a dictionary with the following fields.
+
+**Common FIelds**
 
 - **`service`** (*string*, required): The service to be used for the step (e.g., `nornir`).
 - **`task`** (*string*, required): The task to be executed by the service (e.g., `cli`, `task`).
 - **`kwargs`** (*dict*, optional): A dictionary of arguments to pass to the task. These arguments are task-specific.
+
+**Step Conditionals**
+
 - **`run_if_fail_any`** (*list*, optional): A list of step names. The current step will only run if any of the specified steps have failed.
 - **`run_if_pass_any`** (*list*, optional): A list of step names. The current step will only run if any of the specified steps have passed.
 - **`run_if_fail_all`** (*list*, optional): A list of step names. The current step will only run if all the specified steps have failed.
@@ -65,7 +70,7 @@ Each step is defined as a dictionary with the following fields:
 
 ```yaml
 name: test_workflow_run_if_fail_all
-description: Test workflow that has all of the steps failed
+description: Sample Workflow to show what can be done
 
 step1_failed:
   service: nornir

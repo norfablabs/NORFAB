@@ -3,7 +3,9 @@ tags:
   - nfcli
 ---
 
-NORFAB comes with interactive command line shell interface invoked using ``nfcli`` to work with the system.
+# NORFAB CLI Overview
+
+NORFAB comes with an interactive command line shell interface invoked using ``nfcli`` to work with the system. The CLI provides a powerful and flexible way to interact with NORFAB, enabling users to manage and automate network operations efficiently.
 
 NORFAB CLI designed as a *modal* operating system. The term modal 
 describes a system that has various modes of operation, each having its own 
