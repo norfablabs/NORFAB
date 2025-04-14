@@ -81,12 +81,12 @@ uvicorn = { version = "*", optional = true }
 python-multipart = { version = "*", optional = true }
 
 # docs dependencies
-mkdocs = { version = "*" }
-mkdocs-material = { version = "*" }
-mkdocs-material-extensions = { version = "*" }
-mkdocstrings = { version = "*", extras = ["python"] } 
-pygments = { version = "*" }
-pymdown-extensions = { version = "*" }
+mkdocs = { version = "*", optional = true }
+mkdocs-material = { version = "*", optional = true }
+mkdocs-material-extensions = { version = "*", optional = true }
+mkdocstrings = { version = "*", extras = ["python"], optional = true } 
+pygments = { version = "*", optional = true }
+pymdown-extensions = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 black = "22.3.*"
