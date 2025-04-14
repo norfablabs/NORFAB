@@ -35,15 +35,11 @@ from .picle_shells.agent import agent_picle_shell
 from .picle_shells.fastapi import fastapi_picle_shell
 from .picle_shells.norfab_jobs_shell import NorFabJobsShellCommands
 from .picle_shells.workflow import workflow_picle_shell
+from .picle_shells.containerlab import containerlab_picle_shell
 
 NFCLIENT = None
 RICHCONSOLE = Console()
 log = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------------------------
-# HELPER FUNCTIONS
-# ---------------------------------------------------------------------------------------------
-
 
 # ---------------------------------------------------------------------------------------------
 # SHELL SHOW COMMANDS MODELS
@@ -134,6 +130,9 @@ class ShowCommandsModel(BaseModel):
     )
     workflow: workflow_picle_shell.WorkflowShowCommandsModel = Field(
         None, description="Show Workflow service"
+    )
+    containerlab: containerlab_picle_shell.ContainerlabShowCommandsModel = Field(
+        None, description="Show Containerlab service"
     )
 
     class PicleConfig:
@@ -309,7 +308,10 @@ class NorFabShell(BaseModel):
     workflow: workflow_picle_shell.WorkflowServiceCommands = Field(
         None, description="Workflow service"
     )
-
+    containerlab: containerlab_picle_shell.ContainerlabServiceCommands = Field(
+        None, description="Containerlab service"
+    )
+    
     class PicleConfig:
         subshell = True
         prompt = "nf#"

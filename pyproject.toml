@@ -102,6 +102,7 @@ build-backend = "poetry.core.masonry.api"
 "fastapi" = "norfab.workers.fastapi_worker:FastAPIWorker"
 "agent" = "norfab.workers.agent_worker:AgentWorker"
 "workflow" = "norfab.workers.workflow_worker:WorkflowWorker"
+"containerlab" = "norfab.workers.containerlab_worker:ContainerlabWorker"
 
 [tool.poetry.scripts]
 nfcli = 'norfab.utils.nfcli:nfcli'

@@ -1,0 +1,14 @@
+# broker settings
+broker:
+  endpoint: "tcp://127.0.0.1:5555"
+      
+# workers inventory section
+workers:
+  containerlab-*:
+    - containerlab_common.yaml 
+    
+# list what entities we want to start on this node
+topology:
+  broker: True
+  workers:
+    - containerlab-worker-1
