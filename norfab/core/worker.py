@@ -37,6 +37,8 @@ log = logging.getLogger(__name__)
 # NORFAB Worker Task Object
 # --------------------------------------------------------------------------------------------
 
+# Dictionary to store all tasks references
+NORFAB_WORKER_TASKS = {}
 
 class Task:
     """
@@ -45,8 +47,10 @@ class Task:
     function conform to the schema defined in the model.
 
     Attributes:
-        model (Optional[BaseModel]): A Pydantic model used to validate the function arguments.
-            By default, arguments named "self" are skipped during validation.
+        model (BaseModel): A Pydantic model used to validate the function arguments.
+        name (str): The name of the task, which is used to register the task for calling, by default
+            set equal to the name of decorated function.
+        result_model (BaseModel): A Pydantic model used to validate the function's return value.
 
     Methods:
         __call__(function: Callable) -> Callable:
@@ -57,8 +61,8 @@ class Task:
             dictionary, mapping positional arguments to their corresponding parameter names
             based on the function's signature.
 
-        validate(args: List, kwargs: Dict) -> None:
-            Validates the merged arguments against the Pydantic model. If validation fails,
+        validate_input(args: List, kwargs: Dict) -> None:
+            Validates merged arguments against Pydantic model. If validation fails,
             an exception is raised.
 
     Usage:
@@ -74,18 +78,29 @@ class Task:
 
     def __init__(
         self,
-        model: Optional[BaseModel] = None,
+        input: BaseModel,
+        output: Optional[BaseModel] = None,
+        name: str = None,
     ) -> None:
-        self.model = model
+        self.input = input
+        self.name = name
+        self.output = output
 
     def __call__(self, function: Callable) -> Callable:
-
+        self.name = self.name or function.__name__
         self.function = function
+        NORFAB_WORKER_TASKS[self.name] = self
 
         @wraps(function)
         def wrapper(*args, **kwargs):
-            self.validate(args, kwargs)
-            return self.function(*args, **kwargs)
+            self.validate_input(args, kwargs)
+            ret = self.function(*args, **kwargs)
+
+            # check if can validate result
+            if isinstance(ret, Result) and self.output:
+                _ = self.output(**ret.dict())
+
+            return ret
 
         return wrapper
 
@@ -111,11 +126,7 @@ class Task:
         (
             fun_args,  # list of the positional parameter names
             fun_varargs,  # name of the * parameter or None
-            fun_varkw,  # name of the ** parameter or None
-            fun_defaults,  # tuple of default argument values of the last n positional parameters
-            fun_kwonlyargs,  # list of keyword-only parameter names
-            fun_kwonlydefaults,  # dictionary mapping kwonlyargs parameter names to default values
-            fun_annotations,  # dictionary mapping parameter names to annotations
+            *_ # ignore the rest
         ) = inspect.getfullargspec(self.function)
 
         # "def foo(a, b):" - combine "foo(1, 2)" args with "a, b" fun_args
@@ -132,13 +143,13 @@ class Task:
 
         return merged_kwargs
 
-    def validate(self, args: List, kwargs: Dict) -> None:
+    def validate_input(self, args: List, kwargs: Dict) -> None:
         """Function to validate provided arguments against model"""
         merged_kwargs = self.merge_args_to_kwargs(args, kwargs)
         # if below step succeeds, kwargs passed model validation
-        _ = self.model(**merged_kwargs)
+        _ = self.input(**merged_kwargs)
         log.debug(
-            f"Validated input kwargs: {merged_kwargs} for function {self.function} using model {self.model}"
+            f"Validated input kwargs: {merged_kwargs} for function {self.function} using model {self.input}"
         )
 
 
@@ -710,6 +721,8 @@ class NFPWorker:
             name=f"{self.name}-NFPClient",
             exit_event=self.exit_event,
         )
+
+        self.tasks = NORFAB_WORKER_TASKS
 
     def setup_logging(self, log_queue, log_level: str) -> None:
         """

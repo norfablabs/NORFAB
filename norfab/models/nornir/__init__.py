@@ -1,1 +1,1 @@
-from .nornir_models import NorniHostsFilters, NornirTaskGetNornirHosts
+from .nornir_models import NornirHostsFilters, GetNornirHosts, GetNornirHostsResponse

@@ -14,7 +14,7 @@ from norfab.models import Result
 from norfab.core.worker import NFPWorker, WorkerWatchDog, Task
 from norfab.core.inventory import merge_recursively
 from norfab.core.exceptions import UnsupportedPluginError
-from norfab.models.nornir import NornirTaskGetNornirHosts
+from norfab.models.nornir import GetNornirHosts, GetNornirHostsResponse
 from nornir import InitNornir
 from nornir_salt.plugins.tasks import (
     netmiko_send_commands,
@@ -667,7 +667,7 @@ class NornirWorker(NFPWorker):
     # Nornir Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task(model=NornirTaskGetNornirHosts)
+    @Task(input=GetNornirHosts, output=GetNornirHostsResponse)
     def get_nornir_hosts(
         self, details: bool = False, **kwargs: dict
     ) -> List[Union[str, Dict]]:

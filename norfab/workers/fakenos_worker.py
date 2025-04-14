@@ -4,39 +4,42 @@
 ``` yaml
 service: fakenos
 broker_endpoint: "tcp://127.0.0.1:5555"
-default:
-  password: user
-  username: user
-  port: [5000, 6000]
-  server:
-    plugin: ParamikoSshServer
-    configuration:
-      address: 127.0.0.1
-      ssh_key_file: ./ssh-keys/ssh_host_rsa_key
-      timeout: 1
-  shell:
-    configuration: {}
-    plugin: CMDShell
-  nos:
-    configuration: {}
-    plugin: cisco_ios
-hosts:
-  R1:
-    password: fakenos
-    port: 5001
-    username: fakenos
-    server:
-      plugin: ParamikoSshServer
-      configuration:
-        address: 0.0.0.0
-    shell:
-      plugin: CMDShell
-      configuration:
-        intro: Custom SSH Shell
-  R2: {}
-  core-router:
-    replicas: 2
-    port: [5000, 6000]
+
+topologies:
+  test_topology:
+    default:
+      password: user
+      username: user
+      port: [5000, 6000]
+      server:
+        plugin: ParamikoSshServer
+        configuration:
+          address: 127.0.0.1
+          ssh_key_file: ./ssh-keys/ssh_host_rsa_key
+          timeout: 1
+      shell:
+        configuration: {}
+        plugin: CMDShell
+      nos:
+        configuration: {}
+        plugin: cisco_ios
+    hosts:
+      R1:
+        password: fakenos
+        port: 5001
+        username: fakenos
+        server:
+          plugin: ParamikoSshServer
+          configuration:
+            address: 0.0.0.0
+        shell:
+          plugin: CMDShell
+          configuration:
+            intro: Custom SSH Shell
+      R2: {}
+      core-router:
+        replicas: 2
+        port: [5000, 6000]
 ```
 
 """

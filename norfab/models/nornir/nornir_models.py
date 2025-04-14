@@ -9,14 +9,12 @@ from pydantic import (
     ConfigDict,
     model_validator,
 )
+from norfab.models import Result
 
-
-class NorniHostsFilters(BaseModel):
+class NornirHostsFilters(BaseModel, extra="forbid"):
     """
     Model to list common filter arguments for FFun function
     """
-
-    model_config = ConfigDict(extra="forbid")
     FO: Optional[Union[Dict, List[Dict]]] = Field(
         None, title="Filter Object", description="Filter hosts using Filter Object"
     )
@@ -71,12 +69,36 @@ class NorniHostsFilters(BaseModel):
         return data
 
 
-class NornirTaskGetNornirHosts(NorniHostsFilters):
+# -----------------------------------------------------------------------------------------
+# get_nornir_hosts Task Pydantic Models
+# -----------------------------------------------------------------------------------------
+
+class GetNornirHosts(NornirHostsFilters, extra="forbid"):
     """
     Pydantic model for Nornir get_nornir_hosts task.
     """
-
-    model_config = ConfigDict(extra="forbid")
     details: Optional[StrictBool] = Field(
-        None, description="show hosts details", json_schema_extra={"presence": True}
+        None, description="get_nornir_hosts task input arguments schema"
+    )
+
+class HostDetails(BaseModel, extra="forbid"):
+    platform: StrictStr = Field(
+        None, description="Host's platform name"
+    )
+    hostname: StrictStr = Field(
+        None, description="Host's hostname"
+    )
+    port: StrictStr = Field(
+        None, description="Host's port to initiate connection with"
+    )
+    groups: List[StrictStr] = Field(
+        None, description="Host's groups"
+    )
+    username: StrictStr = Field(
+        None, description="Host's username"
+    )
+
+class GetNornirHostsResponse(Result):
+    result: Union[List[StrictStr], Dict[StrictStr, HostDetails]] = Field(
+        None, description="get_nornir_host results schema"
     )
