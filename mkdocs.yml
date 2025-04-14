@@ -16,7 +16,6 @@ markdown_extensions:
 - tables
 - pymdownx.tabbed:
     alternate_style: true
-      
 - pymdownx.emoji:
     emoji_index: !!python/name:material.extensions.emoji.twemoji
 - toc:
