@@ -201,7 +201,7 @@ class ContainerlabWorker(NFPWorker):
         return self.run_containerlab_command(args, cwd=topology_folder, timeout=timeout, ret=ret)
                     
         
-    def destroy(self, lab_name: str, timeout: int = None) -> Result:
+    def destroy_lab(self, lab_name: str, timeout: int = None) -> Result:
         ret = Result(task=f"{self.name}:destroy")
         
         # get lab details

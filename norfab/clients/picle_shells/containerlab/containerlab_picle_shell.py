@@ -86,7 +86,7 @@ class DestroyCommand(ClientRunJobArgs):
         _ = kwargs.pop("progress", None)
         
         result = NFCLIENT.run_job(
-            "containerlab", "destroy", workers=workers, kwargs=kwargs, args=args, uuid=uuid,
+            "containerlab", "destroy_lab", workers=workers, kwargs=kwargs, args=args, uuid=uuid,
         )
 
         return log_error_or_result(result, verbose_result=verbose_result, verbose_on_fail=True)
