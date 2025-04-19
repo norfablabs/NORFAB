@@ -311,7 +311,7 @@ class NorFabShell(BaseModel):
     containerlab: containerlab_picle_shell.ContainerlabServiceCommands = Field(
         None, description="Containerlab service"
     )
-    
+
     class PicleConfig:
         subshell = True
         prompt = "nf#"

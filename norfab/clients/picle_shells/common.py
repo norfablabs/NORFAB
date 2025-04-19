@@ -128,7 +128,9 @@ def listen_events(fun):
     return wrapper
 
 
-def log_error_or_result(data: dict) -> dict:
+def log_error_or_result(
+    data: dict, verbose_result: bool = False, verbose_on_fail: bool = False
+) -> dict:
     """
     Helper function to log result errors, messages or return results.
 
@@ -144,12 +146,19 @@ def log_error_or_result(data: dict) -> dict:
         return data
 
     for w_name, w_res in data.items():
+        # decide what to log
         if w_res["errors"]:
             errors = "\n".join(w_res["errors"])
             log.error(f"{w_name} '{w_res['task']}' errors:\n{errors}")
         elif w_res["messages"]:
             messages = "\n".join(w_res["messages"])
             log.info(f"{w_name} '{w_res['task']}' messages:\n{messages}")
+
+        # decide what results to return
+        if verbose_result:
+            ret[w_name] = w_res
+        elif verbose_on_fail and w_res["failed"] is True:
+            ret[w_name] = w_res
         else:
             ret[w_name] = w_res["result"]
 
@@ -170,4 +179,10 @@ class ClientRunJobArgs(BaseModel):
     timeout: Optional[StrictInt] = Field(None, description="Job timeout")
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Filter worker to target"
+    )
+    verbose_result: StrictBool = Field(
+        False,
+        description="Control output details",
+        json_schema_extra={"presence": True},
+        alias="verbose-result",
     )

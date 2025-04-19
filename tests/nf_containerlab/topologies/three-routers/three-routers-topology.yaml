@@ -1,0 +1,40 @@
+name: three-routers-lab
+
+topology:
+  nodes:
+    r1: 
+      kind: ceos
+      image: ceosimage:4.30.0F
+      mgmt-ipv4: 172.100.101.12
+      ports:
+        - 12202:22
+        - 18802:80
+        - 18302:830
+        - 14402:443
+    r2: 
+      kind: ceos
+      image: ceosimage:4.30.0F
+      mgmt-ipv4: 172.100.101.13
+      ports:
+        - 12203:22
+        - 18803:80
+        - 18303:830
+        - 14403:443
+    r3: 
+      kind: ceos
+      image: ceosimage:4.30.0F
+      mgmt-ipv4: 172.100.101.14
+      ports:
+        - 12204:22
+        - 18804:80
+        - 18304:830
+        - 14404:443
+        
+  links:
+    - endpoints: ["r1:eth1", "r2:eth1"]
+    - endpoints: ["r2:eth2", "r3:eth2"]
+    - endpoints: ["r3:eth3", "r1:eth3"]
+    
+mgmt:
+  network: three_routers_lab    
+  ipv4-subnet: 172.100.101.0/24  
