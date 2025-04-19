@@ -132,7 +132,21 @@ class ContainerlabWorker(NFPWorker):
         )
 
     def get_running_labs(self, timeout: int = None) -> Result:
-        "Return a list of containerlab lab names that are running"
+        """
+        Retrieve a list of running containerlab lab names.
+
+        This method inspects the current state of containerlab and returns
+        the names of labs that are currently running. The names are sorted
+        and duplicates are removed.
+
+        Args:
+            timeout (int, optional): The timeout value in seconds for the inspection
+                operation. Defaults to None.
+
+        Returns:
+            Result: A Result object containing the task name and a list of running
+            lab names.
+        """
         ret = Result(task=f"{self.name}:get_running_labs", result=[])
         inspect = self.inspect(timeout=timeout)
 
@@ -146,6 +160,34 @@ class ContainerlabWorker(NFPWorker):
     def run_containerlab_command(
         self, args: list, cwd: str = None, timeout: int = None, ret: Result = None
     ) -> Tuple:
+        """
+        Executes a containerlab command using subprocess and processes its output.
+
+        Args:
+            args (list): The list of command-line arguments to execute.
+            cwd (str, optional): The working directory to execute the command in. Defaults to None.
+            timeout (int, optional): The timeout for the command execution in seconds. Defaults to None.
+            ret (Result, optional): An optional Norfab result object to populate with the command's output. Defaults to None.
+
+        Returns:
+            Tuple: If `ret` is None, returns a tuple containing:
+                - output (str): The standard output of the command.
+                - logs (list): A list of log messages from the command's standard error.
+                - proc (subprocess.Popen): The subprocess object for the executed command.
+            Result: If `ret` is provided, returns the populated `Result` object with the following attributes:
+                - result: The parsed JSON output or raw output of the command.
+                - failed (bool): Indicates if the command execution failed.
+                - errors (list): A list of error messages if the command failed.
+                - messages (list): A list of log messages if the command succeeded.
+
+        Raises:
+            Exception: If the output cannot be parsed as JSON when `ret` is provided.
+
+        Notes:
+            - The method reads the command's standard error line by line and processes messages containing "msg=".
+            - If the command fails (non-zero return code), the `ret.failed` attribute is set to True, and errors are populated.
+            - If the command succeeds, the `ret.messages` attribute is populated with log messages.
+        """
         output, logs = "", []
 
         with subprocess.Popen(
@@ -182,6 +224,27 @@ class ContainerlabWorker(NFPWorker):
     def deploy(
         self, topology: str, reconfigure: bool = False, timeout: int = None
     ) -> Result:
+        """
+        Deploys a containerlab topology.
+
+        This method handles the deployment of a containerlab topology by downloading
+        the topology file, organizing it into a specific folder structure, and executing
+        the `containerlab deploy` command with the appropriate arguments.
+
+        Args:
+            topology (str): The path to the topology file to be deployed.
+            reconfigure (bool, optional): If True, reconfigures an already deployed lab.
+                Defaults to False.
+            timeout (int, optional): The timeout in seconds for the deployment process.
+                Defaults to None (no timeout).
+
+        Returns:
+            Result: An object containing the task name, topology folder, topology file,
+            and deployment result.
+
+        Raises:
+            Exception: If the topology file cannot be fetched.
+        """
         ret = Result(
             task=f"{self.name}:deploy",
             result={"topology_folder": "", "topology_file": "", "deployment": None},
@@ -217,7 +280,25 @@ class ContainerlabWorker(NFPWorker):
         )
 
     def destroy_lab(self, lab_name: str, timeout: int = None) -> Result:
-        ret = Result(task=f"{self.name}:destroy")
+        """
+        Destroys a specified lab.
+
+        Args:
+            lab_name (str): The name of the lab to be destroyed.
+            timeout (int, optional): The timeout value in seconds for the operation. Defaults to None.
+
+        Returns:
+            Result: An object containing the status of the operation, errors (if any), 
+                    and the result indicating whether the lab was successfully destroyed.
+
+        Behavior:
+            - Retrieves the lab details using the `inspect` method.
+            - If the lab is not found, marks the operation as failed and returns an error.
+            - If the lab is found, retrieves the topology file and its folder.
+            - Executes the `containerlab destroy` command using the topology file.
+            - Updates the result to indicate success or failure of the destruction process.
+        """
+        ret = Result(task=f"{self.name}:destroy_lab")
 
         # get lab details
         inspect = self.inspect(timeout=timeout, lab_name=lab_name, details=True)
@@ -244,6 +325,23 @@ class ContainerlabWorker(NFPWorker):
     def inspect(
         self, lab_name: str = None, timeout: int = None, details: bool = False
     ) -> Result:
+        """
+        Inspect the container lab containers configuration and status.
+
+        This method retrieves information about a specific container lab or all
+        container labs, optionally including detailed information.
+        
+        Args:
+            lab_name (str, optional): The name of the container lab to inspect. 
+                If not provided, all container labs will be inspected.
+            timeout (int, optional): The maximum time in seconds to wait for the 
+                inspection command to complete. Defaults to None.
+            details (bool, optional): Whether to include detailed information in 
+                the inspection output. Defaults to False.
+
+        Returns:
+            Result: An object containing the result of the inspection task.
+        """
         ret = Result(task=f"{self.name}:inspect")
 
         if lab_name:
@@ -258,6 +356,20 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     def save(self, lab_name: str, timeout: int = None) -> Result:
+        """
+        Saves the config of a specified lab devices by invoking the `containerlab save` command.
+
+        Args:
+            lab_name (str): The name of the lab to save.
+            timeout (int, optional): The maximum time in seconds to wait for the operation 
+                to complete. Defaults to None.
+
+        Returns:
+            Result: An object containing the outcome of the save operation. If successful, 
+                `result` will contain a dictionary with the lab name as the key and `True` 
+                as the value. If unsuccessful, `failed` will be set to True, and `errors` 
+                will contain a list of error messages.
+        """
         ret = Result(task=f"{self.name}:save")
 
         # get lab details
@@ -283,6 +395,20 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     def restart(self, lab_name: str, timeout: int = None) -> Result:
+        """
+        Restart a specified Containerlab lab.
+
+        This method retrieves the lab details, destroys the existing lab, and redeploys it
+        using the provided topology file.
+
+        Args:
+            lab_name (str): The name of the lab to restart.
+            timeout (int, optional): The timeout value for the operation in seconds. Defaults to None.
+
+        Returns:
+            Result: An object containing the status of the operation, any errors encountered,
+                    and the result indicating whether the lab was successfully restarted.
+        """
         ret = Result(task=f"{self.name}:restart")
 
         # get lab details
