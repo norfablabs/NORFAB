@@ -12,3 +12,4 @@ docs/Makefile
 *.rep
 *__norfab__*
 site
+*ipynb_checkpoints*
