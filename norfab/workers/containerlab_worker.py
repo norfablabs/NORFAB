@@ -47,7 +47,7 @@ class ContainerlabWorker(NFPWorker):
 
         # get inventory from broker
         self.containerlab_inventory = self.load_inventory()
-        
+
         self.init_done_event.set()
 
     def worker_exit(self):
@@ -96,7 +96,7 @@ class ContainerlabWorker(NFPWorker):
             result=self.containerlab_inventory,
             task=f"{self.name}:get_inventory",
         )
-    
+
     def get_containerlab_status(self) -> Result:
         """
         Retrieve the status of the Containerlab worker.

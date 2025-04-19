@@ -40,6 +40,7 @@ log = logging.getLogger(__name__)
 # Dictionary to store all tasks references
 NORFAB_WORKER_TASKS = {}
 
+
 class Task:
     """
     Task is a class-based decorator designed to validate the input arguments of a function
@@ -126,7 +127,7 @@ class Task:
         (
             fun_args,  # list of the positional parameter names
             fun_varargs,  # name of the * parameter or None
-            *_ # ignore the rest
+            *_,  # ignore the rest
         ) = inspect.getfullargspec(self.function)
 
         # "def foo(a, b):" - combine "foo(1, 2)" args with "a, b" fun_args

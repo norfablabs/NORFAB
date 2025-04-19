@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 # CONTAINERLAB SERVICE SHELL SHOW COMMANDS MODELS
 # ---------------------------------------------------------------------------------------------
 
+
 class ContainerlabShowCommandsModel(BaseModel):
     inventory: Callable = Field(
         "get_inventory",
@@ -70,12 +71,13 @@ class ContainerlabShowCommandsModel(BaseModel):
         result = log_error_or_result(result)
         return result
 
+
 # ---------------------------------------------------------------------------------------------
 # CONTAINERLAB SERVICE MAIN SHELL MODEL
 # ---------------------------------------------------------------------------------------------
 
-class ContainerlabServiceCommands(BaseModel):
 
+class ContainerlabServiceCommands(BaseModel):
     class PicleConfig:
         subshell = True
         prompt = "nf[containerlab]#"

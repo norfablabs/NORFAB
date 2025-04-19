@@ -1778,12 +1778,15 @@ class NetboxWorker(NFPWorker):
                             if nb_interface.name not in interfaces:
                                 continue
                             interface = interfaces.pop(nb_interface.name)
-                            nb_interface.description = interface["description"]
-                            nb_interface.mtu = interface["mtu"]
-                            nb_interface.speed = interface["speed"] * 1000
-                            nb_interface.mac_address = interface["mac_address"]
-                            nb_interface.enabled = interface["is_enabled"]
                             if dry_run is not True:
+                                nb_interface.description = interface["description"]
+                                if interface["mtu"] > 0:
+                                    nb_interface.mtu = interface["mtu"]
+                                if interface["speed"] > 0:
+                                    nb_interface.speed = interface["speed"] * 1000
+                                if interface["mac_address"] not in ["None"]:
+                                    nb_interface.mac_address = interface["mac_address"]
+                                nb_interface.enabled = interface["is_enabled"]
                                 nb_interface.save()
                             updated[nb_interface.name] = interface
                             self.event(
@@ -1795,21 +1798,24 @@ class NetboxWorker(NFPWorker):
                             continue
                         for interface_name, interface in interfaces.items():
                             interface["type"] = "other"
-                            nb_interface = nb.dcim.interfaces.create(
-                                name=interface_name,
-                                device={"name": nb_device.name},
-                                type=interface["type"],
-                            )
-                            nb_interface.description = interface["description"]
-                            nb_interface.mtu = interface["mtu"]
-                            nb_interface.speed = interface["speed"] * 1000
-                            nb_interface.mac_address = interface["mac_address"]
-                            nb_interface.enabled = interface["is_enabled"]
                             if dry_run is not True:
+                                nb_interface = nb.dcim.interfaces.create(
+                                    name=interface_name,
+                                    device={"name": nb_device.name},
+                                    type=interface["type"],
+                                )
+                                nb_interface.description = interface["description"]
+                                if interface["mtu"] > 0:
+                                    nb_interface.mtu = interface["mtu"]
+                                if interface["speed"] > 0:
+                                    nb_interface.speed = interface["speed"] * 1000
+                                if interface["mac_address"] not in ["None"]:
+                                    nb_interface.mac_address = interface["mac_address"]
+                                nb_interface.enabled = interface["is_enabled"]
                                 nb_interface.save()
                             created[interface_name] = interface
                             self.event(
-                                f"{host} created interface {nb_interface.name}",
+                                f"{host} created interface {interface_name}",
                                 resource=instance,
                             )
         else:
@@ -1895,9 +1901,12 @@ class NetboxWorker(NFPWorker):
                                 continue
                             interface = interfaces.pop(nb_interface.name)
                             # merge v6 into v4 addresses to save code repetition
-                            interface["ipv4"].update(interface.pop("ipv6", {}))
+                            ips = {
+                                **interface.get("ipv4", {}),
+                                **interface.get("ipv6", {}),
+                            }
                             # update/create IP addresses
-                            for ip, ip_data in interface["ipv4"].items():
+                            for ip, ip_data in ips.items():
                                 prefix_length = ip_data["prefix_length"]
                                 # get IP address info from Netbox
                                 nb_ip = nb.ipam.ip_addresses.filter(
@@ -1914,9 +1923,15 @@ class NetboxWorker(NFPWorker):
                                     continue
                                 elif not nb_ip and create is True:
                                     if dry_run is not True:
-                                        nb_ip = nb.ipam.ip_addresses.create(
-                                            address=f"{ip}/{prefix_length}"
-                                        )
+                                        try:
+                                            nb_ip = nb.ipam.ip_addresses.create(
+                                                address=f"{ip}/{prefix_length}"
+                                            )
+                                        except Exception as e:
+                                            msg = f"{host} failed to create {ip}/{prefix_length}, error: {e}"
+                                            log.error(msg)
+                                            self.event(msg, resource=instance)
+                                            continue
                                         nb_ip.assigned_object_type = "dcim.interface"
                                         nb_ip.assigned_object_id = nb_interface.id
                                         nb_ip.status = "active"
@@ -1928,10 +1943,10 @@ class NetboxWorker(NFPWorker):
                                     )
                                 elif nb_ip:
                                     nb_ip = list(nb_ip)[0]
-                                    nb_ip.assigned_object_type = "dcim.interface"
-                                    nb_ip.assigned_object_id = nb_interface.id
-                                    nb_ip.status = "active"
                                     if dry_run is not True:
+                                        nb_ip.assigned_object_type = "dcim.interface"
+                                        nb_ip.assigned_object_id = nb_interface.id
+                                        nb_ip.status = "active"
                                         nb_ip.save()
                                     updated[nb_ip.address] = nb_interface.name
                                     self.event(
