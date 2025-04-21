@@ -1,6 +1,7 @@
 # broker settings
 broker:
   endpoint: "tcp://127.0.0.1:5555"
+  shared_key: "u<)9$o^nYVqybv(?r<5(sVTgI]c)$i(R9]Yz2y28"
       
 # workers inventory section
 workers:
