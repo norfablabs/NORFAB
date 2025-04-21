@@ -1,7 +1,7 @@
 # broker settings
 broker:
-  endpoint: "tcp://127.0.0.1:5555"
-  shared_key: "5z1:yW}]n?UXhGmz+5CeHN1>:S9k!eCh6JyIhJqO"
+  endpoint: "tcp://192.168.1.128:5555"
+  shared_key: "s6/nI}VEKn4eW$z)$w:yqe^)r)gD{d+it%10>xm0"
   
 # uses https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema
 logging:
@@ -42,6 +42,8 @@ workers:
     - plugins/dummy_worker_inventory.yaml
   workflow-worker-1:
     - workflow/common.yaml
+  containerlab-*:
+    - containerlab/containerlab_common.yaml 
     
 # list what entities we want to start on this node
 topology:

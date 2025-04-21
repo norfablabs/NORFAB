@@ -46,8 +46,8 @@ class DeployCommand(ClientRunJobArgs):
         )
         return broker_files["results"]
 
-    @listen_events
     @staticmethod
+    @listen_events
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
@@ -94,8 +94,8 @@ class DestroyCommand(ClientRunJobArgs):
             ret.extend(wres["result"])
         return ret
 
-    @listen_events
     @staticmethod
+    @listen_events
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
@@ -142,8 +142,8 @@ class RestartCommand(ClientRunJobArgs):
             ret.extend(wres["result"])
         return ret
 
-    @listen_events
     @staticmethod
+    @listen_events
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
@@ -190,8 +190,8 @@ class SaveCommand(ClientRunJobArgs):
             ret.extend(wres["result"])
         return ret
 
-    @listen_events
     @staticmethod
+    @listen_events
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
