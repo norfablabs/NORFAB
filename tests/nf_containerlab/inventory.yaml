@@ -3,6 +3,11 @@ broker:
   endpoint: "tcp://192.168.1.128:5555"
   shared_key: "s6/nI}VEKn4eW$z)$w:yqe^)r)gD{d+it%10>xm0"
       
+# workers inventory section
+workers:
+  containerlab-*:
+    - containerlab_common.yaml 
+    
 # list what entities we want to start on this node
 topology:
   workers:

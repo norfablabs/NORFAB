@@ -42,8 +42,6 @@ workers:
     - plugins/dummy_worker_inventory.yaml
   workflow-worker-1:
     - workflow/common.yaml
-  containerlab-*:
-    - containerlab/containerlab_common.yaml 
     
 # list what entities we want to start on this node
 topology:
