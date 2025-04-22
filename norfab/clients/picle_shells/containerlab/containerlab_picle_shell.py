@@ -33,6 +33,11 @@ class DeployCommand(ClientRunJobArgs):
         description="Destroy the lab and then re-deploy it.",
         json_schema_extra={"presence": True},
     )
+    node_filter: StrictStr = Field(
+        None,
+        description="Comma-separated list of node names to deploy",
+        alias="node-filter",
+    )
     progress: Optional[StrictBool] = Field(
         True,
         description="Display progress events",

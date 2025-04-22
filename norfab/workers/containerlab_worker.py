@@ -195,10 +195,18 @@ class ContainerlabWorker(NFPWorker):
         ) as proc:
             while proc.poll() is None:
                 msg = proc.stderr.readline().strip()
-                if msg.strip():
+                if msg:
                     self.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
                     logs.append(msg)
                 time.sleep(0.01)
+            # read remaining messages
+            for msg in proc.stderr.readlines():
+                msg = msg.strip()
+                if msg:
+                    self.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
+                    logs.append(msg)
+                time.sleep(0.01)
+            # read process output
             output = proc.stdout.read()
 
         # populate Norfab result object
@@ -222,7 +230,11 @@ class ContainerlabWorker(NFPWorker):
             return output, logs, proc
 
     def deploy(
-        self, topology: str, reconfigure: bool = False, timeout: int = None
+        self,
+        topology: str,
+        reconfigure: bool = False,
+        timeout: int = None,
+        node_filter: str = None,
     ) -> Result:
         """
         Deploys a containerlab topology.
@@ -237,6 +249,7 @@ class ContainerlabWorker(NFPWorker):
                 Defaults to False.
             timeout (int, optional): The timeout in seconds for the deployment process.
                 Defaults to None (no timeout).
+            node_filter (str, optional): A filter to specify which nodes to deploy.
 
         Returns:
             Result: An object containing the task name, topology folder, topology file,
@@ -273,6 +286,9 @@ class ContainerlabWorker(NFPWorker):
             self.event(f"Re-deploying lab {os.path.split(topology_file)[-1]}")
         else:
             self.event(f"Deploying lab {os.path.split(topology_file)[-1]}")
+        if node_filter is not None:
+            args.append("--node-filter")
+            args.append(node_filter)
 
         # run containerlab command
         return self.run_containerlab_command(
@@ -288,7 +304,7 @@ class ContainerlabWorker(NFPWorker):
             timeout (int, optional): The timeout value in seconds for the operation. Defaults to None.
 
         Returns:
-            Result: An object containing the status of the operation, errors (if any), 
+            Result: An object containing the status of the operation, errors (if any),
                     and the result indicating whether the lab was successfully destroyed.
 
         Behavior:
@@ -330,13 +346,13 @@ class ContainerlabWorker(NFPWorker):
 
         This method retrieves information about a specific container lab or all
         container labs, optionally including detailed information.
-        
+
         Args:
-            lab_name (str, optional): The name of the container lab to inspect. 
+            lab_name (str, optional): The name of the container lab to inspect.
                 If not provided, all container labs will be inspected.
-            timeout (int, optional): The maximum time in seconds to wait for the 
+            timeout (int, optional): The maximum time in seconds to wait for the
                 inspection command to complete. Defaults to None.
-            details (bool, optional): Whether to include detailed information in 
+            details (bool, optional): Whether to include detailed information in
                 the inspection output. Defaults to False.
 
         Returns:
@@ -361,13 +377,13 @@ class ContainerlabWorker(NFPWorker):
 
         Args:
             lab_name (str): The name of the lab to save.
-            timeout (int, optional): The maximum time in seconds to wait for the operation 
+            timeout (int, optional): The maximum time in seconds to wait for the operation
                 to complete. Defaults to None.
 
         Returns:
-            Result: An object containing the outcome of the save operation. If successful, 
-                `result` will contain a dictionary with the lab name as the key and `True` 
-                as the value. If unsuccessful, `failed` will be set to True, and `errors` 
+            Result: An object containing the outcome of the save operation. If successful,
+                `result` will contain a dictionary with the lab name as the key and `True`
+                as the value. If unsuccessful, `failed` will be set to True, and `errors`
                 will contain a list of error messages.
         """
         ret = Result(task=f"{self.name}:save")
