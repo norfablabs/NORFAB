@@ -259,10 +259,7 @@ class ContainerlabWorker(NFPWorker):
         Raises:
             Exception: If the topology file cannot be fetched.
         """
-        ret = Result(
-            task=f"{self.name}:deploy",
-            result={},
-        )
+        ret = Result(task=f"{self.name}:deploy")
 
         # create folder to store topology
         topology_folder = os.path.split(os.path.split(topology)[0])[-1]

@@ -21,10 +21,16 @@ class DeployTask(BaseModel, extra="forbid"):
     """
     Pydantic model for Containerlab worker deploy task.
     """
+
     topology: StrictStr = Field(..., description="Topology file path")
     reconfigure: StrictBool = Field(None, description="Reconfigure flag")
     timeout: StrictInt = Field(None, description="Deployment timeout in seconds")
-    node_filter: StrictStr = Field(None, description="A filter to specify which nodes to deploy")
+    node_filter: StrictStr = Field(
+        None, description="A filter to specify which nodes to deploy"
+    )
+
 
 class DeployTaskResponse(Result):
-    result: Dict[StrictStr, Dict] = Field(None, description="Result of the deploy task")
+    result: Union[StrictStr, Dict, List] = Field(
+        None, description="Result of the deploy task"
+    )

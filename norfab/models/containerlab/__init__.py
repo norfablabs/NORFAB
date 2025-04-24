@@ -1,1 +1,1 @@
-from .containerlab_models import DeployTask
+from .containerlab_models import DeployTask, DeployTaskResponse
