@@ -9,7 +9,8 @@ import subprocess
 import yaml
 import json
 
-from norfab.core.worker import NFPWorker
+from norfab.core.worker import NFPWorker, Task
+from norfab.models.containerlab import DeployTask, DeployTaskResponse
 from norfab.models import Result
 from typing import Union, List, Dict, Any, Annotated, Optional, Tuple
 
@@ -229,6 +230,7 @@ class ContainerlabWorker(NFPWorker):
         else:
             return output, logs, proc
 
+    @Task(input=DeployTask, output=DeployTaskResponse)
     def deploy(
         self,
         topology: str,
@@ -252,15 +254,14 @@ class ContainerlabWorker(NFPWorker):
             node_filter (str, optional): A filter to specify which nodes to deploy.
 
         Returns:
-            Result: An object containing the task name, topology folder, topology file,
-            and deployment result.
+            Result: deployment results with a list of nodes deployed
 
         Raises:
             Exception: If the topology file cannot be fetched.
         """
         ret = Result(
             task=f"{self.name}:deploy",
-            result={"topology_folder": "", "topology_file": "", "deployment": None},
+            result={},
         )
 
         # create folder to store topology
