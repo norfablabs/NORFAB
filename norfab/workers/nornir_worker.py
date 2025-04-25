@@ -322,10 +322,11 @@ class NornirWorker(NFPWorker):
         self.nornir_inventory = self.load_inventory()
 
         # pull Nornir inventory from Netbox
-        self._pull_netbox_inventory()
-
-        # initiate Nornir
-        self._init_nornir()
+        if self.nornir_inventory.get("netbox"):
+            self.pull_netbox_inventory()
+        # initiate Nornir using data from Broker only
+        else:
+            self.init_nornir()
 
         # initiate watchdog
         self.watchdog = WatchDog(self)
@@ -355,7 +356,7 @@ class NornirWorker(NFPWorker):
         for f in self.inventory.hooks.get("nornir-exit", []):
             f["function"](self, *f.get("args", []), **f.get("kwargs", {}))
 
-    def _init_nornir(self):
+    def init_nornir(self):
         """
         Initialize the Nornir instance with the provided inventory configuration.
 
@@ -391,7 +392,7 @@ class NornirWorker(NFPWorker):
             user_defined=self.nornir_inventory.get("user_defined", {}),
         )
 
-    def _pull_netbox_inventory(self):
+    def pull_netbox_inventory(self) -> Result:
         """
         Queries inventory data from Netbox Service and merges it into the Nornir inventory.
 
@@ -405,13 +406,12 @@ class NornirWorker(NFPWorker):
             - Error: If no inventory data is returned from Netbox.
             - Warning: If the Netbox instance returns no hosts data.
         """
-        # exit if has no Netbox data in inventory
+        ret = Result(task=f"{self.name}:pull_netbox_inventory", result=True)
+
         if isinstance(self.nornir_inventory.get("netbox"), dict):
             kwargs = self.nornir_inventory["netbox"]
         elif self.nornir_inventory.get("netbox") is True:
             kwargs = {}
-        else:
-            return
 
         # extract parameters from kwargs
         retry = max(1, kwargs.pop("retry", 3))
@@ -453,6 +453,74 @@ class NornirWorker(NFPWorker):
                 f"{self.name} - '{kwargs.get('instance', 'default')}' Netbox "
                 f"instance returned no hosts data, worker '{wname}', result: {wdata}"
             )
+
+        self.init_nornir()
+
+        return ret
+
+    def pull_containerlab_inventory(self, lab_name: str, groups: list = None) -> Result:
+        """
+        Pulls the Nornir inventory from a Containerlab lab instance and merges it with the
+        existing Nornir inventory.
+
+        Args:
+            lab_name (str): The name of the Containerlab lab to retrieve the inventory from.
+            groups (list, optional): A list of group names to filter the inventory. Defaults to None.
+
+        Returns:
+            Result: A Result object indicating the success or failure of the operation.
+                    If successful, the Nornir inventory is updated with the retrieved data.
+
+        Notes:
+            - The method retrieves inventory data from a Containerlab lab using a client job.
+            - If the retrieved inventory contains host data, it is merged into the existing
+              Nornir inventory using the `merge_recursively` function.
+            - If no inventory or host data is returned, the method logs an error and marks
+              the operation as failed.
+            - After successful merging of inventory, Nornir instance is re-initialized with the
+              updated inventory.
+        """
+        ret = Result(task=f"{self.name}:pull_containerlab_inventory", result=True)
+
+        self.event(f"Loading Nornir inventory from Broker")
+        self.nornir_inventory = self.load_inventory()
+
+        self.event(f"Loading Nornir inventory from Containerlab")
+        clab_inventory_data = self.client.run_job(
+            service="containerlab",
+            task="get_nornir_inventory",
+            workers="any",
+            kwargs={"lab_name": lab_name, "groups": groups},
+        )
+
+        if clab_inventory_data is None:
+            msg = (
+                f"{self.name} - Containerlab get_nornir_inventory no inventory returned"
+            )
+            log.error(msg)
+            ret.failed = True
+            ret.errors = [msg]
+            return ret
+
+        wname, wdata = clab_inventory_data.popitem()
+
+        # merge Netbox inventory into Nornir inventory
+        if wdata["failed"] is False and wdata["result"].get("hosts"):
+            merge_recursively(self.nornir_inventory, wdata["result"])
+        else:
+            msg = (
+                f"{self.name} - '{lab_name}' Containerlab "
+                f"returned no hosts data, worker '{wname}', result: {wdata}"
+            )
+            log.error(msg)
+            ret.failed = True
+            ret.errors = [msg]
+            return ret
+
+        self.event(f"Initiating Nornir with loaded Containerlab inventory")
+        self.init_nornir()
+
+        return ret
 
     def _add_processors(self, nr, kwargs: Dict):
         """

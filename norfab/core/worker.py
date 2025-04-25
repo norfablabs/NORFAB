@@ -856,7 +856,7 @@ class NFPWorker:
         with self.socket_lock:
             self.broker_socket.send_multipart(msg)
 
-    def load_inventory(self):
+    def load_inventory(self) -> dict:
         """
         Load inventory data from the broker for this worker.
 

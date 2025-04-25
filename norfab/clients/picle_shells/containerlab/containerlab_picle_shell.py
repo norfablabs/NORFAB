@@ -221,6 +221,65 @@ class SaveCommand(ClientRunJobArgs):
 
 
 # ---------------------------------------------------------------------------------------------
+# CONTAINERLAB GET NORNIR INVENTORY COMMAND MODELS
+# ---------------------------------------------------------------------------------------------
+
+
+class GetNornirInventoryCommand(ClientRunJobArgs):
+    lab_name: StrictStr = Field(
+        None, description="Lab name to get Nornir inventory for", alias="lab-name"
+    )
+    progress: Optional[StrictBool] = Field(
+        True,
+        description="Display progress events",
+        json_schema_extra={"presence": True},
+    )
+    groups: Union[StrictStr, List[StrictStr]] = Field(
+        None,
+        description="List of groups to include in host's inventory",
+    )
+
+    @staticmethod
+    def source_lab_name():
+        ret = []
+        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        for wname, wres in result.items():
+            ret.extend(wres["result"])
+        return ret
+
+    @staticmethod
+    @listen_events
+    def run(uuid, *args, **kwargs):
+        verbose_result = kwargs.pop("verbose_result")
+        workers = kwargs.pop("workers", "any")
+        _ = kwargs.pop("progress", None)
+
+        # extract groups from kwargs
+        groups = kwargs.pop("groups", None)
+        if groups:
+            if isinstance(groups, str):
+                groups = [groups]
+            kwargs["groups"] = groups
+
+        result = NFCLIENT.run_job(
+            "containerlab",
+            "get_nornir_inventory",
+            workers=workers,
+            kwargs=kwargs,
+            args=args,
+            uuid=uuid,
+        )
+
+        return log_error_or_result(
+            result, verbose_result=verbose_result, verbose_on_fail=True
+        )
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
+
+
+# ---------------------------------------------------------------------------------------------
 # CONTAINERLAB SHOW COMMANDS MODELS
 # ---------------------------------------------------------------------------------------------
 
@@ -354,6 +413,11 @@ class ContainerlabServiceCommands(BaseModel):
         description="Perform configuration save for all containers running in a lab",
     )
     restart: RestartCommand = Field(None, description="Restart lab devices")
+    get_nornir_inventory: GetNornirInventoryCommand = Field(
+        None,
+        description="Get nornir inventory for a given lab",
+        alias="get-nornir-inventory",
+    )
 
     class PicleConfig:
         subshell = True

@@ -8,6 +8,7 @@ import importlib.metadata
 import subprocess
 import yaml
 import json
+import socket
 
 from norfab.core.worker import NFPWorker, Task
 from norfab.core.inventory import merge_recursively
@@ -454,14 +455,146 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    def get_nornir_inventory(self, lab_name: str) -> Result:
+    def get_nornir_inventory(
+        self, lab_name: str, timeout: int = None, groups: list = None
+    ) -> Result:
         """
-        Produce Nornir inventory for a specified lab.
+        Retrieves the Nornir inventory for a specified lab.
+
+        This method inspects the container lab environment and generates a Nornir-compatible
+        inventory of hosts based on the lab's configuration. It maps containerlab node kinds
+        to Netmiko SSH platform types and extracts relevant connection details.
 
         Args:
-            lab_name (str): The name of the lab to generate the Nornir inventory for.
+            lab_name (str): The name of the container lab to inspect.
+            timeout (int, optional): The timeout value for the inspection operation. Defaults to None.
+            groups (list, optional): A list of group names to assign to the hosts in the inventory. Defaults to None.
 
         Returns:
-            Result: An object containing the Nornir inventory for the specified lab.
+            Result: A `Result` object containing the Nornir inventory. The `result` attribute
+            includes a dictionary with host details. If the lab is not found or an error occurs,
+            the `failed` attribute is set to True, and the `errors` attribute contains error messages.
+
+        Notes:
+            - The method uses a predefined mapping (`netmiko_platform_map`) to translate containerlab
+              node kinds to Netmiko platform types.
+            - If a container's SSH port cannot be determined, it is skipped, and an error is logged.
+            - The primary host IP address is determined dynamically using a UDP socket connection or
+              by checking the host IP address in the container's port configuration.
+
+        Example of returned inventory structure:
+            {
+                "hosts": {
+                    "host_name": {
+                        "hostname": "host_ip",
+                        "platform": "netmiko_platform",
+                        "groups": ["group1", "group2"],
+                    },
+                    ...
         """
-        pass
+        groups = groups or []
+        ret = Result(task=f"{self.name}:get_nornir_inventory", result={"hosts": {}})
+
+        # mapping of containerlab kinds to netmiko SSH platform types
+        netmiko_platform_map = {
+            "nokia_srlinux": "nokia_srl",
+            "nokia_sros": "nokia_sros",
+            "arista_ceos": "arista_eos",
+            "arista_veos": "arista_eos",
+            "ceos": "arista_eos",
+            "juniper_crpd": "juniper_junos",
+            "crpd": "juniper_junos",
+            "juniper_vmx": "juniper_junos",
+            "juniper_vqfx": "juniper_junos",
+            "juniper_vsrx": "juniper_junos",
+            "juniper_vjunosrouter": "juniper_junos",
+            "juniper_vjunosswitch": "juniper_junos",
+            "juniper_vjunosevolved": "juniper_junos",
+            "cisco_xrd": "cisco_xr",
+            "xrd": "cisco_xr",
+            "cisco_xrv9k": "cisco_xr",
+            "cisco_xrv": "cisco_xr",
+            "cisco_csr1000v": "cisco_xe",
+            "cisco_n9kv": "cisco_nxos",
+            "cisco_c8000": "cisco_xe",
+            "cisco_cat9kv": "cisco_xe",
+            "cisco_iol": "cisco_ios",
+            "cisco_ftdv": "cisco_ftd",
+            "cumulus_cvx": "",
+            "aruba_aoscx": "aruba_aoscx",
+            "sonic": "",
+            "sonic_vm": "",
+            "dell_ftos": "",
+            "dell_sonic": "dell_sonic",
+            "mikrotik_ros": "mikrotik_routeros",
+            "huawei_vrp": "huawei_vrp",
+            "ipinfusion_ocnos": "",
+            "openbsd": "linux",
+            "keysight_ixia-c-one": "",
+            "linux": "linux",
+            "checkpoint_cloudguard": "",
+            "fortinet_fortigate": "",
+            "paloalto_panos": "paloalto_panos",
+            "6wind_vsr": "",
+            "bridge": "linux",
+            "rare": "",
+            "ovs-bridge": "linux",
+            "ext-container": "linux",
+            "host": "linux",
+        }
+
+        inspect = self.inspect(lab_name=lab_name, timeout=timeout, details=True)
+        # return empty result if lab not found
+        if not inspect.result:
+            ret.failed = True
+            ret.errors = [f"'{lab_name}' lab not found"]
+            return ret
+
+        # get host primary IP address
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        s.connect(("1.2.3.4", 12345))
+        primary_host_ip = s.getsockname()[0]
+
+        # form hosts inventory
+        for container in inspect.result:
+            host_name = container["Labels"]["clab-node-name"]
+            host_port = None
+            host_ip = None
+
+            # get host platform
+            platform = container["Labels"]["clab-node-kind"]
+            if not netmiko_platform_map.get(platform):
+                log.warning(
+                    f"{self.name} - {host_name} clab-node-kind '{platform}' not mapped to Netmiko platform."
+                )
+            else:
+                platform = netmiko_platform_map[platform]
+
+            # get ssh port
+            for port in container["Ports"]:
+                host_ip = primary_host_ip
+                if port["port"] == 22 and port["protocol"] == "tcp":
+                    host_port = port["host_port"]
+                    # get host ip address
+                    if port["host_ip"] not in [
+                        "0.0.0.0",
+                        "127.0.0.1",
+                        "localhost",
+                        "::",
+                    ]:
+                        host_ip = port["host_ip"]
+                    break
+            else:
+                log.error(f"{self.name} - {host_name} failed to map SSH port.")
+                continue
+
+            # add to Nornir inventory
+            ret.result["hosts"][host_name] = {
+                "hostname": host_ip,
+                "port": host_port,
+                "platform": platform,
+                "groups": groups,
+            }
+
+        return ret
