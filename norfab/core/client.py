@@ -135,6 +135,8 @@ class NFPClient(object):
     stats_recv_event_from_broker = 0
     client_private_key_file = None
     broker_public_key_file = None
+    public_keys_dir = None
+    private_keys_dir = None
 
     def __init__(
         self,
@@ -154,6 +156,7 @@ class NFPClient(object):
         self.jobs_dir = os.path.join(self.base_dir, "jobs")
         self.events_dir = os.path.join(self.base_dir, "events")
         self.running_job = None
+        self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
 
         # create base directories
         os.makedirs(self.base_dir, exist_ok=True)
@@ -161,16 +164,21 @@ class NFPClient(object):
         os.makedirs(self.events_dir, exist_ok=True)
 
         # generate certificates and create directories
-        generate_certificates(
-            self.base_dir,
-            cert_name=self.name,
-            broker_keys_dir=os.path.join(
-                self.inventory.base_dir, "__norfab__", "files", "broker", "public_keys"
-            ),
-            inventory=self.inventory,
-        )
-        self.public_keys_dir = os.path.join(self.base_dir, "public_keys")
-        self.private_keys_dir = os.path.join(self.base_dir, "private_keys")
+        if self.zmq_auth is not False:
+            generate_certificates(
+                self.base_dir,
+                cert_name=self.name,
+                broker_keys_dir=os.path.join(
+                    self.inventory.base_dir,
+                    "__norfab__",
+                    "files",
+                    "broker",
+                    "public_keys",
+                ),
+                inventory=self.inventory,
+            )
+            self.public_keys_dir = os.path.join(self.base_dir, "public_keys")
+            self.private_keys_dir = os.path.join(self.base_dir, "private_keys")
 
         self.ctx = zmq.Context()
         self.poller = zmq.Poller()
@@ -243,22 +251,25 @@ class NFPClient(object):
         self.broker_socket.setsockopt_unicode(zmq.IDENTITY, self.zmq_name, "utf8")
         self.broker_socket.linger = 0
 
-        # We need two certificates, one for the client and one for
-        # the server. The client must know the server's public key
-        # to make a CURVE connection.
-        self.client_private_key_file = os.path.join(
-            self.private_keys_dir, f"{self.name}.key_secret"
-        )
-        client_public, client_secret = zmq.auth.load_certificate(
-            self.client_private_key_file
-        )
-        self.broker_socket.curve_secretkey = client_secret
-        self.broker_socket.curve_publickey = client_public
+        if self.zmq_auth is not False:
+            # We need two certificates, one for the client and one for
+            # the server. The client must know the server's public key
+            # to make a CURVE connection.
+            self.client_private_key_file = os.path.join(
+                self.private_keys_dir, f"{self.name}.key_secret"
+            )
+            client_public, client_secret = zmq.auth.load_certificate(
+                self.client_private_key_file
+            )
+            self.broker_socket.curve_secretkey = client_secret
+            self.broker_socket.curve_publickey = client_public
 
-        # The client must know the server's public key to make a CURVE connection.
-        self.broker_public_key_file = os.path.join(self.public_keys_dir, "broker.key")
-        server_public, _ = zmq.auth.load_certificate(self.broker_public_key_file)
-        self.broker_socket.curve_serverkey = server_public
+            # The client must know the server's public key to make a CURVE connection.
+            self.broker_public_key_file = os.path.join(
+                self.public_keys_dir, "broker.key"
+            )
+            server_public, _ = zmq.auth.load_certificate(self.broker_public_key_file)
+            self.broker_socket.curve_serverkey = server_public
 
         self.broker_socket.connect(self.broker)
         self.poller.register(self.broker_socket, zmq.POLLIN)

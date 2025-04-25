@@ -39,18 +39,21 @@ logging: # (9)!
 
 ## Broker Inventory Section
 
-Broker inventory **must** have ``broker_endpoint`` parameter defined for workers and clients to identify how connect with broker, and for broker itself to identify where to listen for connections.
+Broker inventory **must** have broker ``endpoint`` parameter defined for workers and clients to identify how connect with broker, and for broker itself to identify where to listen for connections.
 
 ``` yaml title="inventory.yaml"
 # broker settings
 broker:
   endpoint: "tcp://127.0.0.1:5555"
   shared_key: "5z1:yW}]n?UXhGmz+5CeHN1>:S9k!eCh6JyIhJqO"
+  zmq_auth: True
 ```
 
 In addition these parameters are supported
 
 1. `shared_key` - broker encryption shared key may or may not be needed depending of type of the setup you are running, in case if all components - broker, client and workers run on same machine, configuring `shared_key` parameter is options, as `nfapi` is smart enough to auto-configure all workers and client with correct broker shared key. In case if broker and workers with clients are distributed i.e. running in separate containers or on separate machines, `share_key` parameter **must** be configured on all workers and clients to match shared key used by broker.
+
+2. `zmq_auth` - flag to enable or disable ZeroMQ authentication, `False` - disable authentication and encryption, by default set to `True` - ZeroMQ authentication and encryption enabled.
 
 ## Workers Inventory Section
 

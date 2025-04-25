@@ -6,7 +6,7 @@
     1. Moved FatAPI models under norfab.models.fastapi
     2. Added norfab.models.nornir pydantic models
     3. Events and results models moved under norfab.models
-2. 
+2. Added broker `zmq_auth` inventory parameter to turn zero mq authentication and encryption off
 
 ## 0.7.0
 

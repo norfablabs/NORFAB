@@ -108,7 +108,7 @@ class NFPWorker(object):
 
     def destroy(self, disconnect=False):
         """
-        Clean up routine for the broker.
+        Clean up routine for the worker.
 
         This method performs the following actions:
 
@@ -123,7 +123,8 @@ class NFPWorker(object):
         self.exit_event.set()
         if hasattr(self, "keepaliver"):
             self.keepaliver.stop()
-        self.service.workers.remove(self)
+        if self.service is not None:
+            self.service.workers.remove(self)
 
         if disconnect is True:
             msg = [self.address, b"", NFP.WORKER, self.service.name, NFP.DISCONNECT]
@@ -222,6 +223,7 @@ class NFPBroker:
         self.workers = {}
         self.exit_event = exit_event
         self.inventory = inventory
+        self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
 
         self.base_dir = self.inventory.base_dir
         self.broker_base_dir = os.path.join(
@@ -230,35 +232,38 @@ class NFPBroker:
         os.makedirs(self.base_dir, exist_ok=True)
         os.makedirs(self.broker_base_dir, exist_ok=True)
 
-        # generate certificates, create directories and load certs
-        generate_certificates(
-            self.broker_base_dir, cert_name="broker", inventory=inventory
-        )
-        self.private_keys_dir = os.path.join(self.broker_base_dir, "private_keys")
-        self.public_keys_dir = os.path.join(self.broker_base_dir, "public_keys")
-        self.broker_private_key_file = os.path.join(
-            self.private_keys_dir, "broker.key_secret"
-        )
-        self.broker_public_key_file = os.path.join(self.public_keys_dir, "broker.key")
-        server_public, server_secret = zmq.auth.load_certificate(
-            self.broker_private_key_file
-        )
-
         self.ctx = zmq.Context()
-
-        # Start an authenticator for this context.
-        self.auth = ThreadAuthenticator(self.ctx)
-        self.auth.start()
-        # self.auth.allow("0.0.0.0")
-        self.auth.allow_any = True
-        # Tell the authenticator how to handle CURVE requests
-        self.auth.configure_curve(location=zmq.auth.CURVE_ALLOW_ANY)
-
         self.socket = self.ctx.socket(zmq.ROUTER)
-        self.socket.curve_secretkey = server_secret
-        self.socket.curve_publickey = server_public
-        self.socket.curve_server = True  # must come before bind
         self.socket.linger = 0
+
+        # generate certificates, create directories and load certs
+        if self.zmq_auth is not False:
+            generate_certificates(
+                self.broker_base_dir, cert_name="broker", inventory=inventory
+            )
+            self.private_keys_dir = os.path.join(self.broker_base_dir, "private_keys")
+            self.public_keys_dir = os.path.join(self.broker_base_dir, "public_keys")
+            self.broker_private_key_file = os.path.join(
+                self.private_keys_dir, "broker.key_secret"
+            )
+            self.broker_public_key_file = os.path.join(
+                self.public_keys_dir, "broker.key"
+            )
+            server_public, server_secret = zmq.auth.load_certificate(
+                self.broker_private_key_file
+            )
+
+            # Start an authenticator for this context.
+            self.auth = ThreadAuthenticator(self.ctx)
+            self.auth.start()
+            # self.auth.allow("0.0.0.0")
+            self.auth.allow_any = True
+            # Tell the authenticator how to handle CURVE requests
+            self.auth.configure_curve(location=zmq.auth.CURVE_ALLOW_ANY)
+            self.socket.curve_secretkey = server_secret
+            self.socket.curve_publickey = server_public
+            self.socket.curve_server = True  # must come before bind
+
         self.poller = zmq.Poller()
         self.poller.register(self.socket, zmq.POLLIN)
         self.socket.bind(endpoint)
@@ -341,7 +346,8 @@ class NFPBroker:
             # in case worker self destroyed while we iterating
             if self.workers.get(name):
                 self.delete_worker(self.workers[name], True)
-        self.auth.stop()
+        if self.zmq_auth is not False:
+            self.auth.stop()
         self.ctx.destroy(0)
 
     def delete_worker(self, worker, disconnect):
@@ -464,6 +470,8 @@ class NFPBroker:
         """
         command = msg.pop(0)
         worker = self.require_worker(sender)
+
+        log.debug(f"NFPBroker - processing '{sender}' worker message: '{msg}'")
 
         if NFP.READY == command and not worker.is_ready():
             service = msg.pop(0)
@@ -747,6 +755,7 @@ class NFPBroker:
                 "security": {
                     "broker-private-key-file": self.broker_private_key_file,
                     "broker-public-key-file": self.broker_public_key_file,
+                    "zmq-auth": self.zmq_auth,
                 },
             }
         elif task == "show_broker_version":

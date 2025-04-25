@@ -190,6 +190,7 @@ class ShowCommandsModel(BaseModel):
             "security": {
                 "client-private-key-file": NFCLIENT.client_private_key_file,
                 "broker-public-key-file": NFCLIENT.broker_public_key_file,
+                "zmq_auth": NFCLIENT.zmq_auth,
             },
         }
 

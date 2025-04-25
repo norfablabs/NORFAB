@@ -2,6 +2,7 @@
 broker:
   endpoint: "tcp://192.168.1.128:5555"
   shared_key: "s6/nI}VEKn4eW$z)$w:yqe^)r)gD{d+it%10>xm0"
+  zmq_auth: True 
   
 # uses https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema
 logging:

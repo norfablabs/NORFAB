@@ -31,6 +31,6 @@ class DeployTask(BaseModel, extra="forbid"):
 
 
 class DeployTaskResponse(Result):
-    result: Union[StrictStr, Dict, List] = Field(
+    result: Union[StrictStr, Dict] = Field(
         None, description="Result of the deploy task"
     )

@@ -265,7 +265,6 @@ class ContainerlabWorker(NFPWorker):
         topology_folder = os.path.split(os.path.split(topology)[0])[-1]
         topology_folder = os.path.join(self.topologies_dir, topology_folder)
         os.makedirs(topology_folder, exist_ok=True)
-        ret.result["topology_folder"] = topology_folder
 
         # download topology file
         topology_file = os.path.join(topology_folder, os.path.split(topology)[-1])
@@ -275,7 +274,6 @@ class ContainerlabWorker(NFPWorker):
         os.rename(
             downloaded_topology_file, topology_file
         )  # move tpology file under desired folder
-        ret.result["topology_file"] = topology_file
 
         # form command arguments
         args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
