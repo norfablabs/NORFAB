@@ -10,6 +10,7 @@ import yaml
 import json
 
 from norfab.core.worker import NFPWorker, Task
+from norfab.core.inventory import merge_recursively
 from norfab.models.containerlab import DeployTask, DeployTaskResponse
 from norfab.models import Result
 from typing import Union, List, Dict, Any, Annotated, Optional, Tuple
@@ -53,8 +54,8 @@ class ContainerlabWorker(NFPWorker):
         self.topologies_dir = os.path.join(self.base_dir, "topologies")
         os.makedirs(self.topologies_dir, exist_ok=True)
 
-        # get inventory from broker
-        self.containerlab_inventory = self.load_inventory()
+        # merge local inventory with inventory from broker
+        merge_recursively(self.inventory[self.name], self.load_inventory())
 
         self.init_done_event.set()
 
@@ -115,7 +116,7 @@ class ContainerlabWorker(NFPWorker):
             Dict: A dictionary containing the combined inventory of Containerlab.
         """
         return Result(
-            result=self.containerlab_inventory,
+            result=self.inventory[self.name],
             task=f"{self.name}:get_inventory",
         )
 
