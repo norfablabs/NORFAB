@@ -109,6 +109,7 @@ class AgentServiceCommands(ClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["user_input"] = kwargs.pop("chat")
         _ = kwargs.pop("progress")
+        verbose_result = kwargs.pop("verbose_result", False)
 
         # run the job
         result = NFCLIENT.run_job(
@@ -120,6 +121,6 @@ class AgentServiceCommands(ClientRunJobArgs):
             timeout=timeout,
             uuid=uuid,
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         return "\n".join(result.values())

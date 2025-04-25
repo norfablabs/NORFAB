@@ -258,7 +258,7 @@ class NornirCliShell(
     NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
 ):
     commands: Union[StrictStr, List[StrictStr]] = Field(
-        ...,
+        None,
         description="List of commands to collect form devices",
         json_schema_extra={"multiline": True},
         required=True,
@@ -306,6 +306,7 @@ class NornirCliShell(
     def run(uuid, *args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result")
 
         # covert use_ps_timeout to timeout as use_ps expects "timeout" argument
         if kwargs.get("use_ps") and "use_ps_timeout" in kwargs:
@@ -336,7 +337,7 @@ class NornirCliShell(
             uuid=uuid,
             timeout=timeout,
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         # form table results
         if table:

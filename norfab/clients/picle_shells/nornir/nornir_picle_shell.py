@@ -137,6 +137,7 @@ class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -145,7 +146,7 @@ class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
             workers=workers,
             timeout=timeout,
         )
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
 
 class NornirShowCommandsModel(BaseModel):

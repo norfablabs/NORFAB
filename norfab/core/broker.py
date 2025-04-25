@@ -126,7 +126,7 @@ class NFPWorker(object):
         if self.service is not None:
             self.service.workers.remove(self)
 
-        if disconnect is True:
+        if disconnect is True and self.service is not None:
             msg = [self.address, b"", NFP.WORKER, self.service.name, NFP.DISCONNECT]
             with self.socket_lock:
                 self.socket.send_multipart(msg)
@@ -234,7 +234,12 @@ class NFPBroker:
 
         self.ctx = zmq.Context()
         self.socket = self.ctx.socket(zmq.ROUTER)
-        self.socket.linger = 0
+        self.socket.linger = (
+            0  # discarded pending messages immediately when the socket is closed
+        )
+        self.socket.setsockopt(
+            zmq.ROUTER_HANDOVER, 1
+        )  # allow worker/client reconnect using same identity
 
         # generate certificates, create directories and load certs
         if self.zmq_auth is not False:

@@ -452,3 +452,15 @@ class ContainerlabWorker(NFPWorker):
                 ret.result = {lab_name: True}
 
         return ret
+
+    def get_nornir_inventory(self, lab_name: str) -> Result:
+        """
+        Produce Nornir inventory for a specified lab.
+
+        Args:
+            lab_name (str): The name of the lab to generate the Nornir inventory for.
+
+        Returns:
+            Result: An object containing the Nornir inventory for the specified lab.
+        """
+        pass

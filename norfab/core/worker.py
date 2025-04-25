@@ -797,6 +797,7 @@ class NFPWorker:
 
         # Register service with broker
         self.send_to_broker(NFP.READY)
+        log.debug(f"{self.name} - NFP.READY sent to broker '{self.broker}'")
 
         # start keepalives
         if self.keepaliver is not None:
@@ -1011,17 +1012,21 @@ class NFPWorker:
         filters = filters or {}
         context = context or {}
         for template in templates:
+            j2env = Environment(loader="BaseLoader")
+            j2env.filters.update(filters)  # add custom filters
+            renderer = j2env.from_string(template)
+            template = renderer.render(**context)
+            # download template file and render it again
             if template.startswith("nf://"):
                 filepath = self.jinja2_fetch_template(template)
                 searchpath, filename = os.path.split(filepath)
                 j2env = Environment(loader=FileSystemLoader(searchpath))
                 j2env.filters.update(filters)  # add custom filters
                 renderer = j2env.get_template(filename)
+                rendered.append(renderer.render(**context))
+            # template content is fully rendered
             else:
-                j2env = Environment(loader="BaseLoader")
-                j2env.filters.update(filters)  # add custom filters
-                renderer = j2env.from_string(template)
-            rendered.append(renderer.render(**context))
+                rendered.append(template)
 
         return "\n".join(rendered)
 

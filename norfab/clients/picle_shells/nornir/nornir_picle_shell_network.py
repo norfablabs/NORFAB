@@ -70,6 +70,7 @@ class NornirNetworkPing(
         kwargs["fun"] = "ping"
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if "ping_timeout" in kwargs:
             kwargs["timeout"] = kwargs.pop("ping_timeout")
@@ -95,7 +96,7 @@ class NornirNetworkPing(
             timeout=timeout,
         )
 
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         # form table results
         if table:
@@ -151,6 +152,7 @@ class NornirNetworkDns(
         kwargs["fun"] = "resolve_dns"
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if "dns_timeout" in kwargs:
             kwargs["timeout"] = kwargs.pop("dns_timeout")
@@ -176,7 +178,7 @@ class NornirNetworkDns(
             timeout=timeout,
         )
 
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         # form table results
         if table:

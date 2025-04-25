@@ -82,6 +82,7 @@ class NornirTestShell(
     def run(uuid, *args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         # extract job_data
         if kwargs.get("job_data") and not kwargs["job_data"].startswith("nf://"):
@@ -108,7 +109,7 @@ class NornirTestShell(
             timeout=timeout,
         )
 
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         # form table results
         if table:

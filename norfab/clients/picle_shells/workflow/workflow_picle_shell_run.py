@@ -42,6 +42,7 @@ class WorkflowRunShell(ClientRunJobArgs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         _ = kwargs.pop("progress", None)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "workflow",
@@ -53,6 +54,6 @@ class WorkflowRunShell(ClientRunJobArgs):
             timeout=timeout,
         )
 
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         return result

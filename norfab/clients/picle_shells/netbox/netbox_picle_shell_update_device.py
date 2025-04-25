@@ -68,6 +68,7 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -81,7 +82,7 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
             uuid=uuid,
         )
 
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         return result
 
@@ -119,6 +120,7 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -132,7 +134,7 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
             uuid=uuid,
         )
 
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         return result
 
@@ -170,6 +172,7 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -183,7 +186,7 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
             uuid=uuid,
         )
 
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         return result
 

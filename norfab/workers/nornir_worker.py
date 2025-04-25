@@ -827,7 +827,7 @@ class NornirWorker(NFPWorker):
 
         Args:
             plugin (str): The path to the plugin function to import, or a NorFab
-                URL to download a custom task.
+                URL to download a custom task or template URL that resolves to a file.
             **kwargs: Additional arguments to pass to the specified task plugin.
 
         Keyword Args:
@@ -908,7 +908,8 @@ class NornirWorker(NFPWorker):
         Task to collect show commands output from devices using Command Line Interface (CLI).
 
         Args:
-            commands (list, optional): List of commands to send to devices.
+            commands (list, optional): List of commands to send to devices or URL to a file or template
+                URL that resolves to a file.
             plugin (str, optional): Plugin name to use. Valid options are
                 ``netmiko``, ``scrapli``, ``napalm``.
             dry_run (bool, optional): If True, do not send commands to devices,
@@ -1032,7 +1033,8 @@ class NornirWorker(NFPWorker):
         Task to send configuration commands to devices using Command Line Interface (CLI).
 
         Args:
-            config (list): List of commands to send to devices.
+            config (list): List of commands to send to devices or URL to a file or template
+                URL that resolves to a file.
             plugin (str, optional): Plugin name to use. Valid options are:
 
                 - netmiko - use Netmiko to configure devices
@@ -1136,7 +1138,8 @@ class NornirWorker(NFPWorker):
         Function to test networks using a suite of tests.
 
         Args:
-            suite (Union[list, str]): Path to YAML file with tests or a list of test definitions.
+            suite (Union[list, str]): URL Path to YAML file with tests or a list of test definitions
+                or template URL that resolves to a file path.
             subset (str, optional): List or string with comma-separated non-case-sensitive glob
                 patterns to filter tests by name. Ignored if dry_run is True.
             dry_run (bool, optional): If True, returns produced per-host tests suite content only.

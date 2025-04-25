@@ -41,6 +41,7 @@ class GetCircuits(NetboxClientRunJobArgs, NetboxCommonArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -56,7 +57,7 @@ class GetCircuits(NetboxClientRunJobArgs, NetboxCommonArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_rich_json

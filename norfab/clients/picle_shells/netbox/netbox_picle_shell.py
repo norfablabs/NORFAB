@@ -71,11 +71,19 @@ class GrapQLCommands(NetboxClientRunJobArgs, NetboxCommonArgs):
     @staticmethod
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "any")
-        with RICHCONSOLE.status("[bold green]Running query", spinner="dots") as status:
-            ret = NFCLIENT.run_job(
-                "netbox", "graphql", workers=workers, args=args, kwargs=kwargs
-            )
-        return ret
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+
+        ret = NFCLIENT.run_job(
+            "netbox",
+            "graphql",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+        )
+
+        return log_error_or_result(ret, verbose_result=verbose_result)
 
     class PicleConfig:
         subshell = True
@@ -118,33 +126,37 @@ class NetboxShowCommandsModel(NetboxClientRunJobArgs, NetboxCommonArgs):
     @staticmethod
     def get_inventory(**kwargs):
         workers = kwargs.pop("workers", "all")
+        verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job("netbox", "get_inventory", workers=workers)
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
         return result
 
     @staticmethod
     def get_version(**kwargs):
         workers = kwargs.pop("workers", "all")
+        verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job("netbox", "get_version", workers=workers)
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
         return result
 
     @staticmethod
     def get_netbox_status(**kwargs):
         workers = kwargs.pop("workers", "any")
+        verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job(
             "netbox", "get_netbox_status", workers=workers, kwargs=kwargs
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
         return result
 
     @staticmethod
     def get_compatibility(**kwargs):
         workers = kwargs.pop("workers", "any")
+        verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job(
             "netbox", "get_compatibility", workers=workers, kwargs=kwargs
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
         return result
 
 
@@ -180,6 +192,7 @@ class GetInterfaces(NetboxClientRunJobArgs, NetboxCommonArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
         if isinstance(kwargs["devices"], str):
             kwargs["devices"] = [kwargs["devices"]]
         with RICHCONSOLE.status("[bold green]Running query", spinner="dots") as status:
@@ -191,7 +204,7 @@ class GetInterfaces(NetboxClientRunJobArgs, NetboxCommonArgs):
                 kwargs=kwargs,
                 timeout=timeout,
             )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
         return result
 
     class PicleConfig:

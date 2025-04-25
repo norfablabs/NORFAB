@@ -56,6 +56,7 @@ class CacheList(NetboxClientRunJobArgs, NetboxCommonArgs):
         timeout = kwargs.pop("timeout", 600)
         details = kwargs.get("details", False)
         table = kwargs.pop("table", False)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -65,7 +66,7 @@ class CacheList(NetboxClientRunJobArgs, NetboxCommonArgs):
             kwargs=kwargs,
             timeout=timeout,
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         if details:
             ret = [
@@ -112,6 +113,7 @@ class CacheClear(NetboxClientRunJobArgs, NetboxCommonArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -122,7 +124,7 @@ class CacheClear(NetboxClientRunJobArgs, NetboxCommonArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -149,6 +151,7 @@ class CacheGet(NetboxClientRunJobArgs, NetboxCommonArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -159,7 +162,7 @@ class CacheGet(NetboxClientRunJobArgs, NetboxCommonArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_rich_json

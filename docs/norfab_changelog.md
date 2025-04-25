@@ -7,6 +7,15 @@
     2. Added norfab.models.nornir pydantic models
     3. Events and results models moved under norfab.models
 2. Added broker `zmq_auth` inventory parameter to turn zero mq authentication and encryption off
+3. Added `verbose-result` command line argument to relevant tasks to emit result details
+
+### BUGS
+
+1. Fixed broker to allow workers reconnect on restart.
+
+### FEATURES
+
+1. Improved worker jinja2 templates rendering logic to allow render url first and next download its content
 
 ## 0.7.0
 

@@ -30,6 +30,7 @@ class CreateAuthToken(ClientRunJobArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if "token" not in kwargs:
             kwargs["token"] = uuid4().hex
@@ -42,7 +43,7 @@ class CreateAuthToken(ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -55,6 +56,7 @@ class ListAuthToken(ClientRunJobArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "fastapi",
@@ -63,7 +65,7 @@ class ListAuthToken(ClientRunJobArgs):
             workers=workers,
             timeout=timeout,
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
         ret = []
         for wname, wdata in result.items():
             for token in wdata:
@@ -86,6 +88,7 @@ class DeleteAuthToken(ClientRunJobArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "fastapi",
@@ -95,7 +98,7 @@ class DeleteAuthToken(ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -108,6 +111,7 @@ class CheckAuthToken(ClientRunJobArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "fastapi",
@@ -117,7 +121,7 @@ class CheckAuthToken(ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested

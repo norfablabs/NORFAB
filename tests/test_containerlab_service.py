@@ -5,7 +5,7 @@ import requests
 import json
 
 
-class TestWorkflowWorker:
+class TestWorker:
     def test_get_inventory(self, nfclient):
         ret = nfclient.run_job("containerlab", "get_inventory")
         pprint.pprint(ret)
@@ -25,7 +25,7 @@ class TestWorkflowWorker:
                 assert version != "", f"{worker_name}:{package} version is empty"
 
 
-class TestWorkflowWorker:
+class TestDeployTask:
     def test_deploy(self, nfclient):
         ret = nfclient.run_job("containerlab", "deploy", kwargs={"topology": ""})
         pprint.pprint(ret)

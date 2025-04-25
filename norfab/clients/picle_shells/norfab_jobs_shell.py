@@ -46,6 +46,7 @@ class ListJobsModel(ClientRunJobArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             kwargs.pop("service"),
@@ -55,7 +56,7 @@ class ListJobsModel(ClientRunJobArgs):
             kwargs=kwargs,
             timeout=timeout,
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         ret = []
         for worker_name, worker_results in result.items():
@@ -100,6 +101,7 @@ class JobDetailsModel(ClientRunJobArgs):
     def run(*args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             kwargs.pop("service"),
@@ -109,7 +111,7 @@ class JobDetailsModel(ClientRunJobArgs):
             kwargs=kwargs,
             timeout=timeout,
         )
-        result = log_error_or_result(result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
 
         return result
 

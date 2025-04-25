@@ -61,6 +61,7 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -72,7 +73,7 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = print_nornir_results
@@ -98,6 +99,7 @@ class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -109,7 +111,7 @@ class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = print_nornir_results

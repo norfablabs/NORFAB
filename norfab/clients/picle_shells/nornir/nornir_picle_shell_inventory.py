@@ -50,6 +50,7 @@ class CreateHostModel(ClientRunJobArgs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "create_host"
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if kwargs.get("connection_options"):
             kwargs["connection_options"] = json.loads(kwargs["connection_options"])
@@ -68,7 +69,7 @@ class CreateHostModel(ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -119,6 +120,7 @@ class UpdateHostModel(ClientRunJobArgs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "update_host"
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if kwargs.get("connection_options"):
             kwargs["connection_options"] = json.loads(kwargs["connection_options"])
@@ -137,7 +139,7 @@ class UpdateHostModel(ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -160,6 +162,7 @@ class DeleteHostModel(ClientRunJobArgs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "delete_host"
+        verbose_result = kwargs.pop("verbose_result", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -171,7 +174,7 @@ class DeleteHostModel(ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -198,6 +201,7 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "read_host_data"
+        verbose_result = kwargs.pop("verbose_result", False)
 
         if isinstance(kwargs["keys"], str):
             kwargs["keys"] = [kwargs["keys"]]
@@ -212,7 +216,7 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
             timeout=timeout,
         )
 
-        return log_error_or_result(result)
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         outputter = Outputters.outputter_rich_json
