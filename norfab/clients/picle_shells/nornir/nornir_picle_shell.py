@@ -27,7 +27,7 @@ from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
 from .nornir_picle_shell_jobs import NornirJobsShell
 from .nornir_picle_shell_inventory import NornirInventoryShell
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Any, Dict, Tuple
 from nornir_salt.plugins.functions import TabulateFormatter
 
 SERVICE = "nornir"
@@ -38,7 +38,7 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel):
+class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel, ClientRunJobArgs):
     details: Optional[StrictBool] = Field(
         None, description="show hosts details", presence=True
     )
@@ -73,16 +73,13 @@ class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel):
                         table_data.append({"worker": w_name, "host": host, **host_data})
                 else:
                     return result
-            ret = (  # tuple to return outputter reference
-                TabulateFormatter(
-                    table_data,
-                    tabulate=table,
-                    headers=headers,
-                    headers_exclude=headers_exclude,
-                    sortby=sortby,
-                    reverse=reverse,
-                ),
-                Outputters.outputter_rich_print,
+            ret = TabulateFormatter(  # tuple to return outputter reference
+                table_data,
+                tabulate=table,
+                headers=headers,
+                headers_exclude=headers_exclude,
+                sortby=sortby,
+                reverse=reverse,
             )
         else:
             ret = result
@@ -91,17 +88,20 @@ class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel):
 
 
 class ShowWatchDogModel(NorniHostsFilters):
-    statistics: Callable = Field(
-        "get_watchdog_stats",
+    statistics: Any = Field(
+        None,
         description="show Nornir watchdog statistics",
+        json_schema_extra={"function": "get_watchdog_stats"},
     )
-    configuration: Callable = Field(
-        "get_watchdog_configuration",
+    configuration: Any = Field(
+        None,
         description="show Nornir watchdog configuration",
+        json_schema_extra={"function": "get_watchdog_configuration"},
     )
-    connections: Callable = Field(
-        "get_watchdog_connections",
+    connections: Any = Field(
+        None,
         description="show Nornir watchdog connections monitoring data",
+        json_schema_extra={"function": "get_watchdog_connections"},
     )
 
     class PicleConfig:
@@ -130,7 +130,7 @@ class ShowWatchDogModel(NorniHostsFilters):
 
 class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
     class PicleConfig:
-        outputter = Outputters.outputter_rich_yaml
+        outputter = Outputters.outputter_yaml
         pipe = PipeFunctionsModel
 
     @staticmethod
@@ -158,12 +158,13 @@ class NornirShowCommandsModel(BaseModel):
         None,
         description="show Nornir hosts",
     )
-    version: Callable = Field(
-        "get_version",
+    version: Any = Field(
+        None,
         description="show Nornir service version report",
         json_schema_extra={
-            "outputter": Outputters.outputter_rich_yaml,
-            "initial_indent": 2,
+            "outputter": Outputters.outputter_yaml,
+            "absolute_indent": 2,
+            "function": "get_version",
         },
     )
     watchdog: ShowWatchDogModel = Field(
@@ -181,6 +182,65 @@ class NornirShowCommandsModel(BaseModel):
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("nornir", "get_version", workers=workers)
         return log_error_or_result(result)
+
+
+# ---------------------------------------------------------------------------------------------
+# NORNIR SERVICE UTILITIES SHELL MODELS
+# ---------------------------------------------------------------------------------------------
+
+
+class NornirExternalInentories(str, Enum):
+    netbox = "netbox"
+    containerlab = "containerlab"
+
+
+class RefreshNornirModel(ClientRunJobArgs):
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        ..., description="Workers to refresh"
+    )
+    external_inventories: NornirExternalInentories = Field(
+        None,
+        description="External sources to fetch inventories from",
+        alias="external-inventories",
+    )
+    progress: Optional[StrictBool] = Field(
+        True,
+        description="Display progress events",
+        json_schema_extra={"presence": True},
+    )
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+    @staticmethod
+    def source_workers():
+        reply = NFCLIENT.get(
+            "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    @staticmethod
+    @listen_events
+    def run(uuid, **kwargs):
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result")
+
+        if isinstance(kwargs.get("external_inventories"), str):
+            kwargs["external_inventories"] = [kwargs["external_inventories"]]
+
+        result = NFCLIENT.run_job(
+            "nornir",
+            "refresh_nornir",
+            kwargs=kwargs,
+            workers=workers,
+            timeout=timeout,
+            uuid=uuid,
+        )
+
+        return log_error_or_result(result, verbose_result=verbose_result)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -206,6 +266,7 @@ class NornirServiceCommands(BaseModel):
     inventory: NornirInventoryShell = Field(
         None, description="Work with Nornir inventory"
     )
+    refresh: RefreshNornirModel = Field(None, description="Refresh inventory")
 
     class PicleConfig:
         subshell = True

@@ -15,7 +15,7 @@ from pydantic import (
     conlist,
     Field,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Any, Dict, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 
 RICHCONSOLE = Console()
@@ -29,22 +29,24 @@ log = logging.getLogger(__name__)
 
 
 class AgentShowCommandsModel(BaseModel):
-    inventory: Callable = Field(
-        "get_inventory",
+    inventory: Any = Field(
+        None,
         description="show agent inventory data",
-        json_schema_extra={"outputter": Outputters.outputter_rich_yaml},
+        json_schema_extra={"function": "get_inventory"},
     )
-    version: Callable = Field(
-        "get_version",
+    version: Any = Field(
+        None,
         description="show agent service version report",
         json_schema_extra={
-            "outputter": Outputters.outputter_rich_yaml,
-            "initial_indent": 2,
+            "outputter": Outputters.outputter_yaml,
+            "absolute_indent": 2,
+            "function": "get_version",
         },
     )
-    status: Callable = Field(
-        "get_status",
+    status: Any = Field(
+        None,
         description="show agent status",
+        json_schema_extra={"function": "get_status"},
     )
 
     class PicleConfig:
@@ -99,7 +101,6 @@ class AgentServiceCommands(ClientRunJobArgs):
 
     class PicleConfig:
         subshell = True
-        outputter = Outputters.outputter_rich_print
         prompt = "nf[agent]#"
 
     @staticmethod

@@ -83,7 +83,7 @@ class CacheList(NetboxClientRunJobArgs, NetboxCommonArgs):
             if table:
                 return ret, Outputters.outputter_rich_table
             else:
-                return ret, Outputters.outputter_rich_json
+                return ret, Outputters.outputter_json
         else:
             return result
 
@@ -165,7 +165,7 @@ class CacheGet(NetboxClientRunJobArgs, NetboxCommonArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
-        outputter = Outputters.outputter_rich_json
+        outputter = Outputters.outputter_json
 
 
 class NetboxServiceCache(BaseModel):

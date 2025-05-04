@@ -121,9 +121,6 @@ class N2GLayer3Diagram(NorniHostsFilters, NornirCommonArgs):
 
         return NornirDiagramShell.run(*args, **kwargs)
 
-    class PicleConfig:
-        outputter = Outputters.outputter_rich_print
-
 
 class N2GLayer2Diagram(NorniHostsFilters, NornirCommonArgs):
     add_interfaces_data: StrictBool = Field(
@@ -183,9 +180,6 @@ class N2GLayer2Diagram(NorniHostsFilters, NornirCommonArgs):
 
         return NornirDiagramShell.run(*args, **kwargs)
 
-    class PicleConfig:
-        outputter = Outputters.outputter_rich_print
-
 
 class N2GISISDiagram(NorniHostsFilters, NornirCommonArgs):
     ip_lookup_data: StrictStr = Field(
@@ -227,9 +221,6 @@ class N2GISISDiagram(NorniHostsFilters, NornirCommonArgs):
 
         return NornirDiagramShell.run(*args, **kwargs)
 
-    class PicleConfig:
-        outputter = Outputters.outputter_rich_print
-
 
 class N2GOSPFDiagram(NorniHostsFilters, NornirCommonArgs):
     ip_lookup_data: StrictStr = Field(
@@ -270,9 +261,6 @@ class N2GOSPFDiagram(NorniHostsFilters, NornirCommonArgs):
             n2g_kwargs["add_data"] = kwargs.pop("add_data")
 
         return NornirDiagramShell.run(*args, **kwargs)
-
-    class PicleConfig:
-        outputter = Outputters.outputter_rich_print
 
 
 class NornirDiagramShell(ClientRunJobArgs):

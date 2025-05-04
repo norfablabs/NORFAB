@@ -60,4 +60,4 @@ class GetCircuits(NetboxClientRunJobArgs, NetboxCommonArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
-        outputter = Outputters.outputter_rich_json
+        outputter = Outputters.outputter_json

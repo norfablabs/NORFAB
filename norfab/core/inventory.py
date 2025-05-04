@@ -69,6 +69,7 @@ Whenever inventory queried to provide data for worker with name `nornir-worker-1
 Simple Inventory iterates over `workers` dictionary and recursively merges 
 data for keys (glob patterns) that matched worker name.
 """
+
 import os
 import fnmatch
 import yaml

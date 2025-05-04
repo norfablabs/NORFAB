@@ -4,6 +4,7 @@ PICLE Shell CLient
 
 Client that implements interactive shell to work with NorFab.
 """
+
 import logging
 import json
 import yaml
@@ -26,7 +27,7 @@ from pydantic import (
     conlist,
     Field,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Any, Dict, Tuple
 from norfab.core.nfapi import NorFab
 
 from .picle_shells.nornir import nornir_picle_shell
@@ -57,8 +58,8 @@ class ShowBrokerModel(BaseModel):
     )
 
     class PicleConfig:
-        outputter = Outputters.outputter_rich_yaml
-        outputter_kwargs = {"initial_indent": 2}
+        outputter = Outputters.outputter_yaml
+        outputter_kwargs = {"absolute_indent": 2}
 
     @staticmethod
     def run(*args, **kwargs):
@@ -101,20 +102,28 @@ class ShowWorkersModel(BaseModel):
 
 
 class ShowCommandsModel(BaseModel):
-    version: Callable = Field(
-        "show_version",
+    version: Any = Field(
+        None,
         description="show nfcli client version report",
+        json_schema_extra={"function": "show_version"},
     )
     jobs: NorFabJobsShellCommands = Field(
         None, description="Show NorFab Jobs for all services"
     )
     broker: ShowBrokerModel = Field(None, description="show broker details")
     workers: ShowWorkersModel = Field(None, description="show workers information")
-    client: Callable = Field("show_client", description="Show client details")
-    inventory: Callable = Field(
-        "show_inventory",
+    client: Any = Field(
+        None,
+        description="Show client details",
+        json_schema_extra={"functions": "show_client"},
+    )
+    inventory: Any = Field(
+        None,
         description="Show NorFab inventory",
-        json_schema_extra={"outputter": Outputters.outputter_rich_yaml},
+        json_schema_extra={
+            "outputter": Outputters.outputter_yaml,
+            "function": "show_inventory",
+        },
     )
     nornir: nornir_picle_shell.NornirShowCommandsModel = Field(
         None, description="Show Nornir service"
@@ -137,8 +146,8 @@ class ShowCommandsModel(BaseModel):
 
     class PicleConfig:
         pipe = PipeFunctionsModel
-        outputter = Outputters.outputter_rich_yaml
-        outputter_kwargs = {"initial_indent": 2}
+        outputter = Outputters.outputter_yaml
+        outputter_kwargs = {"absolute_indent": 2}
 
     @staticmethod
     def show_version():
@@ -230,9 +239,6 @@ class CopyFileModel(BaseModel):
     def run(*args, **kwargs):
         status, reply = NFCLIENT.fetch_file(**kwargs)
         return reply
-
-    class PicleConfig:
-        outputter = Outputters.outputter_rich_print
 
 
 class ListFileDetails(BaseModel):

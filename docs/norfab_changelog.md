@@ -8,6 +8,7 @@
     3. Events and results models moved under norfab.models
 2. Added broker `zmq_auth` inventory parameter to turn zero mq authentication and encryption off
 3. Added `verbose-result` command line argument to relevant tasks to emit result details
+4. Updated to CLI shells to support PICLE 0.9.0
 
 ### BUGS
 
@@ -16,6 +17,7 @@
 ### FEATURES
 
 1. Improved worker jinja2 templates rendering logic to allow render url first and next download its content
+2. Added `nornir refresh` CLI command to refresh Nornir workers instances and reload inventory
 
 ## 0.7.0
 

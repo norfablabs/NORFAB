@@ -456,7 +456,11 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     def get_nornir_inventory(
-        self, lab_name: str, timeout: int = None, groups: list = None
+        self,
+        lab_name: str = None,
+        timeout: int = None,
+        groups: list = None,
+        use_default_credentials: bool = True,
     ) -> Result:
         """
         Retrieves the Nornir inventory for a specified lab.
@@ -466,7 +470,7 @@ class ContainerlabWorker(NFPWorker):
         to Netmiko SSH platform types and extracts relevant connection details.
 
         Args:
-            lab_name (str): The name of the container lab to inspect.
+            lab_name (str): The name of the container lab to inspect. If not given loads inventory for all labs.
             timeout (int, optional): The timeout value for the inspection operation. Defaults to None.
             groups (list, optional): A list of group names to assign to the hosts in the inventory. Defaults to None.
 
@@ -497,50 +501,166 @@ class ContainerlabWorker(NFPWorker):
 
         # mapping of containerlab kinds to netmiko SSH platform types
         netmiko_platform_map = {
-            "nokia_srlinux": "nokia_srl",
-            "nokia_sros": "nokia_sros",
-            "arista_ceos": "arista_eos",
-            "arista_veos": "arista_eos",
-            "ceos": "arista_eos",
-            "juniper_crpd": "juniper_junos",
-            "crpd": "juniper_junos",
-            "juniper_vmx": "juniper_junos",
-            "juniper_vqfx": "juniper_junos",
-            "juniper_vsrx": "juniper_junos",
-            "juniper_vjunosrouter": "juniper_junos",
-            "juniper_vjunosswitch": "juniper_junos",
-            "juniper_vjunosevolved": "juniper_junos",
-            "cisco_xrd": "cisco_xr",
-            "xrd": "cisco_xr",
-            "cisco_xrv9k": "cisco_xr",
-            "cisco_xrv": "cisco_xr",
-            "cisco_csr1000v": "cisco_xe",
-            "cisco_n9kv": "cisco_nxos",
-            "cisco_c8000": "cisco_xe",
-            "cisco_cat9kv": "cisco_xe",
-            "cisco_iol": "cisco_ios",
-            "cisco_ftdv": "cisco_ftd",
+            "nokia_srlinux": {
+                "platform": "nokia_srl",
+                "username": "admin",
+                "password": "admin",
+            },
+            "nokia_sros": {
+                "platform": "nokia_sros",
+                "username": "admin",
+                "password": "admin",
+            },
+            "arista_ceos": {
+                "platform": "arista_eos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "arista_veos": {
+                "platform": "arista_eos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "ceos": {
+                "platform": "arista_eos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "juniper_crpd": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "crpd": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "juniper_vmx": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "juniper_vqfx": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "juniper_vsrx": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "juniper_vjunosrouter": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "juniper_vjunosswitch": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "juniper_vjunosevolved": {
+                "platform": "juniper_junos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_xrd": {
+                "platform": "cisco_xr",
+                "username": "admin",
+                "password": "admin",
+            },
+            "xrd": {"platform": "cisco_xr", "username": "admin", "password": "admin"},
+            "cisco_xrv9k": {
+                "platform": "cisco_xr",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_xrv": {
+                "platform": "cisco_xr",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_csr1000v": {
+                "platform": "cisco_xe",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_n9kv": {
+                "platform": "cisco_nxos",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_c8000": {
+                "platform": "cisco_xe",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_cat9kv": {
+                "platform": "cisco_xe",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_iol": {
+                "platform": "cisco_ios",
+                "username": "admin",
+                "password": "admin",
+            },
+            "cisco_ftdv": {
+                "platform": "cisco_ftd",
+                "username": "admin",
+                "password": "admin",
+            },
             "cumulus_cvx": "",
-            "aruba_aoscx": "aruba_aoscx",
+            "aruba_aoscx": {
+                "platform": "aruba_aoscx",
+                "username": "admin",
+                "password": "admin",
+            },
             "sonic": "",
             "sonic_vm": "",
             "dell_ftos": "",
-            "dell_sonic": "dell_sonic",
-            "mikrotik_ros": "mikrotik_routeros",
-            "huawei_vrp": "huawei_vrp",
+            "dell_sonic": {
+                "platform": "dell_sonic",
+                "username": "admin",
+                "password": "admin",
+            },
+            "mikrotik_ros": {
+                "platform": "mikrotik_routeros",
+                "username": "admin",
+                "password": "admin",
+            },
+            "huawei_vrp": {
+                "platform": "huawei_vrp",
+                "username": "admin",
+                "password": "admin",
+            },
             "ipinfusion_ocnos": "",
             "openbsd": "linux",
             "keysight_ixia-c-one": "",
             "linux": "linux",
             "checkpoint_cloudguard": "",
             "fortinet_fortigate": "",
-            "paloalto_panos": "paloalto_panos",
+            "paloalto_panos": {
+                "platform": "paloalto_panos",
+                "username": "admin",
+                "password": "admin",
+            },
             "6wind_vsr": "",
-            "bridge": "linux",
+            "bridge": {"platform": "linux", "username": "admin", "password": "admin"},
             "rare": "",
-            "ovs-bridge": "linux",
-            "ext-container": "linux",
-            "host": "linux",
+            "ovs-bridge": {
+                "platform": "linux",
+                "username": "admin",
+                "password": "admin",
+            },
+            "ext-container": {
+                "platform": "linux",
+                "username": "admin",
+                "password": "admin",
+            },
+            "host": {"platform": "linux", "username": "admin", "password": "admin"},
         }
 
         inspect = self.inspect(lab_name=lab_name, timeout=timeout, details=True)
@@ -561,15 +681,6 @@ class ContainerlabWorker(NFPWorker):
             host_name = container["Labels"]["clab-node-name"]
             host_port = None
             host_ip = None
-
-            # get host platform
-            platform = container["Labels"]["clab-node-kind"]
-            if not netmiko_platform_map.get(platform):
-                log.warning(
-                    f"{self.name} - {host_name} clab-node-kind '{platform}' not mapped to Netmiko platform."
-                )
-            else:
-                platform = netmiko_platform_map[platform]
 
             # get ssh port
             for port in container["Ports"]:
@@ -593,8 +704,23 @@ class ContainerlabWorker(NFPWorker):
             ret.result["hosts"][host_name] = {
                 "hostname": host_ip,
                 "port": host_port,
-                "platform": platform,
                 "groups": groups,
             }
+
+            # get host's platform and default credentials
+            platform = container["Labels"]["clab-node-kind"]
+            if netmiko_platform_map.get(platform):
+                if use_default_credentials:
+                    username = netmiko_platform_map[platform]["username"]
+                    password = netmiko_platform_map[platform]["password"]
+                    ret.result["hosts"][host_name]["username"] = username
+                    ret.result["hosts"][host_name]["password"] = password
+                netmiko_platform = netmiko_platform_map[platform]["platform"]
+            else:
+                log.warning(
+                    f"{self.name} - {host_name} clab-node-kind '{platform}' not mapped to Netmiko platform."
+                )
+                continue
+            ret.result["hosts"][host_name]["platform"] = netmiko_platform
 
         return ret

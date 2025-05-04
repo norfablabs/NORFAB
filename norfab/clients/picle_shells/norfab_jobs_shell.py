@@ -115,9 +115,6 @@ class JobDetailsModel(ClientRunJobArgs):
 
         return result
 
-    class PicleConfig:
-        outputter = Outputters.outputter_rich_print
-
 
 class NorFabJobsShellCommands(BaseModel):
     summary: ListJobsModel = Field(None, description="List jobs")

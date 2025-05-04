@@ -1678,9 +1678,11 @@ class NetboxWorker(NFPWorker):
                         if not dry_run:
                             nb_device.save()
                         result[host] = {
-                            "update_device_facts_dry_run"
-                            if dry_run
-                            else "update_device_facts": {
+                            (
+                                "update_device_facts_dry_run"
+                                if dry_run
+                                else "update_device_facts"
+                            ): {
                                 "serial": facts["serial_number"],
                             }
                         }
@@ -1759,12 +1761,16 @@ class NetboxWorker(NFPWorker):
                     for host, host_data in results["result"].items():
                         updated, created = {}, {}
                         result[host] = {
-                            "update_device_interfaces_dry_run"
-                            if dry_run
-                            else "update_device_interfaces": updated,
-                            "created_device_interfaces_dry_run"
-                            if dry_run
-                            else "created_device_interfaces": created,
+                            (
+                                "update_device_interfaces_dry_run"
+                                if dry_run
+                                else "update_device_interfaces"
+                            ): updated,
+                            (
+                                "created_device_interfaces_dry_run"
+                                if dry_run
+                                else "created_device_interfaces"
+                            ): created,
                         }
                         interfaces = host_data["napalm_get"]["get_interfaces"]
                         nb_device = nb.dcim.devices.get(name=host)

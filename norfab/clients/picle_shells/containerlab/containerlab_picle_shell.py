@@ -13,7 +13,7 @@ from pydantic import (
     root_validator,
     Field,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Any, Dict, Tuple
 from ..common import log_error_or_result, ClientRunJobArgs, listen_events
 
 RICHCONSOLE = Console()
@@ -342,22 +342,27 @@ class ShowRunningLabs(ClientRunJobArgs):
 
 
 class ContainerlabShowCommandsModel(BaseModel):
-    inventory: Callable = Field(
-        "get_inventory",
+    inventory: Any = Field(
+        None,
         description="show containerlab inventory data",
-        json_schema_extra={"outputter": Outputters.outputter_rich_yaml},
+        json_schema_extra={
+            "outputter": Outputters.outputter_yaml,
+            "functions": "get_inventory",
+        },
     )
-    version: Callable = Field(
-        "get_version",
+    version: Any = Field(
+        None,
         description="show containerlab service version report",
         json_schema_extra={
             "outputter": Outputters.outputter_nested,
-            "initial_indent": 2,
+            "absolute_indent": 2,
+            "function": "get_version",
         },
     )
-    status: Callable = Field(
-        "get_containerlab_status",
+    status: Any = Field(
+        None,
         description="show containerlab status",
+        json_schema_extra={"function": "get_containerlab_status"},
     )
     containers: ShowContainers = Field(
         None,

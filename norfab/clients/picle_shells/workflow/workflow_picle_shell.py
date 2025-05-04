@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 class WorkflowShowInventoryModel(ClientRunJobArgs):
     class PicleConfig:
-        outputter = Outputters.outputter_rich_yaml
+        outputter = Outputters.outputter_yaml
         pipe = PipeFunctionsModel
 
     @staticmethod
@@ -45,7 +45,7 @@ class WorkflowShowInventoryModel(ClientRunJobArgs):
 
 class WorkflowShowVersionModel(ClientRunJobArgs):
     class PicleConfig:
-        outputter = Outputters.outputter_rich_yaml
+        outputter = Outputters.outputter_yaml
         pipe = PipeFunctionsModel
 
     @staticmethod

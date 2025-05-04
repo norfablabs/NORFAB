@@ -11,7 +11,7 @@ from pydantic import (
     Field,
 )
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Any, Dict, Tuple
 from .fastapi_picle_shell_auth import FastAPIAuthCommandsModel
 
 SERVICE = "fastapi"
@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 class FastAPIShowInventoryModel(ClientRunJobArgs):
     class PicleConfig:
-        outputter = Outputters.outputter_rich_yaml
+        outputter = Outputters.outputter_yaml
         pipe = PipeFunctionsModel
 
     @staticmethod
@@ -48,12 +48,13 @@ class FastAPIShowCommandsModel(BaseModel):
         None,
         description="show FastAPI inventory data",
     )
-    version: Callable = Field(
-        "get_version",
+    version: Any = Field(
+        None,
         description="show FastAPI service version report",
         json_schema_extra={
-            "outputter": Outputters.outputter_rich_yaml,
-            "initial_indent": 2,
+            "outputter": Outputters.outputter_yaml,
+            "absolute_indent": 2,
+            "function": "get_version",
         },
     )
 

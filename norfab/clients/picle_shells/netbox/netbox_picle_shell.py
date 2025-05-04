@@ -4,6 +4,7 @@ PICLE Shell CLient
 
 Client that implements interactive shell to work with NorFab.
 """
+
 import logging
 import json
 import yaml
@@ -21,7 +22,7 @@ from pydantic import (
     root_validator,
     Field,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Any, Dict, Tuple
 from ..common import log_error_or_result
 from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
 from .netbox_picle_shell_get_devices import GetDevices
@@ -88,7 +89,7 @@ class GrapQLCommands(NetboxClientRunJobArgs, NetboxCommonArgs):
     class PicleConfig:
         subshell = True
         prompt = "nf[netbox-graphql]#"
-        outputter = Outputters.outputter_rich_json
+        outputter = Outputters.outputter_json
 
 
 # ---------------------------------------------------------------------------------------------
@@ -97,26 +98,32 @@ class GrapQLCommands(NetboxClientRunJobArgs, NetboxCommonArgs):
 
 
 class NetboxShowCommandsModel(NetboxClientRunJobArgs, NetboxCommonArgs):
-    inventory: Callable = Field(
-        "get_inventory",
+    inventory: Any = Field(
+        None,
         description="show Netbox inventory data",
-        json_schema_extra={"outputter": Outputters.outputter_rich_yaml},
-    )
-    version: Callable = Field(
-        "get_version",
-        description="show Netbox service version report",
         json_schema_extra={
-            "outputter": Outputters.outputter_rich_yaml,
-            "initial_indent": 2,
+            "outputter": Outputters.outputter_yaml,
+            "function": "get_inventory",
         },
     )
-    status: Callable = Field(
-        "get_netbox_status",
-        description="show Netbox status",
+    version: Any = Field(
+        None,
+        description="show Netbox service version report",
+        json_schema_extra={
+            "outputter": Outputters.outputter_yaml,
+            "absolute_indent": 2,
+            "function": "get_version",
+        },
     )
-    compatibility: Callable = Field(
-        "get_compatibility",
+    status: Any = Field(
+        None,
+        description="show Netbox status",
+        json_schema_extra={"function": "get_netbox_status"},
+    )
+    compatibility: Any = Field(
+        None,
         description="show Netbox compatibility",
+        json_schema_extra={"function": "get_compatibility"},
     )
 
     class PicleConfig:
@@ -208,7 +215,7 @@ class GetInterfaces(NetboxClientRunJobArgs, NetboxCommonArgs):
         return result
 
     class PicleConfig:
-        outputter = Outputters.outputter_rich_json
+        outputter = Outputters.outputter_json
 
 
 class GetCommands(BaseModel):

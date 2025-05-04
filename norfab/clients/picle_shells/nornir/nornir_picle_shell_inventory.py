@@ -10,7 +10,7 @@ from pydantic import (
 )
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
-from picle.models import Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from .nornir_picle_shell_common import NorniHostsFilters
 
 
@@ -114,6 +114,10 @@ class UpdateHostModel(ClientRunJobArgs):
         json_schema_extra={"presence": True},
     )
 
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
+
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
@@ -140,9 +144,6 @@ class UpdateHostModel(ClientRunJobArgs):
         )
 
         return log_error_or_result(result, verbose_result=verbose_result)
-
-    class PicleConfig:
-        outputter = Outputters.outputter_nested
 
 
 class DeleteHostModel(ClientRunJobArgs):
@@ -219,7 +220,101 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
-        outputter = Outputters.outputter_rich_json
+        outputter = Outputters.outputter_json
+
+
+class InventoryLoadContainerlabModel(ClientRunJobArgs):
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        ...,
+        description="Nornir workers to load inventory into",
+    )
+    clab_workers: Union[StrictStr, List[StrictStr]] = Field(
+        None,
+        description="Containerlab workers to load inventory from",
+        alias="clab-workers",
+    )
+    progress: Optional[StrictBool] = Field(
+        True,
+        description="Display progress events",
+        json_schema_extra={"presence": True},
+    )
+    lab_name: StrictStr = Field(
+        None,
+        description="Name of Containerlab lab to load hosts' inventory",
+        alias="lab-name",
+    )
+    groups: Union[StrictStr, List[StrictStr]] = Field(
+        None,
+        description="List of Nornir groups to associate with hosts",
+    )
+    use_default_credentials: StrictBool = Field(
+        None,
+        description="Use Containerlab default credentials for all hosts",
+        alias="use-default-credentials",
+    )
+    dry_run: StrictBool = Field(
+        None,
+        description="Do not refresh Nornir, only return pulled inventory",
+        json_schema_extra={"presence": True},
+        alias="dry-run",
+    )
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
+
+    @staticmethod
+    def source_workers():
+        reply = NFCLIENT.get(
+            "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    @staticmethod
+    def source_lab_name():
+        ret = []
+        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        for wname, wres in result.items():
+            ret.extend(wres["result"])
+        return ret
+
+    @staticmethod
+    def source_clab_workers():
+        reply = NFCLIENT.get(
+            "mmi.service.broker", "show_workers", kwargs={"service": "containerlab"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    @staticmethod
+    @listen_events
+    def run(uuid, **kwargs):
+        workers = kwargs.pop("workers")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result")
+
+        if isinstance(kwargs.get("groups"), str):
+            kwargs["groups"] = [kwargs["groups"]]
+
+        result = NFCLIENT.run_job(
+            "nornir",
+            "nornir_inventory_load_containerlab",
+            kwargs=kwargs,
+            workers=workers,
+            timeout=timeout,
+            uuid=uuid,
+        )
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+
+class InventoryLoadModel(BaseModel):
+    containerlab: InventoryLoadContainerlabModel = Field(
+        None, description="Load inventory from running Containerlab lab(s)"
+    )
 
 
 class NornirInventoryShell(BaseModel):
@@ -236,6 +331,9 @@ class NornirInventoryShell(BaseModel):
         None,
         description="Return host data at given dor-separated key path",
         alias="read-host-data",
+    )
+    load: InventoryLoadModel = Field(
+        None, description="Load inventory from external source"
     )
 
     class PicleConfig:

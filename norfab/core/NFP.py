@@ -1,4 +1,5 @@
 """NORFAB Protocol definitions"""
+
 # This is the version of NFP/Client we implement
 CLIENT = b"NFPC01"
 

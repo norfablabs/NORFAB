@@ -27,7 +27,22 @@ class TestWorker:
 
 class TestDeployTask:
     def test_deploy(self, nfclient):
-        ret = nfclient.run_job("containerlab", "deploy", kwargs={"topology": ""})
+        ret_destroy = ret = nfclient.run_job("containerlab", "destroy", kwargs={"lab_name": "three-routers-lab"})
+        ret_deploy = nfclient.run_job("containerlab", "deploy", kwargs={"lab_name": "three-routers-lab"})
+
+        print("Lab destroyed:")
+        pprint.pprint(ret_destroy)
+
+        print("Lab deployed:")
+        pprint.pprint(ret_deploy)
+
+        for worker_name, data in ret_deploy.items():
+            pass
+
+
+class TestGetNornirInventoryTask:
+    def get_nornir_inventory(self, nfclient):
+        ret = nfclient.run_job("containerlab", "get_nornir_inventory", kwargs={"lab_name": ""})
         pprint.pprint(ret)
 
         for worker_name, data in ret.items():

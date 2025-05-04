@@ -1,6 +1,7 @@
 """
 Common Pydantic Models for PICLE Client Shells
 """
+
 import logging
 import time
 from datetime import datetime
@@ -141,6 +142,9 @@ def log_error_or_result(
     """
     ret = {}
 
+    if data is None:
+        log.error(f"Result data is empty.")
+        return
     if not isinstance(data, dict):
         log.error(f"Data is not a dictionary but '{type(data)}'")
         return data

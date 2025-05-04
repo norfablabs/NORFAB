@@ -7,7 +7,7 @@ from pydantic import (
     BaseModel,
     Field,
 )
-from typing import Dict, Callable
+from typing import Dict, Callable, Any
 from picle.models import Outputters
 
 SERVICE = "DummyService"
@@ -98,17 +98,19 @@ class DummyServiceWorker(NFPWorker):
 
 
 class DummyServiceShowCommandsModel(BaseModel):
-    inventory: Callable = Field(
-        "get_inventory",
+    inventory: Any = Field(
+        None,
         description="show Dummy service inventory data",
+        json_schema_extra={"function": "get_inventory"},
     )
-    version: Callable = Field(
-        "get_version",
+    version: Any = Field(
+        None,
         description="show Dummy service version report",
+        json_schema_extra={"function": "get_version"},  
     )
 
     class PicleConfig:
-        outputter = Outputters.outputter_rich_json
+        outputter = Outputters.outputter_json
 
     @staticmethod
     def get_inventory(**kwargs):
