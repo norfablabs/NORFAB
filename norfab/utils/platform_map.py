@@ -368,21 +368,44 @@ class PlatformMap:
     """
 
     def __init__(self):
-        self.platform_map = {
-            "aws": "AWS",
-            "azure": "AZURE",
-            "gcp": "GCP",
-            "kubernetes": "K8S",
-            "local": "LOCAL",
-            "on_premise": "ON_PREMISE",
-            "edge": "EDGE",
-        }
+        pass
 
-    def get_platform_identifier(self, platform_name):
+    @ classmethod
+    def convert(cls, from_kind: str, to_kind: str, platform: str) -> dict:
         """
-        Get the platform identifier for a given platform name.
+        Converts a platform definition from one format to another based on the known mapping.
 
-        :param platform_name: The name of the platform.
-        :return: The identifier of the platform or None if not found.
+        Args:
+            from_name (str): The key representing the source format in the platform map.
+            to_name (str): The key representing the target format in the platform map.
+            platform (str): The platform value to be matched in the source format.
+
+        Returns:
+            dict: The platform definition in the target format if a match is found.
+                  Returns an empty dictionary if no match is found.
         """
-        return self.platform_map.get(platform_name.lower())
+        for platform_definition in PMAP:
+            if platform_definition.get(from_kind, {}).get("platform") == platform:
+                if platform_definition.get(to_kind, {}).get("platform"):
+                    return platform_definition[to_kind]
+        
+        return {}
+
+    @ classmethod
+    def get(cls, kind: str, platform: str) -> dict:
+        """
+        Retrieve the platform definition for a given kind and platform.
+
+        Args:
+            kind (str): The type of platform definition to retrieve.
+            platform (str): The specific platform to match.
+
+        Returns:
+            dict: The platform definition matching the given kind and platform.
+                  Returns an empty dictionary if no match is found.
+        """
+        for platform_definition in PMAP:
+            if platform_definition.get(kind, {}).get("platform") == platform:
+                return platform_definition[kind]
+            
+        return {}

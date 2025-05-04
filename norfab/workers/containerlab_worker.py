@@ -14,6 +14,7 @@ from norfab.core.worker import NFPWorker, Task
 from norfab.core.inventory import merge_recursively
 from norfab.models.containerlab import DeployTask, DeployTaskResponse
 from norfab.models import Result
+from norfab.utils.platform_map import PlatformMap
 from typing import Union, List, Dict, Any, Annotated, Optional, Tuple
 
 SERVICE = "containerlab"
@@ -473,6 +474,7 @@ class ContainerlabWorker(NFPWorker):
             lab_name (str): The name of the container lab to inspect. If not given loads inventory for all labs.
             timeout (int, optional): The timeout value for the inspection operation. Defaults to None.
             groups (list, optional): A list of group names to assign to the hosts in the inventory. Defaults to None.
+            use_default_credentials (bool, optional): Use Containerlab default credentials for hosts ot not.
 
         Returns:
             Result: A `Result` object containing the Nornir inventory. The `result` attribute
@@ -480,7 +482,7 @@ class ContainerlabWorker(NFPWorker):
             the `failed` attribute is set to True, and the `errors` attribute contains error messages.
 
         Notes:
-            - The method uses a predefined mapping (`netmiko_platform_map`) to translate containerlab
+            - The method uses a predefined mapping (`norfab.utils.platform_map`) to translate containerlab
               node kinds to Netmiko platform types.
             - If a container's SSH port cannot be determined, it is skipped, and an error is logged.
             - The primary host IP address is determined dynamically using a UDP socket connection or
@@ -499,171 +501,9 @@ class ContainerlabWorker(NFPWorker):
         groups = groups or []
         ret = Result(task=f"{self.name}:get_nornir_inventory", result={"hosts": {}})
 
-        # mapping of containerlab kinds to netmiko SSH platform types
-        netmiko_platform_map = {
-            "nokia_srlinux": {
-                "platform": "nokia_srl",
-                "username": "admin",
-                "password": "admin",
-            },
-            "nokia_sros": {
-                "platform": "nokia_sros",
-                "username": "admin",
-                "password": "admin",
-            },
-            "arista_ceos": {
-                "platform": "arista_eos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "arista_veos": {
-                "platform": "arista_eos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "ceos": {
-                "platform": "arista_eos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "juniper_crpd": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "crpd": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "juniper_vmx": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "juniper_vqfx": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "juniper_vsrx": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "juniper_vjunosrouter": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "juniper_vjunosswitch": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "juniper_vjunosevolved": {
-                "platform": "juniper_junos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_xrd": {
-                "platform": "cisco_xr",
-                "username": "admin",
-                "password": "admin",
-            },
-            "xrd": {"platform": "cisco_xr", "username": "admin", "password": "admin"},
-            "cisco_xrv9k": {
-                "platform": "cisco_xr",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_xrv": {
-                "platform": "cisco_xr",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_csr1000v": {
-                "platform": "cisco_xe",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_n9kv": {
-                "platform": "cisco_nxos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_c8000": {
-                "platform": "cisco_xe",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_cat9kv": {
-                "platform": "cisco_xe",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_iol": {
-                "platform": "cisco_ios",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cisco_ftdv": {
-                "platform": "cisco_ftd",
-                "username": "admin",
-                "password": "admin",
-            },
-            "cumulus_cvx": "",
-            "aruba_aoscx": {
-                "platform": "aruba_aoscx",
-                "username": "admin",
-                "password": "admin",
-            },
-            "sonic": "",
-            "sonic_vm": "",
-            "dell_ftos": "",
-            "dell_sonic": {
-                "platform": "dell_sonic",
-                "username": "admin",
-                "password": "admin",
-            },
-            "mikrotik_ros": {
-                "platform": "mikrotik_routeros",
-                "username": "admin",
-                "password": "admin",
-            },
-            "huawei_vrp": {
-                "platform": "huawei_vrp",
-                "username": "admin",
-                "password": "admin",
-            },
-            "ipinfusion_ocnos": "",
-            "openbsd": "linux",
-            "keysight_ixia-c-one": "",
-            "linux": "linux",
-            "checkpoint_cloudguard": "",
-            "fortinet_fortigate": "",
-            "paloalto_panos": {
-                "platform": "paloalto_panos",
-                "username": "admin",
-                "password": "admin",
-            },
-            "6wind_vsr": "",
-            "bridge": {"platform": "linux", "username": "admin", "password": "admin"},
-            "rare": "",
-            "ovs-bridge": {
-                "platform": "linux",
-                "username": "admin",
-                "password": "admin",
-            },
-            "ext-container": {
-                "platform": "linux",
-                "username": "admin",
-                "password": "admin",
-            },
-            "host": {"platform": "linux", "username": "admin", "password": "admin"},
-        }
-
+        # get lab details
         inspect = self.inspect(lab_name=lab_name, timeout=timeout, details=True)
+
         # return empty result if lab not found
         if not inspect.result:
             ret.failed = True
@@ -675,6 +515,7 @@ class ContainerlabWorker(NFPWorker):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         s.connect(("1.2.3.4", 12345))
         primary_host_ip = s.getsockname()[0]
+        log.debug(f"{self.name} - determined Containerlab host primary IP - '{primary_host_ip}'")
 
         # form hosts inventory
         for container in inspect.result:
@@ -700,27 +541,35 @@ class ContainerlabWorker(NFPWorker):
                 log.error(f"{self.name} - {host_name} failed to map SSH port.")
                 continue
 
-            # add to Nornir inventory
+            # add host to Nornir inventory
             ret.result["hosts"][host_name] = {
                 "hostname": host_ip,
                 "port": host_port,
                 "groups": groups,
             }
 
-            # get host's platform and default credentials
-            platform = container["Labels"]["clab-node-kind"]
-            if netmiko_platform_map.get(platform):
-                if use_default_credentials:
-                    username = netmiko_platform_map[platform]["username"]
-                    password = netmiko_platform_map[platform]["password"]
-                    ret.result["hosts"][host_name]["username"] = username
-                    ret.result["hosts"][host_name]["password"] = password
-                netmiko_platform = netmiko_platform_map[platform]["platform"]
+            # get netmiko platform 
+            clab_platform_name = container["Labels"]["clab-node-kind"]
+            netmiko_platform = PlatformMap.convert("containerlab", "netmiko", clab_platform_name)
+            if netmiko_platform:
+                ret.result["hosts"][host_name]["platform"] = netmiko_platform["platfrom"]
             else:
                 log.warning(
-                    f"{self.name} - {host_name} clab-node-kind '{platform}' not mapped to Netmiko platform."
+                    f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not mapped to Netmiko platform."
                 )
                 continue
-            ret.result["hosts"][host_name]["platform"] = netmiko_platform
+
+            # get default credentials
+            if use_default_credentials:
+                clab_platform = PlatformMap.get("containerlab", clab_platform_name)
+                if not clab_platform:
+                    log.warning(
+                        f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not found."
+                    )
+                    continue
+                if clab_platform.get("username"):
+                    ret.result["hosts"][host_name]["username"] = clab_platform["username"]
+                if clab_platform.get("password"):
+                    ret.result["hosts"][host_name]["password"] = clab_platform["password"]
 
         return ret
