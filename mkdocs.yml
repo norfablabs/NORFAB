@@ -91,6 +91,7 @@ nav:
               - Save: workers/containerlab/services_containerlab_service_tasks_save.md
               - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
               - Inspect: workers/containerlab/services_containerlab_service_tasks_inspect.md
+              - Nornir Inventory: workers/containerlab/services_containerlab_service_tasks_nornir_inventory.md
         - Nornir Service: 
             - Overview: workers/nornir/services_nornir_service.md
             - Inventory: workers/nornir/services_nornir_service_inventory.md

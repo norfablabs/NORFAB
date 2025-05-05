@@ -44,15 +44,12 @@ def print_nornir_results(data: Union[list, dict]):
         if isinstance(hosts_results, dict):
             for host in sorted(hosts_results.keys()):
                 tasks = hosts_results[host]
-                # RICHCONSOLE.print(f"[bold green]{host}[/bold green]:")
                 ret.append(f"[bold green]{host}[/bold green]:")
                 for task in sorted(tasks.keys()):
                     result = tasks[task]
-                    # RICHCONSOLE.print(f"{1*indent}[bold blue]{task}[/bold blue]:")
                     ret.append(f"{1*indent}[bold blue]{task}[/bold blue]:")
                     if isinstance(result, str):
                         for line in result.splitlines():
-                            # print(f"{2*indent}{line}")
                             ret.append(f"{2*indent}{line}")
                     elif isinstance(result, dict):
                         for k, v in result.items():
@@ -60,42 +57,26 @@ def print_nornir_results(data: Union[list, dict]):
                                 v = json.dumps(v, indent=indent)
                             lines = str(v).splitlines()
                             if len(lines) == 0:
-                                # RICHCONSOLE.print(
-                                #     f"{2*indent}[bold yellow]{k}[/bold yellow]: ''"
-                                # )
                                 ret.append(
                                     f"{2*indent}[bold yellow]{k}[/bold yellow]: ''"
                                 )
                             elif len(lines) == 1:
-                                # RICHCONSOLE.print(
-                                #     f"{2*indent}[bold yellow]{k}[/bold yellow]: {lines[0]}"
-                                # )
                                 ret.append(
                                     f"{2*indent}[bold yellow]{k}[/bold yellow]: {lines[0]}"
                                 )
                             else:
-                                # RICHCONSOLE.print(
-                                #     f"{2*indent}[bold yellow]{k}[/bold yellow]"
-                                # )
                                 ret.append(f"{2*indent}[bold yellow]{k}[/bold yellow]")
                                 for line in lines:
-                                    # RICHCONSOLE.print(f"{3*indent}{line}")
                                     ret.append(f"{3*indent}{line}")
                     elif isinstance(result, list):
                         for i in result:
                             if isinstance(i, str):
                                 if i.strip().splitlines():  # multiline
                                     for line in i.strip().splitlines():
-                                        # RICHCONSOLE.print(
-                                        #     f"{2*indent}[bold yellow]{line}[/bold yellow]"
-                                        # )
                                         ret.append(
                                             f"{2*indent}[bold yellow]{line}[/bold yellow]"
                                         )
                                 else:
-                                    # RICHCONSOLE.print(
-                                    #     f"{2*indent}[bold yellow]{i.strip()}[/bold yellow]"
-                                    # )
                                     ret.append(
                                         f"{2*indent}[bold yellow]{i.strip()}[/bold yellow]"
                                     )
@@ -109,31 +90,21 @@ def print_nornir_results(data: Union[list, dict]):
                                 for line in json.dumps(
                                     result, indent=indent
                                 ).splitlines():
-                                    # RICHCONSOLE.print(
-                                    #    f"{2*indent}[bold yellow]{line}[/bold yellow]"
-                                    #
                                     ret.append(
                                         f"{2*indent}[bold yellow]{line}[/bold yellow]"
                                     )
                                 break  # we printed full result, stop
                             else:
-                                # RICHCONSOLE.print(
-                                #     f"{2*indent}[bold yellow]{result}[/bold yellow]"
-                                # )
                                 ret.append(
                                     f"{2*indent}[bold yellow]{result}[/bold yellow]"
                                 )
                     else:
-                        # RICHCONSOLE.print(
-                        #     f"{2*indent}[bold yellow]{result}[/bold yellow]"
-                        # )
                         ret.append(f"{2*indent}[bold yellow]{result}[/bold yellow]")
         # handle to_dict is False
         elif isinstance(hosts_results, list):
-            # print(hosts_results)
             ret.append(hosts_results)
 
-        return "\n".join(ret)
+    return "\n".join(ret)
 
 
 # ---------------------------------------------------------------------------------------------

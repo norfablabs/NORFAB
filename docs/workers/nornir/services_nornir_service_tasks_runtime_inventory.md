@@ -37,8 +37,9 @@ Supported actions are:
 - `list_hosts` - return a list of inventory's host names
 - `list_hosts_platforms` - return a dictionary of hosts' platforms
 - `update_defaults` - non recursively update defaults attributes
+- `load` - load Nornir inventory from external sources
 
-Sample nfcli command to create host:
+### Create Host Example
 
 ```
 nf#nornir inventory create-host name foobar
@@ -56,6 +57,112 @@ nf#nornir inventory create-host name foobar
 }
 nf#
 ```
+
+### Load Nornir Inventory from Containerlab
+
+Nornir Service supports loading hosts inventory from running Containerlab labs. This is useful to easily onboard Containerlab environments into Nornir and helps with automation. Internally Nornir service uses Containerlab Service to fetch running containers details and construct Nornir inventory.
+
+!!! example
+
+    === "CLI"
+    
+        ```
+		C:\nf>nfcli
+		Welcome to NorFab Interactive Shell.
+		nf#
+		nf#nornir inventory load containerlab 
+		ceos-spine-1:
+			show clock:
+				Sun Dec  1 10:49:58 2024
+				Timezone: UTC
+				Clock source: local
+			show hostname:
+				Hostname: ceos-spine-1
+				FQDN:     ceos-spine-1
+		ceos-spine-2:
+			show clock:
+				Sun Dec  1 10:49:58 2024
+				Timezone: UTC
+				Clock source: local
+			show hostname:
+				Hostname: ceos-spine-2
+				FQDN:     ceos-spine-2
+		nf[nornir-cli]#
+        ```
+        
+        Demo
+		
+		![Nornir Cli Demo](../../images/nornir_cli_demo.gif)
+    
+        In this example:
+
+        - `nfcli` command starts the NorFab Interactive Shell.
+        - `nornir` command switches to the Nornir sub-shell.
+        - `cli` command switches to the CLI task sub-shell.
+        - `commands` command retrieves the output of "show clock" and "show hostname" from the devices  that contain `ceos-spine` in their hostname as we use `FC` - "Filter Contains" Nornir hosts targeting filter.
+		
+		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
+		
+    === "Python"
+    
+		This code is complete and can run as is
+		
+        ```
+        import pprint
+        
+        from norfab.core.nfapi import NorFab
+        
+        if __name__ == '__main__':
+            nf = NorFab(inventory="inventory.yaml")
+            nf.start()
+            
+            client = nf.make_client()
+            
+            res = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show clock", "show hostname"],
+                    "FC": "ceos-spine"              
+                }
+            )
+            
+            pprint.pprint(res)
+            
+            nf.destroy()
+        ```
+
+		Once executed, above code should produce this output:
+		
+		```
+        C:\nf>python nornir_cli.py
+        {'nornir-worker-1': {'errors': [],
+                             'failed': False,
+                             'messages': [],
+                             'result': {'ceos-spine-1': {'show clock': 'Sun Dec  1 '
+                                                                       '11:10:53 2024\n'
+                                                                       'Timezone: UTC\n'
+                                                                       'Clock source: '
+                                                                       'local',
+                                                         'show hostname': 'Hostname: '
+                                                                          'ceos-spine-1\n'
+                                                                          'FQDN:     '
+                                                                          'ceos-spine-1'},
+                                        'ceos-spine-2': {'show clock': 'Sun Dec  1 '
+                                                                       '11:10:53 2024\n'
+                                                                       'Timezone: UTC\n'
+                                                                       'Clock source: '
+                                                                       'local',
+                                                         'show hostname': 'Hostname: '
+                                                                          'ceos-spine-2\n'
+                                                                          'FQDN:     '
+                                                                          'ceos-spine-2'}},
+                             'task': 'nornir-worker-1:cli'}}
+        C:\nf>					 
+		```
+		
+		Refer to [Getting Started](../../norfab_getting_started.md) section on 
+		how to construct  `inventory.yaml` file.
 
 ## NORFAB Nornir Runtime Inventory Shell Reference
 

@@ -106,7 +106,7 @@ class DummyServiceShowCommandsModel(BaseModel):
     version: Any = Field(
         None,
         description="show Dummy service version report",
-        json_schema_extra={"function": "get_version"},  
+        json_schema_extra={"function": "get_version"},
     )
 
     class PicleConfig:

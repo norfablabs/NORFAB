@@ -13,6 +13,7 @@ from pydantic import (
 from ..common import ClientRunJobArgs, log_error_or_result
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters
+from picle.models import PipeFunctionsModel
 
 
 class NornirTaskEnum(str, Enum):
@@ -128,6 +129,7 @@ class JobDetailsModel(ClientRunJobArgs):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
 
 
 class NornirJobsShell(BaseModel):

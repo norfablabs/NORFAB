@@ -38,9 +38,9 @@ Ncclient, Scrapli NETCONF, pygnmi, puresnmp, TextFSM, TTP etc.
 | **[file_copy](services_nornir_service_tasks_file_copy.md)** | Copy files to network devices over SCP. | Device software upgrades, certificates or license renewal. |
 | **[runtime_inventory](services_nornir_service_tasks_runtime_inventory.md)** | Modify Nornir service runtime inventory. | Add, update or remove Nornir hosts at a runtime. |
 
-## Nornir Service Shell Show Commands
+## Nornir Service Show Commands
 
-Nornir service shell comes with this set of show commands to query various information:
+Nornir service shell comes with a set of show commands to query service details:
 
 ```
 nf#man tree show.nornir

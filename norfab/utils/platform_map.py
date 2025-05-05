@@ -64,8 +64,8 @@ PMAP = [  # Platforms MAP
         "netmiko": {"platform": "juniper_junos"},
         "containerlab": {
             "platform": "juniper_crpd",
-            "username": "admin",
-            "password": "admin",
+            "username": "root",
+            "password": "clab123",
         },
         "napalm": {},
         "scrapli": {},
@@ -87,7 +87,7 @@ PMAP = [  # Platforms MAP
         "containerlab": {
             "platform": "juniper_vmx",
             "username": "admin",
-            "password": "admin",
+            "password": "admin@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -100,7 +100,7 @@ PMAP = [  # Platforms MAP
         "containerlab": {
             "platform": "juniper_vqfx",
             "username": "admin",
-            "password": "admin",
+            "password": "admin@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -113,7 +113,7 @@ PMAP = [  # Platforms MAP
         "containerlab": {
             "platform": "juniper_vsrx",
             "username": "admin",
-            "password": "admin",
+            "password": "admin@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -126,7 +126,7 @@ PMAP = [  # Platforms MAP
         "containerlab": {
             "platform": "juniper_vjunosrouter",
             "username": "admin",
-            "password": "admin",
+            "password": "admin@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -139,7 +139,7 @@ PMAP = [  # Platforms MAP
         "containerlab": {
             "platform": "juniper_vjunosswitch",
             "username": "admin",
-            "password": "admin",
+            "password": "admin@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -152,7 +152,7 @@ PMAP = [  # Platforms MAP
         "containerlab": {
             "platform": "juniper_vjunosevolved",
             "username": "admin",
-            "password": "admin",
+            "password": "admin@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -164,8 +164,8 @@ PMAP = [  # Platforms MAP
         "netmiko": {"platform": "cisco_xr"},
         "containerlab": {
             "platform": "cisco_xrd",
-            "username": "admin",
-            "password": "admin",
+            "username": "clab",
+            "password": "clab@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -175,7 +175,11 @@ PMAP = [  # Platforms MAP
     },
     {
         "netmiko": {"platform": "cisco_xr"},
-        "containerlab": {"platform": "xrd", "username": "admin", "password": "admin"},
+        "containerlab": {
+            "platform": "xrd",
+            "username": "clab",
+            "password": "clab@123",
+        },
         "napalm": {},
         "scrapli": {},
         "scrapli_netconf": {},
@@ -186,8 +190,8 @@ PMAP = [  # Platforms MAP
         "netmiko": {"platform": "cisco_xr"},
         "containerlab": {
             "platform": "cisco_xrv9k",
-            "username": "admin",
-            "password": "admin",
+            "username": "clab",
+            "password": "clab@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -199,8 +203,8 @@ PMAP = [  # Platforms MAP
         "netmiko": {"platform": "cisco_xr"},
         "containerlab": {
             "platform": "cisco_xrv",
-            "username": "admin",
-            "password": "admin",
+            "username": "clab",
+            "password": "clab@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -238,6 +242,19 @@ PMAP = [  # Platforms MAP
         "netmiko": {"platform": "cisco_xe"},
         "containerlab": {
             "platform": "cisco_c8000",
+            "username": "cisco",
+            "password": "cisco123",
+        },
+        "napalm": {},
+        "scrapli": {},
+        "scrapli_netconf": {},
+        "ncclient": {},
+        "pyats": {},
+    },
+    {
+        "netmiko": {"platform": "cisco_xe"},
+        "containerlab": {
+            "platform": "cisco_c8000v",
             "username": "admin",
             "password": "admin",
         },
@@ -278,7 +295,7 @@ PMAP = [  # Platforms MAP
         "containerlab": {
             "platform": "cisco_ftdv",
             "username": "admin",
-            "password": "admin",
+            "password": "Admin@123",
         },
         "napalm": {},
         "scrapli": {},
@@ -370,7 +387,7 @@ class PlatformMap:
     def __init__(self):
         pass
 
-    @ classmethod
+    @classmethod
     def convert(cls, from_kind: str, to_kind: str, platform: str) -> dict:
         """
         Converts a platform definition from one format to another based on the known mapping.
@@ -388,10 +405,10 @@ class PlatformMap:
             if platform_definition.get(from_kind, {}).get("platform") == platform:
                 if platform_definition.get(to_kind, {}).get("platform"):
                     return platform_definition[to_kind]
-        
+
         return {}
 
-    @ classmethod
+    @classmethod
     def get(cls, kind: str, platform: str) -> dict:
         """
         Retrieve the platform definition for a given kind and platform.
@@ -407,5 +424,5 @@ class PlatformMap:
         for platform_definition in PMAP:
             if platform_definition.get(kind, {}).get("platform") == platform:
                 return platform_definition[kind]
-            
+
         return {}

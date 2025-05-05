@@ -16,6 +16,7 @@ from .nornir_picle_shell_common import (
 )
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from nornir_salt.plugins.functions import TabulateFormatter
+from picle.models import PipeFunctionsModel
 
 
 class NrCfgPluginNetmiko(BaseModel):
@@ -309,3 +310,4 @@ class NornirCfgShell(
         subshell = True
         prompt = "nf[nornir-cfg]#"
         outputter = print_nornir_results
+        pipe = PipeFunctionsModel

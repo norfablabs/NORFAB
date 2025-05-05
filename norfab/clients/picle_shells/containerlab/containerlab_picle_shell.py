@@ -156,7 +156,7 @@ class RestartCommand(ClientRunJobArgs):
 
         result = NFCLIENT.run_job(
             "containerlab",
-            "restart",
+            "restart_lab",
             workers=workers,
             kwargs=kwargs,
             args=args,

@@ -17,6 +17,7 @@ from .nornir_picle_shell_common import (
     print_nornir_results,
 )
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from picle.models import PipeFunctionsModel
 
 
 class NapalmGettersEnum(str, Enum):
@@ -129,3 +130,4 @@ class NornirParseShell(BaseModel):
         subshell = True
         prompt = "nf[nornir-parse]#"
         outputter = print_nornir_results
+        pipe = PipeFunctionsModel

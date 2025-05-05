@@ -193,11 +193,16 @@ class ContainerlabWorker(NFPWorker):
             - If the command succeeds, the `ret.messages` attribute is populated with log messages.
         """
         output, logs = "", []
+        begin = time.time()
 
         with subprocess.Popen(
             args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         ) as proc:
             while proc.poll() is None:
+                if time.time() - begin > timeout:
+                    raise TimeoutError(
+                        f"Containerlab output collection {timeout}s timeout expired."
+                    )
                 msg = proc.stderr.readline().strip()
                 if msg:
                     self.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
@@ -224,6 +229,16 @@ class ContainerlabWorker(NFPWorker):
                 )
             # check if command failed
             if proc.returncode != 0:
+                ret.failed = True
+                ret.errors = ["\n".join(logs)]
+            # check if got errors
+            elif not output and any(
+                error in log
+                for log in logs
+                for error in [
+                    "no containers found",
+                ]
+            ):
                 ret.failed = True
                 ret.errors = ["\n".join(logs)]
             else:
@@ -409,7 +424,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    def restart(self, lab_name: str, timeout: int = None) -> Result:
+    def restart_lab(self, lab_name: str, timeout: int = None) -> Result:
         """
         Restart a specified Containerlab lab.
 
@@ -424,7 +439,7 @@ class ContainerlabWorker(NFPWorker):
             Result: An object containing the status of the operation, any errors encountered,
                     and the result indicating whether the lab was successfully restarted.
         """
-        ret = Result(task=f"{self.name}:restart")
+        ret = Result(task=f"{self.name}:restart_lab")
 
         # get lab details
         inspect = self.inspect(timeout=timeout, lab_name=lab_name, details=True)
@@ -515,7 +530,9 @@ class ContainerlabWorker(NFPWorker):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         s.connect(("1.2.3.4", 12345))
         primary_host_ip = s.getsockname()[0]
-        log.debug(f"{self.name} - determined Containerlab host primary IP - '{primary_host_ip}'")
+        log.debug(
+            f"{self.name} - determined Containerlab host primary IP - '{primary_host_ip}'"
+        )
 
         # form hosts inventory
         for container in inspect.result:
@@ -548,11 +565,15 @@ class ContainerlabWorker(NFPWorker):
                 "groups": groups,
             }
 
-            # get netmiko platform 
+            # get netmiko platform
             clab_platform_name = container["Labels"]["clab-node-kind"]
-            netmiko_platform = PlatformMap.convert("containerlab", "netmiko", clab_platform_name)
+            netmiko_platform = PlatformMap.convert(
+                "containerlab", "netmiko", clab_platform_name
+            )
             if netmiko_platform:
-                ret.result["hosts"][host_name]["platform"] = netmiko_platform["platfrom"]
+                ret.result["hosts"][host_name]["platform"] = netmiko_platform[
+                    "platform"
+                ]
             else:
                 log.warning(
                     f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not mapped to Netmiko platform."
@@ -568,8 +589,12 @@ class ContainerlabWorker(NFPWorker):
                     )
                     continue
                 if clab_platform.get("username"):
-                    ret.result["hosts"][host_name]["username"] = clab_platform["username"]
+                    ret.result["hosts"][host_name]["username"] = clab_platform[
+                        "username"
+                    ]
                 if clab_platform.get("password"):
-                    ret.result["hosts"][host_name]["password"] = clab_platform["password"]
+                    ret.result["hosts"][host_name]["password"] = clab_platform[
+                        "password"
+                    ]
 
         return ret

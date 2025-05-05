@@ -18,6 +18,7 @@ from .nornir_picle_shell_common import (
     print_nornir_results,
 )
 from nornir_salt.plugins.functions import TabulateFormatter
+from picle.models import PipeFunctionsModel
 
 
 class SCPDirection(str, Enum):
@@ -145,3 +146,4 @@ class NornirFileCopyShell(
         subshell = True
         prompt = "nf[nornir-file-copy]#"
         outputter = print_nornir_results
+        pipe = PipeFunctionsModel

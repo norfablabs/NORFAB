@@ -24,6 +24,7 @@ from .nornir_picle_shell_common import (
 )
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from nornir_salt.plugins.functions import TabulateFormatter
+from picle.models import PipeFunctionsModel
 
 try:
     import N2G
@@ -383,3 +384,4 @@ class NornirDiagramShell(ClientRunJobArgs):
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-diagram]#"
+        pipe = PipeFunctionsModel

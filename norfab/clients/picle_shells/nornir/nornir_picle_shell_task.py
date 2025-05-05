@@ -12,6 +12,7 @@ from .nornir_picle_shell_common import (
     print_nornir_results,
 )
 from nornir_salt.plugins.functions import TabulateFormatter
+from picle.models import PipeFunctionsModel
 
 
 class NornirTaskShell(
@@ -93,3 +94,4 @@ class NornirTaskShell(
         subshell = True
         prompt = "nf[nornir-task]#"
         outputter = print_nornir_results
+        pipe = PipeFunctionsModel

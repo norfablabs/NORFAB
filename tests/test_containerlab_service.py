@@ -1,12 +1,30 @@
 import pprint
-import pytest
-import random
-import requests
-import json
+import time
+
+
+def check_containerlab_worker(nfclient):
+    workers = nfclient.get(
+        "mmi.service.broker", "show_workers", kwargs={"service": "containerlab"}
+    )
+    print(f"Checking if contaienrlab worker running: {workers}")
+    return any(w["name"] == "containerlab-worker-1" for w in workers["results"])
+
+
+def wait_for_containerlab_worker(nfclient, timer=10):
+    begin = time.time()
+    while (time.time() - begin) < timer:
+        if check_containerlab_worker(nfclient) is True:
+            break
+        time.sleep(1)
+    else:
+        raise TimeoutError(
+            f"Containerlab worker did not come online within {timer} seconds"
+        )
 
 
 class TestWorker:
     def test_get_inventory(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
         ret = nfclient.run_job("containerlab", "get_inventory")
         pprint.pprint(ret)
 
@@ -16,6 +34,7 @@ class TestWorker:
             ), f"{worker_name} inventory incomplete"
 
     def test_get_version(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
         ret = nfclient.run_job("containerlab", "get_version")
         pprint.pprint(ret)
 
@@ -24,11 +43,28 @@ class TestWorker:
             for package, version in version_report["result"].items():
                 assert version != "", f"{worker_name}:{package} version is empty"
 
+    def test_get_running_labs(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job("containerlab", "get_running_labs")
+        pprint.pprint(ret)
+
+        assert isinstance(ret, dict), f"Expected dictionary but received {type(ret)}"
+        for w, r in ret.items():
+            assert r["failed"] == False, f"{w} - failed to get running labs"
+            assert r["result"], f"{w} - result is empty"
+
 
 class TestDeployTask:
     def test_deploy(self, nfclient):
-        ret_destroy = ret = nfclient.run_job("containerlab", "destroy", kwargs={"lab_name": "three-routers-lab"})
-        ret_deploy = nfclient.run_job("containerlab", "deploy", kwargs={"lab_name": "three-routers-lab"})
+        wait_for_containerlab_worker(nfclient)
+        ret_destroy = nfclient.run_job(
+            "containerlab", "destroy_lab", kwargs={"lab_name": "three-routers-lab"}
+        )
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy",
+            kwargs={"topology": "nf://containerlab/three-routers-topology.yaml"},
+        )
 
         print("Lab destroyed:")
         pprint.pprint(ret_destroy)
@@ -36,14 +72,287 @@ class TestDeployTask:
         print("Lab deployed:")
         pprint.pprint(ret_deploy)
 
-        for worker_name, data in ret_deploy.items():
-            pass
+        for w, r in ret_destroy.items():
+            assert r["failed"] == False, f"{w} - failed to destroy lab"
+            assert (
+                r["result"]["three-routers-lab"] == True
+            ), f"{w} - worker did not destroy three-routers-lab lab"
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to deploy lab"
+            assert r["result"][
+                "containers"
+            ], f"{w} - worker did not deploy three-routers-lab containers"
+
+    def test_deploy_reconfigure(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy",
+            kwargs={
+                "topology": "nf://containerlab/three-routers-topology.yaml",
+                "reconfigure": True,
+            },
+        )
+
+        print("Lab deployed:")
+        pprint.pprint(ret_deploy)
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to deploy lab"
+            assert r["result"][
+                "containers"
+            ], f"{w} - worker did not re-deploy three-routers-lab containers"
+
+    def test_deploy_node_filter(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret_destroy = nfclient.run_job(
+            "containerlab", "destroy_lab", kwargs={"lab_name": "three-routers-lab"}
+        )
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy",
+            kwargs={
+                "topology": "nf://containerlab/three-routers-topology.yaml",
+                "node_filter": "r1,r2",
+            },
+        )
+
+        print("Lab destroyed:")
+        pprint.pprint(ret_destroy)
+
+        print("Lab deployed:")
+        pprint.pprint(ret_deploy)
+
+        for w, r in ret_destroy.items():
+            assert r["failed"] == False, f"{w} - failed to destroy lab"
+            assert (
+                r["result"]["three-routers-lab"] == True
+            ), f"{w} - worker did not destroy three-routers-lab lab"
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to deploy lab"
+            assert r["result"][
+                "containers"
+            ], f"{w} - worker did not deploy three-routers-lab containers"
+            assert (
+                len(r["result"]["containers"]) == 2
+            ), f"{w} - worker did not deplpoy 2 containers"
+
+
+class TestInspectTask:
+    def test_inspect_all(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job("containerlab", "inspect")
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == False, f"{w} - failed to inspect labs"
+            assert (
+                len(r["result"]["containers"]) > 0
+            ), f"{w} - no container details returned"
+
+    def test_inspect_by_lab_name(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job(
+            "containerlab", "inspect", kwargs={"lab_name": "three-routers-lab"}
+        )
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == False, f"{w} - failed to inspect labs"
+            assert (
+                len(r["result"]["containers"]) > 0
+            ), f"{w} - no container details returned"
+            assert all(
+                "clab-three-routers" in cntr["name"]
+                for cntr in r["result"]["containers"]
+            ), f"{w} - did not filter contaienr by lab name properly"
+
+    def test_inspect_details(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job(
+            "containerlab",
+            "inspect",
+            kwargs={"lab_name": "three-routers-lab", "details": True},
+        )
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == False, f"{w} - failed to inspect labs"
+            assert len(r["result"]) > 0, f"{w} - no container details returned"
+            assert isinstance(
+                (r["result"][0]), dict
+            ), f"{w} - expected list of dictionaries"
+            assert (
+                len(r["result"][0]) > 10
+            ), f"{w} - expected to have more details for container"
+
+    def test_inspect_nonexist_lab(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job(
+            "containerlab", "inspect", kwargs={"lab_name": "nonexist"}
+        )
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == True, f"{w} - should have failed"
+
+
+class TestSaveTask:
+    def test_save(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job(
+            "containerlab", "save", kwargs={"lab_name": "three-routers-lab"}
+        )
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == False, f"{w} - failed to save lab"
+            assert (
+                r["result"]["three-routers-lab"] == True
+            ), f"{w} - failed to save lab three-routers-lab"
+
+    def test_save_nonexistlab(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job("containerlab", "save", kwargs={"lab_name": "nonexist"})
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == True, f"{w} - should have failed to save lab"
+
+
+class TestRestartTask:
+    def test_restart(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job(
+            "containerlab", "restart_lab", kwargs={"lab_name": "three-routers-lab"}
+        )
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == False, f"{w} - failed to restart lab"
+            assert (
+                r["result"]["three-routers-lab"] == True
+            ), f"{w} - failed to restart lab three-routers-lab"
+
+    def test_restart_nonexist_lab(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret = nfclient.run_job(
+            "containerlab", "restart_lab", kwargs={"lab_name": "nonexist"}
+        )
+        pprint.pprint(ret)
+
+        for w, r in ret.items():
+            assert r["failed"] == True, f"{w} - should have failed to restart lab"
 
 
 class TestGetNornirInventoryTask:
-    def get_nornir_inventory(self, nfclient):
-        ret = nfclient.run_job("containerlab", "get_nornir_inventory", kwargs={"lab_name": ""})
-        pprint.pprint(ret)
+    def test_get_nornir_inventory_by_lab_name(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy",
+            kwargs={
+                "topology": "nf://containerlab/three-routers-topology.yaml",
+                "reconfigure": True,
+            },
+        )
+        ret_inventory = nfclient.run_job(
+            "containerlab",
+            "get_nornir_inventory",
+            kwargs={"lab_name": "three-routers-lab", "groups": ["g1", "g2"]},
+        )
 
-        for worker_name, data in ret.items():
-            pass
+        print("Lab deployed:")
+        pprint.pprint(ret_deploy)
+
+        print("Lab Nornir Inventory generated:")
+        pprint.pprint(ret_inventory)
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to re-deploy lab"
+            assert r["result"][
+                "containers"
+            ], f"{w} - worker did not re-deploy all three-routers-lab containers"
+
+        for w, r in ret_inventory.items():
+            assert r["failed"] == False, f"{w} - failed to get lab Nornir inventory"
+            assert all(
+                k in r["result"]["hosts"] for k in ["r1", "r2", "r3"]
+            ), f"{w} - failed to get inventory for all devices"
+            for h, i in r["result"]["hosts"].items():
+                assert all(
+                    k in i
+                    for k in [
+                        "groups",
+                        "hostname",
+                        "password",
+                        "platform",
+                        "port",
+                        "username",
+                    ]
+                ), f"{w}:{h} - inventory incomplete"
+                assert i["groups"] == ["g1", "g2"], f"{w}:{h} - groups content wrong"
+
+    def test_get_nornir_inventory_all_labs(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy",
+            kwargs={
+                "topology": "nf://containerlab/three-routers-topology.yaml",
+                "reconfigure": True,
+            },
+        )
+        ret_inventory = nfclient.run_job(
+            "containerlab", "get_nornir_inventory", kwargs={"groups": ["g1", "g2"]}
+        )
+
+        print("Lab deployed:")
+        pprint.pprint(ret_deploy)
+
+        print("Lab Nornir Inventory generated:")
+        pprint.pprint(ret_inventory)
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to re-deploy lab"
+            assert r["result"][
+                "containers"
+            ], f"{w} - worker did not re-deploy all three-routers-lab containers"
+
+        for w, r in ret_inventory.items():
+            assert r["failed"] == False, f"{w} - failed to get lab Nornir inventory"
+            assert all(
+                k in r["result"]["hosts"] for k in ["r1", "r2", "r3"]
+            ), f"{w} - failed to get inventory for all devices"
+            for h, i in r["result"]["hosts"].items():
+                assert all(
+                    k in i
+                    for k in [
+                        "groups",
+                        "hostname",
+                        "password",
+                        "platform",
+                        "port",
+                        "username",
+                    ]
+                ), f"{w}:{h} - inventory incomplete"
+                assert i["groups"] == ["g1", "g2"], f"{w}:{h} - groups content wrong"
+
+    def test_get_nornir_inventory_nonexisting_lab_name(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        ret_inventory = nfclient.run_job(
+            "containerlab", "get_nornir_inventory", kwargs={"lab_name": "notexist"}
+        )
+
+        print("Lab Nornir Inventory generated:")
+        pprint.pprint(ret_inventory)
+
+        for w, r in ret_inventory.items():
+            assert (
+                r["failed"] == True
+            ), f"{w} - inventory retrieval for non existing lab should fail"
+            assert r["result"] == {
+                "hosts": {}
+            }, f"{w} - inventory should contain no hosts"
