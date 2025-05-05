@@ -295,6 +295,14 @@ class ShowContainers(ClientRunJobArgs):
     )
 
     @staticmethod
+    def source_lab_name():
+        ret = []
+        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        for wname, wres in result.items():
+            ret.extend(wres["result"])
+        return ret
+
+    @staticmethod
     def run(*args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")

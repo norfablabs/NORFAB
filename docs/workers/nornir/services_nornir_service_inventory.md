@@ -8,7 +8,7 @@ broker:
   shared_key: "5z1:yW}]n?UXhGmz+5CeHN1>:S9k!eCh6JyIhJqO"
 
 workers:
-  fastapi-worker-1: 
+  nornir-worker-1: 
     - nornir/nornir-worker-1.yaml
 
 topology: 

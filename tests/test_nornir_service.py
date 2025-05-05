@@ -1849,3 +1849,7 @@ class TestNornirRunTimeInventory:
         for worker, results in ret.items():
             assert results["failed"] is False, f"{worker} failed to run the task"
             assert results["result"]["foobar"] == True
+
+    @pytest.mark.skip(reason="TBD")
+    def test_load_containerlab_inventory(self, nfclient):
+        pass

@@ -58,50 +58,29 @@ nf#nornir inventory create-host name foobar
 nf#
 ```
 
-### Load Nornir Inventory from Containerlab
+## Nornir and Containerlab Services Integration
 
-Nornir Service supports loading hosts inventory from running Containerlab labs. This is useful to easily onboard Containerlab environments into Nornir and helps with automation. Internally Nornir service uses Containerlab Service to fetch running containers details and construct Nornir inventory.
+Nornir Service supports loading hosts inventory from running Containerlab labs using `nornir_inventory_load_containerlab` task. This is useful to easily onboard Containerlab environments into Nornir and helps with automation. Internally Nornir service uses Containerlab Service to fetch running containers details and construct Nornir inventory.
 
 !!! example
 
     === "CLI"
     
         ```
-		C:\nf>nfcli
-		Welcome to NorFab Interactive Shell.
-		nf#
-		nf#nornir inventory load containerlab 
-		ceos-spine-1:
-			show clock:
-				Sun Dec  1 10:49:58 2024
-				Timezone: UTC
-				Clock source: local
-			show hostname:
-				Hostname: ceos-spine-1
-				FQDN:     ceos-spine-1
-		ceos-spine-2:
-			show clock:
-				Sun Dec  1 10:49:58 2024
-				Timezone: UTC
-				Clock source: local
-			show hostname:
-				Hostname: ceos-spine-2
-				FQDN:     ceos-spine-2
-		nf[nornir-cli]#
-        ```
-        
-        Demo
-		
-		![Nornir Cli Demo](../../images/nornir_cli_demo.gif)
-    
-        In this example:
+        nf#nornir inventory load containerlab clab-workers containerlab-worker-1 workers nornir-worker-1 lab-name three-routers-lab
+        --------------------------------------------- Job Events -----------------------------------------------
+        05-May-2025 21:32:07.155 ed210f6c91ac40ada02149118eede2c9 job started
+        05-May-2025 21:32:07.172 INFO nornir-worker-1 running nornir.nornir_inventory_load_containerlab  - Pulling Containerlab 'three-routers-lab' lab inventory from 'containerlab-worker-1' workers
+        05-May-2025 21:32:07.393 INFO nornir-worker-1 running nornir.nornir_inventory_load_containerlab  - Pulled Containerlab 'three-routers-lab' lab inventory
+        05-May-2025 21:32:07.399 INFO nornir-worker-1 running nornir.nornir_inventory_load_containerlab  - Merged Containerlab 'three-routers-lab' lab inventory with Nornir runtime inventory
+        05-May-2025 21:32:07.916 ed210f6c91ac40ada02149118eede2c9 job completed in 0.76 seconds
 
-        - `nfcli` command starts the NorFab Interactive Shell.
-        - `nornir` command switches to the Nornir sub-shell.
-        - `cli` command switches to the CLI task sub-shell.
-        - `commands` command retrieves the output of "show clock" and "show hostname" from the devices  that contain `ceos-spine` in their hostname as we use `FC` - "Filter Contains" Nornir hosts targeting filter.
-		
-		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
+        --------------------------------------------- Job Results --------------------------------------------
+
+        nornir-worker-1:
+            True
+        nf#
+        ```
 		
     === "Python"
     
@@ -120,10 +99,12 @@ Nornir Service supports loading hosts inventory from running Containerlab labs. 
             
             res = client.run_job(
                 service="nornir",
-                task="cli",
+                workers=["nornir-worker-1"],
+                task="nornir_inventory_load_containerlab",
                 kwargs={
-                    "commands": ["show clock", "show hostname"],
-                    "FC": "ceos-spine"              
+                    "lab_name": "three-routers-lab",
+                    "clab_workers": ["containerlab-worker-1"],
+                    "lab_name": "three-routers-lab"
                 }
             )
             
@@ -131,38 +112,6 @@ Nornir Service supports loading hosts inventory from running Containerlab labs. 
             
             nf.destroy()
         ```
-
-		Once executed, above code should produce this output:
-		
-		```
-        C:\nf>python nornir_cli.py
-        {'nornir-worker-1': {'errors': [],
-                             'failed': False,
-                             'messages': [],
-                             'result': {'ceos-spine-1': {'show clock': 'Sun Dec  1 '
-                                                                       '11:10:53 2024\n'
-                                                                       'Timezone: UTC\n'
-                                                                       'Clock source: '
-                                                                       'local',
-                                                         'show hostname': 'Hostname: '
-                                                                          'ceos-spine-1\n'
-                                                                          'FQDN:     '
-                                                                          'ceos-spine-1'},
-                                        'ceos-spine-2': {'show clock': 'Sun Dec  1 '
-                                                                       '11:10:53 2024\n'
-                                                                       'Timezone: UTC\n'
-                                                                       'Clock source: '
-                                                                       'local',
-                                                         'show hostname': 'Hostname: '
-                                                                          'ceos-spine-2\n'
-                                                                          'FQDN:     '
-                                                                          'ceos-spine-2'}},
-                             'task': 'nornir-worker-1:cli'}}
-        C:\nf>					 
-		```
-		
-		Refer to [Getting Started](../../norfab_getting_started.md) section on 
-		how to construct  `inventory.yaml` file.
 
 ## NORFAB Nornir Runtime Inventory Shell Reference
 
@@ -176,6 +125,7 @@ root
         ├── create-host:    Create new host
         │   ├── timeout:    Job timeout
         │   ├── workers:    Nornir workers to target, default 'any'
+        │   ├── verbose-result:    Control output details, default 'False'
         │   ├── *name:    Name of the host
         │   ├── username:    Host connections username
         │   ├── password:    Host connections password
@@ -189,6 +139,7 @@ root
         ├── update-host:    Update existing host details
         │   ├── timeout:    Job timeout
         │   ├── workers:    Nornir workers to target, default 'all'
+        │   ├── verbose-result:    Control output details, default 'False'
         │   ├── *name:    Name of the host
         │   ├── username:    Host connections username
         │   ├── password:    Host connections password
@@ -198,29 +149,41 @@ root
         │   ├── connection-options:    JSON string with connection options
         │   ├── groups:    List of groups to associate with this host
         │   ├── groups-action:    Action to perform with groups, default 'append'
+        │   ├── data:    JSON string with arbitrary host data
         │   └── progress:    Display progress events, default 'True'
         ├── delete-host:    Delete host from inventory
         │   ├── timeout:    Job timeout
         │   ├── workers:    Nornir workers to target, default 'all'
+        │   ├── verbose-result:    Control output details, default 'False'
         │   ├── *name:    Name of the host
         │   └── progress:    Display progress events, default 'True'
-        └── read-host-data:    Return host data at given dor-separated key path
-            ├── timeout:    Job timeout
-            ├── workers:    Nornir workers to target, default 'all'
-            ├── FO:    Filter hosts using Filter Object
-            ├── FB:    Filter hosts by name using Glob Patterns
-            ├── FH:    Filter hosts by hostname
-            ├── FC:    Filter hosts containment of pattern in name
-            ├── FR:    Filter hosts by name using Regular Expressions
-            ├── FG:    Filter hosts by group
-            ├── FP:    Filter hosts by hostname using IP Prefix
-            ├── FL:    Filter hosts by names list
-            ├── FM:    Filter hosts by platform
-            ├── FX:    Filter hosts excluding them by name
-            ├── FN:    Negate the match
-            ├── hosts:    Filter hosts to target
-            ├── *keys:    Dot separated path within host data, examples: config.interfaces.Lo0
-            └── progress:    Display progress events, default 'True'
+        ├── read-host-data:    Return host data at given dor-separated key path
+        │   ├── timeout:    Job timeout
+        │   ├── workers:    Nornir workers to target, default 'all'
+        │   ├── verbose-result:    Control output details, default 'False'
+        │   ├── FO:    Filter hosts using Filter Object
+        │   ├── FB:    Filter hosts by name using Glob Patterns
+        │   ├── FH:    Filter hosts by hostname
+        │   ├── FC:    Filter hosts containment of pattern in name
+        │   ├── FR:    Filter hosts by name using Regular Expressions
+        │   ├── FG:    Filter hosts by group
+        │   ├── FP:    Filter hosts by hostname using IP Prefix
+        │   ├── FL:    Filter hosts by names list
+        │   ├── FX:    Filter hosts excluding them by name
+        │   ├── FN:    Negate the match
+        │   ├── *keys:    Dot separated path within host data, examples: config.interfaces.Lo0
+        │   └── progress:    Display progress events, default 'True'
+        └── load:    Load inventory from external source
+            └── containerlab:    Load inventory from running Containerlab lab(s)
+                ├── timeout:    Job timeout
+                ├── *workers:    Nornir workers to load inventory into
+                ├── verbose-result:    Control output details, default 'False'
+                ├── clab-workers:    Containerlab workers to load inventory from
+                ├── progress:    Display progress events, default 'True'
+                ├── lab-name:    Name of Containerlab lab to load hosts' inventory
+                ├── groups:    List of Nornir groups to associate with hosts
+                ├── use-default-credentials:    Use Containerlab default credentials for all hosts
+                └── dry-run:    Do not refresh Nornir, only return pulled inventory
 nf#
 ```
 

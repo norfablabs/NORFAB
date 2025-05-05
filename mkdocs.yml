@@ -91,7 +91,7 @@ nav:
               - Save: workers/containerlab/services_containerlab_service_tasks_save.md
               - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
               - Inspect: workers/containerlab/services_containerlab_service_tasks_inspect.md
-              - Nornir Inventory: workers/containerlab/services_containerlab_service_tasks_nornir_inventory.md
+              - Get Nornir Inventory: workers/containerlab/services_containerlab_service_tasks_nornir_inventory.md
         - Nornir Service: 
             - Overview: workers/nornir/services_nornir_service.md
             - Inventory: workers/nornir/services_nornir_service_inventory.md
@@ -126,7 +126,7 @@ nav:
             - Inventory: workers/agent/services_agent_service_inventory.md
             - Tasks:
               - Chat: workers/agent/services_agent_service_tasks_chat.md
-        - FastAPI REST API Service:
+        - REST API Service:
             - Overview: workers/fastapi/services_fastapi_service.md
             - Inventory: workers/fastapi/services_fastapi_service_inventory.md
             - Tasks:
