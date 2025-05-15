@@ -2,6 +2,7 @@ import pynetbox
 import re
 import logging
 import requests
+import traceback
 
 logging.basicConfig(
     level=logging.INFO,
@@ -1787,32 +1788,69 @@ def create_circuits():
             if NB_VERSION < 3.5:
                 _ = circuit.pop("provider_account")
             circuit = nb.circuits.circuits.create(**item)
-            # add termination A
-            if termination_a and "provider_network" in termination_a:
-                cterm_a = nb.circuits.circuit_terminations.create(
-                    circuit=circuit.id,
-                    term_side="A",
-                    provider_network={"name": termination_a["provider_network"]},
-                )
-            elif termination_a:
-                cterm_a = nb.circuits.circuit_terminations.create(
-                    circuit=circuit.id,
-                    term_side="A",
-                    site={"slug": slugify(termination_a["site"])},
-                )
-            # add termination B
-            if termination_b and "provider_network" in termination_b:
-                cterm_z = nb.circuits.circuit_terminations.create(
-                    circuit=circuit.id,
-                    term_side="Z",
-                    provider_network={"name": termination_b["provider_network"]},
-                )
-            elif termination_b:
-                cterm_z = nb.circuits.circuit_terminations.create(
-                    circuit=circuit.id,
-                    term_side="Z",
-                    site={"slug": slugify(termination_b["site"])},
-                )
+            # add terminations
+            if NB_VERSION >=4.2:
+                # add termination A
+                if termination_a and "provider_network" in termination_a:
+                    nb_provider_network_a = nb.circuits.provider_networks.get(name=termination_a["provider_network"])
+                    cterm_a = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="A",
+                        termination_type="circuits.providernetwork",
+                        termination_id=nb_provider_network_a.id,
+                    )
+                elif termination_a:
+                    nb_site_a = nb.dcim.sites.get(slug=slugify(termination_a["site"]))
+                    cterm_a = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="A",
+                        termination_type="dcim.site",
+                        termination_id=nb_site_a.id,
+                    )
+                # add termination B
+                if termination_b and "provider_network" in termination_b:
+                    nb_provider_network_b = nb.circuits.provider_networks.get(name=termination_b["provider_network"])
+                    cterm_z = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="Z",
+                        termination_type="circuits.providernetwork",
+                        termination_id=nb_provider_network_b.id,
+                    )
+                elif termination_b:
+                    nb_site_b = nb.dcim.sites.get(slug=slugify(termination_b["site"]))
+                    cterm_z = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="Z",
+                        termination_type="dcim.site",
+                        termination_id=nb_site_b.id,
+                    )
+            else:
+                # add termination A
+                if termination_a and "provider_network" in termination_a:
+                    cterm_a = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="A",
+                        provider_network={"name": termination_a["provider_network"]},
+                    )
+                elif termination_a:
+                    cterm_a = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="A",
+                        site={"slug": slugify(termination_a["site"])},
+                    )
+                # add termination B
+                if termination_b and "provider_network" in termination_b:
+                    cterm_z = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="Z",
+                        provider_network={"name": termination_b["provider_network"]},
+                    )
+                elif termination_b:
+                    cterm_z = nb.circuits.circuit_terminations.create(
+                        circuit=circuit.id,
+                        term_side="Z",
+                        site={"slug": slugify(termination_b["site"])},
+                    )
             # add cable A
             if termination_a and "provider_network" not in termination_a:
                 cable_a = termination_a.pop("cable", None)
@@ -2284,6 +2322,7 @@ if __name__ == "__main__":
         globals()["nb"] = nb
         NB_VERSION = float(".".join(nb.version.split(".")[:2]))
         globals()["NB_VERSION"] = NB_VERSION
+        print(f"Populating Netbox with data, Netbox version: {NB_VERSION}")
     except Exception as e:
         log.exception(
             f"netbox_data failed to instantiate pynetbox.api object, "

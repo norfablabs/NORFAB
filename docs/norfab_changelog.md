@@ -9,6 +9,7 @@
 2. Added broker `zmq_auth` inventory parameter to turn zero mq authentication and encryption off
 3. Added `verbose-result` command line argument to relevant tasks to emit result details
 4. Updated to CLI shells to support PICLE 0.9.0
+5. Enhanced Netbox service to support working with instances of Netbox of different major and minor releases
 
 ### BUGS
 
@@ -18,6 +19,7 @@
 
 1. Improved worker jinja2 templates rendering logic to allow render url first and next download its content
 2. Added `nornir refresh` CLI command to refresh Nornir workers instances and reload inventory
+3. Added support for Netbox 4.2
 
 ## 0.7.0
 

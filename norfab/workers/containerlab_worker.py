@@ -162,7 +162,12 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     def run_containerlab_command(
-        self, args: list, cwd: str = None, timeout: int = None, ret: Result = None
+        self,
+        args: list,
+        cwd: str = None,
+        timeout: int = 600,
+        ret: Result = None,
+        env: dict = None,
     ) -> Tuple:
         """
         Executes a containerlab command using subprocess and processes its output.
@@ -172,6 +177,7 @@ class ContainerlabWorker(NFPWorker):
             cwd (str, optional): The working directory to execute the command in. Defaults to None.
             timeout (int, optional): The timeout for the command execution in seconds. Defaults to None.
             ret (Result, optional): An optional Norfab result object to populate with the command's output. Defaults to None.
+            env (dict, Optional): OS Environment variables ti use when running the process
 
         Returns:
             Tuple: If `ret` is None, returns a tuple containing:
@@ -194,9 +200,16 @@ class ContainerlabWorker(NFPWorker):
         """
         output, logs = "", []
         begin = time.time()
+        timeout = timeout or 600
+        env = env or dict(os.environ)
 
         with subprocess.Popen(
-            args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            args,
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=env,
         ) as proc:
             while proc.poll() is None:
                 if time.time() - begin > timeout:
@@ -225,7 +238,7 @@ class ContainerlabWorker(NFPWorker):
             except Exception as e:
                 ret.result = output
                 log.error(
-                    f"{self.name} - failed to load containerlab results into JSON, error: {e}"
+                    f"{self.name} - failed to load containerlab results into JSON, error: {e}, result: {output}"
                 )
             # check if command failed
             if proc.returncode != 0:
@@ -304,9 +317,13 @@ class ContainerlabWorker(NFPWorker):
             args.append("--node-filter")
             args.append(node_filter)
 
+        # add needed env variables
+        env = dict(os.environ)
+        env["CLAB_VERSION_CHECK"] = "disable"
+
         # run containerlab command
         return self.run_containerlab_command(
-            args, cwd=topology_folder, timeout=timeout, ret=ret
+            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env
         )
 
     def destroy_lab(self, lab_name: str, timeout: int = None) -> Result:
@@ -452,6 +469,10 @@ class ContainerlabWorker(NFPWorker):
             topology_file = inspect.result[0]["Labels"]["clab-topo-file"]
             topology_folder = os.path.split(topology_file)[0]
 
+            # add needed env variables
+            env = dict(os.environ)
+            env["CLAB_VERSION_CHECK"] = "disable"
+
             # run destroy command
             args = [
                 "containerlab",
@@ -463,7 +484,7 @@ class ContainerlabWorker(NFPWorker):
                 "--reconfigure",
             ]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret
+                args, cwd=topology_folder, timeout=timeout, ret=ret, env=env
             )
 
             if not ret.failed:

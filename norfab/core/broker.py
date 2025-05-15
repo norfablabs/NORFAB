@@ -499,7 +499,9 @@ class NFPBroker:
         elif not worker.is_ready():
             self.delete_worker(worker, disconnect=True)
         else:
-            log.error(f"NFPBroker - invalid message: {msg}")
+            log.error(
+                f"NFPBroker - invalid message: {msg}, command: {command}, sender: {sender}"
+            )
 
     def require_worker(self, address):
         """

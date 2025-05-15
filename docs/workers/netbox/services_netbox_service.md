@@ -5,13 +5,21 @@ tags:
 
 # Netbox Service
 
-The Netbox Service allows NorFab to integrate with [Netbox](https://github.com/netbox-community/netbox) - a well-adopted open-source tool for documenting networks. This integration provides network engineers and administrators with powerful capabilities to manage and automate their network infrastructure using the rich data stored in Netbox.
+The Netbox Service allows NorFab to integrate with [Netbox](https://github.com/netbox-community/netbox) - an open-source tool for documenting networks. This integration provides network engineers and administrators with powerful capabilities to manage and automate their network infrastructure using the rich data stored in Netbox.
 
 ![Nornir Service Architecture](../../images/Netbox_Service.jpg)
 
 ## Overview
 
 Netbox is a comprehensive network documentation and management tool that includes features for IP address management (IPAM), data center infrastructure management (DCIM), and more. By integrating Netbox with NorFab, you can leverage the detailed network data stored in Netbox to automate various network tasks, ensuring consistency and accuracy across your network operations.
+
+## Netbox Compatibility
+
+NorFab supports these versions of Netbox:
+
+1. Netbox 3.6.x
+2. Netbox 4.0.x, 4.1.x
+3. Netbox 4.2.x starting with Norfab 0.8.0
 
 ## NorFab Netbox Service Key Features
 

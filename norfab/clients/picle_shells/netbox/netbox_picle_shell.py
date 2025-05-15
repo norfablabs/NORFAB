@@ -29,6 +29,7 @@ from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_get_circuits import GetCircuits
 from .netbox_picle_shell_update_device import UpdateDeviceCommands
+from .netbox_picle_shell_get_connections import GetConnections
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"
@@ -225,6 +226,9 @@ class GetCommands(BaseModel):
     )
     circuits: GetCircuits = Field(
         None, description="Query Netbox circuits data for devices"
+    )
+    connections: GetConnections = Field(
+        None, description="Query Netbox connections data for devices"
     )
 
     class PicleConfig:

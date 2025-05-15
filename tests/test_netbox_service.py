@@ -7,12 +7,15 @@ cache_options = [True, False, "refresh", "force"]
 
 def get_nb_version(nfclient, instance=None) -> tuple:
     ret = nfclient.run_job(
-        b"netbox", "get_netbox_status", workers="any", kwargs={"instance": instance}
+        b"netbox", "get_version", workers="any"
     )
-    # pprint.pprint(f">>>>>>>>>>>> {ret}")
-    for w, instances_data in ret.items():
-        for instance, instance_data in instances_data["result"].items():
-            return tuple([int(i) for i in instance_data["netbox-version"].split(".")])
+    pprint.pprint(f"Netbox Version {ret}")
+    for w, r in ret.items():
+        if instance is None:
+            for instance_name, instance_version in r["result"]["netbox_version"].items():
+                return tuple(instance_version)
+        else:
+            return tuple(r["result"]["netbox_version"][instance])
 
 
 class TestNetboxWorker:
@@ -470,6 +473,8 @@ class TestGetInterfaces:
     nb_version = None
 
     def test_get_interfaces(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
         ret = nfclient.run_job(
             b"netbox",
             "get_interfaces",
@@ -493,7 +498,6 @@ class TestGetInterfaces:
                             "description",
                             "mtu",
                             "parent",
-                            "mac_address",
                             "mode",
                             "untagged_vlan",
                             "vrf",
@@ -510,8 +514,14 @@ class TestGetInterfaces:
                             "speed",
                         ]
                     ), f"{worker}:{device}:{intf_name} not all data returned"
+                    if self.nb_version >= (4,2,0):
+                        assert "mac_addresses" in intf_data
+                    else:
+                        assert "mac_address" in intf_data
 
     def test_get_interfaces_with_instance(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
         ret = nfclient.run_job(
             b"netbox",
             "get_interfaces",
@@ -535,7 +545,6 @@ class TestGetInterfaces:
                             "description",
                             "mtu",
                             "parent",
-                            "mac_address",
                             "mode",
                             "untagged_vlan",
                             "vrf",
@@ -552,6 +561,10 @@ class TestGetInterfaces:
                             "speed",
                         ]
                     ), f"{worker}:{device}:{intf_name} not all data returned"
+                    if self.nb_version >= (4,2,0):
+                        assert "mac_addresses" in intf_data
+                    else:
+                        assert "mac_address" in intf_data
 
     def test_get_interfaces_dry_run(self, nfclient):
         if self.nb_version is None:
@@ -565,23 +578,32 @@ class TestGetInterfaces:
         )
         pprint.pprint(ret)
 
-        if self.nb_version[0] == 4:
+        if self.nb_version[0] == 4 and self.nb_version[1] == 2:
             for worker, res in ret.items():
                 assert res["result"]["data"] == (
                     '{"query": "query {interfaces: interface_list(filters: {device: [\\"ceos1\\", '
-                    + '\\"fceos4\\"]}) {name enabled description mtu parent {name} mac_address mode '
+                    + '\\"fceos4\\"]}) {name enabled description mtu parent {name} mode '
                     + "untagged_vlan {vid name} vrf {name} tagged_vlans {vid name} tags {name} "
                     + "custom_fields last_updated bridge {name} child_interfaces {name} bridge_interfaces "
-                    + '{name} member_interfaces {name} wwn duplex speed id device {name}}}"}'
+                    + '{name} member_interfaces {name} wwn duplex speed id device {name} mac_addresses {mac_address}}}"}'
+                ), f"{worker} did not return correct query string"
+        elif self.nb_version[0] == 4:
+            for worker, res in ret.items():
+                assert res["result"]["data"] == (
+                    '{"query": "query {interfaces: interface_list(filters: {device: [\\"ceos1\\", '
+                    + '\\"fceos4\\"]}) {name enabled description mtu parent {name} mode '
+                    + "untagged_vlan {vid name} vrf {name} tagged_vlans {vid name} tags {name} "
+                    + "custom_fields last_updated bridge {name} child_interfaces {name} bridge_interfaces "
+                    + '{name} member_interfaces {name} wwn duplex speed id device {name} mac_address}}"}'
                 ), f"{worker} did not return correct query string"
         elif self.nb_version[0] == 3:
             for worker, res in ret.items():
                 assert res["result"]["data"] == (
                     '{"query": "query {interfaces: interface_list(device: [\\"ceos1\\", \\"fceos4\\"]) '
-                    + "{name enabled description mtu parent {name} mac_address mode untagged_vlan {vid name} "
+                    + "{name enabled description mtu parent {name} mode untagged_vlan {vid name} "
                     + "vrf {name} tagged_vlans {vid name} tags {name} custom_fields last_updated bridge "
                     + "{name} child_interfaces {name} bridge_interfaces {name} member_interfaces {name} wwn "
-                    + 'duplex speed id device {name}}}"}'
+                    + 'duplex speed id device {name} mac_address}}"}'
                 ), f"{worker} did not return correct query string"
 
     def test_get_interfaces_add_ip(self, nfclient):
@@ -1399,9 +1421,29 @@ class TestUpdateDeviceFacts:
 
 
 class TestUpdateDeviceInterfaces:
-    @pytest.mark.skip(reason="TBD")
     def test_update_device_interfaces(self, nfclient):
-        pass
+        ret = nfclient.run_job(
+            "netbox",
+            "update_device_interfaces",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "devices": ["ceos-spine-1", "ceos-spine-2"],
+            },
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert device_data["update_device_interfaces"], f"{worker}:{device} no interfaces updated"
+
 
     @pytest.mark.skip(reason="TBD")
     def test_update_device_interfaces_non_exisintg_device(self, nfclient):

@@ -7,6 +7,7 @@ import copy
 import os
 import concurrent.futures
 import pynetbox
+import ipaddress
 
 from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
@@ -115,7 +116,7 @@ class NetboxWorker(NFPWorker):
 
     default_instance = None
     inventory = None
-    nb_version = None
+    nb_version = {}  # dict keyed by instance name and version
     compatible_ge_v3 = (
         3,
         6,
@@ -222,6 +223,7 @@ class NetboxWorker(NFPWorker):
             "requests": "",
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
+            "netbox_version": self.nb_version,
         }
         # get version of packages installed
         for pkg in libs.keys():
@@ -276,13 +278,28 @@ class NetboxWorker(NFPWorker):
                 log.warning(f"{self.name} - {instance} Netbox instance not reachable")
                 ret.result[instance] = None
             else:
-                self.nb_version = tuple(
-                    [int(i) for i in params["netbox-version"].split(".")]
-                )
-                if self.nb_version[0] == 3:  # check Netbox 3 compatibility
-                    ret.result[instance] = self.nb_version >= self.compatible_ge_v3
-                elif self.nb_version[0] == 4:  # check Netbox 4 compatibility
-                    ret.result[instance] = self.nb_version >= self.compatible_ge_v4
+                if "-docker-" in params["netbox-version"].lower():
+                    self.nb_version[instance] = tuple(
+                        [
+                            int(i)
+                            for i in params["netbox-version"]
+                            .lower()
+                            .split("-docker-")[0]
+                            .split(".")
+                        ]
+                    )
+                else:
+                    self.nb_version[instance] = tuple(
+                        [int(i) for i in params["netbox-version"].split(".")]
+                    )
+                if self.nb_version[instance][0] == 3:  # check Netbox 3 compatibility
+                    ret.result[instance] = (
+                        self.nb_version[instance] >= self.compatible_ge_v3
+                    )
+                elif self.nb_version[instance][0] == 4:  # check Netbox 4 compatibility
+                    ret.result[instance] = (
+                        self.nb_version[instance] >= self.compatible_ge_v4
+                    )
 
         return ret
 
@@ -563,22 +580,23 @@ class NetboxWorker(NFPWorker):
         """
         nb_params = self._get_instance_params(instance)
         ret = Result(task=f"{self.name}:graphql")
+        instance = instance or self.default_instance
 
         # form graphql query(ies) payload
         if queries:
             queries_list = []
             for alias, query_data in queries.items():
                 query_data["alias"] = alias
-                if self.nb_version[0] == 4:
+                if self.nb_version[instance][0] == 4:
                     queries_list.append(_form_query_v4(**query_data))
-                elif self.nb_version[0] == 3:
+                elif self.nb_version[instance][0] == 3:
                     queries_list.append(_form_query_v3(**query_data))
             queries_strings = "    ".join(queries_list)
             query = f"query {{{queries_strings}}}"
         elif obj and filters and fields:
-            if self.nb_version[0] == 4:
+            if self.nb_version[instance][0] == 4:
                 query = _form_query_v4(obj, filters, fields)
-            elif self.nb_version[0] == 3:
+            elif self.nb_version[instance][0] == 3:
                 query = _form_query_v3(obj, filters, fields)
             query = f"query {{{query}}}"
         elif query_string:
@@ -755,10 +773,10 @@ class NetboxWorker(NFPWorker):
                             devices.remove(device_name)
                             ret.result[device_name] = self.cache[device_cache_key]
                 # query netbox last updated data for devices
-                if self.nb_version[0] == 4:
+                if self.nb_version[instance][0] == 4:
                     dlist = '["{dl}"]'.format(dl='", "'.join(devices))
                     filters_dict = {"name": f"{{in_list: {dlist}}}"}
-                elif self.nb_version[0] == 3:
+                elif self.nb_version[instance][0] == 3:
                     filters_dict = {"name": devices}
                 last_updated_query["devices_by_devices_list"] = {
                     "obj": "device_list",
@@ -807,10 +825,10 @@ class NetboxWorker(NFPWorker):
         # fetch devices data from Netbox
         if devices or queries:
             if devices:
-                if self.nb_version[0] == 4:
+                if self.nb_version[instance][0] == 4:
                     dlist = '["{dl}"]'.format(dl='", "'.join(devices))
                     filters_dict = {"name": f"{{in_list: {dlist}}}"}
-                elif self.nb_version[0] == 3:
+                elif self.nb_version[instance][0] == 3:
                     filters_dict = {"name": devices}
                 queries["devices_by_devices_list"] = {
                     "obj": "device_list",
@@ -855,6 +873,7 @@ class NetboxWorker(NFPWorker):
         ip_addresses: bool = False,
         inventory_items: bool = False,
         dry_run: bool = False,
+        cache: Union[bool, str] = None,
     ) -> dict:
         """
         Retrieve device interfaces from Netbox using GraphQL API.
@@ -876,13 +895,14 @@ class NetboxWorker(NFPWorker):
         ret = Result(
             task=f"{self.name}:get_interfaces", result={d: {} for d in devices}
         )
+        instance = instance or self.default_instance
+
         intf_fields = [
             "name",
             "enabled",
             "description",
             "mtu",
             "parent {name}",
-            "mac_address",
             "mode",
             "untagged_vlan {vid name}",
             "vrf {name}",
@@ -900,6 +920,10 @@ class NetboxWorker(NFPWorker):
             "id",
             "device {name}",
         ]
+        if self.nb_version[instance] >= (4, 2, 0):
+            intf_fields.append("mac_addresses {mac_address}")
+        else:
+            intf_fields.append("mac_address")
 
         # add IP addresses to interfaces fields
         if ip_addresses:
@@ -947,7 +971,7 @@ class NetboxWorker(NFPWorker):
         interfaces_data = query_result.result
 
         # exit if no Interfaces returned
-        if not interfaces_data.get("interfaces"):
+        if interfaces_data is None or not interfaces_data.get("interfaces"):
             raise Exception(
                 f"{self.name} - no interfaces data in '{interfaces_data}' returned by '{instance}' "
                 f"for devices {', '.join(devices)}"
@@ -990,6 +1014,7 @@ class NetboxWorker(NFPWorker):
         instance: str = None,
         dry_run: bool = False,
         cables: bool = False,
+        cache: Union[bool, str] = None,
     ) -> dict:
         """
         Retrieve interface connection details for specified devices from Netbox.
@@ -1001,7 +1026,30 @@ class NetboxWorker(NFPWorker):
             cables (bool, optional): if True includes interfaces' directly attached cables details
 
         Returns:
-            dict: A dictionary containing connection details for each device.
+            dict: A dictionary containing connection details for each device:
+
+                ```
+                {
+                    "netbox-worker-1.2": {
+                        "r1": {
+                            "Console": {
+                                "breakout": false,
+                                "remote_device": "termserv1",
+                                "remote_interface": "ConsoleServerPort1",
+                                "remote_termination_type": "consoleserverport",
+                                "termination_type": "consoleport"
+                            },
+                            "eth1": {
+                                "breakout": false,
+                                "remote_device": "r2",
+                                "remote_interface": "eth8",
+                                "remote_termination_type": "interface",
+                                "termination_type": "interface"
+                            }
+                        }
+                    }
+                }
+                ```
 
         Raises:
             Exception: If there is an error in the GraphQL query or data retrieval process.
@@ -1010,6 +1058,7 @@ class NetboxWorker(NFPWorker):
         ret = Result(
             task=f"{self.name}:get_connections", result={d: {} for d in devices}
         )
+        instance = instance or self.default_instance
 
         # form lists of fields to request from netbox
         cable_fields = """
@@ -1024,7 +1073,7 @@ class NetboxWorker(NFPWorker):
                 custom_fields
             }
         """
-        if self.nb_version[0] == 4:
+        if self.nb_version[instance][0] == 4:
             interfaces_fields = [
                 "name",
                 "device {name}",
@@ -1034,7 +1083,7 @@ class NetboxWorker(NFPWorker):
                 ... on ProviderNetworkType {name}
                 }""",
             ]
-        elif self.nb_version[0] == 3:
+        elif self.nb_version[instance][0] == 3:
             interfaces_fields = [
                 "name",
                 "device {name}",
@@ -1319,6 +1368,7 @@ class NetboxWorker(NFPWorker):
 
         # form final result object
         ret = Result(task=f"{self.name}:get_circuits", result={d: {} for d in devices})
+        instance = instance or self.default_instance
         cache = self.cache_use if cache is None else cache
         cid = cid or []
         circuit_fields = [
@@ -1344,12 +1394,12 @@ class NetboxWorker(NFPWorker):
             devices=copy.deepcopy(devices), instance=instance, cache=cache
         )
         sites = list(set([i["site"]["slug"] for i in device_data.result.values()]))
-        if self.nb_version[0] == 4:
+        if self.nb_version[instance][0] == 4:
             circuits_filters_dict = {"site": sites}
             if cid:
                 cid_list = '["{cl}"]'.format(cl='", "'.join(cid))
                 circuits_filters_dict["cid"] = f"{{in_list: {cid_list}}}"
-        elif self.nb_version[0] == 3:
+        elif self.nb_version[instance][0] == 3:
             circuits_filters_dict = {"site": sites}
             if cid:
                 cid_list = '["{cl}"]'.format(cl='", "'.join(cid))
@@ -1429,9 +1479,9 @@ class NetboxWorker(NFPWorker):
             circuits_filters_dict = {}
             if cid_list:
                 cid_list = '["{cl}"]'.format(cl='", "'.join(cid_list))
-                if self.nb_version[0] == 4:
+                if self.nb_version[instance][0] == 4:
                     circuits_filters_dict["cid"] = f"{{in_list: {cid_list}}}"
-                elif self.nb_version[0] == 3:
+                elif self.nb_version[instance][0] == 3:
                     circuits_filters_dict["cid"] = cid_list
         # ignore cache data, fetch circuits from netbox
         elif cache == False or cache == "refresh":
@@ -1790,8 +1840,44 @@ class NetboxWorker(NFPWorker):
                                     nb_interface.mtu = interface["mtu"]
                                 if interface["speed"] > 0:
                                     nb_interface.speed = interface["speed"] * 1000
-                                if interface["mac_address"] not in ["None"]:
-                                    nb_interface.mac_address = interface["mac_address"]
+                                if interface["mac_address"].strip().lower() not in [
+                                    "none",
+                                    "",
+                                ]:
+                                    if self.nb_version[instance] >= (4, 2, 0):
+                                        try:
+                                            nb_mac_addr = nb.dcim.mac_addresses.get(
+                                                mac_address=interface["mac_address"]
+                                            )
+                                        except Exception as e:
+                                            msg = f"{worker} failed to get {interface['mac_address']} mac-address from netbox: {e}"
+                                            self.event(msg, severity="WARNING")
+                                            ret.messages.append(msg)
+                                            log.error(msg)
+                                        else:
+                                            if not nb_mac_addr:
+                                                nb_mac_addr = nb.dcim.mac_addresses.create(
+                                                    mac_address=interface[
+                                                        "mac_address"
+                                                    ],
+                                                    assigned_object_type="dcim.interface",
+                                                    assigned_object_id=nb_interface.id,
+                                                )
+                                            elif not nb_mac_addr.assigned_object_id:
+                                                nb_mac_addr.assigned_object_type = (
+                                                    "dcim.interface"
+                                                )
+                                                nb_mac_addr.assigned_object_id = (
+                                                    nb_interface.id
+                                                )
+                                            if not nb_interface.primary_mac_address:
+                                                nb_interface.primary_mac_address = (
+                                                    nb_mac_addr.id
+                                                )
+                                    else:
+                                        nb_interface.mac_address = interface[
+                                            "mac_address"
+                                        ]
                                 nb_interface.enabled = interface["is_enabled"]
                                 nb_interface.save()
                             updated[nb_interface.name] = interface
@@ -2008,3 +2094,94 @@ class NetboxWorker(NFPWorker):
         nb_ip.save()
 
         return Result(result=str(nb_ip))
+
+    def get_containerlab_inventory(
+        self,
+        lab_name: str,
+        filters: list = None,
+        devices: list = None,
+        instance: str = None,
+        ipv4_subnet: str = "172.100.100.0/24",
+        ports: tuple = (12000, 13000),
+    ) -> dict:
+        """
+        Retrieve and construct Containerlab inventory from NetBox data.
+
+        Args:
+            lab_name (str, Mandatory): Name of containerlab to construct inventory for.
+            filters (list, optional): List of filters to apply when retrieving devices from NetBox.
+            devices (list, optional): List of specific devices to retrieve from NetBox.
+            instance (str, optional): NetBox instance to use.
+            ipv4_subnet (str, Optional): Mangement subnet to use to IP number nodes.
+            ports (tuple, Optional): Ports range to use for nodes.
+
+        Returns:
+            dict: Containerlab inventory dictionary containing hosts and their respective data.
+        """
+        nodes = {}
+        links = {}
+        inventory = {
+            "name": lab_name,
+            "topology": {"nodes": nodes, "links": links},
+            "mgmt": {"ipv4-subnet": ipv4_subnet, "network": f"br-{lab_name}"},
+        }
+        ret = Result(task=f"{self.name}:get_containerlab_inventory", result=inventory)
+        mgmt_net = ipaddress.ip_network(ipv4_subnet)
+        available_ips = list(mgmt_net.hosts())[3:]
+        if ports:
+            ports = list(range(ports[0], ports[1]))
+
+        # check Netbox status
+        netbox_status = self.get_netbox_status(instance=instance)
+        if netbox_status.result[instance or self.default_instance]["status"] is False:
+            ret.failed = True
+            ret.messages = [f"Netbox status is no good: {netbox_status}"]
+            return ret
+
+        # retrieve devices data
+        nb_devices = self.get_devices(
+            filters=filters, devices=devices, instance=instance
+        )
+
+        # form Containerlab nodes inventory
+        for device_name, device in nb_devices.result.items():
+            node = device["config_context"].get("norfab", {}).get("containerlab", {})
+            # run checks
+            if not node.get("kind"):
+                log.error(f"{device_name} - has no 'kind' defined, skipping")
+                continue
+            if not node.get("image"):
+                log.error(f"{device_name} - has no 'image' defined, skipping")
+                continue
+            # add mising parameters
+            if not node.get("mgmt-ipv4"):
+                node["mgmt-ipv4"] = f"{available_ips.pop(0)}/{mgmt_net.prefixlen}"
+            if not node.get("ports"):
+                for port in [22, 80, 830, 443, 8080, 161]:
+                    node["ports"].append({ports.pop(0): port})
+            # save node content
+            nodes[device_name] = node
+
+        # return if no nodes found for provided parameters
+        if not nodes:
+            msg = f"{self.name} - no viable nodes returned by Netbox"
+            log.error(msg)
+            ret.failed = True
+            ret.messages = [msg]
+            return ret
+
+        # query interface connections data from netbox
+        nb_connections = self.get_connections(devices=list(nodes), instance=instance)
+        # save connections data to links inventory
+        while nb_connections.result:
+            device, device_connections = nb_connections.result.popitem()
+            hosts[device]["data"]["connections"] = device_connections
+
+        # query circuits connections data from netbox
+        nb_circuits = self.get_circuits(devices=list(nodes), instance=instance)
+        # save circuits data to hosts' inventory
+        while nb_circuits.result:
+            device, device_circuits = nb_circuits.result.popitem()
+            hosts[device]["data"]["circuits"] = device_circuits
+
+        return ret
