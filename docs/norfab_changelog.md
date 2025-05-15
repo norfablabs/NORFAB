@@ -20,6 +20,7 @@
 1. Improved worker jinja2 templates rendering logic to allow render url first and next download its content
 2. Added `nornir refresh` CLI command to refresh Nornir workers instances and reload inventory
 3. Added support for Netbox 4.2
+4. Added support for Nornir service to pull hosts inventory from Containerlab service
 
 ## 0.7.0
 
