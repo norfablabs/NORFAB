@@ -23,6 +23,10 @@ Below is an example of how to use the Containerlab `get_nornir_inventory` task t
 
 !!! example
 
+    === "Demo"
+
+        ![Containerlab Nornir Inventory Demo](../../images/containerlab/containerlab_nornir_inventory_demo.gif)
+
     === "CLI"
 
         ```

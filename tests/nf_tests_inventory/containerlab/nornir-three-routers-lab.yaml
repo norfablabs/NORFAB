@@ -1,0 +1,23 @@
+containerlab-worker-1:
+  hosts:
+    r1:
+      groups: []
+      hostname: 192.168.1.130
+      password: admin
+      platform: arista_eos
+      port: 12202
+      username: admin
+    r2:
+      groups: []
+      hostname: 192.168.1.130
+      password: admin
+      platform: arista_eos
+      port: 12203
+      username: admin
+    r3:
+      groups: []
+      hostname: 192.168.1.130
+      password: admin
+      platform: arista_eos
+      port: 12204
+      username: admin

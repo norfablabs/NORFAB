@@ -12,9 +12,9 @@ Containerlab Service is based on [Containerlab](https://containerlab.dev/) - an 
 Each Containerlab worker can manage multiple labs concurrently, offering scalability for complex network environments. By leveraging Containerlab, users can:
 
 - Deploy network topologies using YAML-based configuration files.
-- Inspect and monitor the status of running labs.
+- Inspect and monitor the status of running container labs.
 - Save and restore lab configurations.
-- Integrate with network automation tools like Nornir.
+- Integrate with Nornir Service for automations testing.
 
 ## Supported Containerlab Versions
 
@@ -32,6 +32,32 @@ The Containerlab Service supports the following tasks:
 | **[save](services_containerlab_service_tasks_save.md)**      | Saves the configuration of a specified lab. | Backing up lab configurations. |
 | **[restart_lab](services_containerlab_service_tasks_restart.md)** | Restarts a specified lab. | Reinitializing lab environments. |
 | **[get_nornir_inventory](services_containerlab_service_tasks_nornir_inventory.md)** | Retrieves the Nornir inventory for a specified lab. | Generating inventory for network automation tools. |
+
+!!! Demos
+
+    === "Deploy"
+
+        ![Containerlab Deploy Demo](../../images/containerlab/containerlab_deploy_demo.gif)
+
+    === "Destroy"
+
+        ![Containerlab Destroy Demo](../../images/containerlab/containerlab_destroy_demo.gif)
+
+    === "Inspect"
+
+        ![Containerlab Inspect Demo](../../images/containerlab/containerlab_inspect_demo.gif)
+
+    === "Save"
+
+        ![Containerlab Save Demo](../../images/containerlab/containerlab_save_demo.gif)
+
+    === "Restart"
+
+        ![Containerlab Restart Demo](../../images/containerlab/containerlab_restart_demo.gif) 
+
+    === "Nornir Inventory"
+
+        ![Containerlab Nornir Inventory Demo](../../images/containerlab/containerlab_nornir_inventory_demo.gif) 
 
 ## Containerlab Service Show Commands
 
@@ -96,3 +122,4 @@ The Containerlab Service is ideal for the following scenarios:
     - Integrate with CI/CD pipelines to validate network changes automatically.
     - Use the `deploy` and `destroy_lab` tasks to spin up and tear down test environments dynamically.
 
+:heart: **Happy CLABing !!** :heart:

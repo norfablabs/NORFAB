@@ -22,6 +22,10 @@ Below is an example of how to use the Containerlab destroy task to clean up a la
 
 !!! example
 
+    === "Demo"
+
+        ![Containerlab Destroy Demo](../../images/containerlab/containerlab_destroy_demo.gif)
+
     === "CLI"
 
         ```

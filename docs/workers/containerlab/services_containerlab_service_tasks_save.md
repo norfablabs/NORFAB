@@ -22,6 +22,10 @@ Below is an example of how to use the Containerlab save task to back up a lab's 
 
 !!! example
 
+    === "Demo"
+
+        ![Containerlab Save Demo](../../images/containerlab/containerlab_save_demo.gif)
+
     === "CLI"
 
         ```

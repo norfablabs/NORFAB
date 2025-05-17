@@ -25,6 +25,7 @@ Norfab provides a range of network automation services that enable you to manage
 - **Nornir Service**: Based on the Nornir library, this service allows you to automate network device operations using popular libraries like Netmiko, NAPALM, and Scrapli. It supports tasks such as configuration management, device diagnostics, and network monitoring.
 - **Workflow Service**: Enables users to define workflows as YAML files, where each workflow consists of multiple steps. It supports conditional execution, error handling, and integration with other Norfab services, making it ideal for automating complex processes.
 - **Agent Service**: Leverages AI-based agents to enhance network automation and management. These agents can perform tasks such as configuration compliance checks, fault detection, and performance optimization.
+- **Containerlab Service**: Integrates with Containerlab tool to manage containerized network topologies for troubleshooting and testing network automations or (c)labbing.
 
 ### Data Management Services
 

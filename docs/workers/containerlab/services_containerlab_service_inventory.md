@@ -16,6 +16,13 @@ topology:
     - containerlab-worker-1
 ```
 
+To obtain broker `shared_key` run this command on broker:
+
+```
+cd <path/to/broker/inventory.yaml>
+nfcli --show-broker-shared-key
+```
+
 Sample Containerlab worker inventory file content:
 
 ``` yaml title="containerlab/containerlab-worker-1.yaml"

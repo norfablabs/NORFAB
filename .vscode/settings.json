@@ -4,6 +4,7 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "terminal.integrated.fontSize": 17,
     "cSpell.words": [
         "ceos",
         "conlist",

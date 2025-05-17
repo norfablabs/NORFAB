@@ -11,7 +11,7 @@ The Containerlab service `restart_lab` task is designed to restart a specified l
 
 !!! warning
   
-    Invoking restart task involves calling Containerlab deploy command with `--reconfigure` flag. Any non saved state will be lost.
+    Restart task calls Containerlab deploy command with `--reconfigure` flag. Any non saved state will be lost. Use [save task](./services_containerlab_service_tasks_save.md) to save configuration as needed.
 
 ## Containerlab Restart Task Overview
 
@@ -25,6 +25,10 @@ The `restart_lab` task provides the following features:
 Below is an example of how to use the Containerlab restart task to restart a lab.
 
 !!! example
+
+    === "Demo"
+
+        ![Containerlab Restart Demo](../../images/containerlab/containerlab_restart_demo.gif)
 
     === "CLI"
 

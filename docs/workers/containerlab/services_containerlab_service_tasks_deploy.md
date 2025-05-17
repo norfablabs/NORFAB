@@ -70,6 +70,10 @@ Below is an example of how to use the Containerlab deploy task to deploy a topol
 
 !!! example
 
+    === "Demo"
+
+        ![Containerlab Deploy Demo](../../images/containerlab/containerlab_deploy_demo.gif)
+
     === "CLI"
 
         ```

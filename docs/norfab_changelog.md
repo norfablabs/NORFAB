@@ -22,6 +22,8 @@
 3. Added support for Netbox 4.2
 4. Added support for Nornir service to pull hosts inventory from Containerlab service
 
+---
+
 ## 0.7.0
 
 ### FEATURES
@@ -37,6 +39,7 @@
 5. NFCLI shell - added aliases to use dash instead of underscore
 6. NFCLI shell - Moved Nornir service show commands under `show nornir xyz` path  
 
+---
 
 ## 0.6.0
 

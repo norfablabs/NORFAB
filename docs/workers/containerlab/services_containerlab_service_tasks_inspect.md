@@ -22,6 +22,10 @@ Below is an example of how to use the Containerlab inspect task to inspect a lab
 
 !!! example
 
+    === "Demo"
+
+        ![Containerlab Inspect Demo](../../images/containerlab/containerlab_inspect_demo.gif)
+
     === "CLI"
 
         ```

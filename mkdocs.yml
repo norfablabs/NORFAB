@@ -79,7 +79,6 @@ nav:
     - Why use NORFAB: norfab_why_use_norfab.md
     - Getting Started: norfab_getting_started.md
     - Installation: norfab_installation.md
-    - Help with NORFAB: norfab_help_with_norfab.md
     - Services:
         - Services Overview: services_overview.md
         - Containerlab Service:
@@ -157,6 +156,7 @@ nav:
   - Docker Deployment: norfab_docker_deployment.md
   - Distributed Deployment: norfab_distributed_deployment.md
 - References:
+    - Tags: tags.md
     - NORFAB Inventory: reference_norfab_inventory.md
     - Changelog: norfab_changelog.md
     - API Reference:
@@ -180,4 +180,4 @@ nav:
     - Architecture:
         - NORFAB Architecture: reference_architecture_norfab.md
         - NORFAB Protocol RFC: reference_architecture_nfp.md 
-- Tags: tags.md
+- Contact Us: norfab_help_with_norfab.md
