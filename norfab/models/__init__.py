@@ -22,6 +22,7 @@ class EventSeverityLevels(str, Enum):
     debug = "DEBUG"
     warning = "WARNING"
     critical = "CRITICAL"
+    error = "ERROR"
 
 
 class EventStatusValues(str, Enum):

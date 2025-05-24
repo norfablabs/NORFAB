@@ -879,10 +879,15 @@ class NFPClient(object):
         uuid = uuid or uuid4().hex
         start_time = int(time.time())
         ret = None
+        post_retry = 3
 
         # POST job to workers
-        post_result = self.post(service, task, args, kwargs, workers, uuid, timeout)
-        if post_result["status"] != "200":
+        while post_retry:
+            post_result = self.post(service, task, args, kwargs, workers, uuid, timeout)
+            if post_result["status"] == "200":
+                break
+            post_retry -= 1
+        else:
             log.error(
                 f"{self.name}:run_job - {service}:{task} POST status "
                 f"to '{workers}' workers is not 200 - '{post_result}'"

@@ -156,9 +156,9 @@ nav:
   - Docker Deployment: norfab_docker_deployment.md
   - Distributed Deployment: norfab_distributed_deployment.md
 - References:
-    - Tags: tags.md
     - NORFAB Inventory: reference_norfab_inventory.md
     - Changelog: norfab_changelog.md
+    - Tags: tags.md
     - API Reference:
         - CORE:
           - NFAPI (Python API): api_reference_core_norfab_nfapi.md

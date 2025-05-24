@@ -902,6 +902,19 @@ devices = [
                 "secret3": f"nb://{NB_SECRETS_PLUGIN}/secret3",
                 "secret4": "nb://secret4",
             },
+            "norfab": {
+                "containerlab": {
+                    "image": "ceosimage:4.30.0F",
+                    "interfaces_rename": [
+                        {
+                            "find": "Ethernet",
+                            "replace": "eth",
+                            "use_regex": False
+                        }
+                    ],
+                    "kind": "ceos"
+                }
+            }
         },
     },
     {
@@ -921,6 +934,19 @@ devices = [
                 "port": "6002",
                 "username": f"nb://{NB_SECRETS_PLUGIN}/keymaster-1/SaltNornirCreds/username",
                 "password": f"nb://{NB_SECRETS_PLUGIN}/keymaster-1/SaltNornirCreds/password",
+            },
+            "norfab": {
+                "containerlab": {
+                    "image": "ceosimage:4.30.0F",
+                    "interfaces_rename": [
+                        {
+                            "find": "Ethernet",
+                            "replace": "eth",
+                            "use_regex": False
+                        }
+                    ],
+                    "kind": "ceos"
+                }
             }
         },
     },

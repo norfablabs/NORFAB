@@ -15,6 +15,7 @@ from pydantic import (
 )
 from typing import Union, Optional, List, Any, Dict, Tuple
 from ..common import log_error_or_result, ClientRunJobArgs, listen_events
+from .containerlab_deploy_netbox import DeployNetboxCommand
 
 RICHCONSOLE = Console()
 SERVICE = "containerlab"
@@ -355,7 +356,7 @@ class ContainerlabShowCommandsModel(BaseModel):
         description="show containerlab inventory data",
         json_schema_extra={
             "outputter": Outputters.outputter_yaml,
-            "functions": "get_inventory",
+            "function": "get_inventory",
         },
     )
     version: Any = Field(
@@ -417,6 +418,11 @@ class ContainerlabShowCommandsModel(BaseModel):
 class ContainerlabServiceCommands(BaseModel):
     deploy: DeployCommand = Field(
         None, description="Spins up a lab using provided topology"
+    )
+    deploy_netbox: DeployNetboxCommand = Field(
+        None,
+        description="Spins up a lab using devices data from Netbox",
+        alias="deploy-netbox",
     )
     destroy: DestroyCommand = Field(
         None, description="The destroy command destroys a lab referenced by its name"

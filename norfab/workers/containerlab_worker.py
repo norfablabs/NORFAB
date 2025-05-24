@@ -1,6 +1,5 @@
 import logging
 import sys
-import threading
 import time
 import os
 import signal
@@ -9,6 +8,7 @@ import subprocess
 import yaml
 import json
 import socket
+import ipaddress
 
 from norfab.core.worker import NFPWorker, Task
 from norfab.core.inventory import merge_recursively
@@ -619,3 +619,179 @@ class ContainerlabWorker(NFPWorker):
                     ]
 
         return ret
+
+    def deploy_netbox(
+        self,
+        lab_name: str,
+        filters: list = None,
+        devices: list = None,
+        instance: str = None,
+        image: str = None,
+        ipv4_subnet: str = "172.100.100.0/24",
+        ports: tuple = (12000, 15000),
+        progress: bool = False,
+        reconfigure: bool = False,
+        timeout: int = 600,
+        node_filter: str = None,
+        dry_run: bool = False,
+    ) -> Result:
+        """
+        Deploys a containerlab topology using device data from the Netbox database.
+
+        This method orchestrates the deployment of a containerlab topology by:
+
+        - Inspecting existing containers to determine subnets and ports in use.
+        - Allocating a management IPv4 subnet for the new lab, avoiding conflicts.
+        - Downloading inventory data from Netbox for the specified lab and filters.
+        - Saving the generated topology file to a dedicated folder.
+        - Executing the `containerlab deploy` command with appropriate arguments.
+
+        Args:
+            lab_name (str): The name of the lab to deploy.
+            filters (list, optional): List of filters to apply when fetching devices from Netbox.
+            devices (list, optional): List of specific devices to include in the topology.
+            instance (str, optional): Netbox instance identifier.
+            image (str, optional): Container image to use for devices.
+            ipv4_subnet (str, optional): Management IPv4 subnet for the lab.
+            ports (tuple, optional): Tuple specifying the range of ports to allocate.
+            progress (bool, optional): If True, emits progress events.
+            reconfigure (bool, optional): If True, reconfigures an already deployed lab.
+            timeout (int, optional): Timeout in seconds for the deployment process.
+            node_filter (str, optional): Comma-separated string of nodes to deploy.
+            dry_run (bool, optional): If True, only generates and returns the topology
+                inventory without deploying.
+
+        Returns:
+            Result: deployment results with a list of nodes deployed
+
+        Raises:
+            Exception: If the topology file cannot be fetched.
+        """
+        ret = Result(task=f"{self.name}:deploy_netbox")
+        subnets_in_use = set()
+        ports_in_use = {}
+
+        if progress:
+            self.event(f"Fetching {lab_name} topology data from Netbox")
+
+        # inspect existing containers
+        get_containers = self.inspect(details=True)
+        if get_containers.failed is False:
+            for container in get_containers.result:
+                clab_name = container["Labels"]["containerlab"]
+                clab_topo = container["Labels"]["clab-topo-file"]
+                node_name = container["Labels"]["clab-node-name"]
+                # collect ports that are in use
+                ports_in_use[node_name] = list(
+                    set(
+                        [
+                            f"{p['host_port']}:{p['port']}/{p['protocol']}"
+                            for p in container["Ports"]
+                            if "host_port" in p and "port" in p and "protocol" in p
+                        ]
+                    )
+                )
+                # check existing subnets
+                if (
+                    container["NetworkSettings"]["IPv4addr"]
+                    and container["NetworkSettings"]["IPv4pLen"]
+                ):
+                    ip = ipaddress.ip_interface(
+                        f"{container['NetworkSettings']['IPv4addr']}/"
+                        f"{container['NetworkSettings']['IPv4pLen']}"
+                    )
+                    subnet = str(ip.network.with_prefixlen)
+                else:
+                    with open(clab_topo, encoding="utf-8") as f:
+                        clab_topo_data = yaml.safe_load(f.read())
+                        if clab_topo_data.get("mgmt", {}).get("ipv4-subnet"):
+                            subnet = clab_topo_data["mgmt"]["ipv4-subnet"]
+                        else:
+                            msg = f"{clab_name} lab {node_name} node failed to determine mgmt subnet"
+                            log.warning(msg)
+                            self.event(msg, severity="WARNING")
+                            continue
+                subnets_in_use.add(subnet)
+                # re-use existing lab subnet
+                if clab_name == lab_name:
+                    ipv4_subnet = subnet
+                # allocate new subnet if its in use by other lab
+                elif clab_name != lab_name and ipv4_subnet == subnet:
+                    msg = f"{ipv4_subnet} already in use, allocating new subnet"
+                    log.info(msg)
+                    if progress:
+                        self.event(msg)
+                    ipv4_subnet = None
+
+        # allocate new subnet
+        if ipv4_subnet is None:
+            pool = set(f"172.100.{i}.0/24" for i in range(100, 255))
+            ipv4_subnet = list(sorted(pool.difference(subnets_in_use)))[0]
+
+        # download inventory data from Netbox
+        netbox_reply = self.client.run_job(
+            service="netbox",
+            task="get_containerlab_inventory",
+            workers="any",
+            timeout=timeout,
+            retry=3,
+            kwargs={
+                "lab_name": lab_name,
+                "filters": filters,
+                "devices": devices,
+                "instance": instance,
+                "image": image,
+                "ipv4_subnet": ipv4_subnet,
+                "ports": ports,
+                "ports_map": ports_in_use,
+                "progress": progress,
+            },
+        )
+
+        # use inventory from first worker that returned hosts data
+        for wname, wdata in netbox_reply.items():
+            if wdata["failed"] is False and wdata["result"]:
+                topology_inventory = wdata["result"]
+                break
+        else:
+            msg = f"{self.name} - Netbox returned no data for '{lab_name}' lab"
+            log.error(msg)
+            raise RuntimeError(msg)
+
+        if dry_run is True:
+            ret.result = topology_inventory
+            return ret
+
+        # create folder to store topology
+        topology_folder = os.path.join(self.topologies_dir, lab_name)
+        os.makedirs(topology_folder, exist_ok=True)
+
+        # create topology file
+        topology_file = os.path.join(topology_folder, f"{lab_name}.yaml")
+        with open(topology_file, "w", encoding="utf-8") as tf:
+            tf.write(yaml.dump(topology_inventory, default_flow_style=False))
+
+        if progress:
+            self.event(
+                f"{lab_name} topology data retrieved and saved to '{topology_file}'"
+            )
+
+        # form command arguments
+        args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
+        if reconfigure is True:
+            args.append("--reconfigure")
+            self.event(f"Re-deploying lab {os.path.split(topology_file)[-1]}")
+        else:
+            self.event(f"Deploying lab {os.path.split(topology_file)[-1]}")
+        if node_filter is not None:
+            args.append("--node-filter")
+            args.append(node_filter)
+
+        # add needed env variables
+        env = dict(os.environ)
+        env["CLAB_VERSION_CHECK"] = "disable"
+
+        # run containerlab command
+        return self.run_containerlab_command(
+            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env
+        )

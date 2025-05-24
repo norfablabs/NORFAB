@@ -9,6 +9,12 @@ def check_containerlab_worker(nfclient):
     print(f"Checking if contaienrlab worker running: {workers}")
     return any(w["name"] == "containerlab-worker-1" for w in workers["results"])
 
+def check_netbox_worker(nfclient):
+    workers = nfclient.get(
+        "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
+    )
+    print(f"Checking if netbox worker running: {workers}")
+    return any(w["name"] == "netbox-worker-1.1" for w in workers["results"])
 
 def wait_for_containerlab_worker(nfclient, timer=10):
     begin = time.time()
@@ -21,6 +27,16 @@ def wait_for_containerlab_worker(nfclient, timer=10):
             f"Containerlab worker did not come online within {timer} seconds"
         )
 
+def wait_for_netbox_worker(nfclient, timer=10):
+    begin = time.time()
+    while (time.time() - begin) < timer:
+        if check_netbox_worker(nfclient) is True:
+            break
+        time.sleep(1)
+    else:
+        raise TimeoutError(
+            f"Netbox worker did not come online within {timer} seconds"
+        )
 
 class TestWorker:
     def test_get_inventory(self, nfclient):
@@ -356,3 +372,115 @@ class TestGetNornirInventoryTask:
             assert r["result"] == {
                 "hosts": {}
             }, f"{w} - inventory should contain no hosts"
+
+class TestDeployNetboxTask:
+    def test_deploy_netbox(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        wait_for_netbox_worker(nfclient)
+        ret_destroy = nfclient.run_job(
+            "containerlab", "destroy_lab", kwargs={"lab_name": "foobar"}
+        )
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy_netbox",
+            kwargs={
+                "lab_name": "foobar",
+                "devices": ["fceos4", "fceos5"]
+            },
+        )
+
+        print("Lab destroyed:")
+        pprint.pprint(ret_destroy)
+
+        print("Lab deployed from Netbox:")
+        pprint.pprint(ret_deploy)
+
+        for w, r in ret_destroy.items():
+            assert r["failed"] == False, f"{w} - failed to destroy lab"
+            assert (
+                r["result"]["foobar"] == True
+            ), f"{w} - worker did not destroy foobar lab"
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to deploy lab"
+            assert len(r["result"][
+                "containers"
+            ]) == 2, f"{w} - worker did not deploy foobar containers"
+
+    def test_deploy_netbox_reconfigure(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        wait_for_netbox_worker(nfclient)
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy_netbox",
+            kwargs={
+                "lab_name": "foobar",
+                "devices": ["fceos4", "fceos5"],
+                "reconfigure": True
+            },
+        )
+
+        print("Lab deployed from Netbox:")
+        pprint.pprint(ret_deploy)
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to deploy lab"
+            assert len(r["result"][
+                "containers"
+            ]) == 2, f"{w} - worker did not deploy foobar containers"
+
+    def test_deploy_netbox_node_filter(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        wait_for_netbox_worker(nfclient)
+        ret_destroy = nfclient.run_job(
+            "containerlab", "destroy_lab", kwargs={"lab_name": "foobar"}
+        )
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy_netbox",
+            kwargs={
+                "lab_name": "foobar",
+                "devices": ["fceos4", "fceos5"],
+                "node_filter": "fceos4"
+            },
+        )
+
+        print("Lab destroyed:")
+        pprint.pprint(ret_destroy)
+
+        print("Lab deployed from Netbox:")
+        pprint.pprint(ret_deploy)
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to deploy lab"
+            assert len(r["result"][
+                "containers"
+            ]) == 1, f"{w} - worker did not deploy correct number of foobar lab containers"
+
+    def test_deploy_netbox_with_nb_filters(self, nfclient):
+        wait_for_containerlab_worker(nfclient)
+        wait_for_netbox_worker(nfclient)
+        ret_destroy = nfclient.run_job(
+            "containerlab", "destroy_lab", kwargs={"lab_name": "foobar"}
+        )
+        ret_deploy = nfclient.run_job(
+            "containerlab",
+            "deploy_netbox",
+            kwargs={
+                "lab_name": "foobar",
+                "devices": ["fceos4", "fceos5"],
+                "filters": [{"tenant": "saltstack"}]
+            },
+        )
+
+        print("Lab destroyed:")
+        pprint.pprint(ret_destroy)
+
+        print("Lab deployed from Netbox:")
+        pprint.pprint(ret_deploy)
+
+        for w, r in ret_deploy.items():
+            assert r["failed"] == False, f"{w} - failed to deploy lab"
+            assert len(r["result"][
+                "containers"
+            ]) == 2, f"{w} - worker did not deploy correct number of foobar lab containers"

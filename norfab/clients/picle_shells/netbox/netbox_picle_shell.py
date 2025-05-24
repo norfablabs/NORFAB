@@ -30,6 +30,9 @@ from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_get_circuits import GetCircuits
 from .netbox_picle_shell_update_device import UpdateDeviceCommands
 from .netbox_picle_shell_get_connections import GetConnections
+from .netbox_picle_shell_get_containerlab_inventory import (
+    GetContainerlabInventoryCommand,
+)
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"
@@ -229,6 +232,11 @@ class GetCommands(BaseModel):
     )
     connections: GetConnections = Field(
         None, description="Query Netbox connections data for devices"
+    )
+    containerlab_inventory: GetContainerlabInventoryCommand = Field(
+        None,
+        description="Query Netbox and construct Containerlab inventory",
+        alias="containerlab-inventory",
     )
 
     class PicleConfig:

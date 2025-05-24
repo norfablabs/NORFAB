@@ -1,3 +1,16 @@
+## 0.8.1
+
+### BUGS
+
+1. Fixed `show containerlab inventory` command
+2. Fixed Nornir Worker inventory load handling
+
+### FEATURES
+
+1. 
+
+---
+
 ## 0.8.0
 
 ### CHANGES

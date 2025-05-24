@@ -8,6 +8,7 @@ import os
 import concurrent.futures
 import pynetbox
 import ipaddress
+import re
 
 from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
@@ -1196,7 +1197,7 @@ class NetboxWorker(NFPWorker):
                 else:
                     remote_interface = endpoints[0]["name"]
                     if len(endpoints) > 1:
-                        remote_interface = [i["name"] for i in endpoints]
+                        remote_interface = list(sorted([i["name"] for i in endpoints]))
                     connection["remote_interface"] = remote_interface
                     connection["remote_device"] = endpoints[0]["device"]["name"]
 
@@ -2101,25 +2102,73 @@ class NetboxWorker(NFPWorker):
         filters: list = None,
         devices: list = None,
         instance: str = None,
+        image: str = None,
         ipv4_subnet: str = "172.100.100.0/24",
-        ports: tuple = (12000, 13000),
+        ports: tuple = (12000, 15000),
+        ports_map: dict = None,
+        progress: bool = False,
     ) -> dict:
         """
         Retrieve and construct Containerlab inventory from NetBox data.
+
+        Containerlab node details must be defined under device configuration
+        context `norfab.containerlab` path, for example:
+
+        ```
+        {
+            "norfab": {
+                "containerlab": {
+                    "kind": "ceos",
+                    "image": "ceos:latest",
+                    "mgmt-ipv4": "172.100.100.10/24",
+                    "ports": [
+                        {10000: 22},
+                        {10001: 830}
+                    ],
+
+                    ... any other node parameters ...
+
+                    "interfaces_rename": [
+                        {
+                            "find": "eth",
+                            "replace": "Eth",
+                            "use_regex": false
+                        }
+                    ]
+                }
+            }
+        }
+        ```
+
+        For complete list of parameters refer to
+        [Containerlab nodes definition](https://containerlab.dev/manual/nodes/).
+
+        Special handling given to these parameters:
+
+        - `kind` - uses device platform field value by default
+        - `image` - uses `image` value if provided, otherwise uses `{kind}:latest`
+        - `interfaces_rename` - a list of one or more interface renaming instructions,
+            each item must have `find` and `replace` defined, optional `use_regex`
+            flag specifies whether to use regex based pattern substitution.
 
         Args:
             lab_name (str, Mandatory): Name of containerlab to construct inventory for.
             filters (list, optional): List of filters to apply when retrieving devices from NetBox.
             devices (list, optional): List of specific devices to retrieve from NetBox.
             instance (str, optional): NetBox instance to use.
-            ipv4_subnet (str, Optional): Mangement subnet to use to IP number nodes.
+            image (str, optional): Default containerlab image to use,
+            ipv4_subnet (str, Optional): Mangement subnet to use to IP number nodes
+                starting with 4th IP in the subnet.
             ports (tuple, Optional): Ports range to use for nodes.
+            ports_map (dict, Optional): dictionary keyed by node name with list of ports maps to use,
 
         Returns:
             dict: Containerlab inventory dictionary containing hosts and their respective data.
         """
-        nodes = {}
-        links = {}
+        nodes, links = {}, []
+        ports_map = ports_map or {}
+        endpts_done = []  # to deduplicate links
+        instance = instance or self.default_instance
         inventory = {
             "name": lab_name,
             "topology": {"nodes": nodes, "links": links},
@@ -2128,17 +2177,28 @@ class NetboxWorker(NFPWorker):
         ret = Result(task=f"{self.name}:get_containerlab_inventory", result=inventory)
         mgmt_net = ipaddress.ip_network(ipv4_subnet)
         available_ips = list(mgmt_net.hosts())[3:]
+
+        # run checks
+        if not available_ips:
+            raise ValueError(f"Need IPs to allocate, but '{ipv4_subnet}' given")
         if ports:
-            ports = list(range(ports[0], ports[1]))
+            available_ports = list(range(ports[0], ports[1]))
+        else:
+            raise ValueError(f"Need ports to allocate, but '{ports}' given")
 
         # check Netbox status
         netbox_status = self.get_netbox_status(instance=instance)
-        if netbox_status.result[instance or self.default_instance]["status"] is False:
+        if netbox_status.result[instance]["status"] is False:
             ret.failed = True
             ret.messages = [f"Netbox status is no good: {netbox_status}"]
             return ret
 
         # retrieve devices data
+        log.debug(
+            f"Fetching devices from {instance} Netbox instance, devices '{devices}', filters '{filters}'"
+        )
+        if progress:
+            self.event("Fetching devices data from Netbox")
         nb_devices = self.get_devices(
             filters=filters, devices=devices, instance=instance
         )
@@ -2146,42 +2206,201 @@ class NetboxWorker(NFPWorker):
         # form Containerlab nodes inventory
         for device_name, device in nb_devices.result.items():
             node = device["config_context"].get("norfab", {}).get("containerlab", {})
-            # run checks
+            # populate node parameters
             if not node.get("kind"):
-                log.error(f"{device_name} - has no 'kind' defined, skipping")
-                continue
+                if device["platform"]:
+                    node["kind"] = device["platform"]["name"]
+                else:
+                    msg = (
+                        f"{device_name} - has no 'kind' of 'platform' defined, skipping"
+                    )
+                    log.warning(msg)
+                    if progress:
+                        self.event(msg, severity="WARNING")
+                    continue
             if not node.get("image"):
-                log.error(f"{device_name} - has no 'image' defined, skipping")
-                continue
-            # add mising parameters
+                if image:
+                    node["image"] = image
+                else:
+                    node["image"] = f"{node['kind']}:latest"
             if not node.get("mgmt-ipv4"):
-                node["mgmt-ipv4"] = f"{available_ips.pop(0)}/{mgmt_net.prefixlen}"
+                if available_ips:
+                    node["mgmt-ipv4"] = f"{available_ips.pop(0)}"
+                else:
+                    raise RuntimeError("Run out of IP addresses to allocate")
             if not node.get("ports"):
-                for port in [22, 80, 830, 443, 8080, 161]:
-                    node["ports"].append({ports.pop(0): port})
+                node["ports"] = []
+                # use ports map
+                if ports_map.get(device_name):
+                    node["ports"] = ports_map[device_name]
+                # allocate next-available ports
+                else:
+                    for port in [
+                        "22/tcp",
+                        "23/tcp",
+                        "80/tcp",
+                        "161/udp",
+                        "443/tcp",
+                        "830/tcp",
+                        "8080/tcp",
+                    ]:
+                        node["ports"].append(f"{available_ports.pop(0)}:{port}")
+
             # save node content
             nodes[device_name] = node
+            if progress:
+                self.event(f"Node added {device_name}")
 
         # return if no nodes found for provided parameters
         if not nodes:
-            msg = f"{self.name} - no viable nodes returned by Netbox"
+            msg = f"{self.name} - no devices found in Netbox"
             log.error(msg)
             ret.failed = True
-            ret.messages = [msg]
+            ret.messages = [
+                f"{self.name} - no devices found in Netbox, "
+                f"devices - '{devices}', filters - '{filters}'"
+            ]
+            ret.errors = [msg]
             return ret
+
+        if progress:
+            self.event("Fetching connections data from Netbox")
 
         # query interface connections data from netbox
         nb_connections = self.get_connections(devices=list(nodes), instance=instance)
         # save connections data to links inventory
         while nb_connections.result:
             device, device_connections = nb_connections.result.popitem()
-            hosts[device]["data"]["connections"] = device_connections
+            for interface, connection in device_connections.items():
+                # skip non ethernet links
+                if connection.get("termination_type") != "interface":
+                    continue
+                # skip orphaned links
+                if not connection.get("remote_interface"):
+                    continue
+                # skip connections to devices that are not part of lab
+                if connection["remote_device"] not in nodes:
+                    continue
+                endpoints = []
+                link = {
+                    "type": "veth",
+                    "endpoints": endpoints,
+                }
+                # add A node
+                endpoints.append(
+                    {
+                        "node": device,
+                        "interface": interface,
+                    }
+                )
+                # add B node
+                endpoints.append({"node": connection["remote_device"]})
+                if connection.get("breakout") is True:
+                    endpoints[-1]["interface"] = connection["remote_interface"][0]
+                else:
+                    endpoints[-1]["interface"] = connection["remote_interface"]
+                # save the link
+                a_end = (
+                    endpoints[0]["node"],
+                    endpoints[0]["interface"],
+                )
+                b_end = (
+                    endpoints[1]["node"],
+                    endpoints[1]["interface"],
+                )
+                if a_end not in endpts_done and b_end not in endpts_done:
+                    endpts_done.append(a_end)
+                    endpts_done.append(b_end)
+                    links.append(link)
+                    if progress:
+                        self.event(
+                            f"Link added {endpoints[0]['node']}:{endpoints[0]['interface']}"
+                            f" - {endpoints[1]['node']}:{endpoints[1]['interface']}"
+                        )
 
         # query circuits connections data from netbox
         nb_circuits = self.get_circuits(devices=list(nodes), instance=instance)
         # save circuits data to hosts' inventory
         while nb_circuits.result:
             device, device_circuits = nb_circuits.result.popitem()
-            hosts[device]["data"]["circuits"] = device_circuits
+            for cid, circuit in device_circuits.items():
+                # skip circuits not connected to devices
+                if not circuit.get("remote_interface"):
+                    continue
+                # skip circuits to devices that are not part of lab
+                if circuit["remote_device"] not in nodes:
+                    continue
+                endpoints = []
+                link = {
+                    "type": "veth",
+                    "endpoints": endpoints,
+                }
+                # add A node
+                endpoints.append(
+                    {
+                        "node": device,
+                        "interface": circuit["interface"],
+                    }
+                )
+                # add B node
+                endpoints.append(
+                    {
+                        "node": circuit["remote_device"],
+                        "interface": circuit["remote_interface"],
+                    }
+                )
+                # save the link
+                a_end = (
+                    endpoints[0]["node"],
+                    endpoints[0]["interface"],
+                )
+                b_end = (
+                    endpoints[1]["node"],
+                    endpoints[1]["interface"],
+                )
+                if a_end not in endpts_done and b_end not in endpts_done:
+                    endpts_done.append(a_end)
+                    endpts_done.append(b_end)
+                    links.append(link)
+                    if progress:
+                        self.event(
+                            f"Link added {endpoints[0]['node']}:{endpoints[0]['interface']}"
+                            f" - {endpoints[1]['node']}:{endpoints[1]['interface']}"
+                        )
+
+        # rename links' interfaces
+        for node_name, node_data in nodes.items():
+            interfaces_rename = node_data.pop("interfaces_rename", [])
+            if interfaces_rename and progress:
+                self.event(f"Renaming {node_name} interfaces")
+            for item in interfaces_rename:
+                if not item.get("find") or not item.get("replace"):
+                    log.error(
+                        f"{self.name} - interface rename need to have"
+                        f" 'find' and 'replace' defined, skipping: {item}"
+                    )
+                    continue
+                pattern = item["find"]
+                replace = item["replace"]
+                use_regex = item.get("use_regex", False)
+                # go over links one by one and rename interfaces
+                for link in links:
+                    for endpoint in link["endpoints"]:
+                        if endpoint["node"] != node_name:
+                            continue
+                        if use_regex:
+                            renamed = re.sub(
+                                pattern,
+                                replace,
+                                endpoint["interface"],
+                            )
+                        else:
+                            renamed = endpoint["interface"].replace(pattern, replace)
+                        if endpoint["interface"] != renamed:
+                            msg = f"{node_name} interface {endpoint['interface']} renamed to {renamed}"
+                            log.debug(msg)
+                            if progress:
+                                self.event(msg)
+                            endpoint["interface"] = renamed
 
         return ret
