@@ -885,6 +885,10 @@ class NFPClient(object):
         while post_retry:
             post_result = self.post(service, task, args, kwargs, workers, uuid, timeout)
             if post_result["status"] == "200":
+                log.warning(
+                    f"{self.name}:run_job - {service}:{task} POST status "
+                    f"to '{workers}' workers is not 200 - '{post_result}'. Retrying.."
+                )
                 break
             post_retry -= 1
         else:

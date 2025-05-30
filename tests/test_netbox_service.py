@@ -1876,3 +1876,79 @@ class TestNetboxCache:
                 for item_1st in ret_list_1st[worker_2nd]["result"]:
                     if item_2nd["key"] == item_1st["key"]:
                         assert item_2nd["expires"] > item_1st["expires"]
+
+
+class TestGetContainerlabInventory:
+    def test_get_containerlab_inventory_devices(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_containerlab_inventory",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+                "lab_name": "foobar",
+            }
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert all(
+                k in res["result"] for k in ["mgmt", "name", "topology"]
+            ), f"{worker} - not all clab inventory data returned"
+            assert res["result"]["topology"]["links"], f"{worker} - no clab inventory links data returned"
+            assert res["result"]["topology"]["nodes"], f"{worker} - no clab inventory nodes data returned"
+            assert res["result"]["name"] == "foobar", f"{worker} - clab inventory name is not foobar"
+
+    def test_get_containerlab_inventory_non_existing_devices(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_containerlab_inventory",
+            workers="any",
+            kwargs={
+                "devices": ["fceosabc", "fceosxyz"],
+                "lab_name": "foobar",
+            }
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert res["errors"], f"{worker} - received no error"
+            assert res["failed"] == True, f"{worker} - should have failed"
+            assert all(
+                k in res["result"] for k in ["mgmt", "name", "topology"]
+            ), f"{worker} - not all clab inventory data returned"
+            assert res["result"]["topology"]["links"] == [], f"{worker} - clab inventory links data returned"
+            assert res["result"]["topology"]["nodes"] == {}, f"{worker} - clab inventory nodes data returned"
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_by_tenant(self, nfclient):
+        pass
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_by_filters(self, nfclient):
+        pass
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_with_instance(self, nfclient):
+        pass
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_with_image(self, nfclient):
+        pass
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_run_out_of_ports(self, nfclient):
+        pass
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_run_out_of_ips(self, nfclient):
+        pass    
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_with_ports_map(self, nfclient):
+        pass    
+
+    @pytest.mark.skip(reason="TBD")
+    def test_get_containerlab_inventory_with_cache(self, nfclient):
+        pass

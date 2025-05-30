@@ -5,7 +5,8 @@ RUN apt-get update && \
     apt-get clean && \
     pip install --no-cache-dir pip setuptools wheel poetry --upgrade
 
-RUN pip install --no-cache-dir norfab[nornirservice] --upgrade
+RUN pip install --no-cache-dir norfab --upgrade && \
+    pip install --no-cache-dir norfab[nornirservice] --upgrade
 
 ENV LOG_LEVEL=INFO
 

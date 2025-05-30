@@ -1778,7 +1778,7 @@ class NetboxWorker(NFPWorker):
             devices (list, optional): List of devices to update.
             create (bool, optional): If True, new interfaces will be created if they do not exist.
             batch_size (int, optional): The number of devices to process in each batch.
-            **kwargs: Additional keyword arguments to pass to the job.
+            **kwargs: Additional keyword arguments to pass to the datasource job.
 
         Returns:
             dict: A dictionary containing the results of the update operation.
@@ -1845,22 +1845,22 @@ class NetboxWorker(NFPWorker):
                                     "none",
                                     "",
                                 ]:
+                                    mac_address = interface["mac_address"]
                                     if self.nb_version[instance] >= (4, 2, 0):
                                         try:
                                             nb_mac_addr = nb.dcim.mac_addresses.get(
-                                                mac_address=interface["mac_address"]
+                                                mac_address=mac_address,
+                                                interface_id=nb_interface.id,
                                             )
                                         except Exception as e:
-                                            msg = f"{worker} failed to get {interface['mac_address']} mac-address from netbox: {e}"
+                                            msg = f"{worker} failed to get {mac_address} mac-address from netbox: {e}"
                                             self.event(msg, severity="WARNING")
                                             ret.messages.append(msg)
                                             log.error(msg)
                                         else:
                                             if not nb_mac_addr:
                                                 nb_mac_addr = nb.dcim.mac_addresses.create(
-                                                    mac_address=interface[
-                                                        "mac_address"
-                                                    ],
+                                                    mac_address=mac_address,
                                                     assigned_object_type="dcim.interface",
                                                     assigned_object_id=nb_interface.id,
                                                 )
@@ -1875,10 +1875,11 @@ class NetboxWorker(NFPWorker):
                                                 nb_interface.primary_mac_address = (
                                                     nb_mac_addr.id
                                                 )
-                                    else:
-                                        nb_interface.mac_address = interface[
-                                            "mac_address"
-                                        ]
+                                                self.event(
+                                                    f"{host} {mac_address} MAC associating with interface {nb_interface.name}",
+                                                    resource=instance,
+                                                )
+                                        nb_interface.mac_address = mac_address
                                 nb_interface.enabled = interface["is_enabled"]
                                 nb_interface.save()
                             updated[nb_interface.name] = interface
@@ -1902,8 +1903,34 @@ class NetboxWorker(NFPWorker):
                                     nb_interface.mtu = interface["mtu"]
                                 if interface["speed"] > 0:
                                     nb_interface.speed = interface["speed"] * 1000
-                                if interface["mac_address"] not in ["None"]:
-                                    nb_interface.mac_address = interface["mac_address"]
+                                # create MAC address
+                                if interface["mac_address"].strip().lower() not in [
+                                    "none",
+                                    "",
+                                ]:
+                                    mac_address = interface["mac_address"]
+                                    if self.nb_version[instance] >= (4, 2, 0):
+                                        try:
+                                            nb_mac_addr = nb.dcim.mac_addresses.create(
+                                                mac_address=mac_address,
+                                                assigned_object_type="dcim.interface",
+                                                assigned_object_id=nb_interface.id,
+                                            )
+                                        except Exception as e:
+                                            msg = f"{host} {mac_address} MAC failed to create, interface {nb_interface.name}: {e}"
+                                            self.event(msg, severity="WARNING")
+                                            ret.messages.append(msg)
+                                            log.error(msg)
+                                        else:
+                                            nb_interface.primary_mac_address = (
+                                                nb_mac_addr.id
+                                            )
+                                    else:
+                                        nb_interface.mac_address = mac_address
+                                    self.event(
+                                        f"{host} {mac_address} MAC created, associating with interface {nb_interface.name}",
+                                        resource=instance,
+                                    )
                                 nb_interface.enabled = interface["is_enabled"]
                                 nb_interface.save()
                             created[interface_name] = interface
@@ -2098,7 +2125,8 @@ class NetboxWorker(NFPWorker):
 
     def get_containerlab_inventory(
         self,
-        lab_name: str,
+        lab_name: str = None,
+        tenant_name: str = None,
         filters: list = None,
         devices: list = None,
         instance: str = None,
@@ -2107,6 +2135,7 @@ class NetboxWorker(NFPWorker):
         ports: tuple = (12000, 15000),
         ports_map: dict = None,
         progress: bool = False,
+        cache: Union[bool, str] = False,
     ) -> dict:
         """
         Retrieve and construct Containerlab inventory from NetBox data.
@@ -2161,6 +2190,12 @@ class NetboxWorker(NFPWorker):
                 starting with 4th IP in the subnet.
             ports (tuple, Optional): Ports range to use for nodes.
             ports_map (dict, Optional): dictionary keyed by node name with list of ports maps to use,
+            cache (Union[bool, str], optional): Cache usage options:
+
+                - True: Use data stored in cache if it is up to date, refresh it otherwise.
+                - False: Do not use cache and do not update cache.
+                - "refresh": Ignore data in cache and replace it with data fetched from Netbox.
+                - "force": Use data in cache without checking if it is up to date.
 
         Returns:
             dict: Containerlab inventory dictionary containing hosts and their respective data.
@@ -2169,6 +2204,16 @@ class NetboxWorker(NFPWorker):
         ports_map = ports_map or {}
         endpts_done = []  # to deduplicate links
         instance = instance or self.default_instance
+        # handle lab name and tenant name with filters
+        if lab_name is None and tenant_name:
+            lab_name = tenant_name
+        if tenant_name:
+            if filters:
+                for filter in filters:
+                    filter["tenant"] = tenant_name
+            else:
+                filters = [{"tenant": tenant_name}]
+        # construct inventory
         inventory = {
             "name": lab_name,
             "topology": {"nodes": nodes, "links": links},
@@ -2200,7 +2245,7 @@ class NetboxWorker(NFPWorker):
         if progress:
             self.event("Fetching devices data from Netbox")
         nb_devices = self.get_devices(
-            filters=filters, devices=devices, instance=instance
+            filters=filters, devices=devices, instance=instance, cache=cache
         )
 
         # form Containerlab nodes inventory
@@ -2267,7 +2312,9 @@ class NetboxWorker(NFPWorker):
             self.event("Fetching connections data from Netbox")
 
         # query interface connections data from netbox
-        nb_connections = self.get_connections(devices=list(nodes), instance=instance)
+        nb_connections = self.get_connections(
+            devices=list(nodes), instance=instance, cache=cache
+        )
         # save connections data to links inventory
         while nb_connections.result:
             device, device_connections = nb_connections.result.popitem()
@@ -2319,7 +2366,9 @@ class NetboxWorker(NFPWorker):
                         )
 
         # query circuits connections data from netbox
-        nb_circuits = self.get_circuits(devices=list(nodes), instance=instance)
+        nb_circuits = self.get_circuits(
+            devices=list(nodes), instance=instance, cache=cache
+        )
         # save circuits data to hosts' inventory
         while nb_circuits.result:
             device, device_circuits = nb_circuits.result.popitem()

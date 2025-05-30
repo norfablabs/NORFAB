@@ -12,6 +12,7 @@ from pydantic import (
     StrictStr,
     conlist,
     Field,
+    model_validator,
 )
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
@@ -86,7 +87,12 @@ class NetboxDeviceFilters(BaseModel):
 
 
 class GetContainerlabInventoryCommand(ClientRunJobArgs):
-    lab_name: StrictStr = Field(..., description="Lab name to generate inventory")
+    lab_name: StrictStr = Field(
+        None, description="Lab name to generate inventory", alias="lab-name"
+    )
+    tenant_name: StrictStr = Field(
+        None, description="Deploy lab by tenant", alias="tenant-name"
+    )
     progress: Optional[StrictBool] = Field(
         True,
         description="Display progress events",
@@ -118,7 +124,7 @@ class GetContainerlabInventoryCommand(ClientRunJobArgs):
         description="Range of TCP ports to use for nodes",
     )
     filters: NetboxDeviceFilters = Field(
-        None, description="Netbox device filters", alias="filters"
+        None, description="Additional Netbox device filters", alias="filters"
     )
 
     @staticmethod
@@ -126,6 +132,14 @@ class GetContainerlabInventoryCommand(ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+
+        if not any(k in kwargs for k in ["devices", "filters", "tenant_name"]):
+            raise ValueError(
+                "Devices list or Netbox filters or Tenant name must be provided."
+            )
+
+        if not any(k in kwargs for k in ["lab_name", "tenant_name"]):
+            raise ValueError("Lab name or Tenant name must be provided.")
 
         if kwargs.get("devices"):
             if not isinstance(kwargs.get("devices"), list):

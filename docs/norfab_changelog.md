@@ -7,7 +7,12 @@
 
 ### FEATURES
 
-1. 
+1. Netbox service added `get_containerlab_inventory` task 
+2. Containerlab service added `deploy_netbox` task
+
+### CHANGES
+
+1. Improved client post job retry logic
 
 ---
 

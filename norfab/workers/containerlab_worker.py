@@ -238,7 +238,7 @@ class ContainerlabWorker(NFPWorker):
             except Exception as e:
                 ret.result = output
                 log.error(
-                    f"{self.name} - failed to load containerlab results into JSON, error: {e}, result: {output}"
+                    f"{self.name} - failed to load containerlab results into JSON, error: {e}, result: '{output}'"
                 )
             # check if command failed
             if proc.returncode != 0:
@@ -622,7 +622,8 @@ class ContainerlabWorker(NFPWorker):
 
     def deploy_netbox(
         self,
-        lab_name: str,
+        lab_name: str = None,
+        tenant_name: str = None,
         filters: list = None,
         devices: list = None,
         instance: str = None,
@@ -647,7 +648,9 @@ class ContainerlabWorker(NFPWorker):
         - Executing the `containerlab deploy` command with appropriate arguments.
 
         Args:
-            lab_name (str): The name of the lab to deploy.
+            lab_name (str, optional): The name of the lab to deploy.
+            tenant_name (str, optional): Deploy lab for given tenant, lab name if not set
+                becomes equal to tenant name.
             filters (list, optional): List of filters to apply when fetching devices from Netbox.
             devices (list, optional): List of specific devices to include in the topology.
             instance (str, optional): Netbox instance identifier.
@@ -670,6 +673,10 @@ class ContainerlabWorker(NFPWorker):
         ret = Result(task=f"{self.name}:deploy_netbox")
         subnets_in_use = set()
         ports_in_use = {}
+
+        # handle lab name and tenant name
+        if lab_name is None and tenant_name:
+            lab_name = tenant_name
 
         if progress:
             self.event(f"Fetching {lab_name} topology data from Netbox")
@@ -737,6 +744,7 @@ class ContainerlabWorker(NFPWorker):
             retry=3,
             kwargs={
                 "lab_name": lab_name,
+                "tenant_name": tenant_name,
                 "filters": filters,
                 "devices": devices,
                 "instance": instance,

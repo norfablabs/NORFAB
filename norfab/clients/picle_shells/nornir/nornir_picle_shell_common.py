@@ -258,7 +258,10 @@ class NorniHostsFilters(BaseModel):
         None, title="Filter eXclude", description="Filter hosts excluding them by name"
     )
     FN: Optional[StrictBool] = Field(
-        None, title="Filter Negate", description="Negate the match"
+        None,
+        title="Filter Negate",
+        description="Negate the match",
+        json_schema_extra={"presence": True},
     )
 
     @staticmethod

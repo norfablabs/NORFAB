@@ -16,6 +16,7 @@ from pydantic import (
     conlist,
     root_validator,
     Field,
+    model_validator,
 )
 from typing import Union, Optional, List, Any, Dict, Tuple
 from ..common import log_error_or_result, ClientRunJobArgs, listen_events
@@ -58,7 +59,9 @@ class DeployNetboxDeviceFilters(NetboxDeviceFilters):
 
 
 class DeployNetboxCommand(GetContainerlabInventoryCommand):
-    lab_name: StrictStr = Field(..., description="Lab name to generate inventory")
+    lab_name: StrictStr = Field(
+        None, description="Lab name to generate inventory", alias="lab-name"
+    )
     reconfigure: StrictBool = Field(
         False,
         description="Destroy the lab and then re-deploy it.",
