@@ -3627,6 +3627,10 @@
 <span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">netbox-worker-1</span>
 </code></pre></div>
+<p>To obtain broker <code>shared_key</code> run this command on broker:</p>
+<div class="highlight"><pre><span></span><code>cd &lt;path/to/broker/inventory.yaml&gt;
+nfcli --show-broker-shared-key
+</code></pre></div>
 <p>Sample Netbox Worker Inventory:</p>
 <div class="highlight"><span class="filename">netbox/netbox-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">netbox</span>
 <span class="nt">cache_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># or False, refresh, force</span>
