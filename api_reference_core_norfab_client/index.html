@@ -264,7 +264,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../tags/" class="md-tabs__link">
+        <a href="../reference_norfab_inventory/" class="md-tabs__link">
           
   
   
@@ -691,6 +691,29 @@
   
   <span class="md-ellipsis">
     Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy Netbox
     
   </span>
   
@@ -1493,6 +1516,29 @@
   
   <span class="md-ellipsis">
     GET Nornir Inventory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GET Containerlab Inventory
     
   </span>
   
@@ -2793,29 +2839,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../tags/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Tags
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../reference_norfab_inventory/" class="md-nav__link">
         
   
@@ -2845,6 +2868,29 @@
   
   <span class="md-ellipsis">
     Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tags
     
   </span>
   
@@ -6858,7 +6904,22 @@ It handles sending and receiving messages, managing connections, and performing 
 <span class="normal">929</span>
 <span class="normal">930</span>
 <span class="normal">931</span>
-<span class="normal">932</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_job</span><span class="p">(</span>
+<span class="normal">932</span>
+<span class="normal">933</span>
+<span class="normal">934</span>
+<span class="normal">935</span>
+<span class="normal">936</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_job</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -6892,10 +6953,24 @@ It handles sending and receiving messages, managing connections, and performing 
     <span class="n">uuid</span> <span class="o">=</span> <span class="n">uuid</span> <span class="ow">or</span> <span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">post_retry</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">retry</span><span class="p">)</span>
+    <span class="n">get_retry</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">retry</span><span class="p">)</span>
 
     <span class="c1"># POST job to workers</span>
-    <span class="n">post_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">workers</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">post_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;200&quot;</span><span class="p">:</span>
+    <span class="k">while</span> <span class="n">post_retry</span><span class="p">:</span>
+        <span class="n">post_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">service</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">workers</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">post_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;200&quot;</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run_job - </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2"> POST status &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;to &#39;</span><span class="si">{</span><span class="n">workers</span><span class="si">}</span><span class="s2">&#39; workers is &#39;</span><span class="si">{</span><span class="n">post_result</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;errors: </span><span class="si">{</span><span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">post_result</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">; Retrying &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">retry</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">post_retry</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">retry</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">post_retry</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run_job - </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2"> POST status &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;to &#39;</span><span class="si">{</span><span class="n">workers</span><span class="si">}</span><span class="s2">&#39; workers is not 200 - &#39;</span><span class="si">{</span><span class="n">post_result</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
@@ -6907,24 +6982,25 @@ It handles sending and receiving messages, managing connections, and performing 
     <span class="n">get_timeout</span> <span class="o">=</span> <span class="n">remaining_timeout</span> <span class="o">/</span> <span class="n">retry</span>
 
     <span class="c1"># GET job results</span>
-    <span class="k">while</span> <span class="n">retry</span><span class="p">:</span>
+    <span class="k">while</span> <span class="n">get_retry</span><span class="p">:</span>
         <span class="n">get</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="n">service</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="p">[],</span> <span class="p">{},</span> <span class="n">post_result</span><span class="p">[</span><span class="s2">&quot;workers&quot;</span><span class="p">],</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">get_timeout</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">destroy_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
             <span class="k">break</span>
         <span class="k">elif</span> <span class="n">get</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;300&quot;</span><span class="p">:</span>  <span class="c1"># PENDING</span>
-            <span class="n">retry</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">get_retry</span> <span class="o">-=</span> <span class="mi">1</span>
             <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run_job - </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2"> GET &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;results pending, keep waiting&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;results pending. Retrying </span><span class="si">{</span><span class="n">retry</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">get_retry</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">retry</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="k">continue</span>
         <span class="k">elif</span> <span class="n">get</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;408&quot;</span><span class="p">:</span>  <span class="c1"># TIMEOUT</span>
-            <span class="n">retry</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">get_retry</span> <span class="o">-=</span> <span class="mi">1</span>
             <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run_job - </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2"> GET &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;results </span><span class="si">{</span><span class="n">get_timeout</span><span class="si">}</span><span class="s2">s timeout expired, keep waiting&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;results </span><span class="si">{</span><span class="n">get_timeout</span><span class="si">}</span><span class="s2">s timeout expired. Retrying &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">retry</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">get_retry</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">retry</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="k">continue</span>
         <span class="k">elif</span> <span class="n">get</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="s2">&quot;202&quot;</span><span class="p">]:</span>  <span class="c1"># OK</span>
@@ -6938,8 +7014,8 @@ It handles sending and receiving messages, managing connections, and performing 
             <span class="k">break</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run_job - </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;retry exceeded, GET returned no results, timeout </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:run_job - </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">retry</span><span class="si">}</span><span class="s2"> GET retries &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;exceeded, GET returned no results, timeout </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s&quot;</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">running_job</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">ret</span>
@@ -7114,22 +7190,7 @@ It handles sending and receiving messages, managing connections, and performing 
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">934</span>
-<span class="normal">935</span>
-<span class="normal">936</span>
-<span class="normal">937</span>
-<span class="normal">938</span>
-<span class="normal">939</span>
-<span class="normal">940</span>
-<span class="normal">941</span>
-<span class="normal">942</span>
-<span class="normal">943</span>
-<span class="normal">944</span>
-<span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span>
-<span class="normal">948</span>
-<span class="normal">949</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">949</span>
 <span class="normal">950</span>
 <span class="normal">951</span>
 <span class="normal">952</span>
@@ -7151,7 +7212,22 @@ It handles sending and receiving messages, managing connections, and performing 
 <span class="normal">968</span>
 <span class="normal">969</span>
 <span class="normal">970</span>
-<span class="normal">971</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_job_iter</span><span class="p">(</span>
+<span class="normal">971</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span>
+<span class="normal">975</span>
+<span class="normal">976</span>
+<span class="normal">977</span>
+<span class="normal">978</span>
+<span class="normal">979</span>
+<span class="normal">980</span>
+<span class="normal">981</span>
+<span class="normal">982</span>
+<span class="normal">983</span>
+<span class="normal">984</span>
+<span class="normal">985</span>
+<span class="normal">986</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_job_iter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -7213,16 +7289,16 @@ destroys the client context to ensure a clean shutdown.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">973</span>
-<span class="normal">974</span>
-<span class="normal">975</span>
-<span class="normal">976</span>
-<span class="normal">977</span>
-<span class="normal">978</span>
-<span class="normal">979</span>
-<span class="normal">980</span>
-<span class="normal">981</span>
-<span class="normal">982</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">988</span>
+<span class="normal">989</span>
+<span class="normal">990</span>
+<span class="normal">991</span>
+<span class="normal">992</span>
+<span class="normal">993</span>
+<span class="normal">994</span>
+<span class="normal">995</span>
+<span class="normal">996</span>
+<span class="normal">997</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gracefully shuts down the client.</span>
 

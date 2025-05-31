@@ -264,7 +264,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../tags/" class="md-tabs__link">
+        <a href="../../../reference_norfab_inventory/" class="md-tabs__link">
           
   
   
@@ -701,6 +701,29 @@
   
   <span class="md-ellipsis">
     Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deploy Netbox
     
   </span>
   
@@ -1507,6 +1530,29 @@
   
   <span class="md-ellipsis">
     GET Nornir Inventory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GET Containerlab Inventory
     
   </span>
   
@@ -2886,29 +2932,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tags/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Tags
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../reference_norfab_inventory/" class="md-nav__link">
         
   
@@ -2938,6 +2961,29 @@
   
   <span class="md-ellipsis">
     Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tags
     
   </span>
   
@@ -3913,7 +3959,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Additional keyword arguments to pass to the job.</p>
+                <p>Additional keyword arguments to pass to the datasource job.</p>
               </div>
             </td>
             <td>
@@ -3982,8 +4028,7 @@ nf#
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1747</span>
-<span class="normal">1748</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1748</span>
 <span class="normal">1749</span>
 <span class="normal">1750</span>
 <span class="normal">1751</span>
@@ -4153,7 +4198,35 @@ nf#
 <span class="normal">1915</span>
 <span class="normal">1916</span>
 <span class="normal">1917</span>
-<span class="normal">1918</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_device_interfaces</span><span class="p">(</span>
+<span class="normal">1918</span>
+<span class="normal">1919</span>
+<span class="normal">1920</span>
+<span class="normal">1921</span>
+<span class="normal">1922</span>
+<span class="normal">1923</span>
+<span class="normal">1924</span>
+<span class="normal">1925</span>
+<span class="normal">1926</span>
+<span class="normal">1927</span>
+<span class="normal">1928</span>
+<span class="normal">1929</span>
+<span class="normal">1930</span>
+<span class="normal">1931</span>
+<span class="normal">1932</span>
+<span class="normal">1933</span>
+<span class="normal">1934</span>
+<span class="normal">1935</span>
+<span class="normal">1936</span>
+<span class="normal">1937</span>
+<span class="normal">1938</span>
+<span class="normal">1939</span>
+<span class="normal">1940</span>
+<span class="normal">1941</span>
+<span class="normal">1942</span>
+<span class="normal">1943</span>
+<span class="normal">1944</span>
+<span class="normal">1945</span>
+<span class="normal">1946</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_device_interfaces</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -4186,7 +4259,7 @@ nf#
 <span class="sd">        devices (list, optional): List of devices to update.</span>
 <span class="sd">        create (bool, optional): If True, new interfaces will be created if they do not exist.</span>
 <span class="sd">        batch_size (int, optional): The number of devices to process in each batch.</span>
-<span class="sd">        **kwargs: Additional keyword arguments to pass to the job.</span>
+<span class="sd">        **kwargs: Additional keyword arguments to pass to the datasource job.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary containing the results of the update operation.</span>
@@ -4253,22 +4326,22 @@ nf#
                                 <span class="s2">&quot;none&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;&quot;</span><span class="p">,</span>
                             <span class="p">]:</span>
+                                <span class="n">mac_address</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span>
                                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
                                     <span class="k">try</span><span class="p">:</span>
                                         <span class="n">nb_mac_addr</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                                            <span class="n">mac_address</span><span class="o">=</span><span class="n">interface</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span>
+                                            <span class="n">mac_address</span><span class="o">=</span><span class="n">mac_address</span><span class="p">,</span>
+                                            <span class="n">interface_id</span><span class="o">=</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
                                         <span class="p">)</span>
                                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> failed to get </span><span class="si">{</span><span class="n">interface</span><span class="p">[</span><span class="s1">&#39;mac_address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> mac-address from netbox: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> failed to get </span><span class="si">{</span><span class="n">mac_address</span><span class="si">}</span><span class="s2"> mac-address from netbox: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                                         <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
                                         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                                         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                                     <span class="k">else</span><span class="p">:</span>
                                         <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_mac_addr</span><span class="p">:</span>
                                             <span class="n">nb_mac_addr</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                                                <span class="n">mac_address</span><span class="o">=</span><span class="n">interface</span><span class="p">[</span>
-                                                    <span class="s2">&quot;mac_address&quot;</span>
-                                                <span class="p">],</span>
+                                                <span class="n">mac_address</span><span class="o">=</span><span class="n">mac_address</span><span class="p">,</span>
                                                 <span class="n">assigned_object_type</span><span class="o">=</span><span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
                                                 <span class="n">assigned_object_id</span><span class="o">=</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
                                             <span class="p">)</span>
@@ -4283,10 +4356,11 @@ nf#
                                             <span class="n">nb_interface</span><span class="o">.</span><span class="n">primary_mac_address</span> <span class="o">=</span> <span class="p">(</span>
                                                 <span class="n">nb_mac_addr</span><span class="o">.</span><span class="n">id</span>
                                             <span class="p">)</span>
-                                <span class="k">else</span><span class="p">:</span>
-                                    <span class="n">nb_interface</span><span class="o">.</span><span class="n">mac_address</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span>
-                                        <span class="s2">&quot;mac_address&quot;</span>
-                                    <span class="p">]</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                                                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mac_address</span><span class="si">}</span><span class="s2"> MAC associating with interface </span><span class="si">{</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+                                            <span class="p">)</span>
+                                    <span class="n">nb_interface</span><span class="o">.</span><span class="n">mac_address</span> <span class="o">=</span> <span class="n">mac_address</span>
                             <span class="n">nb_interface</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;is_enabled&quot;</span><span class="p">]</span>
                             <span class="n">nb_interface</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
                         <span class="n">updated</span><span class="p">[</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface</span>
@@ -4310,8 +4384,34 @@ nf#
                                 <span class="n">nb_interface</span><span class="o">.</span><span class="n">mtu</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;mtu&quot;</span><span class="p">]</span>
                             <span class="k">if</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                 <span class="n">nb_interface</span><span class="o">.</span><span class="n">speed</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span>
-                            <span class="k">if</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;None&quot;</span><span class="p">]:</span>
-                                <span class="n">nb_interface</span><span class="o">.</span><span class="n">mac_address</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span>
+                            <span class="c1"># create MAC address</span>
+                            <span class="k">if</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                                <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="p">]:</span>
+                                <span class="n">mac_address</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">nb_mac_addr</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                                            <span class="n">mac_address</span><span class="o">=</span><span class="n">mac_address</span><span class="p">,</span>
+                                            <span class="n">assigned_object_type</span><span class="o">=</span><span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
+                                            <span class="n">assigned_object_id</span><span class="o">=</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                        <span class="p">)</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mac_address</span><span class="si">}</span><span class="s2"> MAC failed to create, interface </span><span class="si">{</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                                        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">nb_interface</span><span class="o">.</span><span class="n">primary_mac_address</span> <span class="o">=</span> <span class="p">(</span>
+                                            <span class="n">nb_mac_addr</span><span class="o">.</span><span class="n">id</span>
+                                        <span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">nb_interface</span><span class="o">.</span><span class="n">mac_address</span> <span class="o">=</span> <span class="n">mac_address</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mac_address</span><span class="si">}</span><span class="s2"> MAC created, associating with interface </span><span class="si">{</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                    <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+                                <span class="p">)</span>
                             <span class="n">nb_interface</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;is_enabled&quot;</span><span class="p">]</span>
                             <span class="n">nb_interface</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
                         <span class="n">created</span><span class="p">[</span><span class="n">interface_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface</span>
