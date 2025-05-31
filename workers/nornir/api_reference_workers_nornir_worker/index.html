@@ -5621,7 +5621,7 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">close_connections</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;Closed hosts connections.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;Closed existing hosts connections.&quot;</span><span class="p">)</span>
 
     <span class="c1"># initiate Nornir</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nr</span> <span class="o">=</span> <span class="n">InitNornir</span><span class="p">(</span>
@@ -5830,7 +5830,7 @@ configuration for logging, runner, hosts, groups, defaults, and user-defined set
     <span class="c1"># pull Nornir inventory from Containerlab</span>
     <span class="k">if</span> <span class="s2">&quot;containerlab&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nornir_inventory_load_containerlab</span><span class="p">(</span>
-            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">]</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">],</span> <span class="n">re_init_nornir</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;Pulled Nornir inventory data from Containerlab&quot;</span><span class="p">)</span>
@@ -6018,7 +6018,7 @@ data is then merged into the existing Nornir inventory.</p>
 
 
 <h3 id="norfab.workers.nornir_worker.NornirWorker.nornir_inventory_load_containerlab" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">nornir_inventory_load_containerlab</span><span class="p">(</span><span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">clab_workers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">use_default_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
+            <code class="highlight language-python"><span class="n">nornir_inventory_load_containerlab</span><span class="p">(</span><span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">clab_workers</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">use_default_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">re_init_nornir</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span></code>
 
 <a href="#norfab.workers.nornir_worker.NornirWorker.nornir_inventory_load_containerlab" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -6214,7 +6214,13 @@ existing Nornir inventory.</p>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">nornir_inventory_load_containerlab</span><span class="p">(</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">nornir_inventory_load_containerlab</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6222,6 +6228,7 @@ existing Nornir inventory.</p>
     <span class="n">use_default_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">re_init_nornir</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pulls the Nornir inventory from a Containerlab lab instance and merges it with the</span>
@@ -6296,6 +6303,11 @@ existing Nornir inventory.</p>
 
     <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pulled Nornir inventory from Containerlab&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">re_init_nornir</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_nornir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nornir_worker_inventory</span><span class="p">,</span> <span class="n">progress</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;Nornir instance re-initialized&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -6396,13 +6408,7 @@ existing Nornir inventory.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">754</span>
 <span class="normal">755</span>
 <span class="normal">756</span>
 <span class="normal">757</span>
@@ -6416,7 +6422,13 @@ existing Nornir inventory.</p>
 <span class="normal">765</span>
 <span class="normal">766</span>
 <span class="normal">767</span>
-<span class="normal">768</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_job_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_job_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to download job data YAML files and load it.</span>
 
@@ -6487,13 +6499,7 @@ and the values are the corresponding filter functions.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
-<span class="normal">797</span>
-<span class="normal">798</span>
-<span class="normal">799</span>
-<span class="normal">800</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">800</span>
 <span class="normal">801</span>
 <span class="normal">802</span>
 <span class="normal">803</span>
@@ -6501,7 +6507,13 @@ and the values are the corresponding filter functions.</p>
 <span class="normal">805</span>
 <span class="normal">806</span>
 <span class="normal">807</span>
-<span class="normal">808</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_jinja2_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_jinja2_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds custom filters for use in Jinja2 templates.</span>
 
@@ -6608,13 +6620,7 @@ and the values are the corresponding filter functions.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span>
-<span class="normal">820</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">820</span>
 <span class="normal">821</span>
 <span class="normal">822</span>
 <span class="normal">823</span>
@@ -6638,7 +6644,13 @@ and the values are the corresponding filter functions.</p>
 <span class="normal">841</span>
 <span class="normal">842</span>
 <span class="normal">843</span>
-<span class="normal">844</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">GetNornirHosts</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">GetNornirHostsResponse</span><span class="p">)</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">GetNornirHosts</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">GetNornirHostsResponse</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_nornir_hosts</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]:</span>
@@ -6745,19 +6757,19 @@ and the values are the corresponding filter functions.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span>
-<span class="normal">851</span>
-<span class="normal">852</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">852</span>
 <span class="normal">853</span>
 <span class="normal">854</span>
 <span class="normal">855</span>
 <span class="normal">856</span>
 <span class="normal">857</span>
-<span class="normal">858</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve running Nornir inventory for requested hosts</span>
 
@@ -6821,13 +6833,7 @@ an empty string.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">866</span>
 <span class="normal">867</span>
 <span class="normal">868</span>
 <span class="normal">869</span>
@@ -6878,7 +6884,13 @@ an empty string.</p>
 <span class="normal">914</span>
 <span class="normal">915</span>
 <span class="normal">916</span>
-<span class="normal">917</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="normal">917</span>
+<span class="normal">918</span>
+<span class="normal">919</span>
+<span class="normal">920</span>
+<span class="normal">921</span>
+<span class="normal">922</span>
+<span class="normal">923</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the versions of various libraries and system information.</span>
 
@@ -6980,14 +6992,14 @@ an empty string.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">919</span>
-<span class="normal">920</span>
-<span class="normal">921</span>
-<span class="normal">922</span>
-<span class="normal">923</span>
-<span class="normal">924</span>
-<span class="normal">925</span>
-<span class="normal">926</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">925</span>
+<span class="normal">926</span>
+<span class="normal">927</span>
+<span class="normal">928</span>
+<span class="normal">929</span>
+<span class="normal">930</span>
+<span class="normal">931</span>
+<span class="normal">932</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the statistics from the watchdog.</span>
 
@@ -7039,14 +7051,14 @@ an empty string.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">928</span>
-<span class="normal">929</span>
-<span class="normal">930</span>
-<span class="normal">931</span>
-<span class="normal">932</span>
-<span class="normal">933</span>
-<span class="normal">934</span>
-<span class="normal">935</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">934</span>
+<span class="normal">935</span>
+<span class="normal">936</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieves the current configuration of the watchdog.</span>
 
@@ -7099,15 +7111,15 @@ watchdog connections.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">937</span>
-<span class="normal">938</span>
-<span class="normal">939</span>
-<span class="normal">940</span>
-<span class="normal">941</span>
-<span class="normal">942</span>
-<span class="normal">943</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">943</span>
 <span class="normal">944</span>
-<span class="normal">945</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the list of connections curently managed by watchdog.</span>
 
@@ -7296,13 +7308,7 @@ URL to download a custom task or template URL that resolves to a file.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 947</span>
-<span class="normal"> 948</span>
-<span class="normal"> 949</span>
-<span class="normal"> 950</span>
-<span class="normal"> 951</span>
-<span class="normal"> 952</span>
-<span class="normal"> 953</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 953</span>
 <span class="normal"> 954</span>
 <span class="normal"> 955</span>
 <span class="normal"> 956</span>
@@ -7387,7 +7393,13 @@ URL to download a custom task or template URL that resolves to a file.</p>
 <span class="normal">1035</span>
 <span class="normal">1036</span>
 <span class="normal">1037</span>
-<span class="normal">1038</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Execute a Nornir task plugin.</span>
 
@@ -7705,13 +7717,7 @@ cannot be downloaded.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1040</span>
-<span class="normal">1041</span>
-<span class="normal">1042</span>
-<span class="normal">1043</span>
-<span class="normal">1044</span>
-<span class="normal">1045</span>
-<span class="normal">1046</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1046</span>
 <span class="normal">1047</span>
 <span class="normal">1048</span>
 <span class="normal">1049</span>
@@ -7829,7 +7835,13 @@ cannot be downloaded.</p>
 <span class="normal">1161</span>
 <span class="normal">1162</span>
 <span class="normal">1163</span>
-<span class="normal">1164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
+<span class="normal">1164</span>
+<span class="normal">1165</span>
+<span class="normal">1166</span>
+<span class="normal">1167</span>
+<span class="normal">1168</span>
+<span class="normal">1169</span>
+<span class="normal">1170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">commands</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
@@ -8164,13 +8176,7 @@ URL that resolves to a file.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1166</span>
-<span class="normal">1167</span>
-<span class="normal">1168</span>
-<span class="normal">1169</span>
-<span class="normal">1170</span>
-<span class="normal">1171</span>
-<span class="normal">1172</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1172</span>
 <span class="normal">1173</span>
 <span class="normal">1174</span>
 <span class="normal">1175</span>
@@ -8266,7 +8272,13 @@ URL that resolves to a file.</p>
 <span class="normal">1265</span>
 <span class="normal">1266</span>
 <span class="normal">1267</span>
-<span class="normal">1268</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cfg</span><span class="p">(</span>
+<span class="normal">1268</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cfg</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
@@ -8589,13 +8601,7 @@ the dictionary will contain both the test results and the rendered test suite.</
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1270</span>
-<span class="normal">1271</span>
-<span class="normal">1272</span>
-<span class="normal">1273</span>
-<span class="normal">1274</span>
-<span class="normal">1275</span>
-<span class="normal">1276</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1276</span>
 <span class="normal">1277</span>
 <span class="normal">1278</span>
 <span class="normal">1279</span>
@@ -8768,7 +8774,13 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">1446</span>
 <span class="normal">1447</span>
 <span class="normal">1448</span>
-<span class="normal">1449</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span>
+<span class="normal">1449</span>
+<span class="normal">1450</span>
+<span class="normal">1451</span>
+<span class="normal">1452</span>
+<span class="normal">1453</span>
+<span class="normal">1454</span>
+<span class="normal">1455</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">suite</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">subset</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -9070,13 +9082,7 @@ the dictionary will contain both the test results and the rendered test suite.</
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1460</span>
-<span class="normal">1461</span>
-<span class="normal">1462</span>
-<span class="normal">1463</span>
-<span class="normal">1464</span>
-<span class="normal">1465</span>
-<span class="normal">1466</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1466</span>
 <span class="normal">1467</span>
 <span class="normal">1468</span>
 <span class="normal">1469</span>
@@ -9095,7 +9101,13 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">1482</span>
 <span class="normal">1483</span>
 <span class="normal">1484</span>
-<span class="normal">1485</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="normal">1485</span>
+<span class="normal">1486</span>
+<span class="normal">1487</span>
+<span class="normal">1488</span>
+<span class="normal">1489</span>
+<span class="normal">1490</span>
+<span class="normal">1491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Task to call various network-related utility functions.</span>
 
@@ -9319,13 +9331,7 @@ the dictionary will contain both the test results and the rendered test suite.</
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1487</span>
-<span class="normal">1488</span>
-<span class="normal">1489</span>
-<span class="normal">1490</span>
-<span class="normal">1491</span>
-<span class="normal">1492</span>
-<span class="normal">1493</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1493</span>
 <span class="normal">1494</span>
 <span class="normal">1495</span>
 <span class="normal">1496</span>
@@ -9401,7 +9407,13 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">1566</span>
 <span class="normal">1567</span>
 <span class="normal">1568</span>
-<span class="normal">1569</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+<span class="normal">1569</span>
+<span class="normal">1570</span>
+<span class="normal">1571</span>
+<span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;napalm&quot;</span><span class="p">,</span>
     <span class="n">getters</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;get_facts&quot;</span><span class="p">,</span>
@@ -9666,13 +9678,7 @@ the dictionary will contain both the test results and the rendered test suite.</
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1571</span>
-<span class="normal">1572</span>
-<span class="normal">1573</span>
-<span class="normal">1574</span>
-<span class="normal">1575</span>
-<span class="normal">1576</span>
-<span class="normal">1577</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1577</span>
 <span class="normal">1578</span>
 <span class="normal">1579</span>
 <span class="normal">1580</span>
@@ -9746,7 +9752,13 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">1648</span>
 <span class="normal">1649</span>
 <span class="normal">1650</span>
-<span class="normal">1651</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">file_copy</span><span class="p">(</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">file_copy</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">source_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
@@ -9908,13 +9920,7 @@ the dictionary will contain both the test results and the rendered test suite.</
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1653</span>
-<span class="normal">1654</span>
-<span class="normal">1655</span>
-<span class="normal">1656</span>
-<span class="normal">1657</span>
-<span class="normal">1658</span>
-<span class="normal">1659</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1659</span>
 <span class="normal">1660</span>
 <span class="normal">1661</span>
 <span class="normal">1662</span>
@@ -9933,7 +9939,13 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">1675</span>
 <span class="normal">1676</span>
 <span class="normal">1677</span>
-<span class="normal">1678</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">runtime_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="normal">1678</span>
+<span class="normal">1679</span>
+<span class="normal">1680</span>
+<span class="normal">1681</span>
+<span class="normal">1682</span>
+<span class="normal">1683</span>
+<span class="normal">1684</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">runtime_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Task to work with Nornir runtime (in-memory) inventory.</span>
 
@@ -9981,20 +9993,20 @@ the dictionary will contain both the test results and the rendered test suite.</
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\nornir_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1680</span>
-<span class="normal">1681</span>
-<span class="normal">1682</span>
-<span class="normal">1683</span>
-<span class="normal">1684</span>
-<span class="normal">1685</span>
-<span class="normal">1686</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1686</span>
 <span class="normal">1687</span>
 <span class="normal">1688</span>
 <span class="normal">1689</span>
 <span class="normal">1690</span>
 <span class="normal">1691</span>
 <span class="normal">1692</span>
-<span class="normal">1693</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">nb_get_next_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">1693</span>
+<span class="normal">1694</span>
+<span class="normal">1695</span>
+<span class="normal">1696</span>
+<span class="normal">1697</span>
+<span class="normal">1698</span>
+<span class="normal">1699</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">nb_get_next_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Task to query next available IP address from Netbox service&quot;&quot;&quot;</span>
     <span class="n">reply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
