@@ -676,6 +676,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#containerlab-service-tasks-demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Containerlab Service Tasks Demo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#containerlab-service-show-commands" class="md-nav__link">
     <span class="md-ellipsis">
       Containerlab Service Show Commands
@@ -688,6 +697,15 @@
   <a href="#nornir-service-integration" class="md-nav__link">
     <span class="md-ellipsis">
       Nornir Service Integration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#netbox-service-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Netbox Service Integration
     </span>
   </a>
   
@@ -3698,6 +3716,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#containerlab-service-tasks-demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Containerlab Service Tasks Demo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#containerlab-service-show-commands" class="md-nav__link">
     <span class="md-ellipsis">
       Containerlab Service Show Commands
@@ -3710,6 +3737,15 @@
   <a href="#nornir-service-integration" class="md-nav__link">
     <span class="md-ellipsis">
       Nornir Service Integration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#netbox-service-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Netbox Service Integration
     </span>
   </a>
   
@@ -3816,6 +3852,7 @@
 </tr>
 </tbody>
 </table>
+<h2 id="containerlab-service-tasks-demo">Containerlab Service Tasks Demo<a class="headerlink" href="#containerlab-service-tasks-demo" title="Permanent link">¤</a></h2>
 <div class="admonition demos">
 <p class="admonition-title">Demos</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Deploy</label><label for="__tabbed_1_2">Deploy Netbox</label><label for="__tabbed_1_3">Destroy</label><label for="__tabbed_1_4">Inspect</label><label for="__tabbed_1_5">Save</label><label for="__tabbed_1_6">Restart</label><label for="__tabbed_1_7">Nornir Inventory</label></div>
@@ -3866,7 +3903,17 @@ root
 nf#
 </code></pre></div>
 <h2 id="nornir-service-integration">Nornir Service Integration<a class="headerlink" href="#nornir-service-integration" title="Permanent link">¤</a></h2>
-<p>Containerlab Service integrates seamlessly with the Nornir Service to enable network automation workflows. By using the <code>get_nornir_inventory</code> task, Containerlab Service can generate a Nornir-compatible inventory for a specified lab. This inventory can then be loaded into the Nornir Service, allowing it to manage the containerlab hosts as part of its runtime inventory. Refer to <a href="../../nornir/services_nornir_service_tasks_runtime_inventory/#nornir-and-containerlab-services-integration">Nornir and Containerlab Services Integration</a></p>
+<p>NorFab Containerlab Service integrates seamlessly with the Nornir Service to enable network automation workflows. By using the <code>get_nornir_inventory</code> task, Containerlab Service can generate a Nornir-compatible inventory for a specified lab. This inventory can then be loaded into the Nornir Service, allowing it to manage the containerlab hosts as part of its runtime inventory. Refer to <a href="../../nornir/services_nornir_service_tasks_runtime_inventory/#nornir-and-containerlab-services-integration">Nornir and Containerlab Services Integration</a></p>
+<h2 id="netbox-service-integration">Netbox Service Integration<a class="headerlink" href="#netbox-service-integration" title="Permanent link">¤</a></h2>
+<p>NorFab Containerlab Service integrates with Netbox to automate the deployment of network topologies using real device and link data. By leveraging the <code>deploy_netbox</code> task, users can:</p>
+<ul>
+<li>Fetch device and connection information directly from Netbox, using device lists, tenants, or advanced filters.</li>
+<li>Automatically generate Containerlab topology files based on Netbox inventory.</li>
+<li>Deploy, reconfigure, or update labs using up-to-date data from Netbox.</li>
+<li>Customize node parameters via Netbox device configuration context (e.g., image, kind, interface renaming).</li>
+<li>Seamlessly synchronize lab environments with the source of truth in Netbox.</li>
+</ul>
+<p>For more details and usage examples, see the <a href="../services_containerlab_service_tasks_deploy_netbox/">deploy_netbox task documentation</a>.</p>
 <h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">¤</a></h2>
 <p>The Containerlab Service is ideal for the following scenarios:</p>
 <ol>
