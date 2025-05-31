@@ -9,9 +9,10 @@ Containerlab Service is based on [Containerlab](https://containerlab.dev/) - an 
 
 ![Containerlab Service Architecture](../../images/Containerlab_Service.jpg)
 
-Each Containerlab worker can manage multiple labs concurrently, offering scalability for complex network environments. By leveraging Containerlab, users can:
+Each Containerlab worker can manage multiple labs concurrently, offering scalability for complex network environments. By leveraging Containerlab, you can:
 
 - Deploy network topologies using YAML-based configuration files.
+- Source and deploy lab topologies from Netbox using Netbox Services.
 - Inspect and monitor the status of running container labs.
 - Save and restore lab configurations.
 - Integrate with Nornir Service for automations testing.
@@ -22,7 +23,7 @@ Each Containerlab worker can manage multiple labs concurrently, offering scalabi
 
 ## Containerlab Service Tasks
 
-The Containerlab Service supports the following tasks:
+Containerlab Service supports the following tasks:
 
 | Task          | Description  | Use Cases |
 |---------------|--------------|-----------|
@@ -33,6 +34,8 @@ The Containerlab Service supports the following tasks:
 | **[save](services_containerlab_service_tasks_save.md)**      | Saves the configuration of a specified lab. | Backing up lab configurations. |
 | **[restart_lab](services_containerlab_service_tasks_restart.md)** | Restarts a specified lab. | Reinitializing lab environments. |
 | **[get_nornir_inventory](services_containerlab_service_tasks_nornir_inventory.md)** | Retrieves the Nornir inventory for a specified lab. | Generating inventory for network automation tools. |
+
+## Containerlab Service Tasks Demo
 
 !!! Demos
 
@@ -91,7 +94,19 @@ nf#
 
 ## Nornir Service Integration
 
-Containerlab Service integrates seamlessly with the Nornir Service to enable network automation workflows. By using the `get_nornir_inventory` task, Containerlab Service can generate a Nornir-compatible inventory for a specified lab. This inventory can then be loaded into the Nornir Service, allowing it to manage the containerlab hosts as part of its runtime inventory. Refer to [Nornir and Containerlab Services Integration](../nornir/services_nornir_service_tasks_runtime_inventory.md/#nornir-and-containerlab-services-integration)
+NorFab Containerlab Service integrates seamlessly with the Nornir Service to enable network automation workflows. By using the `get_nornir_inventory` task, Containerlab Service can generate a Nornir-compatible inventory for a specified lab. This inventory can then be loaded into the Nornir Service, allowing it to manage the containerlab hosts as part of its runtime inventory. Refer to [Nornir and Containerlab Services Integration](../nornir/services_nornir_service_tasks_runtime_inventory.md/#nornir-and-containerlab-services-integration)
+
+## Netbox Service Integration
+
+NorFab Containerlab Service integrates with Netbox to automate the deployment of network topologies using real device and link data. By leveraging the `deploy_netbox` task, users can:
+
+- Fetch device and connection information directly from Netbox, using device lists, tenants, or advanced filters.
+- Automatically generate Containerlab topology files based on Netbox inventory.
+- Deploy, reconfigure, or update labs using up-to-date data from Netbox.
+- Customize node parameters via Netbox device configuration context (e.g., image, kind, interface renaming).
+- Seamlessly synchronize lab environments with the source of truth in Netbox.
+
+For more details and usage examples, see the [deploy_netbox task documentation](services_containerlab_service_tasks_deploy_netbox.md).
 
 ## Use Cases
 

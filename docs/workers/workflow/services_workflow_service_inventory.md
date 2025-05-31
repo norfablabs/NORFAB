@@ -16,6 +16,13 @@ topology:
     - workflow-worker-1
 ```
 
+To obtain broker `shared_key` run this command on broker:
+
+```
+cd <path/to/broker/inventory.yaml>
+nfcli --show-broker-shared-key
+```
+
 Sample workflow worker inventory definition
 
 ``` yaml title="workflowworkflow-worker-1.yaml"

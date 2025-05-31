@@ -16,6 +16,13 @@ topology:
     - fastapi-worker-1
 ```
 
+To obtain broker `shared_key` run this command on broker:
+
+```
+cd <path/to/broker/inventory.yaml>
+nfcli --show-broker-shared-key
+```
+
 Sample FasAPI worker inventory definition
 
 ``` yaml title="fastapi/fastapi-worker-1.yaml"

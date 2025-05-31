@@ -16,6 +16,13 @@ topology:
     - netbox-worker-1
 ```
 
+To obtain broker `shared_key` run this command on broker:
+
+```
+cd <path/to/broker/inventory.yaml>
+nfcli --show-broker-shared-key
+```
+
 Sample Netbox Worker Inventory:
 
 ``` yaml title="netbox/netbox-worker-1.yaml"

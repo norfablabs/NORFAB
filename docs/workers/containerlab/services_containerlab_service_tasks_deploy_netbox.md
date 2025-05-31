@@ -79,11 +79,11 @@ Containerlab node details can be defined under device configuration context `nor
 
 Below is an example of how to use the Containerlab deploy Netbox task to deploy a topology.
 
-!!! example
+!!! examples
 
     === "Demo - Devices List"
 
-        ![Containerlab Deploy Demo](../../images/containerlab/containerlab_deploy_netbox_demo_devices.gif)
+        ![Containerlab Deploy Netbox Demo](../../images/containerlab/containerlab_deploy_netbox_demo_devices.gif)
 
     === "CLI"
 

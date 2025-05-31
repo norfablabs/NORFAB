@@ -16,6 +16,13 @@ topology:
     - nornir-worker-1
 ```
 
+To obtain broker `shared_key` run this command on broker:
+
+```
+cd <path/to/broker/inventory.yaml>
+nfcli --show-broker-shared-key
+```
+
 Sample Nornir worker inventory definition
 
 ``` yaml title="nornir/nornir-worker-1.yaml"
