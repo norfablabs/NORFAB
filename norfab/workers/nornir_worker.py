@@ -371,7 +371,7 @@ class NornirWorker(NFPWorker):
         if self.nr is not None and self.nr.inventory.hosts:
             self.nr.close_connections()
             if progress:
-                self.event("Closed hosts connections.")
+                self.event("Closed existing hosts connections.")
 
         # initiate Nornir
         self.nr = InitNornir(
@@ -432,7 +432,7 @@ class NornirWorker(NFPWorker):
         # pull Nornir inventory from Containerlab
         if "containerlab" in self.nornir_worker_inventory:
             self.nornir_inventory_load_containerlab(
-                **self.nornir_worker_inventory["containerlab"]
+                **self.nornir_worker_inventory["containerlab"], re_init_nornir=False
             )
             if progress:
                 self.event("Pulled Nornir inventory data from Containerlab")
@@ -521,6 +521,7 @@ class NornirWorker(NFPWorker):
         use_default_credentials: bool = True,
         progress: bool = False,
         dry_run: bool = False,
+        re_init_nornir: bool = True,
     ) -> Result:
         """
         Pulls the Nornir inventory from a Containerlab lab instance and merges it with the
@@ -595,6 +596,11 @@ class NornirWorker(NFPWorker):
 
         if progress:
             self.event(f"Pulled Nornir inventory from Containerlab")
+
+        if re_init_nornir is True:
+            self.init_nornir(self.nornir_worker_inventory, progress)
+            if progress:
+                self.event("Nornir instance re-initialized")
 
         return ret
 

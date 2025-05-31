@@ -1,3 +1,11 @@
+## 0.8.2
+
+### BUGS
+
+1. Fixed nornir inventory load from containerlab handling
+
+---
+
 ## 0.8.1
 
 ### BUGS
