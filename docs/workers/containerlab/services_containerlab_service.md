@@ -9,7 +9,9 @@ Containerlab Service is based on [Containerlab](https://containerlab.dev/) - an 
 
 ![Containerlab Service Architecture](../../images/Containerlab_Service.jpg)
 
-Each Containerlab worker can manage multiple labs concurrently, offering scalability for complex network environments. By leveraging Containerlab, you can:
+Each NorFab Containerlab worker can manage multiple labs, offering scalability for complex network testing environments. 
+
+By leveraging Containerlab, you can:
 
 - Deploy network topologies using YAML-based configuration files.
 - Source and deploy lab topologies from Netbox using Netbox Services.

@@ -1645,6 +1645,37 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    def get_nornir_hosts(self, kwargs: dict, timeout: int):
+        """
+        Retrieves a list of unique Nornir hosts from Nornir service based on provided filter criteria.
+
+        Args:
+            kwargs (dict): Dictionary of keyword arguments, where keys starting with 'F' are used as filters.
+            timeout (int): Timeout value (in seconds) for the job execution.
+
+        Returns:
+            list: Sorted list of unique Nornir host names that match the filter criteria.
+
+        Notes:
+            - Only filters with keys starting with 'F' are considered.
+            - Hosts are collected from all workers where the job did not fail.
+        """
+        ret = []
+        filters = {k: v for k, v in kwargs.items() if k.startswith("F")}
+        if filters:
+            nornir_hosts = self.client.run_job(
+                "nornir",
+                "get_nornir_hosts",
+                kwargs=filters,
+                workers="all",
+                timeout=timeout,
+            )
+            for w, r in nornir_hosts.items():
+                if r["failed"] is False:
+                    ret.extend(r["result"])
+
+        return list(sorted(set(ret)))
+
     def update_device_facts(
         self,
         instance: str = None,
@@ -1688,6 +1719,10 @@ class NetboxWorker(NFPWorker):
         kwargs["add_details"] = True
 
         if datasource == "nornir":
+            # source hosts list from Nornir
+            if kwargs:
+                devices.extend(self.get_nornir_hosts(kwargs, timeout))
+            # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
                 kwargs["FL"] = devices[i : i + batch_size]
                 kwargs["getters"] = "get_facts"
@@ -1788,11 +1823,16 @@ class NetboxWorker(NFPWorker):
             UnsupportedServiceError: If the specified datasource is not supported.
         """
         result = {}
+        devices = devices or []
         instance = instance or self.default_instance
         ret = Result(task=f"{self.name}:update_device_interfaces", result=result)
         nb = self._get_pynetbox(instance)
 
         if datasource == "nornir":
+            # source hosts list from Nornir
+            if kwargs:
+                devices.extend(self.get_nornir_hosts(kwargs, timeout))
+            # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
                 kwargs["FL"] = devices[i : i + batch_size]
                 kwargs["getters"] = "get_interfaces"
@@ -1981,11 +2021,16 @@ class NetboxWorker(NFPWorker):
             UnsupportedServiceError: If the specified datasource is not supported.
         """
         result = {}
+        devices = devices or []
         instance = instance or self.default_instance
         ret = Result(task=f"{self.name}:update_device_ip", result=result)
         nb = self._get_pynetbox(instance)
 
         if datasource == "nornir":
+            # source hosts list from Nornir
+            if kwargs:
+                devices.extend(self.get_nornir_hosts(kwargs, timeout))
+            # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
                 kwargs["FL"] = devices[i : i + batch_size]
                 kwargs["getters"] = "get_interfaces_ip"

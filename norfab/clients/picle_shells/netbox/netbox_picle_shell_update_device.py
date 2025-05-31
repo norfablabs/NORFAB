@@ -21,18 +21,18 @@ from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class NornirServiceCommands(NornirCommonArgs):
+class UpdateDeviceFactsDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
     @staticmethod
     def run(*args, **kwargs):
-        kwargs["via"] = "nornir"
-        return UpdateDeviceInterfacesCommand.run(*args, **kwargs)
+        kwargs["datasource"] = "nornir"
+        return UpdateDeviceFactsCommand.run(*args, **kwargs)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
 
 
-class UpdateDatasources(BaseModel):
-    nornir: NornirServiceCommands = Field(
+class UpdateDeviceFactsDatasources(BaseModel):
+    nornir: UpdateDeviceFactsDatasourcesNornir = Field(
         None,
         description="Use Nornir service to retrieve data from devices",
     )
@@ -57,7 +57,7 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     batch_size: StrictInt = Field(
         10, description="Number of devices to process at a time", alias="batch-size"
     )
-    datasource: UpdateDatasources = Field(
+    datasource: UpdateDeviceFactsDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
     )
@@ -90,6 +90,23 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
+class UpdateDeviceInterfacesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
+    @staticmethod
+    def run(*args, **kwargs):
+        kwargs["datasource"] = "nornir"
+        return UpdateDeviceInterfacesCommand.run(*args, **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class UpdateDeviceInterfacesDatasources(BaseModel):
+    nornir: UpdateDeviceInterfacesDatasourcesNornir = Field(
+        None,
+        description="Use Nornir service to retrieve data from devices",
+    )
+
+
 class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     dry_run: Optional[StrictBool] = Field(
         None,
@@ -106,7 +123,7 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         description="Emit execution progress",
         json_schema_extra={"presence": True},
     )
-    datasource: UpdateDatasources = Field(
+    datasource: UpdateDeviceInterfacesDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
     )
@@ -142,6 +159,23 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
+class UpdateDeviceIPAddressesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
+    @staticmethod
+    def run(*args, **kwargs):
+        kwargs["datasource"] = "nornir"
+        return UpdateDeviceIPAddressesCommand.run(*args, **kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class UpdateDeviceIPAddressesDatasources(BaseModel):
+    nornir: UpdateDeviceIPAddressesDatasourcesNornir = Field(
+        None,
+        description="Use Nornir service to retrieve data from devices",
+    )
+
+
 class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     dry_run: Optional[StrictBool] = Field(
         None,
@@ -158,7 +192,7 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         description="Emit execution progress",
         json_schema_extra={"presence": True},
     )
-    datasource: UpdateDatasources = Field(
+    datasource: UpdateDeviceIPAddressesDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
     )
