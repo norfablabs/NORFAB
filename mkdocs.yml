@@ -86,6 +86,7 @@ nav:
             - Inventory: workers/containerlab/services_containerlab_service_inventory.md
             - Tasks:
               - Deploy: workers/containerlab/services_containerlab_service_tasks_deploy.md
+              - Deploy Netbox: workers/containerlab/services_containerlab_service_tasks_deploy_netbox.md
               - Destroy: workers/containerlab/services_containerlab_service_tasks_destroy.md
               - Save: workers/containerlab/services_containerlab_service_tasks_save.md
               - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
@@ -116,6 +117,7 @@ nav:
               - GET Connections: workers/netbox/services_netbox_service_tasks_get_connections.md
               - GET Circuits: workers/netbox/services_netbox_service_tasks_get_circuits.md
               - GET Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
+              - GET Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
               - GETNext IP: workers/netbox/services_netbox_service_tasks_get_next_ip.md
               - UPDATE Device Facts: workers/netbox/services_netbox_service_tasks_update_device_facts.md
               - UPDATE Device Interfaces: workers/netbox/services_netbox_service_tasks_update_device_interfaces.md

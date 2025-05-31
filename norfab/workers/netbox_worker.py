@@ -2126,7 +2126,7 @@ class NetboxWorker(NFPWorker):
     def get_containerlab_inventory(
         self,
         lab_name: str = None,
-        tenant_name: str = None,
+        tenant: str = None,
         filters: list = None,
         devices: list = None,
         instance: str = None,
@@ -2174,22 +2174,35 @@ class NetboxWorker(NFPWorker):
 
         Special handling given to these parameters:
 
+        - `lab_name` - if not provided uses `tenant` argument value as a lab name
         - `kind` - uses device platform field value by default
         - `image` - uses `image` value if provided, otherwise uses `{kind}:latest`
         - `interfaces_rename` - a list of one or more interface renaming instructions,
             each item must have `find` and `replace` defined, optional `use_regex`
             flag specifies whether to use regex based pattern substitution.
 
+        To retrieve topology data from Netbox at least one of these arguments must be provided
+        to identify a set of devices to include into Containerlab topology:
+
+        - `tenant` - topology constructed using all devices and links that belong to this tenant
+        - `devices` - creates topology only using devices in the lists
+        - `filters` - list of device filters to retrieve from Netbox and add to topology
+
+        If multiple of above arguments provided, resulting lab topology is a sum of all
+        devices matched.
+
         Args:
             lab_name (str, Mandatory): Name of containerlab to construct inventory for.
+            tenant (str, optional): Construct topology using given tenant's devices
             filters (list, optional): List of filters to apply when retrieving devices from NetBox.
             devices (list, optional): List of specific devices to retrieve from NetBox.
             instance (str, optional): NetBox instance to use.
             image (str, optional): Default containerlab image to use,
-            ipv4_subnet (str, Optional): Mangement subnet to use to IP number nodes
-                starting with 4th IP in the subnet.
+            ipv4_subnet (str, Optional): Management subnet to use to IP number nodes
+                starting with 2nd IP in the subnet, in assumption that 1st IP is a default gateway.
             ports (tuple, Optional): Ports range to use for nodes.
             ports_map (dict, Optional): dictionary keyed by node name with list of ports maps to use,
+            progress (bool, optional): If True, emits progress events.
             cache (Union[bool, str], optional): Cache usage options:
 
                 - True: Use data stored in cache if it is up to date, refresh it otherwise.
@@ -2198,21 +2211,21 @@ class NetboxWorker(NFPWorker):
                 - "force": Use data in cache without checking if it is up to date.
 
         Returns:
-            dict: Containerlab inventory dictionary containing hosts and their respective data.
+            dict: Containerlab inventory dictionary containing lab topology data
         """
         nodes, links = {}, []
         ports_map = ports_map or {}
         endpts_done = []  # to deduplicate links
         instance = instance or self.default_instance
         # handle lab name and tenant name with filters
-        if lab_name is None and tenant_name:
-            lab_name = tenant_name
-        if tenant_name:
+        if lab_name is None and tenant:
+            lab_name = tenant
+        if tenant:
             if filters:
                 for filter in filters:
-                    filter["tenant"] = tenant_name
+                    filter["tenant"] = tenant
             else:
-                filters = [{"tenant": tenant_name}]
+                filters = [{"tenant": tenant}]
         # construct inventory
         inventory = {
             "name": lab_name,
@@ -2221,7 +2234,7 @@ class NetboxWorker(NFPWorker):
         }
         ret = Result(task=f"{self.name}:get_containerlab_inventory", result=inventory)
         mgmt_net = ipaddress.ip_network(ipv4_subnet)
-        available_ips = list(mgmt_net.hosts())[3:]
+        available_ips = list(mgmt_net.hosts())[1:]
 
         # run checks
         if not available_ips:
@@ -2289,7 +2302,12 @@ class NetboxWorker(NFPWorker):
                         "830/tcp",
                         "8080/tcp",
                     ]:
-                        node["ports"].append(f"{available_ports.pop(0)}:{port}")
+                        if available_ports:
+                            node["ports"].append(f"{available_ports.pop(0)}:{port}")
+                        else:
+                            raise RuntimeError(
+                                "Run out of TCP / UDP ports to allocate."
+                            )
 
             # save node content
             nodes[device_name] = node

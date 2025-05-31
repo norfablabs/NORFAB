@@ -4,6 +4,7 @@
 
 1. Fixed `show containerlab inventory` command
 2. Fixed Nornir Worker inventory load handling
+3. Netbox interface update improving mac address handling
 
 ### FEATURES
 
@@ -13,6 +14,7 @@
 ### CHANGES
 
 1. Improved client post job retry logic
+2. `FN` filter argument for Nornir add presence handling for nfcli
 
 ---
 

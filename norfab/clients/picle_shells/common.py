@@ -182,7 +182,7 @@ class BoolEnum(Enum):
 class ClientRunJobArgs(BaseModel):
     timeout: Optional[StrictInt] = Field(None, description="Job timeout")
     workers: Union[StrictStr, List[StrictStr]] = Field(
-        "all", description="Filter worker to target"
+        "all", description="Filter workers to target"
     )
     verbose_result: StrictBool = Field(
         False,

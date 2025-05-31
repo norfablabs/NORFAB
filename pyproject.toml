@@ -3,7 +3,7 @@ name = "norfab"
 
 [tool.poetry]
 name = "norfab"
-version = "0.8.0"
+version = "0.8.1"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
 authors = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
 maintainers = ["Denis Mulyalin <d.mulyalin@gmail.com>"]

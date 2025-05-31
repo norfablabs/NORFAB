@@ -879,17 +879,22 @@ class NFPClient(object):
         uuid = uuid or uuid4().hex
         start_time = int(time.time())
         ret = None
-        post_retry = 3
+        post_retry = int(retry)
+        get_retry = int(retry)
 
         # POST job to workers
         while post_retry:
             post_result = self.post(service, task, args, kwargs, workers, uuid, timeout)
             if post_result["status"] == "200":
+                break
+            else:
                 log.warning(
                     f"{self.name}:run_job - {service}:{task} POST status "
-                    f"to '{workers}' workers is not 200 - '{post_result}'. Retrying.."
+                    f"to '{workers}' workers is '{post_result['status']}', "
+                    f"errors: {'; '.join(post_result['errors'])}; Retrying "
+                    f"{retry + 1 - post_retry} / {retry}"
                 )
-                break
+                time.sleep(3)
             post_retry -= 1
         else:
             log.error(
@@ -903,24 +908,25 @@ class NFPClient(object):
         get_timeout = remaining_timeout / retry
 
         # GET job results
-        while retry:
+        while get_retry:
             get = self.get(
                 service, task, [], {}, post_result["workers"], uuid, get_timeout
             )
             if self.exit_event.is_set() or self.destroy_event.is_set():
                 break
             elif get["status"] == "300":  # PENDING
-                retry -= 1
+                get_retry -= 1
                 log.debug(
                     f"{self.name}:run_job - {service}:{task}:{uuid} GET "
-                    f"results pending, keep waiting"
+                    f"results pending. Retrying {retry + 1 - get_retry} / {retry}"
                 )
                 continue
             elif get["status"] == "408":  # TIMEOUT
-                retry -= 1
+                get_retry -= 1
                 log.debug(
                     f"{self.name}:run_job - {service}:{task}:{uuid} GET "
-                    f"results {get_timeout}s timeout expired, keep waiting"
+                    f"results {get_timeout}s timeout expired. Retrying "
+                    f"{retry + 1 - get_retry} / {retry}"
                 )
                 continue
             elif get["status"] in ["200", "202"]:  # OK
@@ -934,8 +940,8 @@ class NFPClient(object):
                 break
         else:
             log.error(
-                f"{self.name}:run_job - {service}:{task}:{uuid} "
-                f"retry exceeded, GET returned no results, timeout {timeout}s"
+                f"{self.name}:run_job - {service}:{task}:{uuid} {retry} GET retries "
+                f"exceeded, GET returned no results, timeout {timeout}s"
             )
         self.running_job = False
         return ret

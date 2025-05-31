@@ -381,7 +381,7 @@ interfaces.extend(
         {
             "name": intf,
             "device": {"name": host},
-            "type": "virtual",
+            "type": "1000base-t",
         }
         for intf in ["Management0", "Ethernet1", "Ethernet2", "Ethernet3", "Ethernet4"]
         for host in ["ceos-spine-1", "ceos-spine-2"]
@@ -683,6 +683,25 @@ connections = [
         "status": "connected",
         "tenant": {"slug": "saltnornir"},
     },
+    {
+        "type": "cat6a",
+        "a_terminations": [
+            {
+                "device": "ceos-spine-1",
+                "interface": f"Ethernet1",
+                "termination_type": "dcim.interface",
+            },
+        ],
+        "b_terminations": [
+            {
+                "device": "ceos-spine-2",
+                "interface": f"Ethernet1",
+                "termination_type": "dcim.interface",
+            }
+        ],
+        "status": "connected",
+        "tenant": {"slug": "saltnornir"},
+    },
     # patch panel connections
     {
         "type": "smf",
@@ -906,15 +925,11 @@ devices = [
                 "containerlab": {
                     "image": "ceosimage:4.30.0F",
                     "interfaces_rename": [
-                        {
-                            "find": "Ethernet",
-                            "replace": "eth",
-                            "use_regex": False
-                        }
+                        {"find": "Ethernet", "replace": "eth", "use_regex": False}
                     ],
-                    "kind": "ceos"
+                    "kind": "ceos",
                 }
-            }
+            },
         },
     },
     {
@@ -939,15 +954,11 @@ devices = [
                 "containerlab": {
                     "image": "ceosimage:4.30.0F",
                     "interfaces_rename": [
-                        {
-                            "find": "Ethernet",
-                            "replace": "eth",
-                            "use_regex": False
-                        }
+                        {"find": "Ethernet", "replace": "eth", "use_regex": False}
                     ],
-                    "kind": "ceos"
+                    "kind": "ceos",
                 }
-            }
+            },
         },
     },
     {
@@ -1118,6 +1129,15 @@ devices = [
         "local_context_data": {
             "domain_name": "norfablab.io",
             "nornir": {"hostname": "192.168.4.130", "port": 2200},
+            "norfab": {
+                "containerlab": {
+                    "image": "ceosimage:4.30.0F",
+                    "interfaces_rename": [
+                        {"find": "Ethernet", "replace": "eth", "use_regex": False}
+                    ],
+                    "kind": "ceos",
+                }
+            },
         },
     },
     {
@@ -1136,6 +1156,15 @@ devices = [
         "local_context_data": {
             "domain_name": "norfablab.io",
             "nornir": {"hostname": "192.168.4.130", "port": 2201},
+            "norfab": {
+                "containerlab": {
+                    "image": "ceosimage:4.30.0F",
+                    "interfaces_rename": [
+                        {"find": "Ethernet", "replace": "eth", "use_regex": False}
+                    ],
+                    "kind": "ceos",
+                }
+            },
         },
     },
 ]
@@ -1815,10 +1844,12 @@ def create_circuits():
                 _ = circuit.pop("provider_account")
             circuit = nb.circuits.circuits.create(**item)
             # add terminations
-            if NB_VERSION >=4.2:
+            if NB_VERSION >= 4.2:
                 # add termination A
                 if termination_a and "provider_network" in termination_a:
-                    nb_provider_network_a = nb.circuits.provider_networks.get(name=termination_a["provider_network"])
+                    nb_provider_network_a = nb.circuits.provider_networks.get(
+                        name=termination_a["provider_network"]
+                    )
                     cterm_a = nb.circuits.circuit_terminations.create(
                         circuit=circuit.id,
                         term_side="A",
@@ -1835,7 +1866,9 @@ def create_circuits():
                     )
                 # add termination B
                 if termination_b and "provider_network" in termination_b:
-                    nb_provider_network_b = nb.circuits.provider_networks.get(name=termination_b["provider_network"])
+                    nb_provider_network_b = nb.circuits.provider_networks.get(
+                        name=termination_b["provider_network"]
+                    )
                     cterm_z = nb.circuits.circuit_terminations.create(
                         circuit=circuit.id,
                         term_side="Z",

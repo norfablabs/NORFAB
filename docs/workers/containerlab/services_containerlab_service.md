@@ -27,6 +27,7 @@ The Containerlab Service supports the following tasks:
 | Task          | Description  | Use Cases |
 |---------------|--------------|-----------|
 | **[deploy](services_containerlab_service_tasks_deploy.md)**    | Deploys a containerlab topology. | Automating lab deployments, testing network configurations. |
+| **[deploy_netbox](services_containerlab_service_tasks_deploy_netbox.md)**    | Deploys a containerlab topology using Netbox devices data. | Automating lab deployments based on Netbox. |
 | **[destroy_lab](services_containerlab_service_tasks_destroy.md)** | Destroys a specified lab. | Cleaning up resources, resetting lab environments. |
 | **[inspect](services_containerlab_service_tasks_inspect.md)**   | Inspects the container lab containers configuration and status. | Monitoring lab status, troubleshooting. |
 | **[save](services_containerlab_service_tasks_save.md)**      | Saves the configuration of a specified lab. | Backing up lab configurations. |
@@ -38,6 +39,10 @@ The Containerlab Service supports the following tasks:
     === "Deploy"
 
         ![Containerlab Deploy Demo](../../images/containerlab/containerlab_deploy_demo.gif)
+
+    === "Deploy Netbox"
+
+        ![Containerlab Deploy Demo Netbox](../../images/containerlab/containerlab_deploy_netbox_demo_devices.gif)
 
     === "Destroy"
 

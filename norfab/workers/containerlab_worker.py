@@ -623,7 +623,7 @@ class ContainerlabWorker(NFPWorker):
     def deploy_netbox(
         self,
         lab_name: str = None,
-        tenant_name: str = None,
+        tenant: str = None,
         filters: list = None,
         devices: list = None,
         instance: str = None,
@@ -647,9 +647,19 @@ class ContainerlabWorker(NFPWorker):
         - Saving the generated topology file to a dedicated folder.
         - Executing the `containerlab deploy` command with appropriate arguments.
 
+        To retrieve topology data from Netbox at least one of these arguments must be provided
+        to identify a set of devices to include into Containerlab topology:
+
+        - `tenant` - deploys lab using all devices and links that belong to this tenant
+        - `devices` - lab deployed only using devices in the lists
+        - `filters` - list of device filters to retrieve from Netbox
+
+        If multiple of above arguments provided, resulting lab topology is a sum of all
+        devices matched.
+
         Args:
-            lab_name (str, optional): The name of the lab to deploy.
-            tenant_name (str, optional): Deploy lab for given tenant, lab name if not set
+            lab_name (str, optional): The name to use for the lab to deploy.
+            tenant (str, optional): Deploy lab for given tenant, lab name if not set
                 becomes equal to tenant name.
             filters (list, optional): List of filters to apply when fetching devices from Netbox.
             devices (list, optional): List of specific devices to include in the topology.
@@ -675,15 +685,16 @@ class ContainerlabWorker(NFPWorker):
         ports_in_use = {}
 
         # handle lab name and tenant name
-        if lab_name is None and tenant_name:
-            lab_name = tenant_name
-
-        if progress:
-            self.event(f"Fetching {lab_name} topology data from Netbox")
+        if lab_name is None and tenant:
+            lab_name = tenant
 
         # inspect existing containers
+        if progress:
+            self.event(f"Checking existing containers")
         get_containers = self.inspect(details=True)
         if get_containers.failed is False:
+            if progress:
+                self.event(f"Existing containers found, retrieving details")
             for container in get_containers.result:
                 clab_name = container["Labels"]["containerlab"]
                 clab_topo = container["Labels"]["clab-topo-file"]
@@ -716,12 +727,17 @@ class ContainerlabWorker(NFPWorker):
                         else:
                             msg = f"{clab_name} lab {node_name} node failed to determine mgmt subnet"
                             log.warning(msg)
-                            self.event(msg, severity="WARNING")
+                            if progress:
+                                self.event(msg, severity="WARNING")
                             continue
                 subnets_in_use.add(subnet)
                 # re-use existing lab subnet
                 if clab_name == lab_name:
                     ipv4_subnet = subnet
+                    if progress:
+                        self.event(
+                            f"{ipv4_subnet} not in use by existing containers, using it"
+                        )
                 # allocate new subnet if its in use by other lab
                 elif clab_name != lab_name and ipv4_subnet == subnet:
                     msg = f"{ipv4_subnet} already in use, allocating new subnet"
@@ -729,11 +745,18 @@ class ContainerlabWorker(NFPWorker):
                     if progress:
                         self.event(msg)
                     ipv4_subnet = None
+            if progress:
+                self.event(f"Collected TCP/UDP ports used by existing containers")
 
         # allocate new subnet
         if ipv4_subnet is None:
             pool = set(f"172.100.{i}.0/24" for i in range(100, 255))
             ipv4_subnet = list(sorted(pool.difference(subnets_in_use)))[0]
+            if progress:
+                self.event(f"{lab_name} allocated new subnet {ipv4_subnet}")
+
+        if progress:
+            self.event(f"{lab_name} fetching lab topology data from Netbox")
 
         # download inventory data from Netbox
         netbox_reply = self.client.run_job(
@@ -744,7 +767,7 @@ class ContainerlabWorker(NFPWorker):
             retry=3,
             kwargs={
                 "lab_name": lab_name,
-                "tenant_name": tenant_name,
+                "tenant": tenant,
                 "filters": filters,
                 "devices": devices,
                 "instance": instance,
@@ -766,6 +789,9 @@ class ContainerlabWorker(NFPWorker):
             log.error(msg)
             raise RuntimeError(msg)
 
+        if progress:
+            self.event(f"{lab_name} topology data retrieved from Netbox")
+
         if dry_run is True:
             ret.result = topology_inventory
             return ret
@@ -780,17 +806,21 @@ class ContainerlabWorker(NFPWorker):
             tf.write(yaml.dump(topology_inventory, default_flow_style=False))
 
         if progress:
-            self.event(
-                f"{lab_name} topology data retrieved and saved to '{topology_file}'"
-            )
+            self.event(f"{lab_name} topology data saved to '{topology_file}'")
 
         # form command arguments
         args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
         if reconfigure is True:
             args.append("--reconfigure")
-            self.event(f"Re-deploying lab {os.path.split(topology_file)[-1]}")
+            if progress:
+                self.event(
+                    f"{lab_name} re-deploying lab using {os.path.split(topology_file)[-1]} topology file"
+                )
         else:
-            self.event(f"Deploying lab {os.path.split(topology_file)[-1]}")
+            if progress:
+                self.event(
+                    f"{lab_name} deploying lab using {os.path.split(topology_file)[-1]} topology file"
+                )
         if node_filter is not None:
             args.append("--node-filter")
             args.append(node_filter)

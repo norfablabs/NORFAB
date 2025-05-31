@@ -59,16 +59,13 @@ class DeployNetboxDeviceFilters(NetboxDeviceFilters):
 
 
 class DeployNetboxCommand(GetContainerlabInventoryCommand):
-    lab_name: StrictStr = Field(
-        None, description="Lab name to generate inventory", alias="lab-name"
-    )
     reconfigure: StrictBool = Field(
         False,
         description="Destroy the lab and then re-deploy it.",
         json_schema_extra={"presence": True},
     )
     filters: DeployNetboxDeviceFilters = Field(
-        None, description="Netbox device filters"
+        None, description="Netbox device filters to generate lab inventory for"
     )
     dry_run: Optional[StrictBool] = Field(
         None,
@@ -90,6 +87,14 @@ class DeployNetboxCommand(GetContainerlabInventoryCommand):
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+
+        if not any(k in kwargs for k in ["devices", "filters", "tenant"]):
+            raise ValueError(
+                "Devices list or Netbox filters or Tenant name must be provided."
+            )
+
+        if not any(k in kwargs for k in ["lab_name", "tenant"]):
+            raise ValueError("Lab name or Tenant name must be provided.")
 
         if kwargs.get("devices"):
             if not isinstance(kwargs.get("devices"), list):

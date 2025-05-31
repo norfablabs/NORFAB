@@ -88,10 +88,17 @@ class NetboxDeviceFilters(BaseModel):
 
 class GetContainerlabInventoryCommand(ClientRunJobArgs):
     lab_name: StrictStr = Field(
-        None, description="Lab name to generate inventory", alias="lab-name"
+        None, description="Lab name to generate lab inventory for", alias="lab-name"
     )
-    tenant_name: StrictStr = Field(
-        None, description="Deploy lab by tenant", alias="tenant-name"
+    tenant: StrictStr = Field(
+        None, description="Tenant name to generate lab inventory for"
+    )
+    filters: NetboxDeviceFilters = Field(
+        None, description="Netbox device filters to generate lab inventory for"
+    )
+    devices: Union[List[StrictStr], StrictStr] = Field(
+        None,
+        description="List of devices to generate lab inventory for",
     )
     progress: Optional[StrictBool] = Field(
         True,
@@ -106,10 +113,6 @@ class GetContainerlabInventoryCommand(ClientRunJobArgs):
         description="Name of Netbox instance to pull inventory from",
         alias="netbox-instance",
     )
-    devices: Union[List[StrictStr], StrictStr] = Field(
-        None,
-        description="Exact device names to include in lab deployment",
-    )
     ipv4_subnet: StrictStr = Field(
         "172.100.100.0/24",
         description="IPv4 management subnet to use for lab",
@@ -121,10 +124,7 @@ class GetContainerlabInventoryCommand(ClientRunJobArgs):
     )
     ports: List[StrictInt] = Field(
         [12000, 13000],
-        description="Range of TCP ports to use for nodes",
-    )
-    filters: NetboxDeviceFilters = Field(
-        None, description="Additional Netbox device filters", alias="filters"
+        description="Range of TCP/UDP ports to use for nodes",
     )
 
     @staticmethod
@@ -133,12 +133,12 @@ class GetContainerlabInventoryCommand(ClientRunJobArgs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
 
-        if not any(k in kwargs for k in ["devices", "filters", "tenant_name"]):
+        if not any(k in kwargs for k in ["devices", "filters", "tenant"]):
             raise ValueError(
                 "Devices list or Netbox filters or Tenant name must be provided."
             )
 
-        if not any(k in kwargs for k in ["lab_name", "tenant_name"]):
+        if not any(k in kwargs for k in ["lab_name", "tenant"]):
             raise ValueError("Lab name or Tenant name must be provided.")
 
         if kwargs.get("devices"):
