@@ -1,3 +1,12 @@
+
+## 0.8.3
+
+### CHANGES
+
+1. Improved Netbox device update nfcli to include Fx hosts filtering for nornir datasource
+
+---
+
 ## 0.8.2
 
 ### BUGS

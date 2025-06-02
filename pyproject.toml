@@ -69,11 +69,11 @@ pythonping = { version = "1.1.4", optional = true }
 robotframework = { version = "7.0", optional = true }
 
 # Agent Service Dependencies
-langchain = { version = "0.3.14", optional = true }
-langchain-community = { version = "0.3.14", optional = true }
-langchain-core = { version = "0.3.30", optional = true }
-langchain-ollama = { version = "0.2.2", optional = true }
-ollama = { version = "0.4.6", optional = true }
+langchain = { version = ">=0.3,<=0.4", optional = true }
+langchain-community = { version = ">=0.3,<=0.4", optional = true }
+langchain-core = { version = ">=0.3,<=0.4", optional = true }
+langchain-ollama = { version = ">=0.2,<=0.3", optional = true }
+ollama = { version = ">=0.4,<=1.0", optional = true }
 
 # Netbox Service Dependencies
 diskcache = { version = "5.6.3", optional = true }

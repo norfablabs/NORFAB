@@ -60,7 +60,7 @@ topology:
           - netbox-worker-1.2
     # - pyats-worker-1
     - nornir-worker-6 # Hosts Juniper vMX
-    # - agent-1
+    - agent-1
     - fastapi-worker-1
     - dummy-worker-1
     - workflow-worker-1
