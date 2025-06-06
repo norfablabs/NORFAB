@@ -9,6 +9,8 @@ import os
 import pickle
 import psutil
 import signal
+import asyncio
+import concurrent.futures
 
 from . import NFP
 from .client import NFPClient
@@ -1264,27 +1266,22 @@ class NFPWorker:
                 result=job_completed + job_pending,
             )
 
-    def work(self):
+    def start_threads(self) -> None:
         """
-        Starts multiple threads to handle different tasks and processes jobs in a
-        loop until an exit or destroy event is set.
+        Starts multiple daemon threads required for the worker's operation.
 
-        Threads started:
+        This method initializes and starts the following threads:
+            - request_thread: Handles posting requests using the _post function.
+            - reply_thread: Handles receiving replies using the _get function.
+            - close_thread: Handles closing operations using the close function.
+            - event_thread: Handles event processing using the _event function.
+            - recv_thread: Handles receiving data using the recv function.
 
-        - request_thread: Handles posting requests.
-        - reply_thread: Handles getting replies.
-        - close_thread: Handles closing operations.
-        - event_thread: Handles event processing.
-        - recv_thread: Handles receiving data.
+        Each thread is started as a daemon and is provided with the necessary arguments,
+        including queues, filenames, events, and base directory paths as required.
 
-        Main work loop:
-
-        - Continuously checks for jobs to process from a queue file.
-        - Loads job data and executes the corresponding task.
-        - Saves the result of the job to a reply file.
-        - Marks the job as processed by moving it from the queue file to a queue done file.
-
-        Ensures proper cleanup by calling the destroy method when exit or destroy events are set.
+        Returns:
+            None
         """
         # Start threads
         self.request_thread = threading.Thread(
@@ -1338,99 +1335,174 @@ class NFPWorker:
         )
         self.recv_thread.start()
 
-        # start main work loop
-        while not self.exit_event.is_set() and not self.destroy_event.is_set():
-            # get some job to do
-            with queue_file_lock:
-                with open(self.queue_filename, "rb+") as f:
-                    # get first UUID
-                    for entry in f.readlines():
+    def run_next_job(self):
+        """
+        Processes the next job in the queue.
+
+        This asynchronous method performs the following steps:
+
+            1. Acquires a lock and reads the next job entry from the queue file.
+            2. Loads the job data from the corresponding request file.
+            3. Extracts task information, arguments, and timeout from the job data.
+            4. Executes the specified task method with the provided arguments and 
+                keyword arguments.
+            5. Handles exceptions during task execution and logs errors.
+            6. Saves the result of the job to a reply file.
+            7. Marks the job as processed by removing it from the queue file and 
+                appending it to the queue done file.
+
+        Returns:
+            None
+
+        Raises:
+            TypeError: If the executed task does not return a Result object.
+            Exception: Any exception raised during task execution is caught and 
+                logged, and a failed Result is generated.
+        """
+        with queue_file_lock:
+            with open(self.queue_filename, "rb+") as qf:
+                entries = qf.readlines()
+                qf.seek(0, os.SEEK_SET)  # go to the beginning
+                qf.truncate()  # empty file content
+                for index, entry in enumerate(entries):
+                    entry = entry.decode("utf-8").strip()
+                    # grab entry that is not started
+                    if entry and not entry.startswith("+"):
+                        entries[index] = f"+{entry}" # mark job as started
+                        break
+                else:
+                    time.sleep(0.001)
+                    return
+                # save job entries back
+                entries = "\n".join(entries) + "\n"
+                qf.write(entries.encode("utf-8"))
+                print(f"wrote job entries back: {entries}")
+
+        # # get some job to do
+        # with queue_file_lock:
+        #     with open(self.queue_filename, "rb+") as f:
+        #         # get first UUID
+        #         for entry in f.readlines():
+        #             entry = entry.decode("utf-8").strip()
+        #             if entry:
+        #                 break
+        #         else:
+        #             time.sleep(0.001)
+        #             return
+# 
+        # load job data
+        suuid = entry.split("--")[0]  # {suuid}--start--
+
+        log.debug(f"{self.name} - processing request {suuid}")
+
+        client_address, empty, juuid, data = loader(
+            request_filename(suuid, self.base_dir_jobs)
+        )
+
+        data = json.loads(data)
+        task = data.pop("task")
+        args = data.pop("args", [])
+        kwargs = data.pop("kwargs", {})
+        timeout = data.pop("timeout", 60)
+
+        self.current_job = {
+            "client_address": client_address,
+            "juuid": juuid,
+            "task": task,
+            "timeout": timeout,
+        }
+
+        log.debug(
+            f"{self.name} - doing task '{task}', timeout: '{timeout}', data: "
+            f"'{data}', args: '{args}', kwargs: '{kwargs}', client: "
+            f"'{client_address}', job uuid: '{juuid}'"
+        )
+
+        # run the actual job
+        try:
+            result = getattr(self, task)(*args, **kwargs)
+            if not isinstance(result, Result):
+                raise TypeError(
+                    f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "
+                    f"kwargs: '{kwargs}', client: '{client_address}', job uuid: '{juuid}'"
+                )
+            result.task = result.task or f"{self.name}:{task}"
+            result.status = result.status or "completed"
+            result.juuid = result.juuid or juuid.decode("utf-8")
+        except Exception as e:
+            result = Result(
+                task=f"{self.name}:{task}",
+                errors=[traceback.format_exc()],
+                messages=[f"Worker experienced error: '{e}'"],
+                failed=True,
+            )
+            log.error(
+                f"{self.name} - worker experienced error:\n{traceback.format_exc()}"
+            )
+
+        # save job results to reply file
+        dumper(
+            [
+                client_address,
+                b"",
+                suuid.encode("utf-8"),
+                b"200",
+                json.dumps({self.name: result.dict()}).encode("utf-8"),
+            ],
+            reply_filename(suuid, self.base_dir_jobs),
+        )
+
+        # mark job entry as processed - remove from queue file and save into queue done file
+        with queue_file_lock:
+            with open(self.queue_filename, "rb+") as qf:
+                with open(self.queue_done_filename, "rb+") as qdf:
+                    qdf.seek(0, os.SEEK_END)  # go to the end
+                    entries = qf.readlines()
+                    qf.seek(0, os.SEEK_SET)  # go to the beginning
+                    qf.truncate()  # empty file content
+                    for entry in entries:
                         entry = entry.decode("utf-8").strip()
-                        if entry:
-                            break
-                    else:
-                        time.sleep(0.001)
-                        continue
+                        # save done entry to queue_done_filename
+                        if suuid in entry:
+                            entry = f"{entry.strip('+')}--{time.ctime()}\n".encode("utf-8")
+                            qdf.write(entry)
+                        # re-save remaining entries to queue_filename
+                        else:
+                            qf.write(f"{entry}\n".encode("utf-8"))
 
-            # load job data
-            suuid = entry.split("--")[0]  # {suuid}--start--
+    async def main(self):
+        while not self.exit_event.is_set() and not self.destroy_event.is_set():
+            await asyncio.to_thread(self.run_next_job)
 
-            log.debug(f"{self.name} - processing request {suuid}")
+    def work(self):
+        """
+        Starts worker threads, runs the main asynchronous work loop, and ensures 
+        cleanup upon completion.
 
-            client_address, empty, juuid, data = loader(
-                request_filename(suuid, self.base_dir_jobs)
-            )
+        This method performs the following steps:
 
-            data = json.loads(data)
-            task = data.pop("task")
-            args = data.pop("args", [])
-            kwargs = data.pop("kwargs", {})
-            timeout = data.pop("timeout", 60)
+        1. Starts any necessary background threads.
+        2. Executes the main work loop asynchronously using asyncio.
+        3. Ensures that cleanup is performed by calling the `destroy` method, 
+        passing a message indicating the state of exit and destroy events.
+        """
+        self.start_threads()
 
-            self.current_job = {
-                "client_address": client_address,
-                "juuid": juuid,
-                "task": task,
-                "timeout": timeout,
-            }
+        # start main work loop
+        # asyncio.run(self.main())
 
-            log.debug(
-                f"{self.name} - doing task '{task}', timeout: '{timeout}', data: "
-                f"'{data}', args: '{args}', kwargs: '{kwargs}', client: "
-                f"'{client_address}', job uuid: '{juuid}'"
-            )
-
-            # run the actual job
-            try:
-                result = getattr(self, task)(*args, **kwargs)
-                if not isinstance(result, Result):
-                    raise TypeError(
-                        f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "
-                        f"kwargs: '{kwargs}', client: '{client_address}', job uuid: '{juuid}'"
-                    )
-                result.task = result.task or f"{self.name}:{task}"
-                result.status = result.status or "completed"
-                result.juuid = result.juuid or juuid.decode("utf-8")
-            except Exception as e:
-                result = Result(
-                    task=f"{self.name}:{task}",
-                    errors=[traceback.format_exc()],
-                    messages=[f"Worker experienced error: '{e}'"],
-                    failed=True,
-                )
-                log.error(
-                    f"{self.name} - worker experienced error:\n{traceback.format_exc()}"
-                )
-
-            # save job results to reply file
-            dumper(
-                [
-                    client_address,
-                    b"",
-                    suuid.encode("utf-8"),
-                    b"200",
-                    json.dumps({self.name: result.dict()}).encode("utf-8"),
-                ],
-                reply_filename(suuid, self.base_dir_jobs),
-            )
-
-            # mark job entry as processed - remove from queue file and save into queue done file
-            with queue_file_lock:
-                with open(self.queue_filename, "rb+") as qf:
-                    with open(self.queue_done_filename, "rb+") as qdf:
-                        qdf.seek(0, os.SEEK_END)  # go to the end
-                        entries = qf.readlines()
-                        qf.seek(0, os.SEEK_SET)  # go to the beginning
-                        qf.truncate()  # empty file content
-                        for entry in entries:
-                            entry = entry.decode("utf-8").strip()
-                            # save done entry to queue_done_filename
-                            if entry.startswith(suuid):
-                                entry = f"{entry}--{time.ctime()}\n".encode("utf-8")
-                                qdf.write(entry)
-                            # re-save remaining entries to queue_filename
-                            else:
-                                qf.write(f"{entry}\n".encode("utf-8"))
+        jobs_running = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            while not self.exit_event.is_set() and not self.destroy_event.is_set():
+                # remove completed jobs
+                jobs_running = [
+                    j for j in jobs_running if j.running()
+                ]
+                # add new jobs
+                if len(jobs_running) < 5:
+                    for i in range(0, 5 - len(jobs_running)):
+                       jobs_running.append(executor.submit(self.run_next_job))
+                time.sleep(0.01)
 
         # make sure to clean up
         self.destroy(
