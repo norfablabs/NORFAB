@@ -1,5 +1,9 @@
 
-## 0.8.3
+## 0.9.0
+
+### FEATURES
+
+1. Adding concurrency to worker jobs execution, adding new worker inventory parameter `max_concurrent_jobs`
 
 ### CHANGES
 

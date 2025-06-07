@@ -1203,7 +1203,7 @@ class NFPWorker:
                     for entry in f.readlines():
                         job_entry = entry.decode("utf-8").strip()
                         suuid, start = job_entry.split("--")  # {suuid}--start
-                        suuid = suuid.lstrip("+") # remove job started indicator
+                        suuid = suuid.lstrip("+")  # remove job started indicator
                         if uuid and uuid != suuid:
                             continue
                         client_address, empty, juuid, data = loader(
@@ -1468,7 +1468,7 @@ class NFPWorker:
                         entries = [
                             e.decode("utf-8").strip() for e in qf.readlines()
                         ]  # read jobs
-                        if not entries: # cycle until file is not empty
+                        if not entries:  # cycle until file is not empty
                             time.sleep(0.1)
                             continue
                         qf.seek(0, os.SEEK_SET)  # go to the beginning
