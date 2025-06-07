@@ -1,0 +1,14 @@
+
+service: nornir
+
+# Nornir inventory and configuration
+runner: 
+  plugin: RetryRunner
+hosts: {}
+default: {}
+groups: {}
+
+# you can also source variables from the environment using Jinja2 syntax
+# defaults:
+#   username: {{ env.get("NORNIR_USERNAME", "nornir") }}
+#   password: {{ env.get("NORNIR_PASSWORD", "password" )}}

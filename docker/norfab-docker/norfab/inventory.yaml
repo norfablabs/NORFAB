@@ -1,0 +1,29 @@
+
+# broker settings
+broker:
+  endpoint: "tcp://10.0.0.100:5555"
+  
+# workers inventory section
+workers:
+  nornir-*:
+    - nornir/common.yaml  
+  nornir-worker-1:
+    - nornir/nornir-worker-1.yaml
+  netbox-*:
+    - netbox/common.yaml
+    
+# you can also source variables from the environment using Jinja2 syntax
+# logging:
+#   handlers:
+#     terminal:
+#       level: {{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}
+#     file: 
+#       level: {{ env.get("FILE_LOGGING_LEVEL", "INFO") }}
+
+# list what entities we want to start on this node
+topology:
+  broker: True
+  workers:
+    - nornir-worker-1
+    - netbox-worker-1
+    - netbox-worker-2

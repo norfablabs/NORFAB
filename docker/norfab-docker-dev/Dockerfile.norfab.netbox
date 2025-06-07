@@ -1,0 +1,14 @@
+FROM python:3.9.7-slim-bullseye
+
+RUN apt-get update && \
+    apt-get clean && \
+    pip install --no-cache-dir pip setuptools wheel poetry --upgrade
+
+COPY norfab/ /tmp/norfab/
+
+RUN pip install --no-cache-dir /tmp/norfab/.[netboxservice] --upgrade && \
+    pip install --no-cache-dir /tmp/norfab/.[nfcli] --upgrade 
+
+ENV LOG_LEVEL=INFO
+
+ENTRYPOINT cd /etc/norfab/ && nfcli --workers-list netbox-worker-1,netbox-worker-2 -l $LOG_LEVEL

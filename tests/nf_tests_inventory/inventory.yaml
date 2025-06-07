@@ -48,22 +48,22 @@ workers:
 topology:
   broker: True
   workers:
-    # - netbox-worker-1.1
-    # - netbox-worker-1.2
+    - netbox-worker-1.1
+    - netbox-worker-1.2
     - nornir-worker-1 # ContainerLab devices
-    # - nornir-worker-2 # ContainerLab devices
-    # - nornir-worker-3 # Worker with no Nornir Hosts Inventory
-    # - nornir-worker-4 # FakeNOS devices
-    # - nornir-worker-5: # Worker to test Netbox Inventory
-    #     depends_on: 
-    #       - netbox-worker-1.1
-    #       - netbox-worker-1.2
+    - nornir-worker-2 # ContainerLab devices
+    - nornir-worker-3 # Worker with no Nornir Hosts Inventory
+    - nornir-worker-4 # FakeNOS devices
+    - nornir-worker-5: # Worker to test Netbox Inventory
+        depends_on: 
+          - netbox-worker-1.1
+          - netbox-worker-1.2
     # - pyats-worker-1
-    # - nornir-worker-6 # Hosts Juniper vMX
-    # - agent-1
-    # - fastapi-worker-1
-    # - dummy-worker-1
-    # - workflow-worker-1
+    - nornir-worker-6 # Hosts Juniper vMX
+    - agent-1
+    - fastapi-worker-1
+    - dummy-worker-1
+    - workflow-worker-1
     
 hooks:
   startup:

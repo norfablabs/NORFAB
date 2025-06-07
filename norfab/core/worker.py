@@ -9,8 +9,8 @@ import os
 import pickle
 import psutil
 import signal
-import asyncio
 import concurrent.futures
+import random
 
 from . import NFP
 from .client import NFPClient
@@ -658,6 +658,9 @@ class NFPWorker:
     ):
         self.setup_logging(log_queue, log_level)
         self.inventory = inventory
+        self.max_concurrent_jobs = inventory.get("worker", {}).get(
+            "max_concurrent_jobs", 5
+        )
         self.broker = broker
         self.service = service.encode("utf-8") if isinstance(service, str) else service
         self.name = name
@@ -1200,7 +1203,8 @@ class NFPWorker:
                     for entry in f.readlines():
                         job_entry = entry.decode("utf-8").strip()
                         suuid, start = job_entry.split("--")  # {suuid}--start
-                        if uuid and suuid != uuid:
+                        suuid = suuid.lstrip("+") # remove job started indicator
+                        if uuid and uuid != suuid:
                             continue
                         client_address, empty, juuid, data = loader(
                             request_filename(suuid, self.base_dir_jobs)
@@ -1335,65 +1339,29 @@ class NFPWorker:
         )
         self.recv_thread.start()
 
-    def run_next_job(self):
+    def run_next_job(self, entry):
         """
-        Processes the next job in the queue.
+        Processes the next job in the queue based on the provided job entry.
 
-        This asynchronous method performs the following steps:
+        This method performs the following steps:
 
-            1. Acquires a lock and reads the next job entry from the queue file.
-            2. Loads the job data from the corresponding request file.
-            3. Extracts task information, arguments, and timeout from the job data.
-            4. Executes the specified task method with the provided arguments and 
-                keyword arguments.
-            5. Handles exceptions during task execution and logs errors.
-            6. Saves the result of the job to a reply file.
-            7. Marks the job as processed by removing it from the queue file and 
-                appending it to the queue done file.
+        1. Loads job data from the job queue using the entry identifier.
+        2. Parses the job data to extract the task name, arguments, keyword arguments, and timeout.
+        3. Executes the specified task method on the worker instance with the provided arguments.
+        4. Handles any exceptions raised during task execution, logging errors and creating a failed Result object if needed.
+        5. Saves the result of the job execution to a reply file for the client.
+        6. Marks the job as processed by removing it from the queue file and appending it to the queue done file.
 
-        Returns:
-            None
+        Args:
+            entry (str): The job queue entry string, typically containing the job's unique identifier.
 
         Raises:
             TypeError: If the executed task does not return a Result object.
-            Exception: Any exception raised during task execution is caught and 
-                logged, and a failed Result is generated.
         """
-        with queue_file_lock:
-            with open(self.queue_filename, "rb+") as qf:
-                entries = qf.readlines()
-                qf.seek(0, os.SEEK_SET)  # go to the beginning
-                qf.truncate()  # empty file content
-                for index, entry in enumerate(entries):
-                    entry = entry.decode("utf-8").strip()
-                    # grab entry that is not started
-                    if entry and not entry.startswith("+"):
-                        entries[index] = f"+{entry}" # mark job as started
-                        break
-                else:
-                    time.sleep(0.001)
-                    return
-                # save job entries back
-                entries = "\n".join(entries) + "\n"
-                qf.write(entries.encode("utf-8"))
-                print(f"wrote job entries back: {entries}")
-
-        # # get some job to do
-        # with queue_file_lock:
-        #     with open(self.queue_filename, "rb+") as f:
-        #         # get first UUID
-        #         for entry in f.readlines():
-        #             entry = entry.decode("utf-8").strip()
-        #             if entry:
-        #                 break
-        #         else:
-        #             time.sleep(0.001)
-        #             return
-# 
         # load job data
         suuid = entry.split("--")[0]  # {suuid}--start--
 
-        log.debug(f"{self.name} - processing request {suuid}")
+        log.debug(f"{self.name} - processing job request {suuid}")
 
         client_address, empty, juuid, data = loader(
             request_filename(suuid, self.base_dir_jobs)
@@ -1464,45 +1432,63 @@ class NFPWorker:
                         entry = entry.decode("utf-8").strip()
                         # save done entry to queue_done_filename
                         if suuid in entry:
-                            entry = f"{entry.strip('+')}--{time.ctime()}\n".encode("utf-8")
+                            entry = f"{entry.strip('+')}--{time.ctime()}\n".encode(
+                                "utf-8"
+                            )
                             qdf.write(entry)
                         # re-save remaining entries to queue_filename
                         else:
                             qf.write(f"{entry}\n".encode("utf-8"))
 
-    async def main(self):
-        while not self.exit_event.is_set() and not self.destroy_event.is_set():
-            await asyncio.to_thread(self.run_next_job)
-
     def work(self):
         """
-        Starts worker threads, runs the main asynchronous work loop, and ensures 
-        cleanup upon completion.
+        Executes the main worker loop, managing job execution using a thread pool.
 
-        This method performs the following steps:
+        This method starts necessary background threads, then enters a loop where it:
 
-        1. Starts any necessary background threads.
-        2. Executes the main work loop asynchronously using asyncio.
-        3. Ensures that cleanup is performed by calling the `destroy` method, 
-        passing a message indicating the state of exit and destroy events.
+        - Acquires a lock to safely read and modify the job queue file.
+        - Searches for the next unstarted job entry, marks it as started, and updates the queue file.
+        - Submits the job to a thread pool executor for concurrent processing.
+        - Waits briefly if no unstarted jobs are found.
+        - Continues until either the exit or destroy event is set.
+
+        Upon exit, performs cleanup by calling the `destroy` method with a status message.
         """
+
         self.start_threads()
 
-        # start main work loop
-        # asyncio.run(self.main())
-
-        jobs_running = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=self.max_concurrent_jobs,
+            thread_name_prefix=f"{self.name}-job-worker",
+        ) as executor:
             while not self.exit_event.is_set() and not self.destroy_event.is_set():
-                # remove completed jobs
-                jobs_running = [
-                    j for j in jobs_running if j.running()
-                ]
-                # add new jobs
-                if len(jobs_running) < 5:
-                    for i in range(0, 5 - len(jobs_running)):
-                       jobs_running.append(executor.submit(self.run_next_job))
-                time.sleep(0.01)
+                # extract next job id
+                with queue_file_lock:
+                    with open(self.queue_filename, "rb+") as qf:
+                        entries = [
+                            e.decode("utf-8").strip() for e in qf.readlines()
+                        ]  # read jobs
+                        if not entries: # cycle until file is not empty
+                            time.sleep(0.1)
+                            continue
+                        qf.seek(0, os.SEEK_SET)  # go to the beginning
+                        qf.truncate()  # empty file content
+                        for index, entry in enumerate(entries):
+                            # grab entry that is not started
+                            if entry and not entry.startswith("+"):
+                                entries[index] = f"+{entry}"  # mark job as started
+                                # save job entries back
+                                entries = "\n".join(entries)
+                                qf.write(entries.encode("utf-8"))
+                                break
+                        else:
+                            # save job entries back
+                            entries = "\n".join(entries)
+                            qf.write(entries.encode("utf-8"))
+                            time.sleep(0.1)
+                            continue
+                # submit the job to workers
+                executor.submit(self.run_next_job, entry)
 
         # make sure to clean up
         self.destroy(
