@@ -391,8 +391,8 @@ class NornirWorker(NFPWorker):
     @Task
     def refresh_nornir(
         self,
-        juuid,
         progress: bool = False,
+        juuid: str = None,
     ) -> Result:
         """
         Refreshes the Nornir instance by reloading the inventory from configured sources.
@@ -451,7 +451,11 @@ class NornirWorker(NFPWorker):
         return ret
 
     @Task
-    def nornir_inventory_load_netbox(self, juuid, progress: bool = False) -> Result:
+    def nornir_inventory_load_netbox(
+        self,
+        progress: bool = False,
+        juuid: str = None,
+    ) -> Result:
         """
         Queries inventory data from Netbox Service and merges it into the Nornir inventory.
 
@@ -520,7 +524,6 @@ class NornirWorker(NFPWorker):
     @Task
     def nornir_inventory_load_containerlab(
         self,
-        juuid,
         lab_name: str = None,
         groups: list = None,
         clab_workers: str = "all",
@@ -528,6 +531,7 @@ class NornirWorker(NFPWorker):
         progress: bool = False,
         dry_run: bool = False,
         re_init_nornir: bool = True,
+        juuid: str = None,
     ) -> Result:
         """
         Pulls the Nornir inventory from a Containerlab lab instance and merges it with the
@@ -823,9 +827,10 @@ class NornirWorker(NFPWorker):
     # Nornir Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    # @Task(input=GetNornirHosts, output=GetNornirHostsResponse)
-    @Task
-    def get_nornir_hosts(self, juuid, details: bool = False, **kwargs: dict) -> Result:
+    @Task.describe(input=GetNornirHosts, output=GetNornirHostsResponse)
+    def get_nornir_hosts(
+        self, details: bool = False, juuid: str = None, **kwargs: dict
+    ) -> Result:
         """
         Retrieve a list of Nornir hosts managed by this worker.
 
@@ -855,7 +860,7 @@ class NornirWorker(NFPWorker):
             return Result(result=list(filtered_nornir.inventory.hosts))
 
     @Task
-    def get_inventory(self, juuid, **kwargs: dict) -> Result:
+    def get_inventory(self, juuid: str = None, **kwargs: dict) -> Result:
         """
         Retrieve running Nornir inventory for requested hosts
 
@@ -961,7 +966,7 @@ class NornirWorker(NFPWorker):
         return Result(result=self.watchdog.connections_get())
 
     @Task
-    def task(self, juuid, plugin: str, **kwargs) -> Result:
+    def task(self, plugin: str, juuid: str = None, **kwargs) -> Result:
         """
         Execute a Nornir task plugin.
 
@@ -1057,7 +1062,6 @@ class NornirWorker(NFPWorker):
     @Task
     def cli(
         self,
-        juuid,
         commands: list = None,
         plugin: str = "netmiko",
         dry_run: bool = False,
@@ -1065,6 +1069,7 @@ class NornirWorker(NFPWorker):
         job_data: str = None,
         to_dict: bool = True,
         add_details: bool = False,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1185,13 +1190,13 @@ class NornirWorker(NFPWorker):
     @Task
     def cfg(
         self,
-        juuid,
         config: list,
         plugin: str = "netmiko",
         dry_run: bool = False,
         to_dict: bool = True,
         add_details: bool = False,
         job_data: str = None,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1291,7 +1296,6 @@ class NornirWorker(NFPWorker):
     @Task
     def test(
         self,
-        juuid,
         suite: Union[list, str],
         subset: str = None,
         dry_run: bool = False,
@@ -1299,6 +1303,7 @@ class NornirWorker(NFPWorker):
         failed_only: bool = False,
         return_tests_suite: bool = False,
         job_data: str = None,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1481,7 +1486,7 @@ class NornirWorker(NFPWorker):
         raise NotImplementedError("SNMP task is not implemented yet")
 
     @Task
-    def network(self, juuid, fun, **kwargs) -> Result:
+    def network(self, fun, juuid: str = None, **kwargs) -> Result:
         """
         Task to call various network-related utility functions.
 
@@ -1504,6 +1509,7 @@ class NornirWorker(NFPWorker):
         """
         kwargs["call"] = fun
         return self.task(
+            juuid=juuid,
             plugin="nornir_salt.plugins.tasks.network",
             **kwargs,
         )
@@ -1511,13 +1517,13 @@ class NornirWorker(NFPWorker):
     @Task
     def parse(
         self,
-        juuid,
         plugin: str = "napalm",
         getters: str = "get_facts",
         template: str = None,
         commands: list = None,
         to_dict: bool = True,
         add_details: bool = False,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1568,6 +1574,7 @@ class NornirWorker(NFPWorker):
             ret.failed = result.failed  # failed is true if any of the hosts failed
         elif plugin == "ttp":
             result = self.cli(
+                juuid=juuid,
                 commands=commands or [],
                 run_ttp=template,
                 **filters,
@@ -1579,6 +1586,7 @@ class NornirWorker(NFPWorker):
             ret.result = result.result
         elif plugin == "textfsm":
             result = self.cli(
+                juuid=juuid,
                 commands=commands,
                 **filters,
                 **kwargs,
@@ -1597,12 +1605,12 @@ class NornirWorker(NFPWorker):
     @Task
     def file_copy(
         self,
-        juuid,
         source_file: str,
         plugin: str = "netmiko",
         to_dict: bool = True,
         add_details: bool = False,
         dry_run: bool = False,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1679,7 +1687,7 @@ class NornirWorker(NFPWorker):
         return ret
 
     @Task
-    def runtime_inventory(self, juuid, action, **kwargs) -> Result:
+    def runtime_inventory(self, action, juuid: str = None, **kwargs) -> Result:
         """
         Task to work with Nornir runtime (in-memory) inventory.
 
@@ -1707,7 +1715,7 @@ class NornirWorker(NFPWorker):
         return Result(result=InventoryFun(self.nr, call=action, **kwargs))
 
     @Task
-    def nb_get_next_ip(self, juuid, *args, **kwargs) -> Result:
+    def nb_get_next_ip(self, *args, juuid: str = None, **kwargs) -> Result:
         """Task to query next available IP address from Netbox service"""
         reply = self.client.run_job(
             "netbox",

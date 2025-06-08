@@ -251,7 +251,7 @@ class WorkflowWorker(NFPWorker):
         return False
 
     @Task
-    def run(self, nb_get_next_ip, workflow: Union[str, Dict]) -> Result:
+    def run(self, workflow: Union[str, Dict], juuid: str = None) -> Result:
         """
         Executes a workflow defined by a dictionary.
 

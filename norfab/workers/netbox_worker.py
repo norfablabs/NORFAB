@@ -212,7 +212,7 @@ class NetboxWorker(NFPWorker):
         )
 
     @Task
-    def get_version(self, juuid, **kwargs) -> Result:
+    def get_version(self, juuid: str = None, **kwargs) -> Result:
         """
         Retrieves the version information of specified libraries and system details.
 
@@ -238,7 +238,7 @@ class NetboxWorker(NFPWorker):
         return Result(task=f"{self.name}:get_version", result=libs)
 
     @Task
-    def get_netbox_status(self, juuid, instance=None) -> Result:
+    def get_netbox_status(self, juuid: str = None, instance=None) -> Result:
         """
         Retrieve the status of NetBox instances.
 
@@ -448,7 +448,7 @@ class NetboxWorker(NFPWorker):
         )
 
     @Task
-    def cache_list(self, juuid, keys="*", details=False) -> Result:
+    def cache_list(self, juuid: str = None, keys="*", details=False) -> Result:
         """
         Retrieve a list of cache keys, optionally with details about each key.
 
@@ -481,7 +481,7 @@ class NetboxWorker(NFPWorker):
         return ret
 
     @Task
-    def cache_clear(self, juuid, key=None, keys=None) -> Result:
+    def cache_clear(self, juuid: str = None, key=None, keys=None) -> Result:
         """
         Clears specified keys from the cache.
 
@@ -526,7 +526,9 @@ class NetboxWorker(NFPWorker):
         return ret
 
     @Task
-    def cache_get(self, juuid, key=None, keys=None, raise_missing=False) -> Result:
+    def cache_get(
+        self, juuid: str = None, key=None, keys=None, raise_missing=False
+    ) -> Result:
         """
         Retrieve values from the cache based on a specific key or a pattern of keys.
 
@@ -560,7 +562,7 @@ class NetboxWorker(NFPWorker):
     @Task
     def graphql(
         self,
-        juuid,
+        juuid: str = None,
         instance: str = None,
         dry_run: bool = False,
         obj: dict = None,
@@ -710,7 +712,7 @@ class NetboxWorker(NFPWorker):
     @Task
     def get_devices(
         self,
-        juuid,
+        juuid: str = None,
         filters: list = None,
         instance: str = None,
         dry_run: bool = False,
@@ -884,7 +886,7 @@ class NetboxWorker(NFPWorker):
     @Task
     def get_interfaces(
         self,
-        juuid,
+        juuid: str = None,
         instance: str = None,
         devices: list = None,
         ip_addresses: bool = False,
@@ -1030,12 +1032,12 @@ class NetboxWorker(NFPWorker):
     @Task
     def get_connections(
         self,
-        juuid,
         devices: list,
         instance: str = None,
         dry_run: bool = False,
         cables: bool = False,
         cache: Union[bool, str] = None,
+        juuid: str = None,
     ) -> Result:
         """
         Retrieve interface connection details for specified devices from Netbox.
@@ -1358,12 +1360,12 @@ class NetboxWorker(NFPWorker):
     @Task
     def get_circuits(
         self,
-        juuid,
         devices: list,
         cid: list = None,
         instance: str = None,
         dry_run: bool = False,
         cache: Union[bool, str] = True,
+        juuid: str = None,
     ) -> Result:
         """
         Retrieve circuit information for specified devices from Netbox.
@@ -1549,7 +1551,6 @@ class NetboxWorker(NFPWorker):
     @Task
     def get_nornir_inventory(
         self,
-        juuid,
         filters: list = None,
         devices: list = None,
         instance: str = None,
@@ -1558,6 +1559,7 @@ class NetboxWorker(NFPWorker):
         circuits: Union[dict, bool] = False,
         nbdata: bool = True,
         primary_ip: str = "ip4",
+        juuid: str = None,
     ) -> Result:
         """
         Retrieve and construct Nornir inventory from NetBox data.
@@ -1706,13 +1708,13 @@ class NetboxWorker(NFPWorker):
     @Task
     def update_device_facts(
         self,
-        juuid,
         instance: str = None,
         dry_run: bool = False,
         datasource: str = "nornir",
         timeout: int = 60,
         devices: list = None,
         batch_size: int = 10,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1812,7 +1814,6 @@ class NetboxWorker(NFPWorker):
     @Task
     def update_device_interfaces(
         self,
-        juuid,
         instance: str = None,
         dry_run: bool = False,
         datasource: str = "nornir",
@@ -1820,6 +1821,7 @@ class NetboxWorker(NFPWorker):
         devices: list = None,
         create: bool = True,
         batch_size: int = 10,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -2019,7 +2021,6 @@ class NetboxWorker(NFPWorker):
     @Task
     def update_device_ip(
         self,
-        juuid,
         instance: str = None,
         dry_run: bool = False,
         datasource: str = "nornir",
@@ -2027,6 +2028,7 @@ class NetboxWorker(NFPWorker):
         devices: list = None,
         create: bool = True,
         batch_size: int = 10,
+        juuid: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -2162,7 +2164,6 @@ class NetboxWorker(NFPWorker):
     @Task
     def get_next_ip(
         self,
-        juuid,
         subnet: str,
         description: str = None,
         device: str = None,
@@ -2174,6 +2175,7 @@ class NetboxWorker(NFPWorker):
         comments: str = None,
         instance: str = None,
         dry_run: bool = False,
+        juuid: str = None,
     ) -> Result:
         """
         Allocate the next available IP address from a given subnet.
@@ -2206,7 +2208,6 @@ class NetboxWorker(NFPWorker):
     @Task
     def get_containerlab_inventory(
         self,
-        juuid,
         lab_name: str = None,
         tenant: str = None,
         filters: list = None,
@@ -2218,6 +2219,7 @@ class NetboxWorker(NFPWorker):
         ports_map: dict = None,
         progress: bool = False,
         cache: Union[bool, str] = False,
+        juuid: str = None,
     ) -> Result:
         """
         Retrieve and construct Containerlab inventory from NetBox data.

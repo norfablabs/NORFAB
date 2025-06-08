@@ -45,9 +45,9 @@ NORFAB_WORKER_TASKS = {}
 
 class TaskWithArgs:
     """
-    TaskWithArgs is a class-based decorator that accept arguments, designed to validate the input arguments of a function
-    using a specified Pydantic model. It ensures that the arguments passed to the decorated
-    function conform to the schema defined in the model.
+    TaskWithArgs is a class-based decorator that accept arguments, designed to validate the
+    input arguments of a task function using a specified Pydantic model. It ensures that
+    the arguments passed to the decorated function conform to the schema defined in the model.
 
     Attributes:
         model (BaseModel): A Pydantic model used to validate the function arguments.
@@ -89,7 +89,7 @@ class TaskWithArgs:
         self.name = name
         self.output = output
 
-    def __call__(self, function: Callable, *dargs, **dkwargs) -> Callable:
+    def __call__(self, function: Callable) -> Callable:
         self.name = self.name or function.__name__
         self.function = function
         NORFAB_WORKER_TASKS[self.name] = self
@@ -160,23 +160,77 @@ class TaskWithArgs:
 
 
 class Task:
-    def __init__(self, func):
-        log.debug(f"NorFab Task decorator initiated for task '{func}'")
-        functools.update_wrapper(self, func)
-        self.func = func
+    """
+    A decorator class for registering and managing worker tasks in the NorFab framework.
+
+    This class wraps a function as a task, registers it in the global NORFAB_WORKER_TASKS dictionary,
+    and provides descriptor behavior for binding the task to a worker instance.
+
+    Attributes:
+        name (str): The name of the decorated function.
+        function (callable): The original function being decorated.
+        worker_instance (object): The worker instance to which the task is bound (set during __get__).
+
+    Usage:
+
+        ```
+        # register task
+        @Task
+        def my_task(self, ...):
+            ...
+
+        # register task and supply input/output arguments Pydantic models
+        @Task.describe(input=InputModel, output=OutputModel)
+        def my_typed_task(self, ...):
+            ...
+        ```
+    """
+
+    def __init__(self, function):
+        log.debug(f"NorFab Task decorator initiated for task '{function}'")
+        functools.update_wrapper(self, function)
+        self.name = function.__name__
+        self.function = function
+        NORFAB_WORKER_TASKS[self.name] = self
 
     def __call__(self, *args, **kwargs):
+        """
+        Invokes the decorated with `@Task` task function with the provided arguments.
+        """
         log.debug(
-            f"NorFab Task decorator called for task {self.func} with args: '{args}', kwargs: '{kwargs}'"
+            f"NorFab Task decorator called task {self.function} with args: '{args}', kwargs: '{kwargs}'"
         )
-        return self.func(self.worker_instance, *args, **kwargs)
+        return self.function(self.worker_instance, *args, **kwargs)
 
-    def __get__(self, worker_instance, worker_calss):
+    def __get__(self, worker_instance, worker_class):
+        """
+        Descriptor method that is called when the decorated function is accessed as an
+        attribute of a worker class instance.
+
+        Args:
+            worker_instance: The instance of the worker class accessing the descriptor.
+            worker_class: The worker class type.
+
+        Returns:
+            Callable: The __call__ method of Task decorator.
+        """
         log.debug(
-            f"NorFab Task decorator for '{worker_instance}' worker called '{self.func}' task method, worker class: '{worker_calss}'"
+            f"NorFab Task decorator worker '{worker_instance}' called '{self.function}' task method, worker class: '{worker_class}'"
         )
         self.worker_instance = worker_instance
         return self.__call__
+
+    @staticmethod
+    def describe(
+        input: Optional[BaseModel] = None,
+        output: Optional[BaseModel] = None,
+        name: str = None,
+    ):
+        return TaskWithArgs(
+            input=input,
+            output=output,
+            name=name,
+        )
 
 
 # --------------------------------------------------------------------------------------------
@@ -682,7 +736,7 @@ class NFPWorker:
         self.setup_logging(log_queue, log_level)
         self.inventory = inventory
         self.max_concurrent_jobs = inventory.get("worker", {}).get(
-            "max_concurrent_jobs", 5
+            "max_concurrent_jobs", 1
         )
         self.broker = broker
         self.service = service.encode("utf-8") if isinstance(service, str) else service
@@ -1421,7 +1475,7 @@ class NFPWorker:
 
         # run the actual job
         try:
-            result = getattr(self, task)(juuid, *args, **kwargs)
+            result = getattr(self, task)(*args, juuid=juuid, **kwargs)
             if not isinstance(result, Result):
                 raise TypeError(
                     f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "
@@ -1465,7 +1519,7 @@ class NFPWorker:
                         entry = entry.decode("utf-8").strip()
                         # save done entry to queue_done_filename
                         if suuid in entry:
-                            entry = f"{entry.strip('+')}--{time.ctime()}\n".encode(
+                            entry = f"{entry.lstrip('+')}--{time.ctime()}\n".encode(
                                 "utf-8"
                             )
                             qdf.write(entry)
@@ -1511,12 +1565,12 @@ class NFPWorker:
                             if entry and not entry.startswith("+"):
                                 entries[index] = f"+{entry}"  # mark job as started
                                 # save job entries back
-                                entries = "\n".join(entries)
+                                entries = "\n".join(entries) + "\n"
                                 qf.write(entries.encode("utf-8"))
                                 break
                         else:
                             # save job entries back
-                            entries = "\n".join(entries)
+                            entries = "\n".join(entries) + "\n"
                             qf.write(entries.encode("utf-8"))
                             time.sleep(0.1)
                             continue

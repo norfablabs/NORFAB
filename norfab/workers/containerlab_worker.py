@@ -139,7 +139,7 @@ class ContainerlabWorker(NFPWorker):
         )
 
     @Task
-    def get_running_labs(self, juuid, timeout: int = None) -> Result:
+    def get_running_labs(self, juuid: str = None, timeout: int = None) -> Result:
         """
         Retrieve a list of running containerlab lab names.
 
@@ -168,12 +168,12 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def run_containerlab_command(
         self,
-        juuid,
         args: list,
         cwd: str = None,
         timeout: int = 600,
         ret: Result = None,
         env: dict = None,
+        juuid: str = None,
     ) -> Tuple:
         """
         Executes a containerlab command using subprocess and processes its output.
@@ -271,11 +271,11 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def deploy(
         self,
-        juuid,
         topology: str,
         reconfigure: bool = False,
         timeout: int = None,
         node_filter: str = None,
+        juuid: str = None,
     ) -> Result:
         """
         Deploys a containerlab topology.
@@ -331,11 +331,13 @@ class ContainerlabWorker(NFPWorker):
 
         # run containerlab command
         return self.run_containerlab_command(
-            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env
+            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, juuid=juuid
         )
 
     @Task
-    def destroy_lab(self, juuid, lab_name: str, timeout: int = None) -> Result:
+    def destroy_lab(
+        self, lab_name: str, juuid: str = None, timeout: int = None
+    ) -> Result:
         """
         Destroys a specified lab.
 
@@ -370,7 +372,7 @@ class ContainerlabWorker(NFPWorker):
             # run destroy command
             args = ["containerlab", "destroy", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret
+                args, cwd=topology_folder, timeout=timeout, ret=ret, juuid=juuid
             )
 
             if not ret.failed:
@@ -380,7 +382,11 @@ class ContainerlabWorker(NFPWorker):
 
     @Task
     def inspect(
-        self, juuid, lab_name: str = None, timeout: int = None, details: bool = False
+        self,
+        lab_name: str = None,
+        juuid: str = None,
+        timeout: int = None,
+        details: bool = False,
     ) -> Result:
         """
         Inspect the container lab containers configuration and status.
@@ -408,12 +414,12 @@ class ContainerlabWorker(NFPWorker):
         if details:
             args.append("--details")
 
-        ret = self.run_containerlab_command(args, timeout=timeout, ret=ret)
+        ret = self.run_containerlab_command(args, timeout=timeout, ret=ret, juuid=juuid)
 
         return ret
 
     @Task
-    def save(self, juuid, lab_name: str, timeout: int = None) -> Result:
+    def save(self, lab_name: str, juuid: str = None, timeout: int = None) -> Result:
         """
         Saves the config of a specified lab devices by invoking the `containerlab save` command.
 
@@ -444,7 +450,7 @@ class ContainerlabWorker(NFPWorker):
             # run destroy command
             args = ["containerlab", "save", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret
+                args, cwd=topology_folder, timeout=timeout, ret=ret, juuid=juuid
             )
 
             if not ret.failed:
@@ -453,7 +459,9 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     @Task
-    def restart_lab(self, juuid, lab_name: str, timeout: int = None) -> Result:
+    def restart_lab(
+        self, lab_name: str, juuid: str = None, timeout: int = None
+    ) -> Result:
         """
         Restart a specified Containerlab lab.
 
@@ -496,7 +504,12 @@ class ContainerlabWorker(NFPWorker):
                 "--reconfigure",
             ]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret, env=env
+                args,
+                cwd=topology_folder,
+                timeout=timeout,
+                ret=ret,
+                env=env,
+                juuid=juuid,
             )
 
             if not ret.failed:
@@ -507,11 +520,11 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def get_nornir_inventory(
         self,
-        juuid,
         lab_name: str = None,
         timeout: int = None,
         groups: list = None,
         use_default_credentials: bool = True,
+        juuid: str = None,
     ) -> Result:
         """
         Retrieves the Nornir inventory for a specified lab.
@@ -637,7 +650,6 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def deploy_netbox(
         self,
-        juuid,
         lab_name: str = None,
         tenant: str = None,
         filters: list = None,
@@ -651,6 +663,7 @@ class ContainerlabWorker(NFPWorker):
         timeout: int = 600,
         node_filter: str = None,
         dry_run: bool = False,
+        juuid: str = None,
     ) -> Result:
         """
         Deploys a containerlab topology using device data from the Netbox database.
@@ -847,5 +860,5 @@ class ContainerlabWorker(NFPWorker):
 
         # run containerlab command
         return self.run_containerlab_command(
-            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env
+            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, juuid=juuid
         )

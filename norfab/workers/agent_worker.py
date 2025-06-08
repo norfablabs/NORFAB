@@ -82,7 +82,7 @@ class AgentWorker(NFPWorker):
         pass
 
     @Task
-    def get_version(self, juuid):
+    def get_version(self, juuid: str = None):
         """
         Generate a report of the versions of specific Python packages and system information.
         This method collects the version information of several Python packages and system details,
@@ -114,7 +114,7 @@ class AgentWorker(NFPWorker):
         return Result(result=libs)
 
     @Task
-    def get_inventory(self, juuid):
+    def get_inventory(self, juuid: str = None):
         """
         NorFab task to retrieve the agent's inventory.
 
@@ -124,7 +124,7 @@ class AgentWorker(NFPWorker):
         return Result(result=self.agent_inventory)
 
     @Task
-    def get_status(self, juuid):
+    def get_status(self, juuid: str = None):
         """
         NorFab Task that retrieves the status of the agent worker.
 
@@ -161,7 +161,7 @@ class AgentWorker(NFPWorker):
         return ret
 
     @Task
-    def chat(self, juuid, user_input, template=None) -> str:
+    def chat(self, user_input, juuid: str = None, template=None) -> str:
         """
         NorFab Task that handles the chat interaction with the user by processing the input through a language model.
 
