@@ -322,7 +322,7 @@ class NornirWorker(NFPWorker):
         self.connections_lock = Lock()
 
         # initiate Nornir
-        self.refresh_nornir()
+        self.refresh_nornir(juuid=None)
 
         # initiate watchdog
         self.watchdog = WatchDog(self)
@@ -388,8 +388,10 @@ class NornirWorker(NFPWorker):
             user_defined=inventory.get("user_defined", {}),
         )
 
+    @Task
     def refresh_nornir(
         self,
+        juuid,
         progress: bool = False,
     ) -> Result:
         """
@@ -425,14 +427,15 @@ class NornirWorker(NFPWorker):
 
         # pull Nornir inventory from Netbox
         if "netbox" in self.nornir_worker_inventory:
-            self.nornir_inventory_load_netbox()
+            self.nornir_inventory_load_netbox(juuid=juuid)
             if progress:
                 self.event("Pulled Nornir inventory data from Netbox")
 
         # pull Nornir inventory from Containerlab
         if "containerlab" in self.nornir_worker_inventory:
             self.nornir_inventory_load_containerlab(
-                **self.nornir_worker_inventory["containerlab"], re_init_nornir=False
+                juuid=juuid ** self.nornir_worker_inventory["containerlab"],
+                re_init_nornir=False,
             )
             if progress:
                 self.event("Pulled Nornir inventory data from Containerlab")
@@ -447,7 +450,8 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    def nornir_inventory_load_netbox(self, progress: bool = False) -> Result:
+    @Task
+    def nornir_inventory_load_netbox(self, juuid, progress: bool = False) -> Result:
         """
         Queries inventory data from Netbox Service and merges it into the Nornir inventory.
 
@@ -513,8 +517,10 @@ class NornirWorker(NFPWorker):
 
         return ret
 
+    @Task
     def nornir_inventory_load_containerlab(
         self,
+        juuid,
         lab_name: str = None,
         groups: list = None,
         clab_workers: str = "all",
@@ -817,10 +823,9 @@ class NornirWorker(NFPWorker):
     # Nornir Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task(input=GetNornirHosts, output=GetNornirHostsResponse)
-    def get_nornir_hosts(
-        self, details: bool = False, **kwargs: dict
-    ) -> List[Union[str, Dict]]:
+    # @Task(input=GetNornirHosts, output=GetNornirHostsResponse)
+    @Task
+    def get_nornir_hosts(self, juuid, details: bool = False, **kwargs: dict) -> Result:
         """
         Retrieve a list of Nornir hosts managed by this worker.
 
@@ -849,7 +854,8 @@ class NornirWorker(NFPWorker):
         else:
             return Result(result=list(filtered_nornir.inventory.hosts))
 
-    def get_inventory(self, **kwargs: dict) -> Dict:
+    @Task
+    def get_inventory(self, juuid, **kwargs: dict) -> Result:
         """
         Retrieve running Nornir inventory for requested hosts
 
@@ -863,7 +869,8 @@ class NornirWorker(NFPWorker):
         filtered_nornir = FFun(self.nr, **filters)
         return Result(result=filtered_nornir.inventory.dict(), task="get_inventory")
 
-    def get_version(self) -> Dict:
+    @Task
+    def get_version(self, juuid) -> Result:
         """
         Retrieve the versions of various libraries and system information.
 
@@ -922,7 +929,8 @@ class NornirWorker(NFPWorker):
 
         return Result(result=libs)
 
-    def get_watchdog_stats(self):
+    @Task
+    def get_watchdog_stats(self, juuid) -> Result:
         """
         Retrieve the statistics from the watchdog.
 
@@ -931,7 +939,8 @@ class NornirWorker(NFPWorker):
         """
         return Result(result=self.watchdog.stats())
 
-    def get_watchdog_configuration(self):
+    @Task
+    def get_watchdog_configuration(self, juuid) -> Result:
         """
         Retrieves the current configuration of the watchdog.
 
@@ -940,7 +949,8 @@ class NornirWorker(NFPWorker):
         """
         return Result(result=self.watchdog.configuration())
 
-    def get_watchdog_connections(self):
+    @Task
+    def get_watchdog_connections(self, juuid) -> Result:
         """
         Retrieve the list of connections curently managed by watchdog.
 
@@ -950,7 +960,8 @@ class NornirWorker(NFPWorker):
         """
         return Result(result=self.watchdog.connections_get())
 
-    def task(self, plugin: str, **kwargs) -> Result:
+    @Task
+    def task(self, juuid, plugin: str, **kwargs) -> Result:
         """
         Execute a Nornir task plugin.
 
@@ -1043,8 +1054,10 @@ class NornirWorker(NFPWorker):
 
         return ret
 
+    @Task
     def cli(
         self,
+        juuid,
         commands: list = None,
         plugin: str = "netmiko",
         dry_run: bool = False,
@@ -1053,7 +1066,7 @@ class NornirWorker(NFPWorker):
         to_dict: bool = True,
         add_details: bool = False,
         **kwargs,
-    ) -> dict:
+    ) -> Result:
         """
         Task to collect show commands output from devices using Command Line Interface (CLI).
 
@@ -1169,8 +1182,10 @@ class NornirWorker(NFPWorker):
 
         return ret
 
+    @Task
     def cfg(
         self,
+        juuid,
         config: list,
         plugin: str = "netmiko",
         dry_run: bool = False,
@@ -1178,7 +1193,7 @@ class NornirWorker(NFPWorker):
         add_details: bool = False,
         job_data: str = None,
         **kwargs,
-    ) -> dict:
+    ) -> Result:
         """
         Task to send configuration commands to devices using Command Line Interface (CLI).
 
@@ -1273,8 +1288,10 @@ class NornirWorker(NFPWorker):
 
         return ret
 
+    @Task
     def test(
         self,
+        juuid,
         suite: Union[list, str],
         subset: str = None,
         dry_run: bool = False,
@@ -1283,7 +1300,7 @@ class NornirWorker(NFPWorker):
         return_tests_suite: bool = False,
         job_data: str = None,
         **kwargs,
-    ) -> dict:
+    ) -> Result:
         """
         Function to test networks using a suite of tests.
 
@@ -1428,7 +1445,7 @@ class NornirWorker(NFPWorker):
                     "subset": subset,
                 }
                 result = getattr(self, nrtask)(
-                    **function_kwargs
+                    juuid=juuid, **function_kwargs
                 )  # returns Result object
                 # save test results into overall results
                 if to_dict == True:
@@ -1463,7 +1480,8 @@ class NornirWorker(NFPWorker):
     def snmp(self) -> dict:
         raise NotImplementedError("SNMP task is not implemented yet")
 
-    def network(self, fun, **kwargs) -> dict:
+    @Task
+    def network(self, juuid, fun, **kwargs) -> Result:
         """
         Task to call various network-related utility functions.
 
@@ -1490,8 +1508,10 @@ class NornirWorker(NFPWorker):
             **kwargs,
         )
 
+    @Task
     def parse(
         self,
+        juuid,
         plugin: str = "napalm",
         getters: str = "get_facts",
         template: str = None,
@@ -1499,7 +1519,7 @@ class NornirWorker(NFPWorker):
         to_dict: bool = True,
         add_details: bool = False,
         **kwargs,
-    ):
+    ) -> Result:
         """
         Parse network device output using specified plugin and options.
 
@@ -1574,15 +1594,17 @@ class NornirWorker(NFPWorker):
 
         return ret
 
+    @Task
     def file_copy(
         self,
+        juuid,
         source_file: str,
         plugin: str = "netmiko",
         to_dict: bool = True,
         add_details: bool = False,
         dry_run: bool = False,
         **kwargs,
-    ) -> Dict:
+    ) -> Result:
         """
         Task to transfer files to and from hosts using SCP.
 
@@ -1656,7 +1678,8 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    def runtime_inventory(self, action, **kwargs) -> dict:
+    @Task
+    def runtime_inventory(self, juuid, action, **kwargs) -> Result:
         """
         Task to work with Nornir runtime (in-memory) inventory.
 
@@ -1683,7 +1706,8 @@ class NornirWorker(NFPWorker):
         self.event(f"Performing '{action}' action")
         return Result(result=InventoryFun(self.nr, call=action, **kwargs))
 
-    def nb_get_next_ip(self, *args, **kwargs):
+    @Task
+    def nb_get_next_ip(self, juuid, *args, **kwargs) -> Result:
         """Task to query next available IP address from Netbox service"""
         reply = self.client.run_job(
             "netbox",
@@ -1696,4 +1720,4 @@ class NornirWorker(NFPWorker):
         # reply is a dict of {worker_name: results_dict}
         result = list(reply.values())[0]
 
-        return result["result"]
+        return Result(result=result["result"])

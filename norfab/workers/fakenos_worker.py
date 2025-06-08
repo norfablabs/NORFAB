@@ -48,7 +48,7 @@ import logging
 import time
 import threading
 
-from norfab.core.worker import NFPWorker
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
 from fakenos import FakeNOS
 

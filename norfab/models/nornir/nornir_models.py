@@ -81,6 +81,7 @@ class GetNornirHosts(NornirHostsFilters, extra="forbid"):
     Pydantic model for Nornir get_nornir_hosts task.
     """
 
+    juuid: str = Field(None, description="Job ID running this task")
     details: Optional[StrictBool] = Field(
         None, description="get_nornir_hosts task input arguments schema"
     )

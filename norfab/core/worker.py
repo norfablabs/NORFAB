@@ -30,7 +30,7 @@ signal.signal(signal.SIGINT, signal.SIG_IGN)
 import logging
 import inspect
 
-from functools import wraps
+import functools
 from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
@@ -43,9 +43,9 @@ log = logging.getLogger(__name__)
 NORFAB_WORKER_TASKS = {}
 
 
-class Task:
+class TaskWithArgs:
     """
-    Task is a class-based decorator designed to validate the input arguments of a function
+    TaskWithArgs is a class-based decorator that accept arguments, designed to validate the input arguments of a function
     using a specified Pydantic model. It ensures that the arguments passed to the decorated
     function conform to the schema defined in the model.
 
@@ -69,7 +69,7 @@ class Task:
             an exception is raised.
 
     Usage:
-        @Task(model=YourPydanticModel)
+        @Task(input=YourPydanticModel)
         def your_function(arg1, arg2, ...):
             # Function implementation
             pass
@@ -81,7 +81,7 @@ class Task:
 
     def __init__(
         self,
-        input: BaseModel,
+        input: Optional[BaseModel] = None,
         output: Optional[BaseModel] = None,
         name: str = None,
     ) -> None:
@@ -89,14 +89,17 @@ class Task:
         self.name = name
         self.output = output
 
-    def __call__(self, function: Callable) -> Callable:
+    def __call__(self, function: Callable, *dargs, **dkwargs) -> Callable:
         self.name = self.name or function.__name__
         self.function = function
         NORFAB_WORKER_TASKS[self.name] = self
 
-        @wraps(function)
+        @functools.wraps(function)
         def wrapper(*args, **kwargs):
-            self.validate_input(args, kwargs)
+            # validate input arguments
+            if self.input:
+                self.validate_input(args, kwargs)
+
             ret = self.function(*args, **kwargs)
 
             # check if can validate result
@@ -154,6 +157,26 @@ class Task:
         log.debug(
             f"Validated input kwargs: {merged_kwargs} for function {self.function} using model {self.input}"
         )
+
+
+class Task:
+    def __init__(self, func):
+        log.debug(f"NorFab Task decorator initiated for task '{func}'")
+        functools.update_wrapper(self, func)
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        log.debug(
+            f"NorFab Task decorator called for task {self.func} with args: '{args}', kwargs: '{kwargs}'"
+        )
+        return self.func(self.worker_instance, *args, **kwargs)
+
+    def __get__(self, worker_instance, worker_calss):
+        log.debug(
+            f"NorFab Task decorator for '{worker_instance}' worker called '{self.func}' task method, worker class: '{worker_calss}'"
+        )
+        self.worker_instance = worker_instance
+        return self.__call__
 
 
 # --------------------------------------------------------------------------------------------
@@ -891,7 +914,8 @@ class NFPWorker:
         """
         return None
 
-    def get_inventory(self) -> Dict:
+    @Task
+    def get_inventory(self, juuid) -> Result:
         """
         Retrieve the worker's inventory.
 
@@ -906,7 +930,8 @@ class NFPWorker:
         """
         raise NotImplementedError
 
-    def get_version(self) -> Dict:
+    @Task
+    def get_version(self) -> Result:
         """
         Retrieve the version report of the worker.
 
@@ -1109,8 +1134,14 @@ class NFPWorker:
         events.append(event_item)
         dumper(events, filename)
 
+    @Task
     def job_details(
-        self, uuid: str, data: bool = True, result: bool = True, events: bool = True
+        self,
+        juuid: str = None,
+        uuid: str = None,
+        data: bool = True,
+        result: bool = True,
+        events: bool = True,
     ) -> Result:
         """
         Method to get job details by UUID for completed jobs.
@@ -1172,8 +1203,10 @@ class NFPWorker:
         else:
             raise FileNotFoundError(f"{self.name} - job with UUID '{uuid}' not found")
 
+    @Task
     def job_list(
         self,
+        juuid: str = None,
         pending: bool = True,
         completed: bool = True,
         task: str = None,
@@ -1388,7 +1421,7 @@ class NFPWorker:
 
         # run the actual job
         try:
-            result = getattr(self, task)(*args, **kwargs)
+            result = getattr(self, task)(juuid, *args, **kwargs)
             if not isinstance(result, Result):
                 raise TypeError(
                     f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "

@@ -2,7 +2,7 @@ import json
 import logging
 import sys
 import importlib.metadata
-from norfab.core.worker import NFPWorker
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
@@ -81,7 +81,8 @@ class AgentWorker(NFPWorker):
     def worker_exit(self):
         pass
 
-    def get_version(self):
+    @Task
+    def get_version(self, juuid):
         """
         Generate a report of the versions of specific Python packages and system information.
         This method collects the version information of several Python packages and system details,
@@ -112,7 +113,8 @@ class AgentWorker(NFPWorker):
 
         return Result(result=libs)
 
-    def get_inventory(self):
+    @Task
+    def get_inventory(self, juuid):
         """
         NorFab task to retrieve the agent's inventory.
 
@@ -121,7 +123,8 @@ class AgentWorker(NFPWorker):
         """
         return Result(result=self.agent_inventory)
 
-    def get_status(self):
+    @Task
+    def get_status(self, juuid):
         """
         NorFab Task that retrieves the status of the agent worker.
 
@@ -157,7 +160,8 @@ class AgentWorker(NFPWorker):
 
         return ret
 
-    def chat(self, user_input, template=None) -> str:
+    @Task
+    def chat(self, juuid, user_input, template=None) -> str:
         """
         NorFab Task that handles the chat interaction with the user by processing the input through a language model.
 

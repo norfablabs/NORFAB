@@ -12,7 +12,7 @@ import re
 
 from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
-from norfab.core.worker import NFPWorker
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
 from typing import Union
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -199,7 +199,8 @@ class NetboxWorker(NFPWorker):
     # Netbox Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    def get_inventory(self) -> dict:
+    @Task
+    def get_inventory(self, juuid) -> Result:
         """
         NorFab Task to return running inventory for NetBox worker.
 
@@ -210,7 +211,8 @@ class NetboxWorker(NFPWorker):
             task=f"{self.name}:get_inventory", result=dict(self.netbox_inventory)
         )
 
-    def get_version(self, **kwargs) -> dict:
+    @Task
+    def get_version(self, juuid, **kwargs) -> Result:
         """
         Retrieves the version information of specified libraries and system details.
 
@@ -235,7 +237,8 @@ class NetboxWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    def get_netbox_status(self, instance=None) -> dict:
+    @Task
+    def get_netbox_status(self, juuid, instance=None) -> Result:
         """
         Retrieve the status of NetBox instances.
 
@@ -259,7 +262,8 @@ class NetboxWorker(NFPWorker):
                 ret.result[name] = self._query_netbox_status(name)
         return ret
 
-    def get_compatibility(self) -> dict:
+    @Task
+    def get_compatibility(self, juuid) -> Result:
         """
         Checks the compatibility of Netbox instances based on their version.
 
@@ -273,7 +277,7 @@ class NetboxWorker(NFPWorker):
                   is not reachable.
         """
         ret = Result(task=f"{self.name}:get_compatibility", result={})
-        netbox_status = self.get_netbox_status()
+        netbox_status = self.get_netbox_status(juuid=juuid)
         for instance, params in netbox_status.result.items():
             if params["status"] is not True:
                 log.warning(f"{self.name} - {instance} Netbox instance not reachable")
@@ -316,7 +320,7 @@ class NetboxWorker(NFPWorker):
         Raises:
             RuntimeError: If any of the Netbox instances are not compatible.
         """
-        compatibility = self.get_compatibility()
+        compatibility = self.get_compatibility(juuid=None)
         if not all(i is not False for i in compatibility.result.values()):
             raise RuntimeError(
                 f"{self.name} - not all Netbox instances are compatible: {compatibility.result}"
@@ -443,7 +447,8 @@ class NetboxWorker(NFPWorker):
             size_limit=1073741824,  #  GigaByte
         )
 
-    def cache_list(self, keys="*", details=False) -> list:
+    @Task
+    def cache_list(self, juuid, keys="*", details=False) -> Result:
         """
         Retrieve a list of cache keys, optionally with details about each key.
 
@@ -475,7 +480,8 @@ class NetboxWorker(NFPWorker):
                     ret.result.append(cache_key)
         return ret
 
-    def cache_clear(self, key=None, keys=None) -> list:
+    @Task
+    def cache_clear(self, juuid, key=None, keys=None) -> Result:
         """
         Clears specified keys from the cache.
 
@@ -519,7 +525,8 @@ class NetboxWorker(NFPWorker):
                         raise RuntimeError(f"Failed to remove {key} from cache")
         return ret
 
-    def cache_get(self, key=None, keys=None, raise_missing=False) -> dict:
+    @Task
+    def cache_get(self, juuid, key=None, keys=None, raise_missing=False) -> Result:
         """
         Retrieve values from the cache based on a specific key or a pattern of keys.
 
@@ -550,8 +557,10 @@ class NetboxWorker(NFPWorker):
                     ret.result[cache_key] = self.cache[cache_key]
         return ret
 
+    @Task
     def graphql(
         self,
+        juuid,
         instance: str = None,
         dry_run: bool = False,
         obj: dict = None,
@@ -559,7 +568,7 @@ class NetboxWorker(NFPWorker):
         fields: list = None,
         queries: dict = None,
         query_string: str = None,
-    ) -> Union[dict, list]:
+    ) -> Result:
         """
         Function to query Netbox v3 or Netbox v4 GraphQL API.
 
@@ -698,14 +707,16 @@ class NetboxWorker(NFPWorker):
 
         return response.json()
 
+    @Task
     def get_devices(
         self,
+        juuid,
         filters: list = None,
         instance: str = None,
         dry_run: bool = False,
         devices: list = None,
         cache: Union[bool, str] = None,
-    ) -> dict:
+    ) -> Result:
         """
         Retrieves device data from Netbox using the GraphQL API.
 
@@ -785,7 +796,10 @@ class NetboxWorker(NFPWorker):
                     "fields": ["name", "last_updated"],
                 }
             last_updated = self.graphql(
-                queries=last_updated_query, instance=instance, dry_run=dry_run
+                juuid=juuid,
+                queries=last_updated_query,
+                instance=instance,
+                dry_run=dry_run,
             )
             last_updated.raise_for_status(f"{self.name} - get devices query failed")
 
@@ -839,7 +853,7 @@ class NetboxWorker(NFPWorker):
 
             # send queries
             query_result = self.graphql(
-                queries=queries, instance=instance, dry_run=dry_run
+                juuid=juuid, queries=queries, instance=instance, dry_run=dry_run
             )
 
             # check for errors
@@ -867,15 +881,17 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    @Task
     def get_interfaces(
         self,
+        juuid,
         instance: str = None,
         devices: list = None,
         ip_addresses: bool = False,
         inventory_items: bool = False,
         dry_run: bool = False,
         cache: Union[bool, str] = None,
-    ) -> dict:
+    ) -> Result:
         """
         Retrieve device interfaces from Netbox using GraphQL API.
 
@@ -963,7 +979,9 @@ class NetboxWorker(NFPWorker):
                 "fields": inv_fields,
             }
 
-        query_result = self.graphql(instance=instance, queries=queries, dry_run=dry_run)
+        query_result = self.graphql(
+            juuid=juuid, instance=instance, queries=queries, dry_run=dry_run
+        )
 
         # return dry run result
         if dry_run:
@@ -1009,14 +1027,16 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    @Task
     def get_connections(
         self,
+        juuid,
         devices: list,
         instance: str = None,
         dry_run: bool = False,
         cables: bool = False,
         cache: Union[bool, str] = None,
-    ) -> dict:
+    ) -> Result:
         """
         Retrieve interface connection details for specified devices from Netbox.
 
@@ -1158,7 +1178,9 @@ class NetboxWorker(NFPWorker):
         }
 
         # retrieve full list of devices interface with all cables
-        query_result = self.graphql(queries=queries, instance=instance, dry_run=dry_run)
+        query_result = self.graphql(
+            juuid=juuid, queries=queries, instance=instance, dry_run=dry_run
+        )
 
         # return dry run result
         if dry_run:
@@ -1333,16 +1355,17 @@ class NetboxWorker(NFPWorker):
         )
         return True
 
+    @Task
     def get_circuits(
         self,
+        juuid,
         devices: list,
         cid: list = None,
         instance: str = None,
         dry_run: bool = False,
         cache: Union[bool, str] = True,
-    ) -> dict:
+    ) -> Result:
         """
-
         Retrieve circuit information for specified devices from Netbox.
 
         Args:
@@ -1392,7 +1415,7 @@ class NetboxWorker(NFPWorker):
         # form initial circuits filters based on devices' sites and cid list
         circuits_filters_dict = {}
         device_data = self.get_devices(
-            devices=copy.deepcopy(devices), instance=instance, cache=cache
+            juuid=juuid, devices=copy.deepcopy(devices), instance=instance, cache=cache
         )
         sites = list(set([i["site"]["slug"] for i in device_data.result.values()]))
         if self.nb_version[instance][0] == 4:
@@ -1415,6 +1438,7 @@ class NetboxWorker(NFPWorker):
             cid_list = []  #  new cid list for follow up query
             # retrieve last updated data from Netbox for circuits and their terminations
             last_updated = self.graphql(
+                juuid=juuid,
                 obj="circuit_list",
                 filters=circuits_filters_dict,
                 fields=[
@@ -1490,6 +1514,7 @@ class NetboxWorker(NFPWorker):
 
         if circuits_filters_dict:
             query_result = self.graphql(
+                juuid=juuid,
                 obj="circuit_list",
                 filters=circuits_filters_dict,
                 fields=circuit_fields,
@@ -1521,8 +1546,10 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    @Task
     def get_nornir_inventory(
         self,
+        juuid,
         filters: list = None,
         devices: list = None,
         instance: str = None,
@@ -1531,7 +1558,7 @@ class NetboxWorker(NFPWorker):
         circuits: Union[dict, bool] = False,
         nbdata: bool = True,
         primary_ip: str = "ip4",
-    ) -> dict:
+    ) -> Result:
         """
         Retrieve and construct Nornir inventory from NetBox data.
 
@@ -1557,13 +1584,13 @@ class NetboxWorker(NFPWorker):
         ret = Result(task=f"{self.name}:get_nornir_inventory", result=inventory)
 
         # check Netbox status
-        netbox_status = self.get_netbox_status(instance=instance)
+        netbox_status = self.get_netbox_status(juuid=juuid, instance=instance)
         if netbox_status.result[instance or self.default_instance]["status"] is False:
             return ret
 
         # retrieve devices data
         nb_devices = self.get_devices(
-            filters=filters, devices=devices, instance=instance
+            juuid=juuid, filters=filters, devices=devices, instance=instance
         )
 
         # form Nornir hosts inventory
@@ -1604,7 +1631,7 @@ class NetboxWorker(NFPWorker):
                 host["data"].setdefault("interfaces", {})
             # query interfaces data from netbox
             nb_interfaces = self.get_interfaces(
-                devices=list(hosts), instance=instance, **kwargs
+                juuid=juuid, devices=list(hosts), instance=instance, **kwargs
             )
             # save interfaces data to hosts' inventory
             while nb_interfaces.result:
@@ -1620,7 +1647,7 @@ class NetboxWorker(NFPWorker):
                 host["data"].setdefault("connections", {})
             # query connections data from netbox
             nb_connections = self.get_connections(
-                devices=list(hosts), instance=instance, **kwargs
+                juuid=juuid, devices=list(hosts), instance=instance, **kwargs
             )
             # save connections data to hosts' inventory
             while nb_connections.result:
@@ -1636,7 +1663,7 @@ class NetboxWorker(NFPWorker):
                 host["data"].setdefault("circuits", {})
             # query circuits data from netbox
             nb_circuits = self.get_circuits(
-                devices=list(hosts), instance=instance, **kwargs
+                juuid=juuid, devices=list(hosts), instance=instance, **kwargs
             )
             # save circuits data to hosts' inventory
             while nb_circuits.result:
@@ -1676,8 +1703,10 @@ class NetboxWorker(NFPWorker):
 
         return list(sorted(set(ret)))
 
+    @Task
     def update_device_facts(
         self,
+        juuid,
         instance: str = None,
         dry_run: bool = False,
         datasource: str = "nornir",
@@ -1685,7 +1714,7 @@ class NetboxWorker(NFPWorker):
         devices: list = None,
         batch_size: int = 10,
         **kwargs,
-    ) -> dict:
+    ) -> Result:
         """
         Updates the device facts in NetBox:
 
@@ -1780,8 +1809,10 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    @Task
     def update_device_interfaces(
         self,
+        juuid,
         instance: str = None,
         dry_run: bool = False,
         datasource: str = "nornir",
@@ -1790,7 +1821,7 @@ class NetboxWorker(NFPWorker):
         create: bool = True,
         batch_size: int = 10,
         **kwargs,
-    ) -> dict:
+    ) -> Result:
         """
         Update or create device interfaces in Netbox. Interface parameters updated:
 
@@ -1985,8 +2016,10 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    @Task
     def update_device_ip(
         self,
+        juuid,
         instance: str = None,
         dry_run: bool = False,
         datasource: str = "nornir",
@@ -1995,7 +2028,7 @@ class NetboxWorker(NFPWorker):
         create: bool = True,
         batch_size: int = 10,
         **kwargs,
-    ) -> dict:
+    ) -> Result:
         """
         Update the IP addresses of devices in Netbox.
 
@@ -2126,8 +2159,10 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    @Task
     def get_next_ip(
         self,
+        juuid,
         subnet: str,
         description: str = None,
         device: str = None,
@@ -2139,7 +2174,7 @@ class NetboxWorker(NFPWorker):
         comments: str = None,
         instance: str = None,
         dry_run: bool = False,
-    ) -> dict:
+    ) -> Result:
         """
         Allocate the next available IP address from a given subnet.
 
@@ -2168,8 +2203,10 @@ class NetboxWorker(NFPWorker):
 
         return Result(result=str(nb_ip))
 
+    @Task
     def get_containerlab_inventory(
         self,
+        juuid,
         lab_name: str = None,
         tenant: str = None,
         filters: list = None,
@@ -2181,7 +2218,7 @@ class NetboxWorker(NFPWorker):
         ports_map: dict = None,
         progress: bool = False,
         cache: Union[bool, str] = False,
-    ) -> dict:
+    ) -> Result:
         """
         Retrieve and construct Containerlab inventory from NetBox data.
 
@@ -2290,7 +2327,7 @@ class NetboxWorker(NFPWorker):
             raise ValueError(f"Need ports to allocate, but '{ports}' given")
 
         # check Netbox status
-        netbox_status = self.get_netbox_status(instance=instance)
+        netbox_status = self.get_netbox_status(juuid=juuid, instance=instance)
         if netbox_status.result[instance]["status"] is False:
             ret.failed = True
             ret.messages = [f"Netbox status is no good: {netbox_status}"]
@@ -2303,7 +2340,11 @@ class NetboxWorker(NFPWorker):
         if progress:
             self.event("Fetching devices data from Netbox")
         nb_devices = self.get_devices(
-            filters=filters, devices=devices, instance=instance, cache=cache
+            juuid=juuid,
+            filters=filters,
+            devices=devices,
+            instance=instance,
+            cache=cache,
         )
 
         # form Containerlab nodes inventory
@@ -2376,7 +2417,7 @@ class NetboxWorker(NFPWorker):
 
         # query interface connections data from netbox
         nb_connections = self.get_connections(
-            devices=list(nodes), instance=instance, cache=cache
+            juuid=juuid, devices=list(nodes), instance=instance, cache=cache
         )
         # save connections data to links inventory
         while nb_connections.result:
@@ -2430,7 +2471,7 @@ class NetboxWorker(NFPWorker):
 
         # query circuits connections data from netbox
         nb_circuits = self.get_circuits(
-            devices=list(nodes), instance=instance, cache=cache
+            juuid=juuid, devices=list(nodes), instance=instance, cache=cache
         )
         # save circuits data to hosts' inventory
         while nb_circuits.result:

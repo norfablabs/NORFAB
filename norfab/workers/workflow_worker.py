@@ -4,7 +4,7 @@ import sys
 import importlib.metadata
 import yaml
 import os
-from norfab.core.worker import NFPWorker
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
 from typing import Union, Dict, List, Tuple
 
@@ -58,7 +58,8 @@ class WorkflowWorker(NFPWorker):
     def worker_exit(self):
         pass
 
-    def get_version(self):
+    @Task
+    def get_version(self, nb_get_next_ip) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
 
@@ -84,7 +85,8 @@ class WorkflowWorker(NFPWorker):
 
         return Result(result=libs)
 
-    def get_inventory(self):
+    @Task
+    def get_inventory(self, nb_get_next_ip) -> Result:
         """
         NorFab task to retrieve the workflow's worker inventory.
 
@@ -248,7 +250,8 @@ class WorkflowWorker(NFPWorker):
                     return True  # stop the workflow since a failure occurred
         return False
 
-    def run(self, workflow: Union[str, Dict]) -> Dict:
+    @Task
+    def run(self, nb_get_next_ip, workflow: Union[str, Dict]) -> Result:
         """
         Executes a workflow defined by a dictionary.
 

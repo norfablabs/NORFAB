@@ -7,7 +7,7 @@ import signal
 import importlib.metadata
 import uvicorn
 
-from norfab.core.worker import NFPWorker
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
 from norfab.models.fastapi import (
     WorkerResult,
@@ -151,7 +151,8 @@ class FastAPIWorker(NFPWorker):
         """
         os.kill(os.getpid(), signal.SIGTERM)
 
-    def get_version(self):
+    @Task
+    def get_version(self, juuid) -> Result:
         """
         Produce a report of the versions of various Python packages.
 
@@ -180,7 +181,8 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    def get_inventory(self) -> Dict:
+    @Task
+    def get_inventory(self, juuid) -> Result:
         """
         Retrieve the inventory of the FastAPI worker.
 
@@ -192,7 +194,10 @@ class FastAPIWorker(NFPWorker):
             task=f"{self.name}:get_inventory",
         )
 
-    def bearer_token_store(self, username: str, token: str, expire: int = None) -> bool:
+    @Task
+    def bearer_token_store(
+        self, juuid, username: str, token: str, expire: int = None
+    ) -> Result:
         """
         Method to store a bearer token in the database.
 
@@ -226,7 +231,10 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_store", result=True)
 
-    def bearer_token_delete(self, username: str = None, token: str = None) -> bool:
+    @Task
+    def bearer_token_delete(
+        self, juuid, username: str = None, token: str = None
+    ) -> Result:
         """
         Deletes a bearer token from the cache.
         This method removes a bearer token from the cache based on either
@@ -267,7 +275,8 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_delete", result=True)
 
-    def bearer_token_list(self, username: str = None) -> list:
+    @Task
+    def bearer_token_list(self, juuid, username: str = None) -> Result:
         """
         Retrieves a list of bearer tokens from the cache, optionally filtered by username.
 
@@ -324,7 +333,8 @@ class FastAPIWorker(NFPWorker):
 
         return ret
 
-    def bearer_token_check(self, token: str) -> bool:
+    @Task
+    def bearer_token_check(self, juuid, token: str) -> Result:
         """
         Checks if the provided bearer token is present in the cache and still active.
 
