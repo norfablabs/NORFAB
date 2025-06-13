@@ -1544,6 +1544,7 @@ class NFPWorker:
 
         self.start_threads()
 
+        # start job threads and submit jobs in an infinite loop
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=self.max_concurrent_jobs,
             thread_name_prefix=f"{self.name}-job-worker",
