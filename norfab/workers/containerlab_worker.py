@@ -10,7 +10,7 @@ import json
 import socket
 import ipaddress
 
-from norfab.core.worker import NFPWorker, Task
+from norfab.core.worker import NFPWorker, Task, Job
 from norfab.core.inventory import merge_recursively
 from norfab.models.containerlab import DeployTask, DeployTaskResponse
 from norfab.models import Result
@@ -71,7 +71,7 @@ class ContainerlabWorker(NFPWorker):
         os.kill(os.getpid(), signal.SIGTERM)
 
     @Task
-    def get_version(self, juuid) -> Result:
+    def get_version(self, job: Job) -> Result:
         """
         Produce a report of the versions of various Python packages.
 
@@ -112,7 +112,7 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     @Task
-    def get_inventory(self, juuid) -> Result:
+    def get_inventory(self, job: Job) -> Result:
         """
         Retrieve the inventory of the Containerlab worker.
 
@@ -125,7 +125,7 @@ class ContainerlabWorker(NFPWorker):
         )
 
     @Task
-    def get_containerlab_status(self, juuid) -> Result:
+    def get_containerlab_status(self, job: Job) -> Result:
         """
         Retrieve the status of the Containerlab worker.
 
@@ -139,7 +139,7 @@ class ContainerlabWorker(NFPWorker):
         )
 
     @Task
-    def get_running_labs(self, juuid: str = None, timeout: int = None) -> Result:
+    def get_running_labs(self, job: Job, timeout: int = None) -> Result:
         """
         Retrieve a list of running containerlab lab names.
 
@@ -168,12 +168,12 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def run_containerlab_command(
         self,
+        job: Job,
         args: list,
         cwd: str = None,
         timeout: int = 600,
         ret: Result = None,
         env: dict = None,
-        juuid: str = None,
     ) -> Tuple:
         """
         Executes a containerlab command using subprocess and processes its output.
@@ -224,14 +224,14 @@ class ContainerlabWorker(NFPWorker):
                     )
                 msg = proc.stderr.readline().strip()
                 if msg:
-                    self.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
+                    job.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
                     logs.append(msg)
                 time.sleep(0.01)
             # read remaining messages
             for msg in proc.stderr.readlines():
                 msg = msg.strip()
                 if msg:
-                    self.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
+                    job.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
                     logs.append(msg)
                 time.sleep(0.01)
             # read process output
@@ -271,11 +271,11 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def deploy(
         self,
+        job: Job,
         topology: str,
         reconfigure: bool = False,
         timeout: int = None,
         node_filter: str = None,
-        juuid: str = None,
     ) -> Result:
         """
         Deploys a containerlab topology.
@@ -318,9 +318,9 @@ class ContainerlabWorker(NFPWorker):
         args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
         if reconfigure is True:
             args.append("--reconfigure")
-            self.event(f"Re-deploying lab {os.path.split(topology_file)[-1]}")
+            job.event(f"Re-deploying lab {os.path.split(topology_file)[-1]}")
         else:
-            self.event(f"Deploying lab {os.path.split(topology_file)[-1]}")
+            job.event(f"Deploying lab {os.path.split(topology_file)[-1]}")
         if node_filter is not None:
             args.append("--node-filter")
             args.append(node_filter)
@@ -331,13 +331,11 @@ class ContainerlabWorker(NFPWorker):
 
         # run containerlab command
         return self.run_containerlab_command(
-            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, juuid=juuid
+            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
         )
 
     @Task
-    def destroy_lab(
-        self, lab_name: str, juuid: str = None, timeout: int = None
-    ) -> Result:
+    def destroy_lab(self, lab_name: str, job: Job, timeout: int = None) -> Result:
         """
         Destroys a specified lab.
 
@@ -372,7 +370,7 @@ class ContainerlabWorker(NFPWorker):
             # run destroy command
             args = ["containerlab", "destroy", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret, juuid=juuid
+                args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
             )
 
             if not ret.failed:
@@ -383,8 +381,8 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def inspect(
         self,
+        job: Job,
         lab_name: str = None,
-        juuid: str = None,
         timeout: int = None,
         details: bool = False,
     ) -> Result:
@@ -414,12 +412,12 @@ class ContainerlabWorker(NFPWorker):
         if details:
             args.append("--details")
 
-        ret = self.run_containerlab_command(args, timeout=timeout, ret=ret, juuid=juuid)
+        ret = self.run_containerlab_command(args, timeout=timeout, ret=ret, job=job)
 
         return ret
 
     @Task
-    def save(self, lab_name: str, juuid: str = None, timeout: int = None) -> Result:
+    def save(self, job: Job, lab_name: str, timeout: int = None) -> Result:
         """
         Saves the config of a specified lab devices by invoking the `containerlab save` command.
 
@@ -450,7 +448,7 @@ class ContainerlabWorker(NFPWorker):
             # run destroy command
             args = ["containerlab", "save", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret, juuid=juuid
+                args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
             )
 
             if not ret.failed:
@@ -459,9 +457,7 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     @Task
-    def restart_lab(
-        self, lab_name: str, juuid: str = None, timeout: int = None
-    ) -> Result:
+    def restart_lab(self, job: Job, lab_name: str, timeout: int = None) -> Result:
         """
         Restart a specified Containerlab lab.
 
@@ -509,7 +505,7 @@ class ContainerlabWorker(NFPWorker):
                 timeout=timeout,
                 ret=ret,
                 env=env,
-                juuid=juuid,
+                job=job,
             )
 
             if not ret.failed:
@@ -520,11 +516,11 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def get_nornir_inventory(
         self,
+        job: Job,
         lab_name: str = None,
         timeout: int = None,
         groups: list = None,
         use_default_credentials: bool = True,
-        juuid: str = None,
     ) -> Result:
         """
         Retrieves the Nornir inventory for a specified lab.
@@ -650,6 +646,7 @@ class ContainerlabWorker(NFPWorker):
     @Task
     def deploy_netbox(
         self,
+        job: Job,
         lab_name: str = None,
         tenant: str = None,
         filters: list = None,
@@ -663,7 +660,6 @@ class ContainerlabWorker(NFPWorker):
         timeout: int = 600,
         node_filter: str = None,
         dry_run: bool = False,
-        juuid: str = None,
     ) -> Result:
         """
         Deploys a containerlab topology using device data from the Netbox database.
@@ -718,12 +714,10 @@ class ContainerlabWorker(NFPWorker):
             lab_name = tenant
 
         # inspect existing containers
-        if progress:
-            self.event(f"Checking existing containers")
+        job.event(f"Checking existing containers")
         get_containers = self.inspect(details=True)
         if get_containers.failed is False:
-            if progress:
-                self.event(f"Existing containers found, retrieving details")
+            job.event(f"Existing containers found, retrieving details")
             for container in get_containers.result:
                 clab_name = container["Labels"]["containerlab"]
                 clab_topo = container["Labels"]["clab-topo-file"]
@@ -756,36 +750,30 @@ class ContainerlabWorker(NFPWorker):
                         else:
                             msg = f"{clab_name} lab {node_name} node failed to determine mgmt subnet"
                             log.warning(msg)
-                            if progress:
-                                self.event(msg, severity="WARNING")
+                            job.event(msg, severity="WARNING")
                             continue
                 subnets_in_use.add(subnet)
                 # re-use existing lab subnet
                 if clab_name == lab_name:
                     ipv4_subnet = subnet
-                    if progress:
-                        self.event(
-                            f"{ipv4_subnet} not in use by existing containers, using it"
-                        )
+                    job.event(
+                        f"{ipv4_subnet} not in use by existing containers, using it"
+                    )
                 # allocate new subnet if its in use by other lab
                 elif clab_name != lab_name and ipv4_subnet == subnet:
                     msg = f"{ipv4_subnet} already in use, allocating new subnet"
                     log.info(msg)
-                    if progress:
-                        self.event(msg)
+                    job.event(msg)
                     ipv4_subnet = None
-            if progress:
-                self.event(f"Collected TCP/UDP ports used by existing containers")
+            job.event(f"Collected TCP/UDP ports used by existing containers")
 
         # allocate new subnet
         if ipv4_subnet is None:
             pool = set(f"172.100.{i}.0/24" for i in range(100, 255))
             ipv4_subnet = list(sorted(pool.difference(subnets_in_use)))[0]
-            if progress:
-                self.event(f"{lab_name} allocated new subnet {ipv4_subnet}")
+            job.event(f"{lab_name} allocated new subnet {ipv4_subnet}")
 
-        if progress:
-            self.event(f"{lab_name} fetching lab topology data from Netbox")
+        job.event(f"{lab_name} fetching lab topology data from Netbox")
 
         # download inventory data from Netbox
         netbox_reply = self.client.run_job(
@@ -818,8 +806,7 @@ class ContainerlabWorker(NFPWorker):
             log.error(msg)
             raise RuntimeError(msg)
 
-        if progress:
-            self.event(f"{lab_name} topology data retrieved from Netbox")
+        job.event(f"{lab_name} topology data retrieved from Netbox")
 
         if dry_run is True:
             ret.result = topology_inventory
@@ -834,22 +821,19 @@ class ContainerlabWorker(NFPWorker):
         with open(topology_file, "w", encoding="utf-8") as tf:
             tf.write(yaml.dump(topology_inventory, default_flow_style=False))
 
-        if progress:
-            self.event(f"{lab_name} topology data saved to '{topology_file}'")
+        job.event(f"{lab_name} topology data saved to '{topology_file}'")
 
         # form command arguments
         args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
         if reconfigure is True:
             args.append("--reconfigure")
-            if progress:
-                self.event(
-                    f"{lab_name} re-deploying lab using {os.path.split(topology_file)[-1]} topology file"
-                )
+            job.event(
+                f"{lab_name} re-deploying lab using {os.path.split(topology_file)[-1]} topology file"
+            )
         else:
-            if progress:
-                self.event(
-                    f"{lab_name} deploying lab using {os.path.split(topology_file)[-1]} topology file"
-                )
+            job.event(
+                f"{lab_name} deploying lab using {os.path.split(topology_file)[-1]} topology file"
+            )
         if node_filter is not None:
             args.append("--node-filter")
             args.append(node_filter)
@@ -860,5 +844,5 @@ class ContainerlabWorker(NFPWorker):
 
         # run containerlab command
         return self.run_containerlab_command(
-            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, juuid=juuid
+            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
         )

@@ -4,7 +4,7 @@ import sys
 import importlib.metadata
 import yaml
 import os
-from norfab.core.worker import NFPWorker, Task
+from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from typing import Union, Dict, List, Tuple
 
@@ -59,7 +59,7 @@ class WorkflowWorker(NFPWorker):
         pass
 
     @Task
-    def get_version(self, nb_get_next_ip) -> Result:
+    def get_version(self, job: Job) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
 
@@ -86,7 +86,7 @@ class WorkflowWorker(NFPWorker):
         return Result(result=libs)
 
     @Task
-    def get_inventory(self, nb_get_next_ip) -> Result:
+    def get_inventory(self, job: Job) -> Result:
         """
         NorFab task to retrieve the workflow's worker inventory.
 
@@ -251,7 +251,7 @@ class WorkflowWorker(NFPWorker):
         return False
 
     @Task
-    def run(self, workflow: Union[str, Dict], juuid: str = None) -> Result:
+    def run(self, job: Job, workflow: Union[str, Dict]) -> Result:
         """
         Executes a workflow defined by a dictionary.
 
@@ -280,7 +280,7 @@ class WorkflowWorker(NFPWorker):
         workflow_description = workflow.pop("description", "")
         remove_no_match_results = workflow.pop("remove_no_match_results", True)
 
-        self.event(f"Starting workflow '{workflow_name}'")
+        job.event(f"Starting workflow '{workflow_name}'")
         log.info(f"Starting workflow '{workflow_name}': {workflow_description}")
 
         ret.result[workflow_name] = {}
@@ -303,7 +303,7 @@ class WorkflowWorker(NFPWorker):
                         "juuid": None,
                     }
                 }
-                self.event(
+                job.event(
                     f"Skipping workflow step '{step}', one of run_if_x conditions not satisfied"
                 )
                 continue
@@ -320,11 +320,11 @@ class WorkflowWorker(NFPWorker):
                         "juuid": None,
                     }
                 }
-                self.event(message)
+                job.event(message)
                 log.error(message)
                 break
 
-            self.event(f"Doing workflow step '{step}'")
+            job.event(f"Doing workflow step '{step}'")
 
             ret.result[workflow_name][step] = self.client.run_job(
                 service=data["service"],

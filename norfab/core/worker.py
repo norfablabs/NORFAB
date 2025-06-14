@@ -10,7 +10,7 @@ import pickle
 import psutil
 import signal
 import concurrent.futures
-import random
+import copy
 
 from . import NFP
 from .client import NFPClient
@@ -231,6 +231,43 @@ class Task:
             output=output,
             name=name,
         )
+
+
+# --------------------------------------------------------------------------------------------
+# NORFAB Worker Job Object
+# --------------------------------------------------------------------------------------------
+
+
+class Job:
+    def __init__(
+        self,
+        worker: object = None,
+        juuid: str = None,
+        client_address: str = None,
+        timeout: int = None,
+        args: list = None,
+        kwargs: dict = None,
+        task: str = None,
+        progress: bool = False,
+    ):
+        self.worker = worker
+        self.juuid = juuid
+        self.client_address = client_address
+        self.timeout = timeout
+        self.args = args or []
+        self.kwargs = kwargs or {}
+        self.task = task
+        self.progress = progress
+
+    def event(self, message, **kwargs):
+        kwargs.setdefault("task", self.task)
+        if self.kwargs.get("progress") and self.juuid and self.worker:
+            self.worker.event(
+                message=message,
+                juuid=self.juuid,
+                client_address=self.client_address,
+                **kwargs,
+            )
 
 
 # --------------------------------------------------------------------------------------------
@@ -579,35 +616,25 @@ def _event(worker, event_queue, destroy_event):
     """
     while not destroy_event.is_set():
         try:
-            work = event_queue.get(block=True, timeout=0.1)
+            event_data = event_queue.get(block=True, timeout=0.1)
         except queue.Empty:
             continue
-
-        client_address = work[0]
-        suuid = work[1]
-        task = work[2]
-        timeout = work[3]
-        data = work[4]
-
+        uuid = event_data.pop("juuid")
         event = [
-            client_address,
+            event_data.pop("client_address").encode("utf-8"),
             b"",
-            suuid,
+            uuid.encode("utf-8"),
             b"200",
             json.dumps(
                 {
                     "worker": worker.name,
                     "service": worker.service.decode("utf-8"),
-                    "uuid": suuid.decode("utf-8"),
-                    "task": task,
-                    "timeout": timeout,
-                    **data,
+                    "uuid": uuid,
+                    **event_data,
                 }
             ).encode("utf-8"),
         ]
-
         worker.send_to_broker(NFP.EVENT, event)
-
         event_queue.task_done()
 
 
@@ -1151,7 +1178,9 @@ class NFPWorker:
 
         return filepath
 
-    def event(self, data: Union[NorFabEvent, str], **kwargs) -> None:
+    def event(
+        self, message: str, juuid: str, task: str, client_address: str, **kwargs
+    ) -> None:
         """
         Handles the creation and emission of an event.
 
@@ -1159,33 +1188,32 @@ class NFPWorker:
         It also saves the event data locally for future reference.
 
         Args:
-            data (Union[NorFabEvent, str]): The event data, which can be either an instance of NorFabEvent or a string.
-            **kwargs: Additional keyword arguments to be passed when creating a NorFabEvent instance if `data` is a string.
+            message: The event message
+            juuid: Job ID for which this event is generated
+            **kwargs: Additional keyword arguments to be passed when creating a NorFabEvent instance
 
         Logs:
             Error: Logs an error message if the event data cannot be formed.
         """
+        # construct NorFabEvent
         try:
-            if not isinstance(data, NorFabEvent):
-                data = NorFabEvent(message=data, **kwargs)
+            event_data = NorFabEvent(
+                message=message,
+                juuid=juuid,
+                client_address=client_address,
+                task=task,
+                **kwargs,
+            )
         except Exception as e:
             log.error(f"Failed to form event data, error {e}")
             return
-        data = data.model_dump(exclude_none=True)
-        # form event ZeroMQ payload
-        event_item = [
-            self.current_job["client_address"],
-            self.current_job["juuid"],
-            self.current_job["task"],
-            self.current_job["timeout"],
-            data,
-        ]
+        event_data = event_data.model_dump(exclude_none=True)
         # emit event to the broker
-        self.event_queue.put(event_item)
+        self.event_queue.put(event_data)
         # save event locally
-        filename = event_filename(self.current_job["juuid"], self.base_dir_jobs)
+        filename = event_filename(juuid, self.base_dir_jobs)
         events = loader(filename) if os.path.exists(filename) else []
-        events.append(event_item)
+        events.append(event_data)
         dumper(events, filename)
 
     @Task
@@ -1460,12 +1488,15 @@ class NFPWorker:
         kwargs = data.pop("kwargs", {})
         timeout = data.pop("timeout", 60)
 
-        self.current_job = {
-            "client_address": client_address,
-            "juuid": juuid,
-            "task": task,
-            "timeout": timeout,
-        }
+        job = Job(
+            worker=self,
+            client_address=client_address.decode("utf-8"),
+            juuid=juuid.decode("utf-8"),
+            task=task,
+            timeout=timeout,
+            args=copy.deepcopy(args),
+            kwargs=copy.deepcopy(kwargs),
+        )
 
         log.debug(
             f"{self.name} - doing task '{task}', timeout: '{timeout}', data: "
@@ -1475,7 +1506,7 @@ class NFPWorker:
 
         # run the actual job
         try:
-            result = getattr(self, task)(*args, juuid=juuid, **kwargs)
+            result = getattr(self, task)(*args, job=job, **kwargs)
             if not isinstance(result, Result):
                 raise TypeError(
                     f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "

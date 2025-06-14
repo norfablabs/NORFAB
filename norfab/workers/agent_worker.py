@@ -2,7 +2,7 @@ import json
 import logging
 import sys
 import importlib.metadata
-from norfab.core.worker import NFPWorker, Task
+from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
@@ -82,7 +82,7 @@ class AgentWorker(NFPWorker):
         pass
 
     @Task
-    def get_version(self, juuid: str = None):
+    def get_version(self, job: Job):
         """
         Generate a report of the versions of specific Python packages and system information.
         This method collects the version information of several Python packages and system details,
@@ -114,7 +114,7 @@ class AgentWorker(NFPWorker):
         return Result(result=libs)
 
     @Task
-    def get_inventory(self, juuid: str = None):
+    def get_inventory(self, job: Job):
         """
         NorFab task to retrieve the agent's inventory.
 
@@ -124,7 +124,7 @@ class AgentWorker(NFPWorker):
         return Result(result=self.agent_inventory)
 
     @Task
-    def get_status(self, juuid: str = None):
+    def get_status(self, job: Job):
         """
         NorFab Task that retrieves the status of the agent worker.
 
@@ -133,7 +133,7 @@ class AgentWorker(NFPWorker):
         """
         return Result(result="OK")
 
-    def _chat_ollama(self, user_input, template=None) -> str:
+    def _chat_ollama(self, user_input, job, template=None) -> str:
         """
         NorFab Task that handles the chat interaction with Ollama LLM.
 
@@ -144,7 +144,7 @@ class AgentWorker(NFPWorker):
         Returns:
             str: The result of the chat interaction.
         """
-        self.event(f"Received user input '{user_input[:50]}..'")
+        job.event(f"Received user input '{user_input[:50]}..'")
         ret = Result(task=f"{self.name}:chat")
         template = (
             template
@@ -153,15 +153,15 @@ class AgentWorker(NFPWorker):
         prompt = ChatPromptTemplate.from_template(template)
         chain = prompt | self.llm
 
-        self.event("Thinking...")
+        job.event("Thinking...")
         ret.result = chain.invoke({"user_input": user_input})
 
-        self.event("Done thinking, sending result back to user")
+        job.event("Done thinking, sending result back to user")
 
         return ret
 
     @Task
-    def chat(self, user_input, juuid: str = None, template=None) -> str:
+    def chat(self, job: Job, user_input, template=None) -> str:
         """
         NorFab Task that handles the chat interaction with the user by processing the input through a language model.
 
@@ -176,6 +176,6 @@ class AgentWorker(NFPWorker):
             Exception: If the llm_flavour is unsupported.
         """
         if self.llm_flavour == "ollama":
-            return self._chat_ollama(user_input, template)
+            return self._chat_ollama(user_input, template, job=job)
         else:
             raise Exception(f"Unsupported llm flavour {self.llm_flavour}")

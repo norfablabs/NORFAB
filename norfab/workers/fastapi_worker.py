@@ -7,7 +7,7 @@ import signal
 import importlib.metadata
 import uvicorn
 
-from norfab.core.worker import NFPWorker, Task
+from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from norfab.models.fastapi import (
     WorkerResult,
@@ -152,7 +152,7 @@ class FastAPIWorker(NFPWorker):
         os.kill(os.getpid(), signal.SIGTERM)
 
     @Task
-    def get_version(self, juuid: str = None) -> Result:
+    def get_version(self, job: Job) -> Result:
         """
         Produce a report of the versions of various Python packages.
 
@@ -182,7 +182,7 @@ class FastAPIWorker(NFPWorker):
         return Result(task=f"{self.name}:get_version", result=libs)
 
     @Task
-    def get_inventory(self, juuid: str = None) -> Result:
+    def get_inventory(self, job: Job) -> Result:
         """
         Retrieve the inventory of the FastAPI worker.
 
@@ -196,7 +196,7 @@ class FastAPIWorker(NFPWorker):
 
     @Task
     def bearer_token_store(
-        self, username: str, token: str, expire: int = None, juuid: str = None
+        self, job: Job, username: str, token: str, expire: int = None
     ) -> Result:
         """
         Method to store a bearer token in the database.
@@ -233,7 +233,7 @@ class FastAPIWorker(NFPWorker):
 
     @Task
     def bearer_token_delete(
-        self, username: str = None, token: str = None, juuid: str = None
+        self, job: Job, username: str = None, token: str = None
     ) -> Result:
         """
         Deletes a bearer token from the cache.
@@ -276,7 +276,7 @@ class FastAPIWorker(NFPWorker):
         return Result(task=f"{self.name}:bearer_token_delete", result=True)
 
     @Task
-    def bearer_token_list(self, juuid: str = None, username: str = None) -> Result:
+    def bearer_token_list(self, job: Job, username: str = None) -> Result:
         """
         Retrieves a list of bearer tokens from the cache, optionally filtered by username.
 
@@ -334,7 +334,7 @@ class FastAPIWorker(NFPWorker):
         return ret
 
     @Task
-    def bearer_token_check(self, token: str, juuid: str = None) -> Result:
+    def bearer_token_check(self, job: Job, token: str) -> Result:
         """
         Checks if the provided bearer token is present in the cache and still active.
 
