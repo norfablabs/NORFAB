@@ -996,7 +996,7 @@ class NFPWorker:
         return None
 
     @Task
-    def get_inventory(self, juuid) -> Result:
+    def get_inventory(self, job: Job) -> Result:
         """
         Retrieve the worker's inventory.
 
@@ -1012,7 +1012,7 @@ class NFPWorker:
         raise NotImplementedError
 
     @Task
-    def get_version(self) -> Result:
+    def get_version(self, job: Job) -> Result:
         """
         Retrieve the version report of the worker.
 
@@ -1219,7 +1219,7 @@ class NFPWorker:
     @Task
     def job_details(
         self,
-        juuid: str = None,
+        job: Job,
         uuid: str = None,
         data: bool = True,
         result: bool = True,
@@ -1288,7 +1288,7 @@ class NFPWorker:
     @Task
     def job_list(
         self,
-        juuid: str = None,
+        job: Job,
         pending: bool = True,
         completed: bool = True,
         task: str = None,

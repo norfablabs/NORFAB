@@ -156,7 +156,7 @@ class ContainerlabWorker(NFPWorker):
             lab names.
         """
         ret = Result(task=f"{self.name}:get_running_labs", result=[])
-        inspect = self.inspect(timeout=timeout)
+        inspect = self.inspect(job=job, timeout=timeout)
 
         # form topologies list if any of them are runing
         if inspect.result:
@@ -331,7 +331,7 @@ class ContainerlabWorker(NFPWorker):
 
         # run containerlab command
         return self.run_containerlab_command(
-            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
+            args=args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
         )
 
     @Task
@@ -357,7 +357,9 @@ class ContainerlabWorker(NFPWorker):
         ret = Result(task=f"{self.name}:destroy_lab")
 
         # get lab details
-        inspect = self.inspect(timeout=timeout, lab_name=lab_name, details=True)
+        inspect = self.inspect(
+            job=job, timeout=timeout, lab_name=lab_name, details=True
+        )
 
         if not inspect.result:
             ret.failed = True
@@ -370,7 +372,7 @@ class ContainerlabWorker(NFPWorker):
             # run destroy command
             args = ["containerlab", "destroy", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
+                args=args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
             )
 
             if not ret.failed:
@@ -412,7 +414,9 @@ class ContainerlabWorker(NFPWorker):
         if details:
             args.append("--details")
 
-        ret = self.run_containerlab_command(args, timeout=timeout, ret=ret, job=job)
+        ret = self.run_containerlab_command(
+            args=args, timeout=timeout, ret=ret, job=job
+        )
 
         return ret
 
@@ -435,7 +439,9 @@ class ContainerlabWorker(NFPWorker):
         ret = Result(task=f"{self.name}:save")
 
         # get lab details
-        inspect = self.inspect(timeout=timeout, lab_name=lab_name, details=True)
+        inspect = self.inspect(
+            job=job, timeout=timeout, lab_name=lab_name, details=True
+        )
 
         if not inspect.result:
             ret.failed = True
@@ -448,7 +454,7 @@ class ContainerlabWorker(NFPWorker):
             # run destroy command
             args = ["containerlab", "save", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
+                args=args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
             )
 
             if not ret.failed:
@@ -475,7 +481,9 @@ class ContainerlabWorker(NFPWorker):
         ret = Result(task=f"{self.name}:restart_lab")
 
         # get lab details
-        inspect = self.inspect(timeout=timeout, lab_name=lab_name, details=True)
+        inspect = self.inspect(
+            job=job, timeout=timeout, lab_name=lab_name, details=True
+        )
 
         if not inspect.result:
             ret.failed = True
@@ -500,7 +508,7 @@ class ContainerlabWorker(NFPWorker):
                 "--reconfigure",
             ]
             ret = self.run_containerlab_command(
-                args,
+                args=args,
                 cwd=topology_folder,
                 timeout=timeout,
                 ret=ret,
@@ -561,7 +569,9 @@ class ContainerlabWorker(NFPWorker):
         ret = Result(task=f"{self.name}:get_nornir_inventory", result={"hosts": {}})
 
         # get lab details
-        inspect = self.inspect(lab_name=lab_name, timeout=timeout, details=True)
+        inspect = self.inspect(
+            job=job, lab_name=lab_name, timeout=timeout, details=True
+        )
 
         # return empty result if lab not found
         if not inspect.result:
@@ -715,7 +725,7 @@ class ContainerlabWorker(NFPWorker):
 
         # inspect existing containers
         job.event(f"Checking existing containers")
-        get_containers = self.inspect(details=True)
+        get_containers = self.inspect(job=job, details=True)
         if get_containers.failed is False:
             job.event(f"Existing containers found, retrieving details")
             for container in get_containers.result:
@@ -844,5 +854,5 @@ class ContainerlabWorker(NFPWorker):
 
         # run containerlab command
         return self.run_containerlab_command(
-            args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
+            args=args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
         )
