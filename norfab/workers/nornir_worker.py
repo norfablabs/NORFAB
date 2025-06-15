@@ -49,7 +49,6 @@ SERVICE = "nornir"
 
 log = logging.getLogger(__name__)
 
-
 # ----------------------------------------------------------------------
 # Nornir Service watchdog class
 # -----------------------------------------------------------------------
@@ -1139,7 +1138,6 @@ class NornirWorker(NFPWorker):
                     context={
                         "host": host,
                         "norfab": self.client,
-                        "nornir": self,
                         "job_data": job_data,
                     },
                     filters=self.add_jinja2_filters(),
@@ -1245,7 +1243,6 @@ class NornirWorker(NFPWorker):
                 context={
                     "host": host,
                     "norfab": self.client,
-                    "nornir": self,
                     "job_data": job_data,
                 },
                 filters=self.add_jinja2_filters(),
@@ -1350,7 +1347,6 @@ class NornirWorker(NFPWorker):
                     context={
                         "host": host,
                         "norfab": self.client,
-                        "nornir": self,
                         "job_data": job_data,
                     },
                     filters=self.add_jinja2_filters(),

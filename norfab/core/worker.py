@@ -11,6 +11,7 @@ import psutil
 import signal
 import concurrent.futures
 import copy
+import inspect
 
 from . import NFP
 from .client import NFPClient
@@ -34,6 +35,43 @@ import functools
 from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
+
+# --------------------------------------------------------------------------------------------
+# NORFAB Worker Job Object
+# --------------------------------------------------------------------------------------------
+
+
+class Job:
+    def __init__(
+        self,
+        worker: object = None,
+        juuid: str = None,
+        client_address: str = None,
+        timeout: int = None,
+        args: list = None,
+        kwargs: dict = None,
+        task: str = None,
+        progress: bool = False,
+    ):
+        self.worker = worker
+        self.juuid = juuid
+        self.client_address = client_address
+        self.timeout = timeout
+        self.args = args or []
+        self.kwargs = kwargs or {}
+        self.task = task
+        self.progress = progress
+
+    def event(self, message, **kwargs):
+        kwargs.setdefault("task", self.task)
+        if self.kwargs.get("progress") and self.juuid and self.worker:
+            self.worker.event(
+                message=message,
+                juuid=self.juuid,
+                client_address=self.client_address,
+                **kwargs,
+            )
+
 
 # --------------------------------------------------------------------------------------------
 # NORFAB Worker Task Object
@@ -195,11 +233,22 @@ class Task:
 
     def __call__(self, *args, **kwargs):
         """
-        Invokes the decorated with `@Task` task function with the provided arguments.
+        Invokes task function decorated with `@Task`, passing provided arguments.
         """
         log.debug(
-            f"NorFab Task decorator called task {self.function} with args: '{args}', kwargs: '{kwargs}'"
+            f"NorFab @Task decorator called {self.function} task, args: '{args}', kwargs: '{kwargs}'"
         )
+        # check if function expects `job` argument
+        (
+            fun_args,  # list of the positional parameter names
+            fun_varargs,  # name of the * parameter or None
+            fun_varkw,  # name of the ** parameter or None
+            fun_defaults,  # tuple of default argument values of the last n positional parameters
+            fun_kwonlyargs,  # list of keyword-only parameter names
+            fun_kwonlydefaults,  # dictionary mapping kwonlyargs parameter names to default values
+            fun_annotations,  # dictionary mapping parameter names to annotations
+        ) = inspect.getfullargspec(self.function)
+
         return self.function(self.worker_instance, *args, **kwargs)
 
     def __get__(self, worker_instance, worker_class):
@@ -231,43 +280,6 @@ class Task:
             output=output,
             name=name,
         )
-
-
-# --------------------------------------------------------------------------------------------
-# NORFAB Worker Job Object
-# --------------------------------------------------------------------------------------------
-
-
-class Job:
-    def __init__(
-        self,
-        worker: object = None,
-        juuid: str = None,
-        client_address: str = None,
-        timeout: int = None,
-        args: list = None,
-        kwargs: dict = None,
-        task: str = None,
-        progress: bool = False,
-    ):
-        self.worker = worker
-        self.juuid = juuid
-        self.client_address = client_address
-        self.timeout = timeout
-        self.args = args or []
-        self.kwargs = kwargs or {}
-        self.task = task
-        self.progress = progress
-
-    def event(self, message, **kwargs):
-        kwargs.setdefault("task", self.task)
-        if self.kwargs.get("progress") and self.juuid and self.worker:
-            self.worker.event(
-                message=message,
-                juuid=self.juuid,
-                client_address=self.client_address,
-                **kwargs,
-            )
 
 
 # --------------------------------------------------------------------------------------------
@@ -763,7 +775,7 @@ class NFPWorker:
         self.setup_logging(log_queue, log_level)
         self.inventory = inventory
         self.max_concurrent_jobs = inventory.get("worker", {}).get(
-            "max_concurrent_jobs", 1
+            "max_concurrent_jobs", 5
         )
         self.broker = broker
         self.service = service.encode("utf-8") if isinstance(service, str) else service
@@ -1264,7 +1276,6 @@ class NFPWorker:
                         events_filename = event_filename(suuid, self.base_dir_jobs)
                         if os.path.exists(events_filename):
                             job_events = loader(events_filename)
-                            job_events = [e[-1] for e in job_events]
 
                     job = {
                         "uuid": suuid,

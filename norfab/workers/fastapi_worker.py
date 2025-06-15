@@ -334,7 +334,7 @@ class FastAPIWorker(NFPWorker):
         return ret
 
     @Task
-    def bearer_token_check(self, job: Job, token: str) -> Result:
+    def bearer_token_check(self, token: str, job: Job) -> Result:
         """
         Checks if the provided bearer token is present in the cache and still active.
 
@@ -390,7 +390,10 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
     ) -> str:
         # check token exists in database
-        if auth is None or worker.bearer_token_check(auth.credentials).result is False:
+        if (
+            auth is None
+            or worker.bearer_token_check(auth.credentials, Job()).result is False
+        ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=UnauthorizedMessage().detail,

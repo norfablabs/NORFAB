@@ -1,5 +1,9 @@
-{% set data = nornir.cli(run_ttp="nf://ttp/parse_eos_intf.txt", enable=True, FB=host.name) %}
-{% for interface in data.result[host.name]["run_ttp"] %}
+{% set data = norfab.run_job("nornir", "cli", kwargs={"run_ttp": "nf://ttp/parse_eos_intf.txt", "enable": True, "FB": host.name}) %}
+{% for w, r in data.items() %}
+{% if r.result %}
+{% for interface in r.result[host.name]["run_ttp"] %}
 interface {{ interface.interface }}
   description {{ interface.get("description", "") }} updated by norfab 1234
+{% endfor %}
+{% endif %}
 {% endfor %}
