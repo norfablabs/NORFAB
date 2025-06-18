@@ -385,7 +385,7 @@ class NornirWorker(NFPWorker):
             user_defined=inventory.get("user_defined", {}),
         )
 
-    @Task
+    @Task()
     def refresh_nornir(
         self,
         job: Job,
@@ -403,6 +403,7 @@ class NornirWorker(NFPWorker):
             5. Optionally emits progress events at each stage if `progress` is True.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             progress (bool, optional): If True, emits progress events during the refresh process. Defaults to False.
 
         The inventory configuration is expected to be a dictionary with the following keys:
@@ -444,7 +445,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def nornir_inventory_load_netbox(
         self,
         job: Job,
@@ -457,6 +458,9 @@ class NornirWorker(NFPWorker):
         it if available. It handles retries and timeout configurations, and ensures
         that necessary filters or devices are specified. The retrieved inventory
         data is then merged into the existing Nornir inventory.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Logs:
             - Critical: If the inventory has no hosts, filters, or devices defined.
@@ -514,7 +518,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def nornir_inventory_load_containerlab(
         self,
         job: Job,
@@ -531,6 +535,7 @@ class NornirWorker(NFPWorker):
         existing Nornir inventory.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             lab_name (str): The name of the Containerlab lab to retrieve the inventory from.
             groups (list, optional): A list of group names to include into the hosts' inventory.
             use_default_credentials (bool): Whether to use default credentials for the hosts.
@@ -809,14 +814,13 @@ class NornirWorker(NFPWorker):
     # Nornir Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task.describe(input=GetNornirHosts, output=GetNornirHostsResponse)
-    def get_nornir_hosts(
-        self, job: Job, details: bool = False, **kwargs: dict
-    ) -> Result:
+    @Task(input=GetNornirHosts, output=GetNornirHostsResponse)
+    def get_nornir_hosts(self, details: bool = False, **kwargs: dict) -> Result:
         """
         Retrieve a list of Nornir hosts managed by this worker.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             details (bool): If True, returns detailed information about each host.
             **kwargs (dict): Hosts filters to apply when retrieving hosts.
 
@@ -841,12 +845,13 @@ class NornirWorker(NFPWorker):
         else:
             return Result(result=list(filtered_nornir.inventory.hosts))
 
-    @Task
-    def get_inventory(self, job: Job, **kwargs: dict) -> Result:
+    @Task()
+    def get_inventory(self, **kwargs: dict) -> Result:
         """
         Retrieve running Nornir inventory for requested hosts
 
         Args:
+            job: NorFab Job object containing relevant metadata
             **kwargs (dict): Fx filters used to filter the inventory.
 
         Returns:
@@ -856,8 +861,8 @@ class NornirWorker(NFPWorker):
         filtered_nornir = FFun(self.nr, **filters)
         return Result(result=filtered_nornir.inventory.dict(), task="get_inventory")
 
-    @Task
-    def get_version(self, job: Job) -> Result:
+    @Task()
+    def get_version(self) -> Result:
         """
         Retrieve the versions of various libraries and system information.
 
@@ -865,6 +870,9 @@ class NornirWorker(NFPWorker):
         and system details such as the Python version and platform. It attempts to
         import each library and fetch its version. If a library is not found, it is
         skipped.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Returns:
             dict: a dictionary with the library names as keys and their respective
@@ -916,30 +924,39 @@ class NornirWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task
-    def get_watchdog_stats(self, job: Job) -> Result:
+    @Task()
+    def get_watchdog_stats(self) -> Result:
         """
         Retrieve the statistics from the watchdog.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Returns:
             Result: An object containing the statistics from the watchdog.
         """
         return Result(result=self.watchdog.stats())
 
-    @Task
-    def get_watchdog_configuration(self, job: Job) -> Result:
+    @Task()
+    def get_watchdog_configuration(self) -> Result:
         """
         Retrieves the current configuration of the watchdog.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Returns:
             Result: An object containing the watchdog configuration.
         """
         return Result(result=self.watchdog.configuration())
 
-    @Task
-    def get_watchdog_connections(self, job: Job) -> Result:
+    @Task()
+    def get_watchdog_connections(self) -> Result:
         """
         Retrieve the list of connections curently managed by watchdog.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Returns:
             Result: An instance of the Result class containing the current
@@ -947,7 +964,7 @@ class NornirWorker(NFPWorker):
         """
         return Result(result=self.watchdog.connections_get())
 
-    @Task
+    @Task()
     def task(self, job: Job, plugin: str, **kwargs) -> Result:
         """
         Execute a Nornir task plugin.
@@ -974,6 +991,7 @@ class NornirWorker(NFPWorker):
             connections to all hosts are initiated simultaneously up to the number of `num_workers`.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             plugin (str): The path to the plugin function to import, or a NorFab
                 URL to download a custom task or template URL that resolves to a file.
             **kwargs: Additional arguments to pass to the specified task plugin.
@@ -1041,7 +1059,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def cli(
         self,
         job: Job,
@@ -1058,6 +1076,7 @@ class NornirWorker(NFPWorker):
         Task to collect show commands output from devices using Command Line Interface (CLI).
 
         Args:
+            job: NorFab Job object containing relevant metadata
             commands (list, optional): List of commands to send to devices or URL to a file or template
                 URL that resolves to a file.
             plugin (str, optional): Plugin name to use. Valid options are
@@ -1168,7 +1187,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def cfg(
         self,
         job: Job,
@@ -1184,6 +1203,7 @@ class NornirWorker(NFPWorker):
         Task to send configuration commands to devices using Command Line Interface (CLI).
 
         Args:
+            job: NorFab Job object containing relevant metadata
             config (list): List of commands to send to devices or URL to a file or template
                 URL that resolves to a file.
             plugin (str, optional): Plugin name to use. Valid options are:
@@ -1273,7 +1293,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def test(
         self,
         job: Job,
@@ -1290,6 +1310,7 @@ class NornirWorker(NFPWorker):
         Function to test networks using a suite of tests.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             suite (Union[list, str]): URL Path to YAML file with tests or a list of test definitions
                 or template URL that resolves to a file path.
             subset (str, optional): List or string with comma-separated non-case-sensitive glob
@@ -1464,12 +1485,13 @@ class NornirWorker(NFPWorker):
     def snmp(self) -> dict:
         raise NotImplementedError("SNMP task is not implemented yet")
 
-    @Task
+    @Task()
     def network(self, job: Job, fun: str, **kwargs) -> Result:
         """
         Task to call various network-related utility functions.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             fun (str): The name of the utility function to call.
             kwargs (dict): Arguments to pass to the utility function.
 
@@ -1493,7 +1515,7 @@ class NornirWorker(NFPWorker):
             **kwargs,
         )
 
-    @Task
+    @Task()
     def parse(
         self,
         job: Job,
@@ -1509,6 +1531,7 @@ class NornirWorker(NFPWorker):
         Parse network device output using specified plugin and options.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             plugin (str): The plugin to use for parsing. Options are:
 
                 - napalm - parse devices output using NAPALM getters
@@ -1581,7 +1604,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def file_copy(
         self,
         job: Job,
@@ -1596,6 +1619,7 @@ class NornirWorker(NFPWorker):
         Task to transfer files to and from hosts using SCP.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             source_file (str): The path or URL of the source file to be copied in
                 ``nf://path/to/file`` format
             plugin (str, optional): The plugin to use for file transfer. Supported plugins:
@@ -1665,7 +1689,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def runtime_inventory(self, job: Job, action: str, **kwargs) -> Result:
         """
         Task to work with Nornir runtime (in-memory) inventory.
@@ -1685,6 +1709,7 @@ class NornirWorker(NFPWorker):
         - `update_defaults` - non recursively update defaults attributes
 
         Args:
+            job: NorFab Job object containing relevant metadata
             action: action to perform on inventory
             kwargs: argument to use with the calling action
         """
@@ -1693,9 +1718,14 @@ class NornirWorker(NFPWorker):
         job.event(f"Performing '{action}' action")
         return Result(result=InventoryFun(self.nr, call=action, **kwargs))
 
-    @Task
+    @Task()
     def nb_get_next_ip(self, job: Job, *args, **kwargs) -> Result:
-        """Task to query next available IP address from Netbox service"""
+        """
+        Task to query next available IP address from Netbox service
+
+        Args:
+            job: NorFab Job object containing relevant metadata
+        """
         reply = self.client.run_job(
             "netbox",
             "get_next_ip",

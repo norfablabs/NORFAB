@@ -3,6 +3,20 @@ import json
 import time
 from uuid import uuid4
 
+class TestWorkersEcho:
+    def test_echo(self, nfclient):
+        ret = nfclient.run_job("nornir", "echo")
+
+        pprint.pprint(ret)
+        for worker, results in ret.items():
+            assert results["result"], f"{worker} returned no results"
+            assert results["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in results["result"]
+            assert "juuid" in res
+            assert "task" in res
+            assert "args" in res
+            assert "kwargs" in res
+            assert "done_timestamp" in res
 
 class TestWorkerJobsApi:
     def test_job_list(self, nfclient):

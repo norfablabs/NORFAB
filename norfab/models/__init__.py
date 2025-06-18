@@ -118,6 +118,12 @@ class Result(BaseModel, use_enum_values=True):
         [], description="List of resources names worked on by the task"
     )
     status: Optional[ResultStatuses] = Field(None, description="Task status")
+    task_started: Optional[StrictStr] = Field(
+        None, description="Timestamp when task was started"
+    )
+    task_completed: Optional[StrictStr] = Field(
+        None, description="Timestamp when task was completed"
+    )
 
     def raise_for_status(self, message=""):
         """

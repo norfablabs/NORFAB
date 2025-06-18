@@ -81,9 +81,9 @@ class Job:
 NORFAB_WORKER_TASKS = {}
 
 
-class TaskWithArgs:
+class Task:
     """
-    TaskWithArgs is a class-based decorator that accept arguments, designed to validate the
+    Validate is a class-based decorator that accept arguments, designed to validate the
     input arguments of a task function using a specified Pydantic model. It ensures that
     the arguments passed to the decorated function conform to the schema defined in the model.
 
@@ -121,22 +121,22 @@ class TaskWithArgs:
         self,
         input: Optional[BaseModel] = None,
         output: Optional[BaseModel] = None,
-        name: str = None,
     ) -> None:
         self.input = input
-        self.name = name
         self.output = output
 
     def __call__(self, function: Callable) -> Callable:
-        self.name = self.name or function.__name__
         self.function = function
-        NORFAB_WORKER_TASKS[self.name] = self
 
-        @functools.wraps(function)
+        @functools.wraps(self.function)
         def wrapper(*args, **kwargs):
             # validate input arguments
             if self.input:
                 self.validate_input(args, kwargs)
+
+            # check if function expects `job` argument
+            if not self.need_job(function):
+                _ = kwargs.pop("job", None)
 
             ret = self.function(*args, **kwargs)
 
@@ -146,7 +146,13 @@ class TaskWithArgs:
 
             return ret
 
+        NORFAB_WORKER_TASKS[self.function.__name__] = wrapper
+
         return wrapper
+
+    def need_job(self, function):
+        fun_args, *_ = inspect.getfullargspec(function)
+        return "job" in fun_args
 
     def merge_args_to_kwargs(self, args: List, kwargs: Dict) -> Dict:
         """
@@ -194,91 +200,6 @@ class TaskWithArgs:
         _ = self.input(**merged_kwargs)
         log.debug(
             f"Validated input kwargs: {merged_kwargs} for function {self.function} using model {self.input}"
-        )
-
-
-class Task:
-    """
-    A decorator class for registering and managing worker tasks in the NorFab framework.
-
-    This class wraps a function as a task, registers it in the global NORFAB_WORKER_TASKS dictionary,
-    and provides descriptor behavior for binding the task to a worker instance.
-
-    Attributes:
-        name (str): The name of the decorated function.
-        function (callable): The original function being decorated.
-        worker_instance (object): The worker instance to which the task is bound (set during __get__).
-
-    Usage:
-
-        ```
-        # register task
-        @Task
-        def my_task(self, ...):
-            ...
-
-        # register task and supply input/output arguments Pydantic models
-        @Task.describe(input=InputModel, output=OutputModel)
-        def my_typed_task(self, ...):
-            ...
-        ```
-    """
-
-    def __init__(self, function):
-        log.debug(f"NorFab Task decorator initiated for task '{function}'")
-        functools.update_wrapper(self, function)
-        self.name = function.__name__
-        self.function = function
-        NORFAB_WORKER_TASKS[self.name] = self
-
-    def __call__(self, *args, **kwargs):
-        """
-        Invokes task function decorated with `@Task`, passing provided arguments.
-        """
-        log.debug(
-            f"NorFab @Task decorator called {self.function} task, args: '{args}', kwargs: '{kwargs}'"
-        )
-        # check if function expects `job` argument
-        (
-            fun_args,  # list of the positional parameter names
-            fun_varargs,  # name of the * parameter or None
-            fun_varkw,  # name of the ** parameter or None
-            fun_defaults,  # tuple of default argument values of the last n positional parameters
-            fun_kwonlyargs,  # list of keyword-only parameter names
-            fun_kwonlydefaults,  # dictionary mapping kwonlyargs parameter names to default values
-            fun_annotations,  # dictionary mapping parameter names to annotations
-        ) = inspect.getfullargspec(self.function)
-
-        return self.function(self.worker_instance, *args, **kwargs)
-
-    def __get__(self, worker_instance, worker_class):
-        """
-        Descriptor method that is called when the decorated function is accessed as an
-        attribute of a worker class instance.
-
-        Args:
-            worker_instance: The instance of the worker class accessing the descriptor.
-            worker_class: The worker class type.
-
-        Returns:
-            Callable: The __call__ method of Task decorator.
-        """
-        log.debug(
-            f"NorFab Task decorator worker '{worker_instance}' called '{self.function}' task method, worker class: '{worker_class}'"
-        )
-        self.worker_instance = worker_instance
-        return self.__call__
-
-    @staticmethod
-    def describe(
-        input: Optional[BaseModel] = None,
-        output: Optional[BaseModel] = None,
-        name: str = None,
-    ):
-        return TaskWithArgs(
-            input=input,
-            output=output,
-            name=name,
         )
 
 
@@ -725,36 +646,6 @@ class NFPWorker:
         log_queue (object, optional): The logging queue. Defaults to None.
         multiplier (int, optional): The multiplier value. Defaults to 6.
         keepalive (int, optional): The keepalive interval in milliseconds. Defaults to 2500.
-
-    Attributes:
-        inventory (NorFabInventory): The inventory object.
-        broker (str): The broker address.
-        service (bytes): The service name encoded in UTF-8.
-        name (str): The name of the worker.
-        exit_event: The event used to signal the worker to exit.
-        broker_socket: The broker socket, initialized to None.
-        multiplier (int): The multiplier value.
-        keepalive (int): The keepalive interval in milliseconds.
-        socket_lock (threading.Lock): The lock used to protect the socket object.
-        base_dir (str): The base directory for the worker.
-        base_dir_jobs (str): The base directory for job files.
-        destroy_event (threading.Event): The event used to signal the destruction of the worker.
-        request_thread: The request thread, initialized to None.
-        reply_thread: The reply thread, initialized to None.
-        close_thread: The close thread, initialized to None.
-        recv_thread: The receive thread, initialized to None.
-        event_thread: The event thread, initialized to None.
-        post_queue (queue.Queue): The queue for POST requests.
-        get_queue (queue.Queue): The queue for GET requests.
-        delete_queue (queue.Queue): The queue for DELETE requests.
-        event_queue (queue.Queue): The queue for events.
-        public_keys_dir (str): The directory for public keys.
-        secret_keys_dir (str): The directory for private keys.
-        ctx (zmq.Context): The ZeroMQ context.
-        poller (zmq.Poller): The ZeroMQ poller.
-        queue_filename (str): The filename for the job queue.
-        queue_done_filename (str): The filename for the completed job queue.
-        client (NFPClient): The NFP client instance.
     """
 
     keepaliver = None
@@ -774,9 +665,7 @@ class NFPWorker:
     ):
         self.setup_logging(log_queue, log_level)
         self.inventory = inventory
-        self.max_concurrent_jobs = inventory.get("worker", {}).get(
-            "max_concurrent_jobs", 5
-        )
+        self.max_concurrent_jobs = max(1, inventory.get("max_concurrent_jobs", 5))
         self.broker = broker
         self.service = service.encode("utf-8") if isinstance(service, str) else service
         self.name = name
@@ -1255,7 +1144,7 @@ class NFPWorker:
                 for entry in f.readlines():
                     job_data, job_result, job_events = None, None, []
                     job_entry = entry.decode("utf-8").strip()
-                    suuid, start, end = job_entry.split("--")  # {suuid}--start--end
+                    suuid, start, end = job_entry.split("--")  # {suuid}--startend
                     if suuid != uuid:
                         continue
                     # load job request details
@@ -1360,7 +1249,7 @@ class NFPWorker:
                 with open(self.queue_done_filename, "rb+") as f:
                     for entry in f.readlines():
                         job_entry = entry.decode("utf-8").strip()
-                        suuid, start, end = job_entry.split("--")  # {suuid}--start--end
+                        suuid, start, end = job_entry.split("--")  # {suuid}--startend
                         if uuid and suuid != uuid:
                             continue
                         client_address, empty, juuid, data = loader(
@@ -1395,6 +1284,33 @@ class NFPWorker:
                 task=f"{self.name}:job_list",
                 result=job_completed + job_pending,
             )
+
+    @Task
+    def echo(self, job: Job, *args, **kwargs) -> Result:
+        """
+        Echoes the details of the given job along with any additional
+        arguments and keyword arguments.
+
+        Args:
+            job (Job): The job instance containing job-specific information.
+            *args: Additional positional arguments to include in the result.
+            **kwargs: Additional keyword arguments to include in the result.
+
+        Returns:
+            Result: An object containing a dictionary with the job's UUID,
+                client address, timeout, task, as well as the provided args
+                and kwargs.
+        """
+        return Result(
+            result={
+                "juuid": job.juuid,
+                "client_address": job.client_address,
+                "timeout": job.timeout,
+                "task": job.task,
+                "args": args,
+                "kwargs": kwargs,
+            }
+        )
 
     def start_threads(self) -> None:
         """
@@ -1485,7 +1401,7 @@ class NFPWorker:
             TypeError: If the executed task does not return a Result object.
         """
         # load job data
-        suuid = entry.split("--")[0]  # {suuid}--start--
+        suuid = entry.split("--")[0]  # {suuid}--start
 
         log.debug(f"{self.name} - processing job request {suuid}")
 
@@ -1517,7 +1433,9 @@ class NFPWorker:
 
         # run the actual job
         try:
+            task_started = time.ctime()
             result = getattr(self, task)(*args, job=job, **kwargs)
+            task_completed = time.ctime()
             if not isinstance(result, Result):
                 raise TypeError(
                     f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "
@@ -1527,6 +1445,7 @@ class NFPWorker:
             result.status = result.status or "completed"
             result.juuid = result.juuid or juuid.decode("utf-8")
         except Exception as e:
+            task_completed = time.ctime()
             result = Result(
                 task=f"{self.name}:{task}",
                 errors=[traceback.format_exc()],
@@ -1536,6 +1455,8 @@ class NFPWorker:
             log.error(
                 f"{self.name} - worker experienced error:\n{traceback.format_exc()}"
             )
+        result.task_started = task_started
+        result.task_completed = task_completed
 
         # save job results to reply file
         dumper(
@@ -1561,7 +1482,7 @@ class NFPWorker:
                         entry = entry.decode("utf-8").strip()
                         # save done entry to queue_done_filename
                         if suuid in entry:
-                            entry = f"{entry.lstrip('+')}--{time.ctime()}\n".encode(
+                            entry = f"{entry.lstrip('+')}--{timestamp_end}\n".encode(
                                 "utf-8"
                             )
                             qdf.write(entry)
@@ -1589,7 +1510,7 @@ class NFPWorker:
         # start job threads and submit jobs in an infinite loop
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=self.max_concurrent_jobs,
-            thread_name_prefix=f"{self.name}-job-worker",
+            thread_name_prefix=f"{self.name}-job-thread",
         ) as executor:
             while not self.exit_event.is_set() and not self.destroy_event.is_set():
                 # extract next job id

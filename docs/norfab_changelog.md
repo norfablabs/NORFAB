@@ -4,10 +4,19 @@
 ### FEATURES
 
 1. Adding concurrency to worker jobs execution, adding new worker inventory parameter `max_concurrent_jobs`
+2. Adding `@Task` and `@Task.describe` decorators to expose worker methods as tasks
+3. Passing on `job` argument to all NorFab tasks, `job` is an object that contains relevant metadata - client address, juuid, args, kwargs etc. Job object can be used to emit events.
 
 ### CHANGES
 
 1. Improved Netbox device update nfcli to include Fx hosts filtering for nornir datasource
+2. Result object added `task_started` and `task_completed` timestamp parameters
+
+### BREAKING CHANGES
+
+1. Instead of `self.event` worker now need to use `job.event`
+2. To add pydantic input / output models for tasks need to use `@Task.describe` decorator instead of `@Task` decorator
+3. Nornir Jinja2 templates context `nornir.cli` removed, need to use `norfab.run_job` instead
 
 ---
 

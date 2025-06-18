@@ -54,7 +54,7 @@ class DummyServiceWorker(NFPWorker):
         self.init_done_event.set()
         log.info(f"{self.name} - Started")
 
-    @Task
+    @Task()
     def get_version(sel, job: Job) -> Dict:
         """
         Retrieves the version information for specified libraries and the current Python environment.
@@ -83,7 +83,7 @@ class DummyServiceWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task
+    @Task()
     def get_inventory(self, job: Job) -> Dict:
         """
         Retrieves the dummy service inventory.

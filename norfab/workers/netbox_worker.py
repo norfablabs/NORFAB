@@ -199,10 +199,13 @@ class NetboxWorker(NFPWorker):
     # Netbox Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task
-    def get_inventory(self, job: Job) -> Result:
+    @Task()
+    def get_inventory(self) -> Result:
         """
         NorFab Task to return running inventory for NetBox worker.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Returns:
             dict: A dictionary containing the NetBox inventory.
@@ -211,10 +214,13 @@ class NetboxWorker(NFPWorker):
             task=f"{self.name}:get_inventory", result=dict(self.netbox_inventory)
         )
 
-    @Task
-    def get_version(self, job: Job, **kwargs) -> Result:
+    @Task()
+    def get_version(self, **kwargs) -> Result:
         """
         Retrieves the version information of specified libraries and system details.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Returns:
             dict: A dictionary containing the version information of the
@@ -237,8 +243,8 @@ class NetboxWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    @Task
-    def get_netbox_status(self, job: Job, instance=None) -> Result:
+    @Task()
+    def get_netbox_status(self, instance=None) -> Result:
         """
         Retrieve the status of NetBox instances.
 
@@ -247,6 +253,7 @@ class NetboxWorker(NFPWorker):
         queries the status of all instances in the NetBox inventory.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             instance (str, optional): The name of the specific NetBox instance
                                       to query.
 
@@ -262,7 +269,7 @@ class NetboxWorker(NFPWorker):
                 ret.result[name] = self._query_netbox_status(name)
         return ret
 
-    @Task
+    @Task()
     def get_compatibility(self, job: Job) -> Result:
         """
         Checks the compatibility of Netbox instances based on their version.
@@ -270,6 +277,9 @@ class NetboxWorker(NFPWorker):
         This method retrieves the status and version of Netbox instances and determines
         if they are compatible with the required versions. It logs a warning if any
         instance is not reachable.
+
+        Args:
+            job: NorFab Job object containing relevant metadata
 
         Returns:
             dict: A dictionary where the keys are the instance names and the values are
@@ -447,12 +457,13 @@ class NetboxWorker(NFPWorker):
             size_limit=1073741824,  #  GigaByte
         )
 
-    @Task
-    def cache_list(self, job: Job, keys="*", details=False) -> Result:
+    @Task()
+    def cache_list(self, keys="*", details=False) -> Result:
         """
         Retrieve a list of cache keys, optionally with details about each key.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             keys (str): A pattern to match cache keys against. Defaults to "*".
             details (bool): If True, include detailed information about each cache key. Defaults to False.
 
@@ -480,12 +491,13 @@ class NetboxWorker(NFPWorker):
                     ret.result.append(cache_key)
         return ret
 
-    @Task
+    @Task()
     def cache_clear(self, job: Job, key=None, keys=None) -> Result:
         """
         Clears specified keys from the cache.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             key (str, optional): A specific key to remove from the cache.
             keys (str, optional): A glob pattern to match multiple keys to remove from the cache.
 
@@ -525,12 +537,13 @@ class NetboxWorker(NFPWorker):
                         raise RuntimeError(f"Failed to remove {key} from cache")
         return ret
 
-    @Task
+    @Task()
     def cache_get(self, job: Job, key=None, keys=None, raise_missing=False) -> Result:
         """
         Retrieve values from the cache based on a specific key or a pattern of keys.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             key (str, optional): A specific key to retrieve from the cache.
             keys (str, optional): A glob pattern to match multiple keys in the cache.
             raise_missing (bool, optional): If True, raises a KeyError if the specific
@@ -557,7 +570,7 @@ class NetboxWorker(NFPWorker):
                     ret.result[cache_key] = self.cache[cache_key]
         return ret
 
-    @Task
+    @Task()
     def graphql(
         self,
         job: Job,
@@ -573,6 +586,7 @@ class NetboxWorker(NFPWorker):
         Function to query Netbox v3 or Netbox v4 GraphQL API.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             instance: Netbox instance name
             dry_run: only return query content, do not run it
             obj: Object to query
@@ -707,7 +721,7 @@ class NetboxWorker(NFPWorker):
 
         return response.json()
 
-    @Task
+    @Task()
     def get_devices(
         self,
         job: Job,
@@ -721,6 +735,7 @@ class NetboxWorker(NFPWorker):
         Retrieves device data from Netbox using the GraphQL API.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             filters (list, optional): A list of filter dictionaries to filter devices.
             instance (str, optional): The Netbox instance name.
             dry_run (bool, optional): If True, only returns the query content without executing it. Defaults to False.
@@ -881,7 +896,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def get_interfaces(
         self,
         job: Job,
@@ -896,6 +911,7 @@ class NetboxWorker(NFPWorker):
         Retrieve device interfaces from Netbox using GraphQL API.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             instance (str, optional): Netbox instance name.
             devices (list, optional): List of devices to retrieve interfaces for.
             ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.
@@ -1027,7 +1043,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def get_connections(
         self,
         job: Job,
@@ -1041,6 +1057,7 @@ class NetboxWorker(NFPWorker):
         Retrieve interface connection details for specified devices from Netbox.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             devices (list): List of device names to retrieve connections for.
             instance (str, optional): Instance name for the GraphQL query.
             dry_run (bool, optional): If True, perform a dry run without making actual changes.
@@ -1355,7 +1372,7 @@ class NetboxWorker(NFPWorker):
         )
         return True
 
-    @Task
+    @Task()
     def get_circuits(
         self,
         job: Job,
@@ -1369,6 +1386,7 @@ class NetboxWorker(NFPWorker):
         Retrieve circuit information for specified devices from Netbox.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             devices (list): List of device names to retrieve circuits for.
             cid (list, optional): List of circuit IDs to filter by.
             instance (str, optional): Netbox instance to query.
@@ -1546,7 +1564,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def get_nornir_inventory(
         self,
         job: Job,
@@ -1563,6 +1581,7 @@ class NetboxWorker(NFPWorker):
         Retrieve and construct Nornir inventory from NetBox data.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             filters (list, optional): List of filters to apply when retrieving devices from NetBox.
             devices (list, optional): List of specific devices to retrieve from NetBox.
             instance (str, optional): NetBox instance to use.
@@ -1703,7 +1722,7 @@ class NetboxWorker(NFPWorker):
 
         return list(sorted(set(ret)))
 
-    @Task
+    @Task()
     def update_device_facts(
         self,
         job: Job,
@@ -1721,6 +1740,7 @@ class NetboxWorker(NFPWorker):
         - serial number
 
         Args:
+            job: NorFab Job object containing relevant metadata
             instance (str, optional): The NetBox instance to use.
             dry_run (bool, optional): If True, no changes will be made to NetBox.
             datasource (str, optional): The data source to use. Supported datasources:
@@ -1809,7 +1829,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def update_device_interfaces(
         self,
         job: Job,
@@ -1833,6 +1853,7 @@ class NetboxWorker(NFPWorker):
         - speed
 
         Args:
+            job: NorFab Job object containing relevant metadata
             instance (str, optional): The instance name to use.
             dry_run (bool, optional): If True, no changes will be made to Netbox.
             datasource (str, optional): The data source to use. Supported datasources:
@@ -2016,7 +2037,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def update_device_ip(
         self,
         job: Job,
@@ -2033,6 +2054,7 @@ class NetboxWorker(NFPWorker):
         Update the IP addresses of devices in Netbox.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             instance (str, optional): The instance name to use.
             dry_run (bool, optional): If True, no changes will be made.
             datasource (str, optional): The data source to use. Supported datasources:
@@ -2159,7 +2181,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task
+    @Task()
     def get_next_ip(
         self,
         job: Job,
@@ -2179,6 +2201,7 @@ class NetboxWorker(NFPWorker):
         Allocate the next available IP address from a given subnet.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             subnet (str): The subnet from which to allocate the IP address.
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.
@@ -2203,7 +2226,7 @@ class NetboxWorker(NFPWorker):
 
         return Result(result=str(nb_ip))
 
-    @Task
+    @Task()
     def get_containerlab_inventory(
         self,
         job: Job,
@@ -2274,6 +2297,7 @@ class NetboxWorker(NFPWorker):
         devices matched.
 
         Args:
+            job: NorFab Job object containing relevant metadata
             lab_name (str, Mandatory): Name of containerlab to construct inventory for.
             tenant (str, optional): Construct topology using given tenant's devices
             filters (list, optional): List of filters to apply when retrieving devices from NetBox.

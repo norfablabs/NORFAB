@@ -58,8 +58,8 @@ class WorkflowWorker(NFPWorker):
     def worker_exit(self):
         pass
 
-    @Task
-    def get_version(self, job: Job) -> Result:
+    @Task()
+    def get_version(self) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
 
@@ -85,8 +85,8 @@ class WorkflowWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task
-    def get_inventory(self, job: Job) -> Result:
+    @Task()
+    def get_inventory(self) -> Result:
         """
         NorFab task to retrieve the workflow's worker inventory.
 
@@ -250,7 +250,7 @@ class WorkflowWorker(NFPWorker):
                     return True  # stop the workflow since a failure occurred
         return False
 
-    @Task
+    @Task()
     def run(self, job: Job, workflow: Union[str, Dict]) -> Result:
         """
         Executes a workflow defined by a dictionary.
