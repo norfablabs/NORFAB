@@ -269,7 +269,7 @@ class ContainerlabWorker(NFPWorker):
         else:
             return output, logs, proc
 
-    @Task()(input=DeployTask, output=DeployTaskResponse)
+    @Task(input=DeployTask, output=DeployTaskResponse)
     def deploy(
         self,
         job: Job,
