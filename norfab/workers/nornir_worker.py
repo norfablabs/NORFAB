@@ -748,7 +748,7 @@ class NornirWorker(NFPWorker):
 
         return nr.with_processors(processors)
 
-    def load_job_data(self, job_data: str):
+    def load_job_data(self, job_data: Any):
         """
         Helper function to download job data YAML files and load it.
 
@@ -1063,11 +1063,11 @@ class NornirWorker(NFPWorker):
     def cli(
         self,
         job: Job,
-        commands: list = None,
+        commands: Union[str, list] = None,
         plugin: str = "netmiko",
         dry_run: bool = False,
         run_ttp: str = None,
-        job_data: str = None,
+        job_data: Any = None,
         to_dict: bool = True,
         add_details: bool = False,
         **kwargs,
@@ -1191,12 +1191,12 @@ class NornirWorker(NFPWorker):
     def cfg(
         self,
         job: Job,
-        config: list,
+        config: Union[str, list],
         plugin: str = "netmiko",
         dry_run: bool = False,
         to_dict: bool = True,
         add_details: bool = False,
-        job_data: str = None,
+        job_data: Any = None,
         **kwargs,
     ) -> Result:
         """
@@ -1303,7 +1303,7 @@ class NornirWorker(NFPWorker):
         remove_tasks: bool = True,
         failed_only: bool = False,
         return_tests_suite: bool = False,
-        job_data: str = None,
+        job_data: Any = None,
         **kwargs,
     ) -> Result:
         """
@@ -1520,9 +1520,9 @@ class NornirWorker(NFPWorker):
         self,
         job: Job,
         plugin: str = "napalm",
-        getters: str = "get_facts",
+        getters: Union[str, list] = "get_facts",
         template: str = None,
-        commands: list = None,
+        commands: Union[str, list] = None,
         to_dict: bool = True,
         add_details: bool = False,
         **kwargs,

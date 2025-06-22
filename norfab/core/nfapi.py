@@ -73,6 +73,14 @@ def start_worker_process(
         log_queue (queue.Queue, optional): The queue to use for logging. Defaults to None.
         init_done_event (threading.Event, optional): An event to signal when initialization is done. Defaults to None.
     """
+    # load entry point on first call
+    if isinstance(worker_plugin, EntryPoint):
+        worker_plugin = worker_plugin.load()
+    elif isinstance(worker_plugin, str):
+        service = inventory[worker_name]["service"]
+        plugins = inventory.load_plugin(service)
+        worker_plugin = plugins[service]["worker"]
+
     worker = worker_plugin(
         inventory=inventory,
         broker=broker_endpoint,
@@ -187,7 +195,7 @@ class NorFab:
                 self.register_worker_plugin(service_name, service_data["worker"])
 
     def register_worker_plugin(
-        self, service_name: str, worker_plugin: Union[EntryPoint, object]
+        self, service_name: str, worker_plugin: Union[EntryPoint, str]
     ) -> None:
         """
         Registers a worker plugin for a given service.
@@ -329,6 +337,7 @@ class NorFab:
             None
         """
         if not self.workers_processes.get(worker_name):
+            log.debug(f"NFAPI PID {os.getpid()} {worker_name} starting worker process")
             worker_inventory = self.inventory[worker_name]
             init_done_event = Event()  # for worker to signal if its fully initiated
 
@@ -345,16 +354,11 @@ class NorFab:
                 ):
                     return
 
-            if self.worker_plugins.get(worker_inventory["service"]):
-                worker_plugin = self.worker_plugins[worker_inventory["service"]]
-                # load entry point on first call
-                if isinstance(worker_plugin, EntryPoint):
-                    worker_plugin = worker_plugin.load()
-                    self.worker_plugins[worker_inventory["service"]] = worker_plugin
-            else:
+            if not self.worker_plugins.get(worker_inventory["service"]):
                 raise norfab_exceptions.ServicePluginNotRegistered(
                     f"No worker plugin registered for service '{worker_inventory['service']}'"
                 )
+            worker_plugin = self.worker_plugins[worker_inventory["service"]]
 
             self.workers_processes[worker_name] = {
                 "process": Process(
@@ -374,6 +378,8 @@ class NorFab:
             }
 
             self.workers_processes[worker_name]["process"].start()
+
+            log.debug(f"NFAPI PID {os.getpid()} {worker_name} worker process started")
 
     def start(
         self,

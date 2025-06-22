@@ -6,8 +6,8 @@ cache_options = [True, False, "refresh", "force"]
 
 
 def get_nb_version(nfclient, instance=None) -> tuple:
-    ret = nfclient.run_job(b"netbox", "get_version", workers="any")
-    pprint.pprint(f"Netbox Version {ret}")
+    ret = nfclient.run_job("netbox", "get_version", workers="any")
+    pprint.pprint(f"Netbox Version: {ret}")
     for w, r in ret.items():
         if instance is None:
             for instance_name, instance_version in r["result"][

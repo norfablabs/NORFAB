@@ -217,14 +217,13 @@ class NetboxWorker(NFPWorker):
     @Task()
     def get_version(self, **kwargs) -> Result:
         """
-        Retrieves the version information of specified libraries and system details.
+        Retrieves the version information of Netbox instances.
 
         Args:
             job: NorFab Job object containing relevant metadata
 
         Returns:
-            dict: A dictionary containing the version information of the
-                specified libraries and system details.
+            dict: A dictionary containing the version information of the Netbox
         """
         libs = {
             "norfab": "",
@@ -244,7 +243,7 @@ class NetboxWorker(NFPWorker):
         return Result(task=f"{self.name}:get_version", result=libs)
 
     @Task()
-    def get_netbox_status(self, instance=None) -> Result:
+    def get_netbox_status(self, instance: Union[None, str] = None) -> Result:
         """
         Retrieve the status of NetBox instances.
 
@@ -458,7 +457,7 @@ class NetboxWorker(NFPWorker):
         )
 
     @Task()
-    def cache_list(self, keys="*", details=False) -> Result:
+    def cache_list(self, keys: str = "*", details: bool = False) -> Result:
         """
         Retrieve a list of cache keys, optionally with details about each key.
 
@@ -492,7 +491,7 @@ class NetboxWorker(NFPWorker):
         return ret
 
     @Task()
-    def cache_clear(self, job: Job, key=None, keys=None) -> Result:
+    def cache_clear(self, job: Job, key: str = None, keys: str = None) -> Result:
         """
         Clears specified keys from the cache.
 
@@ -538,7 +537,9 @@ class NetboxWorker(NFPWorker):
         return ret
 
     @Task()
-    def cache_get(self, job: Job, key=None, keys=None, raise_missing=False) -> Result:
+    def cache_get(
+        self, job: Job, key: str = None, keys: str = None, raise_missing: bool = False
+    ) -> Result:
         """
         Retrieve values from the cache based on a specific key or a pattern of keys.
 
@@ -574,9 +575,9 @@ class NetboxWorker(NFPWorker):
     def graphql(
         self,
         job: Job,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
-        obj: dict = None,
+        obj: Union[str, dict] = None,
         filters: dict = None,
         fields: list = None,
         queries: dict = None,
@@ -686,7 +687,11 @@ class NetboxWorker(NFPWorker):
         return ret
 
     def rest(
-        self, instance: str = None, method: str = "get", api: str = "", **kwargs
+        self,
+        instance: Union[None, str] = None,
+        method: str = "get",
+        api: str = "",
+        **kwargs,
     ) -> Union[dict, list]:
         """
         Sends a request to the Netbox REST API.
@@ -726,7 +731,7 @@ class NetboxWorker(NFPWorker):
         self,
         job: Job,
         filters: list = None,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
         devices: list = None,
         cache: Union[bool, str] = None,
@@ -900,7 +905,7 @@ class NetboxWorker(NFPWorker):
     def get_interfaces(
         self,
         job: Job,
-        instance: str = None,
+        instance: Union[None, str] = None,
         devices: list = None,
         ip_addresses: bool = False,
         inventory_items: bool = False,
@@ -1048,7 +1053,7 @@ class NetboxWorker(NFPWorker):
         self,
         job: Job,
         devices: list,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
         cables: bool = False,
         cache: Union[bool, str] = None,
@@ -1378,7 +1383,7 @@ class NetboxWorker(NFPWorker):
         job: Job,
         devices: list,
         cid: list = None,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
         cache: Union[bool, str] = True,
     ) -> Result:
@@ -1570,7 +1575,7 @@ class NetboxWorker(NFPWorker):
         job: Job,
         filters: list = None,
         devices: list = None,
-        instance: str = None,
+        instance: Union[None, str] = None,
         interfaces: Union[dict, bool] = False,
         connections: Union[dict, bool] = False,
         circuits: Union[dict, bool] = False,
@@ -1599,6 +1604,8 @@ class NetboxWorker(NFPWorker):
             dict: Nornir inventory dictionary containing hosts and their respective data.
         """
         hosts = {}
+        filters = filters or []
+        devices = devices or []
         inventory = {"hosts": hosts}
         ret = Result(task=f"{self.name}:get_nornir_inventory", result=inventory)
 
@@ -1726,7 +1733,7 @@ class NetboxWorker(NFPWorker):
     def update_device_facts(
         self,
         job: Job,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
         datasource: str = "nornir",
         timeout: int = 60,
@@ -1833,7 +1840,7 @@ class NetboxWorker(NFPWorker):
     def update_device_interfaces(
         self,
         job: Job,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
         datasource: str = "nornir",
         timeout: int = 60,
@@ -2041,7 +2048,7 @@ class NetboxWorker(NFPWorker):
     def update_device_ip(
         self,
         job: Job,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
         datasource: str = "nornir",
         timeout: int = 60,
@@ -2194,7 +2201,7 @@ class NetboxWorker(NFPWorker):
         dns_name: str = None,
         tenant: str = None,
         comments: str = None,
-        instance: str = None,
+        instance: Union[None, str] = None,
         dry_run: bool = False,
     ) -> Result:
         """
@@ -2234,7 +2241,7 @@ class NetboxWorker(NFPWorker):
         tenant: str = None,
         filters: list = None,
         devices: list = None,
-        instance: str = None,
+        instance: Union[None, str] = None,
         image: str = None,
         ipv4_subnet: str = "172.100.100.0/24",
         ports: tuple = (12000, 15000),
@@ -2319,6 +2326,8 @@ class NetboxWorker(NFPWorker):
         Returns:
             dict: Containerlab inventory dictionary containing lab topology data
         """
+        devices = devices or []
+        filters = filters or []
         nodes, links = {}, []
         ports_map = ports_map or {}
         endpts_done = []  # to deduplicate links

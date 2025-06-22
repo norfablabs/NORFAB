@@ -12,6 +12,7 @@ import signal
 import concurrent.futures
 import copy
 import inspect
+import functools
 
 from . import NFP
 from .client import NFPClient
@@ -20,19 +21,13 @@ from .security import generate_certificates
 from .inventory import logging_config_producer
 from typing import Any, Callable, Dict, List, Optional, Union
 from norfab.models import NorFabEvent, Result
+from norfab import models
 from norfab.core.inventory import NorFabInventory
 from jinja2.nodes import Include
 from jinja2 import Environment, FileSystemLoader
-
-log = logging.getLogger(__name__)
+from pydantic import BaseModel, create_model
 
 signal.signal(signal.SIGINT, signal.SIG_IGN)
-
-import logging
-import inspect
-
-import functools
-from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
 
@@ -107,7 +102,7 @@ class Task:
             an exception is raised.
 
     Usage:
-        @Task(input=YourPydanticModel)
+        @Task()(input=YourPydanticModel)
         def your_function(arg1, arg2, ...):
             # Function implementation
             pass
@@ -121,36 +116,106 @@ class Task:
         self,
         input: Optional[BaseModel] = None,
         output: Optional[BaseModel] = None,
+        description: Optional[str] = None,
     ) -> None:
         self.input = input
-        self.output = output
+        self.output = output or Result
+        self.description = description
 
     def __call__(self, function: Callable) -> Callable:
         self.function = function
+        self.description = self.description or function.__doc__
+        self.name = function.__name__
+
+        if self.input is None:
+            self.make_input_model()
 
         @functools.wraps(self.function)
         def wrapper(*args, **kwargs):
             # validate input arguments
-            if self.input:
-                self.validate_input(args, kwargs)
+            self.validate_input(args, kwargs)
 
             # check if function expects `job` argument
-            if not self.need_job(function):
+            if self.is_need_job(function) is False:
                 _ = kwargs.pop("job", None)
 
             ret = self.function(*args, **kwargs)
 
-            # check if can validate result
-            if isinstance(ret, Result) and self.output:
-                _ = self.output(**ret.dict())
+            # validate result
+            self.validate_output(ret)
 
             return ret
 
-        NORFAB_WORKER_TASKS[self.function.__name__] = wrapper
+        NORFAB_WORKER_TASKS.update(self.make_task_schema(wrapper))
+
+        log.debug(
+            f"{function.__module__} PID {os.getpid()} registered task '{function.__name__}'"
+        )
 
         return wrapper
 
-    def need_job(self, function):
+    def make_input_model(self):
+        (
+            fun_args,  # list of the positional parameter names
+            fun_varargs,  # name of the * parameter or None
+            fun_varkw,  # name of the ** parameter or None
+            fun_defaults,  # tuple of default argument values of the last n positional parameters
+            fun_kwonlyargs,  # list of keyword-only parameter names
+            fun_kwonlydefaults,  # dictionary mapping kwonlyargs parameter names to default values
+            fun_annotations,  # dictionary mapping parameter names to annotations
+        ) = inspect.getfullargspec(self.function)
+
+        # form a dictionary keyed by args with their default values
+        args_with_defaults = dict(
+            zip(reversed(fun_args or []), reversed(fun_defaults or []))
+        )
+
+        # form a dictionary keyed by args that has no defaults with values set to
+        # (Any, None) tuple if make_optional is True else set to (Any, ...)
+        args_no_defaults = {
+            k: (Any, ...) for k in fun_args if k not in args_with_defaults
+        }
+
+        # form dictionary keyed by args with annotations and tuple values
+        args_with_hints = {
+            k: (v, args_with_defaults.get(k, ...)) for k, v in fun_annotations.items()
+        }
+
+        # form merged kwargs giving preference to type hint annotations
+        merged_kwargs = {**args_no_defaults, **args_with_defaults, **args_with_hints}
+
+        # form final dictionary of fields
+        fields_spec = {
+            k: v
+            for k, v in merged_kwargs.items()
+            if k not in ["self", "return", "job", fun_varargs, fun_varkw]
+        }
+
+        log.debug(
+            f"NorFab worker {self.name} task creating Pydantic input "
+            f"model using fields spec: {fields_spec}"
+        )
+
+        # create Pydantic model
+        self.input = create_model(self.name, **fields_spec)
+
+    def make_task_schema(self, wrapper) -> dict:
+        input_json_schema = self.input.model_json_schema()
+        _ = input_json_schema.pop("title")
+
+        return {
+            self.name: {
+                "function": wrapper,
+                "module": self.function.__module__,
+                "schema": {
+                    "name": str(self.name),
+                    "description": self.description,
+                    "parameters": input_json_schema,
+                },
+            }
+        }
+
+    def is_need_job(self, function):
         fun_args, *_ = inspect.getfullargspec(function)
         return "job" in fun_args
 
@@ -196,11 +261,17 @@ class Task:
     def validate_input(self, args: List, kwargs: Dict) -> None:
         """Function to validate provided arguments against model"""
         merged_kwargs = self.merge_args_to_kwargs(args, kwargs)
+        log.debug(f"{self.name} validating input arguments: {merged_kwargs}")
         # if below step succeeds, kwargs passed model validation
         _ = self.input(**merged_kwargs)
         log.debug(
             f"Validated input kwargs: {merged_kwargs} for function {self.function} using model {self.input}"
         )
+
+    def validate_output(self, ret: Result) -> None:
+        if isinstance(ret, Result) and self.output:
+            _ = self.output(**ret.model_dump())
+        log.debug(f"Validated {self.name} task result.")
 
 
 # --------------------------------------------------------------------------------------------
@@ -896,7 +967,7 @@ class NFPWorker:
         """
         return None
 
-    @Task
+    @Task()
     def get_inventory(self, job: Job) -> Result:
         """
         Retrieve the worker's inventory.
@@ -912,8 +983,8 @@ class NFPWorker:
         """
         raise NotImplementedError
 
-    @Task
-    def get_version(self, job: Job) -> Result:
+    @Task()
+    def get_version(self) -> Result:
         """
         Retrieve the version report of the worker.
 
@@ -1117,10 +1188,9 @@ class NFPWorker:
         events.append(event_data)
         dumper(events, filename)
 
-    @Task
+    @Task()
     def job_details(
         self,
-        job: Job,
         uuid: str = None,
         data: bool = True,
         result: bool = True,
@@ -1185,10 +1255,9 @@ class NFPWorker:
         else:
             raise FileNotFoundError(f"{self.name} - job with UUID '{uuid}' not found")
 
-    @Task
+    @Task()
     def job_list(
         self,
-        job: Job,
         pending: bool = True,
         completed: bool = True,
         task: str = None,
@@ -1285,7 +1354,7 @@ class NFPWorker:
                 result=job_completed + job_pending,
             )
 
-    @Task
+    @Task(input=models.WorkerEchoIn, output=models.WorkerEchoOut)
     def echo(self, job: Job, *args, **kwargs) -> Result:
         """
         Echoes the details of the given job along with any additional
@@ -1311,6 +1380,36 @@ class NFPWorker:
                 "kwargs": kwargs,
             }
         )
+
+    @Task()
+    def list_tasks(self, name: str = None, brief: bool = False) -> Result:
+        """
+        Lists available worker tasks with optional filtering and output format.
+
+        Args:
+            name (str, optional): The name of a specific task to retrieve
+            brief (bool, optional): If True, returns only the list of task names
+
+        Returns:
+            Result: An object containing the result of the query:
+
+                - If brief is True: a list of task names.
+                - If name is provided: the schema of the specified task.
+                - Otherwise: a list of schemas for all tasks.
+
+        Raises:
+            KeyError: If a specific task name is provided but not registered in NORFAB_WORKER_TASKS.
+        """
+        ret = Result()
+        if brief:
+            ret.result = list(NORFAB_WORKER_TASKS.keys())
+        elif name:
+            if name not in NORFAB_WORKER_TASKS:
+                raise KeyError(f"{name} - task not registered")
+            ret.result = [NORFAB_WORKER_TASKS[name]["schema"]]
+        else:
+            ret.result = [t["schema"] for t in NORFAB_WORKER_TASKS.values()]
+        return ret
 
     def start_threads(self) -> None:
         """
@@ -1434,7 +1533,9 @@ class NFPWorker:
         # run the actual job
         try:
             task_started = time.ctime()
-            result = getattr(self, task)(*args, job=job, **kwargs)
+            result = NORFAB_WORKER_TASKS[task]["function"](
+                self, *args, job=job, **kwargs
+            )
             task_completed = time.ctime()
             if not isinstance(result, Result):
                 raise TypeError(
@@ -1465,7 +1566,7 @@ class NFPWorker:
                 b"",
                 suuid.encode("utf-8"),
                 b"200",
-                json.dumps({self.name: result.dict()}).encode("utf-8"),
+                json.dumps({self.name: result.model_dump()}).encode("utf-8"),
             ],
             reply_filename(suuid, self.base_dir_jobs),
         )
@@ -1482,7 +1583,7 @@ class NFPWorker:
                         entry = entry.decode("utf-8").strip()
                         # save done entry to queue_done_filename
                         if suuid in entry:
-                            entry = f"{entry.lstrip('+')}--{timestamp_end}\n".encode(
+                            entry = f"{entry.lstrip('+')}--{time.ctime()}\n".encode(
                                 "utf-8"
                             )
                             qdf.write(entry)

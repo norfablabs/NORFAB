@@ -37,6 +37,10 @@ from .picle_shells.fastapi import fastapi_picle_shell
 from .picle_shells.norfab_jobs_shell import NorFabJobsShellCommands
 from .picle_shells.workflow import workflow_picle_shell
 from .picle_shells.containerlab import containerlab_picle_shell
+from .picle_shells.workers.workers_picle_shell import (
+    ShowWorkersModel,
+    NorfabWorkersCommands,
+)
 
 NFCLIENT = None
 RICHCONSOLE = Console()
@@ -69,32 +73,6 @@ class ShowBrokerModel(BaseModel):
             reply = NFCLIENT.get("mmi.service.broker", "show_broker_inventory")
         else:
             reply = NFCLIENT.get("mmi.service.broker", "show_broker")
-        if reply["errors"]:
-            return "\n".join(reply["errors"])
-        else:
-            return reply["results"]
-
-
-class WorkerStatus(str, Enum):
-    dead = "dead"
-    alive = "alive"
-    any_ = "any"
-
-
-class ShowWorkersModel(BaseModel):
-    service: StrictStr = Field("all", description="Service name")
-    status: WorkerStatus = Field("any", description="Worker status")
-
-    class PicleConfig:
-        pipe = PipeFunctionsModel
-        outputter = Outputters.outputter_rich_table
-        outputter_kwargs = {"sortby": "name"}
-
-    @staticmethod
-    def run(*args, **kwargs):
-        reply = NFCLIENT.get(
-            "mmi.service.broker", "show_workers", args=args, kwargs=kwargs
-        )
         if reply["errors"]:
             return "\n".join(reply["errors"])
         else:
@@ -318,6 +296,7 @@ class NorFabShell(BaseModel):
     containerlab: containerlab_picle_shell.ContainerlabServiceCommands = Field(
         None, description="Containerlab service"
     )
+    workers: NorfabWorkersCommands = Field(None, description="NorFab workers commands")
 
     class PicleConfig:
         subshell = True
@@ -354,9 +333,10 @@ def mount_shell_plugins(shell: App, inventory: object) -> None:
     """
     for service_name, service_data in inventory.plugins.items():
         if service_data.get("nfcli"):
+            plugin = inventory.load_plugin(service_name)
             shell.model_mount(
-                path=service_data["nfcli"]["mount_path"],
-                model=service_data["nfcli"]["shell_model"],
+                path=plugin[service_name]["nfcli"]["mount_path"],
+                model=plugin[service_name]["nfcli"]["shell_model"],
             )
 
 

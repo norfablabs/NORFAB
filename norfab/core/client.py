@@ -353,9 +353,10 @@ class NFPClient(object):
                 assert (
                     reply_command == command
                 ), f"Was expecting reply command '{command}' received '{reply_command}'"
-                assert (
-                    reply_service == service
-                ), f"Was expecting reply from '{service}' but received reply from '{reply_service}' service"
+                if service != b"all":
+                    assert (
+                        reply_service == service
+                    ), f"Was expecting reply from '{service}' but received reply from '{reply_service}' service"
 
                 return reply_status, reply_task_result
             else:

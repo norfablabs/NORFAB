@@ -6,6 +6,7 @@ from pydantic import (
     StrictStr,
     Field,
     model_validator,
+    ConfigDict,
 )
 from enum import Enum
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
@@ -142,3 +143,17 @@ class Result(BaseModel, use_enum_values=True):
                 )
             else:
                 raise NorfabJobFailedError(f"Errors: {'; '.join(self.errors)}")
+
+
+# ------------------------------------------------------
+# NorFab worker tasks models
+# ------------------------------------------------------
+
+
+class WorkerEchoIn(BaseModel):
+    job: object = Field(..., description="NorFab job object")
+    model_config = ConfigDict(extra="allow")
+
+
+class WorkerEchoOut(Result):
+    model_config = ConfigDict(extra="allow")

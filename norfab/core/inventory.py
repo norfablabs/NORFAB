@@ -251,9 +251,9 @@ def make_hooks(base_dir: str, hooks: List) -> Dict[str, List]:
     return ret
 
 
-def make_plugins(base_dir: str, plugins: Dict) -> Dict[str, Dict]:
+def make_plugin(base_dir: str, plugins: Dict, service: str) -> Dict:
     """
-    Loads and initializes plugin functions for the given services.
+    Loads and initializes plugin function for the given service.
 
     This function ensures that the current working directory and the specified
     base directory are included in the Python search path. It then iterates
@@ -263,16 +263,15 @@ def make_plugins(base_dir: str, plugins: Dict) -> Dict[str, Dict]:
 
     Args:
         base_dir (str): The base directory to include in the search path.
-        plugins (dict): A dictionary containing plugin configurations. The
+        plugins (dict): A dictionary containing plugin definition. The
                         dictionary should have a key "workers" which maps to a
-                        list of plugin configurations. Each configuration should
+                        list of plugin import path. Each configuration should
                         include a "service" key and a "plugin" key in the format
                         "module:ClassName".
 
     Returns:
-        dict: A dictionary with a key "workers" mapping to another dictionary
-              where each key is a service name and each value is the corresponding
-              plugin configuration with the plugin class loaded.
+        dict: A dictionary with a key "workers" mapping to worker plugin and an
+            "nfcli" key with a mapping to NFCLI shell plugin details.
 
     Raises:
         Exception: If there is an error loading any of the plugin classes, an
@@ -288,7 +287,7 @@ def make_plugins(base_dir: str, plugins: Dict) -> Dict[str, Dict]:
                 }
             ]
         }
-        result = make_plugins("/path/to/base_dir", plugins)
+        result = make_plugin("/path/to/base_dir", plugins, example_service)
     """
     ret = {}
 
@@ -299,44 +298,40 @@ def make_plugins(base_dir: str, plugins: Dict) -> Dict[str, Dict]:
         sys.path.append(base_dir)
 
     # load service plugins
-    for service_name, service_data in plugins.items():
-        ret[service_name] = service_data
-        # import worker plugin
-        if service_data.get("worker"):
-            try:
-                imp_str, plugin_class_name = service_data["worker"].split(":")
-                log.info(
-                    f"Importing '{plugin_class_name}' worker plugin class from '{imp_str}' module"
-                )
-                plugin_module = __import__(imp_str, fromlist=[""])
-                service_data["worker"] = getattr(plugin_module, plugin_class_name)
-                log.info(
-                    f"Successfully loaded worker plugin {plugin_class_name} for service {service_name}"
-                )
-            except Exception as e:
-                log.exception(
-                    f"Failed loading worker plugin '{service_data['worker']}'"
-                )
-        # impot nfcli pydantic model
-        if service_data.get("nfcli"):
-            try:
-                imp_str, plugin_class_name = service_data["nfcli"]["shell_model"].split(
-                    ":"
-                )
-                log.info(
-                    f"Importing '{plugin_class_name}' nfcli pydantic model plugin class from '{imp_str}' module"
-                )
-                plugin_module = __import__(imp_str, fromlist=[""])
-                service_data["nfcli"]["shell_model"] = getattr(
-                    plugin_module, plugin_class_name
-                )
-                log.info(
-                    f"Successfully loaded nfcli pydantic model plugin class {plugin_class_name} for service {service_name}"
-                )
-            except Exception as e:
-                log.exception(
-                    f"Failed loading nfcli pydantic model plugin class '{service_data['nfcli']}'"
-                )
+    service_data = copy.deepcopy(plugins[service])
+    ret[service] = service_data
+    # import worker plugin
+    if service_data.get("worker"):
+        try:
+            imp_str, plugin_class_name = service_data["worker"].split(":")
+            log.info(
+                f"Importing '{plugin_class_name}' worker plugin class from '{imp_str}' module"
+            )
+            plugin_module = __import__(imp_str, fromlist=[""])
+            service_data["worker"] = getattr(plugin_module, plugin_class_name)
+            log.info(
+                f"Successfully loaded worker plugin {plugin_class_name} for service {service}"
+            )
+        except Exception as e:
+            log.exception(f"Failed loading worker plugin '{service_data['worker']}'")
+    # import nfcli pydantic model
+    if service_data.get("nfcli"):
+        try:
+            imp_str, plugin_class_name = service_data["nfcli"]["shell_model"].split(":")
+            log.info(
+                f"Importing '{plugin_class_name}' nfcli pydantic model plugin class from '{imp_str}' module"
+            )
+            plugin_module = __import__(imp_str, fromlist=[""])
+            service_data["nfcli"]["shell_model"] = getattr(
+                plugin_module, plugin_class_name
+            )
+            log.info(
+                f"Successfully loaded nfcli pydantic model plugin class {plugin_class_name} for service {service}"
+            )
+        except Exception as e:
+            log.exception(
+                f"Failed loading nfcli pydantic model plugin class '{service_data['nfcli']}'"
+            )
 
     return ret
 
@@ -497,7 +492,19 @@ class NorFabInventory:
         self.topology = data.pop("topology", {})
         self.logging = make_logging_config(self.base_dir, data.pop("logging", {}))
         self.hooks = make_hooks(self.base_dir, data.pop("hooks", {}))
-        self.plugins = make_plugins(self.base_dir, data.pop("plugins", {}))
+        self.plugins = data.pop("plugins", {})
+
+    def load_plugin(self, service: str) -> dict:
+        """
+        Loads and returns a plugin instance for the specified service.
+
+        Args:
+            service (str): The name of the service for which the plugin should be loaded.
+
+        Returns:
+            dictionary: Dictionary with plugin corresponding to the given service.
+        """
+        return make_plugin(self.base_dir, self.plugins, service)
 
     def load_path(self, path: str) -> None:
         """

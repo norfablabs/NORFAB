@@ -601,7 +601,32 @@ class NFPBroker:
             service: NFPService object
         """
         ret = []
-        if not service.workers:
+
+        if service.name == b"all":
+            if target == b"all":
+                ret = self.workers.values()
+            elif target == b"any":
+                ret = [
+                    s.workers[random.randint(0, len(s.workers) - 1)]
+                    for s in self.services.values()
+                    if s.workers
+                ]
+            elif target in self.workers:  # single worker
+                ret = [self.workers[target]]
+            else:  # target list of workers
+                try:
+                    target = json.loads(target)
+                    if isinstance(target, list):
+                        for w in target:
+                            w = w.encode("utf-8")
+                            if w in self.workers:
+                                ret.append(self.workers[w])
+                        ret = list(set(ret))  # dedup workers
+                except Exception as e:
+                    log.error(
+                        f"NFPBroker - Failed to load target '{target}' with error '{e}'"
+                    )
+        elif not service.workers:
             log.warning(
                 f"NFPBroker - '{service.name}' has no active workers registered, try later"
             )
@@ -631,7 +656,7 @@ class NFPBroker:
         self,
         sender: str,
         command: bytes,
-        service: object,
+        service: NFPService,
         target: Union[str, List[str]],
         uuid: str,
         data: Any,

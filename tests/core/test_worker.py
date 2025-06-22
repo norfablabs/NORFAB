@@ -3,20 +3,133 @@ import json
 import time
 from uuid import uuid4
 
+
+class TestWorkersListTasks:
+    def test_list_tasks(self, nfclient):
+        ret = nfclient.run_job("nornir", "list_tasks", workers="any")
+
+        pprint.pprint(ret, width=200)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert len(res["result"]) > 0, f"{worker} returned no task details"
+            for t in res["result"]:
+                assert all(k in t for k in ["description", "name", "parameters"])
+
+    def test_list_tasks_brief(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir", "list_tasks", workers="any", kwargs={"brief": True}
+        )
+
+        pprint.pprint(ret, width=200)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert len(res["result"]) > 0, f"{worker} returned no task details"
+            for t in res["result"]:
+                assert isinstance(t, str)
+
+    def test_list_tasks_name(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir", "list_tasks", workers="any", kwargs={"name": "get_version"}
+        )
+
+        pprint.pprint(ret, width=200)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert (
+                len(res["result"]) == 1
+            ), f"{worker} returned more than 1 task details"
+            assert (
+                res["result"][0]["name"] == "get_version"
+            ), f"{worker} did not return get_version task"
+
+
 class TestWorkersEcho:
-    def test_echo(self, nfclient):
-        ret = nfclient.run_job("nornir", "echo")
+    def test_echo_service_nornir_workers_all(self, nfclient):
+        ret = nfclient.run_job("nornir", "echo", workers="all")
 
         pprint.pprint(ret)
-        for worker, results in ret.items():
-            assert results["result"], f"{worker} returned no results"
-            assert results["failed"] is False, f"{worker} failed to run the task"
-            assert "client_address" in results["result"]
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in res["result"]
             assert "juuid" in res
-            assert "task" in res
-            assert "args" in res
-            assert "kwargs" in res
-            assert "done_timestamp" in res
+            assert "task" in res["result"]
+            assert "args" in res["result"]
+            assert "kwargs" in res["result"]
+            assert "task_started" in res
+            assert "task_completed" in res
+
+    def test_echo_service_nornir_workers_any(self, nfclient):
+        ret = nfclient.run_job("nornir", "echo", workers="any")
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in res["result"]
+            assert "juuid" in res
+            assert "task" in res["result"]
+            assert "args" in res["result"]
+            assert "kwargs" in res["result"]
+            assert "task_started" in res
+            assert "task_completed" in res
+
+    def test_echo_service_all_workers_all(self, nfclient):
+        ret = nfclient.run_job("all", "echo", workers="all")
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in res["result"]
+            assert "juuid" in res
+            assert "task" in res["result"]
+            assert "args" in res["result"]
+            assert "kwargs" in res["result"]
+            assert "task_started" in res
+            assert "task_completed" in res
+
+    def test_echo_service_all_workers_any(self, nfclient):
+        ret = nfclient.run_job("all", "echo", workers="any")
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in res["result"]
+            assert "juuid" in res
+            assert "task" in res["result"]
+            assert "args" in res["result"]
+            assert "kwargs" in res["result"]
+            assert "task_started" in res
+            assert "task_completed" in res
+
+    def test_echo_service_all_worker(self, nfclient):
+        ret = nfclient.run_job("all", "echo", workers="nornir-worker-1")
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in res["result"]
+            assert "juuid" in res
+            assert "task" in res["result"]
+            assert "args" in res["result"]
+            assert "kwargs" in res["result"]
+            assert "task_started" in res
+            assert "task_completed" in res
+
+    def test_echo_service_all_workers_list(self, nfclient):
+        ret = nfclient.run_job(
+            "all", "echo", workers=["nornir-worker-1", "nornir-worker-2"]
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in res["result"]
+            assert "juuid" in res
+            assert "task" in res["result"]
+            assert "args" in res["result"]
+            assert "kwargs" in res["result"]
+            assert "task_started" in res
+            assert "task_completed" in res
+
 
 class TestWorkerJobsApi:
     def test_job_list(self, nfclient):
