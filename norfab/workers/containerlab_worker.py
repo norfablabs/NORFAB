@@ -172,7 +172,7 @@ class ContainerlabWorker(NFPWorker):
         job: Job,
         args: list,
         cwd: str = None,
-        timeout: int = 600,
+        timeout: int = None,
         ret: Result = None,
         env: dict = None,
     ) -> Tuple:
@@ -205,6 +205,7 @@ class ContainerlabWorker(NFPWorker):
             - If the command fails (non-zero return code), the `ret.failed` attribute is set to True, and errors are populated.
             - If the command succeeds, the `ret.messages` attribute is populated with log messages.
         """
+        timeout = timeout or 600
         output, logs = "", []
         begin = time.time()
         timeout = timeout or 600
@@ -268,8 +269,7 @@ class ContainerlabWorker(NFPWorker):
         else:
             return output, logs, proc
 
-    # @Task()(input=DeployTask, output=DeployTaskResponse)
-    @Task()
+    @Task()(input=DeployTask, output=DeployTaskResponse)
     def deploy(
         self,
         job: Job,
@@ -299,6 +299,7 @@ class ContainerlabWorker(NFPWorker):
         Raises:
             Exception: If the topology file cannot be fetched.
         """
+        timeout = timeout or 600
         ret = Result(task=f"{self.name}:deploy")
 
         # create folder to store topology
