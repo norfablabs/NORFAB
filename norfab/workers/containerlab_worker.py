@@ -155,6 +155,7 @@ class ContainerlabWorker(NFPWorker):
             Result: A Result object containing the task name and a list of running
             lab names.
         """
+        timeout = timeout or 600
         ret = Result(task=f"{self.name}:get_running_labs", result=[])
         inspect = self.inspect(job=job, timeout=timeout)
 
@@ -354,6 +355,7 @@ class ContainerlabWorker(NFPWorker):
             - Executes the `containerlab destroy` command using the topology file.
             - Updates the result to indicate success or failure of the destruction process.
         """
+        timeout = timeout or 600
         ret = Result(task=f"{self.name}:destroy_lab")
 
         # get lab details
@@ -405,6 +407,7 @@ class ContainerlabWorker(NFPWorker):
         Returns:
             Result: An object containing the result of the inspection task.
         """
+        timeout = timeout or 600
         ret = Result(task=f"{self.name}:inspect")
 
         if lab_name:
@@ -436,6 +439,7 @@ class ContainerlabWorker(NFPWorker):
                 as the value. If unsuccessful, `failed` will be set to True, and `errors`
                 will contain a list of error messages.
         """
+        timeout = timeout or 600
         ret = Result(task=f"{self.name}:save")
 
         # get lab details
@@ -478,6 +482,7 @@ class ContainerlabWorker(NFPWorker):
             Result: An object containing the status of the operation, any errors encountered,
                     and the result indicating whether the lab was successfully restarted.
         """
+        timeout = timeout or 600
         ret = Result(task=f"{self.name}:restart_lab")
 
         # get lab details
@@ -565,6 +570,7 @@ class ContainerlabWorker(NFPWorker):
                     },
                     ...
         """
+        timeout = timeout or 600
         groups = groups or []
         ret = Result(task=f"{self.name}:get_nornir_inventory", result={"hosts": {}})
 
@@ -715,6 +721,7 @@ class ContainerlabWorker(NFPWorker):
         Raises:
             Exception: If the topology file cannot be fetched.
         """
+        timeout = timeout or 600
         ret = Result(task=f"{self.name}:deploy_netbox")
         subnets_in_use = set()
         ports_in_use = {}
