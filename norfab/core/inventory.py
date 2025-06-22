@@ -598,10 +598,10 @@ class NorFabInventory:
         for service_name, service_data in self.plugins.items():
             ret["plugins"][service_name] = {**service_data}
             if service_data.get("worker"):
-                ret["plugins"][service_name]["worker"] = service_data["worker"].__name__
+                ret["plugins"][service_name]["worker"] = service_data["worker"]
             if service_data.get("nfcli"):
                 ret["plugins"][service_name]["nfcli"]["shell_model"] = service_data[
                     "nfcli"
-                ]["shell_model"].__name__
+                ]["shell_model"]
 
         return ret

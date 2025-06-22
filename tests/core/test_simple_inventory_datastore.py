@@ -194,4 +194,5 @@ class TestPluginsInventory:
             assert all(
                 k in service_data for k in ["worker", "nfcli"]
             ), f"{service_name} plugin definition missing some params"
-            assert issubclass(service_data["worker"], NFPWorker)
+            plugin = self.inventory.load_plugin(service_name)
+            assert issubclass(plugin[service_name]["worker"], NFPWorker)

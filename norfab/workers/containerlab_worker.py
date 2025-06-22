@@ -387,7 +387,7 @@ class ContainerlabWorker(NFPWorker):
     def inspect(
         self,
         job: Job,
-        lab_name: str = None,
+        lab_name: Union[None, str] = None,
         timeout: int = None,
         details: bool = False,
     ) -> Result:
@@ -531,7 +531,7 @@ class ContainerlabWorker(NFPWorker):
     def get_nornir_inventory(
         self,
         job: Job,
-        lab_name: str = None,
+        lab_name: Union[None, str] = None,
         timeout: int = None,
         groups: list = None,
         use_default_credentials: bool = True,

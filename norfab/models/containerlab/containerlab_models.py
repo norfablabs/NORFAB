@@ -22,6 +22,7 @@ class DeployTask(BaseModel, extra="forbid"):
     Pydantic model for Containerlab worker deploy task.
     """
 
+    job: object = Field(None, description="Job instance running this task")
     topology: StrictStr = Field(..., description="Topology file path")
     reconfigure: StrictBool = Field(None, description="Reconfigure flag")
     timeout: StrictInt = Field(None, description="Deployment timeout in seconds")

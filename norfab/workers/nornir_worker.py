@@ -553,6 +553,7 @@ class NornirWorker(NFPWorker):
             - After successful merging of inventory, Nornir instance is re-initialized with the
               updated inventory.
         """
+        groups = groups or []
         ret = Result(
             task=f"{self.name}:nornir_inventory_load_containerlab", result=True
         )
