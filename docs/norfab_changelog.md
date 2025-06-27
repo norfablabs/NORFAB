@@ -4,8 +4,10 @@
 ### FEATURES
 
 1. Adding concurrency to worker jobs execution, adding new worker inventory parameter `max_concurrent_jobs`
-2. Adding `@Task` and `@Task.describe` decorators to expose worker methods as tasks
+2. Adding `@Task()` decorator to expose worker methods as tasks, this decorator perfoms automatic typechecking using type annotation, alternatively it support input / output pydanti models to verify input arguments and return results.
 3. Passing on `job` argument to all NorFab tasks, `job` is an object that contains relevant metadata - client address, juuid, args, kwargs etc. Job object can be used to emit events.
+4. Adding workers `echo` task to perform tests, added respective nfcli commands tree `workers.ping`.
+5. Adding workers `list_tasks` method to return information about tasks in MCP compatible format.
 
 ### CHANGES
 
@@ -15,7 +17,7 @@
 ### BREAKING CHANGES
 
 1. Instead of `self.event` worker now need to use `job.event`
-2. To add pydantic input / output models for tasks need to use `@Task.describe` decorator instead of `@Task` decorator
+2. To add pydantic input / output models for tasks need to use `@Task()` decorator instead of `@Task` decorator
 3. Nornir Jinja2 templates context `nornir.cli` removed, need to use `norfab.run_job` instead
 
 ---

@@ -60,6 +60,13 @@ class WorkersPingCommand(ClientRunJobArgs):
         "all",
         description="Service to ping",
     )
+    sleep: StrictInt = Field(None, description="SLeep for given time")
+    raise_error: Union[StrictBool, StrictStr, StrictInt] = Field(
+        None,
+        description="Raise RuntimeError with provided message",
+        alias="raise-error",
+        json_schema_extra={"presence": True},
+    )
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -91,7 +98,9 @@ class WorkersPingCommand(ClientRunJobArgs):
             uuid=uuid,
         )
 
-        return log_error_or_result(result, verbose_result=verbose_result)
+        return log_error_or_result(
+            result, verbose_result=verbose_result, verbose_on_fail=True
+        )
 
 
 # ---------------------------------------------------------------------------------------------

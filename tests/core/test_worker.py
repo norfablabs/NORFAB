@@ -130,6 +130,37 @@ class TestWorkersEcho:
             assert "task_started" in res
             assert "task_completed" in res
 
+    def test_echo_raise_error(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir", "echo", kwargs={"raise_error": "Give me error"}
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is True, f"{worker} did not fail to run the task"
+            assert "Give me error" in res["errors"][0]
+
+    def test_echo_sleep(self, nfclient):
+        start = time.time()
+        ret = nfclient.run_job(
+            "nornir", "echo", kwargs={"sleep": 5}, workers=["nornir-worker-1"]
+        )
+        end = time.time()
+
+        duration = end - start
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run the task"
+            assert "client_address" in res["result"]
+            assert "juuid" in res
+            assert "task" in res["result"]
+            assert "args" in res["result"]
+            assert "kwargs" in res["result"]
+            assert "task_started" in res
+            assert "task_completed" in res
+            assert duration > 5, f"{worker} did not sleep for 5 seconds"
+
 
 class TestWorkerJobsApi:
     def test_job_list(self, nfclient):

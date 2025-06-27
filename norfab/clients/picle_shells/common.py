@@ -130,15 +130,26 @@ def listen_events(fun):
 
 
 def log_error_or_result(
-    data: dict, verbose_result: bool = False, verbose_on_fail: bool = False
+    data: dict, verbose_result: bool = False, verbose_on_fail: bool = True
 ) -> dict:
     """
-    Helper function to log result errors, messages or return results.
-
-    Returns dictionary keyed by worker name with job results as a value.
+    Logs errors or messages from the provided data dictionary and returns a dictionary of results based on verbosity settings.
 
     Args:
-        data: result returned bu NFPCLIENT.run_job function
+        data (dict): A dictionary where each key is a worker name and each
+            value is a dictionary containing job result
+        verbose_result (bool, optional): If True, includes the full result
+            dictionary for each worker in the return value
+        verbose_on_fail (bool, optional): If True, includes the full result
+            dictionary for failed tasks
+
+    Returns:
+        dict: A dictionary containing either the full result or just the "result"
+            field for each worker, depending on verbosity settings.
+
+    Logs:
+        - Errors if present in the worker's result.
+        - Informational messages if present and no errors exist.
     """
     ret = {}
 

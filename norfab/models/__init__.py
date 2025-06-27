@@ -152,6 +152,10 @@ class Result(BaseModel, use_enum_values=True):
 
 class WorkerEchoIn(BaseModel):
     job: object = Field(..., description="NorFab job object")
+    sleep: StrictInt = Field(None, description="SLeep for given time")
+    raise_error: Union[StrictBool, StrictStr, StrictInt] = Field(
+        None, description="Raise RuntimeError with provided message"
+    )
     model_config = ConfigDict(extra="allow")
 
 

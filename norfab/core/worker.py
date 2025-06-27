@@ -1355,21 +1355,34 @@ class NFPWorker:
             )
 
     @Task(input=models.WorkerEchoIn, output=models.WorkerEchoOut)
-    def echo(self, job: Job, *args, **kwargs) -> Result:
+    def echo(
+        self,
+        job: Job,
+        raise_error: Union[bool, int, str] = None,
+        sleep: int = None,
+        *args,
+        **kwargs,
+    ) -> Result:
         """
-        Echoes the details of the given job along with any additional
-        arguments and keyword arguments.
+        Echoes the job information and optional arguments, optionally sleeping or raising an error.
 
         Args:
-            job (Job): The job instance containing job-specific information.
+            job (Job): The job instance containing job details.
+            raise_error (str, optional): If provided, raises a RuntimeError with this message.
+            sleep (int, optional): If provided, sleeps for the specified number of seconds.
             *args: Additional positional arguments to include in the result.
             **kwargs: Additional keyword arguments to include in the result.
 
         Returns:
-            Result: An object containing a dictionary with the job's UUID,
-                client address, timeout, task, as well as the provided args
-                and kwargs.
+            Result: An object containing job details and any provided arguments.
+
+        Raises:
+            RuntimeError: If `raise_error` is provided.
         """
+        if sleep:
+            time.sleep(sleep)
+        if raise_error:
+            raise RuntimeError(raise_error)
         return Result(
             result={
                 "juuid": job.juuid,
@@ -1552,6 +1565,7 @@ class NFPWorker:
                 errors=[traceback.format_exc()],
                 messages=[f"Worker experienced error: '{e}'"],
                 failed=True,
+                juuid=juuid.decode("utf-8"),
             )
             log.error(
                 f"{self.name} - worker experienced error:\n{traceback.format_exc()}"
