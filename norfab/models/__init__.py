@@ -125,6 +125,9 @@ class Result(BaseModel, use_enum_values=True):
     task_completed: Optional[StrictStr] = Field(
         None, description="Timestamp when task was completed"
     )
+    service: Optional[StrictStr] = Field(
+        None, description="Name of the service produced this result"
+    )
 
     def raise_for_status(self, message=""):
         """

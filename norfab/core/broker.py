@@ -673,8 +673,8 @@ class NFPBroker:
             data (Any): The data to be sent to the workers.
         """
         log.debug(
-            f"NFPBroker - dispatching request to workers: sender '{sender}', "
-            f"command '{command}', service '{service.name}', target '{target}'"
+            f"NFPBroker - dispatching request to workers or clients: sender '{sender}', "
+            f"command '{command}', service '{service.name}', target '{target}', "
             f"data '{data}', uuid '{uuid}'"
         )
         self.purge_workers()

@@ -130,7 +130,7 @@ def listen_events(fun):
 
 
 def log_error_or_result(
-    data: dict, verbose_result: bool = False, verbose_on_fail: bool = True
+    data: dict, verbose_result: bool = False, verbose_on_fail: bool = False
 ) -> dict:
     """
     Logs errors or messages from the provided data dictionary and returns a dictionary of results based on verbosity settings.

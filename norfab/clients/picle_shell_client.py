@@ -41,6 +41,7 @@ from .picle_shells.workers.workers_picle_shell import (
     ShowWorkersModel,
     NorfabWorkersCommands,
 )
+from .picle_shells.common import ClientRunJobArgs, log_error_or_result, listen_events
 
 NFCLIENT = None
 RICHCONSOLE = Console()
@@ -311,6 +312,50 @@ class NorFabShell(BaseModel):
 
 
 # ---------------------------------------------------------------------------------------------
+# MAN SHELL COMMANDS
+# ---------------------------------------------------------------------------------------------
+
+
+class ManTasks(BaseModel):
+    service: StrictStr = Field(None, description="Service name to show tasks for")
+    name: StrictStr = Field(None, description="Name of the service task to show")
+    brief: StrictBool = Field(
+        None, description="Only show tasks names", json_schema_extra={"presence": True}
+    )
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+    @staticmethod
+    @listen_events
+    def run(uuid, **kwargs):
+        service = kwargs.pop("service", "all")
+
+        result = NFCLIENT.run_job(
+            service,
+            "list_tasks",
+            uuid=uuid,
+            workers="any",
+            timeout=60,
+            kwargs=kwargs,
+        )
+
+        ret = {}
+        for worker, wresult in result.items():
+            if wresult["failed"]:
+                continue
+            key = f"{wresult['service']}:{kwargs.get('name', 'all')}"
+            if kwargs.get("brief"):
+                ret[key] = wresult["result"]
+            else:
+                ret[key] = {
+                    "description": wresult["result"][0]["description"],
+                    "parameters": wresult["result"][0]["parameters"]["properties"],
+                }
+        return ret
+
+
+# ---------------------------------------------------------------------------------------------
 # SHELL ENTRY POINT
 # ---------------------------------------------------------------------------------------------
 
@@ -338,6 +383,13 @@ def mount_shell_plugins(shell: App, inventory: object) -> None:
                 path=plugin[service_name]["nfcli"]["mount_path"],
                 model=plugin[service_name]["nfcli"]["shell_model"],
             )
+
+    # mount MAN commands
+    shell.model_mount(
+        path=["man", "tasks"],
+        model=ManTasks,
+        description="SHow NorFab services tasks documentation",
+    )
 
 
 def start_picle_shell(

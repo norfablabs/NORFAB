@@ -1395,7 +1395,7 @@ class NFPWorker:
         )
 
     @Task()
-    def list_tasks(self, name: str = None, brief: bool = False) -> Result:
+    def list_tasks(self, name: Union[None, str] = None, brief: bool = False) -> Result:
         """
         Lists available worker tasks with optional filtering and output format.
 
@@ -1558,6 +1558,7 @@ class NFPWorker:
             result.task = result.task or f"{self.name}:{task}"
             result.status = result.status or "completed"
             result.juuid = result.juuid or juuid.decode("utf-8")
+            result.service = self.service.decode("utf-8")
         except Exception as e:
             task_completed = time.ctime()
             result = Result(
