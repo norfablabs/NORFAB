@@ -13,7 +13,10 @@ class TestWorkersListTasks:
             assert res["failed"] is False, f"{worker} failed to run the task"
             assert len(res["result"]) > 0, f"{worker} returned no task details"
             for t in res["result"]:
-                assert all(k in t for k in ["description", "name", "parameters"])
+                assert all(
+                    k in t
+                    for k in ["description", "name", "inputSchema", "annotations"]
+                )
 
     def test_list_tasks_brief(self, nfclient):
         ret = nfclient.run_job(

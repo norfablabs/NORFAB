@@ -324,6 +324,7 @@ class ManTasks(BaseModel):
     )
 
     class PicleConfig:
+        pipe = PipeFunctionsModel
         outputter = Outputters.outputter_nested
 
     @staticmethod
@@ -348,10 +349,7 @@ class ManTasks(BaseModel):
             if kwargs.get("brief"):
                 ret[key] = wresult["result"]
             else:
-                ret[key] = {
-                    "description": wresult["result"][0]["description"],
-                    "parameters": wresult["result"][0]["parameters"]["properties"],
-                }
+                ret[key] = wresult["result"][0]
         return ret
 
 

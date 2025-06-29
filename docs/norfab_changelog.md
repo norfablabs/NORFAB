@@ -8,6 +8,7 @@
 3. Passing on `job` argument to all NorFab tasks, `job` is an object that contains relevant metadata - client address, juuid, args, kwargs etc. Job object can be used to emit events.
 4. Adding workers `echo` task to perform tests, added respective nfcli commands tree `workers.ping`.
 5. Adding workers `list_tasks` method to return information about tasks in MCP compatible format.
+6. Added picle shell `man.tasks` command to retrieve information about NorFab services tasks
 
 ### CHANGES
 

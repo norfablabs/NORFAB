@@ -87,6 +87,7 @@ class Task:
         name (str): The name of the task, which is used to register the task for calling, by default
             set equal to the name of decorated function.
         result_model (BaseModel): A Pydantic model used to validate the function's return value.
+        annotations (dict): Tasks annotation as per MCP standard
 
     Methods:
         __call__(function: Callable) -> Callable:
@@ -117,10 +118,12 @@ class Task:
         input: Optional[BaseModel] = None,
         output: Optional[BaseModel] = None,
         description: Optional[str] = None,
+        annotations: Optional[dict] = None,
     ) -> None:
         self.input = input
         self.output = output or Result
         self.description = description
+        self.annotations = annotations or {}
 
     def __call__(self, function: Callable) -> Callable:
         self.function = function
@@ -210,7 +213,8 @@ class Task:
                 "schema": {
                     "name": str(self.name),
                     "description": self.description,
-                    "parameters": input_json_schema,
+                    "inputSchema": input_json_schema,
+                    "annotations": self.annotations,
                 },
             }
         }
