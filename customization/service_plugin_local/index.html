@@ -3778,10 +3778,13 @@
 <div class="highlight"><span class="filename">plugins/dummy_service.py</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib.metadata</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.worker</span><span class="w"> </span><span class="kn">import</span> <span class="n">NFPWorker</span><span class="p">,</span> <span class="n">Result</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.worker</span><span class="w"> </span><span class="kn">import</span> <span class="n">NFPWorker</span><span class="p">,</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Job</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Result</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BaseModel</span><span class="p">,</span>
+    <span class="n">Field</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">picle.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Outputters</span>
 
 <span class="n">SERVICE</span> <span class="o">=</span> <span class="s2">&quot;DummyService&quot;</span>
@@ -3792,8 +3795,8 @@
 <span class="c1"># DUMMY SERVICE WORKER CLASS</span>
 <span class="c1"># ---------------------------------------------------------------------------------------------</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">DummyServiceWorker</span><span class="p">(</span><span class="n">NFPWorker</span><span class="p">):</span>
 
+<span class="k">class</span><span class="w"> </span><span class="nc">DummyServiceWorker</span><span class="p">(</span><span class="n">NFPWorker</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inventory</span><span class="p">,</span>
@@ -3811,10 +3814,10 @@
 <span class="sd">            inventory: The inventory object.</span>
 <span class="sd">            broker (str): The broker address.</span>
 <span class="sd">            worker_name (str): The name of the worker.</span>
-<span class="sd">            exit_event (threading.Event, optional): Event to signal service exit. </span>
-<span class="sd">            init_done_event (threading.Event, optional): Event to signal initialization completion. </span>
-<span class="sd">            log_level (str, optional): The logging level. </span>
-<span class="sd">            log_queue (object, optional): The logging queue. </span>
+<span class="sd">            exit_event (threading.Event, optional): Event to signal service exit.</span>
+<span class="sd">            init_done_event (threading.Event, optional): Event to signal initialization completion.</span>
+<span class="sd">            log_level (str, optional): The logging level.</span>
+<span class="sd">            log_queue (object, optional): The logging queue.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">inventory</span><span class="p">,</span> <span class="n">broker</span><span class="p">,</span> <span class="n">SERVICE</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">exit_event</span><span class="p">,</span> <span class="n">log_level</span><span class="p">,</span> <span class="n">log_queue</span>
@@ -3828,6 +3831,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">init_done_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Started&quot;</span><span class="p">)</span>
 
+    <span class="nd">@Task</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the version information for specified libraries and the current Python environment.</span>
@@ -3841,6 +3845,7 @@
 <span class="sd">        Note:</span>
 <span class="sd">            If the &#39;norfab&#39; package is not installed, its version will be an empty string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">libs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
@@ -3855,6 +3860,7 @@
 
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">libs</span><span class="p">)</span>
 
+    <span class="nd">@Task</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the dummy service inventory.</span>
@@ -3864,20 +3870,29 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dummy_inventory</span><span class="p">)</span>
 
+    <span class="nd">@Task</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dummy_task</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dummy task</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="s2">&quot;dummy&quot;</span><span class="p">)</span>
+
+
 <span class="c1"># ---------------------------------------------------------------------------------------------</span>
 <span class="c1"># DUMMY SERVICE SHELL SHOW COMMANDS MODELS</span>
 <span class="c1"># ---------------------------------------------------------------------------------------------</span>
+
 
 <span class="k">class</span><span class="w"> </span><span class="nc">DummyServiceShowCommandsModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">inventory</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;show Dummy service inventory data&quot;</span><span class="p">,</span>
-        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;get_inventory&quot;</span><span class="p">}</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;get_inventory&quot;</span><span class="p">},</span>
     <span class="p">)</span>
     <span class="n">version</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;show Dummy service version report&quot;</span><span class="p">,</span>
-        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;get_version&quot;</span><span class="p">}</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;get_version&quot;</span><span class="p">},</span>
     <span class="p">)</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">PicleConfig</span><span class="p">:</span>
@@ -3894,6 +3909,7 @@
         <span class="n">workers</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;workers&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">NFCLIENT</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span><span class="s2">&quot;DummyService&quot;</span><span class="p">,</span> <span class="s2">&quot;get_version&quot;</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
+
 
 <span class="k">class</span><span class="w"> </span><span class="nc">DummyServiceNfcliShell</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">show</span><span class="p">:</span> <span class="n">DummyServiceShowCommandsModel</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>

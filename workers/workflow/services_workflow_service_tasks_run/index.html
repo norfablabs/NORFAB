@@ -4003,7 +4003,7 @@ nf#
       <tbody>
           <tr class="doc-section-item">
 <td><code>Dict</code></td>            <td>
-                  <code><span title="typing.Dict">Dict</span></code>
+                  <code><span title="norfab.models.Result">Result</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4040,9 +4040,7 @@ nf#
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\workflow_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
@@ -4136,7 +4134,11 @@ nf#
 <span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
-<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">workflow</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Executes a workflow defined by a dictionary.</span>
 
@@ -4165,7 +4167,7 @@ nf#
     <span class="n">workflow_description</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">remove_no_match_results</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;remove_no_match_results&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting workflow &#39;</span><span class="si">{</span><span class="n">workflow_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">workflow_description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -4188,7 +4190,7 @@ nf#
                     <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Skipping workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;, one of run_if_x conditions not satisfied&quot;</span>
             <span class="p">)</span>
             <span class="k">continue</span>
@@ -4205,11 +4207,11 @@ nf#
                     <span class="s2">&quot;juuid&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
             <span class="k">break</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Doing workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Doing workflow step &#39;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">workflow_name</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
             <span class="n">service</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">],</span>

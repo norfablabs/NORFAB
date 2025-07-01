@@ -3167,6 +3167,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#norfab.core.inventory.NorFabInventory.load_plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#norfab.core.inventory.NorFabInventory.load_path" class="md-nav__link">
     <span class="md-ellipsis">
       load_path
@@ -3235,9 +3244,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab.core.inventory.make_plugins" class="md-nav__link">
+  <a href="#norfab.core.inventory.make_plugin" class="md-nav__link">
     <span class="md-ellipsis">
-      make_plugins
+      make_plugin
     </span>
   </a>
   
@@ -3768,6 +3777,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#norfab.core.inventory.NorFabInventory.load_plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#norfab.core.inventory.NorFabInventory.load_path" class="md-nav__link">
     <span class="md-ellipsis">
       load_path
@@ -3836,9 +3854,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab.core.inventory.make_plugins" class="md-nav__link">
+  <a href="#norfab.core.inventory.make_plugin" class="md-nav__link">
     <span class="md-ellipsis">
-      make_plugins
+      make_plugin
     </span>
   </a>
   
@@ -4044,9 +4062,9 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
                   <details class="quote">
                     <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
 </code></pre></div></td></tr></table></div>
@@ -4181,7 +4199,12 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
                   <details class="quote">
                     <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">451</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
 <span class="normal">452</span>
 <span class="normal">453</span>
 <span class="normal">454</span>
@@ -4207,12 +4230,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">474</span>
 <span class="normal">475</span>
 <span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">477</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4330,7 +4348,12 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">484</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
 <span class="normal">485</span>
 <span class="normal">486</span>
 <span class="normal">487</span>
@@ -4341,12 +4364,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">492</span>
 <span class="normal">493</span>
 <span class="normal">494</span>
-<span class="normal">495</span>
-<span class="normal">496</span>
-<span class="normal">497</span>
-<span class="normal">498</span>
-<span class="normal">499</span>
-<span class="normal">500</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">495</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load and initialize various components from the provided data dictionary.</span>
 
@@ -4362,7 +4380,104 @@ Raises a KeyError if no inventory data is found for the given name.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">topology</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;topology&quot;</span><span class="p">,</span> <span class="p">{})</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">make_logging_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;logging&quot;</span><span class="p">,</span> <span class="p">{}))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span> <span class="o">=</span> <span class="n">make_hooks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hooks&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span> <span class="o">=</span> <span class="n">make_plugins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;plugins&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;plugins&quot;</span><span class="p">,</span> <span class="p">{})</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="norfab.core.inventory.NorFabInventory.load_plugin" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">load_plugin</span><span class="p">(</span><span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span></code>
+
+<a href="#norfab.core.inventory.NorFabInventory.load_plugin" class="headerlink" title="Permanent link">¤</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Loads and returns a plugin instance for the specified service.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>service</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the service for which the plugin should be loaded.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>dictionary</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="dict() -> Dict[str, Any] (norfab.core.inventory.NorFabInventory.dict)" href="#norfab.core.inventory.NorFabInventory.dict">dict</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionary with plugin corresponding to the given service.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>norfab\core\inventory.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads and returns a plugin instance for the specified service.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        service (str): The name of the service for which the plugin should be loaded.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dictionary: Dictionary with plugin corresponding to the given service.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">make_plugin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4449,14 +4564,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">502</span>
-<span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span>
-<span class="normal">509</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">509</span>
 <span class="normal">510</span>
 <span class="normal">511</span>
 <span class="normal">512</span>
@@ -4471,7 +4579,14 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">521</span>
 <span class="normal">522</span>
 <span class="normal">523</span>
-<span class="normal">524</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads inventory data from a specified file path.</span>
 
@@ -4593,14 +4708,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">533</span>
 <span class="normal">534</span>
 <span class="normal">535</span>
 <span class="normal">536</span>
@@ -4609,7 +4717,14 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">539</span>
 <span class="normal">540</span>
 <span class="normal">541</span>
-<span class="normal">542</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve an item from the inventory.</span>
 
@@ -4718,21 +4833,21 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span>
-<span class="normal">551</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">551</span>
 <span class="normal">552</span>
 <span class="normal">553</span>
 <span class="normal">554</span>
 <span class="normal">555</span>
 <span class="normal">556</span>
 <span class="normal">557</span>
-<span class="normal">558</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the value of the specified item from the inventory.</span>
 
@@ -4798,14 +4913,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
-<span class="normal">564</span>
-<span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">567</span>
 <span class="normal">568</span>
 <span class="normal">569</span>
 <span class="normal">570</span>
@@ -4838,7 +4946,14 @@ Raises a KeyError if no inventory data is found for the given name.</p>
 <span class="normal">597</span>
 <span class="normal">598</span>
 <span class="normal">599</span>
-<span class="normal">600</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the inventory object to a dictionary representation.</span>
 
@@ -4872,11 +4987,11 @@ Raises a KeyError if no inventory data is found for the given name.</p>
     <span class="k">for</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">service_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">][</span><span class="n">service_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">service_data</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">):</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">][</span><span class="n">service_name</span><span class="p">][</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">][</span><span class="n">service_name</span><span class="p">][</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nfcli&quot;</span><span class="p">):</span>
             <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">][</span><span class="n">service_name</span><span class="p">][</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span>
                 <span class="s2">&quot;nfcli&quot;</span>
-            <span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -5445,15 +5560,15 @@ with the value from the second dictionary.</p>
 <div class="doc doc-object doc-function">
 
 
-<h2 id="norfab.core.inventory.make_plugins" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">make_plugins</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span></code>
+<h2 id="norfab.core.inventory.make_plugin" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_plugin</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span></code>
 
-<a href="#norfab.core.inventory.make_plugins" class="headerlink" title="Permanent link">¤</a></h2>
+<a href="#norfab.core.inventory.make_plugin" class="headerlink" title="Permanent link">¤</a></h2>
 
 
     <div class="doc doc-contents ">
 
-        <p>Loads and initializes plugin functions for the given services.</p>
+        <p>Loads and initializes plugin function for the given service.</p>
 <p>This function ensures that the current working directory and the specified
 base directory are included in the Python search path. It then iterates
 through the list of worker plugins provided in the <code>plugins</code> dictionary,
@@ -5497,9 +5612,9 @@ returned dictionary.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A dictionary containing plugin configurations. The
+                <p>A dictionary containing plugin definition. The
             dictionary should have a key "workers" which maps to a
-            list of plugin configurations. Each configuration should
+            list of plugin import path. Each configuration should
             include a "service" key and a "plugin" key in the format
             "module:ClassName".</p>
               </div>
@@ -5523,13 +5638,12 @@ returned dictionary.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>dict</code></td>            <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Dict">Dict</span>]</code>
+                  <code><span title="typing.Dict">Dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A dictionary with a key "workers" mapping to another dictionary
-  where each key is a service name and each value is the corresponding
-  plugin configuration with the plugin class loaded.</p>
+                <p>A dictionary with a key "workers" mapping to worker plugin and an
+"nfcli" key with a mapping to NFCLI shell plugin details.</p>
               </div>
             </td>
           </tr>
@@ -5572,7 +5686,7 @@ returned dictionary.</p>
         }
     ]
 }
-result = make_plugins("/path/to/base_dir", plugins)</p>
+result = make_plugin("/path/to/base_dir", plugins, example_service)</p>
 </details>
 
             <details class="quote">
@@ -5659,14 +5773,9 @@ result = make_plugins("/path/to/base_dir", plugins)</p>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_plugins</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_plugin</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Loads and initializes plugin functions for the given services.</span>
+<span class="sd">    Loads and initializes plugin function for the given service.</span>
 
 <span class="sd">    This function ensures that the current working directory and the specified</span>
 <span class="sd">    base directory are included in the Python search path. It then iterates</span>
@@ -5676,16 +5785,15 @@ result = make_plugins("/path/to/base_dir", plugins)</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        base_dir (str): The base directory to include in the search path.</span>
-<span class="sd">        plugins (dict): A dictionary containing plugin configurations. The</span>
+<span class="sd">        plugins (dict): A dictionary containing plugin definition. The</span>
 <span class="sd">                        dictionary should have a key &quot;workers&quot; which maps to a</span>
-<span class="sd">                        list of plugin configurations. Each configuration should</span>
+<span class="sd">                        list of plugin import path. Each configuration should</span>
 <span class="sd">                        include a &quot;service&quot; key and a &quot;plugin&quot; key in the format</span>
 <span class="sd">                        &quot;module:ClassName&quot;.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: A dictionary with a key &quot;workers&quot; mapping to another dictionary</span>
-<span class="sd">              where each key is a service name and each value is the corresponding</span>
-<span class="sd">              plugin configuration with the plugin class loaded.</span>
+<span class="sd">        dict: A dictionary with a key &quot;workers&quot; mapping to worker plugin and an</span>
+<span class="sd">            &quot;nfcli&quot; key with a mapping to NFCLI shell plugin details.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If there is an error loading any of the plugin classes, an</span>
@@ -5701,7 +5809,7 @@ result = make_plugins("/path/to/base_dir", plugins)</p>
 <span class="sd">                }</span>
 <span class="sd">            ]</span>
 <span class="sd">        }</span>
-<span class="sd">        result = make_plugins(&quot;/path/to/base_dir&quot;, plugins)</span>
+<span class="sd">        result = make_plugin(&quot;/path/to/base_dir&quot;, plugins, example_service)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -5712,44 +5820,40 @@ result = make_plugins("/path/to/base_dir", plugins)</p>
         <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_dir</span><span class="p">)</span>
 
     <span class="c1"># load service plugins</span>
-    <span class="k">for</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">service_data</span> <span class="ow">in</span> <span class="n">plugins</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">ret</span><span class="p">[</span><span class="n">service_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span>
-        <span class="c1"># import worker plugin</span>
-        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Importing &#39;</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">&#39; worker plugin class from &#39;</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">&#39; module&quot;</span>
-                <span class="p">)</span>
-                <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
-                <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plugin_module</span><span class="p">,</span> <span class="n">plugin_class_name</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Successfully loaded worker plugin </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service_name</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Failed loading worker plugin &#39;</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">&#39;worker&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
-                <span class="p">)</span>
-        <span class="c1"># impot nfcli pydantic model</span>
-        <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nfcli&quot;</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
-                    <span class="s2">&quot;:&quot;</span>
-                <span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Importing &#39;</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">&#39; nfcli pydantic model plugin class from &#39;</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">&#39; module&quot;</span>
-                <span class="p">)</span>
-                <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
-                <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-                    <span class="n">plugin_module</span><span class="p">,</span> <span class="n">plugin_class_name</span>
-                <span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Successfully loaded nfcli pydantic model plugin class </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service_name</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Failed loading nfcli pydantic model plugin class &#39;</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">&#39;nfcli&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
-                <span class="p">)</span>
+    <span class="n">service_data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">plugins</span><span class="p">[</span><span class="n">service</span><span class="p">])</span>
+    <span class="n">ret</span><span class="p">[</span><span class="n">service</span><span class="p">]</span> <span class="o">=</span> <span class="n">service_data</span>
+    <span class="c1"># import worker plugin</span>
+    <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Importing &#39;</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">&#39; worker plugin class from &#39;</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">&#39; module&quot;</span>
+            <span class="p">)</span>
+            <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
+            <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plugin_module</span><span class="p">,</span> <span class="n">plugin_class_name</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Successfully loaded worker plugin </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed loading worker plugin &#39;</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">&#39;worker&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="c1"># import nfcli pydantic model</span>
+    <span class="k">if</span> <span class="n">service_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nfcli&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">imp_str</span><span class="p">,</span> <span class="n">plugin_class_name</span> <span class="o">=</span> <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Importing &#39;</span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2">&#39; nfcli pydantic model plugin class from &#39;</span><span class="si">{</span><span class="n">imp_str</span><span class="si">}</span><span class="s2">&#39; module&quot;</span>
+            <span class="p">)</span>
+            <span class="n">plugin_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">imp_str</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
+            <span class="n">service_data</span><span class="p">[</span><span class="s2">&quot;nfcli&quot;</span><span class="p">][</span><span class="s2">&quot;shell_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="n">plugin_module</span><span class="p">,</span> <span class="n">plugin_class_name</span>
+            <span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Successfully loaded nfcli pydantic model plugin class </span><span class="si">{</span><span class="n">plugin_class_name</span><span class="si">}</span><span class="s2"> for service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed loading nfcli pydantic model plugin class &#39;</span><span class="si">{</span><span class="n">service_data</span><span class="p">[</span><span class="s1">&#39;nfcli&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -5883,7 +5987,12 @@ result = make_plugins("/path/to/base_dir", plugins)</p>
 
             <details class="quote">
               <summary>Source code in <code>norfab\core\inventory.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">344</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
 <span class="normal">347</span>
@@ -5908,12 +6017,7 @@ result = make_plugins("/path/to/base_dir", plugins)</p>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">render_jinja2_template</span><span class="p">(</span>
+<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">render_jinja2_template</span><span class="p">(</span>
     <span class="n">template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

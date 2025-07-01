@@ -3900,9 +3900,11 @@ in that case NorFab inventory (<code>inventory.yaml</code>) file could have this
 <p>Workers inventory can contain these common parameters:</p>
 <ol>
 <li><code>service</code> - name of the service this worker belongs to</li>
+<li><code>max_concurrent_jobs</code> - maximum number of concurrent jobs this worker can run</li>
 </ol>
 <p>Sample worker base inventory:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
+<span class="nt">max_concurrent_jobs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 </code></pre></div>
 <p>The rest of the inventory data is worker specific.</p>
 <h2 id="topology-inventory-section">Topology Inventory Section<a class="headerlink" href="#topology-inventory-section" title="Permanent link">¤</a></h2>
