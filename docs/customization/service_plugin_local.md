@@ -30,10 +30,13 @@ Below is the source code of custom worker plugin for dummy service.
 import logging
 import sys
 import importlib.metadata
-
-from norfab.core.worker import NFPWorker, Result
-from pydantic import BaseModel, Field
-from typing import Dict, Any
+from norfab.core.worker import NFPWorker, Task, Job
+from norfab.models import Result
+from pydantic import (
+    BaseModel,
+    Field,
+)
+from typing import Dict, Callable, Any
 from picle.models import Outputters
 
 SERVICE = "DummyService"
@@ -44,8 +47,8 @@ log = logging.getLogger(__name__)
 # DUMMY SERVICE WORKER CLASS
 # ---------------------------------------------------------------------------------------------
 
-class DummyServiceWorker(NFPWorker):
 
+class DummyServiceWorker(NFPWorker):
     def __init__(
         self,
         inventory,
@@ -63,10 +66,10 @@ class DummyServiceWorker(NFPWorker):
             inventory: The inventory object.
             broker (str): The broker address.
             worker_name (str): The name of the worker.
-            exit_event (threading.Event, optional): Event to signal service exit. 
-            init_done_event (threading.Event, optional): Event to signal initialization completion. 
-            log_level (str, optional): The logging level. 
-            log_queue (object, optional): The logging queue. 
+            exit_event (threading.Event, optional): Event to signal service exit.
+            init_done_event (threading.Event, optional): Event to signal initialization completion.
+            log_level (str, optional): The logging level.
+            log_queue (object, optional): The logging queue.
         """
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
@@ -80,6 +83,7 @@ class DummyServiceWorker(NFPWorker):
         self.init_done_event.set()
         log.info(f"{self.name} - Started")
 
+    @Task()
     def get_version(self) -> Dict:
         """
         Retrieves the version information for specified libraries and the current Python environment.
@@ -93,6 +97,7 @@ class DummyServiceWorker(NFPWorker):
         Note:
             If the 'norfab' package is not installed, its version will be an empty string.
         """
+
         libs = {
             "norfab": "",
             "python": sys.version.split(" ")[0],
@@ -107,6 +112,7 @@ class DummyServiceWorker(NFPWorker):
 
         return Result(result=libs)
 
+    @Task()
     def get_inventory(self) -> Dict:
         """
         Retrieves the dummy service inventory.
@@ -116,20 +122,29 @@ class DummyServiceWorker(NFPWorker):
         """
         return Result(result=self.dummy_inventory)
 
+    @Task()
+    def dummy_task(self) -> Dict:
+        """
+        Dummy task
+        """
+        return Result(result="dummy")
+
+
 # ---------------------------------------------------------------------------------------------
 # DUMMY SERVICE SHELL SHOW COMMANDS MODELS
 # ---------------------------------------------------------------------------------------------
+
 
 class DummyServiceShowCommandsModel(BaseModel):
     inventory: Any = Field(
         None,
         description="show Dummy service inventory data",
-        json_schema_extra={"function": "get_inventory"}
+        json_schema_extra={"function": "get_inventory"},
     )
     version: Any = Field(
         None,
         description="show Dummy service version report",
-        json_schema_extra={"function": "get_version"}
+        json_schema_extra={"function": "get_version"},
     )
 
     class PicleConfig:
@@ -146,7 +161,8 @@ class DummyServiceShowCommandsModel(BaseModel):
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("DummyService", "get_version", workers=workers)
         return result
-    
+
+
 class DummyServiceNfcliShell(BaseModel):
     show: DummyServiceShowCommandsModel = Field(
         None, description="Show Dummy service parameters"

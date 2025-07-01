@@ -122,11 +122,13 @@ Both workers will be served with  `netbox_common.yaml` file content as an invent
 Workers inventory can contain these common parameters:
 
 1. `service` - name of the service this worker belongs to
+2. `max_concurrent_jobs` - maximum number of concurrent jobs this worker can run
 
 Sample worker base inventory:
 
 ``` yaml title=""
 service: nornir
+max_concurrent_jobs: 5
 ```
 
 The rest of the inventory data is worker specific.

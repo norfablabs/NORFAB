@@ -796,6 +796,7 @@ class NFPBroker:
                 "pyyaml": "",
                 "pyzmq": "",
                 "psutil": "",
+                "pydantic": "",
                 "tornado": "",
                 "jinja2": "",
                 "python": sys.version.split(" ")[0],

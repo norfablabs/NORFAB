@@ -13,7 +13,7 @@
 ### CHANGES
 
 1. Improved Netbox device update nfcli to include Fx hosts filtering for nornir datasource
-2. Result object added `task_started` and `task_completed` timestamp parameters
+2. Result object added `task_started` and `task_completed` timestamp and `service` parameters
 
 ### BREAKING CHANGES
 

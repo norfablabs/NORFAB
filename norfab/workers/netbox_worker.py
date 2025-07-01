@@ -231,6 +231,7 @@ class NetboxWorker(NFPWorker):
             "requests": "",
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
+            "diskcache": "",
             "netbox_version": self.nb_version,
         }
         # get version of packages installed
