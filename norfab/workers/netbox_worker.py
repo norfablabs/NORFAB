@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 # ----------------------------------------------------------------------
 
 
-def _form_query_v4(obj, filters, fields, alias=None):
+def _form_query_v4(obj, filters, fields, alias=None) -> str:
     """
     Helper function to form graphql query for Netbox version 4.
 
@@ -61,7 +61,7 @@ def _form_query_v4(obj, filters, fields, alias=None):
     return query
 
 
-def _form_query_v3(obj, filters, fields, alias=None):
+def _form_query_v3(obj, filters, fields, alias=None) -> str:
     """
     Helper function to form graphql query for Netbox version 3.
 
@@ -579,9 +579,9 @@ class NetboxWorker(NFPWorker):
         instance: Union[None, str] = None,
         dry_run: bool = False,
         obj: Union[str, dict] = None,
-        filters: dict = None,
-        fields: list = None,
-        queries: dict = None,
+        filters: Union[None, dict] = None,
+        fields: Union[None, list] = None,
+        queries: Union[None, dict] = None,
         query_string: str = None,
     ) -> Result:
         """
@@ -731,10 +731,10 @@ class NetboxWorker(NFPWorker):
     def get_devices(
         self,
         job: Job,
-        filters: list = None,
+        filters: Union[None, list] = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
-        devices: list = None,
+        devices: Union[None, list] = None,
         cache: Union[bool, str] = None,
     ) -> Result:
         """
@@ -907,7 +907,7 @@ class NetboxWorker(NFPWorker):
         self,
         job: Job,
         instance: Union[None, str] = None,
-        devices: list = None,
+        devices: Union[None, list] = None,
         ip_addresses: bool = False,
         inventory_items: bool = False,
         dry_run: bool = False,
@@ -1383,7 +1383,7 @@ class NetboxWorker(NFPWorker):
         self,
         job: Job,
         devices: list,
-        cid: list = None,
+        cid: Union[None, list] = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
         cache: Union[bool, str] = True,
@@ -1574,8 +1574,8 @@ class NetboxWorker(NFPWorker):
     def get_nornir_inventory(
         self,
         job: Job,
-        filters: list = None,
-        devices: list = None,
+        filters: Union[None, list] = None,
+        devices: Union[None, list] = None,
         instance: Union[None, str] = None,
         interfaces: Union[dict, bool] = False,
         connections: Union[dict, bool] = False,
@@ -1738,7 +1738,7 @@ class NetboxWorker(NFPWorker):
         dry_run: bool = False,
         datasource: str = "nornir",
         timeout: int = 60,
-        devices: list = None,
+        devices: Union[None, list] = None,
         batch_size: int = 10,
         **kwargs,
     ) -> Result:
@@ -1845,7 +1845,7 @@ class NetboxWorker(NFPWorker):
         dry_run: bool = False,
         datasource: str = "nornir",
         timeout: int = 60,
-        devices: list = None,
+        devices: Union[None, list] = None,
         create: bool = True,
         batch_size: int = 10,
         **kwargs,
@@ -2053,7 +2053,7 @@ class NetboxWorker(NFPWorker):
         dry_run: bool = False,
         datasource: str = "nornir",
         timeout: int = 60,
-        devices: list = None,
+        devices: Union[None, list] = None,
         create: bool = True,
         batch_size: int = 10,
         **kwargs,
@@ -2198,7 +2198,7 @@ class NetboxWorker(NFPWorker):
         device: str = None,
         interface: str = None,
         vrf: str = None,
-        tags: list = None,
+        tags: Union[None, list] = None,
         dns_name: str = None,
         tenant: str = None,
         comments: str = None,
@@ -2241,12 +2241,12 @@ class NetboxWorker(NFPWorker):
         lab_name: str = None,
         tenant: Union[None, str] = None,
         filters: Union[None, list] = None,
-        devices: list = None,
+        devices: Union[None, list] = None,
         instance: Union[None, str] = None,
         image: Union[None, str] = None,
         ipv4_subnet: str = "172.100.100.0/24",
         ports: tuple = (12000, 15000),
-        ports_map: dict = None,
+        ports_map: Union[None, dict] = None,
         progress: bool = False,
         cache: Union[bool, str] = False,
     ) -> Result:

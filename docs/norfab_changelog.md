@@ -1,3 +1,10 @@
+## 0.9.1
+
+### BUGS
+
+1. Fixing list and dict annotations to also allow None values for workers tasks.
+
+---
 
 ## 0.9.0
 

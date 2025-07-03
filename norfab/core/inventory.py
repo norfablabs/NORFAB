@@ -1,5 +1,5 @@
 """
-Simple Local Inventory is an inventory plugin to load 
+Simple Local Inventory is an inventory plugin to load
 inventory data from locally stored files.
 
 Sample inventory file
@@ -7,20 +7,20 @@ Sample inventory file
 ```yaml
 broker:
   endpoint: "tcp://127.0.0.1:5555"
-  
+
 logging:
   handlers:
     terminal:
       level: CRITICAL
-    file: 
+    file:
       level: DEBUG
 
 workers:
   nornir-*:
-    - nornir/common.yaml  
+    - nornir/common.yaml
   nornir-worker-1:
     - nornir/nornir-worker-1.yaml
-    
+
 topology:
   broker: True
   workers:
@@ -34,7 +34,7 @@ service: nornir
 broker_endpoint: "tcp://127.0.0.1:5555"
 runner:
   plugin: RetryRunner
-  options: 
+  options:
     num_workers: 100
     num_connectors: 10
     connect_retry: 3
@@ -50,7 +50,7 @@ runner:
 and `nornir/nornir-worker-1.yaml` contains
 
 ```yaml
-hosts: 
+hosts:
   csr1000v-1:
     hostname: sandbox-1.lab.com
     platform: cisco_ios
@@ -66,7 +66,7 @@ defaults: {}
 ```
 
 Whenever inventory queried to provide data for worker with name `nornir-worker-1`
-Simple Inventory iterates over `workers` dictionary and recursively merges 
+Simple Inventory iterates over `workers` dictionary and recursively merges
 data for keys (glob patterns) that matched worker name.
 """
 

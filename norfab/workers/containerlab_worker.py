@@ -174,7 +174,7 @@ class ContainerlabWorker(NFPWorker):
         cwd: str = None,
         timeout: int = None,
         ret: Result = None,
-        env: dict = None,
+        env: Union[None, dict] = None,
     ) -> Tuple:
         """
         Executes a containerlab command using subprocess and processes its output.
@@ -533,7 +533,7 @@ class ContainerlabWorker(NFPWorker):
         job: Job,
         lab_name: Union[None, str] = None,
         timeout: int = None,
-        groups: list = None,
+        groups: Union[None, list] = None,
         use_default_credentials: bool = True,
     ) -> Result:
         """
@@ -666,8 +666,8 @@ class ContainerlabWorker(NFPWorker):
         job: Job,
         lab_name: str = None,
         tenant: str = None,
-        filters: list = None,
-        devices: list = None,
+        filters: Union[None, list] = None,
+        devices: Union[None, list] = None,
         instance: str = None,
         image: str = None,
         ipv4_subnet: str = "172.100.100.0/24",

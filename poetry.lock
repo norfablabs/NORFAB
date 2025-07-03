@@ -2817,7 +2817,6 @@ crypto = ["puresnmp-crypto"]
 dev = ["asyncmock ; python_version < \"3.8\"", "black (>=20.8b1)", "fabric (>=2.6.0)", "mypy", "pylint", "pytest", "pytest-asyncio", "pytest-cov", "pytest-dependency", "sphinx", "sphinx-rtd-theme", "types-dataclasses"]
 pdf = ["RXP", "ReportLab (>=1.2)"]
 readthedocs = ["fabric"]
-rest = ["docutils (>=0.3)", "pack (<empty>)"]
 
 [[package]]
 name = "puresnmp-crypto"

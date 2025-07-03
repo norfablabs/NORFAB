@@ -523,7 +523,7 @@ class NornirWorker(NFPWorker):
         self,
         job: Job,
         lab_name: str = None,
-        groups: list = None,
+        groups: Union[None, list] = None,
         clab_workers: str = "all",
         use_default_credentials: bool = True,
         progress: bool = False,
