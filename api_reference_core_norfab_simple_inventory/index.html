@@ -3899,7 +3899,7 @@
 
     <div class="doc doc-contents first">
 
-        <p>Simple Local Inventory is an inventory plugin to load 
+        <p>Simple Local Inventory is an inventory plugin to load
 inventory data from locally stored files.</p>
 <p>Sample inventory file</p>
 <div class="highlight"><pre><span></span><code><span class="nt">broker</span><span class="p">:</span>
@@ -3909,12 +3909,12 @@ inventory data from locally stored files.</p>
 <span class="w">  </span><span class="nt">handlers</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">terminal</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CRITICAL</span>
-<span class="w">    </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">file</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEBUG</span>
 
 <span class="nt">workers</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nornir-*</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir/common.yaml</span><span class="w">  </span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir/common.yaml</span>
 <span class="w">  </span><span class="nt">nornir-worker-1</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir/nornir-worker-1.yaml</span>
 
@@ -3928,7 +3928,7 @@ inventory data from locally stored files.</p>
 broker_endpoint: &quot;tcp://127.0.0.1:5555&quot;
 runner:
   plugin: RetryRunner
-  options: 
+  options:
     num_workers: 100
     num_connectors: 10
     connect_retry: 3
@@ -3941,7 +3941,7 @@ runner:
     task_timeout: 600
 </code></pre></div>
 <p>and <code>nornir/nornir-worker-1.yaml</code> contains</p>
-<div class="highlight"><pre><span></span><code><span class="nt">hosts</span><span class="p">:</span><span class="w"> </span>
+<div class="highlight"><pre><span></span><code><span class="nt">hosts</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">csr1000v-1</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sandbox-1.lab.com</span>
 <span class="w">    </span><span class="nt">platform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cisco_ios</span>
@@ -3956,7 +3956,7 @@ runner:
 <span class="nt">defaults</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
 </code></pre></div>
 <p>Whenever inventory queried to provide data for worker with name <code>nornir-worker-1</code>
-Simple Inventory iterates over <code>workers</code> dictionary and recursively merges 
+Simple Inventory iterates over <code>workers</code> dictionary and recursively merges
 data for keys (glob patterns) that matched worker name.</p>
 
 

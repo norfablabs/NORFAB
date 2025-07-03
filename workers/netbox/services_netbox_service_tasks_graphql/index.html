@@ -3819,7 +3819,7 @@
                 <code>filters</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span></code>
+                  <code><span title="typing.Union">Union</span>[None, <span title="dict">dict</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3835,7 +3835,7 @@
                 <code>fields</code>
             </td>
             <td>
-                  <code><span title="list">list</span></code>
+                  <code><span title="typing.Union">Union</span>[None, <span title="list">list</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3851,7 +3851,7 @@
                 <code>queries</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span></code>
+                  <code><span title="typing.Union">Union</span>[None, <span title="dict">dict</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4060,9 +4060,9 @@
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">queries</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">queries</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">query_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
