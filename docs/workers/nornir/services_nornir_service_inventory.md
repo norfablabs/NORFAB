@@ -25,55 +25,116 @@ nfcli --show-broker-shared-key
 
 Sample Nornir worker inventory definition
 
-``` yaml title="nornir/nornir-worker-1.yaml"
-service: nornir
-watchdog_interval: 30
-connections_idle_timeout: null
+!!! example
 
-# these parameters mapped to Nornir inventory
-# https://nornir.readthedocs.io/en/latest/tutorial/inventory.html
-runner:
-  plugin: RetryRunner
-  options: 
-    num_workers: 100
-    num_connectors: 10
-    connect_retry: 1
-    connect_backoff: 1000
-    connect_splay: 100
-    task_retry: 1
-    task_backoff: 1000
-    task_splay: 100
-    reconnect_on_fail: True
-    task_timeout: 600
-hosts: {}
-groups: {}
-defaults: {}
-logging: {}
-user_defined: {}
+    === "Netbox >= 4.3.0"
 
-# Netbox Service Nornir Inventory integration
-netbox:
-  retry: 3
-  retry_interval: 1
-  instance: prod
-  interfaces:
-    ip_addresses: True
-    inventory_items: True
-  connections:
-    cables: True
-  nbdata: True
-  circuits: True
-  primary_ip: "ipv4"
-  devices:
-    - fceos4
-    - fceos5
-    - fceos8
-    - ceos1
-  filters: 
-    - q: fceos3
-    - manufacturer: cisco
-      platform: cisco_xr
-```
+        This inventory `filters` section contains GraphQL query examples 
+        compatible with Netbox 4.3.0 and above.
+
+        ``` yaml title="nornir/nornir-worker-1.yaml"
+        service: nornir
+        watchdog_interval: 30
+        connections_idle_timeout: null
+
+        # these parameters mapped to Nornir inventory
+        # https://nornir.readthedocs.io/en/latest/tutorial/inventory.html
+        runner:
+          plugin: RetryRunner
+          options: 
+            num_workers: 100
+            num_connectors: 10
+            connect_retry: 1
+            connect_backoff: 1000
+            connect_splay: 100
+            task_retry: 1
+            task_backoff: 1000
+            task_splay: 100
+            reconnect_on_fail: True
+            task_timeout: 600
+        hosts: {}
+        groups: {}
+        defaults: {}
+        logging: {}
+        user_defined: {}
+
+        # Netbox Service Nornir Inventory integration
+        netbox:
+          retry: 3
+          retry_interval: 1
+          instance: prod
+          interfaces:
+            ip_addresses: True
+            inventory_items: True
+          connections:
+            cables: True
+          nbdata: True
+          circuits: True
+          primary_ip: "ipv4"
+          devices:
+            - fceos4
+            - fceos5
+            - fceos8
+            - ceos1
+          filters: 
+            - name: '{i_contains: "fceos3"}'
+            - '{platform: {name: {exact: "cisco_xr"}}}'
+        ```
+        
+    === "Netbox < 4.3.0"
+
+        This inventory `filters` section contains GraphQL query examples 
+        compatible with Netbox below 4.3.0 version.
+        
+        ``` yaml title="nornir/nornir-worker-1.yaml"
+        service: nornir
+        watchdog_interval: 30
+        connections_idle_timeout: null
+
+        # these parameters mapped to Nornir inventory
+        # https://nornir.readthedocs.io/en/latest/tutorial/inventory.html
+        runner:
+          plugin: RetryRunner
+          options: 
+            num_workers: 100
+            num_connectors: 10
+            connect_retry: 1
+            connect_backoff: 1000
+            connect_splay: 100
+            task_retry: 1
+            task_backoff: 1000
+            task_splay: 100
+            reconnect_on_fail: True
+            task_timeout: 600
+        hosts: {}
+        groups: {}
+        defaults: {}
+        logging: {}
+        user_defined: {}
+
+        # Netbox Service Nornir Inventory integration
+        netbox:
+          retry: 3
+          retry_interval: 1
+          instance: prod
+          interfaces:
+            ip_addresses: True
+            inventory_items: True
+          connections:
+            cables: True
+          nbdata: True
+          circuits: True
+          primary_ip: "ipv4"
+          devices:
+            - fceos4
+            - fceos5
+            - fceos8
+            - ceos1
+          filters: 
+            - q: fceos3
+            - manufacturer: cisco
+              platform: cisco_xr
+        ```
 
 **watchdog_interval**
 

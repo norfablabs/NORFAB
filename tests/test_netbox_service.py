@@ -282,7 +282,7 @@ class TestNetboxGrapQL:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        if self.nb_version[0] == 4:
+        if (4, 0, 0) < self.nb_version < (4, 3, 0):
             ret = nfclient.run_job(
                 b"netbox",
                 "graphql",
@@ -291,6 +291,27 @@ class TestNetboxGrapQL:
                     "obj": "device_list",
                     "fields": ["name", "platform {name}"],
                     "filters": {"q": "ceos", "platform": "arista_eos"},
+                },
+            )
+            pprint.pprint(ret)
+
+            for worker, res in ret.items():
+                assert isinstance(
+                    res["result"], list
+                ), f"{worker} - unexpected result type"
+                for item in res["result"]:
+                    assert (
+                        "name" in item and "platform" in item
+                    ), f"{worker} - no name and platform returned: {item}"
+        elif self.nb_version >= (4, 3, 0):
+            ret = nfclient.run_job(
+                "netbox",
+                "graphql",
+                workers="any",
+                kwargs={
+                    "obj": "device_list",
+                    "fields": ["name", "platform {name}"],
+                    "filters": '{name: {i_contains: "ceos"}}',
                 },
             )
             pprint.pprint(ret)
@@ -403,9 +424,9 @@ class TestNetboxGrapQL:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        if self.nb_version[0] == 4:
+        if (4, 0, 0) <= self.nb_version < (4, 3, 0):
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -426,6 +447,37 @@ class TestNetboxGrapQL:
                             "filters": {
                                 "address": '{in_list: ["1.0.10.3/32", "1.0.10.1/32"]}'
                             },
+                        },
+                    },
+                },
+            )
+            pprint.pprint(ret, width=200)
+
+            for worker, res in ret.items():
+                assert all(
+                    k in res["result"] for k in ["devices", "interfaces", "addresses"]
+                ), f"{worker} - did not return some data"
+        elif self.nb_version >= (4, 3, 0):
+            ret = nfclient.run_job(
+                "netbox",
+                "graphql",
+                workers="any",
+                kwargs={
+                    "queries": {
+                        "devices": {
+                            "obj": "device_list",
+                            "fields": ["name", "platform {name}"],
+                            "filters": '{name: {i_contains: "ceos"}}',
+                        },
+                        "interfaces": {
+                            "obj": "interface_list",
+                            "fields": ["name"],
+                            "filters": '{name: {i_contains: "eth"}, type: TYPE_VIRTUAL}',
+                        },
+                        "addresses": {
+                            "obj": "ip_address_list",
+                            "fields": ["address"],
+                            "filters": '{address: {in_list: ["1.0.10.3/32", "1.0.10.1/32"]}}',
                         },
                     },
                 },
@@ -571,14 +623,14 @@ class TestGetInterfaces:
             self.nb_version = get_nb_version(nfclient)
 
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_interfaces",
             workers="any",
             kwargs={"devices": ["ceos1", "fceos4"], "dry_run": True},
         )
         pprint.pprint(ret)
 
-        if self.nb_version[0] == 4 and self.nb_version[1] == 2:
+        if (4, 0, 0) <= self.nb_version < (4, 3, 0):
             for worker, res in ret.items():
                 assert res["result"]["data"] == (
                     '{"query": "query {interfaces: interface_list(filters: {device: [\\"ceos1\\", '
@@ -586,6 +638,14 @@ class TestGetInterfaces:
                     + "untagged_vlan {vid name} vrf {name} tagged_vlans {vid name} tags {name} "
                     + "custom_fields last_updated bridge {name} child_interfaces {name} bridge_interfaces "
                     + '{name} member_interfaces {name} wwn duplex speed id device {name} mac_addresses {mac_address}}}"}'
+                ), f"{worker} did not return correct query string"
+        elif self.nb_version >= (4, 3, 0):
+            for worker, res in ret.items():
+                assert res["result"]["data"] == (
+                    '{"query": "query {interfaces: interface_list(filters: {device: {name: {in_list: [\\"ceos1\\", \\"fceos4\\"]}}}) '
+                    + "{name enabled description mtu parent {name} mode untagged_vlan {vid name} vrf {name} tagged_vlans {vid name} "
+                    + "tags {name} custom_fields last_updated bridge {name} child_interfaces {name} bridge_interfaces {name} "
+                    + 'member_interfaces {name} wwn duplex speed id device {name} mac_addresses {mac_address}}}"}'
                 ), f"{worker} did not return correct query string"
         elif self.nb_version[0] == 4:
             for worker, res in ret.items():
@@ -732,7 +792,7 @@ class TestGetDevices:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        if self.nb_version[0] == 4:
+        if (4, 0, 0) <= self.nb_version < (4, 3, 0):
             ret = nfclient.run_job(
                 "netbox",
                 "get_devices",
@@ -741,6 +801,18 @@ class TestGetDevices:
                     "filters": [
                         {"name": '{in_list: ["ceos1", "fceos4"]}'},
                         {"q": "390"},
+                    ]
+                },
+            )
+        elif self.nb_version >= (4, 3, 0):
+            ret = nfclient.run_job(
+                "netbox",
+                "get_devices",
+                workers="any",
+                kwargs={
+                    "filters": [
+                        {"name": '{in_list: ["ceos1", "fceos4"]}'},
+                        {"name": '{i_contains: "390"}'},
                     ]
                 },
             )
@@ -795,8 +867,11 @@ class TestGetDevices:
                 ), f"{worker}:{device} nodevice role info returned"
 
     def test_with_filters_dry_run(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_devices",
             workers="any",
             kwargs={
@@ -821,7 +896,7 @@ class TestGetDevices:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        if self.nb_version[0] == 4:
+        if (4, 0, 0) <= self.nb_version < (4, 3, 0):
             ret = nfclient.run_job(
                 "netbox",
                 "get_devices",
@@ -831,6 +906,20 @@ class TestGetDevices:
                     "filters": [
                         {"name": '{in_list: ["ceos1", "fceos4"]}'},
                         {"q": "390"},
+                    ],
+                    "cache": cache,
+                },
+            )
+        elif self.nb_version >= (4, 3, 0):
+            ret = nfclient.run_job(
+                "netbox",
+                "get_devices",
+                workers="any",
+                kwargs={
+                    "devices": ["ceos1", "fceos4"],
+                    "filters": [
+                        {"name": '{in_list: ["ceos1", "fceos4"]}'},
+                        {"name": '{i_contains: "390"}'},
                     ],
                     "cache": cache,
                 },
@@ -1415,6 +1504,29 @@ class TestUpdateDeviceFacts:
                     "serial"
                 ], f"{worker}:{device} no serial number updated"
 
+    def test_update_device_fact_datasource_nornir_with_filters(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "update_device_facts",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "FC": "spine",
+            },
+        )
+        pprint.pprint(ret, width=200)
+        for worker, res in ret.items():
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert device_data["update_device_facts"][
+                    "serial"
+                ], f"{worker}:{device} no serial number updated"
+
     @pytest.mark.skip(reason="TBD")
     def test_update_device_fact_non_existing_device(self, nfclient):
         pass
@@ -1880,6 +1992,8 @@ class TestNetboxCache:
 
 
 class TestGetContainerlabInventory:
+    nb_version = None
+
     def test_get_containerlab_inventory_devices(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
@@ -1933,15 +2047,29 @@ class TestGetContainerlabInventory:
             ), f"{worker} - clab inventory nodes data returned"
 
     def test_get_containerlab_inventory_by_tenant(self, nfclient):
-        ret = nfclient.run_job(
-            "netbox",
-            "get_containerlab_inventory",
-            workers="any",
-            kwargs={
-                "tenant": "norfab",
-                "lab_name": "foobar",
-            },
-        )
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        if self.nb_version >= (4, 3, 0):
+            ret = nfclient.run_job(
+                "netbox",
+                "get_containerlab_inventory",
+                workers="any",
+                kwargs={
+                    "tenant": "NORFAB",
+                    "lab_name": "foobar",
+                },
+            )
+        else:
+            ret = nfclient.run_job(
+                "netbox",
+                "get_containerlab_inventory",
+                workers="any",
+                kwargs={
+                    "tenant": "norfab",
+                    "lab_name": "foobar",
+                },
+            )
         pprint.pprint(ret)
 
         for worker, res in ret.items():
@@ -1960,15 +2088,31 @@ class TestGetContainerlabInventory:
             ), f"{worker} - clab inventory name is not foobar"
 
     def test_get_containerlab_inventory_by_filters(self, nfclient):
-        ret = nfclient.run_job(
-            "netbox",
-            "get_containerlab_inventory",
-            workers="any",
-            kwargs={
-                "filters": [{"q": "ceos-spine", "status": "active"}],
-                "lab_name": "foobar",
-            },
-        )
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        if self.nb_version >= (4, 3, 0):
+            ret = nfclient.run_job(
+                "netbox",
+                "get_containerlab_inventory",
+                workers="any",
+                kwargs={
+                    "filters": [
+                        '{name: {i_contains: "ceos-spine"}, status: STATUS_ACTIVE}'
+                    ],
+                    "lab_name": "foobar",
+                },
+            )
+        else:
+            ret = nfclient.run_job(
+                "netbox",
+                "get_containerlab_inventory",
+                workers="any",
+                kwargs={
+                    "filters": [{"q": "ceos-spine", "status": "active"}],
+                    "lab_name": "foobar",
+                },
+            )
         pprint.pprint(ret)
 
         for worker, res in ret.items():

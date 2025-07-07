@@ -4,6 +4,11 @@
 
 1. Fixing list and dict annotations to also allow None values for workers tasks.
 
+### FEATURES
+
+1. Adding support for Netbox >= 4.3.0
+2. Enhanced Netbox service inventory device filters to support GraphQL query string for `device_list` queries.
+
 ---
 
 ## 0.9.0

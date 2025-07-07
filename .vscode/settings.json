@@ -8,6 +8,7 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "terminal.integrated.fontSize": 16,
+    "terminal.integrated.scrollback": 50000,
     "cSpell.words": [
         "ceos",
         "conlist",

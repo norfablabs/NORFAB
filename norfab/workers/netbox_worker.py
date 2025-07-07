@@ -42,21 +42,28 @@ def _form_query_v4(obj, filters, fields, alias=None) -> str:
         str: A formatted GraphQL query string.
     """
     filters_list = []
-    for k, v in filters.items():
-        if isinstance(v, (list, set, tuple)):
-            items = ", ".join(f'"{i}"' for i in v)
-            filters_list.append(f"{k}: [{items}]")
-        elif "{" in v and "}" in v:
-            filters_list.append(f"{k}: {v}")
-        else:
-            filters_list.append(f'{k}: "{v}"')
-    filters_string = ", ".join(filters_list)
-    filters_string = filters_string.replace("'", '"')  # swap quotes
     fields = " ".join(fields)
-    if alias:
-        query = f"{alias}: {obj}(filters: {{{filters_string}}}) {{{fields}}}"
-    else:
-        query = f"{obj}(filters: {{{filters_string}}}) {{{fields}}}"
+    if isinstance(filters, str):
+        filters = filters.replace("'", '"')  # swap quotes
+        if alias:
+            query = f"{alias}: {obj}(filters: {filters}) {{{fields}}}"
+        else:
+            query = f"{obj}(filters: {filters}) {{{fields}}}"
+    elif isinstance(filters, dict):
+        for k, v in filters.items():
+            if isinstance(v, (list, set, tuple)):
+                items = ", ".join(f'"{i}"' for i in v)
+                filters_list.append(f"{k}: [{items}]")
+            elif "{" in v and "}" in v:
+                filters_list.append(f"{k}: {v}")
+            else:
+                filters_list.append(f'{k}: "{v}"')
+        filters_string = ", ".join(filters_list)
+        filters_string = filters_string.replace("'", '"')  # swap quotes
+        if alias:
+            query = f"{alias}: {obj}(filters: {{{filters_string}}}) {{{fields}}}"
+        else:
+            query = f"{obj}(filters: {{{filters_string}}}) {{{fields}}}"
 
     return query
 
@@ -579,7 +586,7 @@ class NetboxWorker(NFPWorker):
         instance: Union[None, str] = None,
         dry_run: bool = False,
         obj: Union[str, dict] = None,
-        filters: Union[None, dict] = None,
+        filters: Union[None, dict, str] = None,
         fields: Union[None, list] = None,
         queries: Union[None, dict] = None,
         query_string: str = None,
@@ -930,6 +937,7 @@ class NetboxWorker(NFPWorker):
         Raises:
             Exception: If no interfaces data is returned for the specified devices.
         """
+        devices = devices or []
         # form final result object
         ret = Result(
             task=f"{self.name}:get_interfaces", result={d: {} for d in devices}
@@ -971,17 +979,30 @@ class NetboxWorker(NFPWorker):
             )
 
         # form interfaces query dictionary
+        if self.nb_version[instance] >= (4, 3, 0):
+            dlist = str(devices).replace("'", '"')  # swap quotes
+            dfilt = "{device: {name: {in_list: " + dlist + "}}}"
+        else:
+            dfilt = {"device": devices}
         queries = {
             "interfaces": {
                 "obj": "interface_list",
-                "filters": {"device": devices},
+                "filters": dfilt,
                 "fields": intf_fields,
             }
         }
 
         # add query to retrieve inventory items
         if inventory_items:
-            inv_filters = {"device": devices, "component_type": "dcim.interface"}
+            if self.nb_version[instance] >= (4, 3, 0):
+                dlist = str(devices).replace("'", '"')  # swap quotes
+                inv_filters = (
+                    "{device: {name: {in_list: "
+                    + dlist
+                    + '}}, component_type: {app_label: {exact: "dcim"}}}'
+                )
+            else:
+                inv_filters = {"device": devices, "component_type": "dcim.interface"}
             inv_fields = [
                 "name",
                 "component {... on InterfaceType {id}}",
@@ -1182,20 +1203,25 @@ class NetboxWorker(NFPWorker):
             console_server_ports_fields.append(cable_fields)
 
         # form query dictionary with aliases to get data from Netbox
+        if self.nb_version[instance] >= (4, 3, 0):
+            dlist = str(devices).replace("'", '"')  # swap quotes
+            dfilt = "{device: {name: {in_list: " + dlist + "}}}"
+        else:
+            dfilt = {"device": devices}
         queries = {
             "interface": {
                 "obj": "interface_list",
-                "filters": {"device": devices},
+                "filters": dfilt,
                 "fields": interfaces_fields,
             },
             "consoleport": {
                 "obj": "console_port_list",
-                "filters": {"device": devices},
+                "filters": dfilt,
                 "fields": console_ports_fields,
             },
             "consoleserverport": {
                 "obj": "console_server_port_list",
-                "filters": {"device": devices},
+                "filters": dfilt,
                 "fields": console_server_ports_fields,
             },
         }
@@ -1409,6 +1435,7 @@ class NetboxWorker(NFPWorker):
 
         Task to retrieve device's circuits data from Netbox.
         """
+        cid = cid or []
         log.info(
             f"{self.name}:get_circuits - {instance or self.default_instance} Netbox, "
             f"devices {', '.join(devices)}, cid {cid}"
@@ -1437,24 +1464,35 @@ class NetboxWorker(NFPWorker):
         ]
 
         # form initial circuits filters based on devices' sites and cid list
-        circuits_filters_dict = {}
+        circuits_filters = {}
         device_data = self.get_devices(
             job=job, devices=copy.deepcopy(devices), instance=instance, cache=cache
         )
         sites = list(set([i["site"]["slug"] for i in device_data.result.values()]))
-        if self.nb_version[instance][0] == 4:
-            circuits_filters_dict = {"site": sites}
+        if (4, 0, 0) <= self.nb_version[instance] < (4, 3, 0):
+            circuits_filters = {"site": sites}
             if cid:
                 cid_list = '["{cl}"]'.format(cl='", "'.join(cid))
-                circuits_filters_dict["cid"] = f"{{in_list: {cid_list}}}"
+                circuits_filters["cid"] = f"{{in_list: {cid_list}}}"
+        elif self.nb_version[instance] >= (4, 3, 0):
+            slist = str(sites).replace("'", '"')  # swap quotes
+            if cid:
+                clist = str(cid).replace("'", '"')  # swap quotes
+                circuits_filters = "{terminations: {site: {slug: {in_list: slist}}}, cid: {in_list: clist}}"
+                circuits_filters = circuits_filters.replace("slist", slist).replace(
+                    "clist", clist
+                )
+            else:
+                circuits_filters = "{terminations: {site: {slug: {in_list: slist }}}}"
+                circuits_filters = circuits_filters.replace("slist", slist)
         elif self.nb_version[instance][0] == 3:
-            circuits_filters_dict = {"site": sites}
+            circuits_filters = {"site": sites}
             if cid:
                 cid_list = '["{cl}"]'.format(cl='", "'.join(cid))
-                circuits_filters_dict["cid"] = cid_list
+                circuits_filters["cid"] = cid_list
 
         log.info(
-            f"{self.name}:get_circuits - constructed circuits filters: {circuits_filters_dict}"
+            f"{self.name}:get_circuits - constructed circuits filters: '{circuits_filters}'"
         )
 
         if cache == True or cache == "force":
@@ -1464,7 +1502,7 @@ class NetboxWorker(NFPWorker):
             last_updated = self.graphql(
                 job=job,
                 obj="circuit_list",
-                filters=circuits_filters_dict,
+                filters=circuits_filters,
                 fields=[
                     "cid",
                     "last_updated",
@@ -1525,22 +1563,25 @@ class NetboxWorker(NFPWorker):
                             f"{self.name}:get_circuits - {circuit['cid']} no cache data found, fetching from Netbox"
                         )
             # form new filters dictionary to fetch remaining circuits data
-            circuits_filters_dict = {}
+            circuits_filters = {}
             if cid_list:
-                cid_list = '["{cl}"]'.format(cl='", "'.join(cid_list))
-                if self.nb_version[instance][0] == 4:
-                    circuits_filters_dict["cid"] = f"{{in_list: {cid_list}}}"
+                cid_list = str(cid_list).replace("'", '"')  # swap quotes
+                if (4, 0, 0) <= self.nb_version[instance] < (4, 3, 0):
+                    circuits_filters["cid"] = f"{{in_list: {cid_list}}}"
+                elif self.nb_version[instance] >= (4, 3, 0):
+                    circuits_filters = "{cid: {in_list: cid_list}}"
+                    circuits_filters = circuits_filters.replace("cid_list", cid_list)
                 elif self.nb_version[instance][0] == 3:
-                    circuits_filters_dict["cid"] = cid_list
+                    circuits_filters["cid"] = cid_list
         # ignore cache data, fetch circuits from netbox
         elif cache == False or cache == "refresh":
             pass
 
-        if circuits_filters_dict:
+        if circuits_filters:
             query_result = self.graphql(
                 job=job,
                 obj="circuit_list",
-                filters=circuits_filters_dict,
+                filters=circuits_filters,
                 fields=circuit_fields,
                 dry_run=dry_run,
                 instance=instance,
@@ -2336,12 +2377,15 @@ class NetboxWorker(NFPWorker):
         # handle lab name and tenant name with filters
         if lab_name is None and tenant:
             lab_name = tenant
+        # add tenant filters
         if tenant:
-            if filters:
-                for filter in filters:
+            filters = filters or [{}]
+            for filter in filters:
+                if self.nb_version[instance] >= (4, 3, 0):
+                    filter["tenant"] = f'{{name: {{exact: "{tenant}"}}}}'
+                else:
                     filter["tenant"] = tenant
-            else:
-                filters = [{"tenant": tenant}]
+
         # construct inventory
         inventory = {
             "name": lab_name,

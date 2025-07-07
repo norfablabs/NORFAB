@@ -541,8 +541,12 @@ class TestDeployNetboxTask:
             "deploy_netbox",
             kwargs={
                 "lab_name": "foobar",
-                "devices": ["fceos4", "fceos5"],
-                "filters": [{"tenant": "saltstack"}],
+                "filters": [
+                    {
+                        "tenant": '{name: {exact: "NORFAB"}}',
+                        "name": '{i_contains: "spine"}',
+                    }
+                ],
             },
         )
 

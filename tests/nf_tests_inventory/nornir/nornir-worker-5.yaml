@@ -15,7 +15,13 @@ netbox:
     - fceos5
     - fceos8
     - ceos1
+# Netbox below 4.3.0 filters
+#  filters: 
+#    - q: fceos3
+#    - manufacturer: cisco
+#      platform: cisco_xr 
+
+# Netbox 4.3.0 and above filters
   filters: 
-    - q: fceos3
-    - manufacturer: cisco
-      platform: cisco_xr 
+    - '{name: {i_contains: "fceos3"}}'
+    - '{platform: {name: {exact: "cisco_xr"}}}'

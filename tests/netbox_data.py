@@ -1048,6 +1048,14 @@ devices = [
                 "hostname": "10.0.1.4",
             },
             "dns_servers": ["1.2.3.4", "8.8.8.8"],
+            "norfab": {
+                "containerlab": {
+                    "interfaces_rename": [
+                        {"find": "Ethernet", "replace": "eth", "use_regex": False}
+                    ],
+                    "kind": "ceos",
+                }
+            },
         },
     },
     {
@@ -1079,6 +1087,7 @@ devices = [
         "rack": {"name": "R201"},
         "position": 31,
         "face": "front",
+        "platform": {"name": "cisco_xr"},
         "local_context_data": {
             "nornir": {"platform": "cisco_xr", "hostname": "sandbox-iosxr-1.cisco.com"}
         },
