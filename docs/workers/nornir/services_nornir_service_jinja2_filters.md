@@ -57,5 +57,5 @@ interface {{ interface }}
 {% endfor %}
 ```
 
-All the same arguments supported by Netbox service `create_ip` function can be passed onto 
+All the same arguments supported by [Netbox service create_ip](../netbox/services_netbox_service_tasks_create_ip.md) function can be passed onto 
 `nb_create_ip` call.

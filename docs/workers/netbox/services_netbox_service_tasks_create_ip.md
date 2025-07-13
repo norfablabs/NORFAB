@@ -7,6 +7,12 @@ tags:
 
 > task api name: `create_ip`
 
+Task to create next available IP from prefix or get existing IP address.
+
+Netbox service `create_ip` task integrated with Nornir service and can be called 
+using [nb_create_ip Jinja2 filter](../nornir/services_nornir_service_jinja2_filters.md#nb_create_ip), 
+allowing to allocate IP addresses in Netbox on the fly while rendering configuration templates. 
+
 ## NORFAB Netbox Create IP Command Shell Reference
 
 NorFab shell supports these command options for Netbox `create_ip` task:
