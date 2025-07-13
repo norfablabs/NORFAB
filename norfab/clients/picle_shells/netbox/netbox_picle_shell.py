@@ -33,6 +33,7 @@ from .netbox_picle_shell_get_connections import GetConnections
 from .netbox_picle_shell_get_containerlab_inventory import (
     GetContainerlabInventoryCommand,
 )
+from .netbox_picle_shell_create_ip import CreateIp
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"
@@ -245,6 +246,22 @@ class GetCommands(BaseModel):
 
 
 # ---------------------------------------------------------------------------------------------
+# NETBOX SERVICE CREATE SHELL MODEL
+# ---------------------------------------------------------------------------------------------
+
+
+class CreateCommands(BaseModel):
+    ip: CreateIp = Field(
+        None,
+        description="Allocate next available IP address from prefix",
+    )
+
+    class PicleConfig:
+        subshell = True
+        prompt = "nf[netbox-create]#"
+
+
+# ---------------------------------------------------------------------------------------------
 # NETBOX SERVICE UPDATE SHELL MODEL
 # ---------------------------------------------------------------------------------------------
 
@@ -269,6 +286,7 @@ class NetboxServiceCommands(BaseModel):
     cache: NetboxServiceCache = Field(
         None, description="Work with Netbox service cached data"
     )
+    create: CreateCommands = Field(None, description="Create objects in Netbox")
 
     class PicleConfig:
         subshell = True

@@ -67,6 +67,9 @@ class ResultStatuses(str, Enum):
     failed = "failed"
     skipped = "skipped"
     error = "error"
+    created = "created"
+    updated = "updated"
+    unchanged = "unchanged"
 
 
 class Result(BaseModel, use_enum_values=True):
@@ -116,7 +119,7 @@ class Result(BaseModel, use_enum_values=True):
         None, description="Job ID associated with the task"
     )
     resources: Optional[List[StrictStr]] = Field(
-        [], description="List of resources names worked on by the task"
+        [], description="List of resources names involved in task"
     )
     status: Optional[ResultStatuses] = Field(None, description="Task status")
     task_started: Optional[StrictStr] = Field(
@@ -127,6 +130,10 @@ class Result(BaseModel, use_enum_values=True):
     )
     service: Optional[StrictStr] = Field(
         None, description="Name of the service produced this result"
+    )
+    diff: Optional[StrictStr] = Field(None, description="Difference in state")
+    dry_run: Optional[StrictBool] = Field(
+        False, description="True if dry run, False otherwise"
     )
 
     def raise_for_status(self, message=""):

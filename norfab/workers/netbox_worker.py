@@ -612,8 +612,8 @@ class NetboxWorker(NFPWorker):
             Exception: If GraphQL query fails
         """
         nb_params = self._get_instance_params(instance)
-        ret = Result(task=f"{self.name}:graphql")
         instance = instance or self.default_instance
+        ret = Result(task=f"{self.name}:graphql", resources=[instance])
 
         # form graphql query(ies) payload
         if queries:
@@ -694,13 +694,15 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    @Task()
     def rest(
         self,
+        job: Job,
         instance: Union[None, str] = None,
         method: str = "get",
         api: str = "",
         **kwargs,
-    ) -> Union[dict, list]:
+    ) -> Result:
         """
         Sends a request to the Netbox REST API.
 
@@ -716,23 +718,29 @@ class NetboxWorker(NFPWorker):
         Raises:
             requests.exceptions.HTTPError: If the HTTP request returned an unsuccessful status code.
         """
-        params = self._get_instance_params(instance)
+        ret = Result(task=f"{self.name}:rest", result={})
+        nb_params = self._get_instance_params(instance)
 
         # send request to Netbox REST API
         response = getattr(requests, method)(
-            url=f"{params['url']}/api/{api}/",
+            url=f"{nb_params['url']}/api/{api}/",
             headers={
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Authorization": f"Token {params['token']}",
+                "Authorization": f"Token {nb_params['token']}",
             },
-            verify=params.get("ssl_verify", True),
+            verify=nb_params.get("ssl_verify", True),
             **kwargs,
         )
 
         response.raise_for_status()
+        try:
+            ret.result = response.json()
+        except Exception as e:
+            log.debug(f"Failed to decode json, error: {e}")
+            ret.result = response.text if response.text else response.status_code
 
-        return response.json()
+        return ret
 
     @Task()
     def get_devices(
@@ -766,9 +774,9 @@ class NetboxWorker(NFPWorker):
         Raises:
             Exception: If the GraphQL query fails or if there are errors in the query result.
         """
-        ret = Result(task=f"{self.name}:get_devices", result={})
-        cache = self.cache_use if cache is None else cache
         instance = instance or self.default_instance
+        ret = Result(task=f"{self.name}:get_devices", result={}, resources=[instance])
+        cache = self.cache_use if cache is None else cache
         filters = filters or []
         devices = devices or []
         queries = {}  # devices queries
@@ -937,12 +945,13 @@ class NetboxWorker(NFPWorker):
         Raises:
             Exception: If no interfaces data is returned for the specified devices.
         """
-        devices = devices or []
-        # form final result object
-        ret = Result(
-            task=f"{self.name}:get_interfaces", result={d: {} for d in devices}
-        )
         instance = instance or self.default_instance
+        devices = devices or []
+        ret = Result(
+            task=f"{self.name}:get_interfaces",
+            result={d: {} for d in devices},
+            resources=[instance],
+        )
 
         intf_fields = [
             "name",
@@ -1119,11 +1128,12 @@ class NetboxWorker(NFPWorker):
         Raises:
             Exception: If there is an error in the GraphQL query or data retrieval process.
         """
-        # form final result dictionary
-        ret = Result(
-            task=f"{self.name}:get_connections", result={d: {} for d in devices}
-        )
         instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:get_connections",
+            result={d: {} for d in devices},
+            resources=[instance],
+        )
 
         # form lists of fields to request from netbox
         cable_fields = """
@@ -1325,13 +1335,13 @@ class NetboxWorker(NFPWorker):
                 instance=instance,
                 method="get",
                 api=f"/circuits/circuit-terminations/{termination_a}/paths/",
-            )
+            )["result"]
         elif termination_z is not None:
             circuit_path = self.rest(
                 instance=instance,
                 method="get",
                 api=f"/circuits/circuit-terminations/{termination_z}/paths/",
-            )
+            )["result"]
         else:
             return True
 
@@ -1440,10 +1450,14 @@ class NetboxWorker(NFPWorker):
             f"{self.name}:get_circuits - {instance or self.default_instance} Netbox, "
             f"devices {', '.join(devices)}, cid {cid}"
         )
+        instance = instance or self.default_instance
 
         # form final result object
-        ret = Result(task=f"{self.name}:get_circuits", result={d: {} for d in devices})
-        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:get_circuits",
+            result={d: {} for d in devices},
+            resources=[instance],
+        )
         cache = self.cache_use if cache is None else cache
         cid = cid or []
         circuit_fields = [
@@ -1812,7 +1826,9 @@ class NetboxWorker(NFPWorker):
         result = {}
         devices = devices or []
         instance = instance or self.default_instance
-        ret = Result(task=f"{self.name}:update_device_facts", result=result)
+        ret = Result(
+            task=f"{self.name}:update_device_facts", result=result, resources=[instance]
+        )
         nb = self._get_pynetbox(instance)
         kwargs["add_details"] = True
 
@@ -1926,7 +1942,11 @@ class NetboxWorker(NFPWorker):
         result = {}
         devices = devices or []
         instance = instance or self.default_instance
-        ret = Result(task=f"{self.name}:update_device_interfaces", result=result)
+        ret = Result(
+            task=f"{self.name}:update_device_interfaces",
+            result=result,
+            resources=[instance],
+        )
         nb = self._get_pynetbox(instance)
 
         if datasource == "nornir":
@@ -2127,7 +2147,9 @@ class NetboxWorker(NFPWorker):
         result = {}
         devices = devices or []
         instance = instance or self.default_instance
-        ret = Result(task=f"{self.name}:update_device_ip", result=result)
+        ret = Result(
+            task=f"{self.name}:update_device_ip", result=result, resources=[instance]
+        )
         nb = self._get_pynetbox(instance)
 
         if datasource == "nornir":
@@ -2231,18 +2253,20 @@ class NetboxWorker(NFPWorker):
         return ret
 
     @Task()
-    def get_next_ip(
+    def create_ip(
         self,
         job: Job,
-        subnet: str,
-        description: str = None,
+        prefix: Union[str, dict],
         device: str = None,
         interface: str = None,
+        description: str = None,
         vrf: str = None,
         tags: Union[None, list] = None,
         dns_name: str = None,
         tenant: str = None,
         comments: str = None,
+        role: str = None,
+        is_primary: bool = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
     ) -> Result:
@@ -2251,7 +2275,7 @@ class NetboxWorker(NFPWorker):
 
         Args:
             job: NorFab Job object containing relevant metadata
-            subnet (str): The subnet from which to allocate the IP address.
+            prefix (str): The prefix from which to allocate the IP address.
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.
             interface (str, optional): The interface associated with the IP address.
@@ -2266,14 +2290,121 @@ class NetboxWorker(NFPWorker):
         Returns:
             dict: A dictionary containing the result of the IP allocation.
         """
+        instance = instance or self.default_instance
+        ret = Result(task=f"{self.name}:create_ip", result={}, resources=[instance])
+        tags = tags or []
+        has_changes = False
+        nb_ip = None
+        nb_device = None
         nb = self._get_pynetbox(instance)
-        nb_prefix = nb.ipam.prefixes.get(prefix=subnet, vrf=vrf)
-        nb_ip = nb_prefix.available_ips.create()
-        if description is not None:
-            nb_ip.description = description
-        nb_ip.save()
 
-        return Result(result=str(nb_ip))
+        # try to source existing IP from netbox
+        if device and interface and description:
+            nb_ip = nb.ipam.ip_addresses.get(
+                device=device, interface=interface, description=description
+            )
+        elif device and interface:
+            nb_ip = nb.ipam.ip_addresses.get(device=device, interface=interface)
+        elif description:
+            nb_ip = nb.ipam.ip_addresses.get(description=description)
+
+        # create new IP address
+        if not nb_ip:
+            job.event(f"Creating new IP address {nb_ip} from prefix {prefix}")
+            # source prefix from Netbox
+            if isinstance(prefix, str):
+                if vrf:
+                    nb_prefix = nb.ipam.prefixes.get(prefix=prefix, vrf__name=vrf)
+                else:
+                    nb_prefix = nb.ipam.prefixes.get(prefix=prefix)
+            elif isinstance(prefix, dict):
+                nb_prefix = nb.ipam.prefixes.get(**prefix)
+            if not nb_prefix:
+                raise RuntimeError(f"Unable to source prefix from Netbox - {prefix}")
+            # execute dry run on new IP
+            if dry_run is True:
+                nb_ip = nb_prefix.available_ips.list()[0]
+                ret.status = "unchanged"
+                ret.dry_run = True
+                ret.result = {
+                    "address": str(nb_ip),
+                    "description": description,
+                    "vrf": vrf,
+                    "device": device,
+                    "interface": interface,
+                }
+                return ret
+            # create new IP
+            else:
+                nb_ip = nb_prefix.available_ips.create()
+            ret.status = "created"
+        else:
+            job.event(f"Using existing IP address {nb_ip}")
+            ret.status = "updated"
+
+        # update IP address parameters
+        if description and description != nb_ip.description:
+            nb_ip.description = description
+            has_changes = True
+        if vrf and vrf != nb_ip.vrf:
+            nb_ip.vrf = {"name": vrf}
+            has_changes = True
+        if tenant and tenant != nb_ip.tenant:
+            nb_ip.tenant = {"name": tenant}
+            has_changes = True
+        if dns_name and dns_name != nb_ip.dns_name:
+            nb_ip.dns_name = dns_name
+            has_changes = True
+        if comments and comments != nb_ip.comments:
+            nb_ip.comments = comments
+            has_changes = True
+        if role and role != nb_ip.role:
+            nb_ip.role = role
+            has_changes = True
+        if tags and not any(t in nb_ip.tags for t in tags):
+            for t in tags:
+                if t not in nb_ip.tags:
+                    nb_ip.tags.append({"name": t})
+                    has_changes = True
+        if device and interface:
+            nb_interface = nb.dcim.interfaces.get(device=device, name=interface)
+            if not nb_interface:
+                raise RuntimeError(
+                    f"Unable to source '{device}:{interface}' interface from Netbox"
+                )
+            if (
+                hasattr(nb_ip, "assigned_object")
+                and nb_ip.assigned_object != nb_interface.id
+            ):
+                nb_ip.assigned_object_id = nb_interface.id
+                nb_ip.assigned_object_type = "dcim.interface"
+                if is_primary is not None:
+                    nb_device = nb.dcim.devices.get(name=device)
+                    nb_device.primary_ip4 = nb_ip.id
+                has_changes = True
+
+        # save IP address into Netbox
+        if dry_run:
+            ret.status = "unchanged"
+            ret.dry_run = True
+        elif has_changes:
+            nb_ip.save()
+            # make IP primary for device
+            if is_primary is True and nb_device:
+                nb_device.save()
+        else:
+            ret.status = "unchanged"
+
+        # form and return results
+        ret.result = {
+            "address": str(nb_ip),
+            "description": str(nb_ip.description),
+            "vrf": str(nb_ip.vrf) if not vrf else nb_ip.vrf["name"],
+            "device": device,
+            "interface": interface,
+        }
+
+        return ret
 
     @Task()
     def get_containerlab_inventory(
@@ -2392,7 +2523,11 @@ class NetboxWorker(NFPWorker):
             "topology": {"nodes": nodes, "links": links},
             "mgmt": {"ipv4-subnet": ipv4_subnet, "network": f"br-{lab_name}"},
         }
-        ret = Result(task=f"{self.name}:get_containerlab_inventory", result=inventory)
+        ret = Result(
+            task=f"{self.name}:get_containerlab_inventory",
+            result=inventory,
+            resources=[instance],
+        )
         mgmt_net = ipaddress.ip_network(ipv4_subnet)
         available_ips = list(mgmt_net.hosts())[1:]
 

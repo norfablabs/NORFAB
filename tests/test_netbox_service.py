@@ -7,7 +7,7 @@ cache_options = [True, False, "refresh", "force"]
 
 def get_nb_version(nfclient, instance=None) -> tuple:
     ret = nfclient.run_job("netbox", "get_version", workers="any")
-    pprint.pprint(f"Netbox Version: {ret}")
+    # pprint.pprint(f"Netbox Version: {ret}")
     for w, r in ret.items():
         if instance is None:
             for instance_name, instance_version in r["result"][
@@ -1563,29 +1563,443 @@ class TestUpdateDeviceInterfaces:
         pass
 
 
-class TestGetNextIP:
+class TestCreateIP:
     nb_version = None
 
-    def test_get_ip(self, nfclient):
+    def delete_ips(self, prefix, nfclient):
+        resp = nfclient.run_job(
+            "netbox",
+            "rest",
+            workers="any",
+            kwargs={
+                "method": "get",
+                "api": "/ipam/ip-addresses/",
+                "params": {"parent": prefix},
+            },
+        )
+        worker, ips = tuple(resp.items())[0]
+        # pprint.pprint(ips)
+        for ip in ips["result"]["results"]:
+            delete_ip = nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={
+                    "method": "delete",
+                    "api": f"/ipam/ip-addresses/{ip['id']}/",
+                },
+            )
+            # print("delete ip address:")
+            # pprint.pprint(delete_ip)
+
+    def test_create_ip_by_prefix(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "description": f"test create ip {rand}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "description": f"test create ip {rand}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"]["address"], f"Result has no ip {res1['result']}"
+
+            worker, res2 = tuple(create_2.items())[0]
+            assert (
+                res1["result"]["address"] == res2["result"]["address"]
+            ), f"Should have been same IP address"
+            assert (
+                res1["result"]["description"] == res2["result"]["description"]
+            ), f"Should have been same IP description"
+
+    def test_create_ip_by_prefix_multiple(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "description": f"test create ip {random.randint(1, 1000)}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "description": f"test create ip {random.randint(1, 1000)}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+            worker, res2 = tuple(create_2.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res2["failed"] == False, "Allocation failed"
+
+            assert res1["result"]["address"] != res2["result"]["address"]
+            assert res1["result"]["description"] != res2["result"]["description"]
+
+    def test_create_ip_nonexist_prefix(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
         if self.nb_version[0] == 4:
-            ret = nfclient.run_job(
+            create_1 = nfclient.run_job(
                 "netbox",
-                "get_next_ip",
+                "create_ip",
                 workers="any",
                 kwargs={
-                    "subnet": "10.0.0.0/24",
-                    "description": "test create ip",
+                    "prefix": "1.2.3.0/24",
+                    "description": f"test create ip {random.randint(1, 1000)}",
                 },
             )
-            pprint.pprint(ret, width=200)
-            for worker, res in ret.items():
-                assert res["failed"] == False, "Allocation failed"
-                assert (
-                    res["result"].count(".") == 3 and "/" in res["result"]
-                ), f"Result is not IPv4 {res['result']}"
+            pprint.pprint(create_1, width=200)
+            worker, res1 = tuple(create_1.items())[0]
+            assert res1["failed"] == True, "Allocation not failed"
+            assert "Unable to source prefix from Netbox" in res1["messages"][0]
+
+    def test_create_ip_by_prefix_device_interface(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "fceos4",
+                    "interface": "eth1",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "fceos4",
+                    "interface": "eth1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+            worker, res2 = tuple(create_2.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res2["failed"] == False, "Allocation failed"
+
+            assert (
+                res1["result"]["address"] == res2["result"]["address"]
+            ), "Should be same IP"
+
+    def test_create_ip_by_prefix_description_device_interface(self, nfclient):
+        "This test should allocate two different IPs since device, interface, description given"
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "fceos4",
+                    "interface": "eth1",
+                    "description": "foo1",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "fceos4",
+                    "interface": "eth1",
+                    "description": "foo2",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+            worker, res2 = tuple(create_2.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res2["failed"] == False, "Allocation failed"
+
+            assert (
+                res1["result"]["address"] != res2["result"]["address"]
+            ), "Should be different IP cause description is different"
+
+    def test_create_ip_with_vrf_tags_tenant_role_dnsname_comments(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "fceos4",
+                    "interface": "eth1",
+                    "description": "foo1",
+                    "vrf": "VRF1",
+                    "tags": ["NORFAB", "ACCESS"],
+                    "tenant": "NORFAB",
+                    "dns_name": "foo1.lab.local",
+                    "role": "anycast",
+                    "comments": "Some comments",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"]["address"], f"No ip allocated"
+
+    def test_create_ip_non_existing_device(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "does_not_exist",
+                    "interface": "eth1",
+                    "description": "foo1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+
+            assert res1["failed"] == True, "Allocation should have failed"
+
+    def test_create_ip_non_existing_interface(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "fce0s4",
+                    "interface": "does_not_exist",
+                    "description": "foo1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+
+            assert res1["failed"] == True, "Allocation should have failed"
+
+    def test_create_ip_is_primary(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "ceos-spine-1",
+                    "interface": "Ethernet1",
+                    "description": "foo1",
+                    "is_primary": True,
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"]["address"], f"No ip allocated"
+
+    def test_create_ip_dry_run_new_ip(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            # test dry rin for new ip
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "ceos-spine-1",
+                    "interface": "Ethernet1",
+                    "dry_run": True,
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={"prefix": "10.0.0.0/24", "description": "foo", "dry_run": True},
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+            worker, res2 = tuple(create_2.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["dry_run"] is True, "No dry run flag set to true"
+            assert res1["status"] == "unchanged", "Unexpected status"
+
+            assert res2["failed"] == False, "Allocation failed"
+            assert res2["result"]["address"], f"No ip allocated"
+            assert res2["dry_run"] is True, "No dry run flag set to true"
+            assert res2["status"] == "unchanged", "Unexpected status"
+
+    def test_create_ip_dry_run_existing_ip(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "description": "foobar",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "description": "foobar",
+                    "role": "anycast",
+                    "dry_run": True,
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+            worker, res2 = tuple(create_2.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["dry_run"] is False, "No dry run flag set to true"
+            assert res1["status"] == "created", "Unexpected status"
+
+            assert res2["failed"] == False, "Allocation failed"
+            assert res2["result"]["address"], f"No ip allocated"
+            assert res2["dry_run"] is True, "No dry run flag set to true"
+            assert res2["status"] == "unchanged", "Unexpected status"
+
+    def test_create_ip_with_nb_instance(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "description": "foobar",
+                    "instance": "dev",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["dry_run"] is False, "No dry run flag set to true"
+            assert res1["status"] == "created", "Unexpected status"
+            assert "dev" in res1["resources"]
 
 
 class TestNetboxCache:

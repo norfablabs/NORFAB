@@ -1929,3 +1929,80 @@ class TestNornirRunTimeInventory:
             h not in ret_hosts_after_refresh["nornir-worker-1"]["result"]
             for h in ["r1", "r2", "r3"]
         ), f"nornir-worker-1 inventory not refreshed"
+
+
+# ----------------------------------------------------------------------------
+# NORNIR NETBOX CREATE IP TESTS
+# ----------------------------------------------------------------------------
+
+
+class TestNBCreateIp:
+    def delete_ips(self, prefix, nfclient):
+        resp = nfclient.run_job(
+            "netbox",
+            "rest",
+            workers="any",
+            kwargs={
+                "method": "get",
+                "api": "/ipam/ip-addresses/",
+                "params": {"parent": prefix},
+            },
+        )
+        worker, ips = tuple(resp.items())[0]
+        # pprint.pprint(ips)
+        for ip in ips["result"]["results"]:
+            delete_ip = nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={
+                    "method": "delete",
+                    "api": f"/ipam/ip-addresses/{ip['id']}/",
+                },
+            )
+            # print("delete ip address:")
+            # pprint.pprint(delete_ip)
+
+    def test_nb_create_ip_jinja2_template_with_filter(self, nfclient):
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        ret = nfclient.run_job(
+            "nornir",
+            "cfg",
+            workers=["nornir-worker-5"],
+            kwargs={
+                "config": "nf://cfg/config_netbox_get_next_ip_j2filter.txt",
+                "FC": "fceos5",
+                "dry_run": True,
+            },
+        )
+
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] is False, f"{worker} failed to run the task"
+            assert (
+                results["result"]["fceos5"]["dry_run"].count("10.0.0.") > 10
+            ), "IPs not allocated"
+
+    def test_nb_create_ip_jinja2_template_with_set(self, nfclient):
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        ret = nfclient.run_job(
+            "nornir",
+            "cfg",
+            workers=["nornir-worker-5"],
+            kwargs={
+                "config": "nf://cfg/config_netbox_get_next_ip_j2set.txt",
+                "FC": "fceos5",
+                "dry_run": True,
+            },
+        )
+
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] is False, f"{worker} failed to run the task"
+            assert (
+                results["result"]["fceos5"]["dry_run"].count("10.0.0.") > 10
+            ), "IPs not allocated"

@@ -1,0 +1,5 @@
+{% for interface in host.interfaces %}
+interface {{ interface }}
+  ip address {{ "10.0.0.0/24" | nb_create_ip(host.name, interface) }}
+!
+{% endfor %}

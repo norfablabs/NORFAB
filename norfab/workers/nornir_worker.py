@@ -775,7 +775,7 @@ class NornirWorker(NFPWorker):
     # Nornir Service Jinja2 Filters
     # ----------------------------------------------------------------------
 
-    def _jinja2_network_hosts(self, network, pfxlen=False):
+    def jinja2_network_hosts(self, network: str, pfxlen: bool = False) -> list:
         """
         Custom Jinja2 filter that return a list of hosts for a given IP network.
 
@@ -795,6 +795,29 @@ class NornirWorker(NFPWorker):
             ret.append(f"{ip}/{prefixlen}" if pfxlen else str(ip))
         return ret
 
+    def jinja2_nb_create_ip(
+        self, prefix: str, device: str = None, interface: str = None, **kwargs
+    ) -> str:
+        """
+        Jinja2 filter to get or create next available IP address from
+        prefix using Netbox service.
+        """
+        kwargs["prefix"] = prefix
+        kwargs["device"] = device
+        kwargs["interface"] = interface
+        reply = self.client.run_job(
+            "netbox",
+            "create_ip",
+            kwargs=kwargs,
+            workers="any",
+            timeout=30,
+        )
+        # reply is a dict of {worker_name: results_dict}
+        res = list(reply.values())[0]
+        if res["failed"]:
+            raise RuntimeError(res["messages"])
+        return res["result"]["address"]
+
     def add_jinja2_filters(self) -> Dict:
         """
         Adds custom filters for use in Jinja2 templates.
@@ -803,12 +826,12 @@ class NornirWorker(NFPWorker):
             dict (Dict): A dictionary where the keys are the names of the filters
                 and the values are the corresponding filter functions.
 
-                - "nb_get_next_ip": Method to get the next IP address.
+                - "nb_create_ip": Method to get the next IP address.
                 - "network_hosts": Method to get IP network hosts.
         """
         return {
-            "nb_get_next_ip": self.nb_get_next_ip,
-            "network_hosts": self._jinja2_network_hosts,
+            "nb_create_ip": self.jinja2_nb_create_ip,
+            "network_hosts": self.jinja2_network_hosts,
         }
 
     # ----------------------------------------------------------------------
@@ -1159,6 +1182,7 @@ class NornirWorker(NFPWorker):
                         "host": host,
                         "norfab": self.client,
                         "job_data": job_data,
+                        "nb_create_ip": self.jinja2_nb_create_ip,
                     },
                     filters=self.add_jinja2_filters(),
                 )
@@ -1265,6 +1289,7 @@ class NornirWorker(NFPWorker):
                     "host": host,
                     "norfab": self.client,
                     "job_data": job_data,
+                    "nb_create_ip": self.jinja2_nb_create_ip,
                 },
                 filters=self.add_jinja2_filters(),
             )
@@ -1718,24 +1743,3 @@ class NornirWorker(NFPWorker):
         _ = kwargs.pop("progress", None)
         job.event(f"Performing '{action}' action")
         return Result(result=InventoryFun(self.nr, call=action, **kwargs))
-
-    @Task()
-    def nb_get_next_ip(self, job: Job, *args, **kwargs) -> Result:
-        """
-        Task to query next available IP address from Netbox service
-
-        Args:
-            job: NorFab Job object containing relevant metadata
-        """
-        reply = self.client.run_job(
-            "netbox",
-            "get_next_ip",
-            args=args,
-            kwargs=kwargs,
-            workers="any",
-            timeout=30,
-        )
-        # reply is a dict of {worker_name: results_dict}
-        result = list(reply.values())[0]
-
-        return Result(result=result["result"])
