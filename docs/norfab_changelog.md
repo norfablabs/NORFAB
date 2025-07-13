@@ -1,13 +1,20 @@
-## 0.9.1
-
-### BUGS
-
-1. Fixing list and dict annotations to also allow None values for workers tasks.
+## 0.10.0
 
 ### FEATURES
 
 1. Adding support for Netbox >= 4.3.0
 2. Enhanced Netbox service inventory device filters to support GraphQL query string for `device_list` queries.
+3. Added Netbox service `create_ip` task to allocate new or source existing IP from prefix
+4. Added `nb_create_ip` Jinja2 filter to Nornir service to source IP allocations during templates rendering
+5. Added nfcli shell `netbox create ip` command to run IP allocations from interactive command line
+ 
+---
+
+## 0.9.1
+
+### BUGS
+
+1. Fixing list and dict annotations to also allow None values for workers tasks.
 
 ---
 
