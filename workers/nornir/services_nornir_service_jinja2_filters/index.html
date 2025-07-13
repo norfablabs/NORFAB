@@ -1279,6 +1279,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#nb_create_ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      nb_create_ip
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1619,12 +1628,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_next_ip/" class="md-nav__link">
+      <a href="../../netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    GETNext IP
+    Create IP
     
   </span>
   
@@ -3652,6 +3661,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#nb_create_ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      nb_create_ip
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3699,6 +3717,26 @@
 
 <span class="p">[</span><span class="s2">&quot;192.168.2.1&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.2.2&quot;</span><span class="p">]</span>
 </code></pre></div>
+<h2 id="nb_create_ip">nb_create_ip<a class="headerlink" href="#nb_create_ip" title="Permanent link">¤</a></h2>
+<p>This Jinja2 filter queries Netbox to get existing or create next available IP in prefix.</p>
+<p><code>nb_create_ip</code> can be invoked using Jinja2 filter syntax where value it is applied against must be 
+a prefix recorded in Netbox:</p>
+<div class="highlight"><pre><span></span><code>{% for interface in host.interfaces %}
+interface {{ interface }}
+  ip address {{ &quot;10.0.0.0/24&quot; | nb_create_ip(host.name, interface) }}
+!
+{% endfor %}
+</code></pre></div>
+<p>Alternatively, <code>nb_create_ip</code> can be called within <code>set</code> block to assign result to a variable:</p>
+<div class="highlight"><pre><span></span><code>{% for interface in host.interfaces %}
+{% set ip = nb_create_ip(&quot;10.0.0.0/24&quot;, host.name, interface, description=&quot;Primary interface ip&quot;) %}
+interface {{ interface }}
+  ip address {{ ip }}
+!
+{% endfor %}
+</code></pre></div>
+<p>All the same arguments supported by <a href="../../netbox/services_netbox_service_tasks_create_ip/">Netbox service create_ip</a> function can be passed onto 
+<code>nb_create_ip</code> call.</p>
 
 
 

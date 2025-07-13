@@ -1551,15 +1551,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-circuits-sample-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Get Circuits Sample Usage
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#norfab-netbox-get-circuits-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       NORFAB Netbox Get Circuits Command Shell Reference
@@ -1639,12 +1630,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_next_ip/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    GETNext IP
+    Create IP
     
   </span>
   
@@ -3664,15 +3655,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-circuits-sample-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Get Circuits Sample Usage
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#norfab-netbox-get-circuits-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       NORFAB Netbox Get Circuits Command Shell Reference
@@ -3723,7 +3705,6 @@
 <blockquote>
 <p>task api name: <code>get_circuits</code></p>
 </blockquote>
-<h2 id="get-circuits-sample-usage">Get Circuits Sample Usage<a class="headerlink" href="#get-circuits-sample-usage" title="Permanent link">¤</a></h2>
 <h2 id="norfab-netbox-get-circuits-command-shell-reference">NORFAB Netbox Get Circuits Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-circuits-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_circuits</code> task:</p>
 <div class="highlight"><pre><span></span><code>nf#man tree netbox.get.circuits
@@ -3896,43 +3877,7 @@ nf#
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1381</span>
-<span class="normal">1382</span>
-<span class="normal">1383</span>
-<span class="normal">1384</span>
-<span class="normal">1385</span>
-<span class="normal">1386</span>
-<span class="normal">1387</span>
-<span class="normal">1388</span>
-<span class="normal">1389</span>
-<span class="normal">1390</span>
-<span class="normal">1391</span>
-<span class="normal">1392</span>
-<span class="normal">1393</span>
-<span class="normal">1394</span>
-<span class="normal">1395</span>
-<span class="normal">1396</span>
-<span class="normal">1397</span>
-<span class="normal">1398</span>
-<span class="normal">1399</span>
-<span class="normal">1400</span>
-<span class="normal">1401</span>
-<span class="normal">1402</span>
-<span class="normal">1403</span>
-<span class="normal">1404</span>
-<span class="normal">1405</span>
-<span class="normal">1406</span>
-<span class="normal">1407</span>
-<span class="normal">1408</span>
-<span class="normal">1409</span>
-<span class="normal">1410</span>
-<span class="normal">1411</span>
-<span class="normal">1412</span>
-<span class="normal">1413</span>
-<span class="normal">1414</span>
-<span class="normal">1415</span>
-<span class="normal">1416</span>
-<span class="normal">1417</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1417</span>
 <span class="normal">1418</span>
 <span class="normal">1419</span>
 <span class="normal">1420</span>
@@ -4086,7 +4031,62 @@ nf#
 <span class="normal">1568</span>
 <span class="normal">1569</span>
 <span class="normal">1570</span>
-<span class="normal">1571</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
+<span class="normal">1571</span>
+<span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span>
+<span class="normal">1576</span>
+<span class="normal">1577</span>
+<span class="normal">1578</span>
+<span class="normal">1579</span>
+<span class="normal">1580</span>
+<span class="normal">1581</span>
+<span class="normal">1582</span>
+<span class="normal">1583</span>
+<span class="normal">1584</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
+<span class="normal">1587</span>
+<span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
+<span class="normal">1591</span>
+<span class="normal">1592</span>
+<span class="normal">1593</span>
+<span class="normal">1594</span>
+<span class="normal">1595</span>
+<span class="normal">1596</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span>
+<span class="normal">1600</span>
+<span class="normal">1601</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span>
+<span class="normal">1612</span>
+<span class="normal">1613</span>
+<span class="normal">1614</span>
+<span class="normal">1615</span>
+<span class="normal">1616</span>
+<span class="normal">1617</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_circuits</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -4117,14 +4117,19 @@ nf#
 
 <span class="sd">    Task to retrieve device&#39;s circuits data from Netbox.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">instance</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span><span class="si">}</span><span class="s2"> Netbox, &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;devices </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2">, cid </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
 
     <span class="c1"># form final result object</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">})</span>
-    <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+    <span class="p">)</span>
     <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cache</span>
     <span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">circuit_fields</span> <span class="o">=</span> <span class="p">[</span>
@@ -4145,24 +4150,35 @@ nf#
     <span class="p">]</span>
 
     <span class="c1"># form initial circuits filters based on devices&#39; sites and cid list</span>
-    <span class="n">circuits_filters_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">circuits_filters</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">device_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span>
     <span class="p">)</span>
     <span class="n">sites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">][</span><span class="s2">&quot;slug&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">device_data</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="n">circuits_filters_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">sites</span><span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">circuits_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">sites</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">cid</span><span class="p">:</span>
             <span class="n">cid_list</span> <span class="o">=</span> <span class="s1">&#39;[&quot;</span><span class="si">{cl}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cl</span><span class="o">=</span><span class="s1">&#39;&quot;, &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cid</span><span class="p">))</span>
-            <span class="n">circuits_filters_dict</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">in_list: </span><span class="si">{</span><span class="n">cid_list</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+            <span class="n">circuits_filters</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">in_list: </span><span class="si">{</span><span class="n">cid_list</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">slist</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sites</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>  <span class="c1"># swap quotes</span>
+        <span class="k">if</span> <span class="n">cid</span><span class="p">:</span>
+            <span class="n">clist</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>  <span class="c1"># swap quotes</span>
+            <span class="n">circuits_filters</span> <span class="o">=</span> <span class="s2">&quot;{terminations: {site: {slug: {in_list: slist}}}, cid: {in_list: clist}}&quot;</span>
+            <span class="n">circuits_filters</span> <span class="o">=</span> <span class="n">circuits_filters</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;slist&quot;</span><span class="p">,</span> <span class="n">slist</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s2">&quot;clist&quot;</span><span class="p">,</span> <span class="n">clist</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">circuits_filters</span> <span class="o">=</span> <span class="s2">&quot;{terminations: {site: {slug: {in_list: slist }}}}&quot;</span>
+            <span class="n">circuits_filters</span> <span class="o">=</span> <span class="n">circuits_filters</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;slist&quot;</span><span class="p">,</span> <span class="n">slist</span><span class="p">)</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">circuits_filters_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">sites</span><span class="p">}</span>
+        <span class="n">circuits_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">sites</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">cid</span><span class="p">:</span>
             <span class="n">cid_list</span> <span class="o">=</span> <span class="s1">&#39;[&quot;</span><span class="si">{cl}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cl</span><span class="o">=</span><span class="s1">&#39;&quot;, &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cid</span><span class="p">))</span>
-            <span class="n">circuits_filters_dict</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cid_list</span>
+            <span class="n">circuits_filters</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cid_list</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - constructed circuits filters: </span><span class="si">{</span><span class="n">circuits_filters_dict</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - constructed circuits filters: &#39;</span><span class="si">{</span><span class="n">circuits_filters</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span><span class="p">:</span>
@@ -4172,7 +4188,7 @@ nf#
         <span class="n">last_updated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphql</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">obj</span><span class="o">=</span><span class="s2">&quot;circuit_list&quot;</span><span class="p">,</span>
-            <span class="n">filters</span><span class="o">=</span><span class="n">circuits_filters_dict</span><span class="p">,</span>
+            <span class="n">filters</span><span class="o">=</span><span class="n">circuits_filters</span><span class="p">,</span>
             <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
                 <span class="s2">&quot;cid&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
@@ -4233,22 +4249,25 @@ nf#
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - </span><span class="si">{</span><span class="n">circuit</span><span class="p">[</span><span class="s1">&#39;cid&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> no cache data found, fetching from Netbox&quot;</span>
                     <span class="p">)</span>
         <span class="c1"># form new filters dictionary to fetch remaining circuits data</span>
-        <span class="n">circuits_filters_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">circuits_filters</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">cid_list</span><span class="p">:</span>
-            <span class="n">cid_list</span> <span class="o">=</span> <span class="s1">&#39;[&quot;</span><span class="si">{cl}</span><span class="s1">&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cl</span><span class="o">=</span><span class="s1">&#39;&quot;, &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cid_list</span><span class="p">))</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">circuits_filters_dict</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">in_list: </span><span class="si">{</span><span class="n">cid_list</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+            <span class="n">cid_list</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cid_list</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>  <span class="c1"># swap quotes</span>
+            <span class="k">if</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">circuits_filters</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">in_list: </span><span class="si">{</span><span class="n">cid_list</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">circuits_filters</span> <span class="o">=</span> <span class="s2">&quot;{cid: {in_list: cid_list}}&quot;</span>
+                <span class="n">circuits_filters</span> <span class="o">=</span> <span class="n">circuits_filters</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;cid_list&quot;</span><span class="p">,</span> <span class="n">cid_list</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">circuits_filters_dict</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cid_list</span>
+                <span class="n">circuits_filters</span><span class="p">[</span><span class="s2">&quot;cid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cid_list</span>
     <span class="c1"># ignore cache data, fetch circuits from netbox</span>
     <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span><span class="p">:</span>
         <span class="k">pass</span>
 
-    <span class="k">if</span> <span class="n">circuits_filters_dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">circuits_filters</span><span class="p">:</span>
         <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphql</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">obj</span><span class="o">=</span><span class="s2">&quot;circuit_list&quot;</span><span class="p">,</span>
-            <span class="n">filters</span><span class="o">=</span><span class="n">circuits_filters_dict</span><span class="p">,</span>
+            <span class="n">filters</span><span class="o">=</span><span class="n">circuits_filters</span><span class="p">,</span>
             <span class="n">fields</span><span class="o">=</span><span class="n">circuit_fields</span><span class="p">,</span>
             <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>

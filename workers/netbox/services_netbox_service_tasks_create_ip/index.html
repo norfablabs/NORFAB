@@ -12,7 +12,7 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_get_next_ip/">
+        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_create_ip/">
       
       
         <link rel="prev" href="../services_netbox_service_tasks_get_containerlab_inventory/">
@@ -26,7 +26,7 @@
     
     
       
-        <title>GETNext IP - Network Automations Fabric [NORFAB]</title>
+        <title>Create IP - Network Automations Fabric [NORFAB]</title>
       
     
     
@@ -79,6 +79,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#netbox-create-ip-task" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -110,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GETNext IP
+              Create IP
             
           </span>
         </div>
@@ -1571,18 +1576,70 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Create IP
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
-    GETNext IP
+    Create IP
     
   </span>
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-create-ip-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      NORFAB Netbox Create IP Command Shell Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python API Reference
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -3588,6 +3645,34 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-create-ip-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      NORFAB Netbox Create IP Command Shell Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python API Reference
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -3601,20 +3686,617 @@
                 
                   
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+        <a href="../../../tags/#tag:netbox" class="md-tag">netbox</a>
+      
+    
+  </nav>
+
 
   
   
 
 
-  <h1>GETNext IP</h1>
+<h1 id="netbox-create-ip-task">Netbox Create IP Task<a class="headerlink" href="#netbox-create-ip-task" title="Permanent link">¤</a></h1>
+<blockquote>
+<p>task api name: <code>create_ip</code></p>
+</blockquote>
+<p>Task to create next available IP from prefix or get existing IP address.</p>
+<p>Netbox service <code>create_ip</code> task integrated with Nornir service and can be called 
+using <a href="../../nornir/services_nornir_service_jinja2_filters/#nb_create_ip">nb_create_ip Jinja2 filter</a>, 
+allowing to allocate IP addresses in Netbox on the fly while rendering configuration templates. </p>
+<h2 id="norfab-netbox-create-ip-command-shell-reference">NORFAB Netbox Create IP Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-ip-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Netbox <code>create_ip</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#man tree netbox.create.ip
+root
+└── netbox:    Netbox service
+    └── create:    Create objects in Netbox
+        └── ip:    Allocate next available IP address from prefix
+            ├── instance:    Netbox instance name to target
+            ├── workers:    Filter worker to target, default &#39;any&#39;
+            ├── timeout:    Job timeout
+            ├── verbose-result:    Control output details, default &#39;False&#39;
+            ├── *prefix:    Prefix to allocate IP address from, can also provide prefix name or filters
+            ├── device:    Device name to associate IP address with
+            ├── interface:    Device interface name to associate IP address with
+            ├── description:    IP address description
+            ├── vrf:    VRF to associate with IP address
+            ├── tags:    Tags to add to IP address
+            ├── dns_name:    IP address DNS name
+            ├── tenant:    Tenant name to associate with IP address
+            ├── comments:    IP address comments field
+            ├── role:    IP address functional role
+            └── dry-run:    Do not commit to database
+nf#
+</code></pre></div>
+<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
-<p>TBD</p>
+
+<div class="doc doc-object doc-function">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Allocate the next available IP address from a given subnet.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job</code>
+            </td>
+            <td>
+                  <code><span title="norfab.core.worker.Job">Job</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NorFab Job object containing relevant metadata</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>prefix</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The prefix from which to allocate the IP address.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>description</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A description for the allocated IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>device</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The device associated with the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>interface</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The interface associated with the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vrf</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The VRF (Virtual Routing and Forwarding) instance.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tags</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of tags to associate with the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dns_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The DNS name for the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tenant</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The tenant associated with the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>comments</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional comments for the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>instance</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The NetBox instance to use.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dry_run</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, do not actually allocate the IP address. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>dict</code></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing the result of the IP allocation.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2255</span>
+<span class="normal">2256</span>
+<span class="normal">2257</span>
+<span class="normal">2258</span>
+<span class="normal">2259</span>
+<span class="normal">2260</span>
+<span class="normal">2261</span>
+<span class="normal">2262</span>
+<span class="normal">2263</span>
+<span class="normal">2264</span>
+<span class="normal">2265</span>
+<span class="normal">2266</span>
+<span class="normal">2267</span>
+<span class="normal">2268</span>
+<span class="normal">2269</span>
+<span class="normal">2270</span>
+<span class="normal">2271</span>
+<span class="normal">2272</span>
+<span class="normal">2273</span>
+<span class="normal">2274</span>
+<span class="normal">2275</span>
+<span class="normal">2276</span>
+<span class="normal">2277</span>
+<span class="normal">2278</span>
+<span class="normal">2279</span>
+<span class="normal">2280</span>
+<span class="normal">2281</span>
+<span class="normal">2282</span>
+<span class="normal">2283</span>
+<span class="normal">2284</span>
+<span class="normal">2285</span>
+<span class="normal">2286</span>
+<span class="normal">2287</span>
+<span class="normal">2288</span>
+<span class="normal">2289</span>
+<span class="normal">2290</span>
+<span class="normal">2291</span>
+<span class="normal">2292</span>
+<span class="normal">2293</span>
+<span class="normal">2294</span>
+<span class="normal">2295</span>
+<span class="normal">2296</span>
+<span class="normal">2297</span>
+<span class="normal">2298</span>
+<span class="normal">2299</span>
+<span class="normal">2300</span>
+<span class="normal">2301</span>
+<span class="normal">2302</span>
+<span class="normal">2303</span>
+<span class="normal">2304</span>
+<span class="normal">2305</span>
+<span class="normal">2306</span>
+<span class="normal">2307</span>
+<span class="normal">2308</span>
+<span class="normal">2309</span>
+<span class="normal">2310</span>
+<span class="normal">2311</span>
+<span class="normal">2312</span>
+<span class="normal">2313</span>
+<span class="normal">2314</span>
+<span class="normal">2315</span>
+<span class="normal">2316</span>
+<span class="normal">2317</span>
+<span class="normal">2318</span>
+<span class="normal">2319</span>
+<span class="normal">2320</span>
+<span class="normal">2321</span>
+<span class="normal">2322</span>
+<span class="normal">2323</span>
+<span class="normal">2324</span>
+<span class="normal">2325</span>
+<span class="normal">2326</span>
+<span class="normal">2327</span>
+<span class="normal">2328</span>
+<span class="normal">2329</span>
+<span class="normal">2330</span>
+<span class="normal">2331</span>
+<span class="normal">2332</span>
+<span class="normal">2333</span>
+<span class="normal">2334</span>
+<span class="normal">2335</span>
+<span class="normal">2336</span>
+<span class="normal">2337</span>
+<span class="normal">2338</span>
+<span class="normal">2339</span>
+<span class="normal">2340</span>
+<span class="normal">2341</span>
+<span class="normal">2342</span>
+<span class="normal">2343</span>
+<span class="normal">2344</span>
+<span class="normal">2345</span>
+<span class="normal">2346</span>
+<span class="normal">2347</span>
+<span class="normal">2348</span>
+<span class="normal">2349</span>
+<span class="normal">2350</span>
+<span class="normal">2351</span>
+<span class="normal">2352</span>
+<span class="normal">2353</span>
+<span class="normal">2354</span>
+<span class="normal">2355</span>
+<span class="normal">2356</span>
+<span class="normal">2357</span>
+<span class="normal">2358</span>
+<span class="normal">2359</span>
+<span class="normal">2360</span>
+<span class="normal">2361</span>
+<span class="normal">2362</span>
+<span class="normal">2363</span>
+<span class="normal">2364</span>
+<span class="normal">2365</span>
+<span class="normal">2366</span>
+<span class="normal">2367</span>
+<span class="normal">2368</span>
+<span class="normal">2369</span>
+<span class="normal">2370</span>
+<span class="normal">2371</span>
+<span class="normal">2372</span>
+<span class="normal">2373</span>
+<span class="normal">2374</span>
+<span class="normal">2375</span>
+<span class="normal">2376</span>
+<span class="normal">2377</span>
+<span class="normal">2378</span>
+<span class="normal">2379</span>
+<span class="normal">2380</span>
+<span class="normal">2381</span>
+<span class="normal">2382</span>
+<span class="normal">2383</span>
+<span class="normal">2384</span>
+<span class="normal">2385</span>
+<span class="normal">2386</span>
+<span class="normal">2387</span>
+<span class="normal">2388</span>
+<span class="normal">2389</span>
+<span class="normal">2390</span>
+<span class="normal">2391</span>
+<span class="normal">2392</span>
+<span class="normal">2393</span>
+<span class="normal">2394</span>
+<span class="normal">2395</span>
+<span class="normal">2396</span>
+<span class="normal">2397</span>
+<span class="normal">2398</span>
+<span class="normal">2399</span>
+<span class="normal">2400</span>
+<span class="normal">2401</span>
+<span class="normal">2402</span>
+<span class="normal">2403</span>
+<span class="normal">2404</span>
+<span class="normal">2405</span>
+<span class="normal">2406</span>
+<span class="normal">2407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_ip</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">interface</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vrf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dns_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tenant</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">comments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_primary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allocate the next available IP address from a given subnet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        job: NorFab Job object containing relevant metadata</span>
+<span class="sd">        prefix (str): The prefix from which to allocate the IP address.</span>
+<span class="sd">        description (str, optional): A description for the allocated IP address.</span>
+<span class="sd">        device (str, optional): The device associated with the IP address.</span>
+<span class="sd">        interface (str, optional): The interface associated with the IP address.</span>
+<span class="sd">        vrf (str, optional): The VRF (Virtual Routing and Forwarding) instance.</span>
+<span class="sd">        tags (list, optional): A list of tags to associate with the IP address.</span>
+<span class="sd">        dns_name (str, optional): The DNS name for the IP address.</span>
+<span class="sd">        tenant (str, optional): The tenant associated with the IP address.</span>
+<span class="sd">        comments (str, optional): Additional comments for the IP address.</span>
+<span class="sd">        instance (str, optional): The NetBox instance to use.</span>
+<span class="sd">        dry_run (bool, optional): If True, do not actually allocate the IP address. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary containing the result of the IP allocation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">nb_ip</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nb_device</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+
+    <span class="c1"># try to source existing IP from netbox</span>
+    <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span> <span class="ow">and</span> <span class="n">description</span><span class="p">:</span>
+        <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span><span class="p">:</span>
+        <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">description</span><span class="p">:</span>
+        <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+
+    <span class="c1"># create new IP address</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_ip</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating new IP address </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2"> from prefix </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># source prefix from Netbox</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">vrf</span><span class="p">:</span>
+                <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span> <span class="n">vrf__name</span><span class="o">=</span><span class="n">vrf</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefix</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to source prefix from Netbox - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># execute dry run on new IP</span>
+        <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">),</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+                <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+                <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="c1"># create new IP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using existing IP address </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
+
+    <span class="c1"># update IP address parameters</span>
+    <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">vrf</span> <span class="ow">and</span> <span class="n">vrf</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">:</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span><span class="p">:</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">dns_name</span> <span class="ow">and</span> <span class="n">dns_name</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">dns_name</span><span class="p">:</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">dns_name</span> <span class="o">=</span> <span class="n">dns_name</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">comments</span> <span class="ow">and</span> <span class="n">comments</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">comments</span><span class="p">:</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">comments</span> <span class="o">=</span> <span class="n">comments</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">:</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span> <span class="ow">in</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
+                <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">})</span>
+                <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span><span class="p">:</span>
+        <span class="n">nb_interface</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">interface</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_interface</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unable to source &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; interface from Netbox&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">,</span> <span class="s2">&quot;assigned_object&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="o">!=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">):</span>
+            <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">&quot;dcim.interface&quot;</span>
+            <span class="k">if</span> <span class="n">is_primary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nb_device</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">nb_device</span><span class="o">.</span><span class="n">primary_ip4</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># save IP address into Netbox</span>
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">has_changes</span><span class="p">:</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># make IP primary for device</span>
+        <span class="k">if</span> <span class="n">is_primary</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">nb_device</span><span class="p">:</span>
+            <span class="n">nb_device</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+
+    <span class="c1"># form and return results</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">),</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span><span class="p">),</span>
+        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">vrf</span> <span class="k">else</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
+        <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
 
 
 
+
+  
+  
 
 
 

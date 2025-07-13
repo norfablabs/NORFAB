@@ -1639,12 +1639,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_next_ip/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    GETNext IP
+    Create IP
     
   </span>
   
@@ -3903,37 +3903,7 @@
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1052</span>
-<span class="normal">1053</span>
-<span class="normal">1054</span>
-<span class="normal">1055</span>
-<span class="normal">1056</span>
-<span class="normal">1057</span>
-<span class="normal">1058</span>
-<span class="normal">1059</span>
-<span class="normal">1060</span>
-<span class="normal">1061</span>
-<span class="normal">1062</span>
-<span class="normal">1063</span>
-<span class="normal">1064</span>
-<span class="normal">1065</span>
-<span class="normal">1066</span>
-<span class="normal">1067</span>
-<span class="normal">1068</span>
-<span class="normal">1069</span>
-<span class="normal">1070</span>
-<span class="normal">1071</span>
-<span class="normal">1072</span>
-<span class="normal">1073</span>
-<span class="normal">1074</span>
-<span class="normal">1075</span>
-<span class="normal">1076</span>
-<span class="normal">1077</span>
-<span class="normal">1078</span>
-<span class="normal">1079</span>
-<span class="normal">1080</span>
-<span class="normal">1081</span>
-<span class="normal">1082</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1082</span>
 <span class="normal">1083</span>
 <span class="normal">1084</span>
 <span class="normal">1085</span>
@@ -4113,7 +4083,43 @@
 <span class="normal">1259</span>
 <span class="normal">1260</span>
 <span class="normal">1261</span>
-<span class="normal">1262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
+<span class="normal">1262</span>
+<span class="normal">1263</span>
+<span class="normal">1264</span>
+<span class="normal">1265</span>
+<span class="normal">1266</span>
+<span class="normal">1267</span>
+<span class="normal">1268</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span>
+<span class="normal">1281</span>
+<span class="normal">1282</span>
+<span class="normal">1283</span>
+<span class="normal">1284</span>
+<span class="normal">1285</span>
+<span class="normal">1286</span>
+<span class="normal">1287</span>
+<span class="normal">1288</span>
+<span class="normal">1289</span>
+<span class="normal">1290</span>
+<span class="normal">1291</span>
+<span class="normal">1292</span>
+<span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span>
+<span class="normal">1296</span>
+<span class="normal">1297</span>
+<span class="normal">1298</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -4162,11 +4168,12 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If there is an error in the GraphQL query or data retrieval process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># form final result dictionary</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_connections&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
-    <span class="p">)</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_connections&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+    <span class="p">)</span>
 
     <span class="c1"># form lists of fields to request from netbox</span>
     <span class="n">cable_fields</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -4246,20 +4253,25 @@
         <span class="n">console_server_ports_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cable_fields</span><span class="p">)</span>
 
     <span class="c1"># form query dictionary with aliases to get data from Netbox</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">dlist</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>  <span class="c1"># swap quotes</span>
+        <span class="n">dfilt</span> <span class="o">=</span> <span class="s2">&quot;{device: {name: {in_list: &quot;</span> <span class="o">+</span> <span class="n">dlist</span> <span class="o">+</span> <span class="s2">&quot;}}}&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dfilt</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">}</span>
     <span class="n">queries</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;interface_list&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">dfilt</span><span class="p">,</span>
             <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">interfaces_fields</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="s2">&quot;consoleport&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;console_port_list&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">dfilt</span><span class="p">,</span>
             <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">console_ports_fields</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="s2">&quot;consoleserverport&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;console_server_port_list&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">dfilt</span><span class="p">,</span>
             <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">console_server_ports_fields</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">}</span>

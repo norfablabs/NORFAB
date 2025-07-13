@@ -1639,12 +1639,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_next_ip/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    GETNext IP
+    Create IP
     
   </span>
   
@@ -3912,22 +3912,7 @@ nf#
 
             <details class="quote">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 905</span>
-<span class="normal"> 906</span>
-<span class="normal"> 907</span>
-<span class="normal"> 908</span>
-<span class="normal"> 909</span>
-<span class="normal"> 910</span>
-<span class="normal"> 911</span>
-<span class="normal"> 912</span>
-<span class="normal"> 913</span>
-<span class="normal"> 914</span>
-<span class="normal"> 915</span>
-<span class="normal"> 916</span>
-<span class="normal"> 917</span>
-<span class="normal"> 918</span>
-<span class="normal"> 919</span>
-<span class="normal"> 920</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 920</span>
 <span class="normal"> 921</span>
 <span class="normal"> 922</span>
 <span class="normal"> 923</span>
@@ -4057,7 +4042,37 @@ nf#
 <span class="normal">1047</span>
 <span class="normal">1048</span>
 <span class="normal">1049</span>
-<span class="normal">1050</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span>
+<span class="normal">1070</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">()</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_interfaces</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -4085,11 +4100,13 @@ nf#
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception: If no interfaces data is returned for the specified devices.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># form final result object</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_interfaces&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
-    <span class="p">)</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_interfaces&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+    <span class="p">)</span>
 
     <span class="n">intf_fields</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;name&quot;</span><span class="p">,</span>
@@ -4126,17 +4143,30 @@ nf#
         <span class="p">)</span>
 
     <span class="c1"># form interfaces query dictionary</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">dlist</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>  <span class="c1"># swap quotes</span>
+        <span class="n">dfilt</span> <span class="o">=</span> <span class="s2">&quot;{device: {name: {in_list: &quot;</span> <span class="o">+</span> <span class="n">dlist</span> <span class="o">+</span> <span class="s2">&quot;}}}&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dfilt</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">}</span>
     <span class="n">queries</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;interface_list&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">dfilt</span><span class="p">,</span>
             <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">intf_fields</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">}</span>
 
     <span class="c1"># add query to retrieve inventory items</span>
     <span class="k">if</span> <span class="n">inventory_items</span><span class="p">:</span>
-        <span class="n">inv_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">,</span> <span class="s2">&quot;component_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">dlist</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>  <span class="c1"># swap quotes</span>
+            <span class="n">inv_filters</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;{device: {name: {in_list: &quot;</span>
+                <span class="o">+</span> <span class="n">dlist</span>
+                <span class="o">+</span> <span class="s1">&#39;}}, component_type: {app_label: {exact: &quot;dcim&quot;}}}&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inv_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">,</span> <span class="s2">&quot;component_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">}</span>
         <span class="n">inv_fields</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;name&quot;</span><span class="p">,</span>
             <span class="s2">&quot;component {... on InterfaceType </span><span class="si">{id}</span><span class="s2">}&quot;</span><span class="p">,</span>
