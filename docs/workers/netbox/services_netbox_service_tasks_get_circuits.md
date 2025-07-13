@@ -7,8 +7,6 @@ tags:
 
 > task api name: `get_circuits`
 
-## Get Circuits Sample Usage
-
 ## NORFAB Netbox Get Circuits Command Shell Reference
 
 NorFab shell supports these command options for Netbox `get_circuits` task:

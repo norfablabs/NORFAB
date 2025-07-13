@@ -118,7 +118,7 @@ nav:
               - GET Circuits: workers/netbox/services_netbox_service_tasks_get_circuits.md
               - GET Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
               - GET Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
-              - GETNext IP: workers/netbox/services_netbox_service_tasks_create_ip.md
+              - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
               - UPDATE Device Facts: workers/netbox/services_netbox_service_tasks_update_device_facts.md
               - UPDATE Device Interfaces: workers/netbox/services_netbox_service_tasks_update_device_interfaces.md
               - UPDATE Device IP: workers/netbox/services_netbox_service_tasks_update_device_ip.md
