@@ -88,6 +88,7 @@ class Task:
             set equal to the name of decorated function.
         result_model (BaseModel): A Pydantic model used to validate the function's return value.
         annotations (dict): Tasks annotation as per MCP standard
+        fastapi (dict): Dictionary with parameters for FastAPI `app.add_api_route` method
 
     Methods:
         __call__(function: Callable) -> Callable:
@@ -119,11 +120,13 @@ class Task:
         output: Optional[BaseModel] = None,
         description: Optional[str] = None,
         annotations: Optional[dict] = None,
+        fastapi: Optional[dict] = None,
     ) -> None:
         self.input = input
         self.output = output or Result
         self.description = description
         self.annotations = annotations or {}
+        self.fastapi = fastapi or {}
 
     def __call__(self, function: Callable) -> Callable:
         self.function = function
@@ -205,6 +208,7 @@ class Task:
     def make_task_schema(self, wrapper) -> dict:
         input_json_schema = self.input.model_json_schema()
         _ = input_json_schema.pop("title")
+        output_json_schema = self.output.model_json_schema()
 
         return {
             self.name: {
@@ -214,7 +218,9 @@ class Task:
                     "name": str(self.name),
                     "description": self.description,
                     "inputSchema": input_json_schema,
+                    "outputSchema": output_json_schema,
                     "annotations": self.annotations,
+                    "fastapi": self.fastapi,
                 },
             }
         }
@@ -971,7 +977,7 @@ class NFPWorker:
         """
         return None
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self, job: Job) -> Result:
         """
         Retrieve the worker's inventory.
@@ -987,7 +993,7 @@ class NFPWorker:
         """
         raise NotImplementedError
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Retrieve the version report of the worker.
@@ -1192,7 +1198,7 @@ class NFPWorker:
         events.append(event_data)
         dumper(events, filename)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def job_details(
         self,
         uuid: str = None,
@@ -1259,7 +1265,7 @@ class NFPWorker:
         else:
             raise FileNotFoundError(f"{self.name} - job with UUID '{uuid}' not found")
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def job_list(
         self,
         pending: bool = True,
@@ -1358,7 +1364,11 @@ class NFPWorker:
                 result=job_completed + job_pending,
             )
 
-    @Task(input=models.WorkerEchoIn, output=models.WorkerEchoOut)
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=models.WorkerEchoIn,
+        output=models.WorkerEchoOut,
+    )
     def echo(
         self,
         job: Job,
@@ -1398,7 +1408,7 @@ class NFPWorker:
             }
         )
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def list_tasks(self, name: Union[None, str] = None, brief: bool = False) -> Result:
         """
         Lists available worker tasks with optional filtering and output format.

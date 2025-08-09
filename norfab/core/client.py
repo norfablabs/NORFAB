@@ -880,8 +880,8 @@ class NFPClient(object):
         uuid = uuid or uuid4().hex
         start_time = int(time.time())
         ret = None
-        post_retry = int(retry)
-        get_retry = int(retry)
+        post_retry = max(1, int(retry))
+        get_retry = max(1, int(retry))
 
         # POST job to workers
         while post_retry:

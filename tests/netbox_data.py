@@ -11,8 +11,8 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 NB_VERSION = None
-NB_URL = "http://192.168.1.130:8000/"
-NB_URL_SSL = "https://192.168.1.130:443/"
+NB_URL = "http://192.168.1.210:8000/"
+NB_URL_SSL = "https://192.168.1.210:443/"
 NB_USERNAME = "admin"
 NB_PASSWORD = "admin"
 NB_API_TOKEN = "0123456789abcdef0123456789abcdef01234567"

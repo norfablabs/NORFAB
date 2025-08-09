@@ -22,6 +22,33 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
+class FastAPIShowOpenAPISchema(ClientRunJobArgs):
+    paths: StrictBool = Field(
+        None,
+        description="show FastAPI app paths only",
+        json_schema_extra={"presence": True},
+    )
+
+    class PicleConfig:
+        outputter = Outputters.outputter_json
+        pipe = PipeFunctionsModel
+
+    @staticmethod
+    def run(*args, **kwargs):
+        workers = kwargs.pop("workers", "any")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+
+        result = NFCLIENT.run_job(
+            "fastapi",
+            "get_openapi_schema",
+            kwargs=kwargs,
+            workers=workers,
+            timeout=timeout,
+        )
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+
 class FastAPIShowInventoryModel(ClientRunJobArgs):
     class PicleConfig:
         outputter = Outputters.outputter_yaml
@@ -56,6 +83,9 @@ class FastAPIShowCommandsModel(BaseModel):
             "absolute_indent": 2,
             "function": "get_version",
         },
+    )
+    openapi_schema: FastAPIShowOpenAPISchema = Field(
+        None, description="show FastAPI OpenAPI schema", alias="openapi-schema"
     )
 
     class PicleConfig:

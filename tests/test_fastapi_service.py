@@ -228,7 +228,7 @@ class TestFastAPIServer:
     def test_job_post(self, nfclient):
         token = get_token(nfclient)
         resp = requests.post(
-            url="http://127.0.0.1:8000/job",
+            url="http://127.0.0.1:8000/api/job",
             headers={"Authorization": f"Bearer {token}"},
             data=json.dumps(
                 {
@@ -253,7 +253,7 @@ class TestFastAPIServer:
     def test_job_post_noargs_nokwargs(self, nfclient):
         token = get_token(nfclient)
         resp = requests.post(
-            url="http://127.0.0.1:8000/job",
+            url="http://127.0.0.1:8000/api/job",
             data=json.dumps({"service": "nornir", "task": "get_version"}),
             headers={"Authorization": f"Bearer {token}"},
         )
@@ -270,7 +270,7 @@ class TestFastAPIServer:
         # post the job first
         token = get_token(nfclient)
         post_resp = requests.post(
-            url="http://127.0.0.1:8000/job",
+            url="http://127.0.0.1:8000/api/job",
             data=json.dumps({"service": "nornir", "task": "get_version"}),
             headers={"Authorization": f"Bearer {token}"},
         )
@@ -282,7 +282,7 @@ class TestFastAPIServer:
 
         # get the job
         get_resp = requests.get(
-            url="http://127.0.0.1:8000/job",
+            url="http://127.0.0.1:8000/api/job",
             data=json.dumps({"service": "nornir", "uuid": uuid}),
             headers={"Authorization": f"Bearer {token}"},
         )
@@ -304,7 +304,7 @@ class TestFastAPIServer:
     def test_job_run(self, nfclient):
         token = get_token(nfclient)
         resp = requests.post(
-            url="http://127.0.0.1:8000/job/run",
+            url="http://127.0.0.1:8000/api/job/run",
             headers={"Authorization": f"Bearer {token}"},
             data=json.dumps(
                 {
@@ -329,7 +329,7 @@ class TestFastAPIServer:
     def test_job_run_specific_worker(self, nfclient):
         token = get_token(nfclient)
         resp = requests.post(
-            url="http://127.0.0.1:8000/job/run",
+            url="http://127.0.0.1:8000/api/job/run",
             headers={"Authorization": f"Bearer {token}"},
             data=json.dumps(
                 {

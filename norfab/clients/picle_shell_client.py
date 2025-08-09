@@ -340,16 +340,12 @@ class ManTasks(BaseModel):
             timeout=60,
             kwargs=kwargs,
         )
-
         ret = {}
         for worker, wresult in result.items():
             if wresult["failed"]:
                 continue
-            key = f"{wresult['service']}:{kwargs.get('name', 'all')}"
-            if kwargs.get("brief"):
-                ret[key] = wresult["result"]
-            else:
-                ret[key] = wresult["result"][0]
+            key = f"{wresult['service']}-service:{kwargs.get('name', 'all-tasks')}"
+            ret[key] = wresult["result"]
         return ret
 
 

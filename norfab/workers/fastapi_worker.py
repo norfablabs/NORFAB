@@ -10,21 +10,138 @@ import uvicorn
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from norfab.models.fastapi import (
-    WorkerResult,
     ClientPostJobResponse,
     ClientGetJobResponse,
 )
+from norfab.models import Result
 from typing import Union, List, Dict, Any, Annotated, Optional
 from diskcache import FanoutCache
 from pydantic import BaseModel
 from datetime import datetime, timedelta
-from fastapi import Depends, FastAPI, Header, HTTPException, Body
+from fastapi import Depends, FastAPI, Header, HTTPException, Body, Request
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.openapi.utils import get_openapi
 from starlette import status
+from starlette.routing import Route
 
 SERVICE = "fastapi"
 
 log = logging.getLogger(__name__)
+
+
+class UnauthorizedMessage(BaseModel):
+    detail: str = "Bearer token missing or unknown"
+
+
+def create_api_endpoint(task: dict, worker: object):
+    """
+    Creates an asynchronous FastAPI endpoint function for a given service task.
+
+    Args:
+        task (dict): A dictionary containing task information,
+            including 'service' and 'name' keys.
+        worker (object): An object representing the worker
+
+    Returns:
+        function: An asynchronous endpoint function
+
+    The generated endpoint expects a JSON body containing arguments for
+    the job and returns the result of the job execution.
+    """
+    # We will handle a missing token ourselves
+    get_bearer_token = HTTPBearer(auto_error=False)
+
+    def get_token(
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+    ) -> str:
+        # check token exists in database
+        if (
+            auth is None
+            or worker.bearer_token_check(auth.credentials, Job()).result is False
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=UnauthorizedMessage().detail,
+            )
+        return auth.credentials
+
+    async def endpoint(
+        request: Request,
+        token: str = Depends(get_token),
+    ) -> Dict[Annotated[str, Body(description="Worker Name")], Result]:
+        kwargs = await request.json()
+        res = worker.client.run_job(
+            service=task["service"],
+            task=task["name"],
+            kwargs=kwargs,
+        )
+        return res
+
+    return endpoint
+
+
+def service_tasks_api_discovery(worker):
+    while not worker.exit_event.is_set():
+        tasks = []
+        services = []
+        try:
+            # get a list of workers and construct a list of services
+            services = worker.client.get("mmi.service.broker", "show_workers")
+            services = [s["service"] for s in services["results"]]
+
+            # retrieve NorFab services and their tasks
+            for service in services:
+                service_tasks = worker.client.run_job(
+                    service=service,
+                    task="list_tasks",
+                    workers="any",
+                    timeout=3,
+                )
+                for wres in service_tasks.values():
+                    for t in wres["result"]:
+                        t["service"] = service
+                    tasks.extend(wres["result"])
+
+            for task in tasks:
+                # skip task endpoint creation if set to false
+                if task["fastapi"] is False:
+                    continue
+                # continue with creating API endpoint for task
+                path = f"{worker.api_prefix}/{task['service']}/{task['name']}/"
+                for route in worker.app.routes:
+                    if isinstance(route, Route) and route.path == path:
+                        break  # do no re-create existing endpoints
+                else:
+                    _ = task["inputSchema"]["properties"].pop("job", None)
+                    task["fastapi"].setdefault("methods", ["POST"])
+                    task["fastapi"].setdefault("path", path)
+                    task["fastapi"].setdefault("description", task["description"])
+                    task["fastapi"].setdefault("name", task["name"])
+                    log.info(f"Registering API endpoint {task['fastapi']['path']}")
+                    worker.app.add_api_route(
+                        endpoint=create_api_endpoint(task, worker),
+                        responses={
+                            status.HTTP_401_UNAUTHORIZED: dict(
+                                model=UnauthorizedMessage
+                            )
+                        },
+                        openapi_extra={
+                            "requestBody": {
+                                "required": True,
+                                "content": {
+                                    "application/json": {"schema": task["inputSchema"]}
+                                },
+                            }
+                        },
+                        **task["fastapi"],
+                    )
+                    # make app to re-generate openapi schema
+                    worker.app.openapi_schema = None
+                    worker.app.setup()
+        except Exception as e:
+            log.exception(f"Failed to discover services tasks, error: {e}")
+
+        time.sleep(10)
 
 
 class FastAPIWorker(NFPWorker):
@@ -57,6 +174,7 @@ class FastAPIWorker(NFPWorker):
         )
         self.init_done_event = init_done_event
         self.exit_event = exit_event
+        self.api_prefix = "/api"
 
         # get inventory from broker
         self.fastapi_inventory = self.load_inventory()
@@ -74,6 +192,11 @@ class FastAPIWorker(NFPWorker):
 
         # start FastAPI server
         self.fastapi_start()
+
+        self.service_tasks_api_discovery_thread = threading.Thread(
+            target=service_tasks_api_discovery, args=(self,)
+        )
+        self.service_tasks_api_discovery_thread.start()
 
         self.init_done_event.set()
 
@@ -193,6 +316,20 @@ class FastAPIWorker(NFPWorker):
             result={**self.fastapi_inventory, "uvicorn": self.uvicorn_inventory},
             task=f"{self.name}:get_inventory",
         )
+
+    @Task()
+    def get_openapi_schema(self, paths: bool = False) -> Result:
+        schema = get_openapi(title="norfab", version="1", routes=self.app.routes)
+        if paths is True:
+            return Result(
+                result=list(schema["paths"].keys()),
+                task=f"{self.name}:get_openapi_schema",
+            )
+        else:
+            return Result(
+                result=schema,
+                task=f"{self.name}:get_openapi_schema",
+            )
 
     @Task()
     def bearer_token_store(
@@ -356,10 +493,6 @@ class FastAPIWorker(NFPWorker):
 # ------------------------------------------------------------------
 
 
-class UnauthorizedMessage(BaseModel):
-    detail: str = "Bearer token missing or unknown"
-
-
 def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     """
     Create a FastAPI application with endpoints for posting, getting, and running jobs.
@@ -401,7 +534,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
         return auth.credentials
 
     @app.post(
-        "/job",
+        f"{worker.api_prefix}/job",
         responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
     )
     def post_job(
@@ -459,7 +592,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
         return res
 
     @app.get(
-        "/job",
+        f"{worker.api_prefix}/job",
         responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
     )
     def get_job(
@@ -500,7 +633,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
         return res
 
     @app.post(
-        "/job/run",
+        f"{worker.api_prefix}/job/run",
         responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
     )
     def run_job(
@@ -530,7 +663,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
             int, Body(description="The number of times to try and GET job results")
         ] = 10,
         token: str = Depends(get_token),
-    ) -> Dict[str, WorkerResult]:
+    ) -> Dict[str, Result]:
         """
         Method to run job and return job results synchronously. This function
         is blocking, internally it uses post/get methods to submit job request

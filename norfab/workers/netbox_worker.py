@@ -707,7 +707,7 @@ class NetboxWorker(NFPWorker):
         Sends a request to the Netbox REST API.
 
         Args:
-            instance (str, optional): The instance name to get parameters for.
+            instance (str, optional): The Netbox instance name to get parameters for.
             method (str, optional): The HTTP method to use for the request (e.g., 'get', 'post'). Defaults to "get".
             api (str, optional): The API endpoint to send the request to. Defaults to "".
             **kwargs: Additional arguments to pass to the request (e.g., params, data, json).
@@ -1095,7 +1095,7 @@ class NetboxWorker(NFPWorker):
         Args:
             job: NorFab Job object containing relevant metadata
             devices (list): List of device names to retrieve connections for.
-            instance (str, optional): Instance name for the GraphQL query.
+            instance (str, optional): Netbox instance name for the GraphQL query.
             dry_run (bool, optional): If True, perform a dry run without making actual changes.
             cables (bool, optional): if True includes interfaces' directly attached cables details
 
@@ -1919,7 +1919,7 @@ class NetboxWorker(NFPWorker):
 
         Args:
             job: NorFab Job object containing relevant metadata
-            instance (str, optional): The instance name to use.
+            instance (str, optional): The Netbox instance name to use.
             dry_run (bool, optional): If True, no changes will be made to Netbox.
             datasource (str, optional): The data source to use. Supported datasources:
 
@@ -2124,7 +2124,7 @@ class NetboxWorker(NFPWorker):
 
         Args:
             job: NorFab Job object containing relevant metadata
-            instance (str, optional): The instance name to use.
+            instance (str, optional): The Netbox instance name to use.
             dry_run (bool, optional): If True, no changes will be made.
             datasource (str, optional): The data source to use. Supported datasources:
 
