@@ -58,7 +58,7 @@ class WorkflowWorker(NFPWorker):
     def worker_exit(self):
         pass
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
@@ -85,7 +85,7 @@ class WorkflowWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self) -> Result:
         """
         NorFab task to retrieve the workflow's worker inventory.
@@ -250,7 +250,7 @@ class WorkflowWorker(NFPWorker):
                     return True  # stop the workflow since a failure occurred
         return False
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def run(self, job: Job, workflow: Union[str, Dict]) -> Result:
         """
         Executes a workflow defined by a dictionary.

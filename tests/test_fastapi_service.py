@@ -223,6 +223,13 @@ class TestFastAPIWorker:
         for worker_name, results in token_check.items():
             results["result"] == True, f"{worker_name} token1 is not valid"
 
+    def test_get_fastapi_openapi_schema(self, nfclient):
+        ret = nfclient.run_job("fastapi", "get_openapi_schema")
+        pprint.pprint(ret)
+
+        for worker_name, results in ret.items():
+            assert results["result"], f"{worker_name} No Openapi schema returned"
+            assert results["result"]["paths"], f"{worker_name} Openapi schema has no route paths"
 
 class TestFastAPIServer:
     def test_job_post(self, nfclient):
@@ -352,3 +359,16 @@ class TestFastAPIServer:
             assert wres["errors"] == [], f"{wname} having errors '{wres['errors']}'"
             assert wres["failed"] == False, f"{wname} failed to run job"
             assert "result" in wres, f"{wname} no results provided"
+
+    def test_openapi_endpoint_discovery(self, nfclient):
+        token = get_token(nfclient)
+        resp = requests.get(
+            url="http://127.0.0.1:8000/openapi.json",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        resp.raise_for_status()
+        res = resp.json()
+        pprint.pprint(res)
+
+        assert len(res["paths"]) > 3, "Path number should be more then 3 if api endpoints dynamically discovered"
+        assert any("nornir" in k for k in res["paths"]), "No nornir service tasks API endpoints discovered"

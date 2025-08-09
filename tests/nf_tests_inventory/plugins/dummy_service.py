@@ -54,7 +54,7 @@ class DummyServiceWorker(NFPWorker):
         self.init_done_event.set()
         log.info(f"{self.name} - Started")
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Dict:
         """
         Retrieves the version information for specified libraries and the current Python environment.
@@ -83,7 +83,7 @@ class DummyServiceWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self) -> Dict:
         """
         Retrieves the dummy service inventory.
@@ -93,7 +93,7 @@ class DummyServiceWorker(NFPWorker):
         """
         return Result(result=self.dummy_inventory)
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def dummy_task(self) -> Dict:
         """
         Dummy task

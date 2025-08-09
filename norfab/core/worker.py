@@ -126,7 +126,10 @@ class Task:
         self.output = output or Result
         self.description = description
         self.annotations = annotations or {}
-        self.fastapi = fastapi or {}
+        if fastapi is False:
+            self.fastapi = False
+        else:
+            self.fastapi = fastapi or {}
 
     def __call__(self, function: Callable) -> Callable:
         self.function = function

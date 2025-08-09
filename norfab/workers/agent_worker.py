@@ -81,7 +81,7 @@ class AgentWorker(NFPWorker):
     def worker_exit(self):
         pass
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self):
         """
         Generate a report of the versions of specific Python packages and system information.
@@ -113,7 +113,7 @@ class AgentWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self):
         """
         NorFab task to retrieve the agent's inventory.
@@ -123,7 +123,7 @@ class AgentWorker(NFPWorker):
         """
         return Result(result=self.agent_inventory)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_status(self):
         """
         NorFab Task that retrieves the status of the agent worker.
@@ -160,7 +160,7 @@ class AgentWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def chat(self, job: Job, user_input, template=None) -> str:
         """
         NorFab Task that handles the chat interaction with the user by processing the input through a language model.

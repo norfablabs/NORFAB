@@ -274,7 +274,7 @@ class FastAPIWorker(NFPWorker):
         """
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Produce a report of the versions of various Python packages.
@@ -304,7 +304,7 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self) -> Result:
         """
         Retrieve the inventory of the FastAPI worker.
@@ -317,8 +317,18 @@ class FastAPIWorker(NFPWorker):
             task=f"{self.name}:get_inventory",
         )
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_openapi_schema(self, paths: bool = False) -> Result:
+        """
+        Generates and returns the OpenAPI schema for the FastAPI application.
+
+        Args:
+            paths (bool, optional): If True, returns a list of available API endpoint paths.
+                If False, returns the full OpenAPI schema. Defaults to False.
+
+        Returns:
+            Result: An object containing either the list of endpoint paths or the full OpenAPI schema
+        """
         schema = get_openapi(title="norfab", version="1", routes=self.app.routes)
         if paths is True:
             return Result(
@@ -331,7 +341,7 @@ class FastAPIWorker(NFPWorker):
                 task=f"{self.name}:get_openapi_schema",
             )
 
-    @Task()
+    @Task(fastapi=False)
     def bearer_token_store(
         self, job: Job, username: str, token: str, expire: int = None
     ) -> Result:
@@ -368,7 +378,7 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_store", result=True)
 
-    @Task()
+    @Task(fastapi=False)
     def bearer_token_delete(
         self, job: Job, username: str = None, token: str = None
     ) -> Result:
@@ -412,7 +422,7 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_delete", result=True)
 
-    @Task()
+    @Task(fastapi=False)
     def bearer_token_list(self, job: Job, username: str = None) -> Result:
         """
         Retrieves a list of bearer tokens from the cache, optionally filtered by username.
@@ -470,7 +480,7 @@ class FastAPIWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi=False)
     def bearer_token_check(self, token: str, job: Job) -> Result:
         """
         Checks if the provided bearer token is present in the cache and still active.

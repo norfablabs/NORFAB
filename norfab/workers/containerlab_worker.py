@@ -70,7 +70,7 @@ class ContainerlabWorker(NFPWorker):
         """
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Produce a report of the versions of various Python packages.
@@ -111,7 +111,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self) -> Result:
         """
         Retrieve the inventory of the Containerlab worker.
@@ -124,7 +124,7 @@ class ContainerlabWorker(NFPWorker):
             task=f"{self.name}:get_inventory",
         )
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_containerlab_status(self) -> Result:
         """
         Retrieve the status of the Containerlab worker.
@@ -138,7 +138,7 @@ class ContainerlabWorker(NFPWorker):
             result={"status": status},
         )
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_running_labs(self, job: Job, timeout: int = None) -> Result:
         """
         Retrieve a list of running containerlab lab names.
@@ -166,7 +166,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def run_containerlab_command(
         self,
         job: Job,
@@ -269,7 +269,7 @@ class ContainerlabWorker(NFPWorker):
         else:
             return output, logs, proc
 
-    @Task(input=DeployTask, output=DeployTaskResponse)
+    @Task(fastapi={"methods": ["POST"]}, input=DeployTask, output=DeployTaskResponse)
     def deploy(
         self,
         job: Job,
@@ -336,7 +336,7 @@ class ContainerlabWorker(NFPWorker):
             args=args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
         )
 
-    @Task()
+    @Task(fastapi={"methods": ["DELETE"]})
     def destroy_lab(self, lab_name: str, job: Job, timeout: int = None) -> Result:
         """
         Destroys a specified lab.
@@ -383,7 +383,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def inspect(
         self,
         job: Job,
@@ -424,7 +424,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def save(self, job: Job, lab_name: str, timeout: int = None) -> Result:
         """
         Saves the config of a specified lab devices by invoking the `containerlab save` command.
@@ -467,7 +467,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def restart_lab(self, job: Job, lab_name: str, timeout: int = None) -> Result:
         """
         Restart a specified Containerlab lab.
@@ -527,7 +527,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_nornir_inventory(
         self,
         job: Job,
@@ -660,7 +660,7 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def deploy_netbox(
         self,
         job: Job,

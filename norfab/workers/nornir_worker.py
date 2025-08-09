@@ -385,7 +385,7 @@ class NornirWorker(NFPWorker):
             user_defined=inventory.get("user_defined", {}),
         )
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def refresh_nornir(
         self,
         job: Job,
@@ -445,7 +445,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def nornir_inventory_load_netbox(
         self,
         job: Job,
@@ -518,7 +518,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def nornir_inventory_load_containerlab(
         self,
         job: Job,
@@ -838,7 +838,11 @@ class NornirWorker(NFPWorker):
     # Nornir Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task(input=GetNornirHosts, output=GetNornirHostsResponse)
+    @Task(
+        fastapi={"methods": ["GET"]},
+        input=GetNornirHosts,
+        output=GetNornirHostsResponse,
+    )
     def get_nornir_hosts(self, details: bool = False, **kwargs: dict) -> Result:
         """
         Retrieve a list of Nornir hosts managed by this worker.
@@ -869,7 +873,7 @@ class NornirWorker(NFPWorker):
         else:
             return Result(result=list(filtered_nornir.inventory.hosts))
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self, **kwargs: dict) -> Result:
         """
         Retrieve running Nornir inventory for requested hosts
@@ -885,7 +889,7 @@ class NornirWorker(NFPWorker):
         filtered_nornir = FFun(self.nr, **filters)
         return Result(result=filtered_nornir.inventory.dict(), task="get_inventory")
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Retrieve the versions of various libraries and system information.
@@ -948,7 +952,7 @@ class NornirWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_watchdog_stats(self) -> Result:
         """
         Retrieve the statistics from the watchdog.
@@ -961,7 +965,7 @@ class NornirWorker(NFPWorker):
         """
         return Result(result=self.watchdog.stats())
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_watchdog_configuration(self) -> Result:
         """
         Retrieves the current configuration of the watchdog.
@@ -974,7 +978,7 @@ class NornirWorker(NFPWorker):
         """
         return Result(result=self.watchdog.configuration())
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_watchdog_connections(self) -> Result:
         """
         Retrieve the list of connections curently managed by watchdog.
@@ -988,7 +992,7 @@ class NornirWorker(NFPWorker):
         """
         return Result(result=self.watchdog.connections_get())
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def task(self, job: Job, plugin: str, **kwargs) -> Result:
         """
         Execute a Nornir task plugin.
@@ -1083,7 +1087,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def cli(
         self,
         job: Job,
@@ -1212,7 +1216,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def cfg(
         self,
         job: Job,
@@ -1319,7 +1323,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def test(
         self,
         job: Job,
@@ -1511,7 +1515,7 @@ class NornirWorker(NFPWorker):
     def snmp(self) -> dict:
         raise NotImplementedError("SNMP task is not implemented yet")
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def network(self, job: Job, fun: str, **kwargs) -> Result:
         """
         Task to call various network-related utility functions.
@@ -1541,7 +1545,7 @@ class NornirWorker(NFPWorker):
             **kwargs,
         )
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def parse(
         self,
         job: Job,
@@ -1630,7 +1634,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def file_copy(
         self,
         job: Job,
@@ -1715,7 +1719,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task()
+    @Task(fastapi={"methods": ["POST"]})
     def runtime_inventory(self, job: Job, action: str, **kwargs) -> Result:
         """
         Task to work with Nornir runtime (in-memory) inventory.
