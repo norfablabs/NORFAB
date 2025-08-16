@@ -30,18 +30,18 @@ from pydantic import (
 from typing import Union, Optional, List, Any, Dict, Tuple
 from norfab.core.nfapi import NorFab
 
-from .picle_shells.nornir import nornir_picle_shell
-from .picle_shells.netbox import netbox_picle_shell
-from .picle_shells.agent import agent_picle_shell
-from .picle_shells.fastapi import fastapi_picle_shell
-from .picle_shells.norfab_jobs_shell import NorFabJobsShellCommands
-from .picle_shells.workflow import workflow_picle_shell
-from .picle_shells.containerlab import containerlab_picle_shell
-from .picle_shells.workers.workers_picle_shell import (
+from .shell_clients.nornir import nornir_picle_shell
+from .shell_clients.netbox import netbox_picle_shell
+from .shell_clients.agent import agent_picle_shell
+from .shell_clients.fastapi import fastapi_picle_shell
+from .shell_clients.norfab_jobs_shell import NorFabJobsShellCommands
+from .shell_clients.workflow import workflow_picle_shell
+from .shell_clients.containerlab import containerlab_picle_shell
+from .shell_clients.workers.workers_picle_shell import (
     ShowWorkersModel,
     NorfabWorkersCommands,
 )
-from .picle_shells.common import ClientRunJobArgs, log_error_or_result, listen_events
+from .shell_clients.common import ClientRunJobArgs, log_error_or_result, listen_events
 
 NFCLIENT = None
 RICHCONSOLE = Console()

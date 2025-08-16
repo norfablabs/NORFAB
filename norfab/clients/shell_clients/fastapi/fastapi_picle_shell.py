@@ -13,6 +13,7 @@ from pydantic import (
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from typing import Union, Optional, List, Any, Dict, Tuple
 from .fastapi_picle_shell_auth import FastAPIAuthCommandsModel
+from .fastapi_picle_shell_discover import Discover
 
 SERVICE = "fastapi"
 log = logging.getLogger(__name__)
@@ -106,6 +107,9 @@ class FastAPIShowCommandsModel(BaseModel):
 
 class FastAPIServiceCommands(BaseModel):
     auth: FastAPIAuthCommandsModel = Field(None, description="Manage auth tokens")
+    discover: Discover = Field(
+        None, description="Discover NorFab services tasks and create API"
+    )
 
     class PicleConfig:
         subshell = True

@@ -131,7 +131,9 @@ class Result(BaseModel, use_enum_values=True):
     service: Optional[StrictStr] = Field(
         None, description="Name of the service produced this result"
     )
-    diff: Optional[StrictStr] = Field(None, description="Difference in state")
+    diff: Optional[Union[dict, StrictStr]] = Field(
+        None, description="Difference in state"
+    )
     dry_run: Optional[StrictBool] = Field(
         False, description="True if dry run, False otherwise"
     )

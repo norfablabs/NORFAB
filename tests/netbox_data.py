@@ -310,6 +310,21 @@ platforms = [
     },
 ]
 
+prefixes = [
+    {"prefix": "10.0.0.0/24", "description": "TEST NEXT IP PREFIX"},
+    {"prefix": "10.1.0.0/24", "description": "TEST CREATE PREFIXES"},
+    {
+        "prefix": "10.2.0.0/24",
+        "description": "TEST CREATE PREFIXES WITH VRF",
+        "vrf": {"name": "VRF1"},
+    },
+]
+
+prefix_roles = [
+    {"name": "PREFIX_ROLE_1", "slug": slugify("PREFIX_ROLE_1")},
+    {"name": "PREFIX_ROLE_2", "slug": slugify("PREFIX_ROLE_2")},
+]
+
 ip_addresses = [
     {"address": "1.0.1.4/32"},
     {"address": "1.0.1.5/32"},
@@ -497,6 +512,7 @@ vrfs = [
     {"name": "OOB_CTRL"},
     {"name": "Signalling"},
     {"name": "Voice"},
+    {"name": "VRF1"},
 ]
 
 ip_adress_to_devices = [
@@ -1560,6 +1576,15 @@ def create_device_roles():
             log.error(f"creating device role '{device_role}' error '{e}'")
 
 
+def create_prefixes():
+    log.info("creating prefixes")
+    for prefix in prefixes:
+        try:
+            nb.ipam.prefixes.create(**prefix)
+        except Exception as e:
+            log.error(f"creating prefix '{prefix}' error '{e}'")
+
+
 def create_ip_addresses():
     log.info("creating ip addresses")
     for ip_address in ip_addresses:
@@ -1576,6 +1601,15 @@ def create_vrfs():
             nb.ipam.vrfs.create(**vrf)
         except Exception as e:
             log.error(f"creating vrf '{vrf}' error '{e}'")
+
+
+def create_prefix_roles():
+    log.info("creating prefix roles")
+    for role in prefix_roles:
+        try:
+            nb.ipam.roles.create(**role)
+        except Exception as e:
+            log.error(f"creating prefix role '{role}' error '{e}'")
 
 
 def create_vlans():
@@ -2103,12 +2137,34 @@ def delete_devices():
             log.error(f"deleting device '{device}' error '{e}'")
 
 
+def delete_prefixes():
+    log.info("deleting prefixes")
+    for prefix in prefixes:
+        try:
+            pfx = nb.ipam.prefixes.filter(prefix=prefix["prefix"])
+            for p in pfx:
+                p.delete()
+        except Exception as e:
+            log.error(f"deleting ip address '{prefix}' error '{e}'")
+
+
+def delete_prefix_roles():
+    log.info("deleting prefix roles")
+    for role in prefix_roles:
+        try:
+            roles = nb.ipam.roles.filter(name=role["name"])
+            for r in roles:
+                r.delete()
+        except Exception as e:
+            log.error(f"deleting prefix roles '{role}' error '{e}'")
+
+
 def delete_ip_addresses():
     log.info("deleting ip addresses")
     for ip_address in ip_addresses:
         try:
-            ip = nb.ipam.ip_addresses.filter(address=ip_address["address"])
-            for ip in ip:
+            ips = nb.ipam.ip_addresses.filter(address=ip_address["address"])
+            for ip in ips:
                 ip.delete()
         except Exception as e:
             log.error(f"deleting ip address '{ip_address}' error '{e}'")
@@ -2331,8 +2387,10 @@ def clean_up_netbox():
     delete_circuit_providers()
     delete_circuit_types()
     delete_devices()
-    delete_ip_addresses()
     delete_vrfs()
+    delete_prefixes()
+    delete_prefix_roles()
+    delete_ip_addresses()
     delete_vlans()
     delete_device_roles()
     delete_device_types()
@@ -2357,6 +2415,8 @@ def populate_netbox():
     create_device_roles()
     create_platforms()
     create_vrfs()
+    create_prefix_roles()
+    create_prefixes()
     create_ip_addresses()
     create_tags()
     create_devices()

@@ -80,14 +80,38 @@ def create_api_endpoint(task: dict, worker: object):
     return endpoint
 
 
-def service_tasks_api_discovery(worker):
-    while not worker.exit_event.is_set():
+def service_tasks_api_discovery(
+    worker, cycles: int = 30, discover_service: str = "all"
+) -> Dict:
+    """
+    Periodically discovers available service tasks and dynamically registers
+    FastAPI endpoints for them.
+
+    This function performs the following steps in a loop:
+
+    1. Retrieves a list of available services from the worker's client.
+    2. For each service, fetches its available tasks.
+    3. For each task, checks if it should be exposed via FastAPI (i.e.,
+        `task["fastapi"]` is not False).
+    4. If the corresponding API endpoint does not already exist, registers a new
+        FastAPI route for the task, using its input schema and metadata.
+    5. Forces regeneration of the OpenAPI schema after new endpoints are added.
+
+    The loop runs on fastapi service startup up to 30 cycles or until the worker's
+    exit event is set, with a 10-second delay between cycles.
+    """
+    result = {}
+    while not worker.exit_event.is_set() and cycles > 0:
         tasks = []
         services = []
         try:
             # get a list of workers and construct a list of services
             services = worker.client.get("mmi.service.broker", "show_workers")
-            services = [s["service"] for s in services["results"]]
+            services = [
+                s["service"]
+                for s in services["results"]
+                if discover_service == "all" or s["service"] == discover_service
+            ]
 
             # retrieve NorFab services and their tasks
             for service in services:
@@ -106,6 +130,8 @@ def service_tasks_api_discovery(worker):
                 # skip task endpoint creation if set to false
                 if task["fastapi"] is False:
                     continue
+                # save service to results
+                result.setdefault(task["service"], [])
                 # continue with creating API endpoint for task
                 path = f"{worker.api_prefix}/{task['service']}/{task['name']}/"
                 for route in worker.app.routes:
@@ -138,10 +164,15 @@ def service_tasks_api_discovery(worker):
                     # make app to re-generate openapi schema
                     worker.app.openapi_schema = None
                     worker.app.setup()
+                    # save discovered task to results
+                    result[task["service"]].append(task["fastapi"]["name"])
         except Exception as e:
             log.exception(f"Failed to discover services tasks, error: {e}")
 
+        cycles -= 1
         time.sleep(10)
+
+    return result
 
 
 class FastAPIWorker(NFPWorker):
@@ -496,6 +527,25 @@ class FastAPIWorker(NFPWorker):
         return Result(
             task=f"{self.name}:bearer_token_check", result=cache_key in self.cache
         )
+
+    @Task(fastapi={"methods": ["POST"]})
+    def discover(self, job, service: str = "all", progress: bool = True) -> Result:
+        """
+        Discovers available services tasks and auto-generate API endpoints for them.
+
+        Args:
+            service (str, optional): The name of the service to discover. Defaults to "all".
+
+        Returns:
+            Result: An object containing the discovery results for the specified service.
+        """
+        job.event("Discovering NorFab services tasks")
+        ret = Result(task=f"{self.name}:discover")
+        ret.result = service_tasks_api_discovery(
+            self, cycles=1, discover_service=service
+        )
+
+        return ret
 
 
 # ------------------------------------------------------------------

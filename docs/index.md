@@ -33,16 +33,6 @@ NorFab is a distributed task automation and orchestration framework built for re
 
 ## How NorFab Works :gear:
 
-- **Universal Deployment:** Windows, macOS, Linux, containers, VMs, on-prem or cloud.
-- **Extensible Core:** Adapt NorFab to your needs with pluggable services and APIs.
-- **Unified Management:** Use built-in or custom services to manage any network resource.
-- **Data-Driven:** Structured models and inventory for reliable automation.
-- **Seamless Integration:** Connect NorFab to your existing ecosystem with minimal effort.
-
----
-
-## Architecture Overview
-
 NorFab’s architecture is designed for flexibility, scalability, and reliability:
 
 - **Clients:** Submit jobs and consume services.
@@ -66,5 +56,4 @@ NorFab’s architecture is designed for flexibility, scalability, and reliabilit
 
 - Jump into the [Getting Started Tutorial](norfab_getting_started.md)
 - Discover [Why NorFab is Different](norfab_why_use_norfab.md)
-
-Ready to transform your network automation? [Contact us](mailto:dmulyalin@gmail.com) for more information or a demo.
+- Ready to transform your network automation? [Contact us](mailto:dmulyalin@gmail.com) for more information or a demo.

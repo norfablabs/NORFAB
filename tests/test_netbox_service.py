@@ -1635,6 +1635,49 @@ class TestCreateIP:
                 res1["result"]["description"] == res2["result"]["description"]
             ), f"Should have been same IP description"
 
+    def test_create_ip_by_prefix_description(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "TEST NEXT IP PREFIX",
+                    "description": f"test create ip {rand}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "TEST NEXT IP PREFIX",
+                    "description": f"test create ip {rand}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"]["address"], f"Result has no ip {res1['result']}"
+
+            worker, res2 = tuple(create_2.items())[0]
+            assert (
+                res1["result"]["address"] == res2["result"]["address"]
+            ), f"Should have been same IP address"
+            assert (
+                res1["result"]["description"] == res2["result"]["description"]
+            ), f"Should have been same IP description"
+
     def test_create_ip_by_prefix_multiple(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
@@ -2704,3 +2747,647 @@ class TestGetContainerlabInventory:
             assert (
                 res["result"]["name"] == "foobar"
             ), f"{worker} - clab inventory name is not foobar"
+
+
+class TestCreatePrefix:
+    nb_version = None
+
+    def delete_prefixes_within(self, prefix, nfclient):
+        resp = nfclient.run_job(
+            "netbox",
+            "rest",
+            workers="any",
+            kwargs={
+                "method": "get",
+                "api": "/ipam/prefixes/",
+                "params": {"within": prefix},
+            },
+        )
+        worker, prefixes = tuple(resp.items())[0]
+        # pprint.pprint(prefixes)
+        for pfx in prefixes["result"]["results"]:
+            delete_pfx = nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={
+                    "method": "delete",
+                    "api": f"/ipam/prefixes/{pfx['id']}/",
+                },
+            )
+            # print("delete prefix:")
+            # pprint.pprint(delete_pfx)
+
+    def test_create_prefix(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"][
+                    "prefix"
+                ], f"Result has no prefix {res1['result']}"
+
+            worker, res2 = tuple(create_2.items())[0]
+            assert (
+                res1["result"]["prefix"] == res2["result"]["prefix"]
+            ), f"Should have been same prefix"
+            assert (
+                res1["result"]["description"] == res2["result"]["description"]
+            ), f"Should have been same prefix description"
+
+    def test_create_prefix_multiple(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {random.randint(1, 100)}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {random.randint(200, 300)}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"][
+                    "prefix"
+                ], f"Result has no prefix {res1['result']}"
+
+            worker, res2 = tuple(create_2.items())[0]
+            assert (
+                res1["result"]["prefix"] != res2["result"]["prefix"]
+            ), f"Should have been different prefix"
+
+    def test_create_prefix_non_exist_parent(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.123.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {random.randint(1, 100)}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == True, "Allocation not failed"
+                assert (
+                    "Unable to source parent prefix from Netbox" in res1["messages"][0]
+                ), f"Result has no errors"
+
+    def test_create_prefix_with_vrf(self, nfclient):
+        """Should create single prefix and handle deduplication within vrf"""
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.2.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "vrf": "VRF1",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.2.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "vrf": "VRF1",
+                },
+            )
+            create_3 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.2.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand+1}",
+                    "vrf": "VRF1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+            print("create_3")
+            pprint.pprint(create_3, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"][
+                    "prefix"
+                ], f"Result has no prefix {res1['result']}"
+
+            worker, res1 = tuple(create_1.items())[0]
+            worker, res2 = tuple(create_2.items())[0]
+            worker, res3 = tuple(create_3.items())[0]
+            assert (
+                res1["result"]["prefix"] == res2["result"]["prefix"]
+            ), f"Should have been same prefix"
+            assert (
+                res1["result"]["prefix"] != res3["result"]["prefix"]
+            ), f"Should have been different prefix"
+
+    def test_create_prefix_with_parent_vrf_mismatch(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "vrf": "VRF1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == True, "Allocation not failed"
+                assert "NetboxAllocationError" in res1["errors"][0]
+
+    def test_create_prefix_by_parent_prefix_name(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "TEST CREATE PREFIXES",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "TEST CREATE PREFIXES",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"][
+                    "prefix"
+                ], f"Result has no prefix {res1['result']}"
+
+            worker, res2 = tuple(create_2.items())[0]
+            assert (
+                res1["result"]["prefix"] == res2["result"]["prefix"]
+            ), f"Should have been same prefix"
+            assert (
+                res1["result"]["description"] == res2["result"]["description"]
+            ), f"Should have been same prefix description"
+
+    def test_create_prefix_within_vrf_by_parent_prefix_name(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "TEST CREATE PREFIX WITH VRF",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "vrf": "VRF1",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "TEST CREATE PREFIX WITH VRF",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "vrf": "VRF1",
+                },
+            )
+            create_3 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "TEST CREATE PREFIX WITH VRF",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand+1}",
+                    "vrf": "VRF1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+            print("create_3")
+            pprint.pprint(create_3, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"][
+                    "prefix"
+                ], f"Result has no prefix {res1['result']}"
+
+            worker, res1 = tuple(create_1.items())[0]
+            worker, res2 = tuple(create_2.items())[0]
+            worker, res3 = tuple(create_3.items())[0]
+
+            assert (
+                res1["result"]["prefix"] == res2["result"]["prefix"]
+            ), f"Should have been same prefix"
+            assert (
+                res1["result"]["description"] == res2["result"]["description"]
+            ), f"Should have been same prefix description"
+            assert (
+                res1["result"]["prefix"] != res3["result"]["prefix"]
+            ), f"Should have been different prefix"
+
+    def test_create_prefix_dry_run_empty_parent(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "dry_run": True,
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["dry_run"] == True
+                assert res1["status"] == "unchanged"
+                assert res1["result"]["prefix"] == "10.1.0.0/30"
+
+    def test_create_prefix_dry_run_parent_has_children(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 31,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            create_dry_run = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand+1}",
+                    "dry_run": True,
+                },
+            )
+            print("create_dry_run")
+            pprint.pprint(create_dry_run, width=200)
+
+            for worker, res1 in create_dry_run.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["dry_run"] == True
+                assert res1["status"] == "unchanged"
+                assert res1["result"]["prefix"] == "10.1.0.4/30"
+
+    def test_create_prefix_dry_run_prefix_exists(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            create_dry_run = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "dry_run": True,
+                },
+            )
+            print("create_dry_run")
+            pprint.pprint(create_dry_run, width=200)
+
+            for worker, res1 in create_dry_run.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["dry_run"] == True
+                assert res1["status"] == "unchanged"
+                assert res1["result"]["prefix"] == "10.1.0.0/30"
+
+    def test_create_prefix_test_length_mismatch(self, nfclient):
+        """We creating first prefix, next creating prefix with same
+        description but different prefix length"""
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 31,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.1.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            for worker, res in create_2.items():
+                assert res["failed"] == True, "Allocation not failed"
+                assert "NetboxAllocationError" in res["errors"][0]
+
+    def test_create_prefix_with_attributes(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.2.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "site": "NORFAB-LAB",
+                    "tenant": "NORFAB",
+                    "role": "PREFIX_ROLE_1",
+                    "comments": "Some important comment",
+                    "vrf": "VRF1",
+                    "tags": ["NORFAB"],
+                    "status": "Reserved",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert all(
+                    k in res1["diff"]
+                    for k in [
+                        "comments",
+                        "description",
+                        "role",
+                        "site",
+                        "status",
+                        "tags",
+                        "tenant",
+                    ]
+                )
+
+            # retrieve created prefix details from Netbox
+            nb_prefix = nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={
+                    "method": "get",
+                    "api": "/ipam/prefixes/",
+                    "params": {"prefix": res1["result"]["prefix"]},
+                },
+            )
+            print("nb_prefix:")
+            pprint.pprint(nb_prefix, width=200)
+            worker, created_prefix = tuple(nb_prefix.items())[0]
+            created_prefix = created_prefix["result"]["results"][0]
+
+            assert created_prefix["role"]["name"] == "PREFIX_ROLE_1"
+            assert created_prefix["scope"]["name"] == "NORFAB-LAB"
+            assert created_prefix["tags"][0]["name"] == "NORFAB"
+            assert created_prefix["tenant"]["name"] == "NORFAB"
+            assert created_prefix["vrf"]["name"] == "VRF1"
+            assert created_prefix["description"]
+            assert created_prefix["comments"]
+
+    def test_create_prefix_with_attributes_updates(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.2.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "site": "NORFAB-LAB",
+                    "tenant": "NORFAB",
+                    "role": "PREFIX_ROLE_1",
+                    "comments": "Some important comment",
+                    "tags": ["NORFAB"],
+                    "status": "Reserved",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.2.0.0/24",
+                    "description": f"test create prefix {rand}",
+                    "site": "SALTNORNIR-LAB",
+                    "tenant": "SALTNORNIR",
+                    "role": "PREFIX_ROLE_2",
+                    "comments": "Some important comments updates",
+                    "tags": ["ACCESS"],
+                    "status": "Active",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            # verify has changes
+            for worker, res1 in create_2.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert all(
+                    k in res1["diff"]
+                    for k in [
+                        "comments",
+                        "role",
+                        "site",
+                        "status",
+                        "tags",
+                        "tenant",
+                    ]
+                )
+
+            # retrieve created prefix details from Netbox
+            nb_prefix = nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={
+                    "method": "get",
+                    "api": "/ipam/prefixes/",
+                    "params": {"prefix": res1["result"]["prefix"]},
+                },
+            )
+            print("nb_prefix:")
+            pprint.pprint(nb_prefix, width=200)
+            worker, created_prefix = tuple(nb_prefix.items())[0]
+            created_prefix = created_prefix["result"]["results"][0]
+
+            assert created_prefix["role"]["name"] == "PREFIX_ROLE_2"
+            assert created_prefix["scope"]["name"] == "SALTNORNIR-LAB"
+            for tag in created_prefix["tags"]:
+                assert tag["name"] == "NORFAB" or tag["name"] == "ACCESS"
+            assert created_prefix["tenant"]["name"] == "SALTNORNIR"
+            assert created_prefix["vrf"]["name"] == "VRF1"
+            assert created_prefix["description"] == f"test create prefix {rand}"
+            assert created_prefix["comments"] == "Some important comments updates"

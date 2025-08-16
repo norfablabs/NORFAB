@@ -229,7 +229,10 @@ class TestFastAPIWorker:
 
         for worker_name, results in ret.items():
             assert results["result"], f"{worker_name} No Openapi schema returned"
-            assert results["result"]["paths"], f"{worker_name} Openapi schema has no route paths"
+            assert results["result"][
+                "paths"
+            ], f"{worker_name} Openapi schema has no route paths"
+
 
 class TestFastAPIServer:
     def test_job_post(self, nfclient):
@@ -370,5 +373,9 @@ class TestFastAPIServer:
         res = resp.json()
         pprint.pprint(res)
 
-        assert len(res["paths"]) > 3, "Path number should be more then 3 if api endpoints dynamically discovered"
-        assert any("nornir" in k for k in res["paths"]), "No nornir service tasks API endpoints discovered"
+        assert (
+            len(res["paths"]) > 3
+        ), "Path number should be more then 3 if api endpoints dynamically discovered"
+        assert any(
+            "nornir" in k for k in res["paths"]
+        ), "No nornir service tasks API endpoints discovered"

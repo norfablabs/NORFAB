@@ -1,3 +1,22 @@
+## 0.11.0
+
+### FEATURES
+
+1. FastAPI services enhanced to generate api endpoints for all services tasks automatically using `@Task` decorator data
+2. Picle show containerlab containers now emits output with nested tables
+3. Netbox `create_ip` task enhanced to source prefixes to allocate next IP from using prefix description string
+
+### BUGS
+
+1. Fixing nornir test picle shell test task handling for verbouse-result and dry-run
+2. Fixing nornir test handling for when suite renders to empty tests for a host
+
+### CHANGES
+
+1. Upgrading NAPALM library dependency from 5.0.0 to 5.1.0
+2. Upgrading PICLE library dependency from 0.9.0 to 0.9.1
+3. Upgrading Pynetbox library dependency from 7.4.0 to 7.5.0
+
 ## 0.10.0
 
 ### FEATURES

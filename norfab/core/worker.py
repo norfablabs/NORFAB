@@ -1432,7 +1432,7 @@ class NFPWorker:
         """
         ret = Result()
         if brief:
-            ret.result = list(NORFAB_WORKER_TASKS.keys())
+            ret.result = list(sorted(NORFAB_WORKER_TASKS.keys()))
         elif name:
             if name not in NORFAB_WORKER_TASKS:
                 raise KeyError(f"{name} - task not registered")

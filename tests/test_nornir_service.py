@@ -983,6 +983,31 @@ class TestNornirTest:
                         "FAIL",
                     ], f"{worker}:{host}:{test_name} unexpected test result"
 
+    def test_nornir_test_suite_empty_suite(self, nfclient):
+        # this test renders empty test for any host except for spine 1
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_empty_tests.txt",
+                "FC": "spine",
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["result"], f"{worker} returned no test results"
+            for host, res in results["result"].items():
+                for test_name, test_res in res.items():
+                    assert (
+                        "Traceback" not in test_res
+                    ), f"{worker}:{host}:{test_name} test output contains error"
+                    assert test_res in [
+                        "PASS",
+                        "FAIL",
+                    ], f"{worker}:{host}:{test_name} unexpected test result"
+
     def test_nornir_test_suite_with_details(self, nfclient):
         ret = nfclient.run_job(
             b"nornir",

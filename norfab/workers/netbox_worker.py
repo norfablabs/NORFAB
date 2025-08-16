@@ -24,6 +24,17 @@ SERVICE = "netbox"
 log = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------
+# EXCEPTIONS
+# ----------------------------------------------------------------------
+
+
+class NetboxAllocationError(Exception):
+    """
+    Raised when there is an error in allocating resource in Netbox
+    """
+
+
+# ----------------------------------------------------------------------
 # HELPER FUNCTIONS
 # ----------------------------------------------------------------------
 
@@ -2273,9 +2284,19 @@ class NetboxWorker(NFPWorker):
         """
         Allocate the next available IP address from a given subnet.
 
+        This task finds or creates an IP address in NetBox, updates its metadata,
+        optionally links it to a device/interface, and supports a dry run mode for
+        previewing changes.
+
         Args:
-            job: NorFab Job object containing relevant metadata
-            prefix (str): The prefix from which to allocate the IP address.
+            prefix (str): The prefix from which to allocate the IP address, could be:
+
+                - IPv4 prefix string e.g. 10.0.0.0/24
+                - IPv6 prefix string e.g. 2001::/64
+                - Prefix description string to filter by
+                - Dictionary with prefix filters to feed `pynetbox` get method
+                    e.g. `{"prefix": "10.0.0.0/24", "site__name": "foo"}`
+
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.
             interface (str, optional): The interface associated with the IP address.
@@ -2289,6 +2310,26 @@ class NetboxWorker(NFPWorker):
 
         Returns:
             dict: A dictionary containing the result of the IP allocation.
+
+        Tasks execution follow these steps:
+
+        1. Tries to find an existing IP in NetBox matching the device/interface/description.
+            If found, uses it; otherwise, proceeds to create a new IP.
+
+        2. If prefix is a string, determines if it’s an IP network or a description.
+            Builds a filter dictionary for NetBox queries, optionally including VRF.
+
+        3. Queries NetBox for the prefix using the constructed filter.
+
+        4. If dry_run is True, fetches the next available IP but doesn’t create it.
+
+        5. If not a dry run, creates the next available IP in the prefix.
+
+        6. Updates IP attributes (description, VRF, tenant, DNS name, comments, role, tags)
+            if provided and different from current values. Handles interface assignment and
+            can set the IP as primary for the device.
+
+        7. If changes were made and not a dry run, saves the IP and device updates to NetBox.
         """
         instance = instance or self.default_instance
         ret = Result(task=f"{self.name}:create_ip", result={}, resources=[instance])
@@ -2313,14 +2354,25 @@ class NetboxWorker(NFPWorker):
             job.event(f"Creating new IP address {nb_ip} from prefix {prefix}")
             # source prefix from Netbox
             if isinstance(prefix, str):
-                if vrf:
-                    nb_prefix = nb.ipam.prefixes.get(prefix=prefix, vrf__name=vrf)
-                else:
-                    nb_prefix = nb.ipam.prefixes.get(prefix=prefix)
-            elif isinstance(prefix, dict):
-                nb_prefix = nb.ipam.prefixes.get(**prefix)
+                # try converting prefix to network, if fails prefix is not an IP network
+                try:
+                    network = ipaddress.ip_network(prefix)
+                    is_network = True
+                except:
+                    is_network = False
+                if is_network is True and vrf:
+                    prefix = {"prefix": prefix, "vrf__name": vrf}
+                elif is_network is True:
+                    prefix = {"prefix": prefix}
+                elif is_network is False and vrf:
+                    prefix = {"description": prefix, "vrf__name": vrf}
+                elif is_network is False:
+                    prefix = {"description": prefix}
+            nb_prefix = nb.ipam.prefixes.get(**prefix)
             if not nb_prefix:
-                raise RuntimeError(f"Unable to source prefix from Netbox - {prefix}")
+                raise NetboxAllocationError(
+                    f"Unable to source prefix from Netbox - {prefix}"
+                )
             # execute dry run on new IP
             if dry_run is True:
                 nb_ip = nb_prefix.available_ips.list()[0]
@@ -2369,7 +2421,7 @@ class NetboxWorker(NFPWorker):
         if device and interface:
             nb_interface = nb.dcim.interfaces.get(device=device, name=interface)
             if not nb_interface:
-                raise RuntimeError(
+                raise NetboxAllocationError(
                     f"Unable to source '{device}:{interface}' interface from Netbox"
                 )
             if (
@@ -2402,6 +2454,236 @@ class NetboxWorker(NFPWorker):
             "vrf": str(nb_ip.vrf) if not vrf else nb_ip.vrf["name"],
             "device": device,
             "interface": interface,
+        }
+
+        return ret
+
+    @Task(fastapi={"methods": ["POST"]})
+    def create_prefix(
+        self,
+        job: Job,
+        parent: Union[str, dict],
+        description: str,
+        prefixlen: int = 30,
+        vrf: str = None,
+        tags: Union[None, list] = None,
+        tenant: str = None,
+        comments: str = None,
+        role: str = None,
+        site: str = None,
+        status: str = None,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+    ) -> Result:
+        """
+        Creates a new IP prefix in NetBox or updates an existing one.
+
+        Args:
+
+            parent (Union[str, dict]): parent prefix to allocate new prefix in, could be:
+
+                - IPv4 prefix string e.g. 10.0.0.0/24
+                - IPv6 prefix string e.g. 2001::/64
+                - Prefix description string to filter by
+                - Dictionary with prefix filters for `pynetbox` prefixes.get method
+                    e.g. `{"prefix": "10.0.0.0/24", "site__name": "foo"}`
+
+            description (str): Description for the new prefix, this is mandatory to have
+                since prefix description used for deduplication to source existng prefixes.
+            prefixlen (int, optional): The prefix length of the new prefix to create, by default
+                allocates next availabe /30 point-to-point prefix.
+            vrf (str, optional): Name of the VRF to associate with the prefix.
+            tags (Union[None, list], optional): List of tags to assign to the prefix.
+            tenant (str, optional): Name of the tenant to associate with the prefix.
+            comments (str, optional): Comments for the prefix.
+            role (str, optional): Role to assign to the prefix.
+            site (str, optional): Name of the site to associate with the prefix.
+            status (str, optional): Status of the prefix.
+            instance (Union[None, str], optional): NetBox instance identifier.
+            dry_run (bool, optional): If True, simulates the creation without making changes.
+
+        Returns:
+            Result: An object containing the outcome, including status, details of the prefix, and resources used.
+        """
+        instance = instance or self.default_instance
+        changed = {}
+        ret = Result(
+            task=f"{self.name}:create_prefix",
+            result={},
+            resources=[instance],
+            diff=changed,
+        )
+        tags = tags or []
+        nb_prefix = None
+        nb = self._get_pynetbox(instance)
+
+        # source parent prefix from Netbox
+        if isinstance(parent, str):
+            # check if parent prefix is IP network or description
+            try:
+                _ = ipaddress.ip_network(parent)
+                is_network = True
+            except:
+                is_network = False
+            if is_network is True and vrf:
+                parent_filters = {"prefix": parent, "vrf__name": vrf}
+            elif is_network is True:
+                parent_filters = {"prefix": parent}
+            elif is_network is False and vrf:
+                parent_filters = {"description": parent, "vrf__name": vrf}
+            elif is_network is False:
+                parent_filters = {"description": parent}
+        nb_parent_prefix = nb.ipam.prefixes.get(**parent_filters)
+        if not nb_parent_prefix:
+            raise NetboxAllocationError(
+                f"Unable to source parent prefix from Netbox - {parent}"
+            )
+
+        # check that parent vrf and new prefix vrf are same
+        if vrf and str(nb_parent_prefix.vrf) != vrf:
+            raise NetboxAllocationError(
+                f"Parent prefix vrf '{nb_parent_prefix.vrf}' not same as requested child prefix vrf '{vrf}'"
+            )
+
+        # try to source existing prefix from netbox using its description
+        prefix_filters = {"within": nb_parent_prefix.prefix, "description": description}
+        if vrf:
+            prefix_filters["vrf__name"] = vrf
+        if site:
+            prefix_filters["site__name"] = site
+        try:
+            nb_prefix = nb.ipam.prefixes.get(**prefix_filters)
+        except Exception as e:
+            raise NetboxAllocationError(
+                f"Failed to source existing prefix from Netbox using filters '{prefix_filters}', error: {e}"
+            )
+
+        # create new prefix
+        if not nb_prefix:
+            job.event(f"Creating new '/{prefixlen}' prefix within '{parent}' prefix")
+            # execute dry run on new prefix
+            if dry_run is True:
+                nb_prefixes = nb_parent_prefix.available_prefixes.list()
+                if not nb_prefixes:
+                    raise NetboxAllocationError(
+                        f"Parent prefix '{parent}' has no child prefixes available"
+                    )
+                for pfx in nb_prefixes:
+                    # parent prefix empty, can use first subnet as a child prefix
+                    if pfx.prefix == nb_parent_prefix.prefix:
+                        nb_prefix = (
+                            nb_parent_prefix.prefix.split("/")[0] + f"/{prefixlen}"
+                        )
+                        break
+                    # find child prefix by prefixlenght
+                    elif str(pfx).endswith(f"/{prefixlen}"):
+                        nb_prefix = str(pfx)
+                        break
+                else:
+                    raise NetboxAllocationError(
+                        f"Parent prefix '{parent}' has no child prefixes available with '/{prefixlen}' prefix length"
+                    )
+                ret.status = "unchanged"
+                ret.dry_run = True
+                ret.result = {
+                    "prefix": nb_prefix,
+                    "description": description,
+                    "parent": nb_parent_prefix.prefix,
+                    "vrf": vrf,
+                    "site": site,
+                }
+                return ret
+            # create new prefix
+            else:
+                try:
+                    nb_prefix = nb_parent_prefix.available_prefixes.create(
+                        {"prefix_length": prefixlen}
+                    )
+                except Exception as e:
+                    raise NetboxAllocationError(
+                        f"Failed creating child prefix of '/{prefixlen}' prefix length "
+                        f"within parent prefix '{str(nb_parent_prefix)}', error: {e}"
+                    )
+            ret.status = "created"
+        else:
+            # check existing prefix length matching requested length
+            if not nb_prefix.prefix.endswith(f"/{prefixlen}"):
+                raise NetboxAllocationError(
+                    f"Found existing child prefix '{nb_prefix.prefix}' with mismatch "
+                    f"requested prefix length '/{prefixlen}'"
+                )
+            job.event(f"Using existing prefix {nb_prefix}")
+
+        # update prefix parameters
+        if description and description != nb_prefix.description:
+            changed["description"] = {"-": str(nb_prefix.description), "+": description}
+            nb_prefix.description = description
+        if vrf and vrf != str(nb_prefix.vrf):
+            changed["vrf"] = {"-": str(nb_prefix.vrf), "+": vrf}
+            nb_prefix.vrf = {"name": vrf}
+        if tenant and tenant != str(nb_prefix.tenant):
+            changed["tenant"] = {
+                "-": str(nb_prefix.tenant) if nb_prefix.tenant else None,
+                "+": tenant,
+            }
+            nb_prefix.tenant = {"name": tenant}
+        if site and str(nb_prefix.scope) != site:
+            nb_site = nb.dcim.sites.get(name=site)
+            if not nb_site:
+                raise NetboxAllocationError(f"Failed to get '{site}' site from Netbox")
+            changed["site"] = {
+                "-": str(nb_prefix.scope) if nb_prefix.scope else None,
+                "+": nb_site.name,
+            }
+            nb_prefix.scope_type = "dcim.site"
+            nb_prefix.scope_id = nb_site.id
+        if status and status.lower() != nb_prefix.status:
+            changed["status"] = {"-": str(nb_prefix.status), "+": status.title()}
+            nb_prefix.status = status.lower()
+        if comments and comments != nb_prefix.comments:
+            changed["comments"] = {"-": str(nb_prefix.comments), "+": comments}
+            nb_prefix.comments = comments
+        if role and role != nb_prefix.role:
+            changed["role"] = {"-": str(nb_prefix.role), "+": role}
+            nb_prefix.role = {"name": role}
+        existing_tags = [str(t) for t in nb_prefix.tags]
+        if tags and not any(t in existing_tags for t in tags):
+            changed["tags"] = {
+                "-": existing_tags,
+                "+": [t for t in tags if t not in existing_tags] + existing_tags,
+            }
+            for t in tags:
+                if t not in existing_tags:
+                    nb_prefix.tags.append({"name": t})
+
+        # save prefix into Netbox
+        if dry_run:
+            ret.status = "unchanged"
+            ret.dry_run = True
+            ret.diff = changed
+        elif changed:
+            ret.diff = changed
+            nb_prefix.save()
+            if ret.status != "created":
+                ret.status = "updated"
+        else:
+            ret.status = "unchanged"
+
+        # source vrf name
+        vrf_name = None
+        if nb_prefix.vrf:
+            if isinstance(nb_prefix.vrf, dict):
+                vrf_name = nb_prefix.vrf["name"]
+            else:
+                vrf_name = nb_prefix.vrf.name
+
+        # form and return results
+        ret.result = {
+            "prefix": nb_prefix.prefix,
+            "description": nb_prefix.description,
+            "vrf": vrf_name,
+            "site": str(nb_prefix.scope) if nb_prefix.scope else site,
+            "parent": nb_parent_prefix.prefix,
         }
 
         return ret

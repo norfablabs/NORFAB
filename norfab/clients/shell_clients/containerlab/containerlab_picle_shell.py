@@ -1,4 +1,5 @@
 import logging
+import os
 
 from rich.console import Console
 from picle.models import PipeFunctionsModel, Outputters
@@ -317,9 +318,18 @@ class ShowContainers(ClientRunJobArgs):
             args=args,
         )
 
-        return log_error_or_result(
+        ret = log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True
         )
+
+        if kwargs.get("details") or verbose_result:
+            return ret
+        else:
+            # replace labPath with topology_file
+            for wname, wres in ret.items():
+                for c in wres["containers"]:
+                    c["topology_file"] = os.path.split(c.pop("labPath"))[-1]
+            return (ret, Outputters.outputter_nested, {"with_tables": True})
 
     class PicleConfig:
         outputter = Outputters.outputter_nested

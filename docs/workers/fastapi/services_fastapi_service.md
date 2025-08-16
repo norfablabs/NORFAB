@@ -25,8 +25,9 @@ The FastAPI Service in Norfab provides a robust and efficient way to REST API in
 
 - **Data Validation**: FastAPI uses Pydantic for data validation, ensuring that the input and output data is correctly formatted and adheres to the specified schema.
 
-
 - **Security**: NorFab FastAPI service includes Bearer token API authentication, ensuring that the APIs are secure and protected.
+
+- **API Endpoints Auto-Generation**: API Endpoints auto-generated using Services' tasks functions definitions
 
 ## Use Cases
 
@@ -41,6 +42,13 @@ The FastAPI Service in Norfab provides a robust and efficient way to REST API in
 ## Getting Started
 
 To get started with the FastAPI Service, you need to define the necessary parameters in your NorFab inventory. Refer to the [FastAPI Inventory](services_fastapi_service_inventory.md) section for detailed instructions on setting up your inventory and running FastAPI REST API Service with NorFab.
+
+### API Endpoints
+
+- `http://<IP Address or FQDN>/api/xyz` NorFab REST API endpoints
+- `http://<IP Address or FQDN>/docs` url for [Swagger UI](https://github.com/swagger-api/swagger-ui) documentation
+- `http://<IP Address or FQDN>/redoc` url for [ReDoc UI](https://github.com/Rebilly/ReDoc) documentation
+- `http://<IP Address or FQDN>/openapi.json` NorFab REST API OpenAPI schema file
 
 ### Authentication
 

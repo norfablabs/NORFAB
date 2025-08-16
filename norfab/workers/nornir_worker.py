@@ -1407,7 +1407,7 @@ class NornirWorker(NFPWorker):
                 raise RuntimeError(msg)
             # load suit using YAML
             try:
-                tests[host_name] = yaml.safe_load(rendered_suite)
+                tests[host_name] = yaml.safe_load(rendered_suite) or []
             except Exception as e:
                 msg = f"{self.name} - '{suite}' YAML load failed: '{e}'"
                 raise RuntimeError(msg)
