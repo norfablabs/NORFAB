@@ -16,7 +16,8 @@ from pydantic import (
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from ..nornir.nornir_picle_shell import NornirCommonArgs, NorniHostsFilters
-from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
+from norfab.models.netbox import NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 
@@ -48,11 +49,6 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of Netbox devices to update",
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Emit execution progress",
-        json_schema_extra={"presence": True},
     )
     batch_size: StrictInt = Field(
         10, description="Number of devices to process at a time", alias="batch-size"
@@ -118,11 +114,6 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         None,
         description="List of Netbox devices to update",
     )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Emit execution progress",
-        json_schema_extra={"presence": True},
-    )
     datasource: UpdateDeviceInterfacesDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
@@ -186,11 +177,6 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of Netbox devices to update",
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Emit execution progress",
-        json_schema_extra={"presence": True},
     )
     datasource: UpdateDeviceIPAddressesDatasources = Field(
         "nornir",

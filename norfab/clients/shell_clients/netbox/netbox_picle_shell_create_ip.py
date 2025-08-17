@@ -16,13 +16,14 @@ from pydantic import (
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from ..nornir.nornir_picle_shell import NornirCommonArgs, NorniHostsFilters
-from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_cache import CacheEnum
+from norfab.models.netbox import NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 
 
-class CreateIp(NetboxClientRunJobArgs, NetboxCommonArgs):
+class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs):
     prefix: StrictStr = Field(
         ...,
         description="Prefix to allocate IP address from, can also provide prefix name or filters",
@@ -52,7 +53,8 @@ class CreateIp(NetboxClientRunJobArgs, NetboxCommonArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    @listen_events
+    def run(uuid, *args, **kwargs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -63,7 +65,7 @@ class CreateIp(NetboxClientRunJobArgs, NetboxCommonArgs):
             kwargs["tags"] = [kwargs["tags"]]
 
         if "{" in kwargs["prefix"] and "}" in kwargs["prefix"]:
-            kwargs["prefix"] - json.loads(kwargs["prefix"])
+            kwargs["prefix"] = json.loads(kwargs["prefix"])
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -72,6 +74,7 @@ class CreateIp(NetboxClientRunJobArgs, NetboxCommonArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            uuid=uuid,
         )
 
         return log_error_or_result(result, verbose_result=verbose_result)

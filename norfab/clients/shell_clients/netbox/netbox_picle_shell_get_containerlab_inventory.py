@@ -17,8 +17,9 @@ from pydantic import (
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from ..nornir.nornir_picle_shell import NornirCommonArgs, NorniHostsFilters
-from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_cache import CacheEnum
+from norfab.models.netbox import NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class NetboxDeviceFilters(BaseModel):
         pipe = PipeFunctionsModel
 
 
-class GetContainerlabInventoryCommand(ClientRunJobArgs):
+class GetContainerlabInventoryCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     lab_name: StrictStr = Field(
         None, description="Lab name to generate lab inventory for", alias="lab-name"
     )
@@ -99,11 +100,6 @@ class GetContainerlabInventoryCommand(ClientRunJobArgs):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of devices to generate lab inventory for",
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
     )
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "any", description="Filter worker to target"

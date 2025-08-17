@@ -17,6 +17,7 @@ from norfab.models import Result
 from typing import Union
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from norfab.core.exceptions import UnsupportedServiceError
+from norfab.models.netbox import CreatePrefixInput, NetboxFastApiArgs
 from diskcache import FanoutCache
 
 SERVICE = "netbox"
@@ -2458,7 +2459,10 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        input=CreatePrefixInput,
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def create_prefix(
         self,
         job: Job,
@@ -2480,7 +2484,7 @@ class NetboxWorker(NFPWorker):
 
         Args:
 
-            parent (Union[str, dict]): parent prefix to allocate new prefix in, could be:
+            parent (Union[str, dict]): Parent prefix to allocate new prefix from, could be:
 
                 - IPv4 prefix string e.g. 10.0.0.0/24
                 - IPv6 prefix string e.g. 2001::/64
@@ -2516,6 +2520,10 @@ class NetboxWorker(NFPWorker):
         tags = tags or []
         nb_prefix = None
         nb = self._get_pynetbox(instance)
+
+        job.event(
+            f"Processing create '/{prefixlen}' prefix request within '{parent}' parent prefix"
+        )
 
         # source parent prefix from Netbox
         if isinstance(parent, str):
@@ -2701,7 +2709,6 @@ class NetboxWorker(NFPWorker):
         ipv4_subnet: str = "172.100.100.0/24",
         ports: tuple = (12000, 15000),
         ports_map: Union[None, dict] = None,
-        progress: bool = False,
         cache: Union[bool, str] = False,
     ) -> Result:
         """
@@ -2770,7 +2777,6 @@ class NetboxWorker(NFPWorker):
                 starting with 2nd IP in the subnet, in assumption that 1st IP is a default gateway.
             ports (tuple, Optional): Ports range to use for nodes.
             ports_map (dict, Optional): dictionary keyed by node name with list of ports maps to use,
-            progress (bool, optional): If True, emits progress events.
             cache (Union[bool, str], optional): Cache usage options:
 
                 - True: Use data stored in cache if it is up to date, refresh it otherwise.
@@ -3013,7 +3019,7 @@ class NetboxWorker(NFPWorker):
         # rename links' interfaces
         for node_name, node_data in nodes.items():
             interfaces_rename = node_data.pop("interfaces_rename", [])
-            if interfaces_rename and progress:
+            if interfaces_rename:
                 job.event(f"Renaming {node_name} interfaces")
             for item in interfaces_rename:
                 if not item.get("find") or not item.get("replace"):

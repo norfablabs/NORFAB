@@ -24,7 +24,7 @@ from pydantic import (
 )
 from typing import Union, Optional, List, Any, Dict, Tuple
 from ..common import log_error_or_result
-from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_get_circuits import GetCircuits
@@ -34,6 +34,8 @@ from .netbox_picle_shell_get_containerlab_inventory import (
     GetContainerlabInventoryCommand,
 )
 from .netbox_picle_shell_create_ip import CreateIp
+from .netbox_picle_shell_create_prefix import CreatePrefixShell
+from norfab.models.netbox import NetboxCommonArgs
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"
@@ -45,7 +47,7 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-class GrapQLCommands(NetboxClientRunJobArgs, NetboxCommonArgs):
+class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
     dry_run: Optional[StrictBool] = Field(
         None,
         description="Only return query content, do not run it",
@@ -102,7 +104,7 @@ class GrapQLCommands(NetboxClientRunJobArgs, NetboxCommonArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class NetboxShowCommandsModel(NetboxClientRunJobArgs, NetboxCommonArgs):
+class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
     inventory: Any = Field(
         None,
         description="show Netbox inventory data",
@@ -177,7 +179,7 @@ class NetboxShowCommandsModel(NetboxClientRunJobArgs, NetboxCommonArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class GetInterfaces(NetboxClientRunJobArgs, NetboxCommonArgs):
+class GetInterfaces(NetboxCommonArgs, NetboxClientRunJobArgs):
     devices: Union[StrictStr, List] = Field(
         ..., description="Devices to retrieve interface for"
     )
@@ -251,6 +253,10 @@ class GetCommands(BaseModel):
 
 
 class CreateCommands(BaseModel):
+    prefix: CreatePrefixShell = Field(
+        None,
+        description="Allocate next available prefix from parent prefix",
+    )
     ip: CreateIp = Field(
         None,
         description="Allocate next available IP address from prefix",

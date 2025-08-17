@@ -57,5 +57,41 @@ interface {{ interface }}
 {% endfor %}
 ```
 
-All the same arguments supported by [Netbox service create_ip](../netbox/services_netbox_service_tasks_create_ip.md) function can be passed onto 
-`nb_create_ip` call.
+All the same arguments supported by [Netbox service create_ip](../netbox/services_netbox_service_tasks_create_ip.md) task can be passed onto `nb_create_ip` call:
+
+::: norfab.workers.netbox_worker.NetboxWorker.create_ip
+
+## nb_create_prefix
+
+This Jinja2 filter queries Netbox to get existing or create next available prefix within parent prefix. The intention is to use `nb_create_prefix` together with `nb_create_ip` function to automate the process of IP addressing devices interfaces and Netbox updates.
+
+`nb_create_prefix` can be invoked using Jinja2 filter syntax where value it is applied against must be 
+a parent prefix recorded in Netbox:
+
+```
+{% for interface in host.interfaces %}
+{% set subnet_description = host.name + ":" + interface  + ":ptp" %}
+interface {{ interface }}
+  ip address {{ "10.0.0.0/24" | nb_create_prefix(subnet_description) | nb_create_ip(host.name, interface) }}
+!
+{% endfor %}
+```
+
+above Jinja2 template will first invoke `nb_create_prefix` to allocate next available `/30` subnet in 10.0.0.0/24 prefix with `nb_create_ip` subsequently allocating next available IP address within newely allocated `/30` subnet.
+
+Alternatively, `nb_create_prefix` can be called within `set` block to assign result to a variable:
+
+```
+{% for interface in host.interfaces %}
+{% set subnet_description = host.name + ":" + interface  + ":ptp" %}
+{% set subnet = nb_create_prefix(parent="10.0.0.0/24", description=subnet_description, prefixlen=30) %}
+{% set ip = nb_create_ip(subnet, host.name, interface, description="Primary interface ip") %}
+interface {{ interface }}
+  ip address {{ ip }}
+!
+{% endfor %}
+```
+
+All the same arguments supported by [Netbox service create_prefix](../netbox/services_netbox_service_tasks_create_prefix.md) task can be passed onto `nb_create_prefix` call:
+
+::: norfab.workers.netbox_worker.NetboxWorker.create_prefix

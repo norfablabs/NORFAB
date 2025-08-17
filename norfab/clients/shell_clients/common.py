@@ -100,7 +100,7 @@ def listen_events(fun):
     def wrapper(*args, **kwargs):
         events_thread_stop = threading.Event()
         uuid = uuid4().hex
-        progress = kwargs.get("progress")
+        progress = kwargs.get("progress", True)
 
         # start events thread to handle job events printing
         if progress:
@@ -200,4 +200,9 @@ class ClientRunJobArgs(BaseModel):
         description="Control output details",
         json_schema_extra={"presence": True},
         alias="verbose-result",
+    )
+    progress: Optional[StrictBool] = Field(
+        True,
+        description="Display progress events",
+        json_schema_extra={"presence": True},
     )

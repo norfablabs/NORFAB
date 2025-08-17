@@ -818,19 +818,90 @@ class NornirWorker(NFPWorker):
             raise RuntimeError(res["messages"])
         return res["result"]["address"]
 
+    def jinja2_nb_create_prefix(
+        self, parent: str, description: str, prefixlen: int = 30, **kwargs
+    ) -> str:
+        """
+        Jinja2 filter to get or create next available prefix from
+        parent prefix using Netbox service.
+        """
+        kwargs["parent"] = parent
+        kwargs["description"] = description
+        kwargs["prefixlen"] = prefixlen
+        reply = self.client.run_job(
+            "netbox",
+            "create_prefix",
+            kwargs=kwargs,
+            workers="any",
+            timeout=30,
+        )
+        # reply is a dict of {worker_name: results_dict}
+        res = list(reply.values())[0]
+        if res["failed"]:
+            raise RuntimeError(res["messages"])
+
+        return res["result"]["prefix"]
+
+    def jinja2_call_netbox(self, netbox_task: str) -> callable:
+        """
+        Returns a callable function to execute arbitrary NetBox service task.
+        """
+
+        def call_netbox(*args, **kwargs) -> dict:
+            reply = self.client.run_job(
+                "netbox",
+                netbox_task,
+                args=args,
+                kwargs=kwargs,
+                workers="any",
+                timeout=300,
+            )
+            res = list(reply.values())[0]
+
+            # check if has an error
+            if res["failed"]:
+                raise RuntimeError(res["messages"])
+
+            # return result for single host only
+            if len(kwargs.get("devices", [])) == 1:
+                return res["result"][kwargs["devices"][0]]
+            # return full results
+            else:
+                return res["result"]
+
+        return call_netbox
+
+    def add_jinja2_netbox(self) -> Dict:
+        """
+        Aggregates Jinja2 NetBox-related methods and functions into a dictionary
+        for the ease of use within Jinja2 templates.
+        """
+        return {
+            "get_connections": self.jinja2_call_netbox("get_connections"),
+            "get_interfaces": self.jinja2_call_netbox("get_interfaces"),
+            "get_circuits": self.jinja2_call_netbox("get_circuits"),
+            "get_devices": self.jinja2_call_netbox("get_devices"),
+            "rest": self.jinja2_call_netbox("rest"),
+            "graphql": self.jinja2_call_netbox("graphql"),
+            "create_ip": self.jinja2_nb_create_ip,
+            "create_prefix": self.jinja2_nb_create_prefix,
+        }
+
     def add_jinja2_filters(self) -> Dict:
         """
-        Adds custom filters for use in Jinja2 templates.
+        Adds custom filters for use in Jinja2 templates using `|` syntaxis.
 
         Returns:
             dict (Dict): A dictionary where the keys are the names of the filters
                 and the values are the corresponding filter functions.
 
                 - "nb_create_ip": Method to get the next IP address.
+                - "nb_create_prefix": Method to get next available prefix.
                 - "network_hosts": Method to get IP network hosts.
         """
         return {
-            "nb_create_ip": self.jinja2_nb_create_ip,
+            "netbox.create_ip": self.jinja2_nb_create_ip,
+            "netbox.create_prefix": self.jinja2_nb_create_prefix,
             "network_hosts": self.jinja2_network_hosts,
         }
 
@@ -1186,7 +1257,7 @@ class NornirWorker(NFPWorker):
                         "host": host,
                         "norfab": self.client,
                         "job_data": job_data,
-                        "nb_create_ip": self.jinja2_nb_create_ip,
+                        "netbox": self.add_jinja2_netbox(),
                     },
                     filters=self.add_jinja2_filters(),
                 )
@@ -1293,7 +1364,7 @@ class NornirWorker(NFPWorker):
                     "host": host,
                     "norfab": self.client,
                     "job_data": job_data,
-                    "nb_create_ip": self.jinja2_nb_create_ip,
+                    "netbox": self.add_jinja2_netbox(),
                 },
                 filters=self.add_jinja2_filters(),
             )
@@ -1399,6 +1470,7 @@ class NornirWorker(NFPWorker):
                         "host": host,
                         "norfab": self.client,
                         "job_data": job_data,
+                        "netbox": self.add_jinja2_netbox(),
                     },
                     filters=self.add_jinja2_filters(),
                 )

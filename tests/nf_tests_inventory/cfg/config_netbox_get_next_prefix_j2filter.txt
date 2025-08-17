@@ -1,0 +1,8 @@
+{% set connections = netbox.get_connections(devices=[host.name]) -%}
+
+{% for interface, connection in connections.items() -%}
+{% set subnet_description = [host.name + ":" + interface, connection["remote_device"] + ":" + connection["remote_interface"]] | sort | join(" - ptp - ") -%}
+interface {{ interface }}
+  ip address {{ "10.1.0.0/24" | netbox.create_prefix(subnet_description) | netbox.create_ip(host.name, interface) }}
+!
+{% endfor %}

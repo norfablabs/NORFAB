@@ -16,7 +16,7 @@ from pydantic import (
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events, BoolEnum
 from ..nornir.nornir_picle_shell import NornirCommonArgs, NorniHostsFilters
-from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class CacheEnum(Enum):
     FORCE = "force"
 
 
-class CacheList(NetboxClientRunJobArgs, NetboxCommonArgs):
+class CacheList(NetboxClientRunJobArgs):
     keys: StrictStr = Field("*", description="Glob pattern to list keys for")
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Filter worker to target"
@@ -92,7 +92,7 @@ class CacheList(NetboxClientRunJobArgs, NetboxCommonArgs):
         outputter = Outputters.outputter_nested
 
 
-class CacheClear(NetboxClientRunJobArgs, NetboxCommonArgs):
+class CacheClear(NetboxClientRunJobArgs):
     key: StrictStr = Field(None, description="Key name to remove from cache")
     keys: StrictStr = Field(
         None, description="Glob pattern of keys to remove from cache"
@@ -130,7 +130,7 @@ class CacheClear(NetboxClientRunJobArgs, NetboxCommonArgs):
         outputter = Outputters.outputter_nested
 
 
-class CacheGet(NetboxClientRunJobArgs, NetboxCommonArgs):
+class CacheGet(NetboxClientRunJobArgs):
     key: StrictStr = Field(None, description="Key name to retrieve data for from cache")
     keys: StrictStr = Field(
         None, description="Glob pattern of keys to retrieve data for from cache"

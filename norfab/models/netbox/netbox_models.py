@@ -1,0 +1,79 @@
+import builtins
+
+from pydantic import (
+    BaseModel,
+    StrictBool,
+    StrictInt,
+    StrictFloat,
+    StrictStr,
+    Field,
+    model_validator,
+)
+from enum import Enum
+from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from norfab.models import Result
+
+
+class NetboxCommonArgs(BaseModel):
+    """Model to enlist arguments common across Netbox service tasks"""
+
+    instance: Optional[StrictStr] = Field(
+        None,
+        description="Netbox instance name to target",
+    )
+    dry_run: StrictBool = Field(
+        None,
+        description="Do not commit to database",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+
+    @staticmethod
+    def source_instance():
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.run_job("netbox", "get_inventory", workers="any")
+        for worker_name, inventory in reply.items():
+            return list(inventory["result"]["instances"])
+
+
+class NetboxFastApiArgs(BaseModel):
+    """Model to specify arguments for FastAPI REST API endpoints"""
+
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        "any", description="Filter worker to target"
+    )
+
+
+class PrefixStatusEnum(str, Enum):
+    active = "active"
+    reserved = "reserved"
+    container = "container"
+    deprecated = "deprecated"
+    Active = "Active"
+    Reserved = "Reserved"
+    Container = "Container"
+    Deprecated = "Deprecated"
+
+
+class CreatePrefixInput(NetboxCommonArgs):
+    parent: Union[StrictStr, dict] = Field(
+        ...,
+        description="Parent prefix to allocate new prefix from",
+    )
+    description: StrictStr = Field(..., description="Description for new prefix")
+    prefixlen: StrictInt = Field(30, description="The prefix length of the new prefix")
+    vrf: StrictStr = Field(
+        None, description="Name of the VRF to associate with the prefix"
+    )
+    tags: Union[StrictStr, list[StrictStr]] = Field(
+        None, description="List of tags to assign to the prefix"
+    )
+    tenant: StrictStr = Field(
+        None, description="Name of the tenant to associate with the prefix"
+    )
+    comments: StrictStr = Field(None, description="Comments for the prefix")
+    role: StrictStr = Field(None, description="Role to assign to the prefix")
+    site: StrictStr = Field(
+        None, description="Name of the site to associate with the prefix"
+    )
+    status: PrefixStatusEnum = Field(None, description="Status of the prefix")

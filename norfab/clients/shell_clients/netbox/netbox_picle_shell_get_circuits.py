@@ -16,13 +16,14 @@ from pydantic import (
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from ..nornir.nornir_picle_shell import NornirCommonArgs, NorniHostsFilters
-from .netbox_picle_shell_common import NetboxCommonArgs, NetboxClientRunJobArgs
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_cache import CacheEnum
+from norfab.models.netbox import NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 
 
-class GetCircuits(NetboxClientRunJobArgs, NetboxCommonArgs):
+class GetCircuits(NetboxCommonArgs, NetboxClientRunJobArgs):
     devices: Union[StrictStr, List[StrictStr]] = Field(
         None, description="Device names to query data for", alias="device-list"
     )

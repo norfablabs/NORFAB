@@ -33,7 +33,9 @@ class UnauthorizedMessage(BaseModel):
     detail: str = "Bearer token missing or unknown"
 
 
-def create_api_endpoint(task: dict, worker: object):
+def create_api_endpoint(
+    service: str, task_name: str, schema: dict, worker: object
+) -> callable:
     """
     Creates an asynchronous FastAPI endpoint function for a given service task.
 
@@ -50,6 +52,7 @@ def create_api_endpoint(task: dict, worker: object):
     """
     # We will handle a missing token ourselves
     get_bearer_token = HTTPBearer(auto_error=False)
+    default_workers = schema["properties"].get("workers", {}).get("default")
 
     def get_token(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
@@ -70,10 +73,12 @@ def create_api_endpoint(task: dict, worker: object):
         token: str = Depends(get_token),
     ) -> Dict[Annotated[str, Body(description="Worker Name")], Result]:
         kwargs = await request.json()
+        workers = kwargs.pop("workers", default_workers)
         res = worker.client.run_job(
-            service=task["service"],
-            task=task["name"],
+            service=service,
+            task=task_name,
             kwargs=kwargs,
+            workers=workers,
         )
         return res
 
@@ -138,14 +143,28 @@ def service_tasks_api_discovery(
                     if isinstance(route, Route) and route.path == path:
                         break  # do no re-create existing endpoints
                 else:
-                    _ = task["inputSchema"]["properties"].pop("job", None)
+                    # form OpenAPI schema for API endpoint
+                    schema = task["inputSchema"]
+                    fastapi_schema = task["fastapi"].pop("schema", {"properties": {}})
+                    schema["properties"] = {
+                        **fastapi_schema["properties"],
+                        **schema["properties"],
+                    }
+                    _ = schema["properties"].pop("job", None)
+                    # form add_api_route arguments
                     task["fastapi"].setdefault("methods", ["POST"])
                     task["fastapi"].setdefault("path", path)
                     task["fastapi"].setdefault("description", task["description"])
                     task["fastapi"].setdefault("name", task["name"])
+                    # register API endpoint
                     log.info(f"Registering API endpoint {task['fastapi']['path']}")
                     worker.app.add_api_route(
-                        endpoint=create_api_endpoint(task, worker),
+                        endpoint=create_api_endpoint(
+                            service=task["service"],
+                            task_name=task["name"],
+                            schema=schema,
+                            worker=worker,
+                        ),
                         responses={
                             status.HTTP_401_UNAUTHORIZED: dict(
                                 model=UnauthorizedMessage
@@ -154,9 +173,7 @@ def service_tasks_api_discovery(
                         openapi_extra={
                             "requestBody": {
                                 "required": True,
-                                "content": {
-                                    "application/json": {"schema": task["inputSchema"]}
-                                },
+                                "content": {"application/json": {"schema": schema}},
                             }
                         },
                         **task["fastapi"],

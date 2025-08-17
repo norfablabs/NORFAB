@@ -1,5 +1,5 @@
 {% for interface in host.interfaces %}
-{% set ip = nb_create_ip("10.0.0.0/24", host.name, interface, description="Primary interface ip") %}
+{% set ip = netbox.create_ip("10.0.0.0/24", host.name, interface, description="Primary interface ip") %}
 interface {{ interface }}
   ip address {{ ip }}
 !

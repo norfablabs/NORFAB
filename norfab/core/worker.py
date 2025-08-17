@@ -46,7 +46,6 @@ class Job:
         args: list = None,
         kwargs: dict = None,
         task: str = None,
-        progress: bool = False,
     ):
         self.worker = worker
         self.juuid = juuid
@@ -55,11 +54,10 @@ class Job:
         self.args = args or []
         self.kwargs = kwargs or {}
         self.task = task
-        self.progress = progress
 
     def event(self, message, **kwargs):
         kwargs.setdefault("task", self.task)
-        if self.kwargs.get("progress") and self.juuid and self.worker:
+        if self.kwargs.get("progress", False) and self.juuid and self.worker:
             self.worker.event(
                 message=message,
                 juuid=self.juuid,
@@ -132,6 +130,20 @@ class Task:
             self.fastapi = fastapi or {}
 
     def __call__(self, function: Callable) -> Callable:
+        """
+        Decorator to register a function as a worker task with input/output
+        validation and optional argument filtering.
+
+        This method wraps the provided function, validates its input arguments
+        and output, and registers it as a task. It also removes 'job' and
+        'progress' keyword arguments if the wrapped function does not accept them.
+
+        Side Effects:
+
+            - Sets self.function, self.description, and self.name based on the provided function.
+            - Initializes input model if not already set.
+            - Updates the global NORFAB_WORKER_TASKS with the task schema.
+        """
         self.function = function
         self.description = self.description or function.__doc__
         self.name = function.__name__
@@ -141,12 +153,16 @@ class Task:
 
         @functools.wraps(self.function)
         def wrapper(*args, **kwargs):
+            # remove `job` argument if function does not expect it
+            if self.is_need_argument(function, "job") is False:
+                _ = kwargs.pop("job", None)
+
+            # remove `progress` argument if function does not expect it
+            if self.is_need_argument(function, "progress") is False:
+                _ = kwargs.pop("progress", None)
+
             # validate input arguments
             self.validate_input(args, kwargs)
-
-            # check if function expects `job` argument
-            if self.is_need_job(function) is False:
-                _ = kwargs.pop("job", None)
 
             ret = self.function(*args, **kwargs)
 
@@ -164,6 +180,17 @@ class Task:
         return wrapper
 
     def make_input_model(self):
+        """
+        Dynamically creates a Pydantic input model for the worker's function by inspecting its signature.
+
+        This method uses `inspect.getfullargspec` to extract the function's argument names, default values,
+        keyword-only arguments, and type annotations. It then constructs a dictionary of field specifications,
+        giving preference to type annotations where available, and excluding special parameters such as 'self',
+        'return', 'job', and any *args or **kwargs. The resulting specification is used to create a Pydantic
+        model, which is assigned to `self.input`.
+
+        The generated model used for input validation.
+        """
         (
             fun_args,  # list of the positional parameter names
             fun_varargs,  # name of the * parameter or None
@@ -209,6 +236,24 @@ class Task:
         self.input = create_model(self.name, **fields_spec)
 
     def make_task_schema(self, wrapper) -> dict:
+        """
+        Generates a task schema dictionary for the current worker.
+
+        Args:
+            wrapper (Callable): The function wrapper to be associated with the task.
+
+        Returns:
+            dict: A dictionary containing the task's metadata, including:
+                - function: The provided wrapper function.
+                - module: The module name where the original function is defined.
+                - schema: A dictionary with the following keys:
+                    - name (str): The name of the task.
+                    - description (str): The description of the task.
+                    - inputSchema (dict): The JSON schema for the input model.
+                    - outputSchema (dict): The JSON schema for the output model.
+                    - annotations: Additional MCP annotations for the task.
+                    - fastapi: FastAPI-specific metadata.
+        """
         input_json_schema = self.input.model_json_schema()
         _ = input_json_schema.pop("title")
         output_json_schema = self.output.model_json_schema()
@@ -228,18 +273,22 @@ class Task:
             }
         }
 
-    def is_need_job(self, function):
+    def is_need_argument(self, function: callable, argument: str) -> bool:
+        """
+        Determines whether a given argument name is required by the function.
+        """
         fun_args, *_ = inspect.getfullargspec(function)
-        return "job" in fun_args
+        return argument in fun_args
 
     def merge_args_to_kwargs(self, args: List, kwargs: Dict) -> Dict:
         """
-        Merges positional arguments (`args`) and keyword arguments (`kwargs`) into a single dictionary.
+        Merges positional arguments (`args`) and keyword arguments (`kwargs`)
+        into a single dictionary.
 
-        This function uses the argument specification of the decorated function to ensure that
-        all arguments are properly combined into a dictionary. This is particularly useful for
-        scenarios where **kwargs need to be passed to another function or model (e.g., for
-        validation purposes).
+        This function uses the argument specification of the decorated function
+        to ensure that all arguments are properly combined into a dictionary.
+        This is particularly useful for scenarios where **kwargs need to be passed
+        to another function or model (e.g., for validation purposes).
 
         Arguments:
             args (list): A list of positional arguments passed to the decorated function.
