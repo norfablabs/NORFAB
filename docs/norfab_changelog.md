@@ -25,6 +25,8 @@
 3. Upgrading Pynetbox library dependency from 7.4.0 to 7.5.0
 4. Refactoring Netbox service pydantic models
 5. BREAKING CHANGE: Starting NorFab 0.11.0 containerlab service only supports Containerlab 0.69+
+6. Dependencies updates.
+
 
 ## 0.10.0
 

@@ -31,7 +31,7 @@ git clone https://github.com/norfablabs/NORFAB.git norfab
 To build NorFab docker images we are going to use `docker compose` utility, it will create broker and nornir service workers containers:
 
 ```
-cd norfab/docker
+cd norfab/docker/norfab-docker
 docker compose build
 ```
 
@@ -44,7 +44,7 @@ docker compose start
 After broker reports that it is started and worker shows that it is registered with broker, this is a good indication that things are going ok:
 
 ```
-root@dockervm:/home/user/norfab/docker# docker compose up
+root@dockervm:/home/user/norfab/docker/norfab-docker# docker compose up
 [+] Running 2/0
  ✔ Container norfab-broker          Created                   0.0s 
  ✔ Container norfab-service-nornir  Created                   0.0s 
@@ -57,7 +57,7 @@ norfab-service-nornir  | 2025-02-02 10:40:21.566 INFO [norfab.workers.nornir_wor
 ...
 ```
 
-Folder `norfab/docker/norfab` mounted to the containers as a volume under `/etc/norfab` path and this is the content of `inventory.yaml` file:
+Folder `norfab/docker/norfab/norfab-docker` mounted to the containers as a volume under `/etc/norfab` path and this is the content of `inventory.yaml` file:
 
 ``` inventory.yaml
 # broker settings
@@ -93,7 +93,7 @@ nfcli --show-broker-shared-key
 Running above commands will produce similar to this output:
 
 ```
-root@user:/home/user/norfab/docker# docker exec -it norfab-broker bash
+root@user:/home/user/norfab/docker/norfab-docker# docker exec -it norfab-broker bash
 root@norfab-broker:/# cd /etc/norfab
 root@norfab-broker:/etc/norfab# nfcli --show-broker-shared-key
 NorFab broker public key content:
