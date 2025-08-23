@@ -1,0 +1,7 @@
+FROM python:3.9.7-slim-bullseye
+
+RUN apt-get update && \
+    apt-get clean && \
+    pip install --no-cache-dir pip setuptools wheel poetry --upgrade
+
+RUN pip install --no-cache-dir norfab --upgrade
