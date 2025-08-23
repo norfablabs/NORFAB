@@ -252,7 +252,7 @@ jobs:
           context: .
           file: ./docker/norfab-docker-build/Dockerfile.norfab.aio
           push: true
-          tags: "dmulyalin/norfab:service-aio-${{ github.ref_name }},dmulyalin/norfab:service-aio-latest"
+          tags: "dmulyalin/norfab:aio-${{ github.ref_name }},dmulyalin/norfab:aio-latest"
           labels: ${{ steps.meta.outputs.labels }}
           
       - name: Generate artifact attestation

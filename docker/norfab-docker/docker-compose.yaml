@@ -2,69 +2,13 @@ version: "3.9"
 
 services:
 
-  norfab-broker:
-    container_name: "norfab-broker"
-    hostname: 'norfab-broker'
-    build:
-      context: .
-      dockerfile: Dockerfile.norfab.broker
+  norfab:
+    container_name: "norfab"
+    hostname: 'norfab'
+    image: docker.io/dmulyalin/norfab:service-aio-latest
     environment:
       LOG_LEVEL: INFO
     volumes:
-      # bind folder with norfab files
       - type: bind
         source: ./norfab/
         target: /etc/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.100
-    # expose ZeroMQ port
-    ports:
-      - "5555:5555/tcp"
-        
-  norfab-service-nornir:
-    container_name: "norfab-service-nornir"
-    hostname: 'norfab-service-nornir'
-    build:
-      context: .
-      dockerfile: Dockerfile.norfab.nornir
-    environment:
-      LOG_LEVEL: INFO
-      WORKERS_LIST: nornir-worker-1
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.101
-    depends_on:
-      - norfab-broker
-
-  norfab-service-netbox:
-    container_name: "norfab-service-netbox"
-    hostname: 'norfab-service-netbox'
-    build:
-      context: .
-      dockerfile: Dockerfile.norfab.netbox
-    environment:
-      LOG_LEVEL: INFO
-      WORKERS_LIST: netbox-worker-1,netbox-worker-2
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.102
-    depends_on:
-      - norfab-broker
-
-networks:
-  net0:
-    ipam:
-      config:
-        - subnet: 10.0.0.0/24
-          gateway: 10.0.0.1

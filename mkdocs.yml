@@ -123,12 +123,12 @@ nav:
               - UPDATE Device Facts: workers/netbox/services_netbox_service_tasks_update_device_facts.md
               - UPDATE Device Interfaces: workers/netbox/services_netbox_service_tasks_update_device_interfaces.md
               - UPDATE Device IP: workers/netbox/services_netbox_service_tasks_update_device_ip.md
-        - Ollama Agent Service:
+        - Agent Service:
             - Overview: workers/agent/services_agent_service.md
             - Inventory: workers/agent/services_agent_service_inventory.md
             - Tasks:
               - Chat: workers/agent/services_agent_service_tasks_chat.md
-        - REST API Service:
+        - FastAPI Service:
             - Overview: workers/fastapi/services_fastapi_service.md
             - Inventory: workers/fastapi/services_fastapi_service_inventory.md
             - Tasks:

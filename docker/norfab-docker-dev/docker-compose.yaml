@@ -7,7 +7,7 @@ services:
     hostname: 'norfab-broker'
     build:
       context: ../../../
-      dockerfile: norfab/docker/norfab-docker-dev/Dockerfile.norfab.broker
+      dockerfile: norfab/docker/norfab-docker-build/Dockerfile.norfab.broker
     environment:
       LOG_LEVEL: INFO
     volumes:
@@ -31,7 +31,7 @@ services:
     hostname: 'norfab-service-nornir'
     build:
       context: ../../../
-      dockerfile: norfab/docker/norfab-docker-dev/Dockerfile.norfab.nornir
+      dockerfile: norfab/docker/norfab-docker-build/Dockerfile.norfab.nornir
     environment:
       LOG_LEVEL: INFO
     volumes:
@@ -54,7 +54,7 @@ services:
     hostname: 'norfab-service-netbox'
     build:
       context: ../../../
-      dockerfile: norfab/docker/norfab-docker-dev/Dockerfile.norfab.netbox
+      dockerfile: norfab/docker/norfab-docker-build/Dockerfile.norfab.netbox
     environment:
       LOG_LEVEL: INFO
     volumes:

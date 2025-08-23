@@ -1,7 +1,7 @@
 
 # broker settings
 broker:
-  endpoint: "tcp://10.0.0.100:5555"
+  endpoint: "tcp://127.0.0.1:5555"
   
 # workers inventory section
 workers:
@@ -11,6 +11,10 @@ workers:
     - nornir/nornir-worker-1.yaml
   netbox-*:
     - netbox/common.yaml
+  fastapi*:
+    - fastapi/common.yaml
+  workflow*:
+    - workflow/common.yaml
     
 # you can also source variables from the environment using Jinja2 syntax
 # logging:
@@ -26,4 +30,5 @@ topology:
   workers:
     - nornir-worker-1
     - netbox-worker-1
-    - netbox-worker-2
+    - fastapi-worker-1
+    - workflow-worker-1
