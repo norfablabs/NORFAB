@@ -1,0 +1,13 @@
+FROM python:3.9.7-slim-bullseye
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y openssh-client && \
+    apt-get clean && \
+    pip install --no-cache-dir pip setuptools wheel poetry --upgrade
+
+RUN pip install --no-cache-dir norfab --upgrade && \
+    pip install --no-cache-dir norfab[full]
+
+ENV LOG_LEVEL=INFO
+
+ENTRYPOINT cd /etc/norfab/ && nfcli -l $LOG_LEVEL

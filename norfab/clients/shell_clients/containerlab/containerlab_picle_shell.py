@@ -327,8 +327,10 @@ class ShowContainers(ClientRunJobArgs):
         else:
             # replace labPath with topology_file
             for wname, wres in ret.items():
-                for c in wres["containers"]:
-                    c["topology_file"] = os.path.split(c.pop("labPath"))[-1]
+                for lname, containers in wres.items():
+                    for c in containers:
+                        c["topology_file"] = os.path.split(c.pop("labPath"))[-1]
+                        _ = c.pop("absLabPath", None)
             return (ret, Outputters.outputter_nested, {"with_tables": True})
 
     class PicleConfig:
