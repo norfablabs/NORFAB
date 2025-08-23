@@ -126,6 +126,9 @@ def service_tasks_api_discovery(
                     workers="any",
                     timeout=3,
                 )
+                # skip if client request timed out
+                if service_tasks is None:
+                    continue
                 for wres in service_tasks.values():
                     for t in wres["result"]:
                         t["service"] = service

@@ -2,12 +2,13 @@
 
 ### FEATURES
 
-1. FastAPI services enhanced to generate api endpoints for all services tasks automatically using `@Task` decorator data
-2. Picle show containerlab containers now emits output with nested tables
-3. Netbox `create_ip` task enhanced to source prefixes to allocate next IP from using prefix description string
-4. Added `create_prefix` task to Netbox service to allocate next available prefix
-5. Adding `nb_create_prefix` Nornir service Jinja2 filter allocate next available prefix during templates rendering
-6. Added `fastapi` argument to `@Task` decorator to control FastAPI REST API endpoints auto-generation
+1. FastAPI Services -  enhanced to generate api endpoints for all services tasks automatically using `@Task` decorator data
+2. NFCLI -  Picle show containerlab containers now emits output with nested tables
+3. Netbox Service - `create_ip` task enhanced to source prefixes to allocate next IP from using prefix description string
+4. Netbox Service -  Added `create_prefix` task to allocate next available prefix
+5. Nornir Service - Adding `nb_create_prefix` Jinja2 filter allocate next available prefix during templates rendering
+6. Worker - Added `fastapi` argument to `@Task` decorator to control FastAPI REST API endpoints auto-generation
+7. Containerlab Service - added support for Containerlab 0.69+
 
 ### BUGS
 
@@ -21,6 +22,7 @@
 2. Upgrading PICLE library dependency from 0.9.0 to 0.9.1
 3. Upgrading Pynetbox library dependency from 7.4.0 to 7.5.0
 4. Refactoring Netbox service pydantic models
+5. BREAKING: Starting NorFab 0.11.0 containerlab service only supports Containerlab 0.69+
 
 ## 0.10.0
 

@@ -2,7 +2,8 @@
 
 {% for interface, connection in connections.items() -%}
 {% set subnet_description = [host.name + ":" + interface, connection["remote_device"] + ":" + connection["remote_interface"]] | sort | join(" - ptp - ") -%}
+{% set ip = netbox.create_prefix("10.1.0.0/24", subnet_description, 30) | netbox.create_ip(host.name, interface) %}
 interface {{ interface }}
-  ip address {{ "10.1.0.0/24" | netbox.create_prefix(subnet_description, 30) | netbox.create_ip(host.name, interface) }}
+  ip address {{ ip }}
 !
 {% endfor %}

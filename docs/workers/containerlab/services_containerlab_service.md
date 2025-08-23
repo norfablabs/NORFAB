@@ -21,7 +21,8 @@ By leveraging Containerlab, you can:
 
 ## Supported Containerlab Versions
 
-- **0.67.0** - tested and supported
+- **0.67** - tested and supported by NorfAB before 0.11.0
+- **0.69** - tested and supported by NorfAB 0.11.0 onwards
 
 ## Containerlab Service Tasks
 

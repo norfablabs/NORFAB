@@ -59,7 +59,32 @@ class ContainerlabWorker(NFPWorker):
         # merge local inventory with inventory from broker
         merge_recursively(self.inventory[self.name], self.load_inventory())
 
+        self.clab_version = self.get_clab_version()
+
         self.init_done_event.set()
+
+    def get_clab_version(self):
+        clab_version = None
+        clab_version = subprocess.run(
+            ["containerlab", "version"], capture_output=True, text=True
+        )
+        if clab_version.returncode == 0:
+            clab_version = clab_version.stdout
+            for line in clab_version.splitlines()[6:]:
+                if "version" in line.lower():
+                    clab_version = [int(i) for i in line.split(" ")[-1].split(".")]
+                    break
+            else:
+                raise RuntimeError(
+                    f"Containerlab worker failed to get containerlab version"
+                )
+        else:
+            raise RuntimeError(
+                f"Containerlab worker failed to get containerlab version, "
+                f"error: '{clab_version.stderr.decode('utf-8')}'"
+            )
+
+        return clab_version
 
     def worker_exit(self):
         """
@@ -87,7 +112,7 @@ class ContainerlabWorker(NFPWorker):
             "pydantic": "",
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
-            "containerlab": "",
+            "containerlab": ".".join([str(i) for i in self.clab_version]),
         }
         ret = Result(task=f"{self.name}:get_version", result=libs)
 
@@ -97,17 +122,6 @@ class ContainerlabWorker(NFPWorker):
                 libs[pkg] = importlib.metadata.version(pkg)
             except importlib.metadata.PackageNotFoundError:
                 pass
-
-        # get containerlab version
-        clab_version = subprocess.run(
-            ["containerlab", "version"], capture_output=True, text=True
-        )
-        if clab_version.returncode == 0:
-            libs["containerlab"] = clab_version.stdout
-            libs["containerlab"] = "\n".join(libs["containerlab"].splitlines()[6:])
-        else:
-            ret.failed = True
-            ret.errors = [clab_version.stderr.decode("utf-8")]
 
         return ret
 
@@ -161,7 +175,7 @@ class ContainerlabWorker(NFPWorker):
 
         # form topologies list if any of them are runing
         if inspect.result:
-            ret.result = [i["lab_name"] for i in inspect.result["containers"]]
+            ret.result = inspect.result.keys()
             ret.result = list(sorted(set(ret.result)))
 
         return ret
@@ -175,6 +189,7 @@ class ContainerlabWorker(NFPWorker):
         timeout: int = None,
         ret: Result = None,
         env: Union[None, dict] = None,
+        expect_output: bool = True,
     ) -> Tuple:
         """
         Executes a containerlab command using subprocess and processes its output.
@@ -185,6 +200,7 @@ class ContainerlabWorker(NFPWorker):
             timeout (int, optional): The timeout for the command execution in seconds. Defaults to None.
             ret (Result, optional): An optional Norfab result object to populate with the command's output. Defaults to None.
             env (dict, Optional): OS Environment variables ti use when running the process
+            expect_output (bool, Optional): whether to expect any output from command
 
         Returns:
             Tuple: If `ret` is None, returns a tuple containing:
@@ -241,29 +257,33 @@ class ContainerlabWorker(NFPWorker):
 
         # populate Norfab result object
         if ret is not None:
-            try:
-                ret.result = json.loads(output)
-            except Exception as e:
-                ret.result = output
-                log.error(
-                    f"{self.name} - failed to load containerlab results into JSON, error: {e}, result: '{output}'"
-                )
             # check if command failed
             if proc.returncode != 0:
                 ret.failed = True
                 ret.errors = ["\n".join(logs)]
-            # check if got errors
-            elif not output and any(
-                error in log
-                for log in logs
-                for error in [
-                    "no containers found",
-                ]
-            ):
+            # check if got no output
+            elif not output.strip() and expect_output is True:
                 ret.failed = True
                 ret.errors = ["\n".join(logs)]
             else:
                 ret.messages = ["\n".join(logs)]
+                try:
+                    ret.result = json.loads(output)
+                except Exception as e:
+                    # if failed, remove any beginning lines that are not part of json
+                    try:
+                        line_split = output.splitlines()
+                        for index, line in enumerate(line_split):
+                            # find first json output line
+                            if "{" in line or "[" in line:
+                                ret.result = json.loads("\n".join(line_split[index:]))
+                                break
+                    except Exception as e:
+                        ret.result = output
+                        log.error(
+                            f"{self.name} - failed to load containerlab results into JSON, error: {e}, result: '{output}'"
+                        )
+
             return ret
         # return command results as is
         else:
@@ -276,7 +296,7 @@ class ContainerlabWorker(NFPWorker):
         topology: str,
         reconfigure: bool = False,
         timeout: int = None,
-        node_filter: str = None,
+        node_filter: Union[None, str] = None,
     ) -> Result:
         """
         Deploys a containerlab topology.
@@ -309,12 +329,13 @@ class ContainerlabWorker(NFPWorker):
 
         # download topology file
         topology_file = os.path.join(topology_folder, os.path.split(topology)[-1])
-        downloaded_topology_file = self.fetch_file(
-            topology, raise_on_fail=True, read=False
-        )
-        os.rename(
-            downloaded_topology_file, topology_file
-        )  # move tpology file under desired folder
+        if self.is_url(topology):
+            downloaded_topology_file = self.fetch_file(
+                topology, raise_on_fail=True, read=False
+            )
+            os.rename(
+                downloaded_topology_file, topology_file
+            )  # move tpology file under desired folder
 
         # form command arguments
         args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
@@ -323,7 +344,7 @@ class ContainerlabWorker(NFPWorker):
             job.event(f"Re-deploying lab {os.path.split(topology_file)[-1]}")
         else:
             job.event(f"Deploying lab {os.path.split(topology_file)[-1]}")
-        if node_filter is not None:
+        if node_filter:
             args.append("--node-filter")
             args.append(node_filter)
 
@@ -369,13 +390,18 @@ class ContainerlabWorker(NFPWorker):
             ret.errors = [f"'{lab_name}' lab not found"]
             ret.result = {lab_name: False}
         else:
-            topology_file = inspect.result[0]["Labels"]["clab-topo-file"]
+            topology_file = inspect.result[lab_name][0]["Labels"]["clab-topo-file"]
             topology_folder = os.path.split(topology_file)[0]
 
             # run destroy command
             args = ["containerlab", "destroy", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args=args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
+                args=args,
+                cwd=topology_folder,
+                timeout=timeout,
+                ret=ret,
+                job=job,
+                expect_output=False,
             )
 
             if not ret.failed:
@@ -422,6 +448,13 @@ class ContainerlabWorker(NFPWorker):
             args=args, timeout=timeout, ret=ret, job=job
         )
 
+        # check if lab name given and it is not in output
+        if lab_name and lab_name not in ret.result:
+            ret.failed = True
+            msg = f"'{lab_name}' lab not found"
+            ret.errors.append(msg)
+            log.error(msg)
+
         return ret
 
     @Task(fastapi={"methods": ["POST"]})
@@ -453,13 +486,18 @@ class ContainerlabWorker(NFPWorker):
             ret.errors = [f"'{lab_name}' lab not found"]
             ret.result = {lab_name: False}
         else:
-            topology_file = inspect.result[0]["Labels"]["clab-topo-file"]
+            topology_file = inspect.result[lab_name][0]["Labels"]["clab-topo-file"]
             topology_folder = os.path.split(topology_file)[0]
 
             # run destroy command
             args = ["containerlab", "save", "-t", topology_file]
             ret = self.run_containerlab_command(
-                args=args, cwd=topology_folder, timeout=timeout, ret=ret, job=job
+                args=args,
+                cwd=topology_folder,
+                timeout=timeout,
+                ret=ret,
+                job=job,
+                expect_output=False,
             )
 
             if not ret.failed:
@@ -496,7 +534,7 @@ class ContainerlabWorker(NFPWorker):
             ret.errors = [f"'{lab_name}' lab not found"]
             ret.result = {lab_name: False}
         else:
-            topology_file = inspect.result[0]["Labels"]["clab-topo-file"]
+            topology_file = inspect.result[lab_name][0]["Labels"]["clab-topo-file"]
             topology_folder = os.path.split(topology_file)[0]
 
             # add needed env variables
@@ -596,67 +634,70 @@ class ContainerlabWorker(NFPWorker):
         )
 
         # form hosts inventory
-        for container in inspect.result:
-            host_name = container["Labels"]["clab-node-name"]
-            host_port = None
-            host_ip = None
-
-            # get ssh port
-            for port in container["Ports"]:
-                host_ip = primary_host_ip
-                if port["port"] == 22 and port["protocol"] == "tcp":
-                    host_port = port["host_port"]
-                    # get host ip address
-                    if port["host_ip"] not in [
-                        "0.0.0.0",
-                        "127.0.0.1",
-                        "localhost",
-                        "::",
-                    ]:
-                        host_ip = port["host_ip"]
-                    break
-            else:
-                log.error(f"{self.name} - {host_name} failed to map SSH port.")
+        for lname, containers in inspect.result.items():
+            if lab_name and lname != lab_name:
                 continue
+            for container in containers:
+                host_name = container["Labels"]["clab-node-name"]
+                host_port = None
+                host_ip = None
 
-            # add host to Nornir inventory
-            ret.result["hosts"][host_name] = {
-                "hostname": host_ip,
-                "port": host_port,
-                "groups": groups,
-            }
+                # get ssh port
+                for port in container["Ports"]:
+                    host_ip = primary_host_ip
+                    if port["port"] == 22 and port["protocol"] == "tcp":
+                        host_port = port["host_port"]
+                        # get host ip address
+                        if port["host_ip"] not in [
+                            "0.0.0.0",
+                            "127.0.0.1",
+                            "localhost",
+                            "::",
+                        ]:
+                            host_ip = port["host_ip"]
+                        break
+                else:
+                    log.error(f"{self.name} - {host_name} failed to map SSH port.")
+                    continue
 
-            # get netmiko platform
-            clab_platform_name = container["Labels"]["clab-node-kind"]
-            netmiko_platform = PlatformMap.convert(
-                "containerlab", "netmiko", clab_platform_name
-            )
-            if netmiko_platform:
-                ret.result["hosts"][host_name]["platform"] = netmiko_platform[
-                    "platform"
-                ]
-            else:
-                log.warning(
-                    f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not mapped to Netmiko platform."
+                # add host to Nornir inventory
+                ret.result["hosts"][host_name] = {
+                    "hostname": host_ip,
+                    "port": host_port,
+                    "groups": groups,
+                }
+
+                # get netmiko platform
+                clab_platform_name = container["Labels"]["clab-node-kind"]
+                netmiko_platform = PlatformMap.convert(
+                    "containerlab", "netmiko", clab_platform_name
                 )
-                continue
-
-            # get default credentials
-            if use_default_credentials:
-                clab_platform = PlatformMap.get("containerlab", clab_platform_name)
-                if not clab_platform:
+                if netmiko_platform:
+                    ret.result["hosts"][host_name]["platform"] = netmiko_platform[
+                        "platform"
+                    ]
+                else:
                     log.warning(
-                        f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not found."
+                        f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not mapped to Netmiko platform."
                     )
                     continue
-                if clab_platform.get("username"):
-                    ret.result["hosts"][host_name]["username"] = clab_platform[
-                        "username"
-                    ]
-                if clab_platform.get("password"):
-                    ret.result["hosts"][host_name]["password"] = clab_platform[
-                        "password"
-                    ]
+
+                # get default credentials
+                if use_default_credentials:
+                    clab_platform = PlatformMap.get("containerlab", clab_platform_name)
+                    if not clab_platform:
+                        log.warning(
+                            f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not found."
+                        )
+                        continue
+                    if clab_platform.get("username"):
+                        ret.result["hosts"][host_name]["username"] = clab_platform[
+                            "username"
+                        ]
+                    if clab_platform.get("password"):
+                        ret.result["hosts"][host_name]["password"] = clab_platform[
+                            "password"
+                        ]
 
         return ret
 
@@ -675,7 +716,7 @@ class ContainerlabWorker(NFPWorker):
         progress: bool = False,
         reconfigure: bool = False,
         timeout: int = 600,
-        node_filter: str = None,
+        node_filter: Union[None, str] = None,
         dry_run: bool = False,
     ) -> Result:
         """
@@ -734,9 +775,14 @@ class ContainerlabWorker(NFPWorker):
         # inspect existing containers
         job.event(f"Checking existing containers")
         get_containers = self.inspect(job=job, details=True)
-        if get_containers.failed is False:
-            job.event(f"Existing containers found, retrieving details")
-            for container in get_containers.result:
+        if get_containers.failed is True:
+            get_containers.task = f"{self.name}:deploy_netbox"
+            return get_containers
+
+        # collect TCP/UDP ports and subnets in use
+        job.event(f"Existing containers found, retrieving details")
+        for lname, containers in get_containers.result.items():
+            for container in containers:
                 clab_name = container["Labels"]["containerlab"]
                 clab_topo = container["Labels"]["clab-topo-file"]
                 node_name = container["Labels"]["clab-node-name"]
@@ -783,7 +829,8 @@ class ContainerlabWorker(NFPWorker):
                     log.info(msg)
                     job.event(msg)
                     ipv4_subnet = None
-            job.event(f"Collected TCP/UDP ports used by existing containers")
+
+        job.event(f"Collected TCP/UDP ports used by existing containers")
 
         # allocate new subnet
         if ipv4_subnet is None:
@@ -841,26 +888,10 @@ class ContainerlabWorker(NFPWorker):
 
         job.event(f"{lab_name} topology data saved to '{topology_file}'")
 
-        # form command arguments
-        args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
-        if reconfigure is True:
-            args.append("--reconfigure")
-            job.event(
-                f"{lab_name} re-deploying lab using {os.path.split(topology_file)[-1]} topology file"
-            )
-        else:
-            job.event(
-                f"{lab_name} deploying lab using {os.path.split(topology_file)[-1]} topology file"
-            )
-        if node_filter is not None:
-            args.append("--node-filter")
-            args.append(node_filter)
-
-        # add needed env variables
-        env = dict(os.environ)
-        env["CLAB_VERSION_CHECK"] = "disable"
-
-        # run containerlab command
-        return self.run_containerlab_command(
-            args=args, cwd=topology_folder, timeout=timeout, ret=ret, env=env, job=job
+        return self.deploy(
+            job=job,
+            topology=topology_file,
+            reconfigure=reconfigure,
+            timeout=timeout,
+            node_filter=node_filter or "",
         )

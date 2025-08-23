@@ -11,6 +11,8 @@ The Netbox Update Device Interfaces Task is a feature of the NorFab Netbox Servi
 
 Keeping interface data accurate and up-to-date is crucial for effective network management. The Netbox Update Device Interfaces Task automates the process of updating interface information, such as interface names, statuses, mac addresses, and other relevant details.
 
+Update device interfaces task is branch aware and can push updates to the branch, branching plugin need to be installed on Netbox instance.
+
 **How it works** - Netbox worker on a call to update interfaces task fetches live data from network devices using nominated datasource, by default it is Nornir service [parse](../nornir/services_nornir_service_tasks_parse.md) task using NAPALM `get_interfaces` getter. Once data retrieved from network, Netbox worker updates records in Netbox database for device interfaces.
 
 ![Netbox Update Device Interfaces](../../images/Netbox_Service_Update_Interfaces.jpg)

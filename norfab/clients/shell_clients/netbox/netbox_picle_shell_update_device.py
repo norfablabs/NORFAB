@@ -57,6 +57,7 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         "nornir",
         description="Service to use to retrieve device data",
     )
+    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
 
     @staticmethod
     @listen_events
@@ -121,6 +122,7 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     batch_size: StrictInt = Field(
         10, description="Number of devices to process at a time", alias="batch-size"
     )
+    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
 
     @staticmethod
     @listen_events
@@ -185,6 +187,7 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     batch_size: StrictInt = Field(
         10, description="Number of devices to process at a time", alias="batch-size"
     )
+    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
 
     @staticmethod
     @listen_events

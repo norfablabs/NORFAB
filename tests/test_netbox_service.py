@@ -18,6 +18,16 @@ def get_nb_version(nfclient, instance=None) -> tuple:
             return tuple(r["result"]["netbox_version"][instance])
 
 
+def delete_branch(branch, nfclient):
+    resp = nfclient.run_job(
+        "netbox",
+        "delete_branch",
+        workers="any",
+        kwargs={"branch": branch},
+    )
+    print(f"Deleted branch '{branch}'")
+
+
 class TestNetboxWorker:
     def test_get_netbox_inventory(self, nfclient):
         ret = nfclient.run_job(
@@ -1531,6 +1541,33 @@ class TestUpdateDeviceFacts:
     def test_update_device_fact_non_existing_device(self, nfclient):
         pass
 
+    def test_update_device_fact_datasource_nornir_with_branch(self, nfclient):
+        delete_branch("update_devices_branch_1", nfclient)
+
+        ret = nfclient.run_job(
+            "netbox",
+            "update_device_facts",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "devices": ["ceos-spine-1", "ceos-spine-2"],
+                "branch": "update_devices_branch_1",
+            },
+        )
+        pprint.pprint(ret, width=200)
+        for worker, res in ret.items():
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert device_data["update_device_facts"][
+                    "serial"
+                ], f"{worker}:{device} no serial number updated"
+                assert device_data["branch"] == "update_devices_branch_1"
+
 
 class TestUpdateDeviceInterfaces:
     def test_update_device_interfaces(self, nfclient):
@@ -1561,6 +1598,127 @@ class TestUpdateDeviceInterfaces:
     @pytest.mark.skip(reason="TBD")
     def test_update_device_interfaces_non_exisintg_device(self, nfclient):
         pass
+
+    def test_update_device_interfaces_with_branch(self, nfclient):
+        delete_branch("update_interfaces_branch_1", nfclient)
+
+        ret = nfclient.run_job(
+            "netbox",
+            "update_device_interfaces",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "devices": ["ceos-spine-1", "ceos-spine-2"],
+                "branch": "update_interfaces_branch_1",
+            },
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert device_data[
+                    "update_device_interfaces"
+                ], f"{worker}:{device} no interfaces updated"
+                assert device_data["branch"] == "update_interfaces_branch_1"
+
+
+class TestUpdateDeviceIP:
+    def test_update_device_ip(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "update_device_ip",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "devices": ["ceos-spine-1", "ceos-spine-2"],
+            },
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert (
+                    "created_ip" in device_data
+                ), f"{worker}:{device} no create ip data"
+                assert (
+                    "updated_ip" in device_data
+                ), f"{worker}:{device} no update ip data"
+
+    def test_update_device_ip_dry_run(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "update_device_ip",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "devices": ["ceos-spine-1", "ceos-spine-2"],
+                "dry_run": True,
+            },
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert (
+                    "created_ip_dry_run" in device_data
+                ), f"{worker}:{device} no create ip data"
+                assert (
+                    "updated_ip_dry_run" in device_data
+                ), f"{worker}:{device} no update ip data"
+
+    def test_update_device_ip_with_branch(self, nfclient):
+        delete_branch("update_device_ip_1", nfclient)
+        ret = nfclient.run_job(
+            "netbox",
+            "update_device_ip",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "devices": ["ceos-spine-1", "ceos-spine-2"],
+                "branch": "update_device_ip_1",
+            },
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert (
+                    "created_ip" in device_data
+                ), f"{worker}:{device} no create ip data"
+                assert (
+                    "updated_ip" in device_data
+                ), f"{worker}:{device} no update ip data"
+                assert (
+                    device_data["branch"] == "update_device_ip_1"
+                ), f"{worker}:{device} has no branch info"
 
 
 class TestCreateIP:
@@ -2043,6 +2201,42 @@ class TestCreateIP:
             assert res1["dry_run"] is False, "No dry run flag set to true"
             assert res1["status"] == "created", "Unexpected status"
             assert "dev" in res1["resources"]
+
+    def test_create_ip_with_branch(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+        delete_branch("create_ip_1", nfclient)
+        self.delete_ips("10.0.0.0/24", nfclient)
+
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": "10.0.0.0/24",
+                    "device": "fceos4",
+                    "interface": "eth1",
+                    "description": "foo1",
+                    "vrf": "VRF1",
+                    "tags": ["NORFAB", "ACCESS"],
+                    "tenant": "NORFAB",
+                    "dns_name": "foo1.lab.local",
+                    "role": "anycast",
+                    "comments": "Some comments",
+                    "branch": "create_ip_1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            worker, res1 = tuple(create_1.items())[0]
+
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"]["address"], f"No ip allocated"
+            assert (
+                res1["result"]["branch"] == "create_ip_1"
+            ), "No branch info in results"
 
 
 class TestNetboxCache:
@@ -3391,3 +3585,39 @@ class TestCreatePrefix:
             assert created_prefix["vrf"]["name"] == "VRF1"
             assert created_prefix["description"] == f"test create prefix {rand}"
             assert created_prefix["comments"] == "Some important comments updates"
+
+    def test_create_prefix_with_branch(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        delete_branch("create_prefix_1", nfclient)
+        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": "10.2.0.0/24",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                    "site": "NORFAB-LAB",
+                    "tenant": "NORFAB",
+                    "role": "PREFIX_ROLE_1",
+                    "comments": "Some important comment",
+                    "vrf": "VRF1",
+                    "tags": ["NORFAB"],
+                    "status": "Reserved",
+                    "branch": "create_prefix_1",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation with branch failed"
+                assert (
+                    res1["result"]["branch"] == "create_prefix_1"
+                ), "No branch details in result"

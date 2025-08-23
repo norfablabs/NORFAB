@@ -9,6 +9,8 @@ tags:
 
 The Netbox Update Device IP Task is a feature of the NorFab Netbox Service that allows you to synchronize and update the IP addresses data of your network devices in Netbox. This task ensures that the IP address records in Netbox are accurate and up-to-date, reflecting the current state of your network infrastructure.
 
+Update device intIP erfaces task is branch aware and can push updates to the branch, branching plugin need to be installed on Netbox instance.
+
 **How it works** - Netbox worker on a call to update IP addresses task fetches live data from network devices using nominated datasource, by default it is Nornir service [parse](../nornir/services_nornir_service_tasks_parse.md) task using NAPALM `get_interfaces_ip` getter. Once data retrieved from network, Netbox worker updates records in Netbox database for device interfaces.
 
 ![Netbox Update Device Interfaces](../../images/Netbox_Service_Update_Interfaces.jpg)

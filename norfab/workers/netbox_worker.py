@@ -9,6 +9,7 @@ import concurrent.futures
 import pynetbox
 import ipaddress
 import re
+import time
 
 from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
@@ -355,6 +356,29 @@ class NetboxWorker(NFPWorker):
                 f"{self.name} - not all Netbox instances are compatible: {compatibility.result}"
             )
 
+    def has_plugin(self, plugin_name: str, instance: str, strict: bool = False) -> bool:
+        """
+        Check if a specified plugin is installed in a given NetBox instance.
+
+        Args:
+            plugin_name (str): The name of the plugin to check for.
+            instance (str): The identifier or address of the NetBox instance.
+            strict (bool, optional): If True, raises a RuntimeError when the plugin is not found.
+
+        Returns:
+            bool: True if the plugin is installed, False otherwise.
+        """
+        nb_status = self._query_netbox_status(instance)
+
+        if plugin_name in nb_status["plugins"]:
+            return True
+        elif strict is True:
+            raise RuntimeError(
+                f"'{instance}' Netbox instance has no '{plugin_name}' plugin installed"
+            )
+
+        return False
+
     def _query_netbox_status(self, name):
         """
         Queries the Netbox API for the status of a given instance.
@@ -432,12 +456,13 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    def _get_pynetbox(self, instance):
+    def _get_pynetbox(self, instance, branch: str = None):
         """
         Helper function to instantiate a pynetbox API object.
 
         Args:
             instance (str): The instance name for which to get the pynetbox API object.
+            branch (str, optional): Branch name to use, need to have branching plugin installed.
 
         Returns:
             pynetbox.core.api.Api: An instantiated pynetbox API object.
@@ -456,6 +481,36 @@ class NetboxWorker(NFPWorker):
             nb.http_session.verify = False
         else:
             nb = pynetbox.api(url=params["url"], token=params["token"])
+
+        # add branch
+        if branch is not None and self.has_plugin(
+            "netbox_branching", instance, strict=True
+        ):
+            try:
+                nb_branch = nb.plugins.branching.branches.get(name=branch)
+            except Exception as e:
+                msg = "Failed to retrieve branch '{branch}' from Netbox"
+                raise RuntimeError(msg)
+
+            # create new branch
+            if not nb_branch:
+                nb_branch = nb.plugins.branching.branches.create(name=branch)
+
+            # wait for branch provisioning to complete
+            if not nb_branch.status.value.lower() == "ready":
+                retries = 0
+                while retries < 30:
+                    nb_branch = nb.plugins.branching.branches.get(name=branch)
+                    if nb_branch.status.value.lower() == "ready":
+                        break
+                    time.sleep(1)
+                    retries += 1
+                else:
+                    raise RuntimeError(f"Branch '{branch}' was created but not ready")
+
+            nb.http_session.headers["X-NetBox-Branch"] = nb_branch.schema_id
+
+            log.info(f"Instantiated pynetbox instance with branch '{branch}'")
 
         return nb
 
@@ -1807,6 +1862,7 @@ class NetboxWorker(NFPWorker):
         timeout: int = 60,
         devices: Union[None, list] = None,
         batch_size: int = 10,
+        branch: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1826,6 +1882,7 @@ class NetboxWorker(NFPWorker):
             timeout (int, optional): The timeout for the job execution. Defaults to 60.
             devices (list, optional): The list of devices to update.
             batch_size (int, optional): The number of devices to process in each batch.
+            branch (str, optional): Branch name to use, need to have branching plugin installed
             **kwargs: Additional keyword arguments to pass to the job.
 
         Returns:
@@ -1841,7 +1898,7 @@ class NetboxWorker(NFPWorker):
         ret = Result(
             task=f"{self.name}:update_device_facts", result=result, resources=[instance]
         )
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, branch=branch)
         kwargs["add_details"] = True
 
         if datasource == "nornir":
@@ -1898,6 +1955,8 @@ class NetboxWorker(NFPWorker):
                                 "serial": facts["serial_number"],
                             }
                         }
+                        if branch is not None:
+                            result[host]["branch"] = branch
                         job.event(f"{host} facts updated", resource=instance)
         else:
             raise UnsupportedServiceError(
@@ -1917,6 +1976,7 @@ class NetboxWorker(NFPWorker):
         devices: Union[None, list] = None,
         create: bool = True,
         batch_size: int = 10,
+        branch: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -1930,7 +1990,7 @@ class NetboxWorker(NFPWorker):
         - speed
 
         Args:
-            job: NorFab Job object containing relevant metadata
+            job: NorFab Job object containing relevant metadata.
             instance (str, optional): The Netbox instance name to use.
             dry_run (bool, optional): If True, no changes will be made to Netbox.
             datasource (str, optional): The data source to use. Supported datasources:
@@ -1942,6 +2002,7 @@ class NetboxWorker(NFPWorker):
             devices (list, optional): List of devices to update.
             create (bool, optional): If True, new interfaces will be created if they do not exist.
             batch_size (int, optional): The number of devices to process in each batch.
+            branch (str, optional): Branch name to use, need to have branching plugin installed.
             **kwargs: Additional keyword arguments to pass to the datasource job.
 
         Returns:
@@ -1959,7 +2020,7 @@ class NetboxWorker(NFPWorker):
             result=result,
             resources=[instance],
         )
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, branch=branch)
 
         if datasource == "nornir":
             # source hosts list from Nornir
@@ -1996,6 +2057,8 @@ class NetboxWorker(NFPWorker):
                                 else "created_device_interfaces"
                             ): created,
                         }
+                        if branch is not None:
+                            result[host]["branch"] = branch
                         interfaces = host_data["napalm_get"]["get_interfaces"]
                         nb_device = nb.dcim.devices.get(name=host)
                         if not nb_device:
@@ -2129,6 +2192,7 @@ class NetboxWorker(NFPWorker):
         devices: Union[None, list] = None,
         create: bool = True,
         batch_size: int = 10,
+        branch: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -2147,6 +2211,7 @@ class NetboxWorker(NFPWorker):
             devices (list, optional): The list of devices to update.
             create (bool, optional): If True, new IP addresses will be created if they do not exist.
             batch_size (int, optional): The number of devices to process in each batch.
+            branch (str, optional): Branch name to use, need to have branching plugin installed.
             **kwargs: Additional keyword arguments.
 
         Returns:
@@ -2162,7 +2227,7 @@ class NetboxWorker(NFPWorker):
         ret = Result(
             task=f"{self.name}:update_device_ip", result=result, resources=[instance]
         )
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, branch=branch)
 
         if datasource == "nornir":
             # source hosts list from Nornir
@@ -2191,6 +2256,8 @@ class NetboxWorker(NFPWorker):
                             "updated_ip_dry_run" if dry_run else "updated_ip": updated,
                             "created_ip_dry_run" if dry_run else "created_ip": created,
                         }
+                        if branch is not None:
+                            result[host]["branch"] = branch
                         interfaces = host_data["napalm_get"]["get_interfaces_ip"]
                         nb_device = nb.dcim.devices.get(name=host)
                         if not nb_device:
@@ -2281,6 +2348,7 @@ class NetboxWorker(NFPWorker):
         is_primary: bool = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
+        branch: str = None,
     ) -> Result:
         """
         Allocate the next available IP address from a given subnet.
@@ -2308,6 +2376,7 @@ class NetboxWorker(NFPWorker):
             comments (str, optional): Additional comments for the IP address.
             instance (str, optional): The NetBox instance to use.
             dry_run (bool, optional): If True, do not actually allocate the IP address. Defaults to False.
+            branch (str, optional): Branch name to use, need to have branching plugin installed.
 
         Returns:
             dict: A dictionary containing the result of the IP allocation.
@@ -2338,7 +2407,7 @@ class NetboxWorker(NFPWorker):
         has_changes = False
         nb_ip = None
         nb_device = None
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, branch=branch)
 
         # try to source existing IP from netbox
         if device and interface and description:
@@ -2352,7 +2421,7 @@ class NetboxWorker(NFPWorker):
 
         # create new IP address
         if not nb_ip:
-            job.event(f"Creating new IP address {nb_ip} from prefix {prefix}")
+            job.event(f"Creating new IP address within prefix {prefix}")
             # source prefix from Netbox
             if isinstance(prefix, str):
                 # try converting prefix to network, if fails prefix is not an IP network
@@ -2386,6 +2455,9 @@ class NetboxWorker(NFPWorker):
                     "device": device,
                     "interface": interface,
                 }
+                # add branch to results
+                if branch is not None:
+                    ret.result["branch"] = branch
                 return ret
             # create new IP
             else:
@@ -2456,6 +2528,9 @@ class NetboxWorker(NFPWorker):
             "device": device,
             "interface": interface,
         }
+        # add branch to results
+        if branch is not None:
+            ret.result["branch"] = branch
 
         return ret
 
@@ -2478,12 +2553,12 @@ class NetboxWorker(NFPWorker):
         status: str = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
+        branch: str = None,
     ) -> Result:
         """
         Creates a new IP prefix in NetBox or updates an existing one.
 
         Args:
-
             parent (Union[str, dict]): Parent prefix to allocate new prefix from, could be:
 
                 - IPv4 prefix string e.g. 10.0.0.0/24
@@ -2505,6 +2580,7 @@ class NetboxWorker(NFPWorker):
             status (str, optional): Status of the prefix.
             instance (Union[None, str], optional): NetBox instance identifier.
             dry_run (bool, optional): If True, simulates the creation without making changes.
+            branch (str, optional): Branch name to use, need to have branching plugin installed.
 
         Returns:
             Result: An object containing the outcome, including status, details of the prefix, and resources used.
@@ -2519,7 +2595,7 @@ class NetboxWorker(NFPWorker):
         )
         tags = tags or []
         nb_prefix = None
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, branch=branch)
 
         job.event(
             f"Processing create '/{prefixlen}' prefix request within '{parent}' parent prefix"
@@ -2600,6 +2676,9 @@ class NetboxWorker(NFPWorker):
                     "vrf": vrf,
                     "site": site,
                 }
+                # add branch to results
+                if branch is not None:
+                    ret.result["branch"] = branch
                 return ret
             # create new prefix
             else:
@@ -2693,6 +2772,9 @@ class NetboxWorker(NFPWorker):
             "site": str(nb_prefix.scope) if nb_prefix.scope else site,
             "parent": nb_parent_prefix.prefix,
         }
+        # add branch to results
+        if branch is not None:
+            ret.result["branch"] = branch
 
         return ret
 
@@ -3049,5 +3131,48 @@ class NetboxWorker(NFPWorker):
                             log.debug(msg)
                             job.event(msg)
                             endpoint["interface"] = renamed
+
+        return ret
+
+    @Task(fastapi={"methods": ["DELETE"]})
+    def delete_branch(
+        self,
+        job: Job,
+        branch: str = None,
+        instance: str = None,
+    ) -> Result:
+        """
+        Deletes a branch with the specified name from the NetBox instance.
+
+        Args:
+            job (Job): The job context for the operation.
+            branch (str, optional): The name of the branch to delete. Defaults to None.
+            instance (str, optional): The NetBox instance name.
+
+        Returns:
+            Result: An object containing the outcome of the deletion operation,
+                including whether the branch was found and deleted.
+        """
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:delete_branch",
+            result=None,
+            resources=[instance],
+        )
+        nb = self._get_pynetbox(instance)
+
+        job.event(f"Deleting branch '{branch}', Netbo instance '{instance}'")
+
+        nb_branch = nb.plugins.branching.branches.get(name=branch)
+
+        if nb_branch:
+            nb_branch.delete()
+            ret.result = True
+            job.event(f"'{branch}' deleted from '{instance}' Netbox instance")
+        else:
+            msg = f"'{branch}' branch does not exist in '{instance}' Netbox instance"
+            ret.result = None
+            ret.messages.append(msg)
+            job.event(msg)
 
         return ret

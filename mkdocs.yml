@@ -105,7 +105,7 @@ nav:
               - Diagram: workers/nornir/services_nornir_service_tasks_diagram.md
               - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
               - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
-            - Jina2 Filters Reference: workers/nornir/services_nornir_service_jinja2_filters.md
+            - Jina2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md
         - Netbox Service: 
             - Overview: workers/netbox/services_netbox_service.md
             - Inventory: workers/netbox/services_netbox_service_inventory.md
@@ -119,6 +119,7 @@ nav:
               - GET Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
               - GET Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
               - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
+              - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md
               - UPDATE Device Facts: workers/netbox/services_netbox_service_tasks_update_device_facts.md
               - UPDATE Device Interfaces: workers/netbox/services_netbox_service_tasks_update_device_interfaces.md
               - UPDATE Device IP: workers/netbox/services_netbox_service_tasks_update_device_ip.md

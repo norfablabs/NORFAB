@@ -77,3 +77,4 @@ class CreatePrefixInput(NetboxCommonArgs):
         None, description="Name of the site to associate with the prefix"
     )
     status: PrefixStatusEnum = Field(None, description="Status of the prefix")
+    branch: StrictStr = Field(None, description="Branching plugin branch name to use")

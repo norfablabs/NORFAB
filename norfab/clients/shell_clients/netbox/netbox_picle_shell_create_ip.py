@@ -51,6 +51,7 @@ class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs):
         alias="dry-run",
         json_schema_extra={"presence": True},
     )
+    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
 
     @staticmethod
     @listen_events

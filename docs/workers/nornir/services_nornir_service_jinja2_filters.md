@@ -31,67 +31,74 @@ Returns:
 ["192.168.2.1", "192.168.2.2"]
 ```
 
-## nb_create_ip
+## netbox.create_ip
 
 This Jinja2 filter queries Netbox to get existing or create next available IP in prefix.
 
-`nb_create_ip` can be invoked using Jinja2 filter syntax where value it is applied against must be 
+`netbox.create_ip` can be invoked using Jinja2 filter syntax where value it is applied against must be 
 a prefix recorded in Netbox:
 
 ```
 {% for interface in host.interfaces %}
 interface {{ interface }}
-  ip address {{ "10.0.0.0/24" | nb_create_ip(host.name, interface) }}
+  ip address {{ "10.0.0.0/24" | netbox.create_ip(host.name, interface) }}
 !
 {% endfor %}
 ```
 
-Alternatively, `nb_create_ip` can be called within `set` block to assign result to a variable:
+Alternatively, `netbox.create_ip` can be called within `set` block to assign result to a variable:
 
 ```
 {% for interface in host.interfaces %}
-{% set ip = nb_create_ip("10.0.0.0/24", host.name, interface, description="Primary interface ip") %}
+{% set ip = netbox.create_ip("10.0.0.0/24", host.name, interface, description="Primary interface ip") %}
 interface {{ interface }}
   ip address {{ ip }}
 !
 {% endfor %}
 ```
 
-All the same arguments supported by [Netbox service create_ip](../netbox/services_netbox_service_tasks_create_ip.md) task can be passed onto `nb_create_ip` call:
+All the same arguments supported by [Netbox service create_ip](../netbox/services_netbox_service_tasks_create_ip.md) task can be passed onto `netbox.create_ip` call:
 
 ::: norfab.workers.netbox_worker.NetboxWorker.create_ip
 
-## nb_create_prefix
+## netbox.create_prefix
 
-This Jinja2 filter queries Netbox to get existing or create next available prefix within parent prefix. The intention is to use `nb_create_prefix` together with `nb_create_ip` function to automate the process of IP addressing devices interfaces and Netbox updates.
+This Jinja2 filter queries Netbox to get existing or create next available prefix within parent prefix. The intention is to use `netbox.create_prefix` together with `netbox.create_ip` function to automate the process of IP addressing devices interfaces and Netbox updates.
 
-`nb_create_prefix` can be invoked using Jinja2 filter syntax where value it is applied against must be 
+!!! warning
+
+    `netbox.create_prefix` functions uses prefix description argument to deduplicate prefixes, calls to `netbox.create_prefix` should contain identical prefix description value for same prefix.
+
+`netbox.create_prefix` can be invoked using Jinja2 filter syntax where value it is applied against must be 
 a parent prefix recorded in Netbox:
 
 ```
-{% for interface in host.interfaces %}
-{% set subnet_description = host.name + ":" + interface  + ":ptp" %}
+{% set connections = netbox.get_connections(devices=[host.name]) -%}
+
+{% for interface, connection in connections.items() -%}
+{% set subnet_description = [host.name + ":" + interface, connection["remote_device"] + ":" + connection["remote_interface"]] | sort | join(" - ptp - ") -%}
 interface {{ interface }}
-  ip address {{ "10.0.0.0/24" | nb_create_prefix(subnet_description) | nb_create_ip(host.name, interface) }}
+  ip address {{ "10.1.0.0/24" | netbox.create_prefix(subnet_description, 30) | netbox.create_ip(host.name, interface) }}
 !
 {% endfor %}
 ```
 
-above Jinja2 template will first invoke `nb_create_prefix` to allocate next available `/30` subnet in 10.0.0.0/24 prefix with `nb_create_ip` subsequently allocating next available IP address within newely allocated `/30` subnet.
+above Jinja2 template will first invoke `netbox.create_prefix` to allocate next available `/30` subnet in 10.0.0.0/24 prefix with `netbox.create_ip` subsequently allocating next available IP address within newely allocated `/30` subnet.
 
-Alternatively, `nb_create_prefix` can be called within `set` block to assign result to a variable:
+Alternatively, `netbox.create_prefix` can be called within `set` block to assign result to a variable:
 
 ```
-{% for interface in host.interfaces %}
-{% set subnet_description = host.name + ":" + interface  + ":ptp" %}
-{% set subnet = nb_create_prefix(parent="10.0.0.0/24", description=subnet_description, prefixlen=30) %}
-{% set ip = nb_create_ip(subnet, host.name, interface, description="Primary interface ip") %}
+{% set connections = netbox.get_connections(devices=[host.name]) -%}
+
+{% for interface, connection in connections.items() -%}
+{% set subnet_description = [host.name + ":" + interface, connection["remote_device"] + ":" + connection["remote_interface"]] | sort | join(" - ptp - ") -%}
+{% set ip = netbox.create_prefix("10.1.0.0/24", subnet_description, 30) | netbox.create_ip(host.name, interface) %}
 interface {{ interface }}
   ip address {{ ip }}
 !
 {% endfor %}
 ```
 
-All the same arguments supported by [Netbox service create_prefix](../netbox/services_netbox_service_tasks_create_prefix.md) task can be passed onto `nb_create_prefix` call:
+All the same arguments supported by [Netbox service create_prefix](../netbox/services_netbox_service_tasks_create_prefix.md) task can be passed onto `netbox.create_prefix` call:
 
 ::: norfab.workers.netbox_worker.NetboxWorker.create_prefix
