@@ -6,3 +6,8 @@ RUN apt-get update && \
 
 RUN pip install --no-cache-dir norfab --upgrade && \
     pip install --no-cache-dir norfab[fastapiservice] --upgrade
+
+ENV LOG_LEVEL=INFO
+ENV WORKERS_LIST
+
+ENTRYPOINT cd /etc/norfab/ && nfcli --workers-list $WORKERS_LIST -l $LOG_LEVEL

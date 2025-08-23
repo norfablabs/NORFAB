@@ -30,6 +30,7 @@ services:
       dockerfile: Dockerfile.norfab.nornir
     environment:
       LOG_LEVEL: INFO
+      WORKERS_LIST: nornir-worker-1
     volumes:
       # bind folder with norfab files
       - type: bind
@@ -49,6 +50,7 @@ services:
       dockerfile: Dockerfile.norfab.netbox
     environment:
       LOG_LEVEL: INFO
+      WORKERS_LIST: netbox-worker-1,netbox-worker-2
     volumes:
       # bind folder with norfab files
       - type: bind

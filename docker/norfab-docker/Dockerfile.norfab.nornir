@@ -9,5 +9,6 @@ RUN pip install --no-cache-dir norfab --upgrade && \
     pip install --no-cache-dir norfab[nornirservice] --upgrade
 
 ENV LOG_LEVEL=INFO
+ENV WORKERS_LIST=
 
-ENTRYPOINT cd /etc/norfab/ && nfcli --workers-list nornir-worker-1 -l $LOG_LEVEL
+ENTRYPOINT cd /etc/norfab/ && nfcli --workers-list $WORKERS_LIST -l $LOG_LEVEL
