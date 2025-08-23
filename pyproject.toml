@@ -158,7 +158,8 @@ netboxservice = [
 fastapiservice = [
     "fastapi",
     "uvicorn",
-    "python-multipart"
+    "python-multipart",
+    "diskcache"
 ]
 robot = [
     "robot"
