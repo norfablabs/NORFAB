@@ -83,7 +83,6 @@ jobs:
           context: .
           file: ./docker/norfab-docker-build/Dockerfile.norfab.nornir
           push: true
-          tags: 
           tags: [
             "dmulyalin/norfab:nornir-${{ github.ref_name }}",
             "dmulyalin/norfab:nornir-latest"
