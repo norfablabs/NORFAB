@@ -53,26 +53,40 @@ root
         └── device:    Update device data
             └── interfaces:    Update device interfaces
                 ├── timeout:    Job timeout
-                ├── workers:    Filter workers to target, default 'any'
+                ├── workers:    Filter worker to target, default 'any'
+                ├── verbose-result:    Control output details, default 'False'
+                ├── progress:    Display progress events, default 'True'
                 ├── instance:    Netbox instance name to target
-                ├── dry_run:    Return information that would be pushed to Netbox but do not push it
-                ├── devices:    Devices to update
-                └── datasource:    Service to use to retrieve device data, default 'nornir'
-                    └── nornir:    Use Nornir service to retrieve data from devices
-                        ├── add_details:    Add task details to results, default 'False'
-                        ├── run_num_workers:    RetryRunner number of threads for tasks execution
-                        ├── run_num_connectors:    RetryRunner number of threads for device connections
-                        ├── run_connect_retry:    RetryRunner number of connection attempts
-                        ├── run_task_retry:    RetryRunner number of attempts to run task
-                        ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-                        ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-                        ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-                        ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
-                        ├── tf:    File group name to save task results to on worker file system
-                        ├── tf_skip_failed:    Save results to file for failed tasks
-                        ├── diff:    File group name to run the diff for
-                        ├── diff_last:    File version number to diff, default is 1 (last)
-                        └── progress:    Display progress events, default 'True'
+                ├── dry-run:    Return information that would be pushed to Netbox but do not push it
+                ├── devices:    List of Netbox devices to update
+                ├── datasource:    Service to use to retrieve device data, default 'nornir'
+                │   └── nornir:    Use Nornir service to retrieve data from devices
+                │       ├── FO:    Filter hosts using Filter Object
+                │       ├── FB:    Filter hosts by name using Glob Patterns
+                │       ├── FH:    Filter hosts by hostname
+                │       ├── FC:    Filter hosts containment of pattern in name
+                │       ├── FR:    Filter hosts by name using Regular Expressions
+                │       ├── FG:    Filter hosts by group
+                │       ├── FP:    Filter hosts by hostname using IP Prefix
+                │       ├── FL:    Filter hosts by names list
+                │       ├── FM:    Filter hosts by platform
+                │       ├── FN:    Negate the match
+                │       ├── add-details:    Add task details to results, default 'False'
+                │       ├── num-workers:    RetryRunner number of threads for tasks execution
+                │       ├── num-connectors:    RetryRunner number of threads for device connections
+                │       ├── connect-retry:    RetryRunner number of connection attempts
+                │       ├── task-retry:    RetryRunner number of attempts to run task
+                │       ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+                │       ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+                │       ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+                │       ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
+                │       ├── tf:    File group name to save task results to on worker file system
+                │       ├── tf-skip-failed:    Save results to file for failed tasks
+                │       ├── diff:    File group name to run the diff for
+                │       ├── diff-last:    File version number to diff, default is 1 (last)
+                │       └── progress:    Display progress events, default 'True'
+                ├── batch-size:    Number of devices to process at a time, default '10'
+                └── branch:    Branching plugin branch name to use
 nf#
 ```
 

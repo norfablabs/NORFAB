@@ -30,7 +30,6 @@ nf#man tree netbox.create.prefix
 root
 └── netbox:    Netbox service
     └── create:    Create objects in Netbox
-        └── prefix:    Allocate next available prefix from parent prefix
             ├── instance:    Netbox instance name to target
             ├── dry-run:    Do not commit to database
             ├── *parent:    Parent prefix to allocate new prefix from
@@ -43,6 +42,7 @@ root
             ├── role:    Role to assign to the prefix
             ├── site:    Name of the site to associate with the prefix
             ├── status:    Status of the prefix
+            ├── branch:    Branching plugin branch name to use
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'

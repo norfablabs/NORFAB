@@ -679,7 +679,7 @@ description = "Disk Cache -- Disk and file backed persistent cache."
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "extra == \"netboxservice\" or extra == \"full\""
+markers = "extra == \"netboxservice\" or extra == \"fastapiservice\" or extra == \"full\""
 files = [
     {file = "diskcache-5.6.3-py3-none-any.whl", hash = "sha256:5e31b2d5fbad117cc363ebaf6b689474db18a1f6438bc82358b024abd4c2ca19"},
     {file = "diskcache-5.6.3.tar.gz", hash = "sha256:2c3a3fa2743d8535d832ec61c2054a1641f41775aa7c556758a109941e33e4fc"},
@@ -5022,7 +5022,7 @@ cffi = ["cffi (>=1.11)"]
 [extras]
 agentservice = ["langchain", "langchain-community", "langchain-core", "langchain-ollama", "ollama"]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-material-extensions", "mkdocstrings", "pygments", "pymdown-extensions"]
-fastapiservice = ["fastapi", "python-multipart", "uvicorn"]
+fastapiservice = ["diskcache", "fastapi", "python-multipart", "uvicorn"]
 full = ["N2G", "cerberus", "diskcache", "dnspython", "fastapi", "jmespath", "langchain", "langchain-community", "langchain-core", "langchain-ollama", "lxml", "napalm", "ncclient", "netmiko", "nornir", "nornir-napalm", "nornir-netmiko", "nornir-salt", "nornir-scrapli", "ntc-templates", "ollama", "paramiko", "picle", "puresnmp", "pydantic", "pydantic", "pygnmi", "pynetbox", "python-multipart", "pythonping", "requests", "requests", "rich", "robotframework", "scrapli", "scrapli-community", "scrapli-netconf", "tabulate", "tabulate", "textfsm", "ttp", "ttp-templates", "uvicorn", "xmltodict"]
 netboxservice = ["diskcache", "pynetbox", "requests"]
 nfcli = ["nornir-salt", "picle", "pydantic", "pyreadline3", "rich", "tabulate"]
@@ -5032,4 +5032,4 @@ robot = []
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.12"
-content-hash = "b0ca34c9aee7a494803103d04d1aeb8be79c99d3527bf944f91ce6d4b669eba8"
+content-hash = "2086aaa9ecf5f88e86f0ccdb89f2c14c296910a84f0d4128c9cfb1ebde70b93b"

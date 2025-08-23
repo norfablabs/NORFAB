@@ -102,3 +102,27 @@ interface {{ interface }}
 All the same arguments supported by [Netbox service create_prefix](../netbox/services_netbox_service_tasks_create_prefix.md) task can be passed onto `netbox.create_prefix` call:
 
 ::: norfab.workers.netbox_worker.NetboxWorker.create_prefix
+
+## netbox.get_connections
+
+TBD
+
+## netbox.get_interfaces
+
+TBD
+
+## netbox.get_devices
+
+TBD
+
+## netbox.get_circuits
+
+TBD
+
+## netbox.rest
+
+TBD
+
+## netbox.graphql
+
+TBD

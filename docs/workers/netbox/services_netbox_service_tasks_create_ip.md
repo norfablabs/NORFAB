@@ -26,11 +26,12 @@ nf#man tree netbox.create.ip
 root
 └── netbox:    Netbox service
     └── create:    Create objects in Netbox
-        └── ip:    Allocate next available IP address from prefix
-            ├── instance:    Netbox instance name to target
-            ├── workers:    Filter worker to target, default 'any'
             ├── timeout:    Job timeout
+            ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'
+            ├── progress:    Display progress events, default 'True'
+            ├── instance:    Netbox instance name to target
+            ├── dry-run:    Do not commit to database
             ├── *prefix:    Prefix to allocate IP address from, can also provide prefix name or filters
             ├── device:    Device name to associate IP address with
             ├── interface:    Device interface name to associate IP address with
@@ -41,7 +42,7 @@ root
             ├── tenant:    Tenant name to associate with IP address
             ├── comments:    IP address comments field
             ├── role:    IP address functional role
-            └── dry-run:    Do not commit to database
+            └── branch:    Branching plugin branch name to use
 nf#
 ```
 
