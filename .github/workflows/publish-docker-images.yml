@@ -80,7 +80,7 @@ jobs:
           context: .
           file: ./docker/norfab-docker-build/Dockerfile.norfab.nornir
           push: true
-          tags: ["dmulyalin/norfab:service-nornir-${{ github.ref_name }}", "dmulyalin/norfab:broker-latest"]
+          tags: ["dmulyalin/norfab:service-nornir-${{ github.ref_name }}", "dmulyalin/norfab:nornir-latest"]
           labels: ${{ steps.meta.outputs.labels }}
           
       - name: Generate artifact attestation
