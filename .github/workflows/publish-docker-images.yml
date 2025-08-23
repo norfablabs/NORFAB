@@ -1,4 +1,4 @@
-name: Publish Docker images
+name: Publish Docker Images
 
 on:
   release:
@@ -7,6 +7,7 @@ on:
 jobs:
   push_to_registry_broker:
     name: Push Broker Docker image to Docker Hub
+    environment: CI
     runs-on: ubuntu-latest
     permissions:
       packages: write
