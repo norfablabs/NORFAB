@@ -5,8 +5,8 @@ on:
     types: [published]
 
 jobs:
-  push_to_registry:
-    name: Push Docker images to Docker Hub
+  push_to_registry_broker:
+    name: Push Broker Docker image to Docker Hub
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -29,22 +29,12 @@ jobs:
         with:
           images: dmulyalin/norfab
 
-      - name: Build and push Docker image for broker
+      - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
           file: ./docker/norfab-docker-build/Dockerfile.norfab.broker
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Build and push Docker image for Nornir service
-        id: push
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          file: ./docker/norfab-docker-build/Dockerfile.norfab.nornir
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
