@@ -38,8 +38,8 @@ jobs:
           file: ./docker/norfab-docker-build/Dockerfile.norfab.broker
           push: true
           tags: 
-            - broker-${{ github.ref_name }}
-            - broker-latest
+            - "***/norfab:broker-${{ github.ref_name }}"
+            - "***/norfab:broker-latest"
           labels: ${{ steps.meta.outputs.labels }}
           
       - name: Generate artifact attestation
@@ -83,8 +83,9 @@ jobs:
           file: ./docker/norfab-docker-build/Dockerfile.norfab.nornir
           push: true
           tags: 
-            - nornir-${{ github.ref_name }}
-            - nornir-latest
+          tags: 
+            - "***/norfab:nornir-${{ github.ref_name }}"
+            - "***/norfab:nornir-latest"
           labels: ${{ steps.meta.outputs.labels }}
           
       - name: Generate artifact attestation
