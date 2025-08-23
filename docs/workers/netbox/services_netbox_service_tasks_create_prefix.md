@@ -17,7 +17,9 @@ allowing to allocate prefixes in Netbox on the fly while rendering configuration
 
     Netbox `create_prefix` task uses prefix description argument to deduplicate prefixes, calls to `create_prefix` task should contain identical prefix description value for same prefix.
 
-Create Prefix task is branch aware and can create IP addresses within the branch, branching plugin need to be installed on Netbox instance.
+## Branching Support
+
+Create Prefix task is branch aware and can create IP addresses within the branch. [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) need to be installed on Netbox instance.
 
 ## NORFAB Netbox Create Prefix Command Shell Reference
 

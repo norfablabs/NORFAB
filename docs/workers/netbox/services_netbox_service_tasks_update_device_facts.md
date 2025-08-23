@@ -17,7 +17,9 @@ Datasource `nornir` uses NAPALM `get_facts` getter and as such only supports the
 - Cisco NXOS
 - Juniper JUNOS
 
-Update device facts task is branch aware and can push updates to the branch, branching plugin need to be installed on Netbox instance.
+## Branching Support
+
+Update device facts task is branch aware and can push updates to the branch. [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) need to be installed on Netbox instance.
 
 ## Update Device Facts Sample Usage
 

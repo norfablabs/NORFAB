@@ -9,6 +9,8 @@
 5. Nornir Service - Adding `nb_create_prefix` Jinja2 filter allocate next available prefix during templates rendering
 6. Worker - Added `fastapi` argument to `@Task` decorator to control FastAPI REST API endpoints auto-generation
 7. Containerlab Service - added support for Containerlab 0.69+
+8. Netbox Service - added support for branching plugin, made creat and update tasks be branch aware, updated nfcli shells to support `branch` argument
+9. Netbox Service - added `delete_branch` task
 
 ### BUGS
 
@@ -22,7 +24,7 @@
 2. Upgrading PICLE library dependency from 0.9.0 to 0.9.1
 3. Upgrading Pynetbox library dependency from 7.4.0 to 7.5.0
 4. Refactoring Netbox service pydantic models
-5. BREAKING: Starting NorFab 0.11.0 containerlab service only supports Containerlab 0.69+
+5. BREAKING CHANGE: Starting NorFab 0.11.0 containerlab service only supports Containerlab 0.69+
 
 ## 0.10.0
 

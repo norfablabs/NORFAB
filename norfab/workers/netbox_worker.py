@@ -463,6 +463,7 @@ class NetboxWorker(NFPWorker):
         Args:
             instance (str): The instance name for which to get the pynetbox API object.
             branch (str, optional): Branch name to use, need to have branching plugin installed.
+                Creates branch if it does not exist in Netbox.
 
         Returns:
             pynetbox.core.api.Api: An instantiated pynetbox API object.
@@ -1882,7 +1883,8 @@ class NetboxWorker(NFPWorker):
             timeout (int, optional): The timeout for the job execution. Defaults to 60.
             devices (list, optional): The list of devices to update.
             batch_size (int, optional): The number of devices to process in each batch.
-            branch (str, optional): Branch name to use, need to have branching plugin installed
+            branch (str, optional): Branch name to use, need to have branching plugin installed,
+                automatically creates branch if it does not exist in Netbox.
             **kwargs: Additional keyword arguments to pass to the job.
 
         Returns:
@@ -2002,7 +2004,8 @@ class NetboxWorker(NFPWorker):
             devices (list, optional): List of devices to update.
             create (bool, optional): If True, new interfaces will be created if they do not exist.
             batch_size (int, optional): The number of devices to process in each batch.
-            branch (str, optional): Branch name to use, need to have branching plugin installed.
+            branch (str, optional): Branch name to use, need to have branching plugin installed,
+                automatically creates branch if it does not exist in Netbox.
             **kwargs: Additional keyword arguments to pass to the datasource job.
 
         Returns:
@@ -2211,7 +2214,8 @@ class NetboxWorker(NFPWorker):
             devices (list, optional): The list of devices to update.
             create (bool, optional): If True, new IP addresses will be created if they do not exist.
             batch_size (int, optional): The number of devices to process in each batch.
-            branch (str, optional): Branch name to use, need to have branching plugin installed.
+            branch (str, optional): Branch name to use, need to have branching plugin installed,
+                automatically creates branch if it does not exist in Netbox.
             **kwargs: Additional keyword arguments.
 
         Returns:
@@ -2376,7 +2380,8 @@ class NetboxWorker(NFPWorker):
             comments (str, optional): Additional comments for the IP address.
             instance (str, optional): The NetBox instance to use.
             dry_run (bool, optional): If True, do not actually allocate the IP address. Defaults to False.
-            branch (str, optional): Branch name to use, need to have branching plugin installed.
+            branch (str, optional): Branch name to use, need to have branching plugin installed,
+                automatically creates branch if it does not exist in Netbox.
 
         Returns:
             dict: A dictionary containing the result of the IP allocation.
@@ -2580,7 +2585,8 @@ class NetboxWorker(NFPWorker):
             status (str, optional): Status of the prefix.
             instance (Union[None, str], optional): NetBox instance identifier.
             dry_run (bool, optional): If True, simulates the creation without making changes.
-            branch (str, optional): Branch name to use, need to have branching plugin installed.
+            branch (str, optional): Branch name to use, need to have branching plugin installed,
+                automatically creates branch if it does not exist in Netbox.
 
         Returns:
             Result: An object containing the outcome, including status, details of the prefix, and resources used.
@@ -3146,7 +3152,7 @@ class NetboxWorker(NFPWorker):
 
         Args:
             job (Job): The job context for the operation.
-            branch (str, optional): The name of the branch to delete. Defaults to None.
+            branch (str, optional): The name of the branch to delete.
             instance (str, optional): The NetBox instance name.
 
         Returns:

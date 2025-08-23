@@ -13,7 +13,9 @@ Netbox service `create_ip` task integrated with Nornir service and can be called
 using [netbox.create_ip Jinja2 filter](../nornir/services_nornir_service_jinja2_filters.md#netboxcreate_ip), 
 allowing to allocate IP addresses in Netbox on the fly while rendering configuration templates. 
 
-Create IP task is branch aware and can create IP addresses within the branch, branching plugin need to be installed on Netbox instance.
+## Branching Support
+
+Create IP task is branch aware and can create IP addresses within the branch. [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) need to be installed on Netbox instance.
 
 ## NORFAB Netbox Create IP Command Shell Reference
 

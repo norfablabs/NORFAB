@@ -25,15 +25,15 @@ classifiers = [
 # Core Libs
 python = ">=3.9,<3.12"
 pyyaml = "6.0.2"
-pyzmq = "26.4.0"
-psutil = "6.1.1"
-tornado = "6.5.1"
+pyzmq = "27.0.2"
+psutil = "7.0.0"
+tornado = "6.5.2"
 jinja2 = "3.1.6"
-pydantic = "2.11.5"
+pydantic = "2.11.7"
 
 # PICLE Client Dependencies
 picle = { version = "0.9.1", optional = true }
-rich = { version = "14.0.0", optional = true }
+rich = { version = "14.1.0", optional = true }
 tabulate = { version = "0.9.0", optional = true }
 pyreadline3 = {version = "3.4.1", optional = true }
 
@@ -48,11 +48,11 @@ netmiko = { version = "4.6.0", optional = true }
 nornir-napalm = { version = "0.5.0", optional = true }
 nornir-netmiko = { version = "1.0.1", optional = true }
 nornir-scrapli = { version = "2025.01.30", optional = true }
-ntc-templates = { version = "4.1.0", optional = true }
-paramiko = { version = "3.5.1", optional = true }
-pygnmi = { version = "0.8.13", optional = true }
+ntc-templates = { version = "8.0.0", optional = true }
+paramiko = { version = "4.0.0", optional = true }
+pygnmi = { version = "0.8.15", optional = true }
 puresnmp = { version = "2.0.0", optional = true, extras = ['crypto'] }
-requests = { version = "2.32.4", optional = true }
+requests = { version = "2.32.5", optional = true }
 scrapli = { version = "2025.01.30", optional = true }
 scrapli-community = { version = "2025.01.30", optional = true }
 scrapli-netconf = { version = "2025.01.30", optional = true }
@@ -66,7 +66,7 @@ dnspython = { version = "2.4.2", optional = true }
 pythonping = { version = "1.1.4", optional = true }
 
 # Robot Client Dependencies
-robotframework = { version = "7.0", optional = true }
+robotframework = { version = "7.3.2", optional = true }
 
 # Agent Service Dependencies
 langchain = { version = "0.3.25", optional = true }
@@ -80,8 +80,8 @@ diskcache = { version = "5.6.3", optional = true }
 pynetbox = { version = "7.5.0", optional = true }
 
 # FastAPI Service Dependencies
-fastapi = { version = "0.115.12", optional = true, extras = ["standard"] }
-uvicorn = { version = "0.34.1", optional = true }
+fastapi = { version = "0.116.1", optional = true, extras = ["standard"] }
+uvicorn = { version = "0.35.0", optional = true }
 python-multipart = { version = "0.0.20", optional = true }
 
 # docs dependencies
@@ -93,7 +93,7 @@ pygments = { version = "*", optional = true }
 pymdown-extensions = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-black = "22.3.*"
+black = ">=25.*"
 pytest = { version = ">=7.1" }
 
 [build-system]

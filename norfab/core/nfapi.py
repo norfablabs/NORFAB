@@ -11,11 +11,7 @@ from norfab.core.broker import NFPBroker
 from norfab.core.client import NFPClient
 from norfab.core.inventory import NorFabInventory
 from norfab.core import exceptions as norfab_exceptions
-
-if sys.version_info < (3, 10):
-    from importlib_metadata import entry_points, EntryPoint
-else:
-    from importlib.metadata import entry_points, EntryPoint
+from importlib.metadata import entry_points, EntryPoint
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +70,7 @@ def start_worker_process(
         init_done_event (threading.Event, optional): An event to signal when initialization is done. Defaults to None.
     """
     # load entry point on first call
-    if isinstance(worker_plugin, EntryPoint):
+    if hasattr(worker_plugin, "load"):
         worker_plugin = worker_plugin.load()
     elif isinstance(worker_plugin, str):
         service = inventory[worker_name]["service"]
@@ -186,7 +182,8 @@ class NorFab:
             Any exceptions raised by the entry point loading or registration process.
         """
         # register worker plugins from entrypoints
-        for entry_point in entry_points(group="norfab.workers"):
+        eps = entry_points()
+        for entry_point in eps["norfab.workers"]:
             self.register_worker_plugin(entry_point.name, entry_point)
 
         # register worker plugins from inventory
