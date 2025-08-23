@@ -12,13 +12,13 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service/">
+        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_create_prefix/">
       
       
-        <link rel="prev" href="../../nornir/services_nornir_service_jinja2_filters/">
+        <link rel="prev" href="../services_netbox_service_tasks_create_ip/">
       
       
-        <link rel="next" href="../services_netbox_service_inventory/">
+        <link rel="next" href="../services_netbox_service_tasks_update_device_facts/">
       
       
       <link rel="icon" href="../../../images/logo.jpg">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Overview - Network Automations Fabric [NORFAB]</title>
+        <title>Create Prefix - Network Automations Fabric [NORFAB]</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#netbox-service" class="md-skip">
+        <a href="#netbox-create-prefix-task" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Create Prefix
             
           </span>
         </div>
@@ -1292,32 +1292,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Overview
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../services_netbox_service/" class="md-nav__link">
         
   
   
@@ -1328,155 +1306,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#netbox-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      Netbox Compatibility
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#norfab-netbox-service-key-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      NorFab Netbox Service Key Features
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="NorFab Netbox Service Key Features">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#multi-instance-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      Multi-Instance Support
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#device-and-interface-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Device and Interface Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#graphql-and-rest-api-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      GraphQL and REST API Integration
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#customizable-filters-and-queries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Customizable Filters and Queries
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#caching-and-performance-optimization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Caching and Performance Optimization
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-cases" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use Cases
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Use Cases">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automated-inventory-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Automated Inventory Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration-compliance-and-auditing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration, Compliance and Auditing
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    <span class="md-ellipsis">
-      Getting Started
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
-    <span class="md-ellipsis">
-      Conclusion
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1509,8 +1338,10 @@
                 
   
   
+    
   
   
+  
     
     
     
@@ -1521,11 +1352,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_4_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_4_3" checked>
         
           
           <label class="md-nav__link" for="__nav_1_5_4_3" id="__nav_1_5_4_3_label" tabindex="0">
@@ -1541,7 +1372,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_4_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_4_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_5_4_3">
             <span class="md-nav__icon md-icon"></span>
             Tasks
@@ -1759,10 +1590,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Create Prefix
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1773,6 +1626,53 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#branching-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branching Support
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-create-prefix-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      NORFAB Netbox Create Prefix Command Shell Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python API Reference
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3787,129 +3687,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Branching Support
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#netbox-compatibility" class="md-nav__link">
+  <a href="#norfab-netbox-create-prefix-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
-      Netbox Compatibility
+      NORFAB Netbox Create Prefix Command Shell Reference
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-service-key-features" class="md-nav__link">
+  <a href="#python-api-reference" class="md-nav__link">
     <span class="md-ellipsis">
-      NorFab Netbox Service Key Features
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="NorFab Netbox Service Key Features">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#multi-instance-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      Multi-Instance Support
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#device-and-interface-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Device and Interface Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#graphql-and-rest-api-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      GraphQL and REST API Integration
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#customizable-filters-and-queries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Customizable Filters and Queries
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#caching-and-performance-optimization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Caching and Performance Optimization
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-cases" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use Cases
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Use Cases">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automated-inventory-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Automated Inventory Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration-compliance-and-auditing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration, Compliance and Auditing
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    <span class="md-ellipsis">
-      Getting Started
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
-    <span class="md-ellipsis">
-      Conclusion
+      Python API Reference
     </span>
   </a>
   
@@ -3934,7 +3732,7 @@
       
       
       
-        <a href="../../../tags/#tag:netbox" class="md-tag">Netbox</a>
+        <a href="../../../tags/#tag:netbox" class="md-tag">netbox</a>
       
     
   </nav>
@@ -3944,38 +3742,808 @@
   
 
 
-<h1 id="netbox-service">Netbox Service<a class="headerlink" href="#netbox-service" title="Permanent link">¤</a></h1>
-<p>The Netbox Service allows NorFab to integrate with <a href="https://github.com/netbox-community/netbox">Netbox</a> - an open-source tool for documenting networks. This integration provides network engineers and administrators with powerful capabilities to manage and automate their network infrastructure using the rich data stored in Netbox.</p>
-<p><img alt="Nornir Service Architecture" src="../../../images/Netbox_Service.jpg" /></p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¤</a></h2>
-<p>Netbox is a comprehensive network documentation and management tool that includes features for IP address management (IPAM), data center infrastructure management (DCIM), and more. By integrating Netbox with NorFab, you can leverage the detailed network data stored in Netbox to automate various network tasks, ensuring consistency and accuracy across your network operations.</p>
-<h2 id="netbox-compatibility">Netbox Compatibility<a class="headerlink" href="#netbox-compatibility" title="Permanent link">¤</a></h2>
-<p>NorFab supports these versions of Netbox:</p>
-<ol>
-<li>Netbox 3.6.x</li>
-<li>Netbox 4.0.x, 4.1.x</li>
-<li>Netbox 4.2.x starting with Norfab 0.8.0</li>
-</ol>
-<h2 id="norfab-netbox-service-key-features">NorFab Netbox Service Key Features<a class="headerlink" href="#norfab-netbox-service-key-features" title="Permanent link">¤</a></h2>
-<h3 id="multi-instance-support">Multi-Instance Support<a class="headerlink" href="#multi-instance-support" title="Permanent link">¤</a></h3>
-<p>With each NorFab Netbox worker capable of working with multiple Netbox instances, NorFab Netbox Service offers high flexibility. This allows you to manage and automate tasks across different Netbox instances, making it ideal for large-scale environments with multiple data centers or network segments.</p>
-<h3 id="device-and-interface-management">Device and Interface Management<a class="headerlink" href="#device-and-interface-management" title="Permanent link">¤</a></h3>
-<p>The Netbox Service enables you to retrieve and manage detailed information about network devices and interfaces. This includes device configuration contexts, interface statuses, IP addresses, and more. By using this data you can  ensure that your network state is always up-to-date and accurate.</p>
-<h3 id="graphql-and-rest-api-integration">GraphQL and REST API Integration<a class="headerlink" href="#graphql-and-rest-api-integration" title="Permanent link">¤</a></h3>
-<p>The Netbox Service leverages both REST and GraphQL API provided by Netbox to perform complex queries and retrieve specific data sets. This allows for efficient data retrieval and manipulation, enabling you to automate tasks such as inventory updates, configuration audits, and compliance checks.</p>
-<h3 id="customizable-filters-and-queries">Customizable Filters and Queries<a class="headerlink" href="#customizable-filters-and-queries" title="Permanent link">¤</a></h3>
-<p>You can define custom filters and queries to retrieve specific data from Netbox. This flexibility allows you to tailor the data retrieval process to meet your specific needs, ensuring that you get the exact information required for your automation tasks.</p>
-<h3 id="caching-and-performance-optimization">Caching and Performance Optimization<a class="headerlink" href="#caching-and-performance-optimization" title="Permanent link">¤</a></h3>
-<p>The Netbox Service includes caching mechanisms to optimize performance and reduce the load on your Netbox instances. By caching frequently accessed data, you can improve the efficiency of your automation workflows and ensure faster response times.</p>
-<h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">¤</a></h2>
-<h3 id="automated-inventory-management">Automated Inventory Management<a class="headerlink" href="#automated-inventory-management" title="Permanent link">¤</a></h3>
-<p>By integrating Netbox with NorFab, you can automate the process of updating and maintaining your network inventory. This ensures that your inventory data is always accurate and up-to-date, reducing the risk of configuration errors and improving overall network reliability.</p>
-<h3 id="configuration-compliance-and-auditing">Configuration, Compliance and Auditing<a class="headerlink" href="#configuration-compliance-and-auditing" title="Permanent link">¤</a></h3>
-<p>The Netbox Service allows you to automate configuration compliance checks and audits through integration with other services such as Nornir. By retrieving inventory data from Netbox and comparing it against network state, you can quickly identify and remediate any deviations, ensuring that your network remains compliant.</p>
-<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">¤</a></h2>
-<p>To get started with the Netbox Service, you need to configure your Netbox instances and define the necessary connection parameters in your NorFab inventory. Refer to the <a href="../services_netbox_service_inventory/">Netbox Inventory</a> section for detailed instructions on setting up your inventory and integrating Netbox with NorFab.</p>
-<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">¤</a></h2>
-<p>The Netbox Service is a powerful addition to NorFab, providing seamless integration with Netbox and enabling advanced network automation capabilities. By leveraging the rich data stored in Netbox, you can enhance your network management processes, improve accuracy, and ensure consistency across your network operations.</p>
+<h1 id="netbox-create-prefix-task">Netbox Create Prefix Task<a class="headerlink" href="#netbox-create-prefix-task" title="Permanent link">¤</a></h1>
+<blockquote>
+<p>task api name: <code>create_prefix</code></p>
+</blockquote>
+<p>Task to create next available prefix of given prefix length within parent prefix or get existing prefix. By default prefix length is <code>30</code> resulting in ptp subnet allocation.</p>
+<p>Netbox service <code>create_prefix</code> task integrated with Nornir service and can be called 
+using <a href="../../nornir/services_nornir_service_jinja2_filters/#netboxcreate_prefix">netbox.create_prefix Jinja2 filter</a>, 
+allowing to allocate prefixes in Netbox on the fly while rendering configuration templates. </p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Netbox <code>create_prefix</code> task uses prefix description argument to deduplicate prefixes, calls to <code>create_prefix</code> task should contain identical prefix description value for same prefix.</p>
+</div>
+<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
+<p>Create Prefix task is branch aware and can create IP addresses within the branch. <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> need to be installed on Netbox instance.</p>
+<h2 id="norfab-netbox-create-prefix-command-shell-reference">NORFAB Netbox Create Prefix Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-prefix-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Netbox <code>create_prefix</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#man tree netbox.create.prefix
+root
+└── netbox:    Netbox service
+    └── create:    Create objects in Netbox
+            ├── instance:    Netbox instance name to target
+            ├── dry-run:    Do not commit to database
+            ├── *parent:    Parent prefix to allocate new prefix from
+            ├── *description:    Description for new prefix
+            ├── prefixlen:    The prefix length of the new prefix, default &#39;30&#39;
+            ├── vrf:    Name of the VRF to associate with the prefix
+            ├── tags:    List of tags to assign to the prefix
+            ├── tenant:    Name of the tenant to associate with the prefix
+            ├── comments:    Comments for the prefix
+            ├── role:    Role to assign to the prefix
+            ├── site:    Name of the site to associate with the prefix
+            ├── status:    Status of the prefix
+            ├── branch:    Branching plugin branch name to use
+            ├── timeout:    Job timeout
+            ├── workers:    Filter worker to target, default &#39;any&#39;
+            ├── verbose-result:    Control output details, default &#39;False&#39;
+            └── progress:    Display progress events, default &#39;True&#39;
+nf#
+</code></pre></div>
+<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Creates a new IP prefix in NetBox or updates an existing one.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>parent</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Parent prefix to allocate new prefix from, could be:</p>
+<ul>
+<li>IPv4 prefix string e.g. 10.0.0.0/24</li>
+<li>IPv6 prefix string e.g. 2001::/64</li>
+<li>Prefix description string to filter by</li>
+<li>Dictionary with prefix filters for <code>pynetbox</code> prefixes.get method
+    e.g. <code>{"prefix": "10.0.0.0/24", "site__name": "foo"}</code></li>
+</ul>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>description</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description for the new prefix, this is mandatory to have
+since prefix description used for deduplication to source existng prefixes.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>prefixlen</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The prefix length of the new prefix to create, by default
+allocates next availabe /30 point-to-point prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>30</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vrf</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the VRF to associate with the prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tags</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="list">list</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of tags to assign to the prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tenant</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the tenant to associate with the prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>comments</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Comments for the prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>role</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Role to assign to the prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>site</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the site to associate with the prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>status</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Status of the prefix.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>instance</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NetBox instance identifier.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dry_run</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, simulates the creation without making changes.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>branch</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Branch name to use, need to have branching plugin installed,
+automatically creates branch if it does not exist in Netbox.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Result</code></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An object containing the outcome, including status, details of the prefix, and resources used.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2542</span>
+<span class="normal">2543</span>
+<span class="normal">2544</span>
+<span class="normal">2545</span>
+<span class="normal">2546</span>
+<span class="normal">2547</span>
+<span class="normal">2548</span>
+<span class="normal">2549</span>
+<span class="normal">2550</span>
+<span class="normal">2551</span>
+<span class="normal">2552</span>
+<span class="normal">2553</span>
+<span class="normal">2554</span>
+<span class="normal">2555</span>
+<span class="normal">2556</span>
+<span class="normal">2557</span>
+<span class="normal">2558</span>
+<span class="normal">2559</span>
+<span class="normal">2560</span>
+<span class="normal">2561</span>
+<span class="normal">2562</span>
+<span class="normal">2563</span>
+<span class="normal">2564</span>
+<span class="normal">2565</span>
+<span class="normal">2566</span>
+<span class="normal">2567</span>
+<span class="normal">2568</span>
+<span class="normal">2569</span>
+<span class="normal">2570</span>
+<span class="normal">2571</span>
+<span class="normal">2572</span>
+<span class="normal">2573</span>
+<span class="normal">2574</span>
+<span class="normal">2575</span>
+<span class="normal">2576</span>
+<span class="normal">2577</span>
+<span class="normal">2578</span>
+<span class="normal">2579</span>
+<span class="normal">2580</span>
+<span class="normal">2581</span>
+<span class="normal">2582</span>
+<span class="normal">2583</span>
+<span class="normal">2584</span>
+<span class="normal">2585</span>
+<span class="normal">2586</span>
+<span class="normal">2587</span>
+<span class="normal">2588</span>
+<span class="normal">2589</span>
+<span class="normal">2590</span>
+<span class="normal">2591</span>
+<span class="normal">2592</span>
+<span class="normal">2593</span>
+<span class="normal">2594</span>
+<span class="normal">2595</span>
+<span class="normal">2596</span>
+<span class="normal">2597</span>
+<span class="normal">2598</span>
+<span class="normal">2599</span>
+<span class="normal">2600</span>
+<span class="normal">2601</span>
+<span class="normal">2602</span>
+<span class="normal">2603</span>
+<span class="normal">2604</span>
+<span class="normal">2605</span>
+<span class="normal">2606</span>
+<span class="normal">2607</span>
+<span class="normal">2608</span>
+<span class="normal">2609</span>
+<span class="normal">2610</span>
+<span class="normal">2611</span>
+<span class="normal">2612</span>
+<span class="normal">2613</span>
+<span class="normal">2614</span>
+<span class="normal">2615</span>
+<span class="normal">2616</span>
+<span class="normal">2617</span>
+<span class="normal">2618</span>
+<span class="normal">2619</span>
+<span class="normal">2620</span>
+<span class="normal">2621</span>
+<span class="normal">2622</span>
+<span class="normal">2623</span>
+<span class="normal">2624</span>
+<span class="normal">2625</span>
+<span class="normal">2626</span>
+<span class="normal">2627</span>
+<span class="normal">2628</span>
+<span class="normal">2629</span>
+<span class="normal">2630</span>
+<span class="normal">2631</span>
+<span class="normal">2632</span>
+<span class="normal">2633</span>
+<span class="normal">2634</span>
+<span class="normal">2635</span>
+<span class="normal">2636</span>
+<span class="normal">2637</span>
+<span class="normal">2638</span>
+<span class="normal">2639</span>
+<span class="normal">2640</span>
+<span class="normal">2641</span>
+<span class="normal">2642</span>
+<span class="normal">2643</span>
+<span class="normal">2644</span>
+<span class="normal">2645</span>
+<span class="normal">2646</span>
+<span class="normal">2647</span>
+<span class="normal">2648</span>
+<span class="normal">2649</span>
+<span class="normal">2650</span>
+<span class="normal">2651</span>
+<span class="normal">2652</span>
+<span class="normal">2653</span>
+<span class="normal">2654</span>
+<span class="normal">2655</span>
+<span class="normal">2656</span>
+<span class="normal">2657</span>
+<span class="normal">2658</span>
+<span class="normal">2659</span>
+<span class="normal">2660</span>
+<span class="normal">2661</span>
+<span class="normal">2662</span>
+<span class="normal">2663</span>
+<span class="normal">2664</span>
+<span class="normal">2665</span>
+<span class="normal">2666</span>
+<span class="normal">2667</span>
+<span class="normal">2668</span>
+<span class="normal">2669</span>
+<span class="normal">2670</span>
+<span class="normal">2671</span>
+<span class="normal">2672</span>
+<span class="normal">2673</span>
+<span class="normal">2674</span>
+<span class="normal">2675</span>
+<span class="normal">2676</span>
+<span class="normal">2677</span>
+<span class="normal">2678</span>
+<span class="normal">2679</span>
+<span class="normal">2680</span>
+<span class="normal">2681</span>
+<span class="normal">2682</span>
+<span class="normal">2683</span>
+<span class="normal">2684</span>
+<span class="normal">2685</span>
+<span class="normal">2686</span>
+<span class="normal">2687</span>
+<span class="normal">2688</span>
+<span class="normal">2689</span>
+<span class="normal">2690</span>
+<span class="normal">2691</span>
+<span class="normal">2692</span>
+<span class="normal">2693</span>
+<span class="normal">2694</span>
+<span class="normal">2695</span>
+<span class="normal">2696</span>
+<span class="normal">2697</span>
+<span class="normal">2698</span>
+<span class="normal">2699</span>
+<span class="normal">2700</span>
+<span class="normal">2701</span>
+<span class="normal">2702</span>
+<span class="normal">2703</span>
+<span class="normal">2704</span>
+<span class="normal">2705</span>
+<span class="normal">2706</span>
+<span class="normal">2707</span>
+<span class="normal">2708</span>
+<span class="normal">2709</span>
+<span class="normal">2710</span>
+<span class="normal">2711</span>
+<span class="normal">2712</span>
+<span class="normal">2713</span>
+<span class="normal">2714</span>
+<span class="normal">2715</span>
+<span class="normal">2716</span>
+<span class="normal">2717</span>
+<span class="normal">2718</span>
+<span class="normal">2719</span>
+<span class="normal">2720</span>
+<span class="normal">2721</span>
+<span class="normal">2722</span>
+<span class="normal">2723</span>
+<span class="normal">2724</span>
+<span class="normal">2725</span>
+<span class="normal">2726</span>
+<span class="normal">2727</span>
+<span class="normal">2728</span>
+<span class="normal">2729</span>
+<span class="normal">2730</span>
+<span class="normal">2731</span>
+<span class="normal">2732</span>
+<span class="normal">2733</span>
+<span class="normal">2734</span>
+<span class="normal">2735</span>
+<span class="normal">2736</span>
+<span class="normal">2737</span>
+<span class="normal">2738</span>
+<span class="normal">2739</span>
+<span class="normal">2740</span>
+<span class="normal">2741</span>
+<span class="normal">2742</span>
+<span class="normal">2743</span>
+<span class="normal">2744</span>
+<span class="normal">2745</span>
+<span class="normal">2746</span>
+<span class="normal">2747</span>
+<span class="normal">2748</span>
+<span class="normal">2749</span>
+<span class="normal">2750</span>
+<span class="normal">2751</span>
+<span class="normal">2752</span>
+<span class="normal">2753</span>
+<span class="normal">2754</span>
+<span class="normal">2755</span>
+<span class="normal">2756</span>
+<span class="normal">2757</span>
+<span class="normal">2758</span>
+<span class="normal">2759</span>
+<span class="normal">2760</span>
+<span class="normal">2761</span>
+<span class="normal">2762</span>
+<span class="normal">2763</span>
+<span class="normal">2764</span>
+<span class="normal">2765</span>
+<span class="normal">2766</span>
+<span class="normal">2767</span>
+<span class="normal">2768</span>
+<span class="normal">2769</span>
+<span class="normal">2770</span>
+<span class="normal">2771</span>
+<span class="normal">2772</span>
+<span class="normal">2773</span>
+<span class="normal">2774</span>
+<span class="normal">2775</span>
+<span class="normal">2776</span>
+<span class="normal">2777</span>
+<span class="normal">2778</span>
+<span class="normal">2779</span>
+<span class="normal">2780</span>
+<span class="normal">2781</span>
+<span class="normal">2782</span>
+<span class="normal">2783</span>
+<span class="normal">2784</span>
+<span class="normal">2785</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="nb">input</span><span class="o">=</span><span class="n">CreatePrefixInput</span><span class="p">,</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_prefix</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
+    <span class="n">parent</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">prefixlen</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="n">vrf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tenant</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">comments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a new IP prefix in NetBox or updates an existing one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        parent (Union[str, dict]): Parent prefix to allocate new prefix from, could be:</span>
+
+<span class="sd">            - IPv4 prefix string e.g. 10.0.0.0/24</span>
+<span class="sd">            - IPv6 prefix string e.g. 2001::/64</span>
+<span class="sd">            - Prefix description string to filter by</span>
+<span class="sd">            - Dictionary with prefix filters for `pynetbox` prefixes.get method</span>
+<span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site__name&quot;: &quot;foo&quot;}`</span>
+
+<span class="sd">        description (str): Description for the new prefix, this is mandatory to have</span>
+<span class="sd">            since prefix description used for deduplication to source existng prefixes.</span>
+<span class="sd">        prefixlen (int, optional): The prefix length of the new prefix to create, by default</span>
+<span class="sd">            allocates next availabe /30 point-to-point prefix.</span>
+<span class="sd">        vrf (str, optional): Name of the VRF to associate with the prefix.</span>
+<span class="sd">        tags (Union[None, list], optional): List of tags to assign to the prefix.</span>
+<span class="sd">        tenant (str, optional): Name of the tenant to associate with the prefix.</span>
+<span class="sd">        comments (str, optional): Comments for the prefix.</span>
+<span class="sd">        role (str, optional): Role to assign to the prefix.</span>
+<span class="sd">        site (str, optional): Name of the site to associate with the prefix.</span>
+<span class="sd">        status (str, optional): Status of the prefix.</span>
+<span class="sd">        instance (Union[None, str], optional): NetBox instance identifier.</span>
+<span class="sd">        dry_run (bool, optional): If True, simulates the creation without making changes.</span>
+<span class="sd">        branch (str, optional): Branch name to use, need to have branching plugin installed,</span>
+<span class="sd">            automatically creates branch if it does not exist in Netbox.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result: An object containing the outcome, including status, details of the prefix, and resources used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_prefix&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+        <span class="n">diff</span><span class="o">=</span><span class="n">changed</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">nb_prefix</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Processing create &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix request within &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; parent prefix&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># source parent prefix from Netbox</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># check if parent prefix is IP network or description</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="n">is_network</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">is_network</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">vrf</span><span class="p">:</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;vrf__name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">vrf</span><span class="p">:</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;vrf__name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">}</span>
+    <span class="n">nb_parent_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">parent_filters</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_parent_prefix</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unable to source parent prefix from Netbox - </span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># check that parent vrf and new prefix vrf are same</span>
+    <span class="k">if</span> <span class="n">vrf</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">)</span> <span class="o">!=</span> <span class="n">vrf</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Parent prefix vrf &#39;</span><span class="si">{</span><span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="si">}</span><span class="s2">&#39; not same as requested child prefix vrf &#39;</span><span class="si">{</span><span class="n">vrf</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># try to source existing prefix from netbox using its description</span>
+    <span class="n">prefix_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;within&quot;</span><span class="p">:</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">vrf</span><span class="p">:</span>
+        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">&quot;vrf__name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
+    <span class="k">if</span> <span class="n">site</span><span class="p">:</span>
+        <span class="n">prefix_filters</span><span class="p">[</span><span class="s2">&quot;site__name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">prefix_filters</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to source existing prefix from Netbox using filters &#39;</span><span class="si">{</span><span class="n">prefix_filters</span><span class="si">}</span><span class="s2">&#39;, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># create new prefix</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefix</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating new &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix within &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span><span class="p">)</span>
+        <span class="c1"># execute dry run on new prefix</span>
+        <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">available_prefixes</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefixes</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Parent prefix &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; has no child prefixes available&quot;</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
+                <span class="c1"># parent prefix empty, can use first subnet as a child prefix</span>
+                <span class="k">if</span> <span class="n">pfx</span><span class="o">.</span><span class="n">prefix</span> <span class="o">==</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">:</span>
+                    <span class="n">nb_prefix</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="c1"># find child prefix by prefixlenght</span>
+                <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">pfx</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+                    <span class="n">nb_prefix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pfx</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Parent prefix &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; has no child prefixes available with &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix length&quot;</span>
+                <span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="c1"># add branch to results</span>
+            <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="c1"># create new prefix</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nb_prefix</span> <span class="o">=</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">available_prefixes</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;prefix_length&quot;</span><span class="p">:</span> <span class="n">prefixlen</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Failed creating child prefix of &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix length &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;within parent prefix &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_parent_prefix</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># check existing prefix length matching requested length</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Found existing child prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; with mismatch &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;requested prefix length &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using existing prefix </span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># update prefix parameters</span>
+    <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+    <span class="k">if</span> <span class="n">vrf</span> <span class="ow">and</span> <span class="n">vrf</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">):</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span><span class="p">):</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;tenant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">site</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="o">!=</span> <span class="n">site</span><span class="p">:</span>
+        <span class="n">nb_site</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_site</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get &#39;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&#39; site from Netbox&quot;</span><span class="p">)</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">nb_site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope_type</span> <span class="o">=</span> <span class="s2">&quot;dcim.site&quot;</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope_id</span> <span class="o">=</span> <span class="n">nb_site</span><span class="o">.</span><span class="n">id</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">and</span> <span class="n">status</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">status</span><span class="p">:</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">status</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">status</span><span class="o">.</span><span class="n">title</span><span class="p">()}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">comments</span> <span class="ow">and</span> <span class="n">comments</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">comments</span><span class="p">:</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">comments</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">comments</span><span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">comments</span> <span class="o">=</span> <span class="n">comments</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">:</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
+    <span class="n">existing_tags</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span> <span class="ow">in</span> <span class="n">existing_tags</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="n">existing_tags</span><span class="p">,</span>
+            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">]</span> <span class="o">+</span> <span class="n">existing_tags</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">:</span>
+                <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">})</span>
+
+    <span class="c1"># save prefix into Netbox</span>
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">changed</span>
+    <span class="k">elif</span> <span class="n">changed</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">changed</span>
+        <span class="n">nb_prefix</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">&quot;created&quot;</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
+
+    <span class="c1"># source vrf name</span>
+    <span class="n">vrf_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># form and return results</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf_name</span><span class="p">,</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span> <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">scope</span> <span class="k">else</span> <span class="n">site</span><span class="p">,</span>
+        <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># add branch to results</span>
+    <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
