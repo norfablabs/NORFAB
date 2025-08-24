@@ -5,7 +5,7 @@ services:
   norfab:
     container_name: "norfab"
     hostname: 'norfab'
-    image: docker.io/dmulyalin/norfab:service-aio-latest
+    image: docker.io/dmulyalin/norfab:aio-latest
     environment:
       LOG_LEVEL: INFO
     volumes:
