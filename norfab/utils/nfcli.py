@@ -205,8 +205,13 @@ def nfcli():
             else (f"\nDone, 'cd {CREATE_ENV}' and run 'nfcli' to start NorFab\n")
         )
 
+    # start broker and workers
+    if BROKER and (WORKERS or WORKERS_LIST):
+        nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
+        nf.start(start_broker=True, workers=WORKERS_LIST if WORKERS_LIST else True)
+        nf.run()
     # start broker only
-    if BROKER:
+    elif BROKER:
         nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
         nf.start(start_broker=True, workers=False)
         nf.run()
@@ -214,11 +219,6 @@ def nfcli():
     elif WORKERS or WORKERS_LIST:
         nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
         nf.start(start_broker=False, workers=WORKERS_LIST if WORKERS_LIST else True)
-        nf.run()
-    # start broker and workers
-    elif BROKER and (WORKERS or WORKERS_LIST):
-        nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
-        nf.start(start_broker=True, workers=WORKERS_LIST if WORKERS_LIST else True)
         nf.run()
     # start interactive client shell only
     elif CLIENT:

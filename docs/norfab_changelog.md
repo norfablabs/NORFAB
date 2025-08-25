@@ -1,3 +1,13 @@
+## 0.11.1
+
+### BUGS
+
+1. Fixed containerlab show lab outputting
+2. Enhanced nfcli logic to b able to start broker nad workers only without a client
+3. Updated aio docker file to start broker and workers only
+
+---
+
 ## 0.11.0
 
 ### FEATURES

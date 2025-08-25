@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir norfab --upgrade && \
 
 ENV LOG_LEVEL=INFO
 
-ENTRYPOINT cd /etc/norfab/ && nfcli -l $LOG_LEVEL
+ENTRYPOINT cd /etc/norfab/ && nfcli -w -b -l $LOG_LEVEL
