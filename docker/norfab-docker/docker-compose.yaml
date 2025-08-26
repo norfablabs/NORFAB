@@ -1,7 +1,4 @@
-version: "3.9"
-
 services:
-
   norfab:
     container_name: "norfab"
     hostname: 'norfab'
@@ -12,3 +9,5 @@ services:
       - type: bind
         source: ./norfab/
         target: /etc/norfab/
+    ports:
+      - "8000:8000" # FastAPI ports

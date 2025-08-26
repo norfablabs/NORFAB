@@ -6,15 +6,15 @@ broker:
 # workers inventory section
 workers:
   nornir-*:
-    - nornir/common.yaml  
+    - nornir/nornir.common.yaml  
   nornir-worker-1:
     - nornir/nornir-worker-1.yaml
   netbox-*:
-    - netbox/common.yaml
+    - netbox/netbox.common.yaml
   fastapi*:
-    - fastapi/common.yaml
+    - fastapi/fastapi.common.yaml
   workflow*:
-    - workflow/common.yaml
+    - workflow/workflow.common.yaml
     
 # you can also source variables from the environment using Jinja2 syntax
 # logging:
