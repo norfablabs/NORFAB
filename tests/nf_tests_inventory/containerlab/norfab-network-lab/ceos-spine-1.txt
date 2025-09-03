@@ -3,6 +3,17 @@
 !
 no aaa root
 !
+security pki key generate rsa 2048 self-signed.key
+!
+security pki certificate generate self-signed self-signed.crt key self-signed.key validity 365 parameters common-name bogus.domain.com country US state CA locality SF organization BigCo organization-unit OPS
+!
+config term
+  management security 
+  ssl profile selfSignedSSLProfile
+    certificate self-signed.crt key self-signed.key
+  management api http-commands
+    protocol https ssl profile selfSignedSSLProfile
+!
 username admin privilege 15 role network-admin secret sha512 $6$QbV8R/z5T/EYeWCs$gx85BIrNaiA84UU084n6/f4KkY9nltutvvFAhqc4CbPaNSBIkO6tqxvycT4CY1YjxFR2rFLkJtAVXqK4O4nLV0
 !
 transceiver qsfp default-mode 4x10G

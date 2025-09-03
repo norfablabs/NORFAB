@@ -1,3 +1,16 @@
+## 0.11.2
+
+### CHANGES
+
+1. Moving to Python 3.10 as primary supported version instead of 3.9 due to addition of FastMCP service which only supports Py3.10 and up.
+2. Updated build dockerfiles to use `python:3.10-slim-trixie` as a base image
+
+### BUGS
+
+1. Fixing FastAPI worker argument handling by setting it to `all` by default
+
+----
+
 ## 0.11.1
 
 ### BUGS

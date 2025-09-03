@@ -13,7 +13,6 @@ from norfab.models.fastapi import (
     ClientPostJobResponse,
     ClientGetJobResponse,
 )
-from norfab.models import Result
 from typing import Union, List, Dict, Any, Annotated, Optional
 from diskcache import FanoutCache
 from pydantic import BaseModel
@@ -52,7 +51,7 @@ def create_api_endpoint(
     """
     # We will handle a missing token ourselves
     get_bearer_token = HTTPBearer(auto_error=False)
-    default_workers = schema["properties"].get("workers", {}).get("default")
+    default_workers = schema["properties"].get("workers", {}).get("default", "all")
 
     def get_token(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
@@ -74,6 +73,11 @@ def create_api_endpoint(
     ) -> Dict[Annotated[str, Body(description="Worker Name")], Result]:
         kwargs = await request.json()
         workers = kwargs.pop("workers", default_workers)
+
+        log.debug(
+            f"FastAPI running '{service}:{task_name}' task, on '{workers}' workers, job data: '{kwargs}'"
+        )
+
         res = worker.client.run_job(
             service=service,
             task=task_name,
@@ -179,6 +183,7 @@ def service_tasks_api_discovery(
                                 "content": {"application/json": {"schema": schema}},
                             }
                         },
+                        tags=["NORFAB"],
                         **task["fastapi"],
                     )
                     # make app to re-generate openapi schema
@@ -594,7 +599,11 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
         FastAPI: A FastAPI application instance.
     """
 
-    app = FastAPI(**config)
+    app = FastAPI(
+        title="NorFab REST API",
+        summary="NorFab Services Tasks FastAPI application with endpoints for posting, getting, and running jobs",
+        **config,
+    )
 
     # We will handle a missing token ourselves
     get_bearer_token = HTTPBearer(auto_error=False)
@@ -616,6 +625,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     @app.post(
         f"{worker.api_prefix}/job",
         responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
+        tags=["NORFAB"],
     )
     def post_job(
         service: Annotated[
@@ -674,6 +684,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     @app.get(
         f"{worker.api_prefix}/job",
         responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
+        tags=["NORFAB"],
     )
     def get_job(
         service: Annotated[
@@ -715,6 +726,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     @app.post(
         f"{worker.api_prefix}/job/run",
         responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},
+        tags=["NORFAB"],
     )
     def run_job(
         service: Annotated[

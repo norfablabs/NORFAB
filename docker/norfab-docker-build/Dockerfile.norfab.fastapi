@@ -1,4 +1,4 @@
-FROM python:3.9-slim-trixie
+FROM python:3.10-slim-trixie
 
 RUN apt-get update && \
     apt-get clean && \
