@@ -24,6 +24,7 @@ from starlette import status
 from starlette.routing import Route
 
 SERVICE = "fastapi"
+API_TITLE = "NORFAB REST API"
 
 log = logging.getLogger(__name__)
 
@@ -89,6 +90,33 @@ def create_api_endpoint(
     return endpoint
 
 
+def make_openapi_schema(app, regenerate=False, json_refs=None):
+    """
+    Generates and returns the OpenAPI schema for a FastAPI application.
+
+    Args:
+        app (FastAPI): The FastAPI application instance.
+        regenerate (bool, optional): If True, forces regeneration of the OpenAPI schema.
+        json_refs (dict, optional): A dictionary of JSON references to include in
+            the schema under the "$defs" key.
+
+    Returns:
+        dict: The generated OpenAPI schema as a dictionary.
+    """
+    # make app to re-generate openapi schema
+    if regenerate is True:
+        app.openapi_schema = None
+        app.setup()
+
+    openapi_schema = get_openapi(title=API_TITLE, version="1", routes=app.routes)
+
+    # add json references
+    if json_refs:
+        openapi_schema["$defs"] = json_refs
+
+    return openapi_schema
+
+
 def service_tasks_api_discovery(
     worker, cycles: int = 30, discover_service: str = "all"
 ) -> Dict:
@@ -110,6 +138,7 @@ def service_tasks_api_discovery(
     exit event is set, with a 10-second delay between cycles.
     """
     result = {}
+    json_refs = {}  # dictionary to store JSON references
     while not worker.exit_event.is_set() and cycles > 0:
         tasks = []
         services = []
@@ -158,13 +187,18 @@ def service_tasks_api_discovery(
                         **schema["properties"],
                     }
                     _ = schema["properties"].pop("job", None)
+                    # extract json references
+                    if "$defs" in schema:
+                        json_refs.update(schema.pop("$defs"))
                     # form add_api_route arguments
                     task["fastapi"].setdefault("methods", ["POST"])
                     task["fastapi"].setdefault("path", path)
                     task["fastapi"].setdefault("description", task["description"])
                     task["fastapi"].setdefault("name", task["name"])
                     # register API endpoint
-                    log.info(f"Registering API endpoint {task['fastapi']['path']}")
+                    log.debug(
+                        f"Registering API endpoint {task['fastapi']['path']}, schema: {schema}"
+                    )
                     worker.app.add_api_route(
                         endpoint=create_api_endpoint(
                             service=task["service"],
@@ -183,12 +217,12 @@ def service_tasks_api_discovery(
                                 "content": {"application/json": {"schema": schema}},
                             }
                         },
-                        tags=["NORFAB"],
+                        tags=[f"NORFAB {task['service'].upper()}"],
                         **task["fastapi"],
                     )
-                    # make app to re-generate openapi schema
-                    worker.app.openapi_schema = None
-                    worker.app.setup()
+                    worker.app.openapi_schema = make_openapi_schema(
+                        app=worker.app, regenerate=True, json_refs=json_refs
+                    )
                     # save discovered task to results
                     result[task["service"]].append(task["fastapi"]["name"])
         except Exception as e:
@@ -385,7 +419,7 @@ class FastAPIWorker(NFPWorker):
         Returns:
             Result: An object containing either the list of endpoint paths or the full OpenAPI schema
         """
-        schema = get_openapi(title="norfab", version="1", routes=self.app.routes)
+        schema = make_openapi_schema(self.app)
         if paths is True:
             return Result(
                 result=list(schema["paths"].keys()),
@@ -598,12 +632,12 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     Returns:
         FastAPI: A FastAPI application instance.
     """
-
-    app = FastAPI(
-        title="NorFab REST API",
-        summary="NorFab Services Tasks FastAPI application with endpoints for posting, getting, and running jobs",
+    config = {
+        "title": API_TITLE,
+        "summary": "NorFab Services Tasks FastAPI application with endpoints for posting, getting, and running jobs",
         **config,
-    )
+    }
+    app = FastAPI(**config)
 
     # We will handle a missing token ourselves
     get_bearer_token = HTTPBearer(auto_error=False)

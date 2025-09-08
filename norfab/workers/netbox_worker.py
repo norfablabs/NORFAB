@@ -219,7 +219,7 @@ class NetboxWorker(NFPWorker):
     # Netbox Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_inventory(self) -> Result:
         """
         NorFab Task to return running inventory for NetBox worker.
@@ -234,7 +234,7 @@ class NetboxWorker(NFPWorker):
             task=f"{self.name}:get_inventory", result=dict(self.netbox_inventory)
         )
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_version(self, **kwargs) -> Result:
         """
         Retrieves the version information of Netbox instances.
@@ -263,7 +263,7 @@ class NetboxWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_netbox_status(self, instance: Union[None, str] = None) -> Result:
         """
         Retrieve the status of NetBox instances.
@@ -289,7 +289,7 @@ class NetboxWorker(NFPWorker):
                 ret.result[name] = self._query_netbox_status(name)
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_compatibility(self, job: Job) -> Result:
         """
         Checks the compatibility of Netbox instances based on their version.
@@ -500,7 +500,7 @@ class NetboxWorker(NFPWorker):
             # wait for branch provisioning to complete
             if not nb_branch.status.value.lower() == "ready":
                 retries = 0
-                while retries < 30:
+                while retries < 60:
                     nb_branch = nb.plugins.branching.branches.get(name=branch)
                     if nb_branch.status.value.lower() == "ready":
                         break
@@ -532,7 +532,7 @@ class NetboxWorker(NFPWorker):
             size_limit=1073741824,  #  GigaByte
         )
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def cache_list(self, keys: str = "*", details: bool = False) -> Result:
         """
         Retrieve a list of cache keys, optionally with details about each key.
@@ -566,7 +566,9 @@ class NetboxWorker(NFPWorker):
                     ret.result.append(cache_key)
         return ret
 
-    @Task(fastapi={"methods": ["DELETE"]})
+    @Task(
+        fastapi={"methods": ["DELETE"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def cache_clear(self, job: Job, key: str = None, keys: str = None) -> Result:
         """
         Clears specified keys from the cache.
@@ -612,7 +614,7 @@ class NetboxWorker(NFPWorker):
                         raise RuntimeError(f"Failed to remove {key} from cache")
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def cache_get(
         self, job: Job, key: str = None, keys: str = None, raise_missing: bool = False
     ) -> Result:
@@ -647,7 +649,9 @@ class NetboxWorker(NFPWorker):
                     ret.result[cache_key] = self.cache[cache_key]
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def graphql(
         self,
         job: Job,
@@ -762,7 +766,9 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def rest(
         self,
         job: Job,
@@ -810,7 +816,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_devices(
         self,
         job: Job,
@@ -985,7 +991,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_interfaces(
         self,
         job: Job,
@@ -1147,7 +1153,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_connections(
         self,
         job: Job,
@@ -1482,7 +1488,7 @@ class NetboxWorker(NFPWorker):
         )
         return True
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_circuits(
         self,
         job: Job,
@@ -1693,7 +1699,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_nornir_inventory(
         self,
         job: Job,
@@ -1853,7 +1859,9 @@ class NetboxWorker(NFPWorker):
 
         return list(sorted(set(ret)))
 
-    @Task(fastapi={"methods": ["PATCH"]})
+    @Task(
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def update_device_facts(
         self,
         job: Job,
@@ -1967,7 +1975,9 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["PATCH"]})
+    @Task(
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def update_device_interfaces(
         self,
         job: Job,
@@ -2184,7 +2194,9 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["PATCH"]})
+    @Task(
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def update_device_ip(
         self,
         job: Job,
@@ -2335,7 +2347,9 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def create_ip(
         self,
         job: Job,
@@ -2784,7 +2798,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_containerlab_inventory(
         self,
         job: Job,
@@ -3140,7 +3154,9 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["DELETE"]})
+    @Task(
+        fastapi={"methods": ["DELETE"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
     def delete_branch(
         self,
         job: Job,

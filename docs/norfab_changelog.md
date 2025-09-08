@@ -1,5 +1,13 @@
 ## 0.11.2
 
+### BUGS
+
+1. FastAPI Service - fixing json references for OpenAPI schema, which previously broken lead to error in swagger and redoc UIs rendering.
+
+---
+
+## 0.11.2
+
 ### CHANGES
 
 1. Moving to Python 3.10 as primary supported version instead of 3.9 due to addition of FastMCP service which only supports Py3.10 and up.

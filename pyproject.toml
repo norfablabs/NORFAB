@@ -3,7 +3,7 @@ name = "norfab"
 
 [tool.poetry]
 name = "norfab"
-version = "0.11.2"
+version = "0.11.3"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
 authors = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
 maintainers = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
@@ -64,7 +64,7 @@ textfsm = { version = "1.1.3", optional = true }
 N2G = { version = "0.3.3", optional = true }
 dnspython = { version = "2.4.2", optional = true }
 pythonping = { version = "1.1.4", optional = true }
-mcp = { version = ">=1.13.0", optional = true }
+mcp = { version = ">=1.13.0", optional = true,  python = ">=3.10,<3.12" }
 
 # Robot Client Dependencies
 robotframework = { version = "7.3.2", optional = true }

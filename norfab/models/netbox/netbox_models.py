@@ -12,6 +12,7 @@ from pydantic import (
 from enum import Enum
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from norfab.models import Result
+from .. import NorFabClientRunJob
 
 
 class NetboxCommonArgs(BaseModel):
@@ -36,7 +37,7 @@ class NetboxCommonArgs(BaseModel):
             return list(inventory["result"]["instances"])
 
 
-class NetboxFastApiArgs(BaseModel):
+class NetboxFastApiArgs(NorFabClientRunJob):
     """Model to specify arguments for FastAPI REST API endpoints"""
 
     workers: Union[StrictStr, List[StrictStr]] = Field(
@@ -49,13 +50,9 @@ class PrefixStatusEnum(str, Enum):
     reserved = "reserved"
     container = "container"
     deprecated = "deprecated"
-    Active = "Active"
-    Reserved = "Reserved"
-    Container = "Container"
-    Deprecated = "Deprecated"
 
 
-class CreatePrefixInput(NetboxCommonArgs):
+class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True):
     parent: Union[StrictStr, dict] = Field(
         ...,
         description="Parent prefix to allocate new prefix from",

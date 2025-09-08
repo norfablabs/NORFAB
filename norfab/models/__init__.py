@@ -173,3 +173,21 @@ class WorkerEchoIn(BaseModel):
 
 class WorkerEchoOut(Result):
     model_config = ConfigDict(extra="allow")
+
+
+# ------------------------------------------------------
+# NorFab Client Run Job model
+# ------------------------------------------------------
+
+
+class NorFabClientRunJob(BaseModel):
+
+    workers: Union[List[StrictInt], StrictStr] = Field(
+        None, description="The workers to run the job on"
+    )
+    timeout: StrictInt = Field(
+        600, description="The maximum time in seconds to wait for the job to complete"
+    )
+    retry: StrictInt = Field(
+        10, description="The number of times to retry getting the job results"
+    )
