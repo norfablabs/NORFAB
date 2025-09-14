@@ -411,7 +411,11 @@ class TestFastAPIServer:
                 "accept": "application/json",
             },
             data=json.dumps(
-                {"suite": "nf://nornir_test_suites/suite_1.txt", "FC": "spine", "workers": "nornir-worker-1"}
+                {
+                    "suite": "nf://nornir_test_suites/suite_1.txt",
+                    "FC": "spine",
+                    "workers": "nornir-worker-1",
+                }
             ),
         )
 

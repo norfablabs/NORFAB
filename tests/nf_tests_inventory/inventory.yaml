@@ -66,7 +66,7 @@ topology:
     - fastapi-worker-1
     - dummy-worker-1
     - workflow-worker-1
-    # - fastmcp-worker-1
+    - fastmcp-worker-1
     
 hooks:
   startup:

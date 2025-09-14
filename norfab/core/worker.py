@@ -85,8 +85,8 @@ class Task:
         name (str): The name of the task, which is used to register the task for calling, by default
             set equal to the name of decorated function.
         result_model (BaseModel): A Pydantic model used to validate the function's return value.
-        annotations (dict): Tasks annotation as per MCP standard
         fastapi (dict): Dictionary with parameters for FastAPI `app.add_api_route` method
+        mcp (dict): Dictionary with parameters for MCP `mcp.types.Tool` class
 
     Methods:
         __call__(function: Callable) -> Callable:
@@ -117,17 +117,20 @@ class Task:
         input: Optional[BaseModel] = None,
         output: Optional[BaseModel] = None,
         description: Optional[str] = None,
-        annotations: Optional[dict] = None,
         fastapi: Optional[dict] = None,
+        mcp: Optional[dict] = None,
     ) -> None:
         self.input = input
         self.output = output or Result
         self.description = description
-        self.annotations = annotations or {}
         if fastapi is False:
             self.fastapi = False
         else:
             self.fastapi = fastapi or {}
+        if mcp is False:
+            self.mcp = False
+        else:
+            self.mcp = mcp or {}
 
     def __call__(self, function: Callable) -> Callable:
         """
@@ -251,8 +254,8 @@ class Task:
                     - description (str): The description of the task.
                     - inputSchema (dict): The JSON schema for the input model.
                     - outputSchema (dict): The JSON schema for the output model.
-                    - annotations: Additional MCP annotations for the task.
                     - fastapi: FastAPI-specific metadata.
+                    - mcp: Model Context protocol metadata
         """
         input_json_schema = self.input.model_json_schema()
         _ = input_json_schema.pop("title")
@@ -267,8 +270,8 @@ class Task:
                     "description": self.description,
                     "inputSchema": input_json_schema,
                     "outputSchema": output_json_schema,
-                    "annotations": self.annotations,
                     "fastapi": self.fastapi,
+                    "mcp": self.mcp,
                 },
             }
         }

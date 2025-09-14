@@ -365,3 +365,25 @@ class NornirCliShell(
         prompt = "nf[nornir-cli]#"
         outputter = print_nornir_results
         pipe = PipeFunctionsModel
+
+
+class CliPlugins(str, Enum):
+    netmiko = "netmiko"
+    scrapli = "scrapli"
+    napalm = "napalm"
+
+
+class NorniCliInput(
+    NorniHostsFilters,
+    TabulateTableModel,
+    NornirCommonArgs,
+    ClientRunJobArgs,
+    NrCliPluginNetmiko,
+    NrCliPluginScrapli,
+    NrCliPluginNapalm,
+    use_enum_values=True,
+):
+    plugin: CliPlugins = Field(None, description="Connection plugin parameters")
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        "all", description="Filter workers to target"
+    )

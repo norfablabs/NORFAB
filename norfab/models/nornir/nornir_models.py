@@ -10,6 +10,12 @@ from pydantic import (
     model_validator,
 )
 from norfab.models import Result
+from norfab.clients.shell_clients.nornir.nornir_picle_shell_common import (
+    NorniHostsFilters,
+    TabulateTableModel,
+    NornirCommonArgs,
+)
+from norfab.clients.shell_clients.common import ClientRunJobArgs
 
 
 class NornirHostsFilters(BaseModel, extra="forbid"):

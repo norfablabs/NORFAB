@@ -1,8 +1,8 @@
-## 0.11.2
+## 0.11.3
 
 ### BUGS
 
-1. FastAPI Service - fixing json references for OpanAPI schema, which previously broken lead to error in swagger and redoc UIs rendering.
+1. FastAPI Service - fixing json references for OpenAPI schema, which previously broken lead to error in swagger and redoc UIs rendering.
 
 ---
 

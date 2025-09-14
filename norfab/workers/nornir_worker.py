@@ -44,6 +44,7 @@ from nornir_napalm.plugins.tasks import napalm_get
 from nornir_netmiko.tasks import netmiko_file_transfer
 from nornir_salt.utils.pydantic_models import modelTestsProcessorSuite
 from threading import Lock
+from norfab.clients.shell_clients.nornir.nornir_picle_shell_cli import NorniCliInput
 
 SERVICE = "nornir"
 
@@ -1158,7 +1159,11 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NorniCliInput,
+        mcp={"name": "send_show_commands"},
+    )
     def cli(
         self,
         job: Job,
@@ -1172,7 +1177,8 @@ class NornirWorker(NFPWorker):
         **kwargs,
     ) -> Result:
         """
-        Task to collect show commands output from devices using Command Line Interface (CLI).
+        Task to collect/retrieve show commands output from network devices using
+        Command Line Interface (CLI).
 
         Args:
             job: NorFab Job object containing relevant metadata
@@ -1196,7 +1202,7 @@ class NornirWorker(NFPWorker):
         Raises:
             UnsupportedPluginError: If the specified plugin is not supported.
             FileNotFoundError: If the specified TTP template or job data file
-                cannot be downloaded.
+            cannot be downloaded.
         """
         job_data = job_data or {}
         filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
@@ -1287,7 +1293,10 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        mcp={"name": "configure_devices"},
+    )
     def cfg(
         self,
         job: Job,

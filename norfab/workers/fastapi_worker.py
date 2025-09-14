@@ -431,7 +431,7 @@ class FastAPIWorker(NFPWorker):
                 task=f"{self.name}:get_openapi_schema",
             )
 
-    @Task(fastapi=False)
+    @Task(fastapi=False, mcp=False)
     def bearer_token_store(
         self, job: Job, username: str, token: str, expire: int = None
     ) -> Result:
@@ -468,7 +468,7 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_store", result=True)
 
-    @Task(fastapi=False)
+    @Task(fastapi=False, mcp=False)
     def bearer_token_delete(
         self, job: Job, username: str = None, token: str = None
     ) -> Result:
@@ -512,7 +512,7 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_delete", result=True)
 
-    @Task(fastapi=False)
+    @Task(fastapi=False, mcp=False)
     def bearer_token_list(self, job: Job, username: str = None) -> Result:
         """
         Retrieves a list of bearer tokens from the cache, optionally filtered by username.
@@ -570,7 +570,7 @@ class FastAPIWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi=False)
+    @Task(fastapi=False, mcp=False)
     def bearer_token_check(self, token: str, job: Job) -> Result:
         """
         Checks if the provided bearer token is present in the cache and still active.
