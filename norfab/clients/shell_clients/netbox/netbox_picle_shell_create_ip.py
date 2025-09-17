@@ -23,7 +23,15 @@ from norfab.models.netbox import NetboxCommonArgs
 log = logging.getLogger(__name__)
 
 
-class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs):
+class IpStatusEnum(str, Enum):
+    active = "active"
+    reserved = "reserved"
+    deprecated = "deprecated"
+    dhcp = "dhcp"
+    slaac = "slaac"
+
+
+class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=True):
     prefix: StrictStr = Field(
         ...,
         description="Prefix to allocate IP address from, can also provide prefix name or filters",
@@ -52,6 +60,16 @@ class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs):
         json_schema_extra={"presence": True},
     )
     branch: StrictStr = Field(None, description="Branching plugin branch name to use")
+    mask_len: StrictInt = Field(
+        None, description="Mask length to use for IP address", alias="mask-len"
+    )
+    create_subnet: StrictBool = Field(
+        None,
+        description="Create new subnet if different mask length provided",
+        alias="create-subnet",
+        json_schema_extra={"presence": True},
+    )
+    status: IpStatusEnum = Field(None, description="IP address status")
 
     @staticmethod
     @listen_events

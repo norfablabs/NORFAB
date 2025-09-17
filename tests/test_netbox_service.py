@@ -3457,7 +3457,7 @@ class TestCreatePrefix:
                     "comments": "Some important comment",
                     "vrf": "VRF1",
                     "tags": ["NORFAB"],
-                    "status": "Reserved",
+                    "status": "reserved",
                 },
             )
             print("create_1")
@@ -3523,7 +3523,7 @@ class TestCreatePrefix:
                     "role": "PREFIX_ROLE_1",
                     "comments": "Some important comment",
                     "tags": ["NORFAB"],
-                    "status": "Reserved",
+                    "status": "reserved",
                 },
             )
             create_2 = nfclient.run_job(
@@ -3538,7 +3538,7 @@ class TestCreatePrefix:
                     "role": "PREFIX_ROLE_2",
                     "comments": "Some important comments updates",
                     "tags": ["ACCESS"],
-                    "status": "Active",
+                    "status": "active",
                 },
             )
             print("create_1")
@@ -3609,7 +3609,7 @@ class TestCreatePrefix:
                     "comments": "Some important comment",
                     "vrf": "VRF1",
                     "tags": ["NORFAB"],
-                    "status": "Reserved",
+                    "status": "reserved",
                     "branch": "create_prefix_1",
                 },
             )

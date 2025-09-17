@@ -57,21 +57,31 @@ class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True):
         ...,
         description="Parent prefix to allocate new prefix from",
     )
-    description: StrictStr = Field(..., description="Description for new prefix")
+    description: Union[None, StrictStr] = Field(
+        None, description="Description for new prefix"
+    )
     prefixlen: StrictInt = Field(30, description="The prefix length of the new prefix")
-    vrf: StrictStr = Field(
+    vrf: Union[None, StrictStr] = Field(
         None, description="Name of the VRF to associate with the prefix"
     )
-    tags: Union[StrictStr, list[StrictStr]] = Field(
+    tags: Union[None, StrictStr, list[StrictStr]] = Field(
         None, description="List of tags to assign to the prefix"
     )
-    tenant: StrictStr = Field(
+    tenant: Union[None, StrictStr] = Field(
         None, description="Name of the tenant to associate with the prefix"
     )
-    comments: StrictStr = Field(None, description="Comments for the prefix")
-    role: StrictStr = Field(None, description="Role to assign to the prefix")
-    site: StrictStr = Field(
+    comments: Union[None, StrictStr] = Field(
+        None, description="Comments for the prefix"
+    )
+    role: Union[None, StrictStr] = Field(
+        None, description="Role to assign to the prefix"
+    )
+    site: Union[None, StrictStr] = Field(
         None, description="Name of the site to associate with the prefix"
     )
-    status: PrefixStatusEnum = Field(None, description="Status of the prefix")
-    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
+    status: Union[None, PrefixStatusEnum] = Field(
+        None, description="Status of the prefix"
+    )
+    branch: Union[None, StrictStr] = Field(
+        None, description="Branching plugin branch name to use"
+    )

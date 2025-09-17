@@ -2363,10 +2363,13 @@ class NetboxWorker(NFPWorker):
         tenant: str = None,
         comments: str = None,
         role: str = None,
+        status: str = None,
         is_primary: bool = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
         branch: str = None,
+        mask_len: int = None,
+        create_subnet: bool = False,
     ) -> Result:
         """
         Allocate the next available IP address from a given subnet.
@@ -2396,6 +2399,11 @@ class NetboxWorker(NFPWorker):
             dry_run (bool, optional): If True, do not actually allocate the IP address. Defaults to False.
             branch (str, optional): Branch name to use, need to have branching plugin installed,
                 automatically creates branch if it does not exist in Netbox.
+            mask_len (int, optional): mask length to use for IP address on creation or to
+                update existing IP address
+            create_subnet (bool, optional): if True, on IP address creation will create
+                child subnet of `mask_len` within parent `prefix`, ignored for existing
+                IP addresses
 
         Returns:
             dict: A dictionary containing the result of the IP allocation.
@@ -2431,17 +2439,22 @@ class NetboxWorker(NFPWorker):
         # try to source existing IP from netbox
         if device and interface and description:
             nb_ip = nb.ipam.ip_addresses.get(
-                device=device, interface=interface, description=description
+                device=device,
+                interface=interface,
+                description=description,
+                parent=prefix,
             )
         elif device and interface:
-            nb_ip = nb.ipam.ip_addresses.get(device=device, interface=interface)
+            nb_ip = nb.ipam.ip_addresses.get(
+                device=device, interface=interface, parent=prefix
+            )
         elif description:
-            nb_ip = nb.ipam.ip_addresses.get(description=description)
+            nb_ip = nb.ipam.ip_addresses.get(description=description, parent=prefix)
 
         # create new IP address
         if not nb_ip:
             job.event(f"Creating new IP address within prefix {prefix}")
-            # source prefix from Netbox
+            # source parent prefix from Netbox
             if isinstance(prefix, str):
                 # try converting prefix to network, if fails prefix is not an IP network
                 try:
@@ -2458,10 +2471,44 @@ class NetboxWorker(NFPWorker):
                 elif is_network is False:
                     prefix = {"description": prefix}
             nb_prefix = nb.ipam.prefixes.get(**prefix)
+
             if not nb_prefix:
                 raise NetboxAllocationError(
                     f"Unable to source prefix from Netbox - {prefix}"
                 )
+
+            # if mask_len provided create new subnet if requested so
+            if mask_len and create_subnet:
+                if mask_len < int(str(nb_prefix).split("/")[1]):
+                    raise ValueError(
+                        f"Mask length '{mask_len}' must be longer then '{str(nb_prefix)}' prefix length"
+                    )
+                prefix_status = status
+                if prefix_status not in ["active", "reserved", "deprecated"]:
+                    prefix_status = None
+                child_subnet = self.create_prefix(
+                    job=job,
+                    parent=str(nb_prefix),
+                    prefixlen=mask_len,
+                    vrf=vrf,
+                    tags=tags,
+                    tenant=tenant,
+                    status=prefix_status,
+                    instance=instance,
+                    dry_run=dry_run,
+                    branch=branch,
+                )
+                prefix = {"prefix": child_subnet.result["prefix"]}
+                if vrf:
+                    prefix["vrf__name"] = vrf
+                nb_prefix = nb.ipam.prefixes.get(**prefix)
+
+                if not nb_prefix:
+                    raise NetboxAllocationError(
+                        f"Unable to source child prefix of mask length "
+                        f"'{mask_len}' from '{prefix}' parent prefix"
+                    )
+
             # execute dry run on new IP
             if dry_run is True:
                 nb_ip = nb_prefix.available_ips.list()[0]
@@ -2526,6 +2573,10 @@ class NetboxWorker(NFPWorker):
                     nb_device = nb.dcim.devices.get(name=device)
                     nb_device.primary_ip4 = nb_ip.id
                 has_changes = True
+        if mask_len and not str(nb_ip).endswith(f"/{mask_len}"):
+            address = str(nb_ip).split("/")[0]
+            nb_ip.address = f"{address}/{mask_len}"
+            has_changes = True
 
         # save IP address into Netbox
         if dry_run:
@@ -2561,7 +2612,7 @@ class NetboxWorker(NFPWorker):
         self,
         job: Job,
         parent: Union[str, dict],
-        description: str,
+        description: str = None,
         prefixlen: int = 30,
         vrf: str = None,
         tags: Union[None, list] = None,
@@ -2586,8 +2637,8 @@ class NetboxWorker(NFPWorker):
                 - Dictionary with prefix filters for `pynetbox` prefixes.get method
                     e.g. `{"prefix": "10.0.0.0/24", "site__name": "foo"}`
 
-            description (str): Description for the new prefix, this is mandatory to have
-                since prefix description used for deduplication to source existng prefixes.
+            description (str): Description for the new prefix, prefix description used for
+                deduplication to source existng prefixes.
             prefixlen (int, optional): The prefix length of the new prefix to create, by default
                 allocates next availabe /30 point-to-point prefix.
             vrf (str, optional): Name of the VRF to associate with the prefix.
@@ -2618,7 +2669,7 @@ class NetboxWorker(NFPWorker):
         nb = self._get_pynetbox(instance, branch=branch)
 
         job.event(
-            f"Processing create '/{prefixlen}' prefix request within '{parent}' parent prefix"
+            f"Processing '/{prefixlen}' prefix create request within '{parent}' parent prefix"
         )
 
         # source parent prefix from Netbox
@@ -2649,14 +2700,19 @@ class NetboxWorker(NFPWorker):
                 f"Parent prefix vrf '{nb_parent_prefix.vrf}' not same as requested child prefix vrf '{vrf}'"
             )
 
-        # try to source existing prefix from netbox using its description
-        prefix_filters = {"within": nb_parent_prefix.prefix, "description": description}
+        # try to source existing prefix from netbox
+        prefix_filters = {}
         if vrf:
             prefix_filters["vrf__name"] = vrf
         if site:
             prefix_filters["site__name"] = site
+        if description:
+            prefix_filters["description"] = description
         try:
-            nb_prefix = nb.ipam.prefixes.get(**prefix_filters)
+            if prefix_filters:
+                nb_prefix = nb.ipam.prefixes.get(
+                    within=nb_parent_prefix.prefix, **prefix_filters
+                )
         except Exception as e:
             raise NetboxAllocationError(
                 f"Failed to source existing prefix from Netbox using filters '{prefix_filters}', error: {e}"
@@ -2711,6 +2767,7 @@ class NetboxWorker(NFPWorker):
                         f"Failed creating child prefix of '/{prefixlen}' prefix length "
                         f"within parent prefix '{str(nb_parent_prefix)}', error: {e}"
                     )
+            job.event(f"Created new '{nb_prefix}' prefix within '{parent}' prefix")
             ret.status = "created"
         else:
             # check existing prefix length matching requested length
