@@ -34,6 +34,7 @@ from .netbox_picle_shell_get_containerlab_inventory import (
     GetContainerlabInventoryCommand,
 )
 from .netbox_picle_shell_create_ip import CreateIp
+from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
 from .netbox_picle_shell_create_prefix import CreatePrefixShell
 from norfab.models.netbox import NetboxCommonArgs
 
@@ -260,6 +261,11 @@ class CreateCommands(BaseModel):
     ip: CreateIp = Field(
         None,
         description="Allocate next available IP address from prefix",
+    )
+    ip_bulk: CreateIpBulk = Field(
+        None,
+        description="Allocate next available IP address from prefix for multiple devices and interfaces",
+        alias="ip-bulk",
     )
 
     class PicleConfig:

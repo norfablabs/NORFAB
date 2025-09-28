@@ -15,7 +15,14 @@ class TestWorkersListTasks:
             for t in res["result"]:
                 assert all(
                     k in t
-                    for k in ["description", "name", "inputSchema", "outputSchema", "fastapi", "mcp"]
+                    for k in [
+                        "description",
+                        "name",
+                        "inputSchema",
+                        "outputSchema",
+                        "fastapi",
+                        "mcp",
+                    ]
                 )
 
     def test_list_tasks_brief(self, nfclient):

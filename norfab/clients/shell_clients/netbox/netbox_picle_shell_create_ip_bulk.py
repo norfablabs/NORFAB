@@ -31,16 +31,17 @@ class IpStatusEnum(str, Enum):
     slaac = "slaac"
 
 
-class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=True):
+class CreateIpBulk(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=True):
     prefix: StrictStr = Field(
         ...,
         description="Prefix to allocate IP address from, can also provide prefix name or filters",
     )
-    device: StrictStr = Field(
-        None, description="Device name to associate IP address with"
+    devices: Union[StrictStr, List[StrictStr]] = Field(
+        ..., description="List of device names to create IP address for"
     )
-    interface: StrictStr = Field(
-        None, description="Device interface name to associate IP address with"
+    interface_regex: StrictStr = Field(
+        ...,
+        description="Regular expression of device interface names to create IP address for",
     )
     description: StrictStr = Field(None, description="IP address description")
     vrf: StrictStr = Field(None, description="VRF to associate with IP address")
@@ -88,7 +89,7 @@ class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=True):
 
         result = NFCLIENT.run_job(
             "netbox",
-            "create_ip",
+            "create_ip_bulk",
             workers=workers,
             args=args,
             kwargs=kwargs,

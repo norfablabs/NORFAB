@@ -349,6 +349,24 @@ interfaces = [
         "description": "Main uplink interface",
     },
     {
+        "name": "Port-Channel1.101",
+        "device": {"name": "fceos4"},
+        "type": "virtual",
+        "parent": {"name": "Port-Channel1"},
+    },
+    {
+        "name": "ae5",
+        "device": {"name": "fceos5"},
+        "type": "lag",
+        "description": "Main uplink interface",
+    },
+    {
+        "name": "ae5.101",
+        "device": {"name": "fceos5"},
+        "type": "virtual",
+        "parent": {"name": "ae5"},
+    },
+    {
         "name": "eth101",
         "device": {"name": "fceos4"},
         "type": "1000base-t",
@@ -357,13 +375,62 @@ interfaces = [
         "lag": {"name": "Port-Channel1"},
     },
     {
+        "name": "eth101",
+        "device": {"name": "fceos5"},
+        "type": "1000base-t",
+        "mtu": 1500,
+        "mode": "tagged",
+        "lag": {"name": "ae5"},
+    },
+    # to test get connections where one side is lag subif and other side is main interface
+    {
+        "name": "Port-Channel2",
+        "device": {"name": "fceos4"},
+        "type": "lag",
+        "description": "Main uplink interface 2",
+    },
+    {
+        "name": "ae6",
+        "device": {"name": "fceos5"},
+        "type": "lag",
+        "description": "Main uplink interface 2",
+    },
+    {
+        "name": "ae6.0",
+        "device": {"name": "fceos5"},
+        "type": "virtual",
+        "parent": {"name": "ae6"},
+    },
+    {
         "name": "eth102",
         "device": {"name": "fceos4"},
         "type": "1000base-t",
         "mtu": 1500,
         "mode": "tagged",
-        "lag": {"name": "Port-Channel1"},
+        "lag": {"name": "Port-Channel2"},
     },
+    {
+        "name": "eth102",
+        "device": {"name": "fceos5"},
+        "type": "1000base-t",
+        "mtu": 1500,
+        "mode": "tagged",
+        "lag": {"name": "ae6"},
+    },
+    # to test get connections where one side is subif and other side is main interface
+    {
+        "name": "eth103",
+        "device": {"name": "fceos4"},
+        "type": "1000base-t",
+        "mtu": 1500,
+    },
+    {
+        "name": "eth103.0",
+        "device": {"name": "fceos4"},
+        "type": "virtual",
+        "parent": {"name": "eth103"},
+    },
+    {"name": "eth103", "device": {"name": "fceos5"}, "type": "1000base-t", "mtu": 1500},
     {
         "name": "eth201",
         "device": {"name": "fceos4"},
@@ -717,6 +784,42 @@ connections = [
         ],
         "status": "connected",
         "tenant": {"slug": "saltnornir"},
+    },
+    {
+        "type": "cat6a",
+        "a_terminations": [
+            {
+                "device": "fceos4",
+                "interface": f"eth102",
+                "termination_type": "dcim.interface",
+            },
+        ],
+        "b_terminations": [
+            {
+                "device": "fceos5",
+                "interface": f"eth102",
+                "termination_type": "dcim.interface",
+            }
+        ],
+        "status": "connected",
+    },
+    {
+        "type": "cat6a",
+        "a_terminations": [
+            {
+                "device": "fceos4",
+                "interface": f"eth103",
+                "termination_type": "dcim.interface",
+            },
+        ],
+        "b_terminations": [
+            {
+                "device": "fceos5",
+                "interface": f"eth103",
+                "termination_type": "dcim.interface",
+            }
+        ],
+        "status": "connected",
     },
     # patch panel connections
     {
@@ -1367,7 +1470,7 @@ circuits = [
         },
         "termination_b": {
             "device": "fceos5",
-            "interface": "eth8",
+            "interface": "eth101",
             "termination_type": "dcim.interface",
             "cable": {"type": "smf"},
             "site": "SALTNORNIR-LAB",
@@ -1870,12 +1973,6 @@ def create_circuit_types():
             log.error(f"creating circuit type '{item}' error '{e}'")
 
 
-# "provider": {"slug": slugify("Provider1")},
-# "type": {"slug": slugify("DarkFibre")},
-# "status": "active",
-# "cid": "CID1",
-# "termination_a": {"device": "fceos4", "interface": "eth101", "cable": {"type": "smf"}},
-# "termination_b": {"device": "fceos5", "interface": "eth8", "cable": {"type": "smf"}}
 def create_circuits():
     log.info("creating curcuits")
     for item in circuits:
@@ -2387,10 +2484,10 @@ def clean_up_netbox():
     delete_circuit_providers()
     delete_circuit_types()
     delete_devices()
-    delete_vrfs()
     delete_prefixes()
     delete_prefix_roles()
     delete_ip_addresses()
+    delete_vrfs()
     delete_vlans()
     delete_device_roles()
     delete_device_types()

@@ -28,6 +28,60 @@ def delete_branch(branch, nfclient):
     print(f"Deleted branch '{branch}'")
 
 
+def delete_prefixes_within(prefix, nfclient):
+    resp = nfclient.run_job(
+        "netbox",
+        "rest",
+        workers="any",
+        kwargs={
+            "method": "get",
+            "api": "/ipam/prefixes/",
+            "params": {"within": prefix},
+        },
+    )
+    worker, prefixes = tuple(resp.items())[0]
+    # pprint.pprint(prefixes)
+    for pfx in prefixes["result"]["results"]:
+        delete_pfx = nfclient.run_job(
+            "netbox",
+            "rest",
+            workers="any",
+            kwargs={
+                "method": "delete",
+                "api": f"/ipam/prefixes/{pfx['id']}/",
+            },
+        )
+        # print("delete prefix:")
+        # pprint.pprint(delete_pfx)
+
+
+def delete_ips(prefix, nfclient):
+    resp = nfclient.run_job(
+        "netbox",
+        "rest",
+        workers="any",
+        kwargs={
+            "method": "get",
+            "api": "/ipam/ip-addresses/",
+            "params": {"parent": prefix},
+        },
+    )
+    worker, ips = tuple(resp.items())[0]
+    # pprint.pprint(ips)
+    for ip in ips["result"]["results"]:
+        delete_ip = nfclient.run_job(
+            "netbox",
+            "rest",
+            workers="any",
+            kwargs={
+                "method": "delete",
+                "api": f"/ipam/ip-addresses/{ip['id']}/",
+            },
+        )
+        # print("delete ip address:")
+        # pprint.pprint(delete_ip)
+
+
 class TestNetboxWorker:
     def test_get_netbox_inventory(self, nfclient):
         ret = nfclient.run_job(
@@ -110,7 +164,7 @@ class TestNetboxGrapQL:
 
     def test_graphql_query_string(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "graphql",
             workers="any",
             kwargs={"query_string": "query DeviceListQuery { device_list { name } }"},
@@ -129,7 +183,7 @@ class TestNetboxGrapQL:
 
     def test_graphql_query_string_with_instance(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "graphql",
             workers="any",
             kwargs={
@@ -151,7 +205,7 @@ class TestNetboxGrapQL:
 
     def test_graphql_query_string_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "graphql",
             workers="any",
             kwargs={
@@ -169,7 +223,7 @@ class TestNetboxGrapQL:
 
     def test_graphql_query_string_error(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "graphql",
             workers="any",
             kwargs={
@@ -189,7 +243,7 @@ class TestNetboxGrapQL:
 
         if self.nb_version[0] == 4:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -206,7 +260,7 @@ class TestNetboxGrapQL:
                 ), f"{worker} did not return correct query string"
         elif self.nb_version[0] == 3:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -228,7 +282,7 @@ class TestNetboxGrapQL:
 
         if self.nb_version[0] == 4:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -253,7 +307,7 @@ class TestNetboxGrapQL:
 
         if self.nb_version[0] == 4:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -271,7 +325,7 @@ class TestNetboxGrapQL:
                 ), f"{worker} did not return correct query string"
         elif self.nb_version[0] == 3:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -294,7 +348,7 @@ class TestNetboxGrapQL:
 
         if (4, 0, 0) < self.nb_version < (4, 3, 0):
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -336,7 +390,7 @@ class TestNetboxGrapQL:
                     ), f"{worker} - no name and platform returned: {item}"
         elif self.nb_version[0] == 3:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -362,7 +416,7 @@ class TestNetboxGrapQL:
 
         if self.nb_version[0] == 4:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -397,7 +451,7 @@ class TestNetboxGrapQL:
                 ), f"{worker} did not return correct query string"
         elif self.nb_version[0] == 3:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -500,7 +554,7 @@ class TestNetboxGrapQL:
                 ), f"{worker} - did not return some data"
         elif self.nb_version[0] == 3:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "graphql",
                 workers="any",
                 kwargs={
@@ -538,7 +592,7 @@ class TestGetInterfaces:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_interfaces",
             workers="any",
             kwargs={"devices": ["ceos1", "fceos4"]},
@@ -585,7 +639,7 @@ class TestGetInterfaces:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_interfaces",
             workers="any",
             kwargs={"devices": ["ceos1", "fceos4"], "instance": "prod"},
@@ -678,7 +732,7 @@ class TestGetInterfaces:
 
     def test_get_interfaces_add_ip(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_interfaces",
             workers="any",
             kwargs={"devices": ["ceos1", "fceos4"], "ip_addresses": True},
@@ -714,7 +768,7 @@ class TestGetInterfaces:
 
     def test_get_interfaces_add_inventory_items(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_interfaces",
             workers="any",
             kwargs={
@@ -752,13 +806,37 @@ class TestGetInterfaces:
                             ]
                         ), f"{worker}:{device}:{intf_name} not all inventory item data returned"
 
+    def test_get_interfaces_with_interface_regex(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_interfaces",
+            workers="any",
+            kwargs={
+                "devices": ["ceos1", "fceos4"],
+                "interface_regex": "loop.+",
+            },
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert "ceos1" in res["result"], f"{worker} returned no results for ceos1"
+            assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
+            for device, interfaces in res["result"].items():
+                assert isinstance(
+                    interfaces, dict
+                ), f"{worker}:{device} did not return interfaces dictionary"
+                for intf_name, intf_data in interfaces.items():
+                    assert (
+                        "loopback" in intf_name.lower()
+                    ), f"{worker}:{device}:{intf_name} interface name does not match regex pattern"
+
 
 class TestGetDevices:
     nb_version = None
 
     def test_with_devices_list(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_devices",
             workers="any",
             kwargs={"devices": ["ceos1", "fceos4"]},
@@ -828,7 +906,7 @@ class TestGetDevices:
             )
         elif self.nb_version[0] == 3:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "get_devices",
                 workers="any",
                 kwargs={
@@ -987,7 +1065,7 @@ class TestGetDevices:
 class TestGetConnections:
     def test_get_connections(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_connections",
             workers="any",
             kwargs={
@@ -1005,6 +1083,15 @@ class TestGetConnections:
             assert (
                 "ConsoleServerPort1" in res["result"]["fceos5"]
             ), f"{worker}:fceos5 no console server ports data returned"
+            assert (
+                "eth11.123" in res["result"]["fceos5"]
+            ), f"{worker}:fceos5 no virtual ports data returned"
+            assert (
+                "Port-Channel1" in res["result"]["fceos4"]
+            ), f"{worker}:fceos5 no lag ports data returned"
+            assert (
+                "Port-Channel1.101" in res["result"]["fceos4"]
+            ), f"{worker}:fceos5 no lag virtual ports data returned"
             for device, interfaces in res["result"].items():
                 assert isinstance(
                     interfaces, dict
@@ -1013,7 +1100,6 @@ class TestGetConnections:
                     assert all(
                         k in intf_data
                         for k in [
-                            "breakout",
                             "remote_device",
                             "remote_interface",
                             "remote_termination_type",
@@ -1035,10 +1121,82 @@ class TestGetConnections:
                         ), f"{worker}:{device}:{intf_name} was expecting breakout connection"
                         assert isinstance(intf_data["remote_interface"], list)
                         assert len(intf_data["remote_interface"]) > 1
+                    # verify virtual ports handling
+                    if device == "fceos5" and intf_name == "eth11.123":
+                        assert intf_data["remote_device"] == "fceos4"
+                        assert intf_data["remote_interface"] == "eth11.123"
+                        assert intf_data["termination_type"] == "virtual"
+                    # verify lag ports handling
+                    if device == "fceos4" and intf_name == "Port-Channel1":
+                        assert intf_data["remote_device"] == "fceos5"
+                        assert intf_data["remote_interface"] == "ae5"
+                        assert intf_data["termination_type"] == "lag"
+                    # verify lag virtual interfaces handling
+                    if device == "fceos4" and intf_name == "Port-Channel1.101":
+                        assert intf_data["remote_device"] == "fceos5"
+                        assert intf_data["remote_interface"] == "ae5.101"
+                        assert intf_data["termination_type"] == "virtual"
+                    if device == "fceos5" and intf_name == "ae6.0":
+                        assert intf_data["remote_device"] == "fceos4"
+                        assert intf_data["remote_interface"] == "Port-Channel2"
+                        assert intf_data["termination_type"] == "virtual"
+                        assert intf_data["remote_termination_type"] == "lag"
+                    if device == "fceos4" and intf_name == "eth103.0":
+                        assert intf_data["remote_device"] == "fceos5"
+                        assert intf_data["remote_interface"] == "eth103"
+                        assert intf_data["termination_type"] == "virtual"
+                        assert intf_data["remote_termination_type"] == "interface"
+
+    def test_get_connections_physical_interface_regex(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+                "interface_regex": "eth10.*",
+                "include_virtual": False,
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
+            assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
+            for device, interfaces in res["result"].items():
+                assert interfaces, f"{worker}:{device} no connections data returned"
+                for intf_name, intf_data in interfaces.items():
+                    assert intf_name.startswith(
+                        "eth10"
+                    ), f"{worker}:{device}:{intf_name} not matching regex"
+
+    def test_get_connections_virtual_interface_regex(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+                "interface_regex": "(Port-Channel1|ae5).101",  # match Port-Channel1.101 and ae5.101
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
+            assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
+            assert (
+                res["result"]["fceos4"]["Port-Channel1.101"]["remote_interface"]
+                == "ae5.101"
+            ), f"Unexpected interface name"
+            assert (
+                res["result"]["fceos5"]["ae5.101"]["remote_interface"]
+                == "Port-Channel1.101"
+            ), f"Unexpected interface name"
 
     def test_get_connections_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_connections",
             workers="any",
             kwargs={"devices": ["fceos4", "fceos5"], "dry_run": True},
@@ -1053,7 +1211,7 @@ class TestGetConnections:
 
     def test_get_connections_and_cables(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_connections",
             workers="any",
             kwargs={"devices": ["fceos4", "fceos5"], "cables": True},
@@ -1068,6 +1226,8 @@ class TestGetConnections:
                     interfaces, dict
                 ), f"{worker}:{device} did not return interfaces dictionary"
                 for intf_name, intf_data in interfaces.items():
+                    if intf_data["termination_type"] in ["virtual", "lag"]:
+                        continue
                     assert (
                         "cable" in intf_data
                     ), f"{worker}:{device}:{intf_name} no cable data returned"
@@ -1315,7 +1475,7 @@ class TestGetCircuits:
 
         if self.nb_version[0] == 3:
             ret = nfclient.run_job(
-                b"netbox",
+                "netbox",
                 "get_circuits",
                 workers="any",
                 kwargs={
@@ -1336,7 +1496,7 @@ class TestGetCircuits:
 
     def test_get_circuits(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_circuits",
             workers="any",
             kwargs={
@@ -1388,7 +1548,7 @@ class TestGetCircuits:
 
     def test_get_circuits_by_cid(self, nfclient):
         ret = nfclient.run_job(
-            b"netbox",
+            "netbox",
             "get_circuits",
             workers="any",
             kwargs={"devices": ["fceos4", "fceos5"], "cid": ["CID1"]},
@@ -1724,37 +1884,11 @@ class TestUpdateDeviceIP:
 class TestCreateIP:
     nb_version = None
 
-    def delete_ips(self, prefix, nfclient):
-        resp = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "get",
-                "api": "/ipam/ip-addresses/",
-                "params": {"parent": prefix},
-            },
-        )
-        worker, ips = tuple(resp.items())[0]
-        # pprint.pprint(ips)
-        for ip in ips["result"]["results"]:
-            delete_ip = nfclient.run_job(
-                "netbox",
-                "rest",
-                workers="any",
-                kwargs={
-                    "method": "delete",
-                    "api": f"/ipam/ip-addresses/{ip['id']}/",
-                },
-            )
-            # print("delete ip address:")
-            # pprint.pprint(delete_ip)
-
     def test_create_ip_by_prefix(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -1797,7 +1931,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -1840,7 +1974,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -1892,13 +2026,13 @@ class TestCreateIP:
             pprint.pprint(create_1, width=200)
             worker, res1 = tuple(create_1.items())[0]
             assert res1["failed"] == True, "Allocation not failed"
-            assert "Unable to source prefix from Netbox" in res1["messages"][0]
+            assert "Unable to source parent prefix from Netbox" in res1["messages"][0]
 
     def test_create_ip_by_prefix_device_interface(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -1941,7 +2075,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -1985,7 +2119,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -2063,7 +2197,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -2090,7 +2224,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             # test dry rin for new ip
@@ -2133,7 +2267,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -2178,7 +2312,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -2206,7 +2340,7 @@ class TestCreateIP:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
         delete_branch("create_ip_1", nfclient)
-        self.delete_ips("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -2237,6 +2371,240 @@ class TestCreateIP:
             assert (
                 res1["result"]["branch"] == "create_ip_1"
             ), "No branch info in results"
+
+    def test_create_ip_with_mask_len(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1",
+                "mask_len": 31,
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+        worker, res1 = tuple(create_1.items())[0]
+        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+
+    def test_create_ip_with_mask_len_dry_run(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1",
+                "mask_len": 31,
+                "dry_run": True,
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+        worker, res1 = tuple(create_1.items())[0]
+        # dry run will allocate first ip within /24 as opposed to /31
+        assert res1["result"]["address"] == "10.0.0.1/24", f"Wrong ip allocated"
+
+    def test_create_ip_check_create_peer_ip(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1.101",
+                "mask_len": 31,
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+
+        worker, res1 = tuple(create_1.items())[0]
+
+        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert (
+            res1["result"]["peer"]["address"] == "10.0.0.1/31"
+        ), f"Wrong ip allocated for peer"
+        assert (
+            res1["result"]["peer"]["device"] == "fceos5"
+        ), f"Wrong ip allocated for peer"
+        assert (
+            res1["result"]["peer"]["interface"] == "ae5.101"
+        ), f"Wrong ip allocated for peer"
+
+    def test_create_ip_check_create_peer_ip_with_branch(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        delete_branch("create_ip_with_peer", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1.101",
+                "mask_len": 31,
+                "branch": "create_ip_with_peer",
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+
+        worker, res1 = tuple(create_1.items())[0]
+
+        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert res1["result"]["branch"] == "create_ip_with_peer", f"Wrong branch"
+        assert (
+            res1["result"]["peer"]["address"] == "10.0.0.1/31"
+        ), f"Wrong ip allocated for peer"
+        assert (
+            res1["result"]["peer"]["device"] == "fceos5"
+        ), f"Wrong ip allocated for peer"
+        assert (
+            res1["result"]["peer"]["interface"] == "ae5.101"
+        ), f"Wrong ip allocated for peer"
+
+    def test_create_ip_check_skip_create_peer_ip(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1.101",
+                "mask_len": 31,
+                "create_peer_ip": False,
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+
+        worker, res1 = tuple(create_1.items())[0]
+
+        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert (
+            "peer" not in res1["result"]
+        ), f"SHould have been skipping peer ip creation"
+
+    def test_create_ip_use_peer_ip(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1.101",
+                "mask_len": 31,
+                "create_peer_ip": False,
+            },
+        )
+        create_2 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos5",
+                "interface": "ae5.101",
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+        print("create_2")
+        pprint.pprint(create_2, width=200)
+
+        worker, res1 = tuple(create_1.items())[0]
+        worker, res2 = tuple(create_2.items())[0]
+
+        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert res2["result"]["address"] == "10.0.0.1/31", f"Wrong ip allocated"
+
+    def test_create_ip_with_link_peer_dry_run(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1.101",
+                "mask_len": 31,
+            },
+        )
+        create_2 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos5",
+                "interface": "ae5.101",
+                "dry_run": True,
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+        print("create_2")
+        pprint.pprint(create_2, width=200)
+
+        worker, res1 = tuple(create_1.items())[0]
+        worker, res2 = tuple(create_2.items())[0]
+
+        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert res2["result"]["address"] == "10.0.0.1/31", f"Wrong ip allocated"
+
+    def test_create_ip_with_link_peer_within_parent(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos4",
+                "interface": "Port-Channel1.101",
+            },
+        )
+        create_2 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "device": "fceos5",
+                "interface": "ae5.101",
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+        print("create_2")
+        pprint.pprint(create_2, width=200)
+
+        worker, res1 = tuple(create_1.items())[0]
+        worker, res2 = tuple(create_2.items())[0]
+
+        assert res1["result"]["address"] == "10.0.0.1/24", f"Wrong ip allocated"
+        assert res2["result"]["address"] == "10.0.0.2/24", f"Wrong ip allocated"
 
 
 class TestNetboxCache:
@@ -2946,37 +3314,11 @@ class TestGetContainerlabInventory:
 class TestCreatePrefix:
     nb_version = None
 
-    def delete_prefixes_within(self, prefix, nfclient):
-        resp = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "get",
-                "api": "/ipam/prefixes/",
-                "params": {"within": prefix},
-            },
-        )
-        worker, prefixes = tuple(resp.items())[0]
-        # pprint.pprint(prefixes)
-        for pfx in prefixes["result"]["results"]:
-            delete_pfx = nfclient.run_job(
-                "netbox",
-                "rest",
-                workers="any",
-                kwargs={
-                    "method": "delete",
-                    "api": f"/ipam/prefixes/{pfx['id']}/",
-                },
-            )
-            # print("delete prefix:")
-            # pprint.pprint(delete_pfx)
-
     def test_create_prefix(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3023,7 +3365,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
             create_1 = nfclient.run_job(
@@ -3091,7 +3433,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+        delete_prefixes_within("10.2.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3155,7 +3497,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3181,7 +3523,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3228,7 +3570,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+        delete_prefixes_within("10.2.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3237,7 +3579,7 @@ class TestCreatePrefix:
                 "create_prefix",
                 workers="any",
                 kwargs={
-                    "parent": "TEST CREATE PREFIX WITH VRF",
+                    "parent": "TEST CREATE PREFIXES WITH VRF",
                     "prefixlen": 30,
                     "description": f"test create prefix {rand}",
                     "vrf": "VRF1",
@@ -3248,7 +3590,7 @@ class TestCreatePrefix:
                 "create_prefix",
                 workers="any",
                 kwargs={
-                    "parent": "TEST CREATE PREFIX WITH VRF",
+                    "parent": "TEST CREATE PREFIXES WITH VRF",
                     "prefixlen": 30,
                     "description": f"test create prefix {rand}",
                     "vrf": "VRF1",
@@ -3259,7 +3601,7 @@ class TestCreatePrefix:
                 "create_prefix",
                 workers="any",
                 kwargs={
-                    "parent": "TEST CREATE PREFIX WITH VRF",
+                    "parent": "TEST CREATE PREFIXES WITH VRF",
                     "prefixlen": 30,
                     "description": f"test create prefix {rand+1}",
                     "vrf": "VRF1",
@@ -3296,7 +3638,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3324,7 +3666,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3362,7 +3704,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3402,7 +3744,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_prefixes_within("10.1.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3439,7 +3781,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+        delete_prefixes_within("10.2.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3506,7 +3848,7 @@ class TestCreatePrefix:
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
 
-        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+        delete_prefixes_within("10.2.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3591,7 +3933,7 @@ class TestCreatePrefix:
             self.nb_version = get_nb_version(nfclient)
 
         delete_branch("create_prefix_1", nfclient)
-        self.delete_prefixes_within("10.2.0.0/24", nfclient)
+        delete_prefixes_within("10.2.0.0/24", nfclient)
 
         rand = random.randint(1, 1000)
         if self.nb_version[0] == 4:
@@ -3621,3 +3963,89 @@ class TestCreatePrefix:
                 assert (
                     res1["result"]["branch"] == "create_prefix_1"
                 ), "No branch details in result"
+
+
+class TestCreateIPBulk:
+    nb_version = None
+
+    def test_create_ip_bulk(self, nfclient):
+        delete_prefixes_within("10.0.0.0/24", nfclient)
+        delete_ips("10.0.0.0/24", nfclient)
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip_bulk",
+            workers="any",
+            kwargs={
+                "prefix": "10.0.0.0/24",
+                "devices": ["fceos4", "fceos5"],
+                "interface_regex": "eth103.0|eth11.123|Port-Channel1.101|ae5.101",
+                "mask_len": 31,
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+
+        for worker, res1 in create_1.items():
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"] == {
+                "fceos4": {
+                    "Port-Channel1.101": {
+                        "address": "10.0.0.4/31",
+                        "description": "",
+                        "device": "fceos4",
+                        "interface": "Port-Channel1.101",
+                        "peer": {
+                            "address": "10.0.0.5/31",
+                            "description": "",
+                            "device": "fceos5",
+                            "interface": "ae5.101",
+                            "vrf": "None",
+                        },
+                        "vrf": "None",
+                    },
+                    "eth103.0": {
+                        "address": "10.0.0.0/31",
+                        "description": "",
+                        "device": "fceos4",
+                        "interface": "eth103.0",
+                        "peer": {
+                            "address": "10.0.0.1/31",
+                            "description": "",
+                            "device": "fceos5",
+                            "interface": "eth103",
+                            "vrf": "None",
+                        },
+                        "vrf": "None",
+                    },
+                    "eth11.123": {
+                        "address": "10.0.0.2/31",
+                        "description": "",
+                        "device": "fceos4",
+                        "interface": "eth11.123",
+                        "peer": {
+                            "address": "10.0.0.3/31",
+                            "description": "",
+                            "device": "fceos5",
+                            "interface": "eth11.123",
+                            "vrf": "None",
+                        },
+                        "vrf": "None",
+                    },
+                },
+                "fceos5": {
+                    "ae5.101": {
+                        "address": "10.0.0.5/31",
+                        "description": "",
+                        "device": "fceos5",
+                        "interface": "ae5.101",
+                        "vrf": "None",
+                    },
+                    "eth11.123": {
+                        "address": "10.0.0.3/31",
+                        "description": "",
+                        "device": "fceos5",
+                        "interface": "eth11.123",
+                        "vrf": "None",
+                    },
+                },
+            }

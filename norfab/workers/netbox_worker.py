@@ -36,6 +36,12 @@ class NetboxAllocationError(Exception):
     """
 
 
+class UnsupportedNetboxVersion(Exception):
+    """
+    Raised when there is an error in allocating resource in Netbox
+    """
+
+
 # ----------------------------------------------------------------------
 # HELPER FUNCTIONS
 # ----------------------------------------------------------------------
@@ -997,6 +1003,7 @@ class NetboxWorker(NFPWorker):
         job: Job,
         instance: Union[None, str] = None,
         devices: Union[None, list] = None,
+        interface_regex: Union[None, str] = None,
         ip_addresses: bool = False,
         inventory_items: bool = False,
         dry_run: bool = False,
@@ -1009,6 +1016,7 @@ class NetboxWorker(NFPWorker):
             job: NorFab Job object containing relevant metadata
             instance (str, optional): Netbox instance name.
             devices (list, optional): List of devices to retrieve interfaces for.
+            interface_regex (str, optional): Regex patter to match interfaces by name, case insensitive.
             ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.
             inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.
             dry_run (bool, optional): If True, only return query content, do not run it. Defaults to False.
@@ -1064,7 +1072,18 @@ class NetboxWorker(NFPWorker):
         # form interfaces query dictionary
         if self.nb_version[instance] >= (4, 3, 0):
             dlist = str(devices).replace("'", '"')  # swap quotes
-            dfilt = "{device: {name: {in_list: " + dlist + "}}}"
+            # add interface name regex filter
+            if interface_regex:
+                dfilt = (
+                    "{device: {name: {in_list: "
+                    + dlist
+                    + "}}"
+                    + ", name: {i_regex: "
+                    + f'"{interface_regex}"'
+                    + "}}"
+                )
+            else:
+                dfilt = "{device: {name: {in_list: " + dlist + "}}}"
         else:
             dfilt = {"device": devices}
         queries = {
@@ -1157,14 +1176,25 @@ class NetboxWorker(NFPWorker):
     def get_connections(
         self,
         job: Job,
-        devices: list,
+        devices: list[str],
         instance: Union[None, str] = None,
         dry_run: bool = False,
         cables: bool = False,
         cache: Union[bool, str] = None,
+        include_virtual: bool = True,
+        interface_regex: Union[None, str] = None,
     ) -> Result:
         """
         Retrieve interface connection details for specified devices from Netbox.
+
+        This task retrieves these connections:
+
+        - Physical interfaces connections
+        - Child/virtual interfaces connections using parent interface connections details
+        - Lag interfaces connections using member ports connections details
+        - Lag child interfaces connections using member ports connections details
+        - Console port and console server ports connections
+        - Connections to provider networks for physical, child/virtual and lag interfaces
 
         Args:
             job: NorFab Job object containing relevant metadata
@@ -1172,6 +1202,9 @@ class NetboxWorker(NFPWorker):
             instance (str, optional): Netbox instance name for the GraphQL query.
             dry_run (bool, optional): If True, perform a dry run without making actual changes.
             cables (bool, optional): if True includes interfaces' directly attached cables details
+            include_virtual (bool, optional): if True include connections for virtual and LAG interfaces
+            interface_regex (str, optional): Regex patter to match interfaces, console ports and
+                console server ports by name, case insensitive.
 
         Returns:
             dict: A dictionary containing connection details for each device:
@@ -1225,22 +1258,49 @@ class NetboxWorker(NFPWorker):
         if self.nb_version[instance][0] == 4:
             interfaces_fields = [
                 "name",
+                "type",
                 "device {name}",
-                """connected_endpoints {
-                __typename 
-                ... on InterfaceType {name device {name}}
-                ... on ProviderNetworkType {name}
-                }""",
+                """
+                member_interfaces {
+                  name
+                  connected_endpoints {
+                    __typename
+                    ... on ProviderNetworkType {name}
+                    ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                  }
+                }
+                """,
+                """
+                parent {
+                  name
+                  type
+                  member_interfaces {
+                    name
+                    connected_endpoints {
+                      __typename
+                      ... on ProviderNetworkType {name}
+                      ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                    }
+                  }
+                  connected_endpoints {
+                    __typename
+                    ... on ProviderNetworkType {name}
+                    ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                  }
+                }
+                """,
+                """
+                connected_endpoints {
+                    __typename 
+                    ... on ProviderNetworkType {name}
+                    ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                }
+                """,
             ]
-        elif self.nb_version[instance][0] == 3:
-            interfaces_fields = [
-                "name",
-                "device {name}",
-                """connected_endpoints {
-                __typename 
-                ... on InterfaceType {name device {name}}
-                }""",
-            ]
+        else:
+            raise UnsupportedNetboxVersion(
+                "Get connections task supported with Netbox 4.3.0+"
+            )
         interfaces_fields.append(
             """
             link_peers {
@@ -1254,6 +1314,7 @@ class NetboxWorker(NFPWorker):
         console_ports_fields = [
             "name",
             "device {name}",
+            "type",
             """connected_endpoints {
               __typename 
               ... on ConsoleServerPortType {name device {name}}
@@ -1268,6 +1329,7 @@ class NetboxWorker(NFPWorker):
         console_server_ports_fields = [
             "name",
             "device {name}",
+            "type",
             """connected_endpoints {
               __typename 
               ... on ConsolePortType {name device {name}}
@@ -1289,23 +1351,36 @@ class NetboxWorker(NFPWorker):
         # form query dictionary with aliases to get data from Netbox
         if self.nb_version[instance] >= (4, 3, 0):
             dlist = str(devices).replace("'", '"')  # swap quotes
-            dfilt = "{device: {name: {in_list: " + dlist + "}}}"
+            if interface_regex:
+                filters = (
+                    "{device: {name: {in_list: "
+                    + dlist
+                    + "}}, "
+                    + "name: {i_regex: "
+                    + f'"{interface_regex}"'
+                    + "}}"
+                )
+            else:
+                filters = "{device: {name: {in_list: " + dlist + "}}}"
         else:
-            dfilt = {"device": devices}
+            raise UnsupportedNetboxVersion(
+                "Get connections task supported with Netbox 4.3.0+"
+            )
+
         queries = {
             "interface": {
                 "obj": "interface_list",
-                "filters": dfilt,
+                "filters": filters,
                 "fields": interfaces_fields,
             },
             "consoleport": {
                 "obj": "console_port_list",
-                "filters": dfilt,
+                "filters": filters,
                 "fields": console_ports_fields,
             },
             "consoleserverport": {
                 "obj": "console_server_port_list",
-                "filters": dfilt,
+                "filters": filters,
                 "fields": console_server_ports_fields,
             },
         }
@@ -1320,12 +1395,14 @@ class NetboxWorker(NFPWorker):
             return query_result
 
         all_ports = query_result.result
+        if not all_ports:
+            return ret
 
-        # extract interfaces
+        # extract physical interfaces connections
         for port_type, ports in all_ports.items():
             for port in ports:
-                endpoints = port["connected_endpoints"]
                 # skip ports that have no remote device connected
+                endpoints = port["connected_endpoints"]
                 if not endpoints or not all(i for i in endpoints):
                     continue
 
@@ -1367,7 +1444,100 @@ class NetboxWorker(NFPWorker):
                         cable["peer_interface"] = [i["name"] for i in link_peers]
                     connection["cable"] = cable
 
+                # add physical connection to the results
                 ret.result[device_name][port_name] = connection
+
+        # extract virtual interfaces connections
+        for port_type, ports in all_ports.items():
+            for port in ports:
+                # add child virtual interfaces connections
+                if (
+                    not include_virtual
+                    or port["type"] != "virtual"
+                    or not port["parent"]
+                ):
+                    continue
+                device_name = port["device"]["name"]
+                interface_name = port["name"]
+                parent = port["parent"]
+                connection = {
+                    "remote_device": None,
+                    "remote_interface": None,
+                    "remote_termination_type": "virtual",
+                    "termination_type": "virtual",
+                }
+                # find connection endpoint
+                if parent["type"] == "lag":
+                    try:
+                        endpoint = parent["member_interfaces"][0][
+                            "connected_endpoints"
+                        ][0]
+                    except:
+                        continue
+                elif parent["connected_endpoints"]:
+                    try:
+                        endpoint = parent["connected_endpoints"][0]
+                    except:
+                        continue
+                connection["remote_device"] = endpoint["device"]["name"]
+                remote_termination_type = endpoint["__typename"].lower()
+                remote_termination_type = remote_termination_type.replace("type", "")
+                # collect virtual interfaces facing provider
+                if remote_termination_type == "providernetwork":
+                    connection["provider"] = endpoint["name"]
+                # find matching remote virtual interface for LAG subif
+                elif "." in interface_name and parent["type"] == "lag":
+                    subif_id = interface_name.split(".")[1]
+                    for remote_child in endpoint["lag"]["child_interfaces"]:
+                        if remote_child["name"].endswith(f".{subif_id}"):
+                            connection["remote_interface"] = remote_child["name"]
+                            break
+                    # no matching subinterface found, associate child interface with remote interface
+                    else:
+                        connection["remote_interface"] = endpoint["lag"]["name"]
+                        connection["remote_termination_type"] = "lag"
+                # find matching remote virtual interface for physical interface subif
+                elif "." in interface_name:
+                    subif_id = interface_name.split(".")[1]
+                    for remote_child in endpoint["child_interfaces"]:
+                        if remote_child["name"].endswith(f".{subif_id}"):
+                            connection["remote_interface"] = remote_child["name"]
+                            break
+                    # no matching subinterface found, associate child interface with remote interface
+                    else:
+                        connection["remote_interface"] = endpoint["name"]
+                        connection["remote_termination_type"] = remote_termination_type
+                # add virtual interface connection to results
+                ret.result[device_name][interface_name] = connection
+
+        # extract LAG interfaces connections
+        for port_type, ports in all_ports.items():
+            for port in ports:
+                if not include_virtual or port["type"] != "lag":
+                    continue
+                device_name = port["device"]["name"]
+                interface_name = port["name"]
+                connection = {
+                    "remote_device": None,
+                    "remote_interface": None,
+                    "remote_termination_type": "lag",
+                    "termination_type": "lag",
+                }
+                try:
+                    endpoint = port["member_interfaces"][0]["connected_endpoints"][0]
+                except:
+                    continue
+                remote_termination_type = endpoint["__typename"].lower()
+                remote_termination_type = remote_termination_type.replace("type", "")
+                # collect lag interfaces facing provider
+                if remote_termination_type == "providernetwork":
+                    connection["provider"] = endpoint["name"]
+                # find remote lag interface
+                elif endpoint["lag"]:
+                    connection["remote_interface"] = endpoint["lag"]["name"]
+                    connection["remote_device"] = endpoint["device"]["name"]
+                # add lag interface connection to results
+                ret.result[device_name][interface_name] = connection
 
         return ret
 
@@ -2354,22 +2524,22 @@ class NetboxWorker(NFPWorker):
         self,
         job: Job,
         prefix: Union[str, dict],
-        device: str = None,
-        interface: str = None,
-        description: str = None,
-        vrf: str = None,
+        device: Union[None, str] = None,
+        interface: Union[None, str] = None,
+        description: Union[None, str] = None,
+        vrf: Union[None, str] = None,
         tags: Union[None, list] = None,
-        dns_name: str = None,
-        tenant: str = None,
-        comments: str = None,
-        role: str = None,
-        status: str = None,
-        is_primary: bool = None,
+        dns_name: Union[None, str] = None,
+        tenant: Union[None, str] = None,
+        comments: Union[None, str] = None,
+        role: Union[None, str] = None,
+        status: Union[None, str] = None,
+        is_primary: Union[None, bool] = None,
         instance: Union[None, str] = None,
-        dry_run: bool = False,
-        branch: str = None,
-        mask_len: int = None,
-        create_subnet: bool = False,
+        dry_run: Union[None, bool] = False,
+        branch: Union[None, str] = None,
+        mask_len: Union[None, int] = None,
+        create_peer_ip: Union[None, bool] = True,
     ) -> Result:
         """
         Allocate the next available IP address from a given subnet.
@@ -2396,14 +2566,16 @@ class NetboxWorker(NFPWorker):
             tenant (str, optional): The tenant associated with the IP address.
             comments (str, optional): Additional comments for the IP address.
             instance (str, optional): The NetBox instance to use.
-            dry_run (bool, optional): If True, do not actually allocate the IP address. Defaults to False.
-            branch (str, optional): Branch name to use, need to have branching plugin installed,
-                automatically creates branch if it does not exist in Netbox.
+            dry_run (bool, optional): If True, do not actually allocate the IP address.
+            branch (str, optional): Branch name to use, need to have branching plugin
+                installed, automatically creates branch if it does not exist in Netbox.
             mask_len (int, optional): mask length to use for IP address on creation or to
-                update existing IP address
-            create_subnet (bool, optional): if True, on IP address creation will create
-                child subnet of `mask_len` within parent `prefix`, ignored for existing
-                IP addresses
+                update existing IP address. On new IP address creation will create child
+                subnet of `mask_len` within parent `prefix`, new subnet not created for
+                existing IP addresses. `mask_len` argument ignored on dry run and ip allocated
+                from parent prefix directly.
+            create_peer_ip (bool, optional): If True creates IP address for link peer -
+                remote device interface connected to requested device and interface
 
         Returns:
             dict: A dictionary containing the result of the IP allocation.
@@ -2434,7 +2606,31 @@ class NetboxWorker(NFPWorker):
         has_changes = False
         nb_ip = None
         nb_device = None
+        create_peer_ip_data = {}
         nb = self._get_pynetbox(instance, branch=branch)
+
+        # source parent prefix from Netbox
+        if isinstance(prefix, str):
+            # try converting prefix to network, if fails prefix is not an IP network
+            try:
+                network = ipaddress.ip_network(prefix)
+                is_network = True
+            except:
+                is_network = False
+            if is_network is True and vrf:
+                prefix = {"prefix": prefix, "vrf__name": vrf}
+            elif is_network is True:
+                prefix = {"prefix": prefix}
+            elif is_network is False and vrf:
+                prefix = {"description": prefix, "vrf__name": vrf}
+            elif is_network is False:
+                prefix = {"description": prefix}
+        nb_prefix = nb.ipam.prefixes.get(**prefix)
+        if not nb_prefix:
+            raise NetboxAllocationError(
+                f"Unable to source parent prefix from Netbox - {prefix}"
+            )
+        parent_prefix_len = int(str(nb_prefix).split("/")[1])
 
         # try to source existing IP from netbox
         if device and interface and description:
@@ -2442,46 +2638,74 @@ class NetboxWorker(NFPWorker):
                 device=device,
                 interface=interface,
                 description=description,
-                parent=prefix,
+                parent=str(nb_prefix),
             )
         elif device and interface:
             nb_ip = nb.ipam.ip_addresses.get(
-                device=device, interface=interface, parent=prefix
+                device=device, interface=interface, parent=str(nb_prefix)
             )
         elif description:
-            nb_ip = nb.ipam.ip_addresses.get(description=description, parent=prefix)
+            nb_ip = nb.ipam.ip_addresses.get(
+                description=description, parent=str(nb_prefix)
+            )
 
         # create new IP address
         if not nb_ip:
-            job.event(f"Creating new IP address within prefix {prefix}")
-            # source parent prefix from Netbox
-            if isinstance(prefix, str):
-                # try converting prefix to network, if fails prefix is not an IP network
-                try:
-                    network = ipaddress.ip_network(prefix)
-                    is_network = True
-                except:
-                    is_network = False
-                if is_network is True and vrf:
-                    prefix = {"prefix": prefix, "vrf__name": vrf}
-                elif is_network is True:
-                    prefix = {"prefix": prefix}
-                elif is_network is False and vrf:
-                    prefix = {"description": prefix, "vrf__name": vrf}
-                elif is_network is False:
-                    prefix = {"description": prefix}
-            nb_prefix = nb.ipam.prefixes.get(**prefix)
-
-            if not nb_prefix:
-                raise NetboxAllocationError(
-                    f"Unable to source prefix from Netbox - {prefix}"
+            # check if interface has link peer that has IP within parent prefix
+            if device and interface:
+                connection = self.get_connections(
+                    job=job,
+                    devices=[device],
+                    interface_regex=interface,
+                    instance=instance,
+                    include_virtual=True,
                 )
-
-            # if mask_len provided create new subnet if requested so
-            if mask_len and create_subnet:
-                if mask_len < int(str(nb_prefix).split("/")[1]):
+                if interface in connection.result[device]:
+                    peer = connection.result[device][interface]
+                    # do not process breakout cables
+                    if isinstance(peer["remote_interface"], list):
+                        peer["remote_interface"] = None
+                    # try to source peer ip subnet
+                    nb_peer_ip = None
+                    if peer["remote_device"] and peer["remote_interface"]:
+                        nb_peer_ip = nb.ipam.ip_addresses.get(
+                            device=peer["remote_device"],
+                            interface=peer["remote_interface"],
+                            parent=str(nb_prefix),
+                        )
+                    # try to source peer ip subnet
+                    nb_peer_prefix = None
+                    if nb_peer_ip:
+                        peer_ip = ipaddress.ip_interface(nb_peer_ip.address)
+                        nb_peer_prefix = nb.ipam.prefixes.get(
+                            prefix=str(peer_ip.network),
+                            vrf__name=vrf,
+                        )
+                    elif create_peer_ip and peer["remote_interface"]:
+                        create_peer_ip_data = {
+                            "device": peer["remote_device"],
+                            "interface": peer["remote_interface"],
+                            "vrf": vrf,
+                            "branch": branch,
+                            "tenant": tenant,
+                            "dry_run": dry_run,
+                            "tags": tags,
+                            "status": status,
+                            "create_peer_ip": False,
+                        }
+                    # use peer subnet to create IP address
+                    if nb_peer_prefix:
+                        nb_prefix = nb_peer_prefix
+                        mask_len = None  # cancel subnet creation
+                        job.event(
+                            f"Using link peer '{peer['remote_device']}:{peer['remote_interface']}' "
+                            f"prefix '{nb_peer_prefix}' to create IP address"
+                        )
+            # if mask_len provided create new subnet
+            if mask_len and not dry_run and mask_len != parent_prefix_len:
+                if mask_len < parent_prefix_len:
                     raise ValueError(
-                        f"Mask length '{mask_len}' must be longer then '{str(nb_prefix)}' prefix length"
+                        f"Mask length '{mask_len}' must be longer then '{parent_prefix_len}' prefix length"
                     )
                 prefix_status = status
                 if prefix_status not in ["active", "reserved", "deprecated"]:
@@ -2495,7 +2719,6 @@ class NetboxWorker(NFPWorker):
                     tenant=tenant,
                     status=prefix_status,
                     instance=instance,
-                    dry_run=dry_run,
                     branch=branch,
                 )
                 prefix = {"prefix": child_subnet.result["prefix"]}
@@ -2508,10 +2731,10 @@ class NetboxWorker(NFPWorker):
                         f"Unable to source child prefix of mask length "
                         f"'{mask_len}' from '{prefix}' parent prefix"
                     )
-
             # execute dry run on new IP
             if dry_run is True:
                 nb_ip = nb_prefix.available_ips.list()[0]
+                print(nb_prefix.available_ips.list()[0])
                 ret.status = "unchanged"
                 ret.dry_run = True
                 ret.result = {
@@ -2528,6 +2751,9 @@ class NetboxWorker(NFPWorker):
             # create new IP
             else:
                 nb_ip = nb_prefix.available_ips.create()
+                job.event(
+                    f"Created '{nb_ip}' IP address for '{device}:{interface}' within '{nb_prefix}' prefix"
+                )
             ret.status = "created"
         else:
             job.event(f"Using existing IP address {nb_ip}")
@@ -2584,6 +2810,7 @@ class NetboxWorker(NFPWorker):
             ret.dry_run = True
         elif has_changes:
             nb_ip.save()
+            job.event(f"Updated '{str(nb_ip)}' IP address parameters")
             # make IP primary for device
             if is_primary is True and nb_device:
                 nb_device.save()
@@ -2601,6 +2828,62 @@ class NetboxWorker(NFPWorker):
         # add branch to results
         if branch is not None:
             ret.result["branch"] = branch
+
+        # create IP address for peer
+        if create_peer_ip and create_peer_ip_data:
+            job.event(
+                f"Creating IP address for link peer '{create_peer_ip_data['device']}:{create_peer_ip_data['interface']}'"
+            )
+            peer_ip = self.create_ip(
+                **create_peer_ip_data, prefix=str(nb_prefix), job=job
+            )
+            if peer_ip.failed == False:
+                ret.result["peer"] = peer_ip.result
+
+        return ret
+
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
+    def create_ip_bulk(
+        self,
+        job: Job,
+        prefix: Union[str, dict],
+        devices: list[str] = None,
+        interface_regex: str = None,
+        instance: Union[None, str] = None,
+        **kwargs,
+    ) -> Result:
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:create_ip_bulk", result={}, resources=[instance]
+        )
+        processed = {}
+
+        # get list of all connections
+        interfaces = self.get_interfaces(
+            job=job,
+            devices=devices,
+            interface_regex=interface_regex,
+            instance=instance,
+        )
+
+        # iterate over interfaces and assign IP addresses
+        for device, device_interfaces in interfaces.result.items():
+            ret.result[device] = {}
+            for interface in device_interfaces.keys():
+                create_ip = self.create_ip(
+                    job=job,
+                    device=device,
+                    interface=interface,
+                    instance=instance,
+                    prefix=prefix,
+                    **kwargs,
+                )
+                ret.result[device][interface] = create_ip.result
+                # add peer interface into results as well
+                if create_ip.result.get("peer"):
+                    pass
 
         return ret
 
@@ -2669,7 +2952,7 @@ class NetboxWorker(NFPWorker):
         nb = self._get_pynetbox(instance, branch=branch)
 
         job.event(
-            f"Processing '/{prefixlen}' prefix create request within '{parent}' parent prefix"
+            f"Processing prefix create request within '{parent}' for '/{prefixlen}' subnet"
         )
 
         # source parent prefix from Netbox

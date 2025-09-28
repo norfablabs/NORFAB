@@ -1,8 +1,18 @@
-## 0.11.2
+## 0.12.0
 
 ### BUGS
 
-1. FastAPI Service - fixing json references for OpanAPI schema, which previously broken lead to error in swagger and redoc UIs rendering.
+1. FastAPI Service - fixing json references for OpenAPI schema, which previously broken lead to error in swagger and redoc UIs rendering.
+
+### FEATURES
+
+1. Netbox service - `get_interfaces` task added `interfaces_regex` filter
+2. Netbox service - `get_connections` task added `interfaces_regex` filter
+3. Netbox service - `get_connections` added support to retrieve virtual interfaces connections for physical and lag interfaces
+4. Netbox service - `create_ip` added support to automatically assign IPs to link peers or use peers IP addresses prefixes to allocate next available IP address
+5. Netbox service - `create_ip` added support to create child subnet within parent prefix and assign IP out of it
+6. Netbox service - added new task `create_ip_bulk` to create IP addresses for devices using interfaces regex match
+7. FastMCP service - created NorFab MCP service
 
 ---
 
