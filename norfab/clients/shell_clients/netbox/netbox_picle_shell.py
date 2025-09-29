@@ -202,6 +202,11 @@ class GetInterfaces(NetboxCommonArgs, NetboxClientRunJobArgs):
         json_schema_extra={"presence": True},
         alias="dry-run",
     )
+    interface_regex: StrictStr = Field(
+        None,
+        description="Regex patter to match interfaces and ports",
+        alias="interface-regex",
+    )
 
     @staticmethod
     def run(*args, **kwargs):

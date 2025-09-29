@@ -1070,11 +1070,11 @@ class NetboxWorker(NFPWorker):
             )
 
         # form interfaces query dictionary
+        dlist = str(devices).replace("'", '"')  # swap quotes
         if self.nb_version[instance] >= (4, 3, 0):
-            dlist = str(devices).replace("'", '"')  # swap quotes
             # add interface name regex filter
             if interface_regex:
-                dfilt = (
+                filters = (
                     "{device: {name: {in_list: "
                     + dlist
                     + "}}"
@@ -1083,13 +1083,23 @@ class NetboxWorker(NFPWorker):
                     + "}}"
                 )
             else:
-                dfilt = "{device: {name: {in_list: " + dlist + "}}}"
-        else:
-            dfilt = {"device": devices}
+                filters = "{device: {name: {in_list: " + dlist + "}}}"
+        elif (4, 2, 0) <= self.nb_version[instance] < (4, 3, 0):
+            if interface_regex:
+                filters = (
+                    "{device: "
+                    + dlist
+                    + ", name: {i_regex: "
+                    + f'"{interface_regex}"'
+                    + "}}"
+                )
+            else:
+                filters = {"device": devices}
+
         queries = {
             "interfaces": {
                 "obj": "interface_list",
-                "filters": dfilt,
+                "filters": filters,
                 "fields": intf_fields,
             }
         }
@@ -1255,52 +1265,47 @@ class NetboxWorker(NFPWorker):
                 custom_fields
             }
         """
-        if self.nb_version[instance][0] == 4:
-            interfaces_fields = [
-                "name",
-                "type",
-                "device {name}",
-                """
-                member_interfaces {
-                  name
-                  connected_endpoints {
-                    __typename
-                    ... on ProviderNetworkType {name}
-                    ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
-                  }
-                }
-                """,
-                """
-                parent {
-                  name
-                  type
-                  member_interfaces {
-                    name
-                    connected_endpoints {
-                      __typename
-                      ... on ProviderNetworkType {name}
-                      ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
-                    }
-                  }
-                  connected_endpoints {
-                    __typename
-                    ... on ProviderNetworkType {name}
-                    ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
-                  }
-                }
-                """,
-                """
+        interfaces_fields = [
+            "name",
+            "type",
+            "device {name}",
+            """
+            member_interfaces {
+              name
+              connected_endpoints {
+                __typename
+                ... on ProviderNetworkType {name}
+                ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+              }
+            }
+            """,
+            """
+            parent {
+              name
+              type
+              member_interfaces {
+                name
                 connected_endpoints {
-                    __typename 
-                    ... on ProviderNetworkType {name}
-                    ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                  __typename
+                  ... on ProviderNetworkType {name}
+                  ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
                 }
-                """,
-            ]
-        else:
-            raise UnsupportedNetboxVersion(
-                "Get connections task supported with Netbox 4.3.0+"
-            )
+              }
+              connected_endpoints {
+                __typename
+                ... on ProviderNetworkType {name}
+                ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+              }
+            }
+            """,
+            """
+            connected_endpoints {
+                __typename 
+                ... on ProviderNetworkType {name}
+                ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+            }
+            """,
+        ]
         interfaces_fields.append(
             """
             link_peers {
@@ -1349,8 +1354,8 @@ class NetboxWorker(NFPWorker):
             console_server_ports_fields.append(cable_fields)
 
         # form query dictionary with aliases to get data from Netbox
+        dlist = str(devices).replace("'", '"')  # swap quotes
         if self.nb_version[instance] >= (4, 3, 0):
-            dlist = str(devices).replace("'", '"')  # swap quotes
             if interface_regex:
                 filters = (
                     "{device: {name: {in_list: "
@@ -1362,10 +1367,17 @@ class NetboxWorker(NFPWorker):
                 )
             else:
                 filters = "{device: {name: {in_list: " + dlist + "}}}"
-        else:
-            raise UnsupportedNetboxVersion(
-                "Get connections task supported with Netbox 4.3.0+"
-            )
+        elif (4, 2, 0) <= self.nb_version[instance] < (4, 3, 0):
+            if interface_regex:
+                filters = (
+                    "{device: "
+                    + dlist
+                    + ", name: {i_regex: "
+                    + f'"{interface_regex}"'
+                    + "}}"
+                )
+            else:
+                filters = {"device": devices}
 
         queries = {
             "interface": {

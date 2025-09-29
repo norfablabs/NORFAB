@@ -1,3 +1,13 @@
+## 0.12.1
+
+# BUGS
+
+1. Netbox service - restored Netbox v4.2.0 support
+2. Fixing Picle shell netbox get interfaces to have `interface_regex` argument
+3. Fixing Picle shek netbox get connection arguments
+
+---
+
 ## 0.12.0
 
 ### BUGS
