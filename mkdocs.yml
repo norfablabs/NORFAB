@@ -133,6 +133,11 @@ nav:
             - Inventory: workers/fastapi/services_fastapi_service_inventory.md
             - Tasks:
               - Auth: workers/fastapi/services_fastapi_service_task_auth.md
+        - FastMCP Service:
+            - Overview: workers/fastmcp/services_fastmcp_service.md
+            - Inventory: workers/fastmcp/services_fastmcp_service_inventory.md
+            - Tasks:
+              - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
         - Workflow Service:
             - Overview: workers/workflow/services_workflow_service.md
             - Inventory: workers/workflow/services_workflow_service_inventory.md
@@ -175,6 +180,7 @@ nav:
           - Nornir Worker: workers/nornir/api_reference_workers_nornir_worker.md
           - Netbox Worker: workers/netbox/api_reference_workers_netbox_worker.md
           - FastAPI Worker: workers/fastapi/api_reference_workers_fastapi_worker.md
+          - FastMCP Worker: workers/fastmcp/api_reference_workers_fastmcp_worker.md
           - Ollama Agent Worker: workers/agent/api_reference_workers_agent_worker.md
           - Workflow Worker: workers/workflow/api_reference_workers_workflow_worker.md
         - Built-in Clients:

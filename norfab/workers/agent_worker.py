@@ -6,6 +6,7 @@ from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
+from typing import Union
 
 SERVICE = "agent"
 
@@ -133,7 +134,7 @@ class AgentWorker(NFPWorker):
         """
         return Result(result="OK")
 
-    def _chat_ollama(self, user_input, job, template=None) -> str:
+    def _chat_ollama(self, job, user_input, template=None) -> str:
         """
         NorFab Task that handles the chat interaction with Ollama LLM.
 
@@ -161,7 +162,7 @@ class AgentWorker(NFPWorker):
         return ret
 
     @Task(fastapi={"methods": ["POST"]})
-    def chat(self, job: Job, user_input, template=None) -> str:
+    def chat(self, job: Job, user_input: str, template: Union[None, str] = None) -> str:
         """
         NorFab Task that handles the chat interaction with the user by processing the input through a language model.
 
@@ -176,6 +177,6 @@ class AgentWorker(NFPWorker):
             Exception: If the llm_flavour is unsupported.
         """
         if self.llm_flavour == "ollama":
-            return self._chat_ollama(user_input, template, job=job)
+            return self._chat_ollama(job, user_input, template)
         else:
             raise Exception(f"Unsupported llm flavour {self.llm_flavour}")

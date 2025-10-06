@@ -5,9 +5,9 @@ import time
 import os
 import signal
 import importlib.metadata
-import uvicorn
-import contextlib
+import asyncio
 
+from fnmatch import fnmatch
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from diskcache import FanoutCache
@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 def service_tasks_discovery(
-    worker, cycles: int = 30, discover_service: str = "all"
+    worker, cycles: int = 5, discover_service: str = "all"
 ) -> None:
     """
     Discovers available tasks from NorFab services and registers them
@@ -39,6 +39,7 @@ def service_tasks_discovery(
             to discover tasks from. If set to "all", tasks from all services
             are discovered. Defaults to "all".
     """
+    result = {}
     while not worker.exit_event.is_set() and cycles > 0:
         tasks = []
         services = []
@@ -53,6 +54,9 @@ def service_tasks_discovery(
 
             # retrieve NorFab services and their tasks
             for service in services:
+                # skip already discovered services
+                if service in result:
+                    continue
                 service_tasks = worker.client.run_job(
                     service=service,
                     task="list_tasks",
@@ -73,7 +77,7 @@ def service_tasks_discovery(
                 if task["mcp"] is False:
                     continue
                 # save service to results
-                worker.norfab_services_tasks.setdefault(task["service"], {})
+                result.setdefault(task["service"], {})
                 # continue with creating tool for task
                 task_tool = {
                     "name": task["name"],
@@ -86,18 +90,22 @@ def service_tasks_discovery(
                     f"service_{task['service']}__task_{task_tool['name']}"
                 )
                 # skip already discovered tasks
-                if task_tool["name"] in worker.norfab_services_tasks[task["service"]]:
+                if task_tool["name"] in result[task["service"]]:
                     continue
-                # save discovered task to results
-                worker.norfab_services_tasks[task["service"]][task_tool["name"]] = {
+                # save discovered task to return results
+                result[task["service"]][task_tool["name"]] = {
                     "tool": types.Tool(**task_tool),
                     "task": task,
                 }
+            # save tools to worker tasks dictionary
+            worker.norfab_services_tasks.update(result)
         except Exception as e:
             log.exception(f"Failed to discover services tasks, error: {e}")
 
         cycles -= 1
         time.sleep(5)
+
+    return result
 
 
 class FastMCPWorker(NFPWorker):
@@ -117,8 +125,8 @@ class FastMCPWorker(NFPWorker):
         )
         self.init_done_event = init_done_event
         self.exit_event = exit_event
-        self.api_prefix = "/"
         self.norfab_services_tasks = {}
+        self.mcp_server_name = "NorFab MCP Server"
 
         # get inventory from broker
         self.fastmcp_inventory = self.load_inventory()
@@ -165,14 +173,23 @@ class FastMCPWorker(NFPWorker):
     def worker_exit(self):
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
+        """
+        Retrieves version information for key libraries and the current Python environment.
+
+        Returns:
+            Result: An object containing a dictionary with the version numbers of
+                'norfab', 'mcp', 'uvicorn', 'pydantic', the Python version, and the platform.
+                If a package is not found, its version will be an empty string.
+        """
 
         libs = {
             "norfab": "",
             "mcp": "",
             "uvicorn": "",
             "pydantic": "",
+            "mcp": "",
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
         }
@@ -185,11 +202,95 @@ class FastMCPWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    @Task()
+    @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self) -> Result:
+        """
+        Retrieves the current inventory from the FastMCP worker.
+
+        Returns:
+            Result: An object containing a copy of the worker's inventory and the task name.
+        """
         return Result(
             result={**self.fastmcp_inventory},
             task=f"{self.name}:get_inventory",
+        )
+
+    @Task(fastapi={"methods": ["GET"]})
+    def get_tools(
+        self, brief: bool = False, service: str = "all", name: str = "*"
+    ) -> Result:
+        """
+        Retrieve tools from the available norfab services, optionally filtered by service 
+        name and tool name pattern.
+
+        Args:
+            brief (bool, optional): If True, returns a list of tool names. If False, 
+                returns a dictionary with tool details.
+            service (str, optional): The name of the service to filter tools by. 
+                Use "all" to include all services.
+            name (str, optional): A glob pattern to match tool names. 
+
+        Returns:
+            Result: An object containing the filtered tools. If brief is True, result 
+                is a list of tool names. Otherwise, result is a dictionary mapping tool 
+                names to their details.
+        """
+        ret = Result(
+            result={},
+            task=f"{self.name}:get_tools",
+        )
+        if brief:
+            ret.result = []
+            for service_name, tasks in self.norfab_services_tasks.items():
+                if service == "all" or service_name == service:
+                    for tool_name, tool_data in tasks.items():
+                        if fnmatch(tool_name, name):
+                            ret.result.append(tool_name)
+        else:
+            for service_name, tasks in self.norfab_services_tasks.items():
+                if service == "all" or service_name == service:
+                    for tool_name, tool_data in tasks.items():
+                        if fnmatch(tool_name, name):
+                            ret.result[tool_name] = tool_data["tool"].model_dump()
+
+        return ret
+
+    @Task(fastapi={"methods": ["POST"]})
+    def discover(self, job, service: str = "all", progress: bool = True) -> Result:
+        """
+        Discovers available services tasks and auto-generate tools for them.
+
+        Args:
+            service (str, optional): The name of the service to discover. Defaults to "all".
+
+        Returns:
+            Result: An object containing the discovery results for the specified service.
+        """
+        job.event("Discovering NorFab services tasks")
+        ret = Result(task=f"{self.name}:discover")
+        ret.result = service_tasks_discovery(self, cycles=1, discover_service=service)
+
+        return ret
+
+    @Task(fastapi={"methods": ["GET"]})
+    def get_status(self) -> Result:
+        """
+        Retrieves the current status of the application, including its name, 
+        URL, and the count of available tools.
+
+        Returns:
+            Result: An object containing a dictionary with the application's name, 
+                URL, and the number of tools, as well as the task identifier.
+        """
+        tools = self.get_tools(brief=True).result
+
+        return Result(
+            result={
+                "name": self.app.name,
+                "url": f"http://{self.fastmcp_inventory['host']}:{self.fastmcp_inventory['port']}/mcp/",
+                "tools_count": len(tools),
+            },
+            task=f"{self.name}:get_status",
         )
 
     def fastmcp_start(self):
@@ -211,7 +312,7 @@ class FastMCPWorker(NFPWorker):
         "streamable-http" transport.
         """
         self.app = FastMCP(
-            "NorFab MCP Server",
+            self.mcp_server_name,
             port=self.fastmcp_inventory["port"],
             host=self.fastmcp_inventory["host"],
         )

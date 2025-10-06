@@ -1162,7 +1162,6 @@ class NornirWorker(NFPWorker):
     @Task(
         fastapi={"methods": ["POST"]},
         input=NorniCliInput,
-        mcp={"name": "send_show_commands"},
     )
     def cli(
         self,
@@ -1295,7 +1294,6 @@ class NornirWorker(NFPWorker):
 
     @Task(
         fastapi={"methods": ["POST"]},
-        mcp={"name": "configure_devices"},
     )
     def cfg(
         self,

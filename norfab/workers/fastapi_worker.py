@@ -153,6 +153,9 @@ def service_tasks_api_discovery(
 
             # retrieve NorFab services and their tasks
             for service in services:
+                # skip already discovered services
+                if service in result:
+                    continue
                 service_tasks = worker.client.run_job(
                     service=service,
                     task="list_tasks",

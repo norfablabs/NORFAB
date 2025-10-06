@@ -42,6 +42,7 @@ from .shell_clients.workers.workers_picle_shell import (
     NorfabWorkersCommands,
 )
 from .shell_clients.common import ClientRunJobArgs, log_error_or_result, listen_events
+from .shell_clients.fastmcp import fastmcp_picle_shell
 
 NFCLIENT = None
 RICHCONSOLE = Console()
@@ -112,6 +113,9 @@ class ShowCommandsModel(BaseModel):
     )
     fastapi: fastapi_picle_shell.FastAPIShowCommandsModel = Field(
         None, description="Show FastAPI service"
+    )
+    fastmcp: fastmcp_picle_shell.FastMCPShowCommandsModel = Field(
+        None, description="Show FastMCP service"
     )
     agent: agent_picle_shell.AgentShowCommandsModel = Field(
         None, description="Show AI Agent service"

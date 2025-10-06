@@ -1622,7 +1622,7 @@ class NFPWorker:
             if not isinstance(result, Result):
                 raise TypeError(
                     f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "
-                    f"kwargs: '{kwargs}', client: '{client_address}', job uuid: '{juuid}'"
+                    f"kwargs: '{kwargs}', client: '{client_address}', job uuid: '{juuid}'; task returned '{type(result)}'"
                 )
             result.task = result.task or f"{self.name}:{task}"
             result.status = result.status or "completed"
