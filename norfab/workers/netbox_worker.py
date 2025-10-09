@@ -2401,6 +2401,26 @@ class NetboxWorker(NFPWorker):
         new descriptions using a Jinja2 template, and updates the interface descriptions
         in NetBox accordingly.
 
+        Only interfaces, console ports and console server ports supported.
+
+        Jinja2 environment receives these context variables for description template rendering:
+
+        - device 
+        - interface 
+        - remote_device 
+        - remote_interface
+        - termination_type
+        - cable - dictionary of directly attached cable attributes:
+            - type
+            - status
+            - tenant - dictionary of `{name: tenant_name}`
+            - label
+            - tags - list of `{name: tag_name}` dictionaries
+            - custom_fields - dictionary with custom fields data
+            - peer_termination_type
+            - peer_device
+            - peer_interface
+
         Args:
             job (Job): The job context for logging and event handling.
             devices (list): List of device names to update interfaces for.
