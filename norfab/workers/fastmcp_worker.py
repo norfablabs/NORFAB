@@ -220,19 +220,19 @@ class FastMCPWorker(NFPWorker):
         self, brief: bool = False, service: str = "all", name: str = "*"
     ) -> Result:
         """
-        Retrieve tools from the available norfab services, optionally filtered by service 
+        Retrieve tools from the available norfab services, optionally filtered by service
         name and tool name pattern.
 
         Args:
-            brief (bool, optional): If True, returns a list of tool names. If False, 
+            brief (bool, optional): If True, returns a list of tool names. If False,
                 returns a dictionary with tool details.
-            service (str, optional): The name of the service to filter tools by. 
+            service (str, optional): The name of the service to filter tools by.
                 Use "all" to include all services.
-            name (str, optional): A glob pattern to match tool names. 
+            name (str, optional): A glob pattern to match tool names.
 
         Returns:
-            Result: An object containing the filtered tools. If brief is True, result 
-                is a list of tool names. Otherwise, result is a dictionary mapping tool 
+            Result: An object containing the filtered tools. If brief is True, result
+                is a list of tool names. Otherwise, result is a dictionary mapping tool
                 names to their details.
         """
         ret = Result(
@@ -275,11 +275,11 @@ class FastMCPWorker(NFPWorker):
     @Task(fastapi={"methods": ["GET"]})
     def get_status(self) -> Result:
         """
-        Retrieves the current status of the application, including its name, 
+        Retrieves the current status of the application, including its name,
         URL, and the count of available tools.
 
         Returns:
-            Result: An object containing a dictionary with the application's name, 
+            Result: An object containing a dictionary with the application's name,
                 URL, and the number of tools, as well as the task identifier.
         """
         tools = self.get_tools(brief=True).result

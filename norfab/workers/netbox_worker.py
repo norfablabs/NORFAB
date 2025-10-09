@@ -2174,7 +2174,10 @@ class NetboxWorker(NFPWorker):
         **kwargs,
     ) -> Result:
         """
-        Update or create device interfaces in Netbox. Interface parameters updated:
+        Update or create device interfaces in Netbox using devices interfaces
+        data sourced via Nornir service `parse` task using NAPALM getter.
+
+        Interface parameters updated:
 
         - interface name
         - interface description
@@ -2373,6 +2376,101 @@ class NetboxWorker(NFPWorker):
             raise UnsupportedServiceError(
                 f"'{datasource}' datasource service not supported"
             )
+
+        return ret
+
+    @Task(
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
+    def update_interfaces_description(
+        self,
+        job: Job,
+        devices: list,
+        description_template: str,
+        interfaces: Union[None, list] = None,
+        interface_regex: Union[None, str] = None,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        timeout: int = 60,
+        branch: str = None,
+    ) -> Result:
+        """
+        Updates the description of interfaces for specified devices in NetBox.
+
+        This method retrieves interface connections for the given devices, renders
+        new descriptions using a Jinja2 template, and updates the interface descriptions
+        in NetBox accordingly.
+
+        Args:
+            job (Job): The job context for logging and event handling.
+            devices (list): List of device names to update interfaces for.
+            description_template (str): Jinja2 template string for the interface description.
+                Can reference remote template using `nf://path/to/template.txt`.
+            interfaces (Union[None, list], optional): Specific interfaces to update.
+            interface_regex (Union[None, str], optional): Regex pattern to filter interfaces.
+            instance (Union[None, str], optional): NetBox instance identifier.
+            dry_run (bool, optional): If True, performs a dry run without saving changes.
+            timeout (int, optional): Timeout for NetBox API requests.
+            branch (str, optional): Branch name for NetBox instance.
+
+        Returns:
+            Result: An object containing the outcome of the update operation, including
+                before and after descriptions.
+        """
+        result = {}
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:update_interfaces_description",
+            result=result,
+            resources=[instance],
+        )
+        nb = self._get_pynetbox(instance, branch=branch)
+
+        # get list of all interfaces connections
+        nb_connections = self.get_connections(
+            job=job,
+            devices=devices,
+            interface_regex=interface_regex,
+            instance=instance,
+            include_virtual=True,
+            cables=True,
+        )
+        # produce interfaces description and update it
+        while nb_connections.result:
+            device, device_connections = nb_connections.result.popitem()
+            ret.result.setdefault(device, {})
+            for interface, connection in device_connections.items():
+                job.event(f"{device}:{interface} updating description")
+                rendered_description = self.jinja2_render_templates(
+                    templates=[description_template],
+                    context={"device": device, "interface": interface, **connection},
+                )
+                rendered_description = str(rendered_description).strip()
+                if connection["termination_type"] == "consoleport":
+                    nb_interface = nb.dcim.console_ports.get(
+                        device=device, name=interface
+                    )
+                elif connection["termination_type"] == "consoleserverport":
+                    nb_interface = nb.dcim.console_server_ports.get(
+                        device=device, name=interface
+                    )
+                elif connection["termination_type"] == "powerport":
+                    nb_interface = nb.dcim.power_ports.get(
+                        device=device, name=interface
+                    )
+                elif connection["termination_type"] == "poweroutlet":
+                    nb_interface = nb.dcim.power_outlets.get(
+                        device=device, name=interface
+                    )
+                else:
+                    nb_interface = nb.dcim.interfaces.get(device=device, name=interface)
+                ret.result[device][interface] = {
+                    "-": str(nb_interface.description),
+                    "+": rendered_description,
+                }
+                nb_interface.description = rendered_description
+                if dry_run is False:
+                    nb_interface.save()
 
         return ret
 
@@ -2872,7 +2970,7 @@ class NetboxWorker(NFPWorker):
         )
         processed = {}
 
-        # get list of all connections
+        # get list of all interfaces
         interfaces = self.get_interfaces(
             job=job,
             devices=devices,

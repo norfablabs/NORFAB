@@ -45,6 +45,8 @@ workers:
     - workflow/common.yaml
   fastmcp-worker-1:
     - fastmcp/common.yaml
+  llamaindex-worker-1:
+    - llamaindex/common.yaml
     
 # list what entities we want to start on this node
 topology:
@@ -67,6 +69,7 @@ topology:
     - dummy-worker-1
     - workflow-worker-1
     - fastmcp-worker-1
+#    - llamaindex-worker-1
     
 hooks:
   startup:

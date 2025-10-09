@@ -36,6 +36,7 @@ from .netbox_picle_shell_get_containerlab_inventory import (
 from .netbox_picle_shell_create_ip import CreateIp
 from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
 from .netbox_picle_shell_create_prefix import CreatePrefixShell
+from .netbox_picle_shell_update_interfaces import UpdateInterfaces
 from norfab.models.netbox import NetboxCommonArgs
 
 RICHCONSOLE = Console()
@@ -285,6 +286,7 @@ class CreateCommands(BaseModel):
 
 class UpdateCommands(BaseModel):
     device: UpdateDeviceCommands = Field(None, description="Update device data")
+    interfaces: UpdateInterfaces = Field(None, description="Update interfaces data")
 
     class PicleConfig:
         subshell = True

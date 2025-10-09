@@ -1131,6 +1131,9 @@ class NFPWorker:
         Raises:
             FileNotFoundError: If raise_on_fail is True and the download fails.
         """
+        if not self.is_url(url):
+            raise ValueError(f"Invalid URL format: {url}")
+
         status, file_content = self.client.fetch_file(url=url, read=read)
         msg = f"{self.name} - worker '{url}' fetch file failed with status '{status}'"
 
