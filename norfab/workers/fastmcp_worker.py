@@ -5,7 +5,6 @@ import time
 import os
 import signal
 import importlib.metadata
-import asyncio
 
 from fnmatch import fnmatch
 from norfab.core.worker import NFPWorker, Task, Job

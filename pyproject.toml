@@ -15,7 +15,11 @@ documentation = "https://docs.norfablabs.com"
 keywords = ["Network", "Automation", "DevOps"]
 classifiers = [
     "Topic :: Utilities",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows",
@@ -23,7 +27,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 # Core Libs
-python = ">=3.9,<3.12"
+python = ">=3.10,<=3.14"
 pyyaml = "6.0.2"
 pyzmq = "27.0.2"
 psutil = "7.0.0"
@@ -70,11 +74,10 @@ mcp = { version = ">=1.13.0", optional = true,  python = ">=3.10,<3.12" }
 robotframework = { version = "7.3.2", optional = true }
 
 # Agent Service Dependencies
-langchain = { version = "0.3.25", optional = true }
-langchain-community = { version = "0.3.24", optional = true }
-langchain-core = { version = "0.3.63", optional = true }
-langchain-ollama = { version = "0.3.0", optional = true }
-ollama = { version = "0.5.1", optional = true }
+langchain = { version = "1.0.2", optional = true }
+langchain-community = { version = "0.4.1", optional = true }
+langchain-ollama = { version = "1.0.0", optional = true }
+ollama = { version = "0.6.0", optional = true }
 
 # Netbox Service Dependencies
 diskcache = { version = "5.6.3", optional = true }
@@ -109,7 +112,6 @@ build-backend = "poetry.core.masonry.api"
 "workflow" = "norfab.workers.workflow_worker:WorkflowWorker"
 "containerlab" = "norfab.workers.containerlab_worker:ContainerlabWorker"
 "fastmcp" = "norfab.workers.fastmcp_worker:FastMCPWorker"
-"llamaindex" = "norfab.workers.llamaindex_worker:LlamaindexWorker"
 
 [tool.poetry.scripts]
 nfcli = 'norfab.utils.nfcli:nfcli'
@@ -170,7 +172,6 @@ robot = [
 agentservice = [
     "langchain",
     "langchain-community",
-    "langchain-core",
     "langchain-ollama",
     "ollama",
 ]
@@ -216,7 +217,6 @@ full = [
     "robotframework",
     "langchain",
     "langchain-community",
-    "langchain-core",
     "langchain-ollama",
     "ollama",
     "fastapi",

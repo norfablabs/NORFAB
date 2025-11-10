@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------------------------
-# NETBOX SERVICE SHELL SHOW COMMANDS MODELS
+# AGENT SERVICE SHELL SHOW COMMANDS MODELS
 # ---------------------------------------------------------------------------------------------
 
 
@@ -79,6 +79,48 @@ class AgentShowCommandsModel(BaseModel):
 
 
 # ---------------------------------------------------------------------------------------------
+# AGENT RUN TASK SHELL MODEL
+# ---------------------------------------------------------------------------------------------
+
+
+class AgentRunTask(ClientRunJobArgs):
+    instructions: StrictStr = Field(None, description="Provide task instructions")
+    tools: Union[List[StrictStr], StrictStr] = Field(
+        None, description="List tools agent can use"
+    )
+    progress: Optional[StrictBool] = Field(
+        True,
+        description="Emit execution progress",
+        json_schema_extra={"presence": True},
+    )
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
+
+    @staticmethod
+    @listen_events
+    def run(uuid, *args, **kwargs):
+        workers = kwargs.pop("workers", "any")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+
+        # run the job
+        result = NFCLIENT.run_job(
+            "agent",
+            "run_task",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+            uuid=uuid,
+        )
+        result = log_error_or_result(result, verbose_result=verbose_result)
+
+        return result
+
+
+# ---------------------------------------------------------------------------------------------
 # AGENT SERVICE MAIN SHELL MODEL
 # ---------------------------------------------------------------------------------------------
 
@@ -92,6 +134,9 @@ class AgentServiceCommands(ClientRunJobArgs):
             "function": "call_chat",
             "outputter": Outputters.outputter_rich_markdown,
         },
+    )
+    run_task: AgentRunTask = Field(
+        None, description="Run task by agent", alias="run-task"
     )
     progress: Optional[StrictBool] = Field(
         True,
@@ -109,7 +154,6 @@ class AgentServiceCommands(ClientRunJobArgs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["user_input"] = kwargs.pop("chat")
-        _ = kwargs.pop("progress")
         verbose_result = kwargs.pop("verbose_result", False)
 
         # run the job

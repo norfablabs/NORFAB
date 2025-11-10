@@ -165,7 +165,12 @@ class NorFab:
         )
 
         self.setup_logging()
-        signal.signal(signal.SIGINT, self.handle_ctrl_c)
+        # to fix ValueError: signal only works in main thread of the main interpreter
+        # when trying to use nfapi to instantiate a client from different process
+        try:
+            signal.signal(signal.SIGINT, self.handle_ctrl_c)
+        except Exception as e:
+            pass
 
         # find all workers plugins
         self.register_plugins()

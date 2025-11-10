@@ -1,6 +1,9 @@
 import argparse
 import os
 import logging
+import subprocess
+import sys
+import shutil
 
 from norfab.core.nfapi import NorFab
 
@@ -9,7 +12,8 @@ log = logging.getLogger(__name__)
 try:
     from norfab.clients.picle_shell_client import start_picle_shell
 except ImportError as e:
-    log.warning(f"Failed to import NorFab Shell, needed libs not found - {e}")
+    log.warning(f"Failed to import NorFab Shell, needed libs not found - '{e}'")
+
 
 norfab_base_inventory = """
 # broker settings
@@ -139,6 +143,13 @@ def nfcli():
         default=False,
         help="Show broker shared key",
     )
+    run_options.add_argument(
+        "--web-ui",
+        action="store_true",
+        dest="WEB_UI",
+        default=False,
+        help="Start WEB UI Client",
+    )
 
     # extract argparser arguments:
     args = argparser.parse_args()
@@ -151,6 +162,7 @@ def nfcli():
     CLIENT = args.CLIENT
     CREATE_ENV = args.CREATE_ENV
     SHOW_BROKER_SHARED_KEY = args.SHOW_BROKER_SHARED_KEY
+    WEB_UI = args.WEB_UI
 
     if WORKERS_LIST is not None:
         WORKERS_LIST = [i.strip() for i in WORKERS_LIST.split(",") if i.strip()]
@@ -220,6 +232,27 @@ def nfcli():
         nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
         nf.start(start_broker=False, workers=WORKERS_LIST if WORKERS_LIST else True)
         nf.run()
+    # start WEB UI Application
+    elif WEB_UI:
+        script_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "clients", "streamlit_client.py"
+        )
+        cmd = [
+            sys.executable,
+            "-m",
+            "streamlit",
+            "run",
+            script_path,
+            "--server.address",
+            "127.0.0.1",
+            "--server.port",
+            "8501",
+            "--server.headless",
+            "true",
+        ]
+        proc = subprocess.Popen(cmd, stdout=None, stderr=None, stdin=None, shell=False)
+        log.info("Starting Streamlit server: %s", " ".join(cmd))
+        proc.wait()
     # start interactive client shell only
     elif CLIENT:
         start_picle_shell(

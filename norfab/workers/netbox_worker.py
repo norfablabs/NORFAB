@@ -2405,11 +2405,12 @@ class NetboxWorker(NFPWorker):
 
         Jinja2 environment receives these context variables for description template rendering:
 
-        - device 
-        - interface 
-        - remote_device 
-        - remote_interface
-        - termination_type
+        - device - pynetbox `dcim.device` object
+        - interface - pynetbox object - `dcim/interface`, `dcip.consoleport`,
+            `dcim.consoleserverport` - depending on what kind of interface is that.
+        - remote_device - string
+        - remote_interface - string
+        - termination_type - string
         - cable - dictionary of directly attached cable attributes:
             - type
             - status
@@ -2461,11 +2462,6 @@ class NetboxWorker(NFPWorker):
             ret.result.setdefault(device, {})
             for interface, connection in device_connections.items():
                 job.event(f"{device}:{interface} updating description")
-                rendered_description = self.jinja2_render_templates(
-                    templates=[description_template],
-                    context={"device": device, "interface": interface, **connection},
-                )
-                rendered_description = str(rendered_description).strip()
                 if connection["termination_type"] == "consoleport":
                     nb_interface = nb.dcim.console_ports.get(
                         device=device, name=interface
@@ -2484,6 +2480,16 @@ class NetboxWorker(NFPWorker):
                     )
                 else:
                     nb_interface = nb.dcim.interfaces.get(device=device, name=interface)
+                nb_device = nb.dcim.devices.get(name=device)
+                rendered_description = self.jinja2_render_templates(
+                    templates=[description_template],
+                    context={
+                        "device": nb_device,
+                        "interface": nb_interface,
+                        **connection,
+                    },
+                )
+                rendered_description = str(rendered_description).strip()
                 ret.result[device][interface] = {
                     "-": str(nb_interface.description),
                     "+": rendered_description,

@@ -4,9 +4,11 @@ import sys
 import importlib.metadata
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
+from typing import Union
+
+from langchain.agents import create_agent
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
-from typing import Union
 
 SERVICE = "agent"
 
@@ -134,49 +136,22 @@ class AgentWorker(NFPWorker):
         """
         return Result(result="OK")
 
-    def _chat_ollama(self, job, user_input, template=None) -> str:
-        """
-        NorFab Task that handles the chat interaction with Ollama LLM.
+    @Task(fastapi={"methods": ["POST"]})
+    def run_task(
+        self, job, instructions: str, agent: Union[str, dict] = "norfab"
+    ) -> Result:
+        ret = Result()
 
-        Args:
-            user_input (str): The input provided by the user.
-            template (str, optional): The template for generating the prompt. Defaults to a predefined template.
-
-        Returns:
-            str: The result of the chat interaction.
-        """
-        job.event(f"Received user input '{user_input[:50]}..'")
-        ret = Result(task=f"{self.name}:chat")
-        template = (
-            template
-            or """Question: {user_input}; Answer: Let's think step by step. Provide answer in markdown format."""
+        job.event("Creating agent")
+        agent = create_agent(
+            model=self.llm,
+            tools=[],
+            system_prompt="You are a helpful assistant",
         )
-        prompt = ChatPromptTemplate.from_template(template)
-        chain = prompt | self.llm
 
-        job.event("Thinking...")
-        ret.result = chain.invoke({"user_input": user_input})
-
-        job.event("Done thinking, sending result back to user")
+        job.event("Agent created, thinking ...")
+        ret.result = agent.invoke(
+            {"messages": [{"role": "user", "content": instructions}]}
+        )
 
         return ret
-
-    @Task(fastapi={"methods": ["POST"]})
-    def chat(self, job: Job, user_input: str, template: Union[None, str] = None) -> str:
-        """
-        NorFab Task that handles the chat interaction with the user by processing the input through a language model.
-
-        Args:
-            user_input (str): The input provided by the user.
-            template (str, optional): A template string for formatting the prompt. Defaults to
-
-        Returns:
-            str: Language model's response.
-
-        Raises:
-            Exception: If the llm_flavour is unsupported.
-        """
-        if self.llm_flavour == "ollama":
-            return self._chat_ollama(job, user_input, template)
-        else:
-            raise Exception(f"Unsupported llm flavour {self.llm_flavour}")

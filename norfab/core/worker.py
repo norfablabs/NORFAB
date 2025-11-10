@@ -27,7 +27,10 @@ from jinja2.nodes import Include
 from jinja2 import Environment, FileSystemLoader
 from pydantic import BaseModel, create_model
 
-signal.signal(signal.SIGINT, signal.SIG_IGN)
+try:
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+except Exception as e:
+    pass
 
 log = logging.getLogger(__name__)
 

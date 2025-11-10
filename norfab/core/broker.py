@@ -22,7 +22,10 @@ from .security import generate_certificates
 
 log = logging.getLogger(__name__)
 
-signal.signal(signal.SIGINT, signal.SIG_IGN)
+try:
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+except Exception as e:
+    pass
 
 # ----------------------------------------------------------------------
 # NORFAB Protocol Broker Implementation
