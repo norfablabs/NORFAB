@@ -1,3 +1,26 @@
+## 0.12.3
+
+### BUGS
+
+1. Fixing handling of entry points for sourcing norfab workers plugins for Py3.10+
+
+### CHANGES
+
+1. Docker images updated to use Py3.11
+
+---
+
+## 0.12.2
+
+### CHANGES
+
+1. Updated Python version dependencies
+2. Adding FastMCP worker
+3. Updating agent worker - work in progress
+4. Adding Streamlit worker to host WEB UI - work in progress
+
+---
+
 ## 0.12.1
 
 ### BUGS

@@ -188,7 +188,7 @@ class NorFab:
         """
         # register worker plugins from entrypoints
         eps = entry_points()
-        for entry_point in eps["norfab.workers"]:
+        for entry_point in eps.select(group="norfab.workers"):
             self.register_worker_plugin(entry_point.name, entry_point)
 
         # register worker plugins from inventory
