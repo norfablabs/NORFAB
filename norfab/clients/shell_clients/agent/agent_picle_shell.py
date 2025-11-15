@@ -3,7 +3,6 @@ import json
 import yaml
 
 from rich.console import Console
-from rich.markdown import Markdown
 from picle.models import PipeFunctionsModel, Outputters
 from enum import Enum
 from pydantic import (
@@ -83,11 +82,9 @@ class AgentShowCommandsModel(BaseModel):
 # ---------------------------------------------------------------------------------------------
 
 
-class AgentRunTask(ClientRunJobArgs):
-    instructions: StrictStr = Field(None, description="Provide task instructions")
-    tools: Union[List[StrictStr], StrictStr] = Field(
-        None, description="List tools agent can use"
-    )
+class AgentInvoke(ClientRunJobArgs):
+    instructions: StrictStr = Field(None, description="Provide instructions")
+    name: StrictStr = Field(None, description="Agent name to interact with")
     progress: Optional[StrictBool] = Field(
         True,
         description="Emit execution progress",
@@ -96,19 +93,19 @@ class AgentRunTask(ClientRunJobArgs):
 
     class PicleConfig:
         pipe = PipeFunctionsModel
-        outputter = Outputters.outputter_nested
+        outputter = Outputters.outputter_rich_markdown
 
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
-        verbose_result = kwargs.pop("verbose_result", False)
+        verbose_result = kwargs.get("verbose_result", False)
 
         # run the job
         result = NFCLIENT.run_job(
             "agent",
-            "run_task",
+            "invoke",
             workers=workers,
             args=args,
             kwargs=kwargs,
@@ -117,7 +114,10 @@ class AgentRunTask(ClientRunJobArgs):
         )
         result = log_error_or_result(result, verbose_result=verbose_result)
 
-        return result
+        if verbose_result:
+            return result, Outputters.outputter_nested
+        else:
+            return list(result.items())[0][-1]
 
 
 # ---------------------------------------------------------------------------------------------
@@ -126,46 +126,11 @@ class AgentRunTask(ClientRunJobArgs):
 
 
 class AgentServiceCommands(ClientRunJobArgs):
-    chat: StrictStr = Field(
+    invoke: AgentInvoke = Field(
         None,
-        description="Chat with the agent",
-        json_schema_extra={
-            "multiline": True,
-            "function": "call_chat",
-            "outputter": Outputters.outputter_rich_markdown,
-        },
-    )
-    run_task: AgentRunTask = Field(
-        None, description="Run task by agent", alias="run-task"
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Emit execution progress",
-        json_schema_extra={"presence": True},
+        description="Invoke an agent to chat or run a task",
     )
 
     class PicleConfig:
         subshell = True
         prompt = "nf[agent]#"
-
-    @staticmethod
-    @listen_events
-    def call_chat(uuid, *args, **kwargs):
-        workers = kwargs.pop("workers", "any")
-        timeout = kwargs.pop("timeout", 600)
-        kwargs["user_input"] = kwargs.pop("chat")
-        verbose_result = kwargs.pop("verbose_result", False)
-
-        # run the job
-        result = NFCLIENT.run_job(
-            "agent",
-            "chat",
-            workers=workers,
-            args=args,
-            kwargs=kwargs,
-            timeout=timeout,
-            uuid=uuid,
-        )
-        result = log_error_or_result(result, verbose_result=verbose_result)
-
-        return "\n".join(result.values())

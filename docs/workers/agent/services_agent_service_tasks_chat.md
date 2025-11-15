@@ -30,4 +30,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.agent_worker.AgentWorker.chat
+::: norfab.workers.agent_worker.agent_worker.AgentWorker.run_task

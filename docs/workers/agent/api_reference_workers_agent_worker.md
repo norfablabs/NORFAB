@@ -1,1 +1,1 @@
-::: norfab.workers.agent_worker
+::: norfab.workers.agent_worker.agent_worker
