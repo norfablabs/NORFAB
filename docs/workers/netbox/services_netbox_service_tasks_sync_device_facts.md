@@ -3,9 +3,9 @@ tags:
   - netbox
 ---
 
-# Netbox Update Device Facts Task
+# Netbox Sync Device Facts Task
 
-> task api name: `update_device_facts`
+> task api name: `sync_device_facts`
 
 ## Limitations
 
@@ -21,17 +21,17 @@ Datasource `nornir` uses NAPALM `get_facts` getter and as such only supports the
 
 Update device facts task is branch aware and can push updates to the branch. [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) need to be installed on Netbox instance.
 
-## Update Device Facts Sample Usage
+## Sync Device Facts Sample Usage
 
 ## NORFAB Netbox Update Device Facts Command Shell Reference
 
-NorFab shell supports these command options for Netbox `update_device_facts` task:
+NorFab shell supports these command options for Netbox `sync_device_facts` task:
 
 ```
 nf# man tree netbox.update.device.facts
 root
 └── netbox:    Netbox service
-    └── update:    Update Netbox data
+    └── sync:    Update Netbox data
         └── device:    Update device data
             └── facts:    Update device serial, OS version
                 ├── timeout:    Job timeout
@@ -74,4 +74,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.update_device_facts
+::: norfab.workers.netbox_worker.NetboxWorker.sync_device_facts

@@ -58,7 +58,6 @@ class DeployCommand(ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -106,7 +105,6 @@ class DestroyCommand(ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -154,7 +152,6 @@ class RestartCommand(ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -202,7 +199,6 @@ class SaveCommand(ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -254,7 +250,6 @@ class GetNornirInventoryCommand(ClientRunJobArgs):
     def run(uuid, *args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
 
         # extract groups from kwargs
         groups = kwargs.pop("groups", None)
@@ -308,7 +303,6 @@ class ShowContainers(ClientRunJobArgs):
     def run(*args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -343,7 +337,6 @@ class ShowRunningLabs(ClientRunJobArgs):
     def run(*args, **kwargs):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
 
         result = NFCLIENT.run_job(
             "containerlab",

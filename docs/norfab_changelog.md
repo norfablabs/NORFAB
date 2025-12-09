@@ -1,3 +1,41 @@
+## 0.12.5
+
+### BUGS
+
+1. Containerlab - fixing error handling when result is None
+2. Workflow - fixed emitting event progress for cli shell
+3. Netbox - bulk ip create updated to sort interfaces names to make ip allocation order deterministic
+
+### CHANGES
+
+1. Updated dependencies:
+  - TTP 0.9.5 -> 0.10.0
+  - nornir-salt 0.22 -> 0.23
+
+2. Renamed Netbox service tasks:
+  - update_device_facts -> sync_device_facts
+  - update_device_interfaces -> sync_device_interfaces
+  - update_device_ip -> sync_device_ip
+  
+### FEATURES
+
+1. Netbox service - get_connections enhanced to retrieve power outlet connections.
+
+---
+
+## 0.12.4
+
+### BUGS
+
+1. Netbox worker - fixing handling of Netbox instance for child subnet creation
+
+
+## FEATURES
+
+1. Netbox worker - update interface descriptions task now can supply dictionary of interface descriptions
+
+---
+
 ## 0.12.3
 
 ### BUGS

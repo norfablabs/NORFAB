@@ -3,11 +3,11 @@ tags:
   - netbox
 ---
 
-# Netbox Update Device Interfaces Task
+# Netbox Sync Device Interfaces Task
 
-> task api name: `update_device_interfaces`
+> task api name: `sync_device_interfaces`
 
-The Netbox Update Device Interfaces Task is a feature of the NorFab Netbox Service that allows you to synchronize and update the interface data of your network devices in Netbox. This task ensures that the interface configurations in Netbox are accurate and up-to-date, reflecting the current state of your network infrastructure.
+The Netbox Sync Device Interfaces Task is a feature of the NorFab Netbox Service that allows you to synchronize and update the interface data of your network devices in Netbox. This task ensures that the interface configurations in Netbox are accurate and up-to-date, reflecting the current state of your network infrastructure.
 
 Keeping interface data accurate and up-to-date is crucial for effective network management. The Netbox Update Device Interfaces Task automates the process of updating interface information, such as interface names, statuses, mac addresses, and other relevant details.
 
@@ -17,7 +17,7 @@ Update device interfaces task is branch aware and can push updates to the branch
 
 **How it works** - Netbox worker on a call to update interfaces task fetches live data from network devices using nominated datasource, by default it is Nornir service [parse](../nornir/services_nornir_service_tasks_parse.md) task using NAPALM `get_interfaces` getter. Once data retrieved from network, Netbox worker updates records in Netbox database for device interfaces.
 
-![Netbox Update Device Interfaces](../../images/Netbox_Service_Update_Interfaces.jpg)
+![Netbox Update Device Interfaces](../../images/Netbox_Service_Sync_Interfaces.jpg)
 
 1. Client submits and on-demand request to NorFab Netbox worker to update device interfaces
 
@@ -43,13 +43,13 @@ Datasource `nornir` uses NAPALM `get_interfaces` getter and as such only support
 
 ## NORFAB Netbox Update Device Interfaces Command Shell Reference
 
-NorFab shell supports these command options for Netbox `update_device_interfaces` task:
+NorFab shell supports these command options for Netbox `sync_device_interfaces` task:
 
 ```
 nf# man tree netbox.update.device.interfaces
 root
 └── netbox:    Netbox service
-    └── update:    Update Netbox data
+    └── sync:    Update Netbox data
         └── device:    Update device data
             └── interfaces:    Update device interfaces
                 ├── timeout:    Job timeout
@@ -92,4 +92,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.update_device_interfaces
+::: norfab.workers.netbox_worker.NetboxWorker.sync_device_interfaces

@@ -1346,12 +1346,26 @@ class NetboxWorker(NFPWorker):
               ... on RearPortType {name device {name}}
             }""",
         ]
+        power_outlet_fields = [
+            "name",
+            "device {name}",
+            "type",
+            """connected_endpoints {
+              __typename 
+              ... on PowerPortType {name device {name}}
+            }""",
+            """link_peers {
+              __typename
+              ... on PowerPortType {name device {name}}
+            }""",
+        ]
 
         # check if need to include cables info
         if cables is True:
             interfaces_fields.append(cable_fields)
             console_ports_fields.append(cable_fields)
             console_server_ports_fields.append(cable_fields)
+            power_outlet_fields.append(cable_fields)
 
         # form query dictionary with aliases to get data from Netbox
         dlist = str(devices).replace("'", '"')  # swap quotes
@@ -1394,6 +1408,11 @@ class NetboxWorker(NFPWorker):
                 "obj": "console_server_port_list",
                 "filters": filters,
                 "fields": console_server_ports_fields,
+            },
+            "poweroutlet": {
+                "obj": "power_outlet_list",
+                "filters": filters,
+                "fields": power_outlet_fields,
             },
         }
 
@@ -2044,7 +2063,7 @@ class NetboxWorker(NFPWorker):
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
     )
-    def update_device_facts(
+    def sync_device_facts(
         self,
         job: Job,
         instance: Union[None, str] = None,
@@ -2088,7 +2107,7 @@ class NetboxWorker(NFPWorker):
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
-            task=f"{self.name}:update_device_facts", result=result, resources=[instance]
+            task=f"{self.name}:sync_device_facts", result=result, resources=[instance]
         )
         nb = self._get_pynetbox(instance, branch=branch)
         kwargs["add_details"] = True
@@ -2140,9 +2159,9 @@ class NetboxWorker(NFPWorker):
                             nb_device.save()
                         result[host] = {
                             (
-                                "update_device_facts_dry_run"
+                                "sync_device_facts_dry_run"
                                 if dry_run
-                                else "update_device_facts"
+                                else "sync_device_facts"
                             ): {
                                 "serial": facts["serial_number"],
                             }
@@ -2160,7 +2179,7 @@ class NetboxWorker(NFPWorker):
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
     )
-    def update_device_interfaces(
+    def sync_device_interfaces(
         self,
         job: Job,
         instance: Union[None, str] = None,
@@ -2214,7 +2233,7 @@ class NetboxWorker(NFPWorker):
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
-            task=f"{self.name}:update_device_interfaces",
+            task=f"{self.name}:sync_device_interfaces",
             result=result,
             resources=[instance],
         )
@@ -2245,9 +2264,9 @@ class NetboxWorker(NFPWorker):
                         updated, created = {}, {}
                         result[host] = {
                             (
-                                "update_device_interfaces_dry_run"
+                                "sync_device_interfaces_dry_run"
                                 if dry_run
-                                else "update_device_interfaces"
+                                else "sync_device_interfaces"
                             ): updated,
                             (
                                 "created_device_interfaces_dry_run"
@@ -2260,7 +2279,11 @@ class NetboxWorker(NFPWorker):
                         interfaces = host_data["napalm_get"]["get_interfaces"]
                         nb_device = nb.dcim.devices.get(name=host)
                         if not nb_device:
-                            raise Exception(f"'{host}' does not exist in Netbox")
+                            job.event(
+                                f"'{host}' does not exist in Netbox", severity="ERROR"
+                            )
+                            log.error(f"'{host}' does not exist in Netbox")
+                            continue
                         nb_interfaces = nb.dcim.interfaces.filter(
                             device_id=nb_device.id
                         )
@@ -2280,40 +2303,38 @@ class NetboxWorker(NFPWorker):
                                     "",
                                 ]:
                                     mac_address = interface["mac_address"]
-                                    if self.nb_version[instance] >= (4, 2, 0):
-                                        try:
-                                            nb_mac_addr = nb.dcim.mac_addresses.get(
+                                    try:
+                                        nb_mac_addr = nb.dcim.mac_addresses.get(
+                                            mac_address=mac_address,
+                                            interface_id=nb_interface.id,
+                                        )
+                                    except Exception as e:
+                                        msg = f"{worker} failed to get {mac_address} mac-address from netbox: {e}"
+                                        job.event(msg, severity="WARNING")
+                                        ret.messages.append(msg)
+                                        log.error(msg)
+                                    else:
+                                        if not nb_mac_addr:
+                                            nb_mac_addr = nb.dcim.mac_addresses.create(
                                                 mac_address=mac_address,
-                                                interface_id=nb_interface.id,
+                                                assigned_object_type="dcim.interface",
+                                                assigned_object_id=nb_interface.id,
                                             )
-                                        except Exception as e:
-                                            msg = f"{worker} failed to get {mac_address} mac-address from netbox: {e}"
-                                            job.event(msg, severity="WARNING")
-                                            ret.messages.append(msg)
-                                            log.error(msg)
-                                        else:
-                                            if not nb_mac_addr:
-                                                nb_mac_addr = nb.dcim.mac_addresses.create(
-                                                    mac_address=mac_address,
-                                                    assigned_object_type="dcim.interface",
-                                                    assigned_object_id=nb_interface.id,
-                                                )
-                                            elif not nb_mac_addr.assigned_object_id:
-                                                nb_mac_addr.assigned_object_type = (
-                                                    "dcim.interface"
-                                                )
-                                                nb_mac_addr.assigned_object_id = (
-                                                    nb_interface.id
-                                                )
-                                            if not nb_interface.primary_mac_address:
-                                                nb_interface.primary_mac_address = (
-                                                    nb_mac_addr.id
-                                                )
-                                                job.event(
-                                                    f"{host} {mac_address} MAC associating with interface {nb_interface.name}",
-                                                    resource=instance,
-                                                )
-                                        nb_interface.mac_address = mac_address
+                                        elif not nb_mac_addr.assigned_object_id:
+                                            nb_mac_addr.assigned_object_type = (
+                                                "dcim.interface"
+                                            )
+                                            nb_mac_addr.assigned_object_id = (
+                                                nb_interface.id
+                                            )
+                                        if not nb_interface.primary_mac_address:
+                                            nb_interface.primary_mac_address = (
+                                                nb_mac_addr.id
+                                            )
+                                            job.event(
+                                                f"{host} {mac_address} MAC associating with interface {nb_interface.name}",
+                                                resource=instance,
+                                            )
                                 nb_interface.enabled = interface["is_enabled"]
                                 nb_interface.save()
                             updated[nb_interface.name] = interface
@@ -2386,7 +2407,8 @@ class NetboxWorker(NFPWorker):
         self,
         job: Job,
         devices: list,
-        description_template: str,
+        description_template: str = None,
+        descriptions: dict = None,
         interfaces: Union[None, list] = None,
         interface_regex: Union[None, str] = None,
         instance: Union[None, str] = None,
@@ -2427,6 +2449,8 @@ class NetboxWorker(NFPWorker):
             devices (list): List of device names to update interfaces for.
             description_template (str): Jinja2 template string for the interface description.
                 Can reference remote template using `nf://path/to/template.txt`.
+            descriptions (dict): Dictionary keyed by interface names with values being interface
+                description strings
             interfaces (Union[None, list], optional): Specific interfaces to update.
             interface_regex (Union[None, str], optional): Regex pattern to filter interfaces.
             instance (Union[None, str], optional): NetBox instance identifier.
@@ -2447,63 +2471,78 @@ class NetboxWorker(NFPWorker):
         )
         nb = self._get_pynetbox(instance, branch=branch)
 
-        # get list of all interfaces connections
-        nb_connections = self.get_connections(
-            job=job,
-            devices=devices,
-            interface_regex=interface_regex,
-            instance=instance,
-            include_virtual=True,
-            cables=True,
-        )
-        # produce interfaces description and update it
-        while nb_connections.result:
-            device, device_connections = nb_connections.result.popitem()
-            ret.result.setdefault(device, {})
-            for interface, connection in device_connections.items():
-                job.event(f"{device}:{interface} updating description")
-                if connection["termination_type"] == "consoleport":
-                    nb_interface = nb.dcim.console_ports.get(
-                        device=device, name=interface
+        if description_template:
+            # get list of all interfaces connections
+            nb_connections = self.get_connections(
+                job=job,
+                devices=devices,
+                interface_regex=interface_regex,
+                instance=instance,
+                include_virtual=True,
+                cables=True,
+            )
+            # produce interfaces description and update it
+            while nb_connections.result:
+                device, device_connections = nb_connections.result.popitem()
+                ret.result.setdefault(device, {})
+                for interface, connection in device_connections.items():
+                    job.event(f"{device}:{interface} updating description")
+                    if connection["termination_type"] == "consoleport":
+                        nb_interface = nb.dcim.console_ports.get(
+                            device=device, name=interface
+                        )
+                    elif connection["termination_type"] == "consoleserverport":
+                        nb_interface = nb.dcim.console_server_ports.get(
+                            device=device, name=interface
+                        )
+                    elif connection["termination_type"] == "powerport":
+                        nb_interface = nb.dcim.power_ports.get(
+                            device=device, name=interface
+                        )
+                    elif connection["termination_type"] == "poweroutlet":
+                        nb_interface = nb.dcim.power_outlets.get(
+                            device=device, name=interface
+                        )
+                    else:
+                        nb_interface = nb.dcim.interfaces.get(
+                            device=device, name=interface
+                        )
+                    nb_device = nb.dcim.devices.get(name=device)
+                    rendered_description = self.jinja2_render_templates(
+                        templates=[description_template],
+                        context={
+                            "device": nb_device,
+                            "interface": nb_interface,
+                            **connection,
+                        },
                     )
-                elif connection["termination_type"] == "consoleserverport":
-                    nb_interface = nb.dcim.console_server_ports.get(
-                        device=device, name=interface
-                    )
-                elif connection["termination_type"] == "powerport":
-                    nb_interface = nb.dcim.power_ports.get(
-                        device=device, name=interface
-                    )
-                elif connection["termination_type"] == "poweroutlet":
-                    nb_interface = nb.dcim.power_outlets.get(
-                        device=device, name=interface
-                    )
-                else:
-                    nb_interface = nb.dcim.interfaces.get(device=device, name=interface)
-                nb_device = nb.dcim.devices.get(name=device)
-                rendered_description = self.jinja2_render_templates(
-                    templates=[description_template],
-                    context={
-                        "device": nb_device,
-                        "interface": nb_interface,
-                        **connection,
-                    },
-                )
-                rendered_description = str(rendered_description).strip()
-                ret.result[device][interface] = {
-                    "-": str(nb_interface.description),
-                    "+": rendered_description,
-                }
-                nb_interface.description = rendered_description
-                if dry_run is False:
-                    nb_interface.save()
-
+                    rendered_description = str(rendered_description).strip()
+                    ret.result[device][interface] = {
+                        "-": str(nb_interface.description),
+                        "+": rendered_description,
+                    }
+                    nb_interface.description = rendered_description
+                    if dry_run is False:
+                        nb_interface.save()
+        if descriptions:
+            for device in devices:
+                ret.result.setdefault(device, {})
+                for interface, description in descriptions.items():
+                    nb_interface = nb.dcim.interfaces.get(name=interface, device=device)
+                    if nb_interface:
+                        ret.result[device][interface] = {
+                            "-": str(nb_interface.description),
+                            "+": description,
+                        }
+                        nb_interface.description = description
+                        if dry_run is False:
+                            nb_interface.save()
         return ret
 
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
     )
-    def update_device_ip(
+    def sync_device_ip(
         self,
         job: Job,
         instance: Union[None, str] = None,
@@ -2547,7 +2586,7 @@ class NetboxWorker(NFPWorker):
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
-            task=f"{self.name}:update_device_ip", result=result, resources=[instance]
+            task=f"{self.name}:sync_device_ip", result=result, resources=[instance]
         )
         nb = self._get_pynetbox(instance, branch=branch)
 
@@ -2575,7 +2614,7 @@ class NetboxWorker(NFPWorker):
                     for host, host_data in results["result"].items():
                         updated, created = {}, {}
                         result[host] = {
-                            "updated_ip_dry_run" if dry_run else "updated_ip": updated,
+                            "sync_ip_dry_run" if dry_run else "sync_ip": updated,
                             "created_ip_dry_run" if dry_run else "created_ip": created,
                         }
                         if branch is not None:
@@ -2828,6 +2867,7 @@ class NetboxWorker(NFPWorker):
                             "tags": tags,
                             "status": status,
                             "create_peer_ip": False,
+                            "instance": instance,
                         }
                     # use peer subnet to create IP address
                     if nb_peer_prefix:
@@ -3007,7 +3047,7 @@ class NetboxWorker(NFPWorker):
         # iterate over interfaces and assign IP addresses
         for device, device_interfaces in interfaces.result.items():
             ret.result[device] = {}
-            for interface in device_interfaces.keys():
+            for interface in sorted(device_interfaces.keys()):
                 create_ip = self.create_ip(
                     job=job,
                     device=device,
@@ -3017,9 +3057,6 @@ class NetboxWorker(NFPWorker):
                     **kwargs,
                 )
                 ret.result[device][interface] = create_ip.result
-                # add peer interface into results as well
-                if create_ip.result.get("peer"):
-                    pass
 
         return ret
 
@@ -3674,3 +3711,25 @@ class NetboxWorker(NFPWorker):
             job.event(msg)
 
         return ret
+
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    def create_device_interfaces(
+        self,
+        job: Job,
+        devices: list,
+        interface_name: Union[list, str],
+        interface_type: str = "other",
+        speed: int = None,
+        mtu: int = None,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        branch: str = None,
+    ):
+        instance = instance or self.default_instance
+        result = {}
+        ret = Result(
+            task=f"{self.name}:create_device_interfaces",
+            result=result,
+            resources=[instance],
+        )
+        nb = self._get_pynetbox(instance, branch=branch)

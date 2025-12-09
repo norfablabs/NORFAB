@@ -28,7 +28,7 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_get_circuits import GetCircuits
-from .netbox_picle_shell_update_device import UpdateDeviceCommands
+from .netbox_picle_shell_sync_device import SyncDeviceCommands
 from .netbox_picle_shell_get_connections import GetConnections
 from .netbox_picle_shell_get_containerlab_inventory import (
     GetContainerlabInventoryCommand,
@@ -280,13 +280,27 @@ class CreateCommands(BaseModel):
 
 
 # ---------------------------------------------------------------------------------------------
+# NETBOX SERVICE SYNC SHELL MODEL
+# ---------------------------------------------------------------------------------------------
+
+
+class SyncCommands(BaseModel):
+    device: SyncDeviceCommands = Field(None, description="Sync from device into Netbox")
+
+    class PicleConfig:
+        subshell = True
+        prompt = "nf[netbox-sync]#"
+
+
+# ---------------------------------------------------------------------------------------------
 # NETBOX SERVICE UPDATE SHELL MODEL
 # ---------------------------------------------------------------------------------------------
 
 
 class UpdateCommands(BaseModel):
-    device: UpdateDeviceCommands = Field(None, description="Update device data")
-    interfaces: UpdateInterfaces = Field(None, description="Update interfaces data")
+    interfaces: UpdateInterfaces = Field(
+        None, description="Update Netbox interfaces attributes"
+    )
 
     class PicleConfig:
         subshell = True
@@ -301,6 +315,7 @@ class UpdateCommands(BaseModel):
 class NetboxServiceCommands(BaseModel):
     graphql: GrapQLCommands = Field(None, description="Query Netbox GrapQL API")
     get: GetCommands = Field(None, description="Query data from Netbox")
+    sync: SyncCommands = Field(None, description="Sync Netbox data")
     update: UpdateCommands = Field(None, description="Update Netbox data")
     cache: NetboxServiceCache = Field(
         None, description="Work with Netbox service cached data"

@@ -1,0 +1,48 @@
+name: Interface Health Agent
+
+llm:
+  provider: ollama
+  model: "qwen3:4b"
+  base_url: "http://127.0.0.1:11434"
+
+system_prompt: |
+    You are 'Interface Health Agent', an expert in evaluating network device interface status.
+
+    Your task is to retrieve interfaces information from network devices and assess their health.
+    
+    For each interface, evaluate:
+
+    - Operational status (up/down)
+    - Error rates and packet loss
+    - Utilization levels
+    - Speed and duplex negotiation
+    
+    Provide results as: HEALTHY (operating normally), WARNING (issues detected), or CRITICAL (down/degraded).
+
+    Include brief recommendations for any problematic interfaces.
+
+tools:
+  retrieve_interface_details:
+    description: Get interface details from network device
+    model_args_schema: 
+      FC:
+        type: string
+        description: Filter Contains - name of the device to get information from
+      interface_name: 
+        type: string
+        description: Name of interface to get status for
+    norfab:
+      job_data: 
+        - interface_name
+      service: nornir
+      task: cli
+      kwargs:
+        commands: |
+          {% if "arista " in device.platform %}
+          show interface {{ job_data.interface_name }}
+          show ip interface {{ job_data.interface_name }}
+          {% elif "juniper" in device.platform %}
+          show interface {{ job_data.interface_name }}
+          show interface diagnostics optics {{ job_data.interface_name }}
+          {% endif %}
+      

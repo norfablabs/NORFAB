@@ -22,24 +22,24 @@ from norfab.models.netbox import NetboxCommonArgs
 log = logging.getLogger(__name__)
 
 
-class UpdateDeviceFactsDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
+class SyncDeviceFactsDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
     @staticmethod
     def run(*args, **kwargs):
         kwargs["datasource"] = "nornir"
-        return UpdateDeviceFactsCommand.run(*args, **kwargs)
+        return SyncDeviceFactsCommand.run(*args, **kwargs)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
 
 
 class UpdateDeviceFactsDatasources(BaseModel):
-    nornir: UpdateDeviceFactsDatasourcesNornir = Field(
+    nornir: SyncDeviceFactsDatasourcesNornir = Field(
         None,
         description="Use Nornir service to retrieve data from devices",
     )
 
 
-class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
+class SyncDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     dry_run: Optional[StrictBool] = Field(
         None,
         description="Return information that would be pushed to Netbox but do not push it",
@@ -48,7 +48,7 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     )
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
-        description="List of Netbox devices to update",
+        description="List of Netbox devices to sync",
     )
     batch_size: StrictInt = Field(
         10, description="Number of devices to process at a time", alias="batch-size"
@@ -72,7 +72,7 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
         result = NFCLIENT.run_job(
             "netbox",
-            "update_device_facts",
+            "sync_device_facts",
             workers=workers,
             kwargs=kwargs,
             timeout=timeout,
@@ -87,24 +87,24 @@ class UpdateDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class UpdateDeviceInterfacesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
+class SyncDeviceInterfacesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
     @staticmethod
     def run(*args, **kwargs):
         kwargs["datasource"] = "nornir"
-        return UpdateDeviceInterfacesCommand.run(*args, **kwargs)
+        return SyncDeviceInterfacesCommand.run(*args, **kwargs)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
 
 
-class UpdateDeviceInterfacesDatasources(BaseModel):
-    nornir: UpdateDeviceInterfacesDatasourcesNornir = Field(
+class SyncDeviceInterfacesDatasources(BaseModel):
+    nornir: SyncDeviceInterfacesDatasourcesNornir = Field(
         None,
         description="Use Nornir service to retrieve data from devices",
     )
 
 
-class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
+class SyncDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     dry_run: Optional[StrictBool] = Field(
         None,
         description="Return information that would be pushed to Netbox but do not push it",
@@ -113,9 +113,9 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     )
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
-        description="List of Netbox devices to update",
+        description="List of Netbox devices to sync",
     )
-    datasource: UpdateDeviceInterfacesDatasources = Field(
+    datasource: SyncDeviceInterfacesDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
     )
@@ -137,7 +137,7 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
         result = NFCLIENT.run_job(
             "netbox",
-            "update_device_interfaces",
+            "sync_device_interfaces",
             workers=workers,
             kwargs=kwargs,
             timeout=timeout,
@@ -152,24 +152,24 @@ class UpdateDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class UpdateDeviceIPAddressesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
+class SyncDeviceIPAddressesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
     @staticmethod
     def run(*args, **kwargs):
         kwargs["datasource"] = "nornir"
-        return UpdateDeviceIPAddressesCommand.run(*args, **kwargs)
+        return SyncDeviceIPAddressesCommand.run(*args, **kwargs)
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
 
 
-class UpdateDeviceIPAddressesDatasources(BaseModel):
-    nornir: UpdateDeviceIPAddressesDatasourcesNornir = Field(
+class SyncDeviceIPAddressesDatasources(BaseModel):
+    nornir: SyncDeviceIPAddressesDatasourcesNornir = Field(
         None,
         description="Use Nornir service to retrieve data from devices",
     )
 
 
-class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
+class SyncDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     dry_run: Optional[StrictBool] = Field(
         None,
         description="Return information that would be pushed to Netbox but do not push it",
@@ -178,9 +178,9 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     )
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
-        description="List of Netbox devices to update",
+        description="List of Netbox devices to sync",
     )
-    datasource: UpdateDeviceIPAddressesDatasources = Field(
+    datasource: SyncDeviceIPAddressesDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
     )
@@ -202,7 +202,7 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
         result = NFCLIENT.run_job(
             "netbox",
-            "update_device_ip",
+            "sync_device_ip",
             workers=workers,
             kwargs=kwargs,
             timeout=timeout,
@@ -217,15 +217,15 @@ class UpdateDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class UpdateDeviceCommands(BaseModel):
-    facts: UpdateDeviceFactsCommand = Field(
+class SyncDeviceCommands(BaseModel):
+    facts: SyncDeviceFactsCommand = Field(
         None,
-        description="Update device serial, OS version",
+        description="Sync device facts e.g. serial number",
     )
-    interfaces: UpdateDeviceInterfacesCommand = Field(
+    interfaces: SyncDeviceInterfacesCommand = Field(
         None,
-        description="Update device interfaces",
+        description="Sync device interfaces",
     )
-    ip_addresses: UpdateDeviceIPAddressesCommand = Field(
-        None, description="Update device interface IP addresses", alias="ip-addresses"
+    ip_addresses: SyncDeviceIPAddressesCommand = Field(
+        None, description="Sync device interface IP addresses", alias="ip-addresses"
     )

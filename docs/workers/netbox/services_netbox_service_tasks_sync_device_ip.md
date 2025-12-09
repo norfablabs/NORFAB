@@ -3,15 +3,15 @@ tags:
   - netbox
 ---
 
-# Netbox Update Device IP Task
+# Netbox Sync Device IP Task
 
-> task api name: `update_device_ip`
+> task api name: `sync_device_ip`
 
-The Netbox Update Device IP Task is a feature of the NorFab Netbox Service that allows you to synchronize and update the IP addresses data of your network devices in Netbox. This task ensures that the IP address records in Netbox are accurate and up-to-date, reflecting the current state of your network infrastructure.
+The Netbox Sync Device IP Task is a feature of the NorFab Netbox Service that allows you to synchronize and update the IP addresses data of your network devices in Netbox. This task ensures that the IP address records in Netbox are accurate and up-to-date, reflecting the current state of your network infrastructure.
 
 **How it works** - Netbox worker on a call to update IP addresses task fetches live data from network devices using nominated datasource, by default it is Nornir service [parse](../nornir/services_nornir_service_tasks_parse.md) task using NAPALM `get_interfaces_ip` getter. Once data retrieved from network, Netbox worker updates records in Netbox database for device interfaces.
 
-![Netbox Update Device Interfaces](../../images/Netbox_Service_Update_Interfaces.jpg)
+![Netbox Update Device Interfaces](../../images/Netbox_Service_Sync_Interfaces.jpg)
 
 1. Client submits and on-demand request to NorFab Netbox worker to update device IP addresses
 
@@ -41,13 +41,13 @@ Datasource `nornir` uses NAPALM `get_interfaces_ip` getter and as such only supp
 
 ## NORFAB Netbox Update Device IP Command Shell Reference
 
-NorFab shell supports these command options for Netbox `update_device_ip` task:
+NorFab shell supports these command options for Netbox `sync_device_ip` task:
 
 ```
 nf# man tree netbox.update.device.ip-addresses
 root
 └── netbox:    Netbox service
-    └── update:    Update Netbox data
+    └── sync:    Update Netbox data
         └── device:    Update device data
             └── ip-addresses:    Update device interface IP addresses
                 ├── timeout:    Job timeout
@@ -90,4 +90,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.update_device_ip
+::: norfab.workers.netbox_worker.NetboxWorker.sync_device_ip

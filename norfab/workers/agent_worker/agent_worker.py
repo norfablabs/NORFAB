@@ -1,10 +1,13 @@
 import json
+import yaml
 import logging
 import sys
 import importlib.metadata
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from typing import Union, List, Dict, Callable
+from pydantic import BaseModel, Field
+from pydantic import create_model as create_pydantic_model
 
 from langchain.agents import create_agent
 from langchain.agents.middleware import wrap_tool_call
@@ -140,10 +143,40 @@ class AgentWorker(NFPWorker):
             input_type=tool.get("model_args_schema", {})
         )
 
+    def make_pydantic_model(self, properties, model_name):
+        fields = {}
+        for field, definition in properties.items():
+            field_type = definition.pop("type", "string")
+            if field_type == "string":
+                fields[field] = (
+                    str,
+                    Field(
+                        definition.pop("default", None),
+                        json_scham_extra={
+                            "job_data": definition.pop("job_data", False),
+                        },
+                        **definition,
+                    ),
+                )
+            else:
+                raise TypeError(
+                    f"Failed creating Pydantic model, unsupported field "
+                    f"type '{field_type}' for '{model_name}' definition"
+                )
+
+        if fields:
+            return create_pydantic_model(f"DynamicModel_{model_name}", **fields)
+        else:
+            return {}
+
     def make_tools(self, job, tools: dict) -> List[langchain_tool]:
         ret = []
 
         for tool_name, tool in tools.items():
+            if isinstance(tool.get("model_args_schema"), dict):
+                tool["model_args_schema"] = self.make_pydantic_model(
+                    tool["model_args_schema"], tool_name
+                )
             ret.append(
                 langchain_tool(
                     tool_name,
@@ -164,6 +197,15 @@ class AgentWorker(NFPWorker):
                 "system_prompt": norfab_agent.system_prompt,
                 "tools": self.make_tools(job, norfab_agent.tools),
                 "llm": norfab_agent.llm,
+            }
+        elif self.is_url(agent):
+            agent_definition = self.fetch_file(agent, raise_on_fail=True, read=True)
+            agent_data = yaml.safe_load(agent_definition)
+            return {
+                "name": agent_data["name"],
+                "system_prompt": agent_data["system_prompt"],
+                "tools": self.make_tools(job, agent_data.get("tools", {})),
+                "llm": agent_data.get("llm", {}),
             }
         else:
             log.error(f"Unsupported agent type '{agent}'")
@@ -225,13 +267,13 @@ class AgentWorker(NFPWorker):
         self,
         job,
         instructions: str,
-        agent: str = "NorFab",
+        name: str = "NorFab",
         verbose_result: bool = False,
     ) -> Result:
         ret = Result()
-        job.event(f"Getting {agent} agent ready")
+        job.event(f"Getting {name} agent ready")
 
-        agent_data = self.get_agent(job, agent)
+        agent_data = self.get_agent(job, name)
 
         agent_instance = create_agent(
             name=agent_data["name"],
@@ -240,7 +282,7 @@ class AgentWorker(NFPWorker):
             tools=agent_data["tools"],
         )
 
-        job.event(f"{agent} agent thinking..")
+        job.event(f"{name} agent thinking..")
 
         ret.result = agent_instance.invoke(
             {"messages": [{"role": "user", "content": instructions}]}

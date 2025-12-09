@@ -272,7 +272,7 @@ class WorkflowWorker(NFPWorker):
             workflow_name = (
                 os.path.split(workflow)[-1].replace(".yaml", "").replace(".yml", "")
             )
-            workflow = self.jinja2_render_templates([workflow])
+            workflow = self.fetch_file(workflow)
             workflow = yaml.safe_load(workflow)
 
         # extract workflow parameters
@@ -340,6 +340,9 @@ class WorkflowWorker(NFPWorker):
                 self.stop_workflow_check(ret.result[workflow_name][step], step, data)
                 is True
             ):
+                job.event(
+                    f"Stopping workflow, step '{step}' failed and has stop_if_fail flag"
+                )
                 break
 
         if remove_no_match_results:

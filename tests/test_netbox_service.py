@@ -134,7 +134,6 @@ class TestNetboxWorker:
                     for k in [
                         "django-version",
                         "error",
-                        "installed-apps",
                         "netbox-version",
                         "plugins",
                         "python-version",
@@ -1650,11 +1649,11 @@ class TestGetCircuits:
                 )
 
 
-class TestUpdateDeviceFacts:
-    def test_update_device_fact_datasource_nornir(self, nfclient):
+class TestSyncDeviceFacts:
+    def test_sync_device_facts_datasource_nornir(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
-            "update_device_facts",
+            "sync_device_facts",
             workers="any",
             kwargs={
                 "datasource": "nornir",
@@ -1670,14 +1669,14 @@ class TestUpdateDeviceFacts:
                 "ceos-spine-2" in res["result"]
             ), f"{worker} returned no results for ceos-spine-2"
             for device, device_data in res["result"].items():
-                assert device_data["update_device_facts"][
+                assert device_data["sync_device_facts"][
                     "serial"
                 ], f"{worker}:{device} no serial number updated"
 
-    def test_update_device_fact_datasource_nornir_with_filters(self, nfclient):
+    def test_sync_device_facts_datasource_nornir_with_filters(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
-            "update_device_facts",
+            "sync_device_facts",
             workers="any",
             kwargs={
                 "datasource": "nornir",
@@ -1693,20 +1692,20 @@ class TestUpdateDeviceFacts:
                 "ceos-spine-2" in res["result"]
             ), f"{worker} returned no results for ceos-spine-2"
             for device, device_data in res["result"].items():
-                assert device_data["update_device_facts"][
+                assert device_data["sync_device_facts"][
                     "serial"
                 ], f"{worker}:{device} no serial number updated"
 
     @pytest.mark.skip(reason="TBD")
-    def test_update_device_fact_non_existing_device(self, nfclient):
+    def test_sync_device_facts_non_existing_device(self, nfclient):
         pass
 
-    def test_update_device_fact_datasource_nornir_with_branch(self, nfclient):
+    def test_sync_device_facts_datasource_nornir_with_branch(self, nfclient):
         delete_branch("update_devices_branch_1", nfclient)
 
         ret = nfclient.run_job(
             "netbox",
-            "update_device_facts",
+            "sync_device_facts",
             workers="any",
             kwargs={
                 "datasource": "nornir",
@@ -1723,17 +1722,17 @@ class TestUpdateDeviceFacts:
                 "ceos-spine-2" in res["result"]
             ), f"{worker} returned no results for ceos-spine-2"
             for device, device_data in res["result"].items():
-                assert device_data["update_device_facts"][
+                assert device_data["sync_device_facts"][
                     "serial"
                 ], f"{worker}:{device} no serial number updated"
                 assert device_data["branch"] == "update_devices_branch_1"
 
 
-class TestUpdateDeviceInterfaces:
-    def test_update_device_interfaces(self, nfclient):
+class TestSyncDeviceInterfaces:
+    def test_sync_device_interfaces(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
-            "update_device_interfaces",
+            "sync_device_interfaces",
             workers="any",
             kwargs={
                 "datasource": "nornir",
@@ -1752,19 +1751,19 @@ class TestUpdateDeviceInterfaces:
             ), f"{worker} returned no results for ceos-spine-2"
             for device, device_data in res["result"].items():
                 assert device_data[
-                    "update_device_interfaces"
+                    "sync_device_interfaces"
                 ], f"{worker}:{device} no interfaces updated"
 
     @pytest.mark.skip(reason="TBD")
-    def test_update_device_interfaces_non_exisintg_device(self, nfclient):
+    def test_sync_device_interfaces_non_exisintg_device(self, nfclient):
         pass
 
-    def test_update_device_interfaces_with_branch(self, nfclient):
+    def test_sync_device_interfaces_with_branch(self, nfclient):
         delete_branch("update_interfaces_branch_1", nfclient)
 
         ret = nfclient.run_job(
             "netbox",
-            "update_device_interfaces",
+            "sync_device_interfaces",
             workers="any",
             kwargs={
                 "datasource": "nornir",
@@ -1784,16 +1783,16 @@ class TestUpdateDeviceInterfaces:
             ), f"{worker} returned no results for ceos-spine-2"
             for device, device_data in res["result"].items():
                 assert device_data[
-                    "update_device_interfaces"
+                    "sync_device_interfaces"
                 ], f"{worker}:{device} no interfaces updated"
                 assert device_data["branch"] == "update_interfaces_branch_1"
 
 
-class TestUpdateDeviceIP:
-    def test_update_device_ip(self, nfclient):
+class TestSyncDeviceIP:
+    def test_sync_device_ip(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
-            "update_device_ip",
+            "sync_device_ip",
             workers="any",
             kwargs={
                 "datasource": "nornir",
@@ -1814,14 +1813,12 @@ class TestUpdateDeviceIP:
                 assert (
                     "created_ip" in device_data
                 ), f"{worker}:{device} no create ip data"
-                assert (
-                    "updated_ip" in device_data
-                ), f"{worker}:{device} no update ip data"
+                assert "sync_ip" in device_data, f"{worker}:{device} no update ip data"
 
-    def test_update_device_ip_dry_run(self, nfclient):
+    def test_sync_device_ip_dry_run(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
-            "update_device_ip",
+            "sync_device_ip",
             workers="any",
             kwargs={
                 "datasource": "nornir",
@@ -1844,19 +1841,19 @@ class TestUpdateDeviceIP:
                     "created_ip_dry_run" in device_data
                 ), f"{worker}:{device} no create ip data"
                 assert (
-                    "updated_ip_dry_run" in device_data
+                    "sync_ip_dry_run" in device_data
                 ), f"{worker}:{device} no update ip data"
 
-    def test_update_device_ip_with_branch(self, nfclient):
-        delete_branch("update_device_ip_1", nfclient)
+    def test_sync_device_ip_with_branch(self, nfclient):
+        delete_branch("sync_device_ip_1", nfclient)
         ret = nfclient.run_job(
             "netbox",
-            "update_device_ip",
+            "sync_device_ip",
             workers="any",
             kwargs={
                 "datasource": "nornir",
                 "devices": ["ceos-spine-1", "ceos-spine-2"],
-                "branch": "update_device_ip_1",
+                "branch": "sync_device_ip_1",
             },
         )
 
@@ -1873,11 +1870,9 @@ class TestUpdateDeviceIP:
                 assert (
                     "created_ip" in device_data
                 ), f"{worker}:{device} no create ip data"
+                assert "sync_ip" in device_data, f"{worker}:{device} no update ip data"
                 assert (
-                    "updated_ip" in device_data
-                ), f"{worker}:{device} no update ip data"
-                assert (
-                    device_data["branch"] == "update_device_ip_1"
+                    device_data["branch"] == "sync_device_ip_1"
                 ), f"{worker}:{device} has no branch info"
 
 
@@ -3990,12 +3985,12 @@ class TestCreateIPBulk:
             assert res1["result"] == {
                 "fceos4": {
                     "Port-Channel1.101": {
-                        "address": "10.0.0.4/31",
+                        "address": "10.0.0.0/31",
                         "description": "",
                         "device": "fceos4",
                         "interface": "Port-Channel1.101",
                         "peer": {
-                            "address": "10.0.0.5/31",
+                            "address": "10.0.0.1/31",
                             "description": "",
                             "device": "fceos5",
                             "interface": "ae5.101",
@@ -4004,12 +3999,12 @@ class TestCreateIPBulk:
                         "vrf": "None",
                     },
                     "eth103.0": {
-                        "address": "10.0.0.0/31",
+                        "address": "10.0.0.2/31",
                         "description": "",
                         "device": "fceos4",
                         "interface": "eth103.0",
                         "peer": {
-                            "address": "10.0.0.1/31",
+                            "address": "10.0.0.3/31",
                             "description": "",
                             "device": "fceos5",
                             "interface": "eth103",
@@ -4018,12 +4013,12 @@ class TestCreateIPBulk:
                         "vrf": "None",
                     },
                     "eth11.123": {
-                        "address": "10.0.0.2/31",
+                        "address": "10.0.0.4/31",
                         "description": "",
                         "device": "fceos4",
                         "interface": "eth11.123",
                         "peer": {
-                            "address": "10.0.0.3/31",
+                            "address": "10.0.0.5/31",
                             "description": "",
                             "device": "fceos5",
                             "interface": "eth11.123",
@@ -4034,14 +4029,14 @@ class TestCreateIPBulk:
                 },
                 "fceos5": {
                     "ae5.101": {
-                        "address": "10.0.0.5/31",
+                        "address": "10.0.0.1/31",
                         "description": "",
                         "device": "fceos5",
                         "interface": "ae5.101",
                         "vrf": "None",
                     },
                     "eth11.123": {
-                        "address": "10.0.0.3/31",
+                        "address": "10.0.0.5/31",
                         "description": "",
                         "device": "fceos5",
                         "interface": "eth11.123",

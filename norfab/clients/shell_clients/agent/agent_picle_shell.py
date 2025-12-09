@@ -55,7 +55,6 @@ class AgentShowCommandsModel(BaseModel):
     @staticmethod
     def get_inventory(**kwargs):
         workers = kwargs.pop("workers", "all")
-        _ = kwargs.pop("progress", None)
         result = NFCLIENT.run_job("agent", "get_inventory", workers=workers)
         result = log_error_or_result(result)
         return result
@@ -63,7 +62,6 @@ class AgentShowCommandsModel(BaseModel):
     @staticmethod
     def get_version(**kwargs):
         workers = kwargs.pop("workers", "all")
-        _ = kwargs.pop("progress", None)
         result = NFCLIENT.run_job("agent", "get_version", workers=workers)
         result = log_error_or_result(result)
         return result
@@ -71,7 +69,6 @@ class AgentShowCommandsModel(BaseModel):
     @staticmethod
     def get_status(**kwargs):
         workers = kwargs.pop("workers", "any")
-        _ = kwargs.pop("progress", None)
         result = NFCLIENT.run_job("agent", "get_status", workers=workers, kwargs=kwargs)
         result = log_error_or_result(result)
         return result
@@ -94,6 +91,13 @@ class AgentInvoke(ClientRunJobArgs):
     class PicleConfig:
         pipe = PipeFunctionsModel
         outputter = Outputters.outputter_rich_markdown
+
+    @staticmethod
+    def source_name():
+        broker_files = NFCLIENT.get(
+            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        )
+        return ["NorFab"] + broker_files["results"]
 
     @staticmethod
     @listen_events
