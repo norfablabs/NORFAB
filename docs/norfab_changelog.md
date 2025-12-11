@@ -1,3 +1,11 @@
+## 0.12.6
+
+### BUGS
+
+1. Netbox service - fixed get_circuits handling bug, was not returning circuits data due to recent code refactoring, updated test to catch this kind of an issue.
+
+---
+
 ## 0.12.5
 
 ### BUGS

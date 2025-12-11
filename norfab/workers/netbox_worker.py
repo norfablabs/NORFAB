@@ -1573,7 +1573,13 @@ class NetboxWorker(NFPWorker):
         return ret
 
     def _map_circuit(
-        self, circuit: dict, ret: Result, instance: str, devices: list, cache: bool
+        self,
+        job: Job,
+        circuit: dict,
+        ret: Result,
+        instance: str,
+        devices: list,
+        cache: bool,
     ) -> bool:
         """
         ThreadPoolExecutor target function to retrieve circuit details from Netbox
@@ -1606,17 +1612,21 @@ class NetboxWorker(NFPWorker):
 
         # retrieve A or Z termination path using Netbox REST API
         if termination_a is not None:
-            circuit_path = self.rest(
+            resp = self.rest(
+                job=job,
                 instance=instance,
                 method="get",
                 api=f"/circuits/circuit-terminations/{termination_a}/paths/",
-            )["result"]
+            )
+            circuit_path = resp.result
         elif termination_z is not None:
-            circuit_path = self.rest(
+            resp = self.rest(
+                job=job,
                 instance=instance,
                 method="get",
                 api=f"/circuits/circuit-terminations/{termination_z}/paths/",
-            )["result"]
+            )
+            circuit_path = resp.result
         else:
             return True
 
@@ -1626,6 +1636,9 @@ class NetboxWorker(NFPWorker):
             or "name" not in circuit_path[0]["path"][0][0]
             or "name" not in circuit_path[0]["path"][-1][-1]
         ):
+            log.warning(
+                f"{self.name}:get_circuits - {cid} has no terminations, cannot trace the path"
+            )
             return True
 
         # form A and Z connection endpoints
@@ -1891,7 +1904,7 @@ class NetboxWorker(NFPWorker):
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
                 results = [
                     executor.submit(
-                        self._map_circuit, circuit, ret, instance, devices, cache
+                        self._map_circuit, job, circuit, ret, instance, devices, cache
                     )
                     for circuit in all_circuits
                 ]
@@ -2910,7 +2923,6 @@ class NetboxWorker(NFPWorker):
             # execute dry run on new IP
             if dry_run is True:
                 nb_ip = nb_prefix.available_ips.list()[0]
-                print(nb_prefix.available_ips.list()[0])
                 ret.status = "unchanged"
                 ret.dry_run = True
                 ret.result = {

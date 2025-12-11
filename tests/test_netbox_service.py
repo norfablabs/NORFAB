@@ -1507,6 +1507,7 @@ class TestGetCircuits:
             assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
             assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
             for device, device_data in res["result"].items():
+                assert device_data, f"{worker}:{device} no circuit data returned"
                 for cid, cid_data in device_data.items():
                     if cid == "CID3":
                         assert all(
@@ -1557,6 +1558,7 @@ class TestGetCircuits:
             assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
             assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
             for device, device_data in res["result"].items():
+                assert device_data, f"{worker}:{device} no circuit data returned"
                 for cid, cid_data in device_data.items():
                     assert (
                         cid == "CID1"
@@ -1564,6 +1566,7 @@ class TestGetCircuits:
 
     @pytest.mark.parametrize("cache", cache_options)
     def test_get_circuits_cache(self, nfclient, cache):
+        print(f"cache: {cache}")
         ret = nfclient.run_job(
             "netbox",
             "get_circuits",
@@ -1575,6 +1578,7 @@ class TestGetCircuits:
             assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
             assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
             for device, device_data in res["result"].items():
+                assert device_data, f"{worker}:{device} no circuit data returned"
                 for cid, cid_data in device_data.items():
                     if cid == "CID3":
                         assert all(
