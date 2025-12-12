@@ -6,6 +6,7 @@ broker:
   
 # uses https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema
 logging:
+  log_events: True
   handlers:
     terminal:
       level: {{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}
@@ -64,11 +65,11 @@ topology:
           - netbox-worker-1.2
     # - pyats-worker-1
     - nornir-worker-6 # Hosts Juniper vMX
-    # - agent-worker-1
-    # - fastapi-worker-1
-    # - dummy-worker-1
-    # - workflow-worker-1
-    # - fastmcp-worker-1
+    - agent-worker-1
+    - fastapi-worker-1
+    - dummy-worker-1
+    - workflow-worker-1
+    - fastmcp-worker-1
     
 hooks:
   startup:

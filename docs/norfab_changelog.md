@@ -1,3 +1,16 @@
+## 0.13.0
+
+### FEATURES
+
+1. NFAPI logging - added support for `logging->log_events` parameter to emit events as syslog messages
+2. Added context manager support fo NFAPI to simplify invocation from python scripts
+
+### CHANGES
+
+1. NFAPI changed start method arguments from `start_broker` to `run_broker` and `workers` to `run_workers`
+2. Nornir task - enhanced task import logic
+---
+
 ## 0.12.6
 
 ### BUGS

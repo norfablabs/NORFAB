@@ -1126,11 +1126,16 @@ class NornirWorker(NFPWorker):
             exec(function_text, globals_dict, globals_dict)
             task_function = globals_dict["task"]
         # import task function
-        else:
+        elif "." in plugin:
             # below same as "from nornir.plugins.tasks import task_fun as task_function"
-            task_fun = plugin.split(".")[-1]
-            module = __import__(plugin, fromlist=[""])
-            task_function = getattr(module, task_fun)
+            module_name, func_name = plugin.rsplit(".", 1)
+            module = __import__(module_name, fromlist=[func_name])  # nosec
+            task_function = getattr(module, func_name)
+        else:
+            raise RuntimeError(
+                f"{self.name} - '{plugin}' task should either be a path "
+                f"to a file or a module import string"
+            )
 
         self.nr.data.reset_failed_hosts()  # reset failed hosts
         filtered_nornir = FFun(self.nr, **filters)  # filter hosts

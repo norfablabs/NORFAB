@@ -392,24 +392,26 @@ def mount_shell_plugins(shell: App, inventory: object) -> None:
 
 def start_picle_shell(
     inventory="./inventory.yaml",
-    workers=None,
-    start_broker=None,
+    run_workers=None,
+    run_broker=None,
     log_level="WARNING",
 ):
     global NFCLIENT
     # initiate NorFab
-    nf = NorFab(inventory=inventory, log_level=log_level)
-    nf.start(start_broker=start_broker, workers=workers)
-    NFCLIENT = nf.make_client()
+    with NorFab(
+        inventory=inventory,
+        log_level=log_level,
+        run_broker=run_broker,
+        run_workers=run_workers,
+    ) as nf:
+        NFCLIENT = nf.client
+        if NFCLIENT is not None:
+            # inject NFCLIENT to all imported models' global space
+            builtins.NFCLIENT = NFCLIENT
 
-    if NFCLIENT is not None:
-        # inject NFCLIENT to all imported models' global space
-        builtins.NFCLIENT = NFCLIENT
+            # start PICLE interactive shell
+            shell = App(NorFabShell)
+            mount_shell_plugins(shell, nf.inventory)
+            shell.start()
 
-        # start PICLE interactive shell
-        shell = App(NorFabShell)
-        mount_shell_plugins(shell, nf.inventory)
-        shell.start()
-
-        print("Exiting...")
-        nf.destroy()
+            print("Exiting...")

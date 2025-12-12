@@ -111,7 +111,7 @@ class NorFab:
         from norfab.core.nfapi import NorFab
 
         nf = NorFab(inventory="./inventory.yaml")
-        nf.start(start_broker=True, workers=["my-worker-1"])
+        nf.start(run_broker=True, run_workers=["my-worker-1"])
         NFCLIENT = nf.make_client()
 
 
@@ -125,7 +125,7 @@ class NorFab:
         }
 
         nf = NorFab(inventory_data=data, base_dir="./")
-        nf.start(start_broker=True, workers=["my-worker-1"])
+        nf.start(run_broker=True, run_workers=["my-worker-1"])
         NFCLIENT = nf.make_client()
     """
 
@@ -141,11 +141,15 @@ class NorFab:
         inventory_data: dict = None,
         base_dir: str = None,
         log_level: str = None,
+        run_broker: bool = True,
+        run_workers: Union[bool, list[str]] = True,
     ) -> None:
         self.exiting = False  # flag to signal that Norfab is exiting
         self.inventory = NorFabInventory(
             path=inventory, data=inventory_data, base_dir=base_dir
         )
+        self.run_broker = run_broker
+        self.run_workers = run_workers
         self.log_queue = Queue()
         self.log_level = log_level
         self.broker_endpoint = self.inventory.broker["endpoint"]
@@ -174,6 +178,15 @@ class NorFab:
 
         # find all workers plugins
         self.register_plugins()
+
+    def __enter__(self):
+        self.start()
+        self.make_client()
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.destroy()
 
     def register_plugins(self) -> None:
         """
@@ -385,15 +398,15 @@ class NorFab:
 
     def start(
         self,
-        start_broker: bool = True,
-        workers: Union[bool, list] = True,
+        run_broker: bool = None,
+        run_workers: Union[bool, list] = None,
     ) -> None:
         """
         Starts the broker and specified workers.
 
         Args:
-            start_broker (bool): If True, starts the broker if it is defined in the inventory topology.
-            workers (Union[bool, list]): Determines which workers to start. If True, starts all workers defined in the inventory topology.
+            run_broker (bool): If True, starts the broker if it is defined in the inventory topology.
+            run_workers (Union[bool, list]): Determines which workers to start. If True, starts all workers defined in the inventory topology.
                                          If False or None, no workers are started. If a list, starts the specified workers.
 
         Returns:
@@ -409,28 +422,29 @@ class NorFab:
             - If the initialization timeout expires, an error is logged and the system is destroyed.
             - After starting the workers, any startup hooks defined in the inventory are executed.
         """
-
+        run_broker = run_broker or self.run_broker
+        run_workers = run_workers or self.run_workers
         workers_to_start = set()
 
         # start the broker
-        if start_broker is True and self.inventory.topology.get("broker") is True:
+        if run_broker is True and self.inventory.topology.get("broker") is True:
             self.start_broker()
 
         # decide on a set of workers to start
-        if workers is False or workers is None:
-            workers = []
-        elif isinstance(workers, list) and workers:
-            workers = [w.strip() for w in workers if w.strip()]
+        if run_workers is False or run_workers is None:
+            run_workers = []
+        elif isinstance(run_workers, list) and run_workers:
+            run_workers = [w.strip() for w in run_workers if w.strip()]
         # start workers defined in inventory
-        elif workers is True:
-            workers = self.inventory.topology.get("workers", [])
+        elif run_workers is True:
+            run_workers = self.inventory.topology.get("workers", [])
 
         # exit if no workers
-        if not workers:
+        if not run_workers:
             return
 
         # form a list of workers to start
-        for worker_name in workers:
+        for worker_name in run_workers:
             if isinstance(worker_name, dict):
                 worker_name = tuple(worker_name)[0]
             if worker_name:
@@ -440,7 +454,7 @@ class NorFab:
                 continue
 
         while workers_to_start != set(self.workers_processes.keys()):
-            for worker in workers:
+            for worker in run_workers:
                 # extract worker name and data/params
                 if isinstance(worker, dict):
                     worker_name = tuple(worker)[0]

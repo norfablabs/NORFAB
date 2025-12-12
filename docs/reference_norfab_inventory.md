@@ -20,6 +20,7 @@ topology: # (6)!
     - nornir-worker-1
 
 logging: # (9)!
+  log_events: True
   handlers:
     terminal:
       level: WARNING
@@ -139,7 +140,11 @@ Topology section of NorFab inventory identifies the components that need to be s
 
 ## Logging Inventory Section
 
-Logging inventory section allows to configure logging parameters such file retention option, logging to remote hosts, logging levels etc.
+Logging inventory section allows to configure logging parameters such as file retention options, logging to remote hosts, logging levels etc. using Python logging [configuration dictionary schema](https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema). 
+
+Additional `logging` section supported attributes:
+
+- `log_events` - boolean, if True emit events copy as log messages
 
 ## Hooks Section
 

@@ -1019,7 +1019,7 @@ class NFPWorker:
             "sid.service.broker", "get_inventory", kwargs={"name": self.name}
         )
 
-        log.debug(f"{self.name} - worker received invenotry data {inventory_data}")
+        log.debug(f"{self.name} - worker received inventory data {inventory_data}")
 
         if inventory_data["results"]:
             return inventory_data["results"]
@@ -1222,7 +1222,13 @@ class NFPWorker:
         return filepath
 
     def event(
-        self, message: str, juuid: str, task: str, client_address: str, **kwargs
+        self,
+        message: str,
+        juuid: str,
+        task: str,
+        client_address: str,
+        severity: str,
+        **kwargs,
     ) -> None:
         """
         Handles the creation and emission of an event.
@@ -1245,6 +1251,7 @@ class NFPWorker:
                 juuid=juuid,
                 client_address=client_address,
                 task=task,
+                severity=severity,
                 **kwargs,
             )
         except Exception as e:
@@ -1253,6 +1260,19 @@ class NFPWorker:
         event_data = event_data.model_dump(exclude_none=True)
         # emit event to the broker
         self.event_queue.put(event_data)
+        # check if need to emit log for this event
+        if self.inventory["logging"].get("log_events", False):
+            event_log = f"EVENT {self.name}:{task} - {message}"
+            if severity == "INFO":
+                log.info(event_log)
+            if severity == "DEBUG":
+                log.debug(event_log)
+            if severity == "WARNING":
+                log.warning(event_log)
+            if severity == "CRITICAL":
+                log.critical(event_log)
+            if severity == "ERROR":
+                log.error(event_log)
         # save event locally
         filename = event_filename(juuid, self.base_dir_jobs)
         events = loader(filename) if os.path.exists(filename) else []

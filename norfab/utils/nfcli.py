@@ -220,17 +220,17 @@ def nfcli():
     # start broker and workers
     if BROKER and (WORKERS or WORKERS_LIST):
         nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
-        nf.start(start_broker=True, workers=WORKERS_LIST if WORKERS_LIST else True)
+        nf.start(run_broker=True, run_workers=WORKERS_LIST if WORKERS_LIST else True)
         nf.run()
     # start broker only
     elif BROKER:
         nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
-        nf.start(start_broker=True, workers=False)
+        nf.start(run_broker=True, run_workers=False)
         nf.run()
     # start workers only
     elif WORKERS or WORKERS_LIST:
         nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
-        nf.start(start_broker=False, workers=WORKERS_LIST if WORKERS_LIST else True)
+        nf.start(run_broker=False, run_workers=WORKERS_LIST if WORKERS_LIST else True)
         nf.run()
     # start WEB UI Application
     elif WEB_UI:
@@ -257,15 +257,15 @@ def nfcli():
     elif CLIENT:
         start_picle_shell(
             inventory=INVENTORY,
-            workers=False,
-            start_broker=False,
+            run_workers=False,
+            run_broker=False,
             log_level=LOGLEVEL,
         )
     # default, start everything locally - interactive shell, broker and all workers
     elif SHELL:
         start_picle_shell(
             inventory=INVENTORY,
-            workers=WORKERS_LIST if WORKERS_LIST else True,
-            start_broker=True,
+            run_workers=WORKERS_LIST if WORKERS_LIST else True,
+            run_broker=True,
             log_level=LOGLEVEL,
         )

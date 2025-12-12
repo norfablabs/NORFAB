@@ -9,7 +9,7 @@ import random
 
 class TestNornirWorker:
     def test_get_nornir_inventory(self, nfclient):
-        ret = nfclient.run_job(b"nornir", "get_inventory")
+        ret = nfclient.run_job("nornir", "get_inventory")
         pprint.pprint(ret)
 
         for worker_name, data in ret.items():
@@ -18,7 +18,7 @@ class TestNornirWorker:
             ), f"{worker_name} inventory incomplete"
 
     def test_get_nornir_hosts(self, nfclient):
-        ret = nfclient.run_job(b"nornir", "get_nornir_hosts")
+        ret = nfclient.run_job("nornir", "get_nornir_hosts")
         pprint.pprint(ret)
 
         for worker_name, data in ret.items():
@@ -28,7 +28,7 @@ class TestNornirWorker:
             assert len(data) > 0 or data == []
 
     def test_get_nornir_hosts_check_validation(self, nfclient):
-        ret = nfclient.run_job(b"nornir", "get_nornir_hosts", kwargs={"FZ": "spine"})
+        ret = nfclient.run_job("nornir", "get_nornir_hosts", kwargs={"FZ": "spine"})
         pprint.pprint(ret)
 
         for worker_name, results in ret.items():
@@ -38,7 +38,7 @@ class TestNornirWorker:
             ), f"{worker_name} did not raise ValidationError"
 
     def test_get_nornir_version(self, nfclient):
-        ret = nfclient.run_job(b"nornir", "get_version")
+        ret = nfclient.run_job("nornir", "get_version")
         pprint.pprint(ret)
 
         assert isinstance(ret, dict), f"Expected dictionary but received {type(ret)}"
@@ -67,7 +67,7 @@ class TestNornirWorker:
 class TestNornirCli:
     def test_commands_list(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={"commands": ["show version", "show clock"]},
@@ -85,7 +85,7 @@ class TestNornirCli:
 
     def test_commands_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             kwargs={"commands": ["show version", "show clock"], "dry_run": True},
         )
@@ -131,7 +131,7 @@ class TestNornirCli:
 
     def test_commands_from_file_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             kwargs={
                 "commands": "nf://cli/commands.txt",
@@ -150,7 +150,7 @@ class TestNornirCli:
 
     def test_commands_from_nonexisting_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers="nornir-worker-1",
             kwargs={"commands": "nf://cli/commands_non_existing.txt"},
@@ -162,7 +162,7 @@ class TestNornirCli:
 
     def test_commands_from_file_template(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             kwargs={
                 "commands": "nf://cli/show_interfaces.j2",
@@ -190,7 +190,7 @@ class TestNornirCli:
 
     def test_run_ttp(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers="nornir-worker-1",
             kwargs={
@@ -211,7 +211,7 @@ class TestNornirCli:
 
     def test_commands_template_with_norfab_client_call(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers="nornir-worker-1",
             kwargs={
@@ -237,7 +237,7 @@ class TestNornirCli:
 
     def test_commands_template_with_nornir_worker_call(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers="nornir-worker-1",
             kwargs={
@@ -261,7 +261,7 @@ class TestNornirCli:
 
     def test_commands_with_tests(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers="nornir-worker-1",
             kwargs={
@@ -302,7 +302,7 @@ class TestNornirCli:
 
     def test_commands_template_with_job_data_dict(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             kwargs={
                 "job_data": {"commands": ["show version", "show clock"]},
@@ -321,7 +321,7 @@ class TestNornirCli:
 
     def test_commands_template_with_job_data_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             kwargs={
                 "job_data": "nf://cli/job_data_1.txt",
@@ -340,7 +340,7 @@ class TestNornirCli:
 
     def test_commands_template_with_job_data_wrong_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers=["nornir-worker-1"],
             kwargs={
@@ -358,7 +358,7 @@ class TestNornirCli:
 
     def test_commands_template_with_job_data_wrong_yaml(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cli",
             workers=["nornir-worker-1"],
             kwargs={
@@ -383,7 +383,7 @@ class TestNornirCli:
 class TestNornirTask:
     def test_task_nornir_salt_nr_test(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "task",
             workers=["nornir-worker-1"],
             kwargs={"plugin": "nornir_salt.plugins.tasks.nr_test", "foo": "bar"},
@@ -396,7 +396,7 @@ class TestNornirTask:
 
     def test_task_nornir_salt_nr_test_add_details(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "task",
             workers=["nornir-worker-1"],
             kwargs={
@@ -422,7 +422,7 @@ class TestNornirTask:
 
     def test_task_from_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "task",
             workers=["nornir-worker-1"],
             kwargs={"plugin": "nf://nornir_tasks/dummy.py"},
@@ -435,7 +435,7 @@ class TestNornirTask:
 
     def test_task_from_nonexisting_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "task",
             workers=["nornir-worker-1"],
             kwargs={"plugin": "nf://nornir_tasks/_non_existing_.py"},
@@ -455,7 +455,7 @@ class TestNornirTask:
 
     def test_task_from_nonexisting_module(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "task",
             workers=["nornir-worker-1"],
             kwargs={
@@ -468,17 +468,17 @@ class TestNornirTask:
         for worker, results in ret.items():
             assert results["failed"] == True
             assert (
-                "No module named 'nornir_salt.plugins.tasks.non_existing_module'"
+                "module 'nornir_salt.plugins.tasks' has no attribute 'non_existing_module'"
                 in results["errors"][0]
             )
             assert (
-                "No module named 'nornir_salt.plugins.tasks.non_existing_module'"
+                "module 'nornir_salt.plugins.tasks' has no attribute 'non_existing_module'"
                 in results["messages"][0]
             )
 
     def test_task_with_error(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "task",
             workers=["nornir-worker-1"],
             kwargs={"plugin": "nf://nornir_tasks/dummy_with_error.py"},
@@ -494,7 +494,7 @@ class TestNornirTask:
 
     def test_task_with_subtasks(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "task",
             workers=["nornir-worker-1"],
             kwargs={"plugin": "nf://nornir_tasks/dummy_with_subtasks.py"},
@@ -508,6 +508,46 @@ class TestNornirTask:
                     "dummy_subtask": "dummy substask done",
                 }
 
+    def test_task_netmiko_send_command(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "task",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "plugin": "nornir_netmiko.tasks.netmiko_send_command",
+                "FC": "spine",
+                "command_string": "show clock",
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] == False, f"{worker} task failed"
+            for host, res in results["result"].items():
+                assert (
+                    "Timezone" in res["netmiko_send_command"]
+                ), f"{worker}:{host} unexpected output"
+
+    def test_task_netmiko_send_command_full_path(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "task",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "plugin": "nornir_netmiko.tasks.netmiko_send_command.netmiko_send_command",
+                "FC": "spine",
+                "command_string": "show clock",
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] == False, f"{worker} task failed"
+            for host, res in results["result"].items():
+                assert (
+                    "Timezone" in res["netmiko_send_command"]
+                ), f"{worker}:{host} unexpected output"
+
 
 # ----------------------------------------------------------------------------
 # NORNIR.CFG FUNCTION TESTS
@@ -517,7 +557,7 @@ class TestNornirTask:
 class TestNornirCfg:
     def test_config_list(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={"config": ["interface loopback 0", "description RID"]},
@@ -535,7 +575,7 @@ class TestNornirCfg:
 
     def test_config_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -554,7 +594,7 @@ class TestNornirCfg:
 
     def test_config_with_hosts_filters(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -581,7 +621,7 @@ class TestNornirCfg:
 
     def test_config_with_worker_target(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
@@ -596,7 +636,7 @@ class TestNornirCfg:
 
     def test_config_add_details(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -628,7 +668,7 @@ class TestNornirCfg:
 
     def test_config_to_dict_false(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -653,7 +693,7 @@ class TestNornirCfg:
 
     def test_config_to_dict_false_add_details(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -690,7 +730,7 @@ class TestNornirCfg:
 
     def test_config_wrong_plugin(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -708,7 +748,7 @@ class TestNornirCfg:
 
     def test_config_from_file_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -727,7 +767,7 @@ class TestNornirCfg:
 
     def test_config_from_nonexisting_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -742,7 +782,7 @@ class TestNornirCfg:
 
     def test_config_from_file_template(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -764,7 +804,7 @@ class TestNornirCfg:
 
     def test_config_plugin_napalm(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
@@ -792,7 +832,7 @@ class TestNornirCfg:
 
     def test_config_plugin_scrapli(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
@@ -813,7 +853,7 @@ class TestNornirCfg:
 
     def test_config_plugin_netmiko(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
@@ -834,7 +874,7 @@ class TestNornirCfg:
 
     def test_config_from_file_template_with_include(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -860,7 +900,7 @@ class TestNornirCfg:
 
     def test_config_from_file_template_with_include_non_exist(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -876,7 +916,7 @@ class TestNornirCfg:
 
     def test_config_from_file_template_with_if_and_include(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -896,7 +936,7 @@ class TestNornirCfg:
 
     def test_config_from_file_template_with_job_data_dict(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -918,7 +958,7 @@ class TestNornirCfg:
 
     def test_config_from_file_template_with_job_data_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -938,7 +978,7 @@ class TestNornirCfg:
 
     def test_config_from_file_template_with_job_data_wrong_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
@@ -961,7 +1001,7 @@ class TestNornirCfg:
 class TestNornirTest:
     def test_nornir_test_suite(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={"suite": "nf://nornir_test_suites/suite_1.txt"},
@@ -1010,7 +1050,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_with_details(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1035,7 +1075,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_list_result(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={"suite": "nf://nornir_test_suites/suite_1.txt", "to_dict": False},
@@ -1059,7 +1099,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_list_result_with_details(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1089,7 +1129,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_template(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={"suite": "nf://nornir_test_suites/suite_2.txt"},
@@ -1113,7 +1153,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_subset(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1135,7 +1175,7 @@ class TestNornirTest:
 
     def test_nornir_test_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1161,7 +1201,7 @@ class TestNornirTest:
 
     def test_nornir_test_to_dict_true(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1185,7 +1225,7 @@ class TestNornirTest:
 
     def test_nornir_test_to_dict_false(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1205,7 +1245,7 @@ class TestNornirTest:
 
     def test_nornir_test_remove_tasks_false(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1226,7 +1266,7 @@ class TestNornirTest:
 
     def test_nornir_test_failed_only_true(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1249,7 +1289,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_non_existing_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={"suite": "nf://nornir_test_suites/suite_non_existing.txt"},
@@ -1263,7 +1303,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_bad_yaml_file(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={"suite": "nf://nornir_test_suites/suite_bad_yaml.txt"},
@@ -1277,7 +1317,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_bad_jinja2(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={"suite": "nf://nornir_test_suites/suite_bad_jinja2.txt"},
@@ -1291,7 +1331,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_custom_functions_files(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1324,7 +1364,7 @@ class TestNornirTest:
 
     def test_nornir_test_with_nftask_to_dict_false(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1344,7 +1384,7 @@ class TestNornirTest:
 
     def test_nornir_test_with_nftask_to_dict_true(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1369,7 +1409,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_with_includes_dry_run(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1392,7 +1432,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_with_includes(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
@@ -1414,7 +1454,7 @@ class TestNornirTest:
 
     def test_nornir_test_suite_with_job_data_dict(self, nfclient):
         ret = nfclient.run_job(
-            b"nornir",
+            "nornir",
             "test",
             workers=["nornir-worker-1"],
             kwargs={
