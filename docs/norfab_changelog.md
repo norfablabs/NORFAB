@@ -9,6 +9,8 @@
 
 1. NFAPI changed start method arguments from `start_broker` to `run_broker` and `workers` to `run_workers`
 2. Nornir task - enhanced task import logic
+3. Nornir worker - refactoring to reduce duplicate code
+
 ---
 
 ## 0.12.6

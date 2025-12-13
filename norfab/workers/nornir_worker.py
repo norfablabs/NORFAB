@@ -150,7 +150,7 @@ class WatchDog(WorkerWatchDog):
         """
         conn_stats = {
             "last_use": None,
-            "last_keepealive": None,
+            "last_keepalive": None,
             "keepalive_count": 0,
         }
         for host_name in nr.inventory.hosts:
@@ -257,6 +257,11 @@ class WatchDog(WorkerWatchDog):
             self.dead_connections_cleaned += stats["dead_connections_cleaned"]
             # remove connections that are no longer present in Nornir inventory
             for host_name, host_connections in self.connections_data.items():
+                # check if host is still in Nornir inventory
+                if host_name not in self.worker.nr.inventory.hosts:
+                    self.connections_data.pop(host_name, None)
+                    continue
+                # clean up specific connections for host
                 for connection_name in list(host_connections.keys()):
                     if not self.worker.nr.inventory.hosts[host_name].connections.get(
                         connection_name
@@ -269,7 +274,7 @@ class WatchDog(WorkerWatchDog):
             # update connections statistics
             for plugins in self.connections_data.values():
                 for plugin in plugins.values():
-                    plugin["last_keepealive"] = time.ctime()
+                    plugin["last_keepalive"] = time.ctime()
                     plugin["keepalive_count"] += 1
         except Exception as e:
             msg = f"{self.worker.name} - watchdog HostsKeepalive check error: {e}"
@@ -368,23 +373,46 @@ class NornirWorker(NFPWorker):
             None
         """
         # clean up existing Nornir instance
-        if self.nr is not None and self.nr.inventory.hosts:
-            self.nr.close_connections()
+        with self.connections_lock:
+            if self.nr is not None and self.nr.inventory.hosts:
+                self.nr.close_connections()
 
-        # initiate Nornir
-        self.nr = InitNornir(
-            logging=inventory.get("logging", {"enabled": False}),
-            runner=inventory.get("runner", {}),
-            inventory={
-                "plugin": "DictInventory",
-                "options": {
-                    "hosts": inventory.get("hosts", {}),
-                    "groups": inventory.get("groups", {}),
-                    "defaults": inventory.get("defaults", {}),
+            # initiate Nornir
+            self.nr = InitNornir(
+                logging=inventory.get("logging", {"enabled": False}),
+                runner=inventory.get("runner", {}),
+                inventory={
+                    "plugin": "DictInventory",
+                    "options": {
+                        "hosts": inventory.get("hosts", {}),
+                        "groups": inventory.get("groups", {}),
+                        "defaults": inventory.get("defaults", {}),
+                    },
                 },
-            },
-            user_defined=inventory.get("user_defined", {}),
-        )
+                user_defined=inventory.get("user_defined", {}),
+            )
+
+    def filter_hosts_and_validate(self, kwargs: Dict, ret: Result) -> Result:
+        """
+        Helper method to filter hosts and validate results.
+
+        Returns:
+            tuple: (filtered_nornir, Result) where Result status set to
+                `no_match` if no hosts matched.
+        """
+        self.nr.data.reset_failed_hosts()  # reset failed hosts before filtering
+        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
+        filtered_nornir = FFun(self.nr, **filters)
+
+        if not filtered_nornir.inventory.hosts:
+            msg = (
+                f"{self.name} - nothing to do, no hosts matched by filters '{filters}'"
+            )
+            log.debug(msg)
+            ret.messages.append(msg)
+            ret.status = "no_match"
+
+        return filtered_nornir, ret
 
     @Task(fastapi={"methods": ["POST"]})
     def refresh_nornir(
@@ -483,10 +511,11 @@ class NornirWorker(NFPWorker):
             if self.nornir_worker_inventory.get("hosts"):
                 kwargs["devices"] = list(self.nornir_worker_inventory["hosts"])
             else:
-                log.warning(
-                    f"{self.name} - inventory has no hosts, Netbox filters or devices defined"
-                )
-                return
+                msg = f"{self.name} - inventory has no hosts, Netbox filters or devices defined"
+                log.warning(msg)
+                ret.result = False
+                ret.messages = [msg]
+                return ret
 
         nb_inventory_data = self.client.run_job(
             service="netbox",
@@ -927,23 +956,24 @@ class NornirWorker(NFPWorker):
         Returns:
             List[Dict]: A list of hosts with optional detailed information.
         """
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
-        filtered_nornir = FFun(self.nr, **filters)
-        if details:
-            return Result(
-                result={
-                    host_name: {
-                        "platform": str(host.platform),
-                        "hostname": str(host.hostname),
-                        "port": str(host.port),
-                        "groups": [str(g) for g in host.groups],
-                        "username": str(host.username),
-                    }
-                    for host_name, host in filtered_nornir.inventory.hosts.items()
+        ret = Result(task=f"{self.name}:get_nornir_hosts", result={} if details else [])
+        filtered_nornir, ret = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
+            ret.result = None
+        elif details:
+            ret.result = {
+                host_name: {
+                    "platform": str(host.platform),
+                    "hostname": str(host.hostname),
+                    "port": str(host.port),
+                    "groups": [str(g) for g in host.groups],
+                    "username": str(host.username),
                 }
-            )
+                for host_name, host in filtered_nornir.inventory.hosts.items()
+            }
         else:
-            return Result(result=list(filtered_nornir.inventory.hosts))
+            ret.result = list(filtered_nornir.inventory.hosts)
+        return ret
 
     @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self, **kwargs: dict) -> Result:
@@ -957,9 +987,11 @@ class NornirWorker(NFPWorker):
         Returns:
             Dict: A dictionary representation of the filtered inventory.
         """
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
-        filtered_nornir = FFun(self.nr, **filters)
-        return Result(result=filtered_nornir.inventory.dict(), task="get_inventory")
+        ret = Result(task=f"{self.name}:get_inventory", result={})
+        filtered_nornir, ret = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status != "no_match":
+            ret.result = filtered_nornir.inventory.dict()
+        return ret
 
     @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
@@ -1110,8 +1142,11 @@ class NornirWorker(NFPWorker):
         # extract attributes
         add_details = kwargs.pop("add_details", False)  # ResultSerializer
         to_dict = kwargs.pop("to_dict", True)  # ResultSerializer
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
         ret = Result(task=f"{self.name}:task", result={} if to_dict else [])
+
+        filtered_nornir, no_match_result = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
+            return ret
 
         # download task from broker and load it
         if plugin.startswith("nf://"):
@@ -1136,19 +1171,6 @@ class NornirWorker(NFPWorker):
                 f"{self.name} - '{plugin}' task should either be a path "
                 f"to a file or a module import string"
             )
-
-        self.nr.data.reset_failed_hosts()  # reset failed hosts
-        filtered_nornir = FFun(self.nr, **filters)  # filter hosts
-
-        # check if no hosts matched
-        if not filtered_nornir.inventory.hosts:
-            msg = (
-                f"{self.name} - nothing to do, no hosts matched by filters '{filters}'"
-            )
-            log.debug(msg)
-            ret.messages.append(msg)
-            ret.status = "no_match"
-            return ret
 
         nr = self._add_processors(filtered_nornir, kwargs, job)  # add processors
 
@@ -1209,9 +1231,12 @@ class NornirWorker(NFPWorker):
             cannot be downloaded.
         """
         job_data = job_data or {}
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
         timeout = job.timeout * 0.9
         ret = Result(task=f"{self.name}:cli", result={} if to_dict else [])
+
+        filtered_nornir, no_match_result = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
+            return ret
 
         # decide on what send commands task plugin to use
         if plugin == "netmiko":
@@ -1227,19 +1252,6 @@ class NornirWorker(NFPWorker):
             task_plugin = napalm_send_commands
         else:
             raise UnsupportedPluginError(f"Plugin '{plugin}' not supported")
-
-        self.nr.data.reset_failed_hosts()  # reset failed hosts
-        filtered_nornir = FFun(self.nr, **filters)  # filter hosts
-
-        # check if no hosts matched
-        if not filtered_nornir.inventory.hosts:
-            msg = (
-                f"{self.name} - nothing to do, no hosts matched by filters '{filters}'"
-            )
-            log.debug(msg)
-            ret.messages.append(msg)
-            ret.status = "no_match"
-            return ret
 
         # download TTP template
         if self.is_url(run_ttp):
@@ -1338,8 +1350,11 @@ class NornirWorker(NFPWorker):
             FileNotFoundError: If the specified job data file cannot be downloaded.
         """
         config = config if isinstance(config, list) else [config]
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
         ret = Result(task=f"{self.name}:cfg", result={} if to_dict else [])
+
+        filtered_nornir, no_match_result = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
+            return ret
 
         # decide on what send commands task plugin to use
         if plugin == "netmiko":
@@ -1350,19 +1365,6 @@ class NornirWorker(NFPWorker):
             task_plugin = napalm_configure
         else:
             raise UnsupportedPluginError(f"Plugin '{plugin}' not supported")
-
-        self.nr.data.reset_failed_hosts()  # reset failed hosts
-        filtered_nornir = FFun(self.nr, **filters)  # filter hosts
-
-        # check if no hosts matched
-        if not filtered_nornir.inventory.hosts:
-            msg = (
-                f"{self.name} - nothing to do, no hosts matched by filters '{filters}'"
-            )
-            log.debug(msg)
-            ret.messages.append(msg)
-            ret.status = "no_match"
-            return ret
 
         job_data = self.load_job_data(job_data)
 
@@ -1450,21 +1452,12 @@ class NornirWorker(NFPWorker):
         tests = {}  # dictionary to hold per-host test suites
         add_details = kwargs.get("add_details", False)  # ResultSerializer
         to_dict = kwargs.get("to_dict", True)  # ResultSerializer
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
+        filters = {k: kwargs.get(k) for k in list(kwargs.keys()) if k in FFun_functions}
         ret = Result(task=f"{self.name}:test", result={} if to_dict else [])
         suites = {}  # dictionary to hold combined test suites
 
-        self.nr.data.reset_failed_hosts()  # reset failed hosts
-        filtered_nornir = FFun(self.nr, **filters)  # filter hosts
-
-        # check if no hosts matched
-        if not filtered_nornir.inventory.hosts:
-            msg = (
-                f"{self.name} - nothing to do, no hosts matched by filters '{filters}'"
-            )
-            log.debug(msg)
-            ret.messages.append(msg)
-            ret.status = "no_match"
+        filtered_nornir, ret = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
             if return_tests_suite is True:
                 ret.result = {"test_results": [], "suite": {}}
             return ret
@@ -1487,21 +1480,21 @@ class NornirWorker(NFPWorker):
                     filters=self.add_jinja2_filters(),
                 )
             except Exception as e:
-                msg = f"{self.name} - '{suite}' Jinja2 rendering failed: '{e}'"
-                raise RuntimeError(msg)
+                msg = f"{self.name} - '{suite}' Jinja2 rendering failed: '{type(e).__name__}:{e}'"
+                raise RuntimeError(msg) from e
             # load suit using YAML
             try:
                 tests[host_name] = yaml.safe_load(rendered_suite) or []
             except Exception as e:
-                msg = f"{self.name} - '{suite}' YAML load failed: '{e}'"
-                raise RuntimeError(msg)
+                msg = f"{self.name} - '{suite}' YAML load failed: '{type(e).__name__}:{e}'"
+                raise RuntimeError(msg) from e
 
         # validate tests suite
         try:
             _ = modelTestsProcessorSuite(tests=tests)
         except Exception as e:
-            msg = f"{self.name} - '{suite}' suite validation failed: '{e}'"
-            raise RuntimeError(msg)
+            msg = f"{self.name} - '{suite}' suite validation failed: '{type(e).__name__}:{e}'"
+            raise RuntimeError(msg) from e
 
         # download pattern, schema and custom function files
         for host_name in tests.keys():
@@ -1665,20 +1658,11 @@ class NornirWorker(NFPWorker):
         Raises:
             UnsupportedPluginError: If the specified plugin is not supported.
         """
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
+        filters = {k: kwargs.get(k) for k in list(kwargs.keys()) if k in FFun_functions}
         ret = Result(task=f"{self.name}:parse", result={} if to_dict else [])
 
-        self.nr.data.reset_failed_hosts()  # reset failed hosts
-        filtered_nornir = FFun(self.nr, **filters)  # filter hosts
-
-        # check if no hosts matched
-        if not filtered_nornir.inventory.hosts:
-            msg = (
-                f"{self.name} - nothing to do, no hosts matched by filters '{filters}'"
-            )
-            log.debug(msg)
-            ret.messages.append(msg)
-            ret.status = "no_match"
+        filtered_nornir, ret = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
             return ret
 
         if plugin == "napalm":
@@ -1751,9 +1735,12 @@ class NornirWorker(NFPWorker):
         Raises:
             UnsupportedPluginError: If the specified plugin is not supported.
         """
-        filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
         timeout = job.timeout * 0.9
         ret = Result(task=f"{self.name}:file_copy", result={} if to_dict else [])
+
+        filtered_nornir, ret = self.filter_hosts_and_validate(kwargs, ret)
+        if ret.status == "no_match":
+            return ret
 
         # download file from broker
         if self.is_url(source_file):
@@ -1769,19 +1756,6 @@ class NornirWorker(NFPWorker):
             kwargs.setdefault("dest_file", os.path.split(source_file_local)[-1])
         else:
             raise UnsupportedPluginError(f"Plugin '{plugin}' not supported")
-
-        self.nr.data.reset_failed_hosts()  # reset failed hosts
-        filtered_nornir = FFun(self.nr, **filters)  # filter hosts
-
-        # check if no hosts matched
-        if not filtered_nornir.inventory.hosts:
-            msg = (
-                f"{self.name} - nothing to do, no hosts matched by filters '{filters}'"
-            )
-            log.debug(msg)
-            ret.messages.append(msg)
-            ret.status = "no_match"
-            return ret
 
         nr = self._add_processors(filtered_nornir, kwargs, job)  # add processors
 

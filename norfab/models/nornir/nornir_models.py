@@ -102,6 +102,6 @@ class HostDetails(BaseModel, extra="forbid"):
 
 
 class GetNornirHostsResponse(Result):
-    result: Union[List[StrictStr], Dict[StrictStr, HostDetails]] = Field(
+    result: Union[List[StrictStr], Dict[StrictStr, HostDetails], None] = Field(
         None, description="get_nornir_host results schema"
     )
