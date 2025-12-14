@@ -324,6 +324,10 @@ class NFPBroker:
                 msg = self.socket.recv_multipart()
                 log.debug(f"NFPBroker - received '{msg}'")
 
+                if len(msg) < 3:
+                    log.error(f"NFPBroker - received malformed message: {msg}")
+                    continue
+
                 sender = msg.pop(0)
                 empty = msg.pop(0)
                 header = msg.pop(0)
@@ -332,6 +336,10 @@ class NFPBroker:
                     self.process_client(sender, msg)
                 elif header == NFP.WORKER:
                     self.process_worker(sender, msg)
+                else:
+                    log.error(
+                        f"NFPBroker - message from '{sender}' contains unsupported header '{header}'"
+                    )
 
             self.purge_workers()
 
@@ -394,11 +402,11 @@ class NFPBroker:
             # in case worker self destroyed while we iterating
             if self.workers.get(name):
                 w = self.workers[name]
-            if not w.keepaliver.is_alive():
-                self.delete_worker(w, False)
-                log.info(
-                    f"NFPBroker - {w.address.decode(encoding='utf-8')} worker keepalives expired"
-                )
+                if not w.keepaliver.is_alive():
+                    self.delete_worker(w, False)
+                    log.info(
+                        f"NFPBroker - {w.address.decode(encoding='utf-8')} worker keepalives expired"
+                    )
 
     def send_to_worker(
         self, worker: NFPWorker, command: bytes, sender: bytes, uuid: bytes, data: bytes

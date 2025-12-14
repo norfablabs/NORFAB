@@ -93,7 +93,7 @@ class NFPClient(object):
     Methods:
         __init__(inventory, broker, name, exit_event=None, event_queue=None):
             Initializes the NFPClient instance with the given parameters.
-        _make_workers(workers) -> bytes:
+        ensure_bytes(workers) -> bytes:
             Helper function to convert workers target to bytes.
         reconnect_to_broker():
             Connects or reconnects to the broker.
@@ -203,29 +203,18 @@ class NFPClient(object):
         )
         self.recv_thread.start()
 
-    def _make_workers(self, workers: Union[str, list]) -> bytes:
+    def ensure_bytes(self, value: Any) -> bytes:
         """
-        Helper function to convert workers target to bytes.
-
-        This function takes a workers target, which can be either a string or a list,
-        and converts it to a bytes object. If the input is a string, it is encoded
-        using UTF-8. If the input is a list, it is first converted to a JSON string
-        and then encoded using UTF-8.
-
-        Args:
-            workers (Union[str, list]): The workers target to be converted to bytes.
-
-        Returns:
-            bytes: The workers target converted to bytes.
+        Helper function to convert value to bytes.
         """
-        # transform workers string to bytes
-        if isinstance(workers, str):
-            workers = workers.encode("utf-8")
-        # encode workers names list to list of bytes
-        elif isinstance(workers, list):
-            workers = json.dumps(workers).encode("utf-8")
-
-        return workers
+        if isinstance(value, bytes):
+            return value
+        # transform string to bytes
+        if isinstance(value, str):
+            return value.encode("utf-8")
+        # convert value to json string
+        else:
+            return json.dumps(value).encode("utf-8")
 
     def reconnect_to_broker(self):
         """
@@ -403,17 +392,13 @@ class NFPClient(object):
         kwargs = kwargs or {}
         ret = {"status": b"200", "workers": [], "errors": [], "uuid": uuid}
 
-        if not isinstance(service, bytes):
-            service = service.encode("utf-8")
+        service = self.ensure_bytes(service)
+        uuid = self.ensure_bytes(uuid)
+        workers = self.ensure_bytes(workers)
 
-        if not isinstance(uuid, bytes):
-            uuid = uuid.encode("utf-8")
-
-        workers = self._make_workers(workers)
-
-        request = json.dumps(
+        request = self.ensure_bytes(
             {"task": task, "kwargs": kwargs or {}, "args": args or []}
-        ).encode("utf-8")
+        )
 
         # run POST response loop
         start_time = time.time()
@@ -527,17 +512,13 @@ class NFPClient(object):
         }
         ret = {"status": b"200", "results": {}, "errors": [], "workers": wkrs}
 
-        if not isinstance(service, bytes):
-            service = service.encode("utf-8")
+        service = self.ensure_bytes(service)
+        uuid = self.ensure_bytes(uuid)
+        workers = self.ensure_bytes(workers)
 
-        if not isinstance(uuid, bytes):
-            uuid = uuid.encode("utf-8")
-
-        workers = self._make_workers(workers)
-
-        request = json.dumps(
+        request = self.ensure_bytes(
             {"task": task, "kwargs": kwargs or {}, "args": args or []}
-        ).encode("utf-8")
+        )
 
         # run GET response loop
         start_time = time.time()
@@ -651,17 +632,13 @@ class NFPClient(object):
         args = args or []
         kwargs = kwargs or {}
 
-        if not isinstance(service, bytes):
-            service = service.encode("utf-8")
+        service = self.ensure_bytes(service)
+        uuid = self.ensure_bytes(uuid)
+        workers = self.ensure_bytes(workers)
 
-        if not isinstance(uuid, bytes):
-            uuid = uuid.encode("utf-8")
-
-        workers = self._make_workers(workers)
-
-        request = json.dumps(
+        request = self.ensure_bytes(
             {"task": task, "kwargs": kwargs or {}, "args": args or []}
-        ).encode("utf-8")
+        )
 
         # run GET response loop
         start_time = time.time()
@@ -706,7 +683,6 @@ class NFPClient(object):
                 else:
                     msg = f"{self.name} - unexpected GET Response status '{status}', response '{response}'"
                     log.error(msg)
-                    ret["errors"].append(msg)
                 if workers_responded == workers_dispatched:
                     break
             if workers_done == workers_dispatched:
@@ -742,7 +718,7 @@ class NFPClient(object):
         Raises:
             Exception: If there is an error in fetching the file or if the file's MD5 hash does not match the expected hash.
         """
-        uuid = str(uuid4().hex).encode("utf-8")
+        uuid = self.ensure_bytes(str(uuid4().hex))
         total = 0  # Total bytes received
         chunks = 0  # Total chunks received
         offset = 0  # Offset of next chunk request
@@ -764,9 +740,7 @@ class NFPClient(object):
         os.makedirs(os.path.split(destination)[0], exist_ok=True)
 
         # get file details
-        request = json.dumps({"task": "file_details", "kwargs": {"url": url}}).encode(
-            "utf-8"
-        )
+        request = self.ensure_bytes({"task": "file_details", "kwargs": {"url": url}})
         self.send_to_broker(NFP.GET, service, workers, uuid, request)
         rcv_status, file_details = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
         file_details = json.loads(file_details)
@@ -794,7 +768,7 @@ class NFPClient(object):
                         return "400", ""
                     # ask for chunks
                     while credit:
-                        request = json.dumps(
+                        request = self.ensure_bytes(
                             {
                                 "task": "fetch_file",
                                 "kwargs": {
@@ -803,7 +777,7 @@ class NFPClient(object):
                                     "url": url,
                                 },
                             }
-                        ).encode("utf-8")
+                        )
                         self.send_to_broker(NFP.GET, service, workers, uuid, request)
                         offset += chunk_size
                         credit -= 1

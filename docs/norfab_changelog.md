@@ -1,4 +1,4 @@
-## 0.13.0
+## 0.12.7
 
 ### FEATURES
 
@@ -9,7 +9,8 @@
 
 1. NFAPI changed start method arguments from `start_broker` to `run_broker` and `workers` to `run_workers`
 2. Nornir task - enhanced task import logic
-3. Nornir worker - refactoring to reduce duplicate code
+3. Nornir worker - added filter hosts method to reduce duplicate code
+4. NorFab client - added ensure_bytes method to reduce duplicate code
 
 ---
 
