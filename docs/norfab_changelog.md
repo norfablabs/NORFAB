@@ -1,3 +1,12 @@
+## 0.12.8
+
+### BUG FIXES
+
+1. Fixing even severity handling in worker.
+
+
+---
+
 ## 0.12.7
 
 ### FEATURES

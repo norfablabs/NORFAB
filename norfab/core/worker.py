@@ -1227,7 +1227,6 @@ class NFPWorker:
         juuid: str,
         task: str,
         client_address: str,
-        severity: str,
         **kwargs,
     ) -> None:
         """
@@ -1251,7 +1250,6 @@ class NFPWorker:
                 juuid=juuid,
                 client_address=client_address,
                 task=task,
-                severity=severity,
                 **kwargs,
             )
         except Exception as e:
@@ -1263,15 +1261,15 @@ class NFPWorker:
         # check if need to emit log for this event
         if self.inventory["logging"].get("log_events", False):
             event_log = f"EVENT {self.name}:{task} - {message}"
-            if severity == "INFO":
+            if event_data.severity == "INFO":
                 log.info(event_log)
-            if severity == "DEBUG":
+            if event_data.severity == "DEBUG":
                 log.debug(event_log)
-            if severity == "WARNING":
+            if event_data.severity == "WARNING":
                 log.warning(event_log)
-            if severity == "CRITICAL":
+            if event_data.severity == "CRITICAL":
                 log.critical(event_log)
-            if severity == "ERROR":
+            if event_data.severity == "ERROR":
                 log.error(event_log)
         # save event locally
         filename = event_filename(juuid, self.base_dir_jobs)
