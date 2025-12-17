@@ -13,6 +13,9 @@ import concurrent.futures
 import copy
 import inspect
 import functools
+import sqlite3
+import zlib
+from contextlib import contextmanager
 
 from . import NFP
 from .client import NFPClient
@@ -343,6 +346,528 @@ class Task:
 
 
 # --------------------------------------------------------------------------------------------
+# NORFAB Worker Job Database
+# --------------------------------------------------------------------------------------------
+
+
+class JobDatabase:
+    """
+    Thread-safe SQLite database manager for worker jobs.
+
+    Handles all job persistence operations with proper thread safety through
+    connection-level locking and WAL mode for concurrent reads.
+
+    Attributes:
+        db_path (str): Path to the SQLite database file.
+        _local (threading.local): Thread-local storage for database connections.
+        _lock (threading.Lock): Lock for write operations to ensure thread safety.
+    """
+
+    def __init__(self, db_path: str, jobs_compress: bool = True):
+        """
+        Initialize the job database.
+
+        Args:
+            db_path (str): Path to the SQLite database file.
+            jobs_compress (bool): If True, compress request_data and result_data fields. Defaults to True.
+        """
+        self.db_path = db_path
+        self.jobs_compress = jobs_compress
+        self._local = threading.local()
+        self._lock = threading.Lock()
+        self._initialize_database()
+
+    def _get_connection(self) -> sqlite3.Connection:
+        """
+        Get a thread-local database connection.
+
+        Returns:
+            sqlite3.Connection: Thread-local database connection.
+        """
+        if not hasattr(self._local, "conn"):
+            self._local.conn = sqlite3.connect(
+                self.db_path, check_same_thread=False, timeout=30.0
+            )
+            self._local.conn.row_factory = sqlite3.Row
+            # Enable WAL mode for better concurrent access
+            self._local.conn.execute("PRAGMA journal_mode=WAL")
+            self._local.conn.execute("PRAGMA synchronous=NORMAL")
+
+            # Verify JSON1 extension is available
+            try:
+                self._local.conn.execute("SELECT json('{}')").fetchone()
+                log.debug(f"SQLite JSON1 extension is available")
+            except sqlite3.OperationalError:
+                log.warning(
+                    f"SQLite JSON1 extension not available - JSON queries will be limited"
+                )
+        return self._local.conn
+
+    @contextmanager
+    def _transaction(self, write: bool = False):
+        """
+        Context manager for database transactions with optional write locking.
+
+        Args:
+            write (bool): If True, acquire write lock for the transaction.
+
+        Yields:
+            sqlite3.Connection: Database connection.
+        """
+        conn = self._get_connection()
+        if write:
+            with self._lock:
+                try:
+                    yield conn
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
+                    raise
+        else:
+            try:
+                yield conn
+            except Exception:
+                raise
+
+    def _compress_data(self, data: dict) -> str:
+        """
+        Compress dictionary data to base64-encoded string if compression is enabled.
+
+        Args:
+            data (dict): Dictionary to compress.
+
+        Returns:
+            str: Compressed and base64-encoded string if compression enabled, otherwise JSON string.
+        """
+        if self.jobs_compress:
+            import base64
+            json_str = json.dumps(data)
+            compressed = zlib.compress(json_str.encode('utf-8'))
+            return base64.b64encode(compressed).decode('utf-8')
+        else:
+            return json.dumps(data)
+
+    def _decompress_data(self, data_str: str) -> dict:
+        """
+        Decompress base64-encoded compressed string back to dictionary.
+        Automatically detects if data is compressed or plain JSON.
+
+        Args:
+            data_str (str): Compressed base64 string or plain JSON string.
+
+        Returns:
+            dict: Decompressed dictionary.
+        """
+        if not data_str:
+            return {}
+
+        # Try to detect if data is compressed (base64) or plain JSON
+        try:
+            # First, try to parse as JSON (uncompressed)
+            return json.loads(data_str)
+        except json.JSONDecodeError:
+            # If JSON parsing fails, assume it's compressed
+            import base64
+            try:
+                compressed = base64.b64decode(data_str.encode('utf-8'))
+                decompressed = zlib.decompress(compressed)
+                return json.loads(decompressed.decode('utf-8'))
+            except Exception as e:
+                log.error(f"Failed to decompress data: {e}")
+                return {}
+
+    def _initialize_database(self):
+        """Initialize the database schema."""
+        with self._transaction(write=True) as conn:
+            # Jobs table - using JSON TEXT fields instead of BLOB
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS jobs (
+                    uuid TEXT PRIMARY KEY,
+                    client_address TEXT NOT NULL,
+                    task TEXT NOT NULL,
+                    args TEXT,
+                    kwargs TEXT,
+                    timeout INTEGER,
+                    status TEXT DEFAULT 'PENDING',
+                    received_timestamp TEXT NOT NULL,
+                    started_timestamp TEXT,
+                    completed_timestamp TEXT,
+                    request_data TEXT,
+                    result_data TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """
+            )
+
+            # Events table
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_uuid TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    severity TEXT DEFAULT 'INFO',
+                    task TEXT,
+                    event_data TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (job_uuid) REFERENCES jobs(uuid) ON DELETE CASCADE
+                )
+            """
+            )
+
+            # Create indexes for performance
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_task ON jobs(task)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_jobs_client ON jobs(client_address)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_jobs_received ON jobs(received_timestamp)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_jobs_created ON jobs(created_at)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_events_job_uuid ON events(job_uuid)"
+            )
+
+    def add_job(
+        self,
+        uuid: str,
+        client_address: str,
+        task: str,
+        args: list,
+        kwargs: dict,
+        timeout: int,
+        request_data: dict,
+        timestamp: str,
+    ) -> None:
+        """
+        Add a new job to the database.
+
+        Args:
+            uuid (str): Job UUID.
+            client_address (str): Client address.
+            task (str): Task name.
+            args (list): Task arguments.
+            kwargs (dict): Task keyword arguments.
+            timeout (int): Job timeout.
+            request_data (dict): Full request data as dictionary.
+            timestamp (str): Received timestamp.
+        """
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                INSERT INTO jobs (uuid, client_address, task, args, kwargs, timeout,
+                                 status, received_timestamp, request_data)
+                VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?)
+            """,
+                (
+                    uuid,
+                    client_address,
+                    task,
+                    json.dumps(args),
+                    json.dumps(kwargs),
+                    timeout,
+                    timestamp,
+                    self._compress_data(request_data),
+                ),
+            )
+
+    def get_next_pending_job(self) -> tuple:
+        """
+        Get the next pending job and mark it as STARTED.
+
+        Returns:
+            tuple: (uuid, received_timestamp) or None if no pending jobs.
+        """
+        with self._transaction(write=True) as conn:
+            # order jobs by their creation timestamp in ascending order - oldest first
+            cursor = conn.execute(
+                """
+                SELECT uuid, received_timestamp FROM jobs
+                WHERE status = 'PENDING'
+                ORDER BY created_at ASC
+                LIMIT 1
+            """
+            )
+            row = cursor.fetchone()
+            if row:
+                uuid = row["uuid"]
+                conn.execute(
+                    """
+                    UPDATE jobs SET status = 'STARTED', started_timestamp = ?
+                    WHERE uuid = ?
+                """,
+                    (time.ctime(), uuid),
+                )
+                return uuid, row["received_timestamp"]
+            return None
+
+    def complete_job(self, uuid: str, result_data: dict) -> None:
+        """
+        Mark a job as completed and store its result.
+
+        Args:
+            uuid (str): Job UUID.
+            result_data (dict): Result data as dictionary.
+        """
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                UPDATE jobs
+                SET status = 'COMPLETED', completed_timestamp = ?, result_data = ?
+                WHERE uuid = ?
+            """,
+                (time.ctime(), self._compress_data(result_data), uuid),
+            )
+
+    def fail_job(self, uuid: str, result_data: dict) -> None:
+        """
+        Mark a job as failed and store its result.
+
+        Args:
+            uuid (str): Job UUID.
+            result_data (dict): Result data as dictionary.
+        """
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                UPDATE jobs
+                SET status = 'FAILED', completed_timestamp = ?, result_data = ?
+                WHERE uuid = ?
+            """,
+                (time.ctime(), self._compress_data(result_data), uuid),
+            )
+
+    def get_job_info(
+        self,
+        uuid: str,
+        include_result: bool = False,
+        include_data: bool = False,
+        include_events: bool = False,
+    ) -> dict:
+        """
+        Get comprehensive job information including status, execution data, and optionally result data and events.
+
+        Args:
+            uuid (str): Job UUID.
+            include_result (bool): If True, include result_data in the response. Defaults to False.
+            include_data (bool): If True, include parsed job data (task, args, kwargs). Defaults to False.
+            include_events (bool): If True, include job events. Defaults to False.
+
+        Returns:
+            dict: Job information with the following fields:
+                - uuid: Job UUID
+                - status: Job status (PENDING, STARTED, COMPLETED, FAILED)
+                - received_timestamp: When job was received
+                - started_timestamp: When job started execution
+                - completed_timestamp: When job completed
+                - client_address: Client address
+                - task: Task name
+
+            If include_data=True, also includes:
+                - job_data: Dictionary with task, args, and kwargs
+
+            If include_result=True, also includes:
+                - job_result: Result data dictionary (if available)
+
+            If include_events=True, also includes:
+                - job_events: List of event dictionaries
+
+            If none of the include flags are True, also returns:
+                - args: Parsed task arguments list
+                - kwargs: Parsed task keyword arguments dict
+                - timeout: Job timeout
+                - request_data: Full request data dictionary
+
+            Returns None if job not found.
+        """
+        with self._transaction(write=False) as conn:
+            # Build SELECT clause based on requested fields
+            select_fields = [
+                "uuid",
+                "status",
+                "received_timestamp",
+                "started_timestamp",
+                "completed_timestamp",
+                "client_address",
+                "task",
+                "args",
+                "kwargs",
+                "timeout",
+                "request_data",
+            ]
+
+            if include_result:
+                select_fields.append("result_data")
+
+            query = f"""
+                SELECT {', '.join(select_fields)}
+                FROM jobs WHERE uuid = ?
+            """
+
+            cursor = conn.execute(query, (uuid,))
+            row = cursor.fetchone()
+
+            if not row:
+                return None
+
+            result = dict(row)
+            result.setdefault("job_data", None)
+            result.setdefault("result_data", None)
+            result.setdefault("job_events", [])
+
+            # Determine output format based on flags
+            if include_data or include_result or include_events:
+
+                if include_data:
+                    result["job_data"] = {
+                        "task": row["task"],
+                        "args": json.loads(row["args"]) if row["args"] else [],
+                        "kwargs": json.loads(row["kwargs"]) if row["kwargs"] else {},
+                    }
+
+                if include_result and row["result_data"]:
+                    result["result_data"] = self._decompress_data(row["result_data"])
+
+                if include_events:
+                    result["job_events"] = self.get_job_events(uuid)
+
+            else:
+                # Parse JSON fields
+                result["args"] = json.loads(row["args"]) if row["args"] else []
+                result["kwargs"] = json.loads(row["kwargs"]) if row["kwargs"] else {}
+
+                # Decompress request_data if present
+                if "request_data" in result and result["request_data"]:
+                    result["request_data"] = self._decompress_data(result["request_data"])
+
+            return result
+
+    def add_event(
+        self, job_uuid: str, message: str, severity: str, task: str, event_data: dict
+    ) -> None:
+        """
+        Add an event for a job.
+
+        Args:
+            job_uuid (str): Job UUID.
+            message (str): Event message.
+            severity (str): Event severity.
+            task (str): Task name.
+            event_data (dict): Event data dictionary.
+        """
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                INSERT INTO events (job_uuid, message, severity, task, event_data)
+                VALUES (?, ?, ?, ?, ?)
+            """,
+                (job_uuid, message, severity, task, json.dumps(event_data)),
+            )
+
+    def get_job_events(self, uuid: str) -> list:
+        """
+        Get all events for a job.
+
+        Args:
+            uuid (str): Job UUID.
+
+        Returns:
+            list: List of event dictionaries.
+        """
+        with self._transaction(write=False) as conn:
+            cursor = conn.execute(
+                """
+                SELECT message, severity, task, event_data, created_at
+                FROM events WHERE job_uuid = ?
+                ORDER BY created_at ASC
+            """,
+                (uuid,),
+            )
+            return [
+                {
+                    "message": row["message"],
+                    "severity": row["severity"],
+                    "task": row["task"],
+                    **json.loads(row["event_data"]),
+                    "created_at": row["created_at"],
+                }
+                for row in cursor.fetchall()
+            ]
+
+    def list_jobs(
+        self,
+        pending: bool = True,
+        completed: bool = True,
+        task: str = None,
+        last: int = None,
+        client: str = None,
+        uuid: str = None,
+    ) -> list:
+        """
+        List jobs based on filters.
+
+        Args:
+            pending (bool): Include pending jobs.
+            completed (bool): Include completed jobs.
+            task (str): Filter by task name.
+            last (int): Return only last N jobs.
+            client (str): Filter by client address.
+            uuid (str): Filter by specific UUID.
+
+        Returns:
+            list: List of job dictionaries.
+        """
+        with self._transaction(write=False) as conn:
+            # Build query
+            conditions = []
+            params = []
+
+            if uuid:
+                conditions.append("uuid = ?")
+                params.append(uuid)
+            else:
+                status_conditions = []
+                if pending:
+                    status_conditions.append("status IN ('PENDING', 'STARTED')")
+                if completed:
+                    status_conditions.append("status IN ('COMPLETED', 'FAILED')")
+                if status_conditions:
+                    conditions.append(f"({' OR '.join(status_conditions)})")
+
+                if task:
+                    conditions.append("task = ?")
+                    params.append(task)
+                if client:
+                    conditions.append("client_address = ?")
+                    params.append(client)
+
+            where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+            query = f"""
+                SELECT uuid, client_address, task, status,
+                       received_timestamp, started_timestamp, completed_timestamp
+                FROM jobs {where_clause}
+                ORDER BY created_at DESC
+            """
+
+            if last:
+                query += f" LIMIT {last}"
+
+            cursor = conn.execute(query, params)
+            return [dict(row) for row in cursor.fetchall()]
+
+
+    def close(self):
+        """Close all database connections."""
+        if hasattr(self._local, "conn"):
+            self._local.conn.close()
+            delattr(self._local, "conn")
+
+
+# --------------------------------------------------------------------------------------------
 # NORFAB Worker watchdog Object
 # --------------------------------------------------------------------------------------------
 
@@ -464,147 +989,66 @@ class WorkerWatchDog(threading.Thread):
 # NORFAB worker
 # --------------------------------------------------------------------------------------------
 
-file_write_lock = threading.Lock()
-queue_file_lock = threading.Lock()
 
-
-def dumper(data, filename):
+def _post(worker, post_queue, destroy_event):
     """
-    Serializes and saves data to a file using pickle.
-
-    Args:
-        data (any): The data to be serialized and saved.
-        filename (str): The name of the file where the data will be saved.
-    """
-    with file_write_lock:
-        with open(filename, "wb") as f:
-            pickle.dump(data, f)
-
-
-def loader(filename):
-    """
-    Load and deserialize a Python object from a file.
-
-    This function opens a file in binary read mode, reads its content, and
-    deserializes it using the pickle module. The file access is synchronized
-    using a file write lock to ensure thread safety.
-
-    Args:
-        filename (str): The path to the file to be loaded.
-
-    Returns:
-        object: The deserialized Python object from the file.
-    """
-    with file_write_lock:
-        with open(filename, "rb") as f:
-            return pickle.load(f)
-
-
-def request_filename(suuid: Union[str, bytes], base_dir_jobs: str):
-    """
-    Returns a freshly allocated request filename for the given UUID string.
-
-    Args:
-        suuid (Union[str, bytes]): The UUID string or bytes.
-        base_dir_jobs (str): The base directory where job files are stored.
-
-    Returns:
-        str: The full path to the request file with the given UUID.
-    """
-    suuid = suuid.decode("utf-8") if isinstance(suuid, bytes) else suuid
-    return os.path.join(base_dir_jobs, f"{suuid}.req")
-
-
-def reply_filename(suuid: Union[str, bytes], base_dir_jobs: str):
-    """
-    Returns a freshly allocated reply filename for the given UUID string.
-
-    Args:
-        suuid (Union[str, bytes]): The UUID string or bytes.
-        base_dir_jobs (str): The base directory where job files are stored.
-
-    Returns:
-        str: The full path to the reply file with the given UUID.
-    """
-    suuid = suuid.decode("utf-8") if isinstance(suuid, bytes) else suuid
-    return os.path.join(base_dir_jobs, f"{suuid}.rep")
-
-
-def event_filename(suuid: Union[str, bytes], base_dir_jobs: str):
-    """
-    Returns a freshly allocated event filename for the given UUID string.
-
-    Args:
-        suuid (Union[str, bytes]): The UUID string or bytes.
-        base_dir_jobs (str): The base directory where job files are stored.
-
-    Returns:
-        str: The full path to the event file with the given UUID.
-    """
-    suuid = suuid.decode("utf-8") if isinstance(suuid, bytes) else suuid
-    return os.path.join(base_dir_jobs, f"{suuid}.event")
-
-
-def _post(worker, post_queue, queue_filename, destroy_event, base_dir_jobs):
-    """
-    Thread to receive POST requests and save them to hard disk.
+    Thread to receive POST requests and save them to database.
 
     Args:
         worker (Worker): The worker instance handling the request.
         post_queue (queue.Queue): The queue from which POST requests are received.
-        queue_filename (str): The filename where the job queue is stored.
         destroy_event (threading.Event): Event to signal the thread to stop.
-        base_dir_jobs (str): The base directory where job files are stored.
 
     Functionality:
-        - Ensures the message directory exists.
         - Continuously processes POST requests from the queue until the destroy event is set.
-        - Saves the request to the hard disk.
-        - Writes a reply indicating the job is pending.
-        - Adds the job request to the queue file.
+        - Saves the request to the database.
         - Sends an acknowledgment back to the client.
     """
-    # Ensure message directory exists
-    if not os.path.exists(base_dir_jobs):
-        os.mkdir(base_dir_jobs)
-
     while not destroy_event.is_set():
         try:
             work = post_queue.get(block=True, timeout=0.1)
         except queue.Empty:
             continue
+
         timestamp = time.ctime()
         client_address = work[0]
         suuid = work[2]
-        filename = request_filename(suuid, base_dir_jobs)
-        dumper(work, filename)
+        data = json.loads(work[3].decode("utf-8"))
 
-        # write reply for this job indicating it is pending
-        filename = reply_filename(suuid, base_dir_jobs)
-        dumper(
-            [
-                client_address,
-                b"",
-                suuid,
-                b"300",
-                json.dumps(
-                    {
-                        "worker": worker.name,
-                        "uuid": suuid.decode("utf-8"),
-                        "status": "PENDING",
-                        "service": worker.service.decode("utf-8"),
-                    }
-                ).encode("utf-8"),
-            ],
-            filename,
-        )
-        log.debug(f"{worker.name} - '{suuid}' job, saved PENDING reply filename")
+        task = data.get("task")
+        args = data.get("args", [])
+        kwargs = data.get("kwargs", {})
+        timeout = data.get("timeout", 60)
 
-        # add job request to the queue_filename
-        with queue_file_lock:
-            with open(queue_filename, "ab") as f:
-                f.write(f"{suuid.decode('utf-8')}--{timestamp}\n".encode("utf-8"))
-        log.debug(f"{worker.name} - '{suuid}' job, added job to queue filename")
+        # Store the entire work as JSON-serializable dict for request_data
+        request_data = {
+            "client_address": client_address.decode("utf-8"),
+            "uuid": suuid.decode("utf-8"),
+            "task": task,
+            "args": args,
+            "kwargs": kwargs,
+            "timeout": timeout,
+        }
+
+        # Add job to database
+        try:
+            worker.db.add_job(
+                uuid=suuid.decode("utf-8"),
+                client_address=client_address.decode("utf-8"),
+                task=task,
+                args=args,
+                kwargs=kwargs,
+                timeout=timeout,
+                request_data=request_data,
+                timestamp=timestamp,
+            )
+            log.debug(
+                f"{worker.name} - '{suuid.decode('utf-8')}' job added to database"
+            )
+        except Exception as e:
+            log.error(f"{worker.name} - failed to add job to database: {e}")
+            post_queue.task_done()
+            continue
 
         # ack job back to client
         worker.send_to_broker(
@@ -625,21 +1069,25 @@ def _post(worker, post_queue, queue_filename, destroy_event, base_dir_jobs):
             ],
         )
         log.debug(
-            f"{worker.name} - '{suuid}' job, sent ACK back to client '{client_address}'"
+            f"{worker.name} - '{suuid.decode('utf-8')}' job, sent ACK back to client '{client_address.decode('utf-8')}'"
         )
 
         post_queue.task_done()
 
 
-def _get(worker, get_queue, destroy_event, base_dir_jobs):
+def _get(worker, get_queue, destroy_event):
     """
-    Thread to receive GET requests and retrieve results from the hard disk.
+    Thread to receive GET requests and retrieve job status/results from the database.
+
+    This function handles GET requests intelligently based on job status:
+    - If job is PENDING or STARTED: Returns current status with timestamps
+    - If job is COMPLETED or FAILED: Returns full job results
+    - If job is not found: Returns 404 error
 
     Args:
         worker (Worker): The worker instance handling the request.
         get_queue (queue.Queue): The queue from which GET requests are received.
         destroy_event (threading.Event): Event to signal the thread to stop.
-        base_dir_jobs (str): The base directory where job results are stored.
     """
     while not destroy_event.is_set():
         try:
@@ -649,21 +1097,87 @@ def _get(worker, get_queue, destroy_event, base_dir_jobs):
 
         client_address = work[0]
         suuid = work[2]
-        rep_filename = reply_filename(suuid, base_dir_jobs)
+        uuid_str = suuid.decode("utf-8")
 
-        if os.path.exists(rep_filename):
-            reply = loader(rep_filename)
-        else:
+        # Get job info - first without result data for efficiency
+        job_info = worker.db.get_job_info(uuid_str, include_result=False)
+
+        if job_info is None:
+            # Job not found
             reply = [
                 client_address,
                 b"",
                 suuid,
-                b"400",
+                b"404",
                 json.dumps(
                     {
                         "worker": worker.name,
-                        "uuid": suuid.decode("utf-8"),
-                        "status": "JOB RESULTS NOT FOUND",
+                        "uuid": uuid_str,
+                        "status": "JOB NOT FOUND",
+                        "service": worker.service.decode("utf-8"),
+                    }
+                ).encode("utf-8"),
+            ]
+        elif job_info["status"] in ("PENDING", "STARTED"):
+            # Job is still in progress - return status with timestamps
+            reply = [
+                client_address,
+                b"",
+                suuid,
+                b"300",
+                json.dumps(
+                    {
+                        "worker": worker.name,
+                        "uuid": uuid_str,
+                        "status": job_info["status"],
+                        "service": worker.service.decode("utf-8"),
+                        "received_timestamp": job_info.get("received_timestamp"),
+                        "started_timestamp": job_info.get("started_timestamp"),
+                    }
+                ).encode("utf-8"),
+            ]
+        elif job_info["status"] in ("COMPLETED", "FAILED"):
+            # Job is completed - fetch full result data
+            job_info_with_result = worker.db.get_job_info(uuid_str, include_result=True)
+            result_dict = job_info_with_result.get("result_data")
+
+            if result_dict:
+                # result_dict is already decompressed by get_job_info
+                reply = [
+                    client_address,
+                    b"",
+                    suuid,
+                    result_dict.get("status_code", "200").encode("utf-8"),
+                    json.dumps(result_dict.get("body", {})).encode("utf-8"),
+                ]
+            else:
+                # Status says completed but no result data (shouldn't happen)
+                reply = [
+                    client_address,
+                    b"",
+                    suuid,
+                    b"500",
+                    json.dumps(
+                        {
+                            "worker": worker.name,
+                            "uuid": uuid_str,
+                            "status": "RESULT DATA MISSING",
+                            "service": worker.service.decode("utf-8"),
+                        }
+                    ).encode("utf-8"),
+                ]
+        else:
+            # Unknown status
+            reply = [
+                client_address,
+                b"",
+                suuid,
+                b"500",
+                json.dumps(
+                    {
+                        "worker": worker.name,
+                        "uuid": uuid_str,
+                        "status": f"UNKNOWN STATUS: {job_info['status']}",
                         "service": worker.service.decode("utf-8"),
                     }
                 ).encode("utf-8"),
@@ -708,10 +1222,6 @@ def _event(worker, event_queue, destroy_event):
         ]
         worker.send_to_broker(NFP.EVENT, event)
         event_queue.task_done()
-
-
-def close(delete_queue, queue_filename, destroy_event, base_dir_jobs):
-    pass
 
 
 def recv(worker, destroy_event):
@@ -805,6 +1315,7 @@ class NFPWorker:
         self.setup_logging(log_queue, log_level)
         self.inventory = inventory
         self.max_concurrent_jobs = max(1, inventory.get("max_concurrent_jobs", 5))
+        self.jobs_compress = inventory.get("jobs_compress", True)
         self.broker = broker
         self.service = service.encode("utf-8") if isinstance(service, str) else service
         self.name = name
@@ -821,15 +1332,16 @@ class NFPWorker:
         self.base_dir = os.path.join(
             self.inventory.base_dir, "__norfab__", "files", "worker", self.name
         )
-        self.base_dir_jobs = os.path.join(self.base_dir, "jobs")
         os.makedirs(self.base_dir, exist_ok=True)
-        os.makedirs(self.base_dir_jobs, exist_ok=True)
+
+        # Initialize SQLite database for job management
+        db_path = os.path.join(self.base_dir, f"{self.name}.db")
+        self.db = JobDatabase(db_path, jobs_compress=self.jobs_compress)
 
         # create events and queues
         self.destroy_event = threading.Event()
         self.request_thread = None
         self.reply_thread = None
-        self.close_thread = None
         self.recv_thread = None
         self.event_thread = None
 
@@ -858,18 +1370,6 @@ class NFPWorker:
         self.ctx = zmq.Context()
         self.poller = zmq.Poller()
         self.reconnect_to_broker()
-
-        # create queue file
-        self.queue_filename = os.path.join(self.base_dir_jobs, f"{self.name}.queue.txt")
-        if not os.path.exists(self.queue_filename):
-            with open(self.queue_filename, "w") as f:
-                pass
-        self.queue_done_filename = os.path.join(
-            self.base_dir_jobs, f"{self.name}.queue.done.txt"
-        )
-        if not os.path.exists(self.queue_done_filename):
-            with open(self.queue_done_filename, "w") as f:
-                pass
 
         self.client = NFPClient(
             self.inventory,
@@ -1074,10 +1574,11 @@ class NFPWorker:
         1. Calls the worker_exit method to handle any worker-specific exit procedures.
         2. Sets the destroy_event to signal that the worker is being destroyed.
         3. Calls the destroy method on the client to clean up client resources.
-        4. Joins all the threads (request_thread, reply_thread, close_thread, event_thread, recv_thread) if they are not None, ensuring they have finished execution.
-        5. Destroys the context with a linger period of 0 to immediately close all sockets.
-        6. Stops the keepaliver to cease any keepalive signals.
-        7. Logs an informational message indicating that the worker has been destroyed, including an optional message.
+        4. Joins all the threads (request_thread, reply_thread, event_thread, recv_thread) if they are not None, ensuring they have finished execution.
+        5. Closes the database connections.
+        6. Destroys the context with a linger period of 0 to immediately close all sockets.
+        7. Stops the keepaliver to cease any keepalive signals.
+        8. Logs an informational message indicating that the worker has been destroyed, including an optional message.
 
         Args:
             message (str, optional): An optional message to include in the log when the worker is destroyed.
@@ -1091,12 +1592,13 @@ class NFPWorker:
             self.request_thread.join()
         if self.reply_thread is not None:
             self.reply_thread.join()
-        if self.close_thread is not None:
-            self.close_thread.join()
         if self.event_thread is not None:
             self.event_thread.join()
         if self.recv_thread:
             self.recv_thread.join()
+
+        # close database
+        self.db.close()
 
         self.ctx.destroy(0)
 
@@ -1233,11 +1735,13 @@ class NFPWorker:
         Handles the creation and emission of an event.
 
         This method takes event data, processes it, and sends it to the event queue.
-        It also saves the event data locally for future reference.
+        It also saves the event data to the database for future reference.
 
         Args:
             message: The event message
             juuid: Job ID for which this event is generated
+            task: Task name
+            client_address: Client address
             **kwargs: Additional keyword arguments to be passed when creating a NorFabEvent instance
 
         Logs:
@@ -1255,27 +1759,37 @@ class NFPWorker:
         except Exception as e:
             log.error(f"Failed to form event data, error {e}")
             return
-        event_data = event_data.model_dump(exclude_none=True)
+        event_dict = event_data.model_dump(exclude_none=True)
+
         # emit event to the broker
-        self.event_queue.put(event_data)
+        self.event_queue.put(event_dict)
+
         # check if need to emit log for this event
         if self.inventory["logging"].get("log_events", False):
             event_log = f"EVENT {self.name}:{task} - {message}"
-            if event_data.severity == "INFO":
+            severity = event_dict.get("severity", "INFO")
+            if severity == "INFO":
                 log.info(event_log)
-            if event_data.severity == "DEBUG":
+            elif severity == "DEBUG":
                 log.debug(event_log)
-            if event_data.severity == "WARNING":
+            elif severity == "WARNING":
                 log.warning(event_log)
-            if event_data.severity == "CRITICAL":
+            elif severity == "CRITICAL":
                 log.critical(event_log)
-            if event_data.severity == "ERROR":
+            elif severity == "ERROR":
                 log.error(event_log)
-        # save event locally
-        filename = event_filename(juuid, self.base_dir_jobs)
-        events = loader(filename) if os.path.exists(filename) else []
-        events.append(event_data)
-        dumper(events, filename)
+
+        # save event to database
+        try:
+            self.db.add_event(
+                job_uuid=juuid,
+                message=message,
+                severity=event_dict.get("severity", "INFO"),
+                task=task,
+                event_data=event_dict,
+            )
+        except Exception as e:
+            log.error(f"Failed to save event to database: {e}")
 
     @Task(fastapi={"methods": ["GET"]})
     def job_details(
@@ -1297,44 +1811,9 @@ class NFPWorker:
         Returns:
             Result: A Result object with the job details.
         """
-        job = None
-        with queue_file_lock:
-            with open(self.queue_done_filename, "rb+") as f:
-                for entry in f.readlines():
-                    job_data, job_result, job_events = None, None, []
-                    job_entry = entry.decode("utf-8").strip()
-                    suuid, start, end = job_entry.split("--")  # {suuid}--startend
-                    if suuid != uuid:
-                        continue
-                    # load job request details
-                    client_address, empty, juuid, job_data_bytes = loader(
-                        request_filename(suuid, self.base_dir_jobs)
-                    )
-                    if data:
-                        job_data = json.loads(job_data_bytes.decode("utf-8"))
-                    # load job result details
-                    if result:
-                        rep_filename = reply_filename(suuid, self.base_dir_jobs)
-                        if os.path.exists(rep_filename):
-                            job_result = loader(rep_filename)
-                            job_result = json.loads(job_result[-1].decode("utf-8"))
-                            job_result = job_result[self.name]
-                    # load event details
-                    if events:
-                        events_filename = event_filename(suuid, self.base_dir_jobs)
-                        if os.path.exists(events_filename):
-                            job_events = loader(events_filename)
-
-                    job = {
-                        "uuid": suuid,
-                        "client": client_address.decode("utf-8"),
-                        "received_timestamp": start,
-                        "done_timestamp": end,
-                        "status": "COMPLETED",
-                        "job_data": job_data,
-                        "job_result": job_result,
-                        "job_events": job_events,
-                    }
+        job = self.db.get_job_info(
+            uuid=uuid, include_data=data, include_result=result, include_events=events
+        )
 
         if job:
             return Result(
@@ -1368,80 +1847,30 @@ class NFPWorker:
         Returns:
             Result: Result object with a list of jobs.
         """
-        job_pending = []
-        # load pending jobs
-        if pending is True:
-            with queue_file_lock:
-                with open(self.queue_filename, "rb+") as f:
-                    for entry in f.readlines():
-                        job_entry = entry.decode("utf-8").strip()
-                        suuid, start = job_entry.split("--")  # {suuid}--start
-                        suuid = suuid.lstrip("+")  # remove job started indicator
-                        if uuid and uuid != suuid:
-                            continue
-                        client_address, empty, juuid, data = loader(
-                            request_filename(suuid, self.base_dir_jobs)
-                        )
-                        if client and client_address.decode("utf-8") != client:
-                            continue
-                        job_task = json.loads(data.decode("utf-8"))["task"]
-                        # check if need to skip this job
-                        if task and job_task != task:
-                            continue
-                        job_pending.append(
-                            {
-                                "uuid": suuid,
-                                "client": client_address.decode("utf-8"),
-                                "received_timestamp": start,
-                                "done_timestamp": None,
-                                "task": job_task,
-                                "status": "PENDING",
-                                "worker": self.name,
-                                "service": self.service.decode("utf-8"),
-                            }
-                        )
-        job_completed = []
-        # load done jobs
-        if completed is True:
-            with queue_file_lock:
-                with open(self.queue_done_filename, "rb+") as f:
-                    for entry in f.readlines():
-                        job_entry = entry.decode("utf-8").strip()
-                        suuid, start, end = job_entry.split("--")  # {suuid}--startend
-                        if uuid and suuid != uuid:
-                            continue
-                        client_address, empty, juuid, data = loader(
-                            request_filename(suuid, self.base_dir_jobs)
-                        )
-                        if client and client_address.decode("utf-8") != client:
-                            continue
-                        job_task = json.loads(data.decode("utf-8"))["task"]
-                        # check if need to skip this job
-                        if task and job_task != task:
-                            continue
-                        job_completed.append(
-                            {
-                                "uuid": suuid,
-                                "client": client_address.decode("utf-8"),
-                                "received_timestamp": start,
-                                "done_timestamp": end,
-                                "task": job_task,
-                                "status": "COMPLETED",
-                                "worker": self.name,
-                                "service": self.service.decode("utf-8"),
-                            }
-                        )
-        if last:
-            return Result(
-                task=f"{self.name}:job_list",
-                result=job_completed[len(job_completed) - last :]
-                + job_pending[len(job_pending) - last :],
-            )
-        else:
-            return Result(
-                task=f"{self.name}:job_list",
-                result=job_completed + job_pending,
-            )
+        jobs = self.db.list_jobs(
+            pending=pending,
+            completed=completed,
+            task=task,
+            last=last,
+            client=client,
+            uuid=uuid,
+        )
+
+        # Add worker and service information to each job
+        for job in jobs:
+            job["worker"] = self.name
+            job["service"] = self.service.decode("utf-8")
+            # Map database status to expected status names
+            if job["status"] in ("PENDING", "STARTED"):
+                job["status"] = "PENDING"
+                job["completed_timestamp"] = None
+            elif job["status"] in ("COMPLETED", "FAILED"):
+                job["status"] = "COMPLETED"
+
+        return Result(
+            task=f"{self.name}:job_list",
+            result=jobs,
+        )
 
     @Task(
         fastapi={"methods": ["POST"]},
@@ -1524,12 +1953,11 @@ class NFPWorker:
         This method initializes and starts the following threads:
             - request_thread: Handles posting requests using the _post function.
             - reply_thread: Handles receiving replies using the _get function.
-            - close_thread: Handles closing operations using the close function.
             - event_thread: Handles event processing using the _event function.
             - recv_thread: Handles receiving data using the recv function.
 
         Each thread is started as a daemon and is provided with the necessary arguments,
-        including queues, filenames, events, and base directory paths as required.
+        including queues and events as required.
 
         Returns:
             None
@@ -1542,9 +1970,7 @@ class NFPWorker:
             args=(
                 self,
                 self.post_queue,
-                self.queue_filename,
                 self.destroy_event,
-                self.base_dir_jobs,
             ),
         )
         self.request_thread.start()
@@ -1552,21 +1978,9 @@ class NFPWorker:
             target=_get,
             daemon=True,
             name=f"{self.name}_get_thread",
-            args=(self, self.get_queue, self.destroy_event, self.base_dir_jobs),
+            args=(self, self.get_queue, self.destroy_event),
         )
         self.reply_thread.start()
-        self.close_thread = threading.Thread(
-            target=close,
-            daemon=True,
-            name=f"{self.name}_close_thread",
-            args=(
-                self.delete_queue,
-                self.queue_filename,
-                self.destroy_event,
-                self.base_dir_jobs,
-            ),
-        )
-        self.close_thread.start()
         self.event_thread = threading.Thread(
             target=_event,
             daemon=True,
@@ -1586,44 +2000,43 @@ class NFPWorker:
         )
         self.recv_thread.start()
 
-    def run_next_job(self, entry):
+    def run_next_job(self, uuid: str):
         """
-        Processes the next job in the queue based on the provided job entry.
+        Processes the next job from the database.
 
         This method performs the following steps:
 
-        1. Loads job data from the job queue using the entry identifier.
+        1. Loads job data from the database.
         2. Parses the job data to extract the task name, arguments, keyword arguments, and timeout.
         3. Executes the specified task method on the worker instance with the provided arguments.
         4. Handles any exceptions raised during task execution, logging errors and creating a failed Result object if needed.
-        5. Saves the result of the job execution to a reply file for the client.
-        6. Marks the job as processed by removing it from the queue file and appending it to the queue done file.
+        5. Saves the result of the job execution to the database.
+        6. Marks the job as completed or failed in the database.
 
         Args:
-            entry (str): The job queue entry string, typically containing the job's unique identifier.
+            uuid (str): The job UUID to process.
 
         Raises:
             TypeError: If the executed task does not return a Result object.
         """
-        # load job data
-        suuid = entry.split("--")[0]  # {suuid}--start
+        log.debug(f"{self.name} - processing job request {uuid}")
 
-        log.debug(f"{self.name} - processing job request {suuid}")
+        # Load job data from database
+        job_data = self.db.get_job_info(uuid)
+        if not job_data:
+            log.error(f"{self.name} - job {uuid} not found in database")
+            return
 
-        client_address, empty, juuid, data = loader(
-            request_filename(suuid, self.base_dir_jobs)
-        )
-
-        data = json.loads(data)
-        task = data.pop("task")
-        args = data.pop("args", [])
-        kwargs = data.pop("kwargs", {})
-        timeout = data.pop("timeout", 60)
+        client_address = job_data["client_address"]
+        task = job_data["task"]
+        args = job_data["args"]
+        kwargs = job_data["kwargs"]
+        timeout = job_data["timeout"]
 
         job = Job(
             worker=self,
-            client_address=client_address.decode("utf-8"),
-            juuid=juuid.decode("utf-8"),
+            client_address=client_address,
+            juuid=uuid,
             task=task,
             timeout=timeout,
             args=copy.deepcopy(args),
@@ -1631,9 +2044,9 @@ class NFPWorker:
         )
 
         log.debug(
-            f"{self.name} - doing task '{task}', timeout: '{timeout}', data: "
-            f"'{data}', args: '{args}', kwargs: '{kwargs}', client: "
-            f"'{client_address}', job uuid: '{juuid}'"
+            f"{self.name} - doing task '{task}', timeout: '{timeout}', "
+            f"args: '{args}', kwargs: '{kwargs}', client: '{client_address}', "
+            f"job uuid: '{uuid}'"
         )
 
         # run the actual job
@@ -1645,13 +2058,15 @@ class NFPWorker:
             task_completed = time.ctime()
             if not isinstance(result, Result):
                 raise TypeError(
-                    f"{self.name} - task '{task}' did not return Result object, data: {data}, args: '{args}', "
-                    f"kwargs: '{kwargs}', client: '{client_address}', job uuid: '{juuid}'; task returned '{type(result)}'"
+                    f"{self.name} - task '{task}' did not return Result object, "
+                    f"args: '{args}', kwargs: '{kwargs}', client: '{client_address}', "
+                    f"job uuid: '{uuid}'; task returned '{type(result)}'"
                 )
             result.task = result.task or f"{self.name}:{task}"
             result.status = result.status or "completed"
-            result.juuid = result.juuid or juuid.decode("utf-8")
+            result.juuid = result.juuid or uuid
             result.service = self.service.decode("utf-8")
+            job_failed = False
         except Exception as e:
             task_completed = time.ctime()
             result = Result(
@@ -1659,45 +2074,31 @@ class NFPWorker:
                 errors=[traceback.format_exc()],
                 messages=[f"Worker experienced error: '{e}'"],
                 failed=True,
-                juuid=juuid.decode("utf-8"),
+                juuid=uuid,
             )
             log.error(
                 f"{self.name} - worker experienced error:\n{traceback.format_exc()}"
             )
+            job_failed = True
+
         result.task_started = task_started
         result.task_completed = task_completed
 
-        # save job results to reply file
-        dumper(
-            [
-                client_address,
-                b"",
-                suuid.encode("utf-8"),
-                b"200",
-                json.dumps({self.name: result.model_dump()}).encode("utf-8"),
-            ],
-            reply_filename(suuid, self.base_dir_jobs),
-        )
+        # Prepare result data for database storage as JSON-serializable dict
+        result_data = {
+            "client_address": client_address,
+            "uuid": uuid,
+            "status_code": "200",
+            "body": {self.name: result.model_dump()},
+            "worker": self.name,
+            "service": self.service.decode("utf-8"),
+        }
 
-        # mark job entry as processed - remove from queue file and save into queue done file
-        with queue_file_lock:
-            with open(self.queue_filename, "rb+") as qf:
-                with open(self.queue_done_filename, "rb+") as qdf:
-                    qdf.seek(0, os.SEEK_END)  # go to the end
-                    entries = qf.readlines()
-                    qf.seek(0, os.SEEK_SET)  # go to the beginning
-                    qf.truncate()  # empty file content
-                    for entry in entries:
-                        entry = entry.decode("utf-8").strip()
-                        # save done entry to queue_done_filename
-                        if suuid in entry:
-                            entry = f"{entry.lstrip('+')}--{time.ctime()}\n".encode(
-                                "utf-8"
-                            )
-                            qdf.write(entry)
-                        # re-save remaining entries to queue_filename
-                        else:
-                            qf.write(f"{entry}\n".encode("utf-8"))
+        # Save job result to database
+        if job_failed:
+            self.db.fail_job(uuid, result_data)
+        else:
+            self.db.complete_job(uuid, result_data)
 
     def work(self):
         """
@@ -1705,10 +2106,10 @@ class NFPWorker:
 
         This method starts necessary background threads, then enters a loop where it:
 
-        - Acquires a lock to safely read and modify the job queue file.
-        - Searches for the next unstarted job entry, marks it as started, and updates the queue file.
+        - Queries the database for the next pending job.
+        - Atomically marks the job as started in the database.
         - Submits the job to a thread pool executor for concurrent processing.
-        - Waits briefly if no unstarted jobs are found.
+        - Waits briefly if no pending jobs are found.
         - Continues until either the exit or destroy event is set.
 
         Upon exit, performs cleanup by calling the `destroy` method with a status message.
@@ -1722,33 +2123,19 @@ class NFPWorker:
             thread_name_prefix=f"{self.name}-job-thread",
         ) as executor:
             while not self.exit_event.is_set() and not self.destroy_event.is_set():
-                # extract next job id
-                with queue_file_lock:
-                    with open(self.queue_filename, "rb+") as qf:
-                        entries = [
-                            e.decode("utf-8").strip() for e in qf.readlines()
-                        ]  # read jobs
-                        if not entries:  # cycle until file is not empty
-                            time.sleep(0.1)
-                            continue
-                        qf.seek(0, os.SEEK_SET)  # go to the beginning
-                        qf.truncate()  # empty file content
-                        for index, entry in enumerate(entries):
-                            # grab entry that is not started
-                            if entry and not entry.startswith("+"):
-                                entries[index] = f"+{entry}"  # mark job as started
-                                # save job entries back
-                                entries = "\n".join(entries) + "\n"
-                                qf.write(entries.encode("utf-8"))
-                                break
-                        else:
-                            # save job entries back
-                            entries = "\n".join(entries) + "\n"
-                            qf.write(entries.encode("utf-8"))
-                            time.sleep(0.1)
-                            continue
-                # submit the job to workers
-                executor.submit(self.run_next_job, entry)
+                # Get next pending job from database
+                job_info = self.db.get_next_pending_job()
+
+                if job_info is None:
+                    # No pending jobs, wait a bit
+                    time.sleep(0.1)
+                    continue
+
+                uuid, received_timestamp = job_info
+                log.debug(f"{self.name} - submitting job {uuid} to executor")
+
+                # Submit the job to workers
+                executor.submit(self.run_next_job, uuid)
 
         # make sure to clean up
         self.destroy(

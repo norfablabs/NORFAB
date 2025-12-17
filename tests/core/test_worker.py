@@ -182,12 +182,12 @@ class TestWorkerJobsApi:
             assert results["result"], f"{worker} returned no results"
             assert results["failed"] is False, f"{worker} failed to run the task"
             for res in results["result"]:
-                assert "client" in res
+                assert "client_address" in res
                 assert "uuid" in res
                 assert "task" in res
                 assert "status" in res
                 assert "received_timestamp" in res
-                assert "done_timestamp" in res
+                assert "completed_timestamp" in res
 
     def test_job_list_pending_only(self, nfclient):
         ret = nfclient.run_job(
@@ -216,7 +216,7 @@ class TestWorkerJobsApi:
                 ), f"{worker} - Job with none 'cli' task returned: {res}"
 
     def test_job_list_last_1(self, nfclient):
-        ret = nfclient.run_job("nornir", "job_list", kwargs={"last": 1})
+        ret = nfclient.run_job("nornir", "job_list", kwargs={"last": 2})
 
         pprint.pprint(ret)
 
@@ -262,13 +262,13 @@ class TestWorkerJobsApi:
         for worker, results in ret.items():
             assert results["result"], f"{worker} returned no results"
             assert results["failed"] is False, f"{worker} failed to run the task"
-            assert "client" in results["result"]
+            assert "client_address" in results["result"]
             assert "uuid" in results["result"]
             assert "status" in results["result"]
             assert "received_timestamp" in results["result"]
-            assert "done_timestamp" in results["result"]
-            assert "job_result" in results["result"]
-            assert results["result"]["job_result"]
+            assert "completed_timestamp" in results["result"]
+            assert "result_data" in results["result"]
+            assert results["result"]["result_data"]
             assert "job_data" in results["result"]
             assert "job_events" in results["result"]
             assert len(results["result"]["job_events"]) > 0
@@ -308,6 +308,6 @@ class TestWorkerJobsApi:
         for worker, results in ret.items():
             assert results["result"], f"{worker} returned no results"
             assert results["failed"] is False, f"{worker} failed to run the task"
-            assert results["result"]["job_result"] == None
+            assert results["result"]["result_data"] == None
             assert results["result"]["job_data"] == None
             assert results["result"]["job_events"] == []

@@ -1789,7 +1789,7 @@ class TestNornirFileCopy:
                 "source_file": "nf://nornir/files/file_copy_test.txt",
                 "dry_run": True,
                 "FC": "spine",
-                "enable": True
+                "enable": True,
             },
         )
 
@@ -1810,7 +1810,11 @@ class TestNornirFileCopy:
             "nornir",
             "cli",
             workers=["nornir-worker-1"],
-            kwargs={"commands": "delete file_copy_test.txt", "FC": "spine", "enable": True},
+            kwargs={
+                "commands": "delete file_copy_test.txt",
+                "FC": "spine",
+                "enable": True,
+            },
         )
         print("File delete result:")
         pprint.pprint(file_delete)

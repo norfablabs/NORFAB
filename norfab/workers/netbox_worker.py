@@ -2068,7 +2068,7 @@ class NetboxWorker(NFPWorker):
                 timeout=timeout,
             )
             for w, r in nornir_hosts.items():
-                if r["failed"] is False:
+                if r["failed"] is False and isinstance(r["result"], list):
                     ret.extend(r["result"])
 
         return list(sorted(set(ret)))
