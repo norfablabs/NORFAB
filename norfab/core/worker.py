@@ -441,9 +441,10 @@ class JobDatabase:
         """
         if self.jobs_compress:
             import base64
+
             json_str = json.dumps(data)
-            compressed = zlib.compress(json_str.encode('utf-8'))
-            return base64.b64encode(compressed).decode('utf-8')
+            compressed = zlib.compress(json_str.encode("utf-8"))
+            return base64.b64encode(compressed).decode("utf-8")
         else:
             return json.dumps(data)
 
@@ -468,10 +469,11 @@ class JobDatabase:
         except json.JSONDecodeError:
             # If JSON parsing fails, assume it's compressed
             import base64
+
             try:
-                compressed = base64.b64decode(data_str.encode('utf-8'))
+                compressed = base64.b64decode(data_str.encode("utf-8"))
                 decompressed = zlib.decompress(compressed)
-                return json.loads(decompressed.decode('utf-8'))
+                return json.loads(decompressed.decode("utf-8"))
             except Exception as e:
                 log.error(f"Failed to decompress data: {e}")
                 return {}
@@ -561,7 +563,7 @@ class JobDatabase:
             else:
                 compressed_args = json.dumps(args)
                 compressed_kwargs = json.dumps(kwargs)
-            
+
             conn.execute(
                 """
                 INSERT INTO jobs (uuid, client_address, task, args, kwargs, timeout,
@@ -716,7 +718,9 @@ class JobDatabase:
             # Decompress args and kwargs
             if self.jobs_compress:
                 result["args"] = self._decompress_data(row["args"]).get("args", [])
-                result["kwargs"] = self._decompress_data(row["kwargs"]).get("kwargs", {})
+                result["kwargs"] = self._decompress_data(row["kwargs"]).get(
+                    "kwargs", {}
+                )
             else:
                 result["args"] = json.loads(row["args"])
                 result["kwargs"] = json.loads(row["kwargs"])
@@ -846,7 +850,6 @@ class JobDatabase:
 
             cursor = conn.execute(query, params)
             return [dict(row) for row in cursor.fetchall()]
-
 
     def close(self):
         """Close all database connections."""
@@ -1075,11 +1078,7 @@ def _get(worker, get_queue, destroy_event):
         client_address = work[0]
         suuid = work[2]
         uuid_str = suuid.decode("utf-8")
-        reply = [
-            client_address,
-            b"",
-            suuid
-        ]
+        reply = [client_address, b"", suuid]
         payload = {
             "worker": worker.name,
             "uuid": uuid_str,
