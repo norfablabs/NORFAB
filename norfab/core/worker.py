@@ -369,7 +369,7 @@ class JobDatabase:
 
         Args:
             db_path (str): Path to the SQLite database file.
-            jobs_compress (bool): If True, compress request_data and result_data fields. Defaults to True.
+            jobs_compress (bool): If True, compress args, kwargs, and result_data fields. Defaults to True.
         """
         self.db_path = db_path
         self.jobs_compress = jobs_compress
@@ -493,7 +493,6 @@ class JobDatabase:
                     received_timestamp TEXT NOT NULL,
                     started_timestamp TEXT,
                     completed_timestamp TEXT,
-                    request_data TEXT,
                     result_data TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -540,7 +539,6 @@ class JobDatabase:
         args: list,
         kwargs: dict,
         timeout: int,
-        request_data: dict,
         timestamp: str,
     ) -> None:
         """
@@ -553,25 +551,31 @@ class JobDatabase:
             args (list): Task arguments.
             kwargs (dict): Task keyword arguments.
             timeout (int): Job timeout.
-            request_data (dict): Full request data as dictionary.
             timestamp (str): Received timestamp.
         """
         with self._transaction(write=True) as conn:
+            # Compress args and kwargs if compression is enabled
+            if self.jobs_compress:
+                compressed_args = self._compress_data({"args": args})
+                compressed_kwargs = self._compress_data({"kwargs": kwargs})
+            else:
+                compressed_args = json.dumps(args)
+                compressed_kwargs = json.dumps(kwargs)
+            
             conn.execute(
                 """
                 INSERT INTO jobs (uuid, client_address, task, args, kwargs, timeout,
-                                 status, received_timestamp, request_data)
-                VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?)
+                                 status, received_timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?)
             """,
                 (
                     uuid,
                     client_address,
                     task,
-                    json.dumps(args),
-                    json.dumps(kwargs),
+                    compressed_args,
+                    compressed_kwargs,
                     timeout,
                     timestamp,
-                    self._compress_data(request_data),
                 ),
             )
 
@@ -645,7 +649,6 @@ class JobDatabase:
         self,
         uuid: str,
         include_result: bool = False,
-        include_data: bool = False,
         include_events: bool = False,
     ) -> dict:
         """
@@ -654,7 +657,6 @@ class JobDatabase:
         Args:
             uuid (str): Job UUID.
             include_result (bool): If True, include result_data in the response. Defaults to False.
-            include_data (bool): If True, include parsed job data (task, args, kwargs). Defaults to False.
             include_events (bool): If True, include job events. Defaults to False.
 
         Returns:
@@ -666,21 +668,15 @@ class JobDatabase:
                 - completed_timestamp: When job completed
                 - client_address: Client address
                 - task: Task name
-
-            If include_data=True, also includes:
-                - job_data: Dictionary with task, args, and kwargs
-
-            If include_result=True, also includes:
-                - job_result: Result data dictionary (if available)
-
-            If include_events=True, also includes:
-                - job_events: List of event dictionaries
-
-            If none of the include flags are True, also returns:
                 - args: Parsed task arguments list
                 - kwargs: Parsed task keyword arguments dict
                 - timeout: Job timeout
-                - request_data: Full request data dictionary
+
+            If include_result=True, also includes:
+                - result_data: Result data dictionary (if available)
+
+            If include_events=True, also includes:
+                - job_events: List of event dictionaries
 
             Returns None if job not found.
         """
@@ -697,7 +693,6 @@ class JobDatabase:
                 "args",
                 "kwargs",
                 "timeout",
-                "request_data",
             ]
 
             if include_result:
@@ -715,34 +710,27 @@ class JobDatabase:
                 return None
 
             result = dict(row)
-            result.setdefault("job_data", None)
             result.setdefault("result_data", None)
             result.setdefault("job_events", [])
 
-            # Determine output format based on flags
-            if include_data or include_result or include_events:
-
-                if include_data:
-                    result["job_data"] = {
-                        "task": row["task"],
-                        "args": json.loads(row["args"]) if row["args"] else [],
-                        "kwargs": json.loads(row["kwargs"]) if row["kwargs"] else {},
-                    }
-
-                if include_result and row["result_data"]:
-                    result["result_data"] = self._decompress_data(row["result_data"])
-
-                if include_events:
-                    result["job_events"] = self.get_job_events(uuid)
-
+            # Decompress args and kwargs
+            if self.jobs_compress:
+                result["args"] = self._decompress_data(row["args"]).get("args", [])
+                result["kwargs"] = self._decompress_data(row["kwargs"]).get("kwargs", {})
             else:
-                # Parse JSON fields
-                result["args"] = json.loads(row["args"]) if row["args"] else []
-                result["kwargs"] = json.loads(row["kwargs"]) if row["kwargs"] else {}
+                result["args"] = json.loads(row["args"])
+                result["kwargs"] = json.loads(row["kwargs"])
 
-                # Decompress request_data if present
-                if "request_data" in result and result["request_data"]:
-                    result["request_data"] = self._decompress_data(result["request_data"])
+            # Include result data if requested
+            if include_result:
+                if self.jobs_compress:
+                    result["result_data"] = self._decompress_data(row["result_data"])
+                else:
+                    result["result_data"] = row["result_data"]
+
+            # Include events if requested
+            if include_events:
+                result["job_events"] = self.get_job_events(uuid)
 
             return result
 
@@ -1020,16 +1008,6 @@ def _post(worker, post_queue, destroy_event):
         kwargs = data.get("kwargs", {})
         timeout = data.get("timeout", 60)
 
-        # Store the entire work as JSON-serializable dict for request_data
-        request_data = {
-            "client_address": client_address.decode("utf-8"),
-            "uuid": suuid.decode("utf-8"),
-            "task": task,
-            "args": args,
-            "kwargs": kwargs,
-            "timeout": timeout,
-        }
-
         # Add job to database
         try:
             worker.db.add_job(
@@ -1039,7 +1017,6 @@ def _post(worker, post_queue, destroy_event):
                 args=args,
                 kwargs=kwargs,
                 timeout=timeout,
-                request_data=request_data,
                 timestamp=timestamp,
             )
             log.debug(
@@ -1098,90 +1075,37 @@ def _get(worker, get_queue, destroy_event):
         client_address = work[0]
         suuid = work[2]
         uuid_str = suuid.decode("utf-8")
-
-        # Get job info - first without result data for efficiency
-        job_info = worker.db.get_job_info(uuid_str, include_result=False)
+        reply = [
+            client_address,
+            b"",
+            suuid
+        ]
+        payload = {
+            "worker": worker.name,
+            "uuid": uuid_str,
+            "service": worker.service.decode("utf-8"),
+        }
+        job_info = worker.db.get_job_info(uuid_str, include_result=True)
 
         if job_info is None:
             # Job not found
-            reply = [
-                client_address,
-                b"",
-                suuid,
-                b"404",
-                json.dumps(
-                    {
-                        "worker": worker.name,
-                        "uuid": uuid_str,
-                        "status": "JOB NOT FOUND",
-                        "service": worker.service.decode("utf-8"),
-                    }
-                ).encode("utf-8"),
-            ]
+            status = b"404"
+            payload["status"] = "JOB NOT FOUND"
         elif job_info["status"] in ("PENDING", "STARTED"):
             # Job is still in progress - return status with timestamps
-            reply = [
-                client_address,
-                b"",
-                suuid,
-                b"300",
-                json.dumps(
-                    {
-                        "worker": worker.name,
-                        "uuid": uuid_str,
-                        "status": job_info["status"],
-                        "service": worker.service.decode("utf-8"),
-                        "received_timestamp": job_info.get("received_timestamp"),
-                        "started_timestamp": job_info.get("started_timestamp"),
-                    }
-                ).encode("utf-8"),
-            ]
+            status = b"300"
+            payload["status"] = job_info["status"]
         elif job_info["status"] in ("COMPLETED", "FAILED"):
-            # Job is completed - fetch full result data
-            job_info_with_result = worker.db.get_job_info(uuid_str, include_result=True)
-            result_dict = job_info_with_result.get("result_data")
-
-            if result_dict:
-                # result_dict is already decompressed by get_job_info
-                reply = [
-                    client_address,
-                    b"",
-                    suuid,
-                    result_dict.get("status_code", "200").encode("utf-8"),
-                    json.dumps(result_dict.get("body", {})).encode("utf-8"),
-                ]
-            else:
-                # Status says completed but no result data (shouldn't happen)
-                reply = [
-                    client_address,
-                    b"",
-                    suuid,
-                    b"500",
-                    json.dumps(
-                        {
-                            "worker": worker.name,
-                            "uuid": uuid_str,
-                            "status": "RESULT DATA MISSING",
-                            "service": worker.service.decode("utf-8"),
-                        }
-                    ).encode("utf-8"),
-                ]
+            result_dict = job_info.get("result_data")
+            status = result_dict.get("status_code", "200").encode("utf-8")
+            payload = result_dict["result"]
         else:
             # Unknown status
-            reply = [
-                client_address,
-                b"",
-                suuid,
-                b"500",
-                json.dumps(
-                    {
-                        "worker": worker.name,
-                        "uuid": uuid_str,
-                        "status": f"UNKNOWN STATUS: {job_info['status']}",
-                        "service": worker.service.decode("utf-8"),
-                    }
-                ).encode("utf-8"),
-            ]
+            status = b"500"
+            payload["status"] = f"UNKNOWN STATUS: {job_info['status']}"
+
+        reply.append(status)
+        reply.append(json.dumps(payload).encode("utf-8"))
 
         worker.send_to_broker(NFP.RESPONSE, reply)
 
@@ -1795,7 +1719,6 @@ class NFPWorker:
     def job_details(
         self,
         uuid: str = None,
-        data: bool = True,
         result: bool = True,
         events: bool = True,
     ) -> Result:
@@ -1804,7 +1727,6 @@ class NFPWorker:
 
         Args:
             uuid (str): The job UUID to return details for.
-            data (bool): If True, return job data.
             result (bool): If True, return job result.
             events (bool): If True, return job events.
 
@@ -1812,7 +1734,7 @@ class NFPWorker:
             Result: A Result object with the job details.
         """
         job = self.db.get_job_info(
-            uuid=uuid, include_data=data, include_result=result, include_events=events
+            uuid=uuid, include_result=result, include_events=events
         )
 
         if job:
@@ -1821,7 +1743,7 @@ class NFPWorker:
                 result=job,
             )
         else:
-            raise FileNotFoundError(f"{self.name} - job with UUID '{uuid}' not found")
+            raise RuntimeError(f"{self.name} - job with UUID '{uuid}' not found")
 
     @Task(fastapi={"methods": ["GET"]})
     def job_list(
@@ -2089,7 +2011,7 @@ class NFPWorker:
             "client_address": client_address,
             "uuid": uuid,
             "status_code": "200",
-            "body": {self.name: result.model_dump()},
+            "result": {self.name: result.model_dump()},
             "worker": self.name,
             "service": self.service.decode("utf-8"),
         }

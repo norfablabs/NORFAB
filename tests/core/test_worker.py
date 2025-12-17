@@ -203,7 +203,10 @@ class TestWorkerJobsApi:
                 assert res["status"] == "PENDING"
 
     def test_job_list_filter_by_task_name(self, nfclient):
-        ret = nfclient.run_job("nornir", "job_list", kwargs={"task": "cli"})
+        # run task
+        get_inventory_ret = nfclient.run_job("nornir", "get_inventory", kwargs={})
+        # query job for the task
+        ret = nfclient.run_job("nornir", "job_list", kwargs={"task": "get_inventory"})
 
         pprint.pprint(ret)
 
@@ -212,8 +215,8 @@ class TestWorkerJobsApi:
             assert results["failed"] is False, f"{worker} failed to run the task"
             for res in results["result"]:
                 assert (
-                    res["task"] == "cli"
-                ), f"{worker} - Job with none 'cli' task returned: {res}"
+                    res["task"] == "get_inventory"
+                ), f"{worker} - Job with none 'get_inventory' task returned: {res}"
 
     def test_job_list_last_1(self, nfclient):
         ret = nfclient.run_job("nornir", "job_list", kwargs={"last": 2})
@@ -269,7 +272,9 @@ class TestWorkerJobsApi:
             assert "completed_timestamp" in results["result"]
             assert "result_data" in results["result"]
             assert results["result"]["result_data"]
-            assert "job_data" in results["result"]
+            assert "args" in results["result"]
+            assert "task" in results["result"]
+            assert "kwargs" in results["result"]
             assert "job_events" in results["result"]
             assert len(results["result"]["job_events"]) > 0
 
@@ -301,7 +306,7 @@ class TestWorkerJobsApi:
             "nornir",
             "job_details",
             workers=["nornir-worker-1"],
-            kwargs={"uuid": job_id, "data": False, "events": False, "result": False},
+            kwargs={"uuid": job_id, "events": False, "result": False},
         )
         print(">>> job_details:")
         pprint.pprint(ret, width=150)
@@ -309,5 +314,4 @@ class TestWorkerJobsApi:
             assert results["result"], f"{worker} returned no results"
             assert results["failed"] is False, f"{worker} failed to run the task"
             assert results["result"]["result_data"] == None
-            assert results["result"]["job_data"] == None
             assert results["result"]["job_events"] == []
