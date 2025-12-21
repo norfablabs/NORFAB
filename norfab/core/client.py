@@ -13,6 +13,7 @@ from .security import generate_certificates
 from . import NFP
 from .zhelpers import dump
 from norfab.core.inventory import NorFabInventory
+from norfab.utils.markdown_results import markdown_results
 from typing import Union, List, Callable, Any
 
 log = logging.getLogger(__name__)
@@ -829,7 +830,8 @@ class NFPClient(object):
         kwargs: dict = None,
         workers: str = "all",
         timeout: int = 600,
-        retry=10,
+        retry: int = 10,
+        markdown: bool = False,
     ):
         """
         Run a job on the specified service and task, with optional arguments, timeout and retry settings.
@@ -843,6 +845,7 @@ class NFPClient(object):
             workers (str, optional): The workers to run the job on. Defaults to "all".
             timeout (int, optional): The maximum time in seconds to wait for the job to complete. Defaults to 600.
             retry (int, optional): The number of times to retry getting the job results. Defaults to 10.
+            markdown (bool, optional): Convert results to markdown representation
 
         Returns:
             Any: The result of the job if successful, or None if the job failed or timed out.
@@ -919,7 +922,8 @@ class NFPClient(object):
                 f"exceeded, GET returned no results, timeout {timeout}s"
             )
         self.running_job = False
-        return ret
+
+        return markdown_results(get, service, task, kwargs) if markdown else ret
 
     def run_job_iter(
         self,

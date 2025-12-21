@@ -53,3 +53,17 @@ class TestClientApi:
         for k in ["broker", "logging", "workers", "topology"]:
             assert k in ret, "Not all broker params returned"
             assert ret[k], "Some broker params seems wrong"
+
+
+class TestClientRunJob:
+
+    def test_generic_markdown_output(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "get_inventory",
+            markdown=True,
+        )
+        print(ret)
+        assert "Overall Summary" in ret
+        assert "Worker:" in ret
+        assert "Results" in ret

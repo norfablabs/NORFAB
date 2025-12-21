@@ -1480,6 +1480,49 @@ class TestNornirTest:
     def test_nornir_test_suite_pattern_files(self, nfclient):
         pass
 
+    def test_nornir_test_markdown_brief(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "FC": ["spine", "leaf"],
+            },
+            markdown=True,
+        )
+        print(ret)
+        assert "No hosts test suites available" in ret
+        assert "No hosts outputs available" in ret
+        assert "No detailed results available" in ret
+        assert "|Host|Test Name|Result|Exception|" in ret
+        assert "Input Arguments (kwargs)" in ret
+        assert "Complete Results (JSON)" in ret
+
+    def test_nornir_test_markdown_with_extensive(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "FC": ["spine", "leaf"],
+                "extensive": True,
+            },
+            markdown=True,
+        )
+        print(ret)
+        assert "|Host|Test Name|Result|Exception|" in ret
+        assert "Input Arguments (kwargs)" in ret
+        assert "Complete Results (JSON)" in ret
+        assert "Test suites definitions for each host" in ret
+        assert (
+            "Expandable sections containing outputs collected during test execution for each host"
+            in ret
+        )
+        assert (
+            "Hierarchical expandable sections organized by device, then test name, containing complete test result details"
+            in ret
+        )
+
 
 # ----------------------------------------------------------------------------
 # NORNIR.NETWORK FUNCTION TESTS

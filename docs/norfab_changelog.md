@@ -1,9 +1,19 @@
-## 0.12.8
+## 0.13.0
 
 ### BUG FIXES
 
-1. Fixing even severity handling in worker.
+1. Fixing event severity handling in worker.
 
+### CHANGES
+
+1. Changed worker to use sqllite database for job persistent storage instead of json files
+
+### FEATURES
+
+1. Nornir test task - added `extensive` argument to return detailed results
+2. Client - added `markdown` argument to `run_job` method to support rendering results into markdown output
+3. Client - added Nornir test task markdown render function to return tests results in a form of markdown report.
+3. Client - added generic markdown render function to return results in a form of markdown report.
 
 ---
 

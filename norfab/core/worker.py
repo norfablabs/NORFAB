@@ -15,6 +15,7 @@ import inspect
 import functools
 import sqlite3
 import zlib
+import base64
 from contextlib import contextmanager
 
 from . import NFP
@@ -440,8 +441,6 @@ class JobDatabase:
             str: Compressed and base64-encoded string if compression enabled, otherwise JSON string.
         """
         if self.jobs_compress:
-            import base64
-
             json_str = json.dumps(data)
             compressed = zlib.compress(json_str.encode("utf-8"))
             return base64.b64encode(compressed).decode("utf-8")
@@ -451,7 +450,6 @@ class JobDatabase:
     def _decompress_data(self, data_str: str) -> dict:
         """
         Decompress base64-encoded compressed string back to dictionary.
-        Automatically detects if data is compressed or plain JSON.
 
         Args:
             data_str (str): Compressed base64 string or plain JSON string.
@@ -459,24 +457,12 @@ class JobDatabase:
         Returns:
             dict: Decompressed dictionary.
         """
-        if not data_str:
-            return {}
-
-        # Try to detect if data is compressed (base64) or plain JSON
-        try:
-            # First, try to parse as JSON (uncompressed)
+        if self.jobs_compress:
+            compressed = base64.b64decode(data_str.encode("utf-8"))
+            decompressed = zlib.decompress(compressed)
+            return json.loads(decompressed.decode("utf-8"))
+        else:
             return json.loads(data_str)
-        except json.JSONDecodeError:
-            # If JSON parsing fails, assume it's compressed
-            import base64
-
-            try:
-                compressed = base64.b64decode(data_str.encode("utf-8"))
-                decompressed = zlib.decompress(compressed)
-                return json.loads(decompressed.decode("utf-8"))
-            except Exception as e:
-                log.error(f"Failed to decompress data: {e}")
-                return {}
 
     def _initialize_database(self):
         """Initialize the database schema."""
@@ -726,7 +712,7 @@ class JobDatabase:
                 result["kwargs"] = json.loads(row["kwargs"])
 
             # Include result data if requested
-            if include_result:
+            if include_result and row["result_data"]:
                 if self.jobs_compress:
                     result["result_data"] = self._decompress_data(row["result_data"])
                 else:
@@ -1105,9 +1091,7 @@ def _get(worker, get_queue, destroy_event):
 
         reply.append(status)
         reply.append(json.dumps(payload).encode("utf-8"))
-
         worker.send_to_broker(NFP.RESPONSE, reply)
-
         get_queue.task_done()
 
 

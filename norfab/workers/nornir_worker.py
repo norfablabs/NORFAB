@@ -1419,6 +1419,7 @@ class NornirWorker(NFPWorker):
         failed_only: bool = False,
         return_tests_suite: bool = False,
         job_data: Any = None,
+        extensive: bool = False,
         **kwargs,
     ) -> Result:
         """
@@ -1437,6 +1438,13 @@ class NornirWorker(NFPWorker):
                 content in addition to test results using a dictionary with ``results`` and ``suite`` keys.
             job_data (str, optional): URL to YAML file with data or dictionary/list of data
                 to pass on to Jinja2 rendering context.
+            extensive (bool, optional): return extensive results, equivalent to using these arguments:
+
+                - remove_tasks = False
+                - return_tests_suite = True
+                - add_details = True
+                - to_dict = False
+
             **kwargs: Any additional arguments to pass on to the Nornir service task.
 
         Returns:
@@ -1450,6 +1458,12 @@ class NornirWorker(NFPWorker):
             RuntimeError: If there is an error in rendering the Jinja2 templates or loading the YAML.
         """
         tests = {}  # dictionary to hold per-host test suites
+        # set extensive details flags
+        if extensive is True:
+            kwargs["add_details"] = True
+            kwargs["to_dict"] = False
+            remove_tasks = False
+            return_tests_suite = True
         add_details = kwargs.get("add_details", False)  # ResultSerializer
         to_dict = kwargs.get("to_dict", True)  # ResultSerializer
         filters = {k: kwargs.get(k) for k in list(kwargs.keys()) if k in FFun_functions}
