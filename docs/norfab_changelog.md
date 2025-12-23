@@ -7,6 +7,7 @@
 ### CHANGES
 
 1. Changed worker to use sqllite database for job persistent storage instead of json files
+2. Netbox sync device facts - enhanced sync logic to use bulk device updates
 
 ### FEATURES
 

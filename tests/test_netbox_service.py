@@ -1700,6 +1700,30 @@ class TestSyncDeviceFacts:
                     "serial"
                 ], f"{worker}:{device} no serial number updated"
 
+    def test_sync_device_facts_dry_run(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_device_facts",
+            workers="any",
+            kwargs={
+                "datasource": "nornir",
+                "devices": ["ceos-spine-1", "ceos-spine-2"],
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret, width=200)
+        for worker, res in ret.items():
+            assert (
+                "ceos-spine-1" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-1"
+            assert (
+                "ceos-spine-2" in res["result"]
+            ), f"{worker} returned no results for ceos-spine-2"
+            for device, device_data in res["result"].items():
+                assert device_data["sync_device_facts_dry_run"][
+                    "serial"
+                ], f"{worker}:{device} no serial number updated"
+
     @pytest.mark.skip(reason="TBD")
     def test_sync_device_facts_non_existing_device(self, nfclient):
         pass

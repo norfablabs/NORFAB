@@ -117,6 +117,63 @@ def _form_query_v3(obj, filters, fields, alias=None) -> str:
     return query
 
 
+def compare_netbox_object_state(
+    desired_state: dict,
+    current_state: dict,
+    ignore_fields: Union[list, None] = None,
+    ignore_if_not_empty: Union[list, None] = None,
+) -> dict:
+    """
+    Compare desired state with current NetBox object state and return fields that need updating.
+
+    Args:
+        desired_state (dict): Dictionary with desired field values.
+        current_state (dict): Dictionary with current NetBox object field values.
+        ignore_fields (list, optional): List of field names to ignore completely.
+        ignore_if_not_empty (list, optional): List of field names to ignore if they have
+            non-empty values in current_state (won't overwrite existing data).
+
+    Returns:
+        dict: Dictionary containing only fields that need to be updated with their new values.
+
+    Example:
+        >>> desired = {"serial": "ABC123", "asset_tag": "TAG001", "comments": "New comment"}
+        >>> current = {"serial": "OLD123", "asset_tag": "TAG001", "comments": "Existing"}
+        >>> ignore_fields = ["comments"]
+        >>> ignore_if_not_empty = []
+        >>> compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)
+        {"serial": "ABC123"}
+
+        >>> desired = {"serial": "ABC123", "asset_tag": "TAG001", "comments": "New comment"}
+        >>> current = {"serial": "OLD123", "asset_tag": "", "comments": "Existing"}
+        >>> ignore_fields = []
+        >>> ignore_if_not_empty = ["comments"]
+        >>> compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)
+        {"serial": "ABC123", "asset_tag": "TAG001"}
+    """
+    ignore_fields = ignore_fields or []
+    ignore_if_not_empty = ignore_if_not_empty or []
+    updates = {}
+
+    for field, desired_value in desired_state.items():
+        # Skip if field is in ignore list
+        if field in ignore_fields:
+            continue
+
+        # Get current value, default to None if field doesn't exist
+        current_value = current_state.get(field)
+
+        # Skip if field is in ignore_if_not_empty and current value is not empty
+        if field in ignore_if_not_empty and current_value:
+            continue
+
+        # Compare values and add to updates if different
+        if current_value != desired_value:
+            updates[field] = desired_value
+
+    return updates
+
+
 class NetboxWorker(NFPWorker):
     """
     NetboxWorker class for interacting with Netbox API and managing inventory.
@@ -880,6 +937,7 @@ class NetboxWorker(NFPWorker):
             "primary_ip6 {address}",
             "airflow",
             "position",
+            "id",
         ]
 
         if cache == True or cache == "force":
@@ -2089,7 +2147,7 @@ class NetboxWorker(NFPWorker):
         **kwargs,
     ) -> Result:
         """
-        Updates the device facts in NetBox:
+        Updates the device facts in NetBox using bulk update for improved performance.
 
         - serial number
 
@@ -2129,14 +2187,20 @@ class NetboxWorker(NFPWorker):
             # source hosts list from Nornir
             if kwargs:
                 devices.extend(self.get_nornir_hosts(kwargs, timeout))
+                devices = list(set(devices))
+                job.event(f"Syncing {len(devices)} devices")
+            # fetch devices data from Netbox
+            nb_devices = self.get_devices(
+                job=job,
+                instance=instance,
+                devices=copy.copy(devices),
+                cache="refresh",
+            ).result
             # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
                 kwargs["FL"] = devices[i : i + batch_size]
                 kwargs["getters"] = "get_facts"
-                job.event(
-                    f"retrieving facts data for devices {', '.join(kwargs['FL'])}",
-                    resource=instance,
-                )
+                job.event(f"retrieving facts for devices {', '.join(kwargs['FL'])}")
                 data = self.client.run_job(
                     "nornir",
                     "parse",
@@ -2144,44 +2208,66 @@ class NetboxWorker(NFPWorker):
                     workers="all",
                     timeout=timeout,
                 )
+
+                # Collect devices to update in bulk
+                devices_to_update = []
+
                 for worker, results in data.items():
                     if results["failed"]:
-                        log.error(
-                            f"{worker} get_facts failed, errors: {'; '.join(results['errors'])}"
-                        )
+                        msg = f"{worker} get_facts failed, errors: {'; '.join(results['errors'])}"
+                        ret.errors.append(msg)
+                        log.error(msg)
                         continue
                     for host, host_data in results["result"].items():
                         if host_data["napalm_get"]["failed"]:
-                            log.error(
-                                f"{host} facts update failed: '{host_data['napalm_get']['exception']}'"
-                            )
-                            job.event(
-                                f"{host} facts update failed",
-                                resource=instance,
-                                status="failed",
-                                severity="WARNING",
-                            )
+                            msg = f"{host} facts update failed: '{host_data['napalm_get']['exception']}'"
+                            ret.errors.append(msg)
+                            log.error(msg)
                             continue
-                        nb_device = nb.dcim.devices.get(name=host)
+
+                        nb_device = nb_devices.get(host)
                         if not nb_device:
                             raise Exception(f"'{host}' does not exist in Netbox")
+
                         facts = host_data["napalm_get"]["result"]["get_facts"]
-                        # update serial number
-                        nb_device.serial = facts["serial_number"]
-                        if not dry_run:
-                            nb_device.save()
+
+                        # Prepare desired state
+                        desired_state = {
+                            "serial": facts["serial_number"],
+                        }
+
+                        # Get current state
+                        current_state = {
+                            "serial": nb_device["serial"],
+                        }
+
+                        # Compare and get fields that need updating
+                        updates = compare_netbox_object_state(
+                            desired_state=desired_state,
+                            current_state=current_state,
+                        )
+
+                        # Only update if there are changes
+                        if updates:
+                            updates["id"] = int(nb_device["id"])
+                            devices_to_update.append(updates)
+
                         result[host] = {
                             (
                                 "sync_device_facts_dry_run"
                                 if dry_run
                                 else "sync_device_facts"
-                            ): {
-                                "serial": facts["serial_number"],
-                            }
+                            ): (updates if updates else current_state)
                         }
                         if branch is not None:
                             result[host]["branch"] = branch
-                        job.event(f"{host} facts updated", resource=instance)
+
+                # Perform bulk update
+                if devices_to_update and not dry_run:
+                    try:
+                        nb.dcim.devices.update(devices_to_update)
+                    except Exception as e:
+                        ret.errors.append(f"Bulk update failed: {e}")
         else:
             raise UnsupportedServiceError(
                 f"'{datasource}' datasource service not supported"
