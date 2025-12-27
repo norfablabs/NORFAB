@@ -122,7 +122,8 @@ def compare_netbox_object_state(
     current_state: dict,
     ignore_fields: Union[list, None] = None,
     ignore_if_not_empty: Union[list, None] = None,
-) -> dict:
+    diff: dict = None,
+) -> tuple:
     """
     Compare desired state with current NetBox object state and return fields that need updating.
 
@@ -132,28 +133,35 @@ def compare_netbox_object_state(
         ignore_fields (list, optional): List of field names to ignore completely.
         ignore_if_not_empty (list, optional): List of field names to ignore if they have
             non-empty values in current_state (won't overwrite existing data).
+        diff (dict, optional): Dictionary to accumulate field differences. If not provided,
+            a new dictionary will be created.
 
     Returns:
-        dict: Dictionary containing only fields that need to be updated with their new values.
+        tuple: A tuple containing:
+            - updates (dict): Dictionary containing only fields that need to be updated with their new values.
+            - diff (dict): Dictionary containing the differences with '+' (new value) and '-' (old value) keys.
 
     Example:
         >>> desired = {"serial": "ABC123", "asset_tag": "TAG001", "comments": "New comment"}
         >>> current = {"serial": "OLD123", "asset_tag": "TAG001", "comments": "Existing"}
         >>> ignore_fields = ["comments"]
         >>> ignore_if_not_empty = []
-        >>> compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)
+        >>> updates, diff = compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)
+        >>> updates
         {"serial": "ABC123"}
 
         >>> desired = {"serial": "ABC123", "asset_tag": "TAG001", "comments": "New comment"}
         >>> current = {"serial": "OLD123", "asset_tag": "", "comments": "Existing"}
         >>> ignore_fields = []
         >>> ignore_if_not_empty = ["comments"]
-        >>> compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)
+        >>> updates, diff = compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)
+        >>> updates
         {"serial": "ABC123", "asset_tag": "TAG001"}
     """
     ignore_fields = ignore_fields or []
     ignore_if_not_empty = ignore_if_not_empty or []
     updates = {}
+    diff = diff or {}
 
     for field, desired_value in desired_state.items():
         # Skip if field is in ignore list
@@ -170,8 +178,12 @@ def compare_netbox_object_state(
         # Compare values and add to updates if different
         if current_value != desired_value:
             updates[field] = desired_value
+            diff[field] = {
+                "+": desired_value,
+                "-": current_value
+            }
 
-    return updates
+    return updates, diff
 
 
 class NetboxWorker(NFPWorker):
@@ -2147,7 +2159,7 @@ class NetboxWorker(NFPWorker):
         **kwargs,
     ) -> Result:
         """
-        Updates the device facts in NetBox using bulk update for improved performance.
+        Updates device facts in NetBox, this task updates this device attributes:
 
         - serial number
 
@@ -2174,11 +2186,14 @@ class NetboxWorker(NFPWorker):
             Exception: If a device does not exist in NetBox.
             UnsupportedServiceError: If the specified datasource is not supported.
         """
-        result = {}
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
-            task=f"{self.name}:sync_device_facts", result=result, resources=[instance]
+            task=f"{self.name}:sync_device_facts", 
+            resources=[instance], 
+            dry_run=dry_run, 
+            diff={}, 
+            result={}
         )
         nb = self._get_pynetbox(instance, branch=branch)
         kwargs["add_details"] = True
@@ -2230,19 +2245,15 @@ class NetboxWorker(NFPWorker):
                             raise Exception(f"'{host}' does not exist in Netbox")
 
                         facts = host_data["napalm_get"]["result"]["get_facts"]
-
-                        # Prepare desired state
                         desired_state = {
                             "serial": facts["serial_number"],
                         }
-
-                        # Get current state
                         current_state = {
                             "serial": nb_device["serial"],
                         }
 
                         # Compare and get fields that need updating
-                        updates = compare_netbox_object_state(
+                        updates, diff = compare_netbox_object_state(
                             desired_state=desired_state,
                             current_state=current_state,
                         )
@@ -2251,8 +2262,9 @@ class NetboxWorker(NFPWorker):
                         if updates:
                             updates["id"] = int(nb_device["id"])
                             devices_to_update.append(updates)
+                            ret.diff[host] = diff
 
-                        result[host] = {
+                        ret.result[host] = {
                             (
                                 "sync_device_facts_dry_run"
                                 if dry_run
@@ -2260,7 +2272,7 @@ class NetboxWorker(NFPWorker):
                             ): (updates if updates else current_state)
                         }
                         if branch is not None:
-                            result[host]["branch"] = branch
+                            ret.result[host]["branch"] = branch
 
                 # Perform bulk update
                 if devices_to_update and not dry_run:
