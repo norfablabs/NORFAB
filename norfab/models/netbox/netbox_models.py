@@ -28,6 +28,9 @@ class NetboxCommonArgs(BaseModel):
         alias="dry-run",
         json_schema_extra={"presence": True},
     )
+    branch: Union[None, StrictStr] = Field(
+        None, description="Branching plugin branch name to use"
+    )
 
     @staticmethod
     def source_instance():
@@ -82,6 +85,31 @@ class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True):
     status: Union[None, PrefixStatusEnum] = Field(
         None, description="Status of the prefix"
     )
-    branch: Union[None, StrictStr] = Field(
-        None, description="Branching plugin branch name to use"
+
+
+class InterfaceTypeEnum(str, Enum):
+    virtual = "virtual"
+    other = "other"
+    bridge = "bridge"
+    lag = "lag"
+
+
+class CreateDeviceInterfacesInput(NetboxCommonArgs, use_enum_values=True):
+    devices: List = Field(
+        ...,
+        description="List of device names or device objects to create interfaces for",
     )
+    interface_name: Union[StrictStr, List[StrictStr]] = Field(
+        ...,
+        description="Name(s) of the interface(s) to create",
+    )
+    interface_type: InterfaceTypeEnum = Field(
+        "other",
+        description="Name(s) of the interface(s) to create",
+        alias="interface-type"
+    )
+    description: Union[None, StrictStr] = Field(
+        None, description="Interface description"
+    )
+    speed: StrictInt = Field(None, description="Interface speed in Kbps")
+    mtu: StrictInt = Field(None, description="Maximum transmission unit size in bytes")

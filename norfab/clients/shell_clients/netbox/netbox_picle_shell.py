@@ -37,6 +37,7 @@ from .netbox_picle_shell_create_ip import CreateIp
 from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
 from .netbox_picle_shell_create_prefix import CreatePrefixShell
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
+from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
 from norfab.models.netbox import NetboxCommonArgs
 
 RICHCONSOLE = Console()
@@ -272,6 +273,11 @@ class CreateCommands(BaseModel):
         None,
         description="Allocate next available IP address from prefix for multiple devices and interfaces",
         alias="ip-bulk",
+    )
+    device_interfaces: CreateDeviceInterfacesShell = Field(
+        None,
+        description="Create devices interfaces",
+        alias="device-interfaces",
     )
 
     class PicleConfig:

@@ -179,8 +179,8 @@ def compare_netbox_object_state(
         if current_value != desired_value:
             updates[field] = desired_value
             diff[field] = {
+                "-": current_value,
                 "+": desired_value,
-                "-": current_value
             }
 
     return updates, diff
@@ -220,8 +220,8 @@ class NetboxWorker(NFPWorker):
     )  # 3.6.0 - minimum supported Netbox v3
     compatible_ge_v4 = (
         4,
+        4,
         0,
-        5,
     )  # 4.0.5 - minimum supported Netbox v4
 
     def __init__(
@@ -1244,7 +1244,6 @@ class NetboxWorker(NFPWorker):
         # transform interfaces list to dictionary keyed by device and interfaces names
         while interfaces:
             intf = interfaces.pop()
-            _ = intf.pop("id")
             device_name = intf.pop("device").pop("name")
             intf_name = intf.pop("name")
             if device_name in ret.result:  # Netbox issue #16299
@@ -2189,11 +2188,11 @@ class NetboxWorker(NFPWorker):
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
-            task=f"{self.name}:sync_device_facts", 
-            resources=[instance], 
-            dry_run=dry_run, 
-            diff={}, 
-            result={}
+            task=f"{self.name}:sync_device_facts",
+            resources=[instance],
+            dry_run=dry_run,
+            diff={},
+            result={},
         )
         nb = self._get_pynetbox(instance, branch=branch)
         kwargs["add_details"] = True
@@ -2269,7 +2268,7 @@ class NetboxWorker(NFPWorker):
                                 "sync_device_facts_dry_run"
                                 if dry_run
                                 else "sync_device_facts"
-                            ): (updates if updates else current_state)
+                            ): (updates if updates else "Device facts in sync")
                         }
                         if branch is not None:
                             ret.result[host]["branch"] = branch
@@ -2340,24 +2339,47 @@ class NetboxWorker(NFPWorker):
             Exception: If a device does not exist in Netbox.
             UnsupportedServiceError: If the specified datasource is not supported.
         """
-        result = {}
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_interfaces",
-            result=result,
+            result={},
             resources=[instance],
+            dry_run=dry_run,
+            diff={},
         )
         nb = self._get_pynetbox(instance, branch=branch)
+        kwargs["add_details"] = True
 
         if datasource == "nornir":
             # source hosts list from Nornir
             if kwargs:
                 devices.extend(self.get_nornir_hosts(kwargs, timeout))
+                devices = list(set(devices))
+                job.event(f"syncing {len(devices)} devices")
+
+            # fetch devices interfaces data from Netbox
+            nb_interfaces_data = self.get_interfaces(
+                job=job,
+                instance=instance,
+                devices=copy.copy(devices),
+                cache="refresh",
+            ).result
+
+            # fetch devices data from Netbox
+            nb_devices_data = self.get_devices(
+                job=job,
+                instance=instance,
+                devices=copy.copy(devices),
+            ).result
+
             # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
                 kwargs["FL"] = devices[i : i + batch_size]
                 kwargs["getters"] = "get_interfaces"
+                job.event(
+                    f"retrieving interfaces for devices {', '.join(kwargs['FL'])}"
+                )
                 data = self.client.run_job(
                     "nornir",
                     "parse",
@@ -2365,145 +2387,195 @@ class NetboxWorker(NFPWorker):
                     workers="all",
                     timeout=timeout,
                 )
+
+                # Collect interfaces to update and create in bulk
+                interfaces_to_update = []
+                interfaces_to_create = []
+                mac_addresses_to_create = []
+
                 for worker, results in data.items():
                     if results["failed"]:
-                        log.error(
-                            f"{worker} get_interfaces failed, errors: {'; '.join(results['errors'])}"
-                        )
+                        msg = f"{worker} get_interfaces failed, errors: {'; '.join(results['errors'])}"
+                        ret.errors.append(msg)
+                        log.error(msg)
                         continue
+
                     for host, host_data in results["result"].items():
-                        updated, created = {}, {}
-                        result[host] = {
-                            (
-                                "sync_device_interfaces_dry_run"
-                                if dry_run
-                                else "sync_device_interfaces"
-                            ): updated,
-                            (
-                                "created_device_interfaces_dry_run"
-                                if dry_run
-                                else "created_device_interfaces"
-                            ): created,
+                        if host_data["napalm_get"]["failed"]:
+                            msg = f"{host} interfaces update failed: '{host_data['napalm_get']['exception']}'"
+                            ret.errors.append(msg)
+                            log.error(msg)
+                            continue
+
+                        nb_interfaces = nb_interfaces_data.get(host, {})
+                        if not nb_interfaces:
+                            msg = f"'{host}' has no interfaces in Netbox, skipping"
+                            ret.errors.append(msg)
+                            log.warning(msg)
+                            continue
+
+                        # Get device ID for creating new interfaces
+                        nb_device = nb_devices_data.get(host)
+                        if not nb_device:
+                            msg = f"'{host}' does not exist in Netbox"
+                            ret.errors.append(msg)
+                            log.error(msg)
+                            continue
+
+                        interfaces = host_data["napalm_get"]["result"]["get_interfaces"]
+
+                        sync_key = "sync_device_interfaces"
+                        create_key = "created_device_interfaces"
+                        if dry_run:
+                            sync_key = "sync_device_interfaces_dry_run"
+                            create_key = "created_device_interfaces_dry_run"
+                        ret.result[host] = {
+                            sync_key: {},
+                            create_key: {},
                         }
                         if branch is not None:
-                            result[host]["branch"] = branch
-                        interfaces = host_data["napalm_get"]["get_interfaces"]
-                        nb_device = nb.dcim.devices.get(name=host)
-                        if not nb_device:
-                            job.event(
-                                f"'{host}' does not exist in Netbox", severity="ERROR"
-                            )
-                            log.error(f"'{host}' does not exist in Netbox")
-                            continue
-                        nb_interfaces = nb.dcim.interfaces.filter(
-                            device_id=nb_device.id
-                        )
-                        # update existing interfaces
-                        for nb_interface in nb_interfaces:
-                            if nb_interface.name not in interfaces:
-                                continue
-                            interface = interfaces.pop(nb_interface.name)
-                            if dry_run is not True:
-                                nb_interface.description = interface["description"]
-                                if interface["mtu"] > 0:
-                                    nb_interface.mtu = interface["mtu"]
-                                if interface["speed"] > 0:
-                                    nb_interface.speed = interface["speed"] * 1000
-                                if interface["mac_address"].strip().lower() not in [
-                                    "none",
-                                    "",
-                                ]:
-                                    mac_address = interface["mac_address"]
-                                    try:
-                                        nb_mac_addr = nb.dcim.mac_addresses.get(
-                                            mac_address=mac_address,
-                                            interface_id=nb_interface.id,
-                                        )
-                                    except Exception as e:
-                                        msg = f"{worker} failed to get {mac_address} mac-address from netbox: {e}"
-                                        job.event(msg, severity="WARNING")
-                                        ret.messages.append(msg)
-                                        log.error(msg)
-                                    else:
-                                        if not nb_mac_addr:
-                                            nb_mac_addr = nb.dcim.mac_addresses.create(
-                                                mac_address=mac_address,
-                                                assigned_object_type="dcim.interface",
-                                                assigned_object_id=nb_interface.id,
-                                            )
-                                        elif not nb_mac_addr.assigned_object_id:
-                                            nb_mac_addr.assigned_object_type = (
-                                                "dcim.interface"
-                                            )
-                                            nb_mac_addr.assigned_object_id = (
-                                                nb_interface.id
-                                            )
-                                        if not nb_interface.primary_mac_address:
-                                            nb_interface.primary_mac_address = (
-                                                nb_mac_addr.id
-                                            )
-                                            job.event(
-                                                f"{host} {mac_address} MAC associating with interface {nb_interface.name}",
-                                                resource=instance,
-                                            )
-                                nb_interface.enabled = interface["is_enabled"]
-                                nb_interface.save()
-                            updated[nb_interface.name] = interface
-                            job.event(
-                                f"{host} updated interface {nb_interface.name}",
-                                resource=instance,
-                            )
-                        # create new interfaces
-                        if create is not True:
-                            continue
-                        for interface_name, interface in interfaces.items():
-                            interface["type"] = "other"
-                            if dry_run is not True:
-                                nb_interface = nb.dcim.interfaces.create(
-                                    name=interface_name,
-                                    device={"name": nb_device.name},
-                                    type=interface["type"],
-                                )
-                                nb_interface.description = interface["description"]
-                                if interface["mtu"] > 0:
-                                    nb_interface.mtu = interface["mtu"]
-                                if interface["speed"] > 0:
-                                    nb_interface.speed = interface["speed"] * 1000
-                                # create MAC address
-                                if interface["mac_address"].strip().lower() not in [
-                                    "none",
-                                    "",
-                                ]:
-                                    mac_address = interface["mac_address"]
-                                    if self.nb_version[instance] >= (4, 2, 0):
-                                        try:
-                                            nb_mac_addr = nb.dcim.mac_addresses.create(
-                                                mac_address=mac_address,
-                                                assigned_object_type="dcim.interface",
-                                                assigned_object_id=nb_interface.id,
-                                            )
-                                        except Exception as e:
-                                            msg = f"{host} {mac_address} MAC failed to create, interface {nb_interface.name}: {e}"
-                                            job.event(msg, severity="WARNING")
-                                            ret.messages.append(msg)
-                                            log.error(msg)
-                                        else:
-                                            nb_interface.primary_mac_address = (
-                                                nb_mac_addr.id
-                                            )
-                                    else:
-                                        nb_interface.mac_address = mac_address
-                                    job.event(
-                                        f"{host} {mac_address} MAC created, associating with interface {nb_interface.name}",
-                                        resource=instance,
+                            ret.result[host]["branch"] = branch
+
+                        # Process network device interfaces
+                        for intf_name, interface_data in interfaces.items():
+                            if intf_name in nb_interfaces:
+                                # Interface exists - prepare update
+                                nb_intf = nb_interfaces[intf_name]
+
+                                # Build desired state
+                                desired_state = {
+                                    "description": interface_data.get(
+                                        "description", ""
+                                    ),
+                                    "enabled": interface_data.get("is_enabled", True),
+                                }
+                                if 10000 > interface_data.get("mtu", 0) > 0:
+                                    desired_state["mtu"] = interface_data["mtu"]
+                                if interface_data.get("speed", 0) > 0:
+                                    desired_state["speed"] = (
+                                        interface_data["speed"] * 1000
                                     )
-                                nb_interface.enabled = interface["is_enabled"]
-                                nb_interface.save()
-                            created[interface_name] = interface
-                            job.event(
-                                f"{host} created interface {interface_name}",
-                                resource=instance,
-                            )
+
+                                # Build current state
+                                current_state = {
+                                    "description": nb_intf.get("description", ""),
+                                    "enabled": nb_intf.get("enabled", True),
+                                }
+                                if nb_intf.get("mtu"):
+                                    current_state["mtu"] = nb_intf["mtu"]
+                                if nb_intf.get("speed"):
+                                    current_state["speed"] = nb_intf["speed"]
+
+                                # Compare and get fields that need updating
+                                updates, diff = compare_netbox_object_state(
+                                    desired_state=desired_state,
+                                    current_state=current_state,
+                                )
+
+                                # Only update if there are changes
+                                if updates:
+                                    updates["id"] = int(nb_intf["id"])
+                                    interfaces_to_update.append(updates)
+                                    ret.diff.setdefault(host, {})[intf_name] = diff
+
+                                ret.result[host][sync_key][intf_name] = (
+                                    updates if updates else "Interface in sync"
+                                )
+
+                                mac_address = (
+                                    interface_data.get("mac_address", "")
+                                    .strip()
+                                    .lower()
+                                )
+                                if mac_address and mac_address not in ["none", ""]:
+                                    # Check if MAC already exists
+                                    for nb_mac in nb_intf.get("mac_addresses") or []:
+                                        if (
+                                            nb_mac.get("mac_address", "").lower()
+                                            == mac_address
+                                        ):
+                                            break
+                                    else:
+                                        # Prepare MAC address for creation
+                                        mac_addresses_to_create.append(
+                                            {
+                                                "mac_address": mac_address,
+                                                "assigned_object_type": "dcim.interface",
+                                                "assigned_object_id": int(
+                                                    nb_intf["id"]
+                                                ),
+                                            }
+                                        )
+                            elif create:
+                                # Interface doesn't exist - prepare creation
+                                new_intf = {
+                                    "name": intf_name,
+                                    "device": int(nb_device["id"]),
+                                    "type": "other",
+                                    "description": interface_data.get(
+                                        "description", ""
+                                    ),
+                                    "enabled": interface_data.get("is_enabled", True),
+                                }
+                                if 10000 > interface_data.get("mtu", 0) > 0:
+                                    new_intf["mtu"] = interface_data["mtu"]
+                                if interface_data.get("speed", 0) > 0:
+                                    new_intf["speed"] = interface_data["speed"] * 1000
+
+                                mac_address = (
+                                    interface_data.get("mac_address", "")
+                                    .strip()
+                                    .lower()
+                                )
+                                if mac_address and mac_address not in ["none", ""]:
+                                    mac_addresses_to_create.append(
+                                        {
+                                            "mac_address": mac_address,
+                                            "assigned_object_type": "dcim.interface",
+                                            "assigned_object_id": int(nb_intf["id"]),
+                                        }
+                                    )
+
+                                interfaces_to_create.append(new_intf)
+                                ret.result[host][create_key][intf_name] = new_intf
+
+                # Perform bulk updates and creations
+                if interfaces_to_update and not dry_run:
+                    try:
+                        nb.dcim.interfaces.update(interfaces_to_update)
+                        job.event(
+                            f"Bulk updated {len(interfaces_to_update)} interfaces"
+                        )
+                    except Exception as e:
+                        msg = f"Bulk interface update failed: {e}"
+                        ret.errors.append(msg)
+                        log.error(msg)
+
+                if interfaces_to_create and not dry_run:
+                    try:
+                        created_interfaces = nb.dcim.interfaces.create(
+                            interfaces_to_create
+                        )
+                        job.event(
+                            f"Bulk created {len(interfaces_to_create)} interfaces"
+                        )
+                    except Exception as e:
+                        msg = f"Bulk interface creation failed: {e}"
+                        ret.errors.append(msg)
+                        log.error(msg)
+
+                # Bulk create MAC addresses
+                if mac_addresses_to_create and not dry_run:
+                    try:
+                        nb.dcim.mac_addresses.create(mac_addresses_to_create)
+                        job.event(
+                            f"Bulk created {len(mac_addresses_to_create)} MAC addresses"
+                        )
+                    except Exception as e:
+                        msg = f"Bulk MAC address creation failed: {e}"
+                        ret.errors.append(msg)
+                        log.error(msg)
+
         else:
             raise UnsupportedServiceError(
                 f"'{datasource}' datasource service not supported"
@@ -3822,6 +3894,62 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
+    def expand_alphanumeric_range(self, range_pattern: str) -> list:
+        """
+        Expand alphanumeric ranges.
+
+        Examples:
+            - Ethernet[1-3] -> ['Ethernet1', 'Ethernet2', 'Ethernet3']
+            - [ge,xe]-0/0/[0-9] -> ['ge-0/0/0', 'ge-0/0/1', ..., 'xe-0/0/9']
+        """
+        expanded_names = []
+        
+        # Find all bracketed patterns
+        bracket_pattern = r'\[([^\]]+)\]'
+        matches = list(re.finditer(bracket_pattern, range_pattern))
+        
+        if not matches:
+            # No ranges found, return as-is
+            return [range_pattern]
+        
+        # Start with a single template
+        templates = [range_pattern]
+        
+        # Process each bracket from left to right
+        for match in matches:
+            bracket_content = match.group(1)
+            new_templates = []
+            
+            # Check if it's a comma-separated list
+            if ',' in bracket_content:
+                options = [opt.strip() for opt in bracket_content.split(',')]
+                for template in templates:
+                    for option in options:
+                        new_templates.append(template.replace(f'[{bracket_content}]', option, 1))
+            
+            # Check if it's a numeric range
+            elif '-' in bracket_content and bracket_content.replace('-', '').replace(' ', '').isdigit():
+                parts = bracket_content.split('-')
+                if len(parts) == 2:
+                    try:
+                        start = int(parts[0].strip())
+                        end = int(parts[1].strip())
+                        for template in templates:
+                            for num in range(start, end + 1):
+                                new_templates.append(template.replace(f'[{bracket_content}]', str(num), 1))
+                    except ValueError:
+                        # If conversion fails, treat as literal
+                        for template in templates:
+                            new_templates.append(template.replace(f'[{bracket_content}]', bracket_content, 1))
+            else:
+                # Treat as literal
+                for template in templates:
+                    new_templates.append(template.replace(f'[{bracket_content}]', bracket_content, 1))
+            
+            templates = new_templates
+        
+        return templates
+        
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def create_device_interfaces(
         self,
@@ -3829,17 +3957,118 @@ class NetboxWorker(NFPWorker):
         devices: list,
         interface_name: Union[list, str],
         interface_type: str = "other",
-        speed: int = None,
-        mtu: int = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
         branch: str = None,
+        **kwargs: dict
     ):
+        """
+        Create interfaces for one or more devices in NetBox. This task creates interfaces in bulk and only
+        if interfaces does not exist in Netbox.
+
+        Args:
+            job (Job): The job object containing execution context and metadata.
+            devices (list): List of device names or device objects to create interfaces for.
+            interface_name (Union[list, str]): Name(s) of the interface(s) to create. Can be a single 
+                interface name as a string or multiple names as a list. Alphanumeric ranges are 
+                supported for bulk creation:
+
+                - Ethernet[1-3] -> Ethernet1, Ethernet2, Ethernet3
+                - [ge,xe]-0/0/[0-9] -> ge-0/0/0, ..., xe-0/0/0 etc.
+
+            interface_type (str, optional): Type of interface (e.g., "other", "virtual", "lag", 
+                "1000base-t"). Defaults to "other".
+            instance (Union[None, str], optional): NetBox instance identifier to use. If None, 
+                uses the default instance. Defaults to None.
+            dry_run (bool, optional): If True, simulates the operation without making actual changes. 
+                Defaults to False.
+            branch (str, optional): NetBox branch to use for the operation. Defaults to None.
+            kwargs (dict, optional): Any additional interface attributes
+
+        Returns:
+            Result: Result object containing the task name, execution results, and affected resources.
+                The result dictionary contains status and details of interface creation operations.
+        """
         instance = instance or self.default_instance
         result = {}
+        kwargs = kwargs or {}
         ret = Result(
             task=f"{self.name}:create_device_interfaces",
             result=result,
             resources=[instance],
         )
         nb = self._get_pynetbox(instance, branch=branch)
+        
+        # Normalize interface_name to a list
+        if isinstance(interface_name, str):
+            interface_names = [interface_name]
+        else:
+            interface_names = interface_name
+        
+        # Expand all interface name patterns
+        all_interface_names = []
+        for name_pattern in interface_names:
+            all_interface_names.extend(self.expand_alphanumeric_range(name_pattern))
+        
+        job.event(f"Expanded interface names to {len(all_interface_names)} interface(s)")
+        
+        # Process each device
+        for device_name in devices:
+            result[device_name] = {
+                'created': [],
+                'skipped': [],
+            }
+            
+            try:
+                # Get device from NetBox
+                nb_device = nb.dcim.devices.get(name=device_name)
+                if not nb_device:
+                    msg = f"Device '{device_name}' not found in NetBox"
+                    ret.errors.append(msg)
+                    job.event(msg)
+                    continue
+                
+                # Get existing interfaces for this device
+                existing_interfaces = nb.dcim.interfaces.filter(device=device_name)
+                existing_interface_names = {intf.name for intf in existing_interfaces}
+                
+                # Prepare interfaces to create
+                interfaces_to_create = []
+                
+                for intf_name in all_interface_names:
+                    if intf_name in existing_interface_names:
+                        result[device_name]['skipped'].append(intf_name)
+                        continue
+                    
+                    # Build interface data
+                    intf_data = {
+                        'device': nb_device.id,
+                        'name': intf_name,
+                        'type': interface_type,
+                        **kwargs
+                    }
+
+                    interfaces_to_create.append(intf_data)
+                    result[device_name]['created'].append(intf_name)
+                
+                # Create interfaces in bulk if not dry_run
+                if interfaces_to_create and not dry_run:
+                    try:
+                        nb.dcim.interfaces.create(interfaces_to_create)
+                        msg = f"Created {len(interfaces_to_create)} interface(s) on device '{device_name}'"
+                        job.event(msg)
+                    except Exception as e:
+                        msg = f"Failed to create interfaces on device '{device_name}': {e}"
+                        ret.errors.append(msg)
+                        log.error(msg)
+                elif interfaces_to_create and dry_run:
+                    msg = f"[DRY RUN] Would create {len(interfaces_to_create)} interface(s) on device '{device_name}'"
+                    job.event(msg)
+            
+            except Exception as e:
+                msg = f"Error processing device '{device_name}': {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+        
+        return ret
+

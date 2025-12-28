@@ -1,3 +1,15 @@
+## 0.13.1
+
+### CHANGES
+
+1. Netbox sync_device_interfaces - refactored to use bulk update and bulk create operations
+
+### FEATURES
+
+1. Netbox service added `create_device_interfaces` task
+
+----
+
 ## 0.13.0
 
 ### BUG FIXES
