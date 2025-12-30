@@ -430,6 +430,12 @@ class NFPClient(object):
 
         # get a list of workers where job was dispatched to
         post_response = json.loads(post_response)
+
+        if "workers" not in post_response:
+            raise RuntimeError(
+                f"{self.name} - '{uuid}' job, POST response missing 'workers' {post_response}"
+            )
+
         workers_dispatched = set(post_response["workers"])
         log.debug(
             f"{self.name} - broker dispatched job '{uuid}' POST request to workers {workers_dispatched}"

@@ -106,7 +106,7 @@ class CreateDeviceInterfacesInput(NetboxCommonArgs, use_enum_values=True):
     interface_type: InterfaceTypeEnum = Field(
         "other",
         description="Name(s) of the interface(s) to create",
-        alias="interface-type"
+        alias="interface-type",
     )
     description: Union[None, StrictStr] = Field(
         None, description="Interface description"

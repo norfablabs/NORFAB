@@ -31,6 +31,7 @@ cache_use: True # or False, refresh, force
 cache_ttl: 31557600
 netbox_connect_timeout: 10
 netbox_read_timeout: 300
+branch_create_timeout: 120
 instances:
   prod:
     default: True

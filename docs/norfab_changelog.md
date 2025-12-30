@@ -3,10 +3,22 @@
 ### CHANGES
 
 1. Netbox sync_device_interfaces - refactored to use bulk update and bulk create operations
+2. Netbox service - deprecated support for Netbox below 4.4.0 version
+3. Netbox service - `get_interfaces` added `label` and `mark_connected` fields
+4. Netbox service - `get_connections` added `remote_device_status` field
+5. Nornir service - test task added nornir hosts inventory to results if extensive set to true
+6. Nornir tests markdown - added hosts expandable inventory section
+7. Nornir tests markdown - added total tests number for detailed section for each host
+8. Nornir tests markdown - updated headings and paragraphs content
 
 ### FEATURES
 
 1. Netbox service added `create_device_interfaces` task
+2. Netbox service - added `branch_create_timeout` inventory argument to control timer waiting for new branch to be created
+
+### BUGS
+
+1. Nornir tests markdown - fixed detailed output handling to not collect suite into summary table
 
 ----
 

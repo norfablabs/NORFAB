@@ -87,36 +87,6 @@ def _form_query_v4(obj, filters, fields, alias=None) -> str:
     return query
 
 
-def _form_query_v3(obj, filters, fields, alias=None) -> str:
-    """
-    Helper function to form graphql query for Netbox version 3.
-
-    Args:
-        obj (str): The object to return data for, e.g., 'device', 'interface', 'ip_address'.
-        filters (dict): A dictionary of key-value pairs to filter by.
-        fields (list): A list of data fields to return.
-        alias (str, optional): An alias value for the requested object.
-
-    Returns:
-        str: A formatted GraphQL query string.
-    """
-    filters_list = []
-    for k, v in filters.items():
-        if isinstance(v, (list, set, tuple)):
-            items = ", ".join(f'"{i}"' for i in v)
-            filters_list.append(f"{k}: [{items}]")
-        else:
-            filters_list.append(f'{k}: "{v}"')
-    filters_string = ", ".join(filters_list)
-    fields = " ".join(fields)
-    if alias:
-        query = f"{alias}: {obj}({filters_string}) {{{fields}}}"
-    else:
-        query = f"{obj}({filters_string}) {{{fields}}}"
-
-    return query
-
-
 def compare_netbox_object_state(
     desired_state: dict,
     current_state: dict,
@@ -206,23 +176,17 @@ class NetboxWorker(NFPWorker):
         default_instance (str): Default Netbox instance name.
         inventory (dict): Inventory data.
         nb_version (tuple): Netbox version.
-        compatible_ge_v3 (tuple): Minimum supported Netbox v3 version.
-        compatible_ge_v4 (tuple): Minimum supported Netbox v4 version.
+        compatible_ge_v4 (tuple): Minimum supported Netbox v4 version (4.4.0+).
     """
 
     default_instance = None
     inventory = None
     nb_version = {}  # dict keyed by instance name and version
-    compatible_ge_v3 = (
-        3,
-        6,
-        0,
-    )  # 3.6.0 - minimum supported Netbox v3
     compatible_ge_v4 = (
         4,
         4,
         0,
-    )  # 4.0.5 - minimum supported Netbox v4
+    )  # 4.4.0 - minimum supported Netbox v4
 
     def __init__(
         self,
@@ -259,6 +223,9 @@ class NetboxWorker(NFPWorker):
         self.netbox_read_timeout = self.netbox_inventory.get("netbox_read_timeout", 300)
         self.cache_use = self.netbox_inventory.get("cache_use", True)
         self.cache_ttl = self.netbox_inventory.get("cache_ttl", 31557600)  # 1 Year
+        self.branch_create_timeout = self.netbox_inventory.get(
+            "branch_create_timeout", 120
+        )
 
         # find default instance
         for name, params in self.netbox_inventory["instances"].items():
@@ -402,13 +369,14 @@ class NetboxWorker(NFPWorker):
                     self.nb_version[instance] = tuple(
                         [int(i) for i in params["netbox-version"].split(".")]
                     )
-                if self.nb_version[instance][0] == 3:  # check Netbox 3 compatibility
-                    ret.result[instance] = (
-                        self.nb_version[instance] >= self.compatible_ge_v3
-                    )
-                elif self.nb_version[instance][0] == 4:  # check Netbox 4 compatibility
-                    ret.result[instance] = (
-                        self.nb_version[instance] >= self.compatible_ge_v4
+                # check Netbox 4.4+ compatibility
+                if self.nb_version[instance] >= self.compatible_ge_v4:
+                    ret.result[instance] = True
+                else:
+                    ret.result[instance] = False
+                    log.error(
+                        f"{self.name} - {instance} Netbox version {self.nb_version[instance]} is not supported, "
+                        f"minimum required version is {self.compatible_ge_v4}"
                     )
 
         return ret
@@ -575,7 +543,7 @@ class NetboxWorker(NFPWorker):
             # wait for branch provisioning to complete
             if not nb_branch.status.value.lower() == "ready":
                 retries = 0
-                while retries < 60:
+                while retries < self.branch_create_timeout:
                     nb_branch = nb.plugins.branching.branches.get(name=branch)
                     if nb_branch.status.value.lower() == "ready":
                         break
@@ -767,17 +735,23 @@ class NetboxWorker(NFPWorker):
             queries_list = []
             for alias, query_data in queries.items():
                 query_data["alias"] = alias
-                if self.nb_version[instance][0] == 4:
+                if self.nb_version[instance] >= (4, 4, 0):
                     queries_list.append(_form_query_v4(**query_data))
-                elif self.nb_version[instance][0] == 3:
-                    queries_list.append(_form_query_v3(**query_data))
+                else:
+                    raise UnsupportedNetboxVersion(
+                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                        f"minimum required version is {self.compatible_ge_v4}"
+                    )
             queries_strings = "    ".join(queries_list)
             query = f"query {{{queries_strings}}}"
         elif obj and filters and fields:
-            if self.nb_version[instance][0] == 4:
+            if self.nb_version[instance] >= (4, 4, 0):
                 query = _form_query_v4(obj, filters, fields)
-            elif self.nb_version[instance][0] == 3:
-                query = _form_query_v3(obj, filters, fields)
+            else:
+                raise UnsupportedNetboxVersion(
+                    f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                    f"minimum required version is {self.compatible_ge_v4}"
+                )
             query = f"query {{{query}}}"
         elif query_string:
             query = query_string
@@ -971,11 +945,14 @@ class NetboxWorker(NFPWorker):
                             devices.remove(device_name)
                             ret.result[device_name] = self.cache[device_cache_key]
                 # query netbox last updated data for devices
-                if self.nb_version[instance][0] == 4:
+                if self.nb_version[instance] >= (4, 4, 0):
                     dlist = '["{dl}"]'.format(dl='", "'.join(devices))
                     filters_dict = {"name": f"{{in_list: {dlist}}}"}
-                elif self.nb_version[instance][0] == 3:
-                    filters_dict = {"name": devices}
+                else:
+                    raise UnsupportedNetboxVersion(
+                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                        f"minimum required version is {self.compatible_ge_v4}"
+                    )
                 last_updated_query["devices_by_devices_list"] = {
                     "obj": "device_list",
                     "filters": filters_dict,
@@ -1026,11 +1003,14 @@ class NetboxWorker(NFPWorker):
         # fetch devices data from Netbox
         if devices or queries:
             if devices:
-                if self.nb_version[instance][0] == 4:
+                if self.nb_version[instance] >= (4, 4, 0):
                     dlist = '["{dl}"]'.format(dl='", "'.join(devices))
                     filters_dict = {"name": f"{{in_list: {dlist}}}"}
-                elif self.nb_version[instance][0] == 3:
-                    filters_dict = {"name": devices}
+                else:
+                    raise UnsupportedNetboxVersion(
+                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                        f"minimum required version is {self.compatible_ge_v4}"
+                    )
                 queries["devices_by_devices_list"] = {
                     "obj": "device_list",
                     "filters": filters_dict,
@@ -1127,11 +1107,10 @@ class NetboxWorker(NFPWorker):
             "speed",
             "id",
             "device {name}",
+            "label",
+            "mark_connected",
         ]
-        if self.nb_version[instance] >= (4, 2, 0):
-            intf_fields.append("mac_addresses {mac_address}")
-        else:
-            intf_fields.append("mac_address")
+        intf_fields.append("mac_addresses {mac_address}")
 
         # add IP addresses to interfaces fields
         if ip_addresses:
@@ -1141,7 +1120,7 @@ class NetboxWorker(NFPWorker):
 
         # form interfaces query dictionary
         dlist = str(devices).replace("'", '"')  # swap quotes
-        if self.nb_version[instance] >= (4, 3, 0):
+        if self.nb_version[instance] >= (4, 4, 0):
             # add interface name regex filter
             if interface_regex:
                 filters = (
@@ -1154,17 +1133,11 @@ class NetboxWorker(NFPWorker):
                 )
             else:
                 filters = "{device: {name: {in_list: " + dlist + "}}}"
-        elif (4, 2, 0) <= self.nb_version[instance] < (4, 3, 0):
-            if interface_regex:
-                filters = (
-                    "{device: "
-                    + dlist
-                    + ", name: {i_regex: "
-                    + f'"{interface_regex}"'
-                    + "}}"
-                )
-            else:
-                filters = {"device": devices}
+        else:
+            raise UnsupportedNetboxVersion(
+                f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                f"minimum required version is {self.compatible_ge_v4}"
+            )
 
         queries = {
             "interfaces": {
@@ -1176,7 +1149,7 @@ class NetboxWorker(NFPWorker):
 
         # add query to retrieve inventory items
         if inventory_items:
-            if self.nb_version[instance] >= (4, 3, 0):
+            if self.nb_version[instance] >= (4, 4, 0):
                 dlist = str(devices).replace("'", '"')  # swap quotes
                 inv_filters = (
                     "{device: {name: {in_list: "
@@ -1184,7 +1157,10 @@ class NetboxWorker(NFPWorker):
                     + '}}, component_type: {app_label: {exact: "dcim"}}}'
                 )
             else:
-                inv_filters = {"device": devices, "component_type": "dcim.interface"}
+                raise UnsupportedNetboxVersion(
+                    f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                    f"minimum required version is {self.compatible_ge_v4}"
+                )
             inv_fields = [
                 "name",
                 "component {... on InterfaceType {id}}",
@@ -1295,6 +1271,7 @@ class NetboxWorker(NFPWorker):
                             "Console": {
                                 "breakout": false,
                                 "remote_device": "termserv1",
+                                "remote_device_status": "active",
                                 "remote_interface": "ConsoleServerPort1",
                                 "remote_termination_type": "consoleserverport",
                                 "termination_type": "consoleport"
@@ -1302,6 +1279,7 @@ class NetboxWorker(NFPWorker):
                             "eth1": {
                                 "breakout": false,
                                 "remote_device": "r2",
+                                "remote_device_status": "active",
                                 "remote_interface": "eth8",
                                 "remote_termination_type": "interface",
                                 "termination_type": "interface"
@@ -1337,14 +1315,14 @@ class NetboxWorker(NFPWorker):
         interfaces_fields = [
             "name",
             "type",
-            "device {name}",
+            "device {name, status}",
             """
             member_interfaces {
               name
               connected_endpoints {
                 __typename
                 ... on ProviderNetworkType {name}
-                ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
               }
             }
             """,
@@ -1357,13 +1335,13 @@ class NetboxWorker(NFPWorker):
                 connected_endpoints {
                   __typename
                   ... on ProviderNetworkType {name}
-                  ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                  ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
                 }
               }
               connected_endpoints {
                 __typename
                 ... on ProviderNetworkType {name}
-                ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
               }
             }
             """,
@@ -1371,7 +1349,7 @@ class NetboxWorker(NFPWorker):
             connected_endpoints {
                 __typename 
                 ... on ProviderNetworkType {name}
-                ... on InterfaceType {name, device {name}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
             }
             """,
         ]
@@ -1379,53 +1357,53 @@ class NetboxWorker(NFPWorker):
             """
             link_peers {
                 __typename
-                ... on InterfaceType {name device {name}}
-                ... on FrontPortType {name device {name}}
-                ... on RearPortType {name device {name}}
+                ... on InterfaceType {name device {name, status}}
+                ... on FrontPortType {name device {name, status}}
+                ... on RearPortType {name device {name, status}}
             }
         """
         )
         console_ports_fields = [
             "name",
-            "device {name}",
+            "device {name, status}",
             "type",
             """connected_endpoints {
               __typename 
-              ... on ConsoleServerPortType {name device {name}}
+              ... on ConsoleServerPortType {name device {name, status}}
             }""",
             """link_peers {
               __typename
-              ... on ConsoleServerPortType {name device {name}}
-              ... on FrontPortType {name device {name}}
-              ... on RearPortType {name device {name}}
+              ... on ConsoleServerPortType {name device {name, status}}
+              ... on FrontPortType {name device {name, status}}
+              ... on RearPortType {name device {name, status}}
             }""",
         ]
         console_server_ports_fields = [
             "name",
-            "device {name}",
+            "device {name, status}",
             "type",
             """connected_endpoints {
               __typename 
-              ... on ConsolePortType {name device {name}}
+              ... on ConsolePortType {name device {name, status}}
             }""",
             """link_peers {
               __typename
-              ... on ConsolePortType {name device {name}}
-              ... on FrontPortType {name device {name}}
-              ... on RearPortType {name device {name}}
+              ... on ConsolePortType {name device {name, status}}
+              ... on FrontPortType {name device {name, status}}
+              ... on RearPortType {name device {name, status}}
             }""",
         ]
         power_outlet_fields = [
             "name",
-            "device {name}",
+            "device {name, status}",
             "type",
             """connected_endpoints {
               __typename 
-              ... on PowerPortType {name device {name}}
+              ... on PowerPortType {name device {name, status}}
             }""",
             """link_peers {
               __typename
-              ... on PowerPortType {name device {name}}
+              ... on PowerPortType {name device {name, status}}
             }""",
         ]
 
@@ -1438,7 +1416,7 @@ class NetboxWorker(NFPWorker):
 
         # form query dictionary with aliases to get data from Netbox
         dlist = str(devices).replace("'", '"')  # swap quotes
-        if self.nb_version[instance] >= (4, 3, 0):
+        if self.nb_version[instance] >= (4, 4, 0):
             if interface_regex:
                 filters = (
                     "{device: {name: {in_list: "
@@ -1450,17 +1428,11 @@ class NetboxWorker(NFPWorker):
                 )
             else:
                 filters = "{device: {name: {in_list: " + dlist + "}}}"
-        elif (4, 2, 0) <= self.nb_version[instance] < (4, 3, 0):
-            if interface_regex:
-                filters = (
-                    "{device: "
-                    + dlist
-                    + ", name: {i_regex: "
-                    + f'"{interface_regex}"'
-                    + "}}"
-                )
-            else:
-                filters = {"device": devices}
+        else:
+            raise UnsupportedNetboxVersion(
+                f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                f"minimum required version is {self.compatible_ge_v4}"
+            )
 
         queries = {
             "interface": {
@@ -1524,6 +1496,7 @@ class NetboxWorker(NFPWorker):
                 # add remote connection details
                 if remote_termination_type == "providernetwork":
                     connection["remote_device"] = None
+                    connection["remote_device_status"] = None
                     connection["remote_interface"] = None
                     connection["provider"] = endpoints[0]["name"]
                 else:
@@ -1532,6 +1505,9 @@ class NetboxWorker(NFPWorker):
                         remote_interface = list(sorted([i["name"] for i in endpoints]))
                     connection["remote_interface"] = remote_interface
                     connection["remote_device"] = endpoints[0]["device"]["name"]
+                    connection["remote_device_status"] = endpoints[0]["device"][
+                        "status"
+                    ]
 
                 # add cable and its peer details
                 if cables:
@@ -1562,6 +1538,7 @@ class NetboxWorker(NFPWorker):
                 parent = port["parent"]
                 connection = {
                     "remote_device": None,
+                    "remote_device_status": None,
                     "remote_interface": None,
                     "remote_termination_type": "virtual",
                     "termination_type": "virtual",
@@ -1580,6 +1557,7 @@ class NetboxWorker(NFPWorker):
                     except:
                         continue
                 connection["remote_device"] = endpoint["device"]["name"]
+                connection["remote_device_status"] = endpoint["device"]["status"]
                 remote_termination_type = endpoint["__typename"].lower()
                 remote_termination_type = remote_termination_type.replace("type", "")
                 # collect virtual interfaces facing provider
@@ -1619,6 +1597,7 @@ class NetboxWorker(NFPWorker):
                 interface_name = port["name"]
                 connection = {
                     "remote_device": None,
+                    "remote_device_status": None,
                     "remote_interface": None,
                     "remote_termination_type": "lag",
                     "termination_type": "lag",
@@ -1636,6 +1615,7 @@ class NetboxWorker(NFPWorker):
                 elif endpoint["lag"]:
                     connection["remote_interface"] = endpoint["lag"]["name"]
                     connection["remote_device"] = endpoint["device"]["name"]
+                    connection["remote_device_status"] = endpoint["device"]["status"]
                 # add lag interface connection to results
                 ret.result[device_name][interface_name] = connection
 
@@ -1840,12 +1820,7 @@ class NetboxWorker(NFPWorker):
             job=job, devices=copy.deepcopy(devices), instance=instance, cache=cache
         )
         sites = list(set([i["site"]["slug"] for i in device_data.result.values()]))
-        if (4, 0, 0) <= self.nb_version[instance] < (4, 3, 0):
-            circuits_filters = {"site": sites}
-            if cid:
-                cid_list = '["{cl}"]'.format(cl='", "'.join(cid))
-                circuits_filters["cid"] = f"{{in_list: {cid_list}}}"
-        elif self.nb_version[instance] >= (4, 3, 0):
+        if self.nb_version[instance] >= (4, 4, 0):
             slist = str(sites).replace("'", '"')  # swap quotes
             if cid:
                 clist = str(cid).replace("'", '"')  # swap quotes
@@ -1856,11 +1831,11 @@ class NetboxWorker(NFPWorker):
             else:
                 circuits_filters = "{terminations: {site: {slug: {in_list: slist }}}}"
                 circuits_filters = circuits_filters.replace("slist", slist)
-        elif self.nb_version[instance][0] == 3:
-            circuits_filters = {"site": sites}
-            if cid:
-                cid_list = '["{cl}"]'.format(cl='", "'.join(cid))
-                circuits_filters["cid"] = cid_list
+        else:
+            raise UnsupportedNetboxVersion(
+                f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                f"minimum required version is {self.compatible_ge_v4}"
+            )
 
         log.info(
             f"{self.name}:get_circuits - constructed circuits filters: '{circuits_filters}'"
@@ -1937,13 +1912,14 @@ class NetboxWorker(NFPWorker):
             circuits_filters = {}
             if cid_list:
                 cid_list = str(cid_list).replace("'", '"')  # swap quotes
-                if (4, 0, 0) <= self.nb_version[instance] < (4, 3, 0):
-                    circuits_filters["cid"] = f"{{in_list: {cid_list}}}"
-                elif self.nb_version[instance] >= (4, 3, 0):
+                if self.nb_version[instance] >= (4, 4, 0):
                     circuits_filters = "{cid: {in_list: cid_list}}"
                     circuits_filters = circuits_filters.replace("cid_list", cid_list)
-                elif self.nb_version[instance][0] == 3:
-                    circuits_filters["cid"] = cid_list
+                else:
+                    raise UnsupportedNetboxVersion(
+                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                        f"minimum required version is {self.compatible_ge_v4}"
+                    )
         # ignore cache data, fetch circuits from netbox
         elif cache == False or cache == "refresh":
             pass
@@ -2169,14 +2145,14 @@ class NetboxWorker(NFPWorker):
             datasource (str, optional): The data source to use. Supported datasources:
 
                 - **nornir** - uses Nornir Service parse task to retrieve devices' data
-                    using NAPALM get_facts getter
+                    using NAPALM `get_facts` getter
 
             timeout (int, optional): The timeout for the job execution. Defaults to 60.
             devices (list, optional): The list of devices to update.
             batch_size (int, optional): The number of devices to process in each batch.
             branch (str, optional): Branch name to use, need to have branching plugin installed,
                 automatically creates branch if it does not exist in Netbox.
-            **kwargs: Additional keyword arguments to pass to the job.
+            **kwargs: Additional keyword arguments to pass to the datasource job.
 
         Returns:
             dict: A dictionary containing the results of the update operation.
@@ -2210,6 +2186,13 @@ class NetboxWorker(NFPWorker):
                 devices=copy.copy(devices),
                 cache="refresh",
             ).result
+            # remove devices that does not exist in Netbox
+            for d in list(devices):
+                if d not in nb_devices:
+                    msg = f"'{d}' device does not exist in Netbox"
+                    ret.errors.append(msg)
+                    log.error(msg)
+                    devices.remove(d)
             # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
                 kwargs["FL"] = devices[i : i + batch_size]
@@ -2239,9 +2222,7 @@ class NetboxWorker(NFPWorker):
                             log.error(msg)
                             continue
 
-                        nb_device = nb_devices.get(host)
-                        if not nb_device:
-                            raise Exception(f"'{host}' does not exist in Netbox")
+                        nb_device = nb_devices[host]
 
                         facts = host_data["napalm_get"]["result"]["get_facts"]
                         desired_state = {
@@ -3597,10 +3578,13 @@ class NetboxWorker(NFPWorker):
         if tenant:
             filters = filters or [{}]
             for filter in filters:
-                if self.nb_version[instance] >= (4, 3, 0):
+                if self.nb_version[instance] >= (4, 4, 0):
                     filter["tenant"] = f'{{name: {{exact: "{tenant}"}}}}'
                 else:
-                    filter["tenant"] = tenant
+                    raise UnsupportedNetboxVersion(
+                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
+                        f"minimum required version is {self.compatible_ge_v4}"
+                    )
 
         # construct inventory
         inventory = {
@@ -3903,53 +3887,68 @@ class NetboxWorker(NFPWorker):
             - [ge,xe]-0/0/[0-9] -> ['ge-0/0/0', 'ge-0/0/1', ..., 'xe-0/0/9']
         """
         expanded_names = []
-        
+
         # Find all bracketed patterns
-        bracket_pattern = r'\[([^\]]+)\]'
+        bracket_pattern = r"\[([^\]]+)\]"
         matches = list(re.finditer(bracket_pattern, range_pattern))
-        
+
         if not matches:
             # No ranges found, return as-is
             return [range_pattern]
-        
+
         # Start with a single template
         templates = [range_pattern]
-        
+
         # Process each bracket from left to right
         for match in matches:
             bracket_content = match.group(1)
             new_templates = []
-            
+
             # Check if it's a comma-separated list
-            if ',' in bracket_content:
-                options = [opt.strip() for opt in bracket_content.split(',')]
+            if "," in bracket_content:
+                options = [opt.strip() for opt in bracket_content.split(",")]
                 for template in templates:
                     for option in options:
-                        new_templates.append(template.replace(f'[{bracket_content}]', option, 1))
-            
+                        new_templates.append(
+                            template.replace(f"[{bracket_content}]", option, 1)
+                        )
+
             # Check if it's a numeric range
-            elif '-' in bracket_content and bracket_content.replace('-', '').replace(' ', '').isdigit():
-                parts = bracket_content.split('-')
+            elif (
+                "-" in bracket_content
+                and bracket_content.replace("-", "").replace(" ", "").isdigit()
+            ):
+                parts = bracket_content.split("-")
                 if len(parts) == 2:
                     try:
                         start = int(parts[0].strip())
                         end = int(parts[1].strip())
                         for template in templates:
                             for num in range(start, end + 1):
-                                new_templates.append(template.replace(f'[{bracket_content}]', str(num), 1))
+                                new_templates.append(
+                                    template.replace(
+                                        f"[{bracket_content}]", str(num), 1
+                                    )
+                                )
                     except ValueError:
                         # If conversion fails, treat as literal
                         for template in templates:
-                            new_templates.append(template.replace(f'[{bracket_content}]', bracket_content, 1))
+                            new_templates.append(
+                                template.replace(
+                                    f"[{bracket_content}]", bracket_content, 1
+                                )
+                            )
             else:
                 # Treat as literal
                 for template in templates:
-                    new_templates.append(template.replace(f'[{bracket_content}]', bracket_content, 1))
-            
+                    new_templates.append(
+                        template.replace(f"[{bracket_content}]", bracket_content, 1)
+                    )
+
             templates = new_templates
-        
+
         return templates
-        
+
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def create_device_interfaces(
         self,
@@ -3960,7 +3959,7 @@ class NetboxWorker(NFPWorker):
         instance: Union[None, str] = None,
         dry_run: bool = False,
         branch: str = None,
-        **kwargs: dict
+        **kwargs: dict,
     ):
         """
         Create interfaces for one or more devices in NetBox. This task creates interfaces in bulk and only
@@ -3969,18 +3968,18 @@ class NetboxWorker(NFPWorker):
         Args:
             job (Job): The job object containing execution context and metadata.
             devices (list): List of device names or device objects to create interfaces for.
-            interface_name (Union[list, str]): Name(s) of the interface(s) to create. Can be a single 
-                interface name as a string or multiple names as a list. Alphanumeric ranges are 
+            interface_name (Union[list, str]): Name(s) of the interface(s) to create. Can be a single
+                interface name as a string or multiple names as a list. Alphanumeric ranges are
                 supported for bulk creation:
 
                 - Ethernet[1-3] -> Ethernet1, Ethernet2, Ethernet3
                 - [ge,xe]-0/0/[0-9] -> ge-0/0/0, ..., xe-0/0/0 etc.
 
-            interface_type (str, optional): Type of interface (e.g., "other", "virtual", "lag", 
+            interface_type (str, optional): Type of interface (e.g., "other", "virtual", "lag",
                 "1000base-t"). Defaults to "other".
-            instance (Union[None, str], optional): NetBox instance identifier to use. If None, 
+            instance (Union[None, str], optional): NetBox instance identifier to use. If None,
                 uses the default instance. Defaults to None.
-            dry_run (bool, optional): If True, simulates the operation without making actual changes. 
+            dry_run (bool, optional): If True, simulates the operation without making actual changes.
                 Defaults to False.
             branch (str, optional): NetBox branch to use for the operation. Defaults to None.
             kwargs (dict, optional): Any additional interface attributes
@@ -3998,27 +3997,29 @@ class NetboxWorker(NFPWorker):
             resources=[instance],
         )
         nb = self._get_pynetbox(instance, branch=branch)
-        
+
         # Normalize interface_name to a list
         if isinstance(interface_name, str):
             interface_names = [interface_name]
         else:
             interface_names = interface_name
-        
+
         # Expand all interface name patterns
         all_interface_names = []
         for name_pattern in interface_names:
             all_interface_names.extend(self.expand_alphanumeric_range(name_pattern))
-        
-        job.event(f"Expanded interface names to {len(all_interface_names)} interface(s)")
-        
+
+        job.event(
+            f"Expanded interface names to {len(all_interface_names)} interface(s)"
+        )
+
         # Process each device
         for device_name in devices:
             result[device_name] = {
-                'created': [],
-                'skipped': [],
+                "created": [],
+                "skipped": [],
             }
-            
+
             try:
                 # Get device from NetBox
                 nb_device = nb.dcim.devices.get(name=device_name)
@@ -4027,30 +4028,30 @@ class NetboxWorker(NFPWorker):
                     ret.errors.append(msg)
                     job.event(msg)
                     continue
-                
+
                 # Get existing interfaces for this device
                 existing_interfaces = nb.dcim.interfaces.filter(device=device_name)
                 existing_interface_names = {intf.name for intf in existing_interfaces}
-                
+
                 # Prepare interfaces to create
                 interfaces_to_create = []
-                
+
                 for intf_name in all_interface_names:
                     if intf_name in existing_interface_names:
-                        result[device_name]['skipped'].append(intf_name)
+                        result[device_name]["skipped"].append(intf_name)
                         continue
-                    
+
                     # Build interface data
                     intf_data = {
-                        'device': nb_device.id,
-                        'name': intf_name,
-                        'type': interface_type,
-                        **kwargs
+                        "device": nb_device.id,
+                        "name": intf_name,
+                        "type": interface_type,
+                        **kwargs,
                     }
 
                     interfaces_to_create.append(intf_data)
-                    result[device_name]['created'].append(intf_name)
-                
+                    result[device_name]["created"].append(intf_name)
+
                 # Create interfaces in bulk if not dry_run
                 if interfaces_to_create and not dry_run:
                     try:
@@ -4064,11 +4065,10 @@ class NetboxWorker(NFPWorker):
                 elif interfaces_to_create and dry_run:
                     msg = f"[DRY RUN] Would create {len(interfaces_to_create)} interface(s) on device '{device_name}'"
                     job.event(msg)
-            
+
             except Exception as e:
                 msg = f"Error processing device '{device_name}': {e}"
                 ret.errors.append(msg)
                 log.error(msg)
-        
-        return ret
 
+        return ret

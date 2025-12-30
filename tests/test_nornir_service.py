@@ -1494,9 +1494,32 @@ class TestNornirTest:
         assert "No hosts test suites available" in ret
         assert "No hosts outputs available" in ret
         assert "No detailed results available" in ret
+        assert "No hosts inventory available" in ret
         assert "|Host|Test Name|Result|Exception|" in ret
         assert "Input Arguments (kwargs)" in ret
         assert "Complete Results (JSON)" in ret
+
+    def test_nornir_test_with_extensive(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "FC": ["spine", "leaf"],
+                "extensive": True,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, results in ret.items():
+            assert (
+                "hosts_inventory" in results["result"]
+            ), f"{worker} returned no hosts inventory"
+            assert (
+                "test_results" in results["result"]
+            ), f"{worker} returned no test results"
+            assert "suite" in results["result"], f"{worker} returned no tests suite"
+            if "worker" in ["nornir-worker-2", "nornir-worker-1"]:
+                assert results["result"]["hosts_inventory"]
 
     def test_nornir_test_markdown_with_extensive(self, nfclient):
         ret = nfclient.run_job(
@@ -1513,6 +1536,7 @@ class TestNornirTest:
         assert "|Host|Test Name|Result|Exception|" in ret
         assert "Input Arguments (kwargs)" in ret
         assert "Complete Results (JSON)" in ret
+        assert "Devices Inventory" in ret
         assert "Test suites definitions for each host" in ret
         assert (
             "Expandable sections containing outputs collected during test execution for each host"

@@ -132,7 +132,8 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     #     "hostname": {
     #         "suite": {...},           # Test suite definitions
     #         "commands": [...],        # Command outputs
-    #         "results": [...]          # Test results
+    #         "results": [...],         # Test results
+    #         "inventory": {...}        # Host inventory data
     #     }
     # }
     hosts_tests_results = {}
@@ -152,6 +153,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     devices_commands_output_html = ""  # HTML for device command outputs section
     debug_html = ""  # HTML for debug section with kwargs and raw data
     hosts_test_suites_html = ""  # HTML for test suite definitions per host
+    devices_inventory_html = ""  # HTML for devices inventory per host
 
     # Markdown generator
     md = MdUtils(file_name="nornir_test_results")
@@ -165,6 +167,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         worker_result = worker_data["result"]
         # Handle detailed result format (extensive=True)
         test_suite = worker_result.get("suite", {})
+        hosts_inventory = worker_result.get("hosts_inventory", {})
         test_results_list = worker_result.get("test_results", [])
         if test_results_list:
             for test_result in test_results_list:
@@ -173,7 +176,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
                 result = test_result.get("result", "N/A")
                 exception = test_result.get("exception", "")
                 hosts_tests_results.setdefault(
-                    host, {"suite": {}, "commands": [], "results": []}
+                    host, {"suite": {}, "commands": [], "results": [], "inventory": {}}
                 )
 
                 # Determine if this is a test result or command output
@@ -193,12 +196,21 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         if test_suite:
             for host, suite_tests in test_suite.items():
                 hosts_tests_results.setdefault(
-                    host, {"suite": {}, "commands": [], "results": []}
+                    host, {"suite": {}, "commands": [], "results": [], "inventory": {}}
                 )
                 hosts_tests_results[host]["suite"] = suite_tests
+        # Store inventory info
+        if hosts_inventory:
+            for host, inventory_data in hosts_inventory.items():
+                hosts_tests_results.setdefault(
+                    host, {"suite": {}, "commands": [], "results": [], "inventory": {}}
+                )
+                hosts_tests_results[host]["inventory"] = inventory_data
         # Handle brief result format (extensive=False)
-        for device, tests in worker_result.items():
-            if isinstance(tests, dict):
+        if not all(
+            k in worker_result for k in ["suite", "hosts_inventory", "test_results"]
+        ):
+            for device, tests in worker_result.items():
                 for test_name, status in tests.items():
                     status_icon = "✅ PASS" if status == "PASS" else "❌ FAIL"
                     table_rows.append([device, test_name, status_icon, ""])
@@ -217,7 +229,8 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         for host in sorted(hosts_tests_results.keys()):
             host_results = hosts_tests_results[host]["results"]
             host_commands = hosts_tests_results[host]["commands"]
-            host_suite = commands = hosts_tests_results[host]["suite"]
+            host_suite = hosts_tests_results[host]["suite"]
+            host_inventory = hosts_tests_results[host]["inventory"]
 
             # Create hierarchical structure: Host > Test Name > Details
             if host_results:
@@ -226,7 +239,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
 
                 tests_details_html += (
                     f'<details style="margin-left:20px;">\n'
-                    f"<summary>{host} (✅ {passed} passed, ❌ {failed} failed)</summary>\n\n"
+                    f"<summary>{host} ({len(host_results)} tests, ✅ {passed} passed, ❌ {failed} failed)</summary>\n\n"
                 )
 
                 for test in sorted(host_results, key=lambda x: x.get("name", "")):
@@ -285,9 +298,27 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
                     f"```json\n{suite_json}\n```\n\n"
                     f"</details>\n"
                 )
+
+            # Prepare Inventory HTML if available
+            if host_inventory:
+                if not devices_inventory_html:
+                    devices_inventory_html += (
+                        f'<details style="margin-left:20px;">\n'
+                        f"<summary>Devices Inventory</summary>\n\n"
+                    )
+                inventory_json = json.dumps(host_inventory, indent=2, default=str)
+                devices_inventory_html += (
+                    f'<details style="margin-left:40px;">\n'
+                    f"<summary>{host}</summary>\n\n"
+                    f"```json\n{inventory_json}\n```\n\n"
+                    f"</details>\n"
+                )
         # complete Test Suites HTML section
         if hosts_test_suites_html:
             hosts_test_suites_html += "\n</details>\n"
+        # complete Devices Inventory HTML section
+        if devices_inventory_html:
+            devices_inventory_html += "</details>\n\n"
 
     # Prepare Debug section HTML
     debug_html = (
@@ -307,9 +338,9 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     md.new_header(level=1, title="Tests Execution Report")
 
     # Tests Summary section
-    md.new_header(level=2, title="Test Results")
+    md.new_header(level=2, title="Summary")
     if total_rows > 1:
-        md.new_paragraph("Table with tests results.")
+        md.new_paragraph("High-level table with all test results.")
         md.new_table(columns=4, rows=total_rows, text=table_text, text_align="left")
     else:
         md.new_paragraph("❌ Failed to produce summary results.\n\n")
@@ -327,7 +358,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         )
 
     # Device Output section
-    md.new_header(level=2, title="Device Output")
+    md.new_header(level=2, title="Device Outputs")
     if devices_commands_output_html:
         md.new_paragraph(
             "Expandable sections containing outputs collected during test execution for each host."
@@ -343,8 +374,13 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     md.new_paragraph(
         "This section contains detailed debugging information for troubleshooting and inspection. Includes input arguments and complete raw results data used to produce sections above."
     )
-    md.new_line(debug_html)
-
+    # Devices inventory section (if available)
+    if devices_inventory_html:
+        md.new_line(devices_inventory_html)
+    else:
+        md.new_paragraph(
+            "❌ No hosts inventory available. Set `extensive` to `True` in input kwargs arguments.\n\n"
+        )
     # Test Suites section (if available)
     if hosts_test_suites_html:
         md.new_line(hosts_test_suites_html)
@@ -352,5 +388,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         md.new_paragraph(
             "❌ No hosts test suites available. Set `extensive` to `True` in input kwargs arguments.\n\n"
         )
+    # Debug details section
+    md.new_line(debug_html)
 
     return md.file_data_text
