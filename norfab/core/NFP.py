@@ -1,3 +1,5 @@
+from typing import List
+
 """NORFAB Protocol definitions"""
 
 # This is the version of NFP/Client we implement
@@ -46,43 +48,40 @@ FRAME_COUNTS = {
     "worker_response_min": 3,  # empty, header, command + response data
 }
 
-class NFPMessageBuilder:
+class MessageBuilder:
     """Builder class for constructing NFP protocol messages."""
     
     @staticmethod
-    def broker_to_worker(
+    def broker_to_worker_post(
         worker_address: bytes,
-        command: bytes,
         sender: bytes,
         uuid: bytes,
         data: bytes
     ) -> List[bytes]:
-        """
-        Build a message from broker to worker.
-        
-        Args:
-            worker_address: Worker's ZMQ identity
-            command: NFP command (POST, GET, DELETE, etc.)
-            sender: Client address
-            uuid: Unique request identifier
-            data: Request payload
-            
-        Returns:
-            List of message frames ready for send_multipart()
-        """
-        return [worker_address, b"", WORKER, command, sender, b"", uuid, data]
+        """Build a POST message from broker to worker."""
+        return [worker_address, b"", WORKER, POST, sender, b"", uuid, data]
     
     @staticmethod
+    def broker_to_worker_get(
+        worker_address: bytes,
+        sender: bytes,
+        uuid: bytes,
+        data: bytes
+    ) -> List[bytes]:
+        """Build a GET message from broker to worker."""
+        return [worker_address, b"", WORKER, GET, sender, b"", uuid, data]
+
+    @staticmethod
+    def broker_to_worker_disconnect(
+        worker_address: bytes,
+        service: bytes,
+    ) -> List[bytes]:
+        """Build a DISCONNECT message from broker to worker."""
+        return [worker_address, b"", WORKER, service, DISCONNECT]
+
+    @staticmethod
     def worker_to_broker_ready(service: bytes) -> List[bytes]:
-        """
-        Build READY message from worker to broker.
-        
-        Args:
-            service: Service name worker will handle
-            
-        Returns:
-            List of message frames
-        """
+        """Build READY message from worker to broker."""
         return [b"", WORKER, READY, service]
     
     @staticmethod
@@ -92,68 +91,62 @@ class NFPMessageBuilder:
     
     @staticmethod
     def worker_to_broker_response(response_data: List[bytes]) -> List[bytes]:
-        """
-        Build RESPONSE message from worker to broker.
-        
-        Args:
-            response_data: [client_address, empty_frame, uuid, status, data]
-            
-        Returns:
-            List of message frames
-        """
+        """Build RESPONSE message from worker to broker."""
         return [b"", WORKER, RESPONSE] + response_data
     
     @staticmethod
     def worker_to_broker_event(event_data: List[bytes]) -> List[bytes]:
         """Build EVENT message from worker to broker."""
         return [b"", WORKER, EVENT] + event_data
-    
+
     @staticmethod
-    def client_to_broker(
+    def worker_to_broker_keepalive(service: bytes) -> List[bytes]:
+        """Build KEEPALIVE message from worker to broker."""
+        return [b"", WORKER, KEEPALIVE, service]
+
+    @staticmethod
+    def broker_to_worker_keepalive(address: bytes, service: bytes) -> List[bytes]:
+        """Build KEEPALIVE message from broker to worker."""
+        return [address, b"", BROKER, KEEPALIVE, service]
+
+    @staticmethod
+    def client_to_broker_post(
         command: bytes,
         service: bytes,
         workers: bytes,
         uuid: bytes,
         request: bytes
     ) -> List[bytes]:
-        """
-        Build a message from client to broker.
-        
-        Args:
-            command: NFP command (POST, GET, DELETE)
-            service: Target service name
-            workers: Target workers ('all', 'any', or list JSON)
-            uuid: Unique request identifier
-            request: Request payload
-            
-        Returns:
-            List of message frames
-        """
-        return [b"", CLIENT, command, service, workers, uuid, request]
-    
+        """Build a POST message from client to broker."""
+        return [b"", CLIENT, POST, service, workers, uuid, request]
+
+    @staticmethod
+    def client_to_broker_get(
+        command: bytes,
+        service: bytes,
+        workers: bytes,
+        uuid: bytes,
+        request: bytes
+    ) -> List[bytes]:
+        """Build a GET message from client to broker."""
+        return [b"", CLIENT, GET, service, workers, uuid, request]
+
     @staticmethod
     def broker_to_client_response(
+        client: bytes,
         service: bytes,
-        message_data: List[bytes]
+        message: List[bytes]
     ) -> List[bytes]:
-        """
-        Build RESPONSE message from broker to client.
-        
-        Args:
-            service: Service that processed the request
-            message_data: Message content frames
-            
-        Returns:
-            List of message frames
-        """
-        return [b"", CLIENT, RESPONSE, service] + message_data
+        """Build RESPONSE message from broker to client."""
+        return [client, b"", CLIENT, RESPONSE, service] + message
     
     @staticmethod
     def broker_to_client_event(
+        client: bytes,
         service: bytes,
-        message_data: List[bytes]
+        message: List[bytes]
     ) -> List[bytes]:
         """Build EVENT message from broker to client."""
-        return [b"", CLIENT, EVENT, service] + message_data
+        return [client, b"", CLIENT, EVENT, service] + message
 
 

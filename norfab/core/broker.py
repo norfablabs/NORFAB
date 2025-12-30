@@ -85,6 +85,7 @@ class NFPWorker(object):
         self.keepalive = keepalive
         self.multiplier = multiplier
         self.socket_lock = socket_lock
+        self.build_message = NFP.MessageBuilder()
 
     def start_keepalives(self):
         self.keepaliver = KeepAliver(
@@ -130,7 +131,10 @@ class NFPWorker(object):
             self.service.workers.remove(self)
 
         if disconnect is True and self.service is not None:
-            msg = [self.address, b"", NFP.WORKER, self.service.name, NFP.DISCONNECT]
+            msg = self.build_message.broker_to_worker_disconnect(
+                worker_address=self.address,
+                service=self.service.name
+            )
             with self.socket_lock:
                 self.socket.send_multipart(msg)
 
@@ -224,6 +228,7 @@ class NFPBroker:
 
         self.services = {}
         self.workers = {}
+        self.build_message = NFP.MessageBuilder()
         self.exit_event = exit_event
         self.inventory = inventory
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
@@ -238,7 +243,7 @@ class NFPBroker:
         self.ctx = zmq.Context()
         self.socket = self.ctx.socket(zmq.ROUTER)
         self.socket.linger = (
-            0  # discarded pending messages immediately when the socket is closed
+            0  # discard pending messages immediately when the socket is closed
         )
         self.socket.setsockopt(
             zmq.ROUTER_HANDOVER, 1
@@ -321,7 +326,8 @@ class NFPBroker:
                 break  # Interrupted
 
             if items:
-                msg = self.socket.recv_multipart()
+                with self.socket_lock:
+                    msg = self.socket.recv_multipart()
                 log.debug(f"NFPBroker - received '{msg}'")
 
                 if len(msg) < 3:
@@ -427,9 +433,19 @@ class NFPBroker:
         """
         # Stack routing and protocol envelopes to start of message
         if command == NFP.POST:
-            msg = [worker.address, b"", NFP.WORKER, NFP.POST, sender, b"", uuid, data]
+            msg = self.build_message.broker_to_worker_post(
+                worker_address=worker.address, 
+                sender=sender, 
+                uuid=uuid, 
+                data=data
+            )
         elif command == NFP.GET:
-            msg = [worker.address, b"", NFP.WORKER, NFP.GET, sender, b"", uuid, data]
+            msg = self.build_message.broker_to_worker_get(
+                worker_address=worker.address, 
+                sender=sender, 
+                uuid=uuid, 
+                data=data
+            )
         else:
             log.error(f"NFPBroker - invalid worker command: {command}")
             return
@@ -452,9 +468,17 @@ class NFPBroker:
 
         # Stack routing and protocol envelopes to start of message
         if command == NFP.RESPONSE:
-            msg = [client, b"", NFP.CLIENT, NFP.RESPONSE, service] + message
+            msg = self.build_message.broker_to_client_response(
+                client=client,
+                service=service,
+                message=message
+            )
         elif command == NFP.EVENT:
-            msg = [client, b"", NFP.CLIENT, NFP.EVENT, service] + message
+            msg = self.build_message.broker_to_client_event(
+                client=client,
+                service=service,
+                message=message
+            )
         else:
             log.error(f"NFPBroker - invalid client command: {command}")
             return

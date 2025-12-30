@@ -75,6 +75,7 @@ class KeepAliver:
         self.whoami = whoami
         self.name = f"{name}-keepaliver"
         self.socket_lock = socket_lock
+        self.build_message = NFP.MessageBuilder()
 
         self.started_at = 0
         self.keepalives_received = 0
@@ -138,10 +139,15 @@ class KeepAliver:
         """
         while not self.exit_event.is_set() and not self.destroy_event.is_set():
             if time.time() > self.keepalive_at:  # time to send heartbeat
-                if self.address:
-                    msg = [self.address, b"", self.whoami, NFP.KEEPALIVE, self.service]
-                else:
-                    msg = [b"", self.whoami, NFP.KEEPALIVE, self.service]
+                if self.whoami == NFP.WORKER:
+                    msg = self.build_message.worker_to_broker_keepalive(
+                        service=self.service
+                    )
+                elif self.whoami == NFP.BROKER:
+                    msg = self.build_message.broker_to_worker_keepalive(
+                        address=self.address,
+                        service=self.service,
+                    )
                 with self.socket_lock:
                     try:
                         self.socket.send_multipart(msg)

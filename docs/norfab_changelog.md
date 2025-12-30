@@ -10,6 +10,7 @@
 6. Nornir tests markdown - added hosts expandable inventory section
 7. Nornir tests markdown - added total tests number for detailed section for each host
 8. Nornir tests markdown - updated headings and paragraphs content
+9. Enhanced message construction for NFP protocol buy adding message builder
 
 ### FEATURES
 
@@ -19,6 +20,7 @@
 ### BUGS
 
 1. Nornir tests markdown - fixed detailed output handling to not collect suite into summary table
+2. Nfcli - fixed show client command function calling
 
 ----
 

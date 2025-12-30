@@ -95,7 +95,7 @@ class ShowCommandsModel(BaseModel):
     client: Any = Field(
         None,
         description="Show client details",
-        json_schema_extra={"functions": "show_client"},
+        json_schema_extra={"function": "show_client"},
     )
     inventory: Any = Field(
         None,

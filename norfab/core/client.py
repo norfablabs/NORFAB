@@ -55,7 +55,7 @@ def recv(client):
         KeyboardInterrupt: If the polling is interrupted by a keyboard interrupt.
     """
     while not client.exit_event.is_set():
-        # Poll socket for messages every timeout interval
+        # Poll socket for messages every 1s interval
         try:
             items = client.poller.poll(1000)
         except KeyboardInterrupt:
@@ -63,7 +63,8 @@ def recv(client):
         except:
             continue
         if items:
-            msg = client.broker_socket.recv_multipart()
+            with client.socket_lock:
+                msg = client.broker_socket.recv_multipart()
             log.debug(f"{client.name} - received '{msg}'")
             if msg[2] == NFP.EVENT:
                 client.event_queue.put(msg)
@@ -158,7 +159,11 @@ class NFPClient(object):
         self.events_dir = os.path.join(self.base_dir, "events")
         self.running_job = None
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
-
+        self.socket_lock = (
+            threading.Lock()
+        )  # used to protect socket object
+        self.build_message = NFP.MessageBuilder()
+        
         # create base directories
         os.makedirs(self.base_dir, exist_ok=True)
         os.makedirs(self.jobs_dir, exist_ok=True)
@@ -278,9 +283,21 @@ class NFPClient(object):
             request (str): The request payload to be sent.
         """
         if command == NFP.POST:
-            msg = [b"", NFP.CLIENT, command, service, workers, uuid, request]
+            msg = self.build_message.client_to_broker_post(
+                command=command,
+                service=service,
+                workers=workers,
+                uuid=uuid,
+                request=request,
+            )
         elif command == NFP.GET:
-            msg = [b"", NFP.CLIENT, command, service, workers, uuid, request]
+            msg = self.build_message.client_to_broker_get(
+                command=command,
+                service=service,
+                workers=workers,
+                uuid=uuid,
+                request=request,
+            )
         else:
             log.error(
                 f"{self.name} - cannot send '{command}' to broker, command unsupported"
@@ -289,8 +306,9 @@ class NFPClient(object):
 
         log.debug(f"{self.name} - sending '{msg}'")
 
-        self.broker_socket.send_multipart(msg)
-        self.stats_send_to_broker += 1
+        with self.socket_lock:
+            self.broker_socket.send_multipart(msg)
+            self.stats_send_to_broker += 1
 
     def rcv_from_broker(self, command, service, uuid):
         """

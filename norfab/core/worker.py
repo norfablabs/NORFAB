@@ -1159,7 +1159,8 @@ def recv(worker, destroy_event):
         except KeyboardInterrupt:
             break  # Interrupted
         if items:
-            msg = worker.broker_socket.recv_multipart()
+            with worker.socket_lock:
+                msg = worker.broker_socket.recv_multipart()
             log.debug(f"{worker.name} - received '{msg}'")
             empty = msg.pop(0)
             header = msg.pop(0)
@@ -1234,6 +1235,7 @@ class NFPWorker:
             threading.Lock()
         )  # used for keepalives to protect socket object
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
+        self.build_message = NFP.MessageBuilder()
 
         # create base directories
         self.base_dir = os.path.join(
@@ -1394,13 +1396,21 @@ class NFPWorker:
             This method is thread-safe and uses a lock to ensure that the broker socket is accessed by only one thread at a time.
         """
         if command == NFP.READY:
-            msg = [b"", NFP.WORKER, NFP.READY, self.service]
+            msg = self.build_message.worker_to_broker_ready(
+                service=self.service
+            )
         elif command == NFP.DISCONNECT:
-            msg = [b"", NFP.WORKER, NFP.DISCONNECT, self.service]
+            msg = self.build_message.worker_to_broker_disconnect(
+                service=self.service
+            )
         elif command == NFP.RESPONSE:
-            msg = [b"", NFP.WORKER, NFP.RESPONSE] + msg
+            msg = self.build_message.worker_to_broker_response(
+                response_data=msg
+            )
         elif command == NFP.EVENT:
-            msg = [b"", NFP.WORKER, NFP.EVENT] + msg
+            msg = self.build_message.worker_to_broker_event(
+                event_data=msg
+            )
         else:
             log.error(
                 f"{self.name} - cannot send '{command}' to broker, command unsupported"
