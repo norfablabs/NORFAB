@@ -32,7 +32,7 @@ def nfclient_dict_inventory():
     data = {
         "broker": {
             "endpoint": "tcp://127.0.0.1:5555",
-            "shared_key": "s6/nI}VEKn4eW$z)$w:yqe^)r)gD{d+it%10>xm0",
+            "shared_key": "Q?0HtZA%w]r5Q9T+NlmCpBd:p:2[kj[9#UI04yP4",
         },
         "topology": {"broker": True, "workers": ["nornir-worker-1", "nornir-worker-2"]},
         "workers": {
