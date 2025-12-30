@@ -29,6 +29,7 @@ commands = [
     b"RESPONSE",
     b"GET",
     b"DELETE",
+    b"EVENT",
 ]
 
 client_commands = [OPEN, DISCONNECT, POST, GET, DELETE]
@@ -36,3 +37,123 @@ client_commands = [OPEN, DISCONNECT, POST, GET, DELETE]
 worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE]
 
 broker_commands = [OPEN, KEEPALIVE, DISCONNECT, POST, RESPONSE, GET, DELETE]
+
+# Convenience constants for frame counts
+FRAME_COUNTS = {
+    "broker_to_worker": 8,  # address, empty, header, command, sender, empty, uuid, data
+    "client_to_broker": 7,  # empty, header, command, service, workers, uuid, request
+    "worker_ready": 4,      # empty, header, command, service
+    "worker_response_min": 3,  # empty, header, command + response data
+}
+
+class NFPMessageBuilder:
+    """Builder class for constructing NFP protocol messages."""
+    
+    @staticmethod
+    def broker_to_worker(
+        worker_address: bytes,
+        command: bytes,
+        sender: bytes,
+        uuid: bytes,
+        data: bytes
+    ) -> List[bytes]:
+        """
+        Build a message from broker to worker.
+        
+        Args:
+            worker_address: Worker's ZMQ identity
+            command: NFP command (POST, GET, DELETE, etc.)
+            sender: Client address
+            uuid: Unique request identifier
+            data: Request payload
+            
+        Returns:
+            List of message frames ready for send_multipart()
+        """
+        return [worker_address, b"", WORKER, command, sender, b"", uuid, data]
+    
+    @staticmethod
+    def worker_to_broker_ready(service: bytes) -> List[bytes]:
+        """
+        Build READY message from worker to broker.
+        
+        Args:
+            service: Service name worker will handle
+            
+        Returns:
+            List of message frames
+        """
+        return [b"", WORKER, READY, service]
+    
+    @staticmethod
+    def worker_to_broker_disconnect(service: bytes) -> List[bytes]:
+        """Build DISCONNECT message from worker to broker."""
+        return [b"", WORKER, DISCONNECT, service]
+    
+    @staticmethod
+    def worker_to_broker_response(response_data: List[bytes]) -> List[bytes]:
+        """
+        Build RESPONSE message from worker to broker.
+        
+        Args:
+            response_data: [client_address, empty_frame, uuid, status, data]
+            
+        Returns:
+            List of message frames
+        """
+        return [b"", WORKER, RESPONSE] + response_data
+    
+    @staticmethod
+    def worker_to_broker_event(event_data: List[bytes]) -> List[bytes]:
+        """Build EVENT message from worker to broker."""
+        return [b"", WORKER, EVENT] + event_data
+    
+    @staticmethod
+    def client_to_broker(
+        command: bytes,
+        service: bytes,
+        workers: bytes,
+        uuid: bytes,
+        request: bytes
+    ) -> List[bytes]:
+        """
+        Build a message from client to broker.
+        
+        Args:
+            command: NFP command (POST, GET, DELETE)
+            service: Target service name
+            workers: Target workers ('all', 'any', or list JSON)
+            uuid: Unique request identifier
+            request: Request payload
+            
+        Returns:
+            List of message frames
+        """
+        return [b"", CLIENT, command, service, workers, uuid, request]
+    
+    @staticmethod
+    def broker_to_client_response(
+        service: bytes,
+        message_data: List[bytes]
+    ) -> List[bytes]:
+        """
+        Build RESPONSE message from broker to client.
+        
+        Args:
+            service: Service that processed the request
+            message_data: Message content frames
+            
+        Returns:
+            List of message frames
+        """
+        return [b"", CLIENT, RESPONSE, service] + message_data
+    
+    @staticmethod
+    def broker_to_client_event(
+        service: bytes,
+        message_data: List[bytes]
+    ) -> List[bytes]:
+        """Build EVENT message from broker to client."""
+        return [b"", CLIENT, EVENT, service] + message_data
+
+
