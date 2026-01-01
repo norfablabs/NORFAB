@@ -1,4 +1,4 @@
-## 0.13.1
+## 0.14.0
 
 ### CHANGES
 
@@ -11,11 +11,14 @@
 7. Nornir tests markdown - added total tests number for detailed section for each host
 8. Nornir tests markdown - updated headings and paragraphs content
 9. Enhanced message construction for NFP protocol buy adding message builder
+10. Enhanced client, worker and broker socket handling by adding thread locks
 
 ### FEATURES
 
-1. Netbox service added `create_device_interfaces` task
+1. Netbox service - added `create_device_interfaces` task
 2. Netbox service - added `branch_create_timeout` inventory argument to control timer waiting for new branch to be created
+3. Netbox service - added `get_bgp_peerings` task to fetch BGP sessions data fro devices, added nfcli shell command to call `get_bgp_peerings` task.
+4. Netbox sefivces - `get_nornir_inventory` task added suport for `bgp_sessions` argument. if True, fetched devices' BGP peerings from netbox and stores them under `bgp_sessions` key in host's data.
 
 ### BUGS
 

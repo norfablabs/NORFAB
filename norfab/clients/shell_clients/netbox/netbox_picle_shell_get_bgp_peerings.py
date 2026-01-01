@@ -23,14 +23,9 @@ from norfab.models.netbox import NetboxCommonArgs
 log = logging.getLogger(__name__)
 
 
-class GetDevices(NetboxCommonArgs, NetboxClientRunJobArgs):
-    filters: StrictStr = Field(
-        None,
-        description="List of device filters dictionaries as a JSON string",
-        examples='[{"q": "ceos1"}]',
-    )
+class GetBGPPeerings(NetboxCommonArgs, NetboxClientRunJobArgs):
     devices: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="Device names to query data for"
+        ..., description="Device names to query data for"
     )
     dry_run: StrictBool = Field(
         None,
@@ -54,7 +49,7 @@ class GetDevices(NetboxCommonArgs, NetboxClientRunJobArgs):
 
         result = NFCLIENT.run_job(
             "netbox",
-            "get_devices",
+            "get_bgp_peerings",
             workers=workers,
             args=args,
             kwargs=kwargs,

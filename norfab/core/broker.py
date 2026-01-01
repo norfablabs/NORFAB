@@ -132,8 +132,7 @@ class NFPWorker(object):
 
         if disconnect is True and self.service is not None:
             msg = self.build_message.broker_to_worker_disconnect(
-                worker_address=self.address,
-                service=self.service.name
+                worker_address=self.address, service=self.service.name
             )
             with self.socket_lock:
                 self.socket.send_multipart(msg)
@@ -434,17 +433,11 @@ class NFPBroker:
         # Stack routing and protocol envelopes to start of message
         if command == NFP.POST:
             msg = self.build_message.broker_to_worker_post(
-                worker_address=worker.address, 
-                sender=sender, 
-                uuid=uuid, 
-                data=data
+                worker_address=worker.address, sender=sender, uuid=uuid, data=data
             )
         elif command == NFP.GET:
             msg = self.build_message.broker_to_worker_get(
-                worker_address=worker.address, 
-                sender=sender, 
-                uuid=uuid, 
-                data=data
+                worker_address=worker.address, sender=sender, uuid=uuid, data=data
             )
         else:
             log.error(f"NFPBroker - invalid worker command: {command}")
@@ -469,15 +462,11 @@ class NFPBroker:
         # Stack routing and protocol envelopes to start of message
         if command == NFP.RESPONSE:
             msg = self.build_message.broker_to_client_response(
-                client=client,
-                service=service,
-                message=message
+                client=client, service=service, message=message
             )
         elif command == NFP.EVENT:
             msg = self.build_message.broker_to_client_event(
-                client=client,
-                service=service,
-                message=message
+                client=client, service=service, message=message
             )
         else:
             log.error(f"NFPBroker - invalid client command: {command}")

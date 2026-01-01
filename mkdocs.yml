@@ -25,8 +25,10 @@ plugins:
     - tags:
         tags_file: tags.md
     - mkdocstrings:
+        default_handler: python
         handlers:
           python:
+            paths: [.]
             options:
               show_root_toc_entry: false
               docstring_section_style: table
@@ -116,6 +118,7 @@ nav:
               - GET Interfaces: workers/netbox/services_netbox_service_tasks_get_interfaces.md
               - GET Connections: workers/netbox/services_netbox_service_tasks_get_connections.md
               - GET Circuits: workers/netbox/services_netbox_service_tasks_get_circuits.md
+              - GET BGP Peerings: workers/netbox/services_netbox_service_tasks_get_bgp_peerings.md
               - GET Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
               - GET Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
               - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
@@ -190,4 +193,7 @@ nav:
     - Architecture:
         - NORFAB Architecture: reference_architecture_norfab.md
         - NORFAB Protocol RFC: reference_architecture_nfp.md 
+    - Tests:
+        - NORFAB Testing Framework: testing/norfab_testing_framework.md
+        - Netbox Service Tests: testing/netbox_service_tests.md
 - Contact Us: norfab_help_with_norfab.md

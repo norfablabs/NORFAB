@@ -1396,21 +1396,13 @@ class NFPWorker:
             This method is thread-safe and uses a lock to ensure that the broker socket is accessed by only one thread at a time.
         """
         if command == NFP.READY:
-            msg = self.build_message.worker_to_broker_ready(
-                service=self.service
-            )
+            msg = self.build_message.worker_to_broker_ready(service=self.service)
         elif command == NFP.DISCONNECT:
-            msg = self.build_message.worker_to_broker_disconnect(
-                service=self.service
-            )
+            msg = self.build_message.worker_to_broker_disconnect(service=self.service)
         elif command == NFP.RESPONSE:
-            msg = self.build_message.worker_to_broker_response(
-                response_data=msg
-            )
+            msg = self.build_message.worker_to_broker_response(response_data=msg)
         elif command == NFP.EVENT:
-            msg = self.build_message.worker_to_broker_event(
-                event_data=msg
-            )
+            msg = self.build_message.worker_to_broker_event(event_data=msg)
         else:
             log.error(
                 f"{self.name} - cannot send '{command}' to broker, command unsupported"

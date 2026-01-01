@@ -15,7 +15,6 @@ from pydantic import (
 )
 from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
-from ..nornir.nornir_picle_shell import NornirCommonArgs, NorniHostsFilters
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_cache import CacheEnum
 from norfab.models.netbox import NetboxCommonArgs
@@ -23,22 +22,33 @@ from norfab.models.netbox import NetboxCommonArgs
 log = logging.getLogger(__name__)
 
 
-class GetDevices(NetboxCommonArgs, NetboxClientRunJobArgs):
-    filters: StrictStr = Field(
+class GetInterfaces(NetboxCommonArgs, NetboxClientRunJobArgs):
+    devices: Union[StrictStr, List] = Field(
+        ..., description="Devices to retrieve interface for"
+    )
+    ip_addresses: Optional[StrictBool] = Field(
         None,
-        description="List of device filters dictionaries as a JSON string",
-        examples='[{"q": "ceos1"}]',
+        description="Retrieves interface IP addresses",
+        json_schema_extra={"presence": True},
+        alias="ip-addresses",
     )
-    devices: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="Device names to query data for"
+    inventory_items: Optional[StrictBool] = Field(
+        None,
+        description="Retrieves interface inventory items",
+        json_schema_extra={"presence": True},
+        alias="inventory-items",
     )
-    dry_run: StrictBool = Field(
+    dry_run: Optional[StrictBool] = Field(
         None,
         description="Only return query content, do not run it",
-        alias="dry-run",
         json_schema_extra={"presence": True},
+        alias="dry-run",
     )
-    cache: CacheEnum = Field(True, description="How to use cache")
+    interface_regex: StrictStr = Field(
+        None,
+        description="Regex patter to match interfaces and ports",
+        alias="interface-regex",
+    )
 
     @staticmethod
     @listen_events
@@ -46,23 +56,19 @@ class GetDevices(NetboxCommonArgs, NetboxClientRunJobArgs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
-
-        if isinstance(kwargs.get("devices"), str):
+        if isinstance(kwargs["devices"], str):
             kwargs["devices"] = [kwargs["devices"]]
-        if isinstance(kwargs.get("filters"), str):
-            kwargs["filters"] = json.loads(kwargs["filters"])
-
         result = NFCLIENT.run_job(
             "netbox",
-            "get_devices",
+            "get_interfaces",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
             uuid=uuid,
         )
-
-        return log_error_or_result(result, verbose_result=verbose_result)
+        result = log_error_or_result(result, verbose_result=verbose_result)
+        return result
 
     class PicleConfig:
         outputter = Outputters.outputter_json

@@ -318,6 +318,11 @@ prefixes = [
         "description": "TEST CREATE PREFIXES WITH VRF",
         "vrf": {"name": "VRF1"},
     },
+    {"prefix": "10.0.2.0/24", "description": "TEST_BGP_PEERINGS"},
+    {"prefix": "10.0.1.0/30", "description": "Point to point link"},
+    {"prefix": "1.0.1.0/24", "description": "Loopback addresses"},
+    {"prefix": "1.0.100.0/24", "description": "Loopback addresses"},
+    {"prefix": "1.0.10.0/24", "description": "Subinterface addresses"},
 ]
 
 prefix_roles = [
@@ -333,6 +338,13 @@ ip_addresses = [
     {"address": "10.0.0.2/30"},
     {"address": "10.0.1.1/30"},
     {"address": "10.0.1.2/30"},
+    # BGP peering IPs
+    {"address": "10.0.2.1/30"},  # eth105 fceos4
+    {"address": "10.0.2.2/30"},  # eth105 fceos5
+    {"address": "10.0.2.4/31"},  # eth106 fceos4
+    {"address": "10.0.2.5/31"},  # eth106 fceos5
+    {"address": "10.0.2.9/30"},  # eth107 fceos4
+    {"address": "10.0.2.10/30"},  # eth107 fceos5
 ]
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
@@ -455,6 +467,13 @@ interfaces = [
         "parent": {"name": "eth11"},
     },
     {"name": "eth30", "device": {"name": "fceos4"}, "type": "10gbase-x-sfpp"},
+    # BGP peering interfaces
+    {"name": "eth105", "device": {"name": "fceos4"}, "type": "10gbase-x-sfpp"},
+    {"name": "eth105", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
+    {"name": "eth106", "device": {"name": "fceos4"}, "type": "10gbase-x-sfpp"},
+    {"name": "eth106", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
+    {"name": "eth107", "device": {"name": "fceos4"}, "type": "10gbase-x-sfpp"},
+    {"name": "eth107", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
 ]
 
 # add Containerlab devices interfaces
@@ -580,6 +599,7 @@ vrfs = [
     {"name": "Signalling"},
     {"name": "Voice"},
     {"name": "VRF1"},
+    {"name": "TEST_BGP_VRF"},
 ]
 
 ip_adress_to_devices = [
@@ -627,6 +647,39 @@ ip_adress_to_devices = [
         "device": "fceos5",
         "vrf": {"name": "OOB_CTRL"},
     },
+    # BGP peering IP assignments
+    {
+        "address": "10.0.2.1/30",
+        "interface": "eth105",
+        "device": "fceos4",
+    },
+    {
+        "address": "10.0.2.2/30",
+        "interface": "eth105",
+        "device": "fceos5",
+    },
+    {
+        "address": "10.0.2.4/31",
+        "interface": "eth106",
+        "device": "fceos4",
+    },
+    {
+        "address": "10.0.2.5/31",
+        "interface": "eth106",
+        "device": "fceos5",
+    },
+    {
+        "address": "10.0.2.9/30",
+        "interface": "eth107",
+        "device": "fceos4",
+        "vrf": {"name": "TEST_BGP_VRF"},
+    },
+    {
+        "address": "10.0.2.10/30",
+        "interface": "eth107",
+        "device": "fceos5",
+        "vrf": {"name": "TEST_BGP_VRF"},
+    },
 ]
 # associate IP addresses to subinterfaces
 ip_adress_to_devices.extend(
@@ -640,6 +693,138 @@ ip_adress_to_devices.extend(
         for i in range(1, 11)
     ]
 )
+
+# RIR (Regional Internet Registry) data
+rirs = [
+    {
+        "name": "lab",
+        "slug": "lab",
+        "is_private": True,
+        "description": "Lab RIR for private ASN and IP space",
+    },
+]
+
+# BGP peer groups data
+bgp_peer_groups = [
+    {
+        "name": "TEST_BGP_PEER_GROUP_1",
+        "description": "Test BGP peer group 1 for standard peerings",
+    },
+    {
+        "name": "TEST_BGP_PEER_GROUP_2",
+        "description": "Test BGP peer group 2 for VRF peerings",
+    },
+]
+
+# BGP ASN (Autonomous System Numbers) data
+bgp_asns = [
+    {
+        "asn": 65100,
+        "description": "BGP ASN for fceos4",
+        "rir": "lab",
+    },
+    {
+        "asn": 65101,
+        "description": "BGP ASN for fceos5",
+        "rir": "lab",
+    },
+]
+
+# BGP peerings data
+bgp_peerings = [
+    {
+        "name": "fceos4-fceos5-eth105",
+        "description": "BGP peering between fceos4 and fceos5 on eth105",
+        "device": "fceos4",
+        "device_a": "fceos4",
+        "ip_a": "10.0.2.1/30",
+        "local_as": 65100,
+        "device_b": "fceos5",
+        "ip_b": "10.0.2.2/30",
+        "remote_as": 65101,
+        "status": "active",
+        "peer_group": "TEST_BGP_PEER_GROUP_1",
+        "tenant": "SALTNORNIR",
+        "site": "SALTNORNIR-LAB",
+    },
+    {
+        "name": "fceos5-fceos4-eth105",
+        "description": "BGP peering between fceos5 and fceos4 on eth105",
+        "device": "fceos5",
+        "device_a": "fceos5",
+        "ip_a": "10.0.2.2/30",
+        "local_as": 65101,
+        "device_b": "fceos4",
+        "ip_b": "10.0.2.1/30",
+        "remote_as": 65100,
+        "status": "active",
+        "peer_group": "TEST_BGP_PEER_GROUP_1",
+        "tenant": "SALTNORNIR",
+        "site": "SALTNORNIR-LAB",
+    },
+    {
+        "name": "fceos4-fceos5-eth106",
+        "description": "BGP peering between fceos4 and fceos5 on eth106",
+        "device": "fceos4",
+        "device_a": "fceos4",
+        "ip_a": "10.0.2.4/31",
+        "local_as": 65100,
+        "device_b": "fceos5",
+        "ip_b": "10.0.2.5/31",
+        "remote_as": 65101,
+        "status": "active",
+        "peer_group": None,
+        "tenant": "SALTNORNIR",
+        "site": "SALTNORNIR-LAB",
+    },
+    {
+        "name": "fceos5-fceos4-eth106",
+        "description": "BGP peering between fceos5 and fceos4 on eth106",
+        "device": "fceos5",
+        "device_a": "fceos5",
+        "ip_a": "10.0.2.5/31",
+        "local_as": 65101,
+        "device_b": "fceos4",
+        "ip_b": "10.0.2.4/31",
+        "remote_as": 65100,
+        "status": "active",
+        "peer_group": None,
+        "tenant": "SALTNORNIR",
+        "site": "SALTNORNIR-LAB",
+    },
+    {
+        "name": "fceos4-fceos5-eth107-vrf",
+        "description": "BGP peering between fceos4 and fceos5 on eth107 in TEST_BGP_VRF",
+        "device": "fceos4",
+        "device_a": "fceos4",
+        "ip_a": "10.0.2.8/30",
+        "local_as": 65100,
+        "device_b": "fceos5",
+        "ip_b": "10.0.2.9/30",
+        "remote_as": 65101,
+        "status": "active",
+        "peer_group": "TEST_BGP_PEER_GROUP_2",
+        "vrf": "TEST_BGP_VRF",
+        "tenant": "SALTNORNIR",
+        "site": "SALTNORNIR-LAB",
+    },
+    {
+        "name": "fceos5-fceos4-eth107-vrf",
+        "description": "BGP peering between fceos5 and fceos4 on eth107 in TEST_BGP_VRF",
+        "device": "fceos5",
+        "device_a": "fceos5",
+        "ip_a": "10.0.2.9/30",
+        "local_as": 65101,
+        "device_b": "fceos4",
+        "ip_b": "10.0.2.8/30",
+        "remote_as": 65100,
+        "status": "active",
+        "peer_group": "TEST_BGP_PEER_GROUP_2",
+        "vrf": "TEST_BGP_VRF",
+        "tenant": "SALTNORNIR",
+        "site": "SALTNORNIR-LAB",
+    },
+]
 
 # create interface connections
 # supported teminaton types - "dcim.consoleport", "dcim.interface", "dcim.consoleserverport" etc.
@@ -1706,6 +1891,15 @@ def create_vrfs():
             log.error(f"creating vrf '{vrf}' error '{e}'")
 
 
+def create_rir():
+    log.info("creating RIRs")
+    for rir in rirs:
+        try:
+            nb.ipam.rirs.create(**rir)
+        except Exception as e:
+            log.error(f"creating RIR '{rir}' error '{e}'")
+
+
 def create_prefix_roles():
     log.info("creating prefix roles")
     for role in prefix_roles:
@@ -2160,6 +2354,135 @@ def creat_circuit_provider_networks():
             log.error(f"creating provider network '{item}' error '{e}'")
 
 
+def create_bgp_peer_groups():
+    """Create BGP peer groups using netbox_bgp plugin API"""
+    log.info("creating BGP peer groups")
+    for peer_group in bgp_peer_groups:
+        try:
+            # Create BGP peer group using the plugin API
+            nb.plugins.bgp.peer_group.create(**peer_group)
+        except Exception as e:
+            log.error(f"creating BGP peer group '{peer_group['name']}' error '{e}'")
+            log.error(traceback.format_exc())
+
+
+def create_bgp_asn():
+    """Create BGP ASNs (Autonomous System Numbers) using netbox_bgp plugin API"""
+    log.info("creating BGP ASNs")
+    for asn_data in bgp_asns:
+        try:
+            # Get RIR if specified
+            asn_create_data = {
+                "asn": asn_data["asn"],
+                "description": asn_data.get("description", ""),
+            }
+
+            if asn_data.get("rir"):
+                rir = nb.ipam.rirs.get(slug=asn_data["rir"])
+                if rir:
+                    asn_create_data["rir"] = rir.id
+                else:
+                    log.warning(
+                        f"RIR '{asn_data['rir']}' not found for ASN {asn_data['asn']}"
+                    )
+
+            nb.ipam.asns.create(**asn_create_data)
+        except Exception as e:
+            log.error(f"creating BGP ASN '{asn_data['asn']}' error '{e}'")
+            log.error(traceback.format_exc())
+
+
+def create_bgp_peerings():
+    """Create BGP peerings using netbox_bgp plugin API"""
+    log.info("creating BGP peerings")
+    for peering in bgp_peerings:
+        try:
+            # Get device IPs
+            ip_a = nb.ipam.ip_addresses.get(address=peering["ip_a"])
+            ip_b = nb.ipam.ip_addresses.get(address=peering["ip_b"])
+
+            if not ip_a or not ip_b:
+                log.error(f"BGP peering '{peering['name']}': IP addresses not found")
+                continue
+
+            # Prepare BGP session data
+            bgp_session_data = {
+                "name": peering["name"],
+                "description": peering.get("description", ""),
+                "status": peering.get("status", "active"),
+                "local_address": ip_a.id,
+                "remote_address": ip_b.id,
+            }
+
+            # Add device if specified
+            if peering.get("device"):
+                device = nb.dcim.devices.get(name=peering["device"])
+                if device:
+                    bgp_session_data["device"] = device.id
+                else:
+                    log.warning(
+                        f"Device '{peering['device']}' not found for peering '{peering['name']}'"
+                    )
+
+            # Add tenant if specified
+            if peering.get("tenant"):
+                tenant = nb.tenancy.tenants.get(name=peering["tenant"])
+                if tenant:
+                    bgp_session_data["tenant"] = tenant.id
+                else:
+                    log.warning(
+                        f"Tenant '{peering['tenant']}' not found for peering '{peering['name']}'"
+                    )
+
+            # Add site if specified
+            if peering.get("site"):
+                site = nb.dcim.sites.get(name=peering["site"])
+                if site:
+                    bgp_session_data["site"] = site.id
+                else:
+                    log.warning(
+                        f"Site '{peering['site']}' not found for peering '{peering['name']}'"
+                    )
+
+            # Add local AS if specified
+            if peering.get("local_as"):
+                local_asn = nb.ipam.asns.get(asn=peering["local_as"])
+                if local_asn:
+                    bgp_session_data["local_as"] = local_asn.id
+                else:
+                    log.warning(
+                        f"Local ASN '{peering['local_as']}' not found for peering '{peering['name']}'"
+                    )
+
+            # Add remote AS if specified
+            if peering.get("remote_as"):
+                remote_asn = nb.ipam.asns.get(asn=peering["remote_as"])
+                if remote_asn:
+                    bgp_session_data["remote_as"] = remote_asn.id
+                else:
+                    log.warning(
+                        f"Remote ASN '{peering['remote_as']}' not found for peering '{peering['name']}'"
+                    )
+
+            # Add peer group if specified
+            if peering.get("peer_group"):
+                peer_group = nb.plugins.bgp.peer_group.get(name=peering["peer_group"])
+                if peer_group:
+                    bgp_session_data["peer_group"] = peer_group.id
+                else:
+                    log.warning(
+                        f"BGP peer group '{peering['peer_group']}' not found for peering '{peering['name']}'"
+                    )
+                    continue
+
+            # Create BGP session using the plugin API
+            # The netbox_bgp plugin adds endpoints under plugins.bgp
+            nb.plugins.bgp.session.create(**bgp_session_data)
+        except Exception as e:
+            log.error(f"creating BGP peering '{peering['name']}' error '{e}'")
+            log.error(traceback.format_exc())
+
+
 # -----------------------------------------------------------------------------------
 # DELETE functions
 # -----------------------------------------------------------------------------------
@@ -2349,6 +2672,17 @@ def delete_tags():
             log.error(f"deleting tag '{tag}' error '{e}'")
 
 
+def delete_rir():
+    log.info("deleting RIRs")
+    for rir in rirs:
+        try:
+            nb_rir = nb.ipam.rirs.get(slug=rir["slug"])
+            if nb_rir:
+                nb_rir.delete()
+        except Exception as e:
+            log.error(f"deleting RIR '{rir}' error '{e}'")
+
+
 def delete_racks():
     log.info("deleting racks")
     for rack in racks:
@@ -2474,9 +2808,52 @@ def delete_circuit_provider_networks():
         log.error(f"deleting all circuit provider networks error '{e}'")
 
 
+def delete_bgp_peerings():
+    """Delete all BGP peerings using netbox_bgp plugin API"""
+    log.info("deleting all BGP peerings")
+    try:
+        # Get all BGP sessions from the plugin
+        bgp_sessions = nb.plugins.bgp.session.all()
+        for session in bgp_sessions:
+            session.delete()
+    except Exception as e:
+        log.error(f"deleting BGP peerings error '{e}'")
+        log.error(traceback.format_exc())
+
+
+def delete_bgp_peer_groups():
+    """Delete all BGP peer groups using netbox_bgp plugin API"""
+    log.info("deleting all BGP peer groups")
+    try:
+        # Get all BGP peer groups from the plugin
+        peer_groups = nb.plugins.bgp.peer_group.all()
+        for peer_group in peer_groups:
+            peer_group.delete()
+    except Exception as e:
+        log.error(f"deleting BGP peer groups error '{e}'")
+        log.error(traceback.format_exc())
+
+
+def delete_bgp_asn():
+    """Delete all BGP ASNs using netbox_bgp plugin API"""
+    log.info("deleting all BGP ASNs")
+    try:
+        # Get all BGP ASNs from the plugin
+        asns = nb.ipam.asns.all()
+        for asn in asns:
+            asn.delete()
+    except Exception as e:
+        log.error(f"deleting BGP ASNs error '{e}'")
+        log.error(traceback.format_exc())
+
+
 def clean_up_netbox():
     # delete_netbox_secrets_secrets()
     # delete_netbox_secrets_roles()
+    delete_bgp_peerings()
+    delete_bgp_peer_groups()
+    delete_bgp_asn()
+    delete_rir()
     delete_connections()
     delete_circuits()
     delete_circuit_provider_accounts()
@@ -2512,6 +2889,7 @@ def populate_netbox():
     create_device_roles()
     create_platforms()
     create_vrfs()
+    create_rir()
     create_prefix_roles()
     create_prefixes()
     create_ip_addresses()
@@ -2536,6 +2914,9 @@ def populate_netbox():
     create_circuit_types()
     create_circuits()
     create_config_templates()
+    create_bgp_asn()
+    create_bgp_peer_groups()
+    create_bgp_peerings()
 
 
 if __name__ == "__main__":

@@ -124,6 +124,7 @@ Sample Nornir worker inventory definition
             cables: True
           nbdata: True
           circuits: True
+          bgp_peerings: True
           primary_ip: "ipv4"
           devices:
             - fceos4

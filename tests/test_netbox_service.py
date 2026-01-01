@@ -1482,6 +1482,35 @@ class TestGetNornirInventory:
                         ]
                     ), f"{worker}:{device}:{intf_name} not all connection data returned"
 
+    def test_with_devices_add_bgp_peerings(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_nornir_inventory",
+            workers="any",
+            kwargs={"devices": ["fceos4", "fceos5"], "bgp_peerings": True},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert (
+                "fceos5" in res["result"]["hosts"]
+            ), f"{worker} returned no results for fceos5"
+            assert (
+                "fceos4" in res["result"]["hosts"]
+            ), f"{worker} returned no results for fceos4"
+            for device, data in res["result"]["hosts"].items():
+                assert data["data"][
+                    "bgp_peerings"
+                ], f"{worker}:{device} no bgp_peerings data returned"
+                for peering, peering_data in data["data"]["bgp_peerings"].items():
+                    assert all(
+                        k in peering_data
+                        for k in [
+                            "id",
+                            "name",
+                        ]
+                    ), f"{worker}:{device}:{peering} not all peerings data returned"
+
 
 class TestGetCircuits:
     nb_version = None
@@ -1669,6 +1698,273 @@ class TestGetCircuits:
                     res["result"]["get_circuits::CID3"]["fceos4"]["provider_network"]
                     == "Provider1-Net1"
                 )
+
+
+class TestGetBgpPeerings:
+    """Test suite for get_bgp_peerings function"""
+
+    nb_version = None
+
+    def test_get_bgp_peerings(self, nfclient):
+        """Test basic BGP peerings retrieval"""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": ["fceos4", "fceos5"]},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["result"], f"{worker} returned no results"
+            assert "fceos4" in res["result"], f"{worker} missing fceos4 in results"
+            assert "fceos5" in res["result"], f"{worker} missing fceos5 in results"
+            # Check that each device has a dictionary (may be empty if no BGP sessions)
+            for device, bgp_sessions in res["result"].items():
+                assert isinstance(
+                    bgp_sessions, dict
+                ), f"{worker}:{device} BGP sessions should be a dictionary"
+                # If there are BGP sessions, verify the structure
+                for session_name, session_data in bgp_sessions.items():
+                    assert isinstance(
+                        session_data, dict
+                    ), f"{worker}:{device}:{session_name} session data should be a dictionary"
+
+                    # Verify required top-level fields
+                    required_fields = [
+                        "id",
+                        "name",
+                        "description",
+                        "device",
+                        "local_address",
+                        "local_as",
+                        "remote_address",
+                        "remote_as",
+                        "status",
+                        "last_updated",
+                        "created",
+                        "url",
+                        "display",
+                        "site",
+                        "tenant",
+                        "tags",
+                        "comments",
+                        "custom_fields",
+                    ]
+                    for field in required_fields:
+                        assert (
+                            field in session_data
+                        ), f"{worker}:{device}:{session_name} missing field '{field}'"
+
+    def test_get_bgp_peerings_with_instance(self, nfclient):
+        """Test BGP peerings retrieval with explicit instance"""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": ["fceos4", "fceos5"], "instance": "prod"},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["result"], f"{worker} returned no results"
+            assert "fceos4" in res["result"], f"{worker} missing fceos4 in results"
+            assert "fceos5" in res["result"], f"{worker} missing fceos5 in results"
+            # Check that each device has a dictionary (may be empty if no BGP sessions)
+            for device, bgp_sessions in res["result"].items():
+                assert isinstance(
+                    bgp_sessions, dict
+                ), f"{worker}:{device} BGP sessions should be a dictionary"
+
+    def test_get_bgp_peerings_nonexistent_device(self, nfclient):
+        """Test error handling for non-existent device"""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": ["nonexistent-device-12345"]},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["result"], f"{worker} returned no results"
+            assert (
+                "nonexistent-device-12345" in res["result"]
+            ), f"{worker} should have entry for nonexistent device"
+            # The result for non-existent device should be empty dict
+            assert (
+                res["result"]["nonexistent-device-12345"] == {}
+            ), f"{worker} should return empty dict for nonexistent device"
+
+    def test_get_bgp_peerings_empty_devices_list(self, nfclient):
+        """Test with empty devices list"""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": []},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert isinstance(
+                res["result"], dict
+            ), f"{worker} should return a dictionary"
+            assert (
+                len(res["result"]) == 0
+            ), f"{worker} should return empty dict for empty devices list"
+
+    def test_get_bgp_peerings_cache_true(self, nfclient):
+        """Test cache content for BGP peerings"""
+        # get cache brief info
+        cache_before = nfclient.run_job(
+            "netbox",
+            "cache_list",
+            workers=["netbox-worker-1.1"],
+            kwargs={"keys": "get_bgp_peerings*", "details": True},
+        )
+
+        # Clear any existing cache
+        nfclient.run_job(
+            "netbox",
+            "cache_clear",
+            workers=["netbox-worker-1.1"],
+            kwargs={"keys": "get_bgp_peerings*"},
+        )
+
+        # cache data
+        nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers=["netbox-worker-1.1"],
+            kwargs={"devices": ["fceos4", "fceos5"], "cache": True},
+        )
+
+        # Now retrieve cache content
+        cache_after = nfclient.run_job(
+            "netbox",
+            "cache_list",
+            workers=["netbox-worker-1.1"],
+            kwargs={"keys": "get_bgp_peerings*", "details": True},
+        )
+
+        print("cache_before:")
+        pprint.pprint(cache_before, width=200)
+
+        print("cache_after:")
+        pprint.pprint(cache_after, width=200)
+
+        for worker, res in cache_after.items():
+            for cache_item_after in res["result"]:
+                key = cache_item_after["key"]
+                for cache_item_before in cache_before[worker]["result"]:
+                    if cache_item_before["key"] == key:
+                        assert (
+                            cache_item_before["creation"]
+                            != cache_item_after["creation"]
+                        ), f"{worker}:{key} cache not re-created"
+
+    def test_get_bgp_peerings_cache_refresh(self, nfclient):
+        """Test cache content for BGP peerings"""
+        # get cache brief info
+        cache_before = nfclient.run_job(
+            "netbox",
+            "cache_list",
+            workers=["netbox-worker-1.1"],
+            kwargs={"keys": "get_bgp_peerings*", "details": True},
+        )
+
+        # cache data
+        nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers=["netbox-worker-1.1"],
+            kwargs={"devices": ["fceos4", "fceos5"], "cache": "refresh"},
+        )
+
+        # Now retrieve cache content
+        cache_after = nfclient.run_job(
+            "netbox",
+            "cache_list",
+            workers=["netbox-worker-1.1"],
+            kwargs={"keys": "get_bgp_peerings*", "details": True},
+        )
+
+        print("cache_before:")
+        pprint.pprint(cache_before, width=200)
+
+        print("cache_after:")
+        pprint.pprint(cache_after, width=200)
+
+        for worker, res in cache_after.items():
+            for cache_item_after in res["result"]:
+                key = cache_item_after["key"]
+                for cache_item_before in cache_before[worker]["result"]:
+                    if cache_item_before["key"] == key:
+                        assert (
+                            cache_item_before["creation"]
+                            != cache_item_after["creation"]
+                        ), f"{worker}:{key} cache not re-created"
+
+    def test_get_bgp_peerings_cache_force(self, nfclient):
+        """Test cache force mode (use cache without checking)"""
+        # First, populate cache
+        nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": ["fceos4"], "cache": True},
+        )
+
+        # Use cache="force" to retrieve from cache only
+        ret = nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": ["fceos4"], "cache": "force"},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["result"], f"{worker} returned no results"
+            assert "fceos4" in res["result"], f"{worker} missing fceos4 in results"
+
+    def test_get_bgp_peerings_cache_false(self, nfclient):
+        """Test with cache disabled"""
+        # Clear any existing cache
+        nfclient.run_job(
+            "netbox",
+            "cache_clear",
+            workers="all",
+            kwargs={"keys": "get_bgp_peerings*"},
+        )
+
+        # Fetch with cache=False
+        ret = nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": ["fceos4"], "cache": False},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["result"], f"{worker} returned no results"
+            assert "fceos4" in res["result"], f"{worker} missing fceos4 in results"
+
+        # Verify nothing was cached
+        bgp_cache = nfclient.run_job(
+            "netbox",
+            "cache_get",
+            workers="all",
+            kwargs={"keys": "get_bgp_peerings::fceos4"},
+        )
+
+        for worker, res in bgp_cache.items():
+            # Cache should be empty or the key should not exist
+            assert (
+                "get_bgp_peerings::fceos4" not in res["result"]
+            ), f"{worker} should not have cached data when cache=False"
 
 
 class TestSyncDeviceFacts:

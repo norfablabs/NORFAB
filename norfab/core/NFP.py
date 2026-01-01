@@ -44,29 +44,24 @@ broker_commands = [OPEN, KEEPALIVE, DISCONNECT, POST, RESPONSE, GET, DELETE]
 FRAME_COUNTS = {
     "broker_to_worker": 8,  # address, empty, header, command, sender, empty, uuid, data
     "client_to_broker": 7,  # empty, header, command, service, workers, uuid, request
-    "worker_ready": 4,      # empty, header, command, service
+    "worker_ready": 4,  # empty, header, command, service
     "worker_response_min": 3,  # empty, header, command + response data
 }
 
+
 class MessageBuilder:
     """Builder class for constructing NFP protocol messages."""
-    
+
     @staticmethod
     def broker_to_worker_post(
-        worker_address: bytes,
-        sender: bytes,
-        uuid: bytes,
-        data: bytes
+        worker_address: bytes, sender: bytes, uuid: bytes, data: bytes
     ) -> List[bytes]:
         """Build a POST message from broker to worker."""
         return [worker_address, b"", WORKER, POST, sender, b"", uuid, data]
-    
+
     @staticmethod
     def broker_to_worker_get(
-        worker_address: bytes,
-        sender: bytes,
-        uuid: bytes,
-        data: bytes
+        worker_address: bytes, sender: bytes, uuid: bytes, data: bytes
     ) -> List[bytes]:
         """Build a GET message from broker to worker."""
         return [worker_address, b"", WORKER, GET, sender, b"", uuid, data]
@@ -83,17 +78,17 @@ class MessageBuilder:
     def worker_to_broker_ready(service: bytes) -> List[bytes]:
         """Build READY message from worker to broker."""
         return [b"", WORKER, READY, service]
-    
+
     @staticmethod
     def worker_to_broker_disconnect(service: bytes) -> List[bytes]:
         """Build DISCONNECT message from worker to broker."""
         return [b"", WORKER, DISCONNECT, service]
-    
+
     @staticmethod
     def worker_to_broker_response(response_data: List[bytes]) -> List[bytes]:
         """Build RESPONSE message from worker to broker."""
         return [b"", WORKER, RESPONSE] + response_data
-    
+
     @staticmethod
     def worker_to_broker_event(event_data: List[bytes]) -> List[bytes]:
         """Build EVENT message from worker to broker."""
@@ -111,42 +106,28 @@ class MessageBuilder:
 
     @staticmethod
     def client_to_broker_post(
-        command: bytes,
-        service: bytes,
-        workers: bytes,
-        uuid: bytes,
-        request: bytes
+        command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
     ) -> List[bytes]:
         """Build a POST message from client to broker."""
         return [b"", CLIENT, POST, service, workers, uuid, request]
 
     @staticmethod
     def client_to_broker_get(
-        command: bytes,
-        service: bytes,
-        workers: bytes,
-        uuid: bytes,
-        request: bytes
+        command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
     ) -> List[bytes]:
         """Build a GET message from client to broker."""
         return [b"", CLIENT, GET, service, workers, uuid, request]
 
     @staticmethod
     def broker_to_client_response(
-        client: bytes,
-        service: bytes,
-        message: List[bytes]
+        client: bytes, service: bytes, message: List[bytes]
     ) -> List[bytes]:
         """Build RESPONSE message from broker to client."""
         return [client, b"", CLIENT, RESPONSE, service] + message
-    
+
     @staticmethod
     def broker_to_client_event(
-        client: bytes,
-        service: bytes,
-        message: List[bytes]
+        client: bytes, service: bytes, message: List[bytes]
     ) -> List[bytes]:
         """Build EVENT message from broker to client."""
         return [client, b"", CLIENT, EVENT, service] + message
-
-

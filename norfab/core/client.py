@@ -159,11 +159,9 @@ class NFPClient(object):
         self.events_dir = os.path.join(self.base_dir, "events")
         self.running_job = None
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
-        self.socket_lock = (
-            threading.Lock()
-        )  # used to protect socket object
+        self.socket_lock = threading.Lock()  # used to protect socket object
         self.build_message = NFP.MessageBuilder()
-        
+
         # create base directories
         os.makedirs(self.base_dir, exist_ok=True)
         os.makedirs(self.jobs_dir, exist_ok=True)
