@@ -21,21 +21,20 @@ markdown_extensions:
 - toc:
     permalink: "¤"
 plugins:
-    - search
-    - tags:
-        tags_file: tags.md
-    - mkdocstrings:
-        default_handler: python
-        handlers:
-          python:
-            paths: [.]
-            options:
-              show_root_toc_entry: false
-              docstring_section_style: table
-              docstring_style: google
-              members_order: source
-              show_signature_annotations: true
-              merge_init_into_class: true
+  - search
+  - tags
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [.]
+          options:
+            show_root_toc_entry: false
+            docstring_section_style: table
+            docstring_style: google
+            members_order: source
+            show_signature_annotations: true
+            merge_init_into_class: true
 repo_name: norfablabs/norfab
 repo_url: https://github.com/norfablabs/NORFAB
 site_author: Denis Mulyalin
@@ -76,124 +75,137 @@ theme:
 # -------------------------------------------------------------------
 
 nav:
-- NORFAB: 
-    - Introduction: index.md
-    - Why use NORFAB: norfab_why_use_norfab.md
-    - Getting Started: norfab_getting_started.md
-    - Installation: norfab_installation.md
-    - Services:
-        - Services Overview: services_overview.md
-        - Containerlab Service:
-            - Overview: workers/containerlab/services_containerlab_service.md
-            - Inventory: workers/containerlab/services_containerlab_service_inventory.md
-            - Tasks:
-              - Deploy: workers/containerlab/services_containerlab_service_tasks_deploy.md
-              - Deploy Netbox: workers/containerlab/services_containerlab_service_tasks_deploy_netbox.md
-              - Destroy: workers/containerlab/services_containerlab_service_tasks_destroy.md
-              - Save: workers/containerlab/services_containerlab_service_tasks_save.md
-              - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
-              - Inspect: workers/containerlab/services_containerlab_service_tasks_inspect.md
-              - Get Nornir Inventory: workers/containerlab/services_containerlab_service_tasks_nornir_inventory.md
-        - Nornir Service: 
-            - Overview: workers/nornir/services_nornir_service.md
-            - Inventory: workers/nornir/services_nornir_service_inventory.md
-            - Tasks:
-              - Nornir Task: workers/nornir/services_nornir_service_tasks_task.md
-              - CLI: workers/nornir/services_nornir_service_tasks_cli.md
-              - CFG: workers/nornir/services_nornir_service_tasks_cfg.md
-              - Test: workers/nornir/services_nornir_service_tasks_test.md
-              - Network: workers/nornir/services_nornir_service_tasks_network.md
-              - Parse: workers/nornir/services_nornir_service_tasks_parse.md
-              - Diagram: workers/nornir/services_nornir_service_tasks_diagram.md
-              - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
-              - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
-            - Jina2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md
-        - Netbox Service: 
-            - Overview: workers/netbox/services_netbox_service.md
-            - Inventory: workers/netbox/services_netbox_service_inventory.md
-            - Tasks:
-              - GraphQL: workers/netbox/services_netbox_service_tasks_graphql.md
-              - REST: workers/netbox/services_netbox_service_tasks_rest.md
-              - GET Devices: workers/netbox/services_netbox_service_tasks_get_devices.md
-              - GET Interfaces: workers/netbox/services_netbox_service_tasks_get_interfaces.md
-              - GET Connections: workers/netbox/services_netbox_service_tasks_get_connections.md
-              - GET Circuits: workers/netbox/services_netbox_service_tasks_get_circuits.md
-              - GET BGP Peerings: workers/netbox/services_netbox_service_tasks_get_bgp_peerings.md
-              - GET Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
-              - GET Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
-              - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
-              - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md
-              - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
-              - UPDATE Device Facts: workers/netbox/services_netbox_service_tasks_sync_device_facts.md
-              - UPDATE Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
-              - UPDATE Device IP: workers/netbox/services_netbox_service_tasks_sync_device_ip.md
-        - Agent Service:
-            - Overview: workers/agent/services_agent_service.md
-            - Inventory: workers/agent/services_agent_service_inventory.md
-            - Tasks:
-              - Chat: workers/agent/services_agent_service_tasks_chat.md
-        - FastAPI Service:
-            - Overview: workers/fastapi/services_fastapi_service.md
-            - Inventory: workers/fastapi/services_fastapi_service_inventory.md
-            - Tasks:
-              - Auth: workers/fastapi/services_fastapi_service_task_auth.md
-        - FastMCP Service:
-            - Overview: workers/fastmcp/services_fastmcp_service.md
-            - Inventory: workers/fastmcp/services_fastmcp_service_inventory.md
-            - Tasks:
-              - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
-        - Workflow Service:
-            - Overview: workers/workflow/services_workflow_service.md
-            - Inventory: workers/workflow/services_workflow_service_inventory.md
-            - Tasks:
-              - Run: workers/workflow/services_workflow_service_tasks_run.md
-        - NORFAB Services:
-            - MMI: services_norfab_mmi.md
-            - Inventory Service: services_norfab_inventory_service.md
-            - File Service: services_norfab_file_service.md
-            - Jobs Service: services_norfab_jobs_service.md
-            - Events Service: services_norfab_events_service.md
-    - Clients:
-        - Clients Overview: clients_overview.md
-        - NFCLI Shell Client: clients_nfcli_overview.md
-        - Python API Client: clients_python_api_overview.md
-        - ROBOT Client: clients_robot_client_overview.md
-    - Customization:
-        - NORFAB Hooks System: customization/norfab_hooks.md
-        - Service Plugins: 
-          - Service Plugins Overview: customization/service_plugin_overview.md
-          - Local Plugin: customization/service_plugin_local.md
-          - Python Module Plugin: customization/service_plugin_module.md
+- Overview:
+  - Introduction: index.md
+  - Why use NORFAB: norfab_why_use_norfab.md
+  - Changelog: norfab_changelog.md
+
+- Getting Started:
+  - Installation: norfab_installation.md
+  - Quickstart: norfab_getting_started.md
+
+- Services:
+  - Services Overview: services_overview.md
+  - Containerlab:
+    - Overview: workers/containerlab/services_containerlab_service.md
+    - Inventory: workers/containerlab/services_containerlab_service_inventory.md
+    - Tasks:
+      - Deploy: workers/containerlab/services_containerlab_service_tasks_deploy.md
+      - Deploy Netbox: workers/containerlab/services_containerlab_service_tasks_deploy_netbox.md
+      - Destroy: workers/containerlab/services_containerlab_service_tasks_destroy.md
+      - Save: workers/containerlab/services_containerlab_service_tasks_save.md
+      - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
+      - Inspect: workers/containerlab/services_containerlab_service_tasks_inspect.md
+      - Get Nornir Inventory: workers/containerlab/services_containerlab_service_tasks_nornir_inventory.md
+  - Nornir:
+    - Overview: workers/nornir/services_nornir_service.md
+    - Inventory: workers/nornir/services_nornir_service_inventory.md
+    - Tasks:
+      - Task: workers/nornir/services_nornir_service_tasks_task.md
+      - CLI: workers/nornir/services_nornir_service_tasks_cli.md
+      - CFG: workers/nornir/services_nornir_service_tasks_cfg.md
+      - Test: workers/nornir/services_nornir_service_tasks_test.md
+      - Network: workers/nornir/services_nornir_service_tasks_network.md
+      - Parse: workers/nornir/services_nornir_service_tasks_parse.md
+      - Diagram: workers/nornir/services_nornir_service_tasks_diagram.md
+      - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
+      - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
+    - Jinja2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md
+  - Netbox:
+    - Overview: workers/netbox/services_netbox_service.md
+    - Inventory: workers/netbox/services_netbox_service_inventory.md
+    - Tasks:
+      - GraphQL: workers/netbox/services_netbox_service_tasks_graphql.md
+      - REST: workers/netbox/services_netbox_service_tasks_rest.md
+      - Get Devices: workers/netbox/services_netbox_service_tasks_get_devices.md
+      - Get Interfaces: workers/netbox/services_netbox_service_tasks_get_interfaces.md
+      - Get Connections: workers/netbox/services_netbox_service_tasks_get_connections.md
+      - Get Circuits: workers/netbox/services_netbox_service_tasks_get_circuits.md
+      - Get BGP Peerings: workers/netbox/services_netbox_service_tasks_get_bgp_peerings.md
+      - Get Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
+      - Get Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
+      - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
+      - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md
+      - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
+      - Sync Device Facts: workers/netbox/services_netbox_service_tasks_sync_device_facts.md
+      - Sync Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
+      - Sync Device IP: workers/netbox/services_netbox_service_tasks_sync_device_ip.md
+  - Agent:
+    - Overview: workers/agent/services_agent_service.md
+    - Inventory: workers/agent/services_agent_service_inventory.md
+    - Tasks:
+      - Chat: workers/agent/services_agent_service_tasks_chat.md
+  - FastAPI:
+    - Overview: workers/fastapi/services_fastapi_service.md
+    - Inventory: workers/fastapi/services_fastapi_service_inventory.md
+    - Tasks:
+      - Auth: workers/fastapi/services_fastapi_service_task_auth.md
+  - FastMCP:
+    - Overview: workers/fastmcp/services_fastmcp_service.md
+    - Inventory: workers/fastmcp/services_fastmcp_service_inventory.md
+    - Tasks:
+      - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
+  - Workflow:
+    - Overview: workers/workflow/services_workflow_service.md
+    - Inventory: workers/workflow/services_workflow_service_inventory.md
+    - Tasks:
+      - Run: workers/workflow/services_workflow_service_tasks_run.md
+  - NORFAB Built-ins:
+    - MMI: services_norfab_mmi.md
+    - Inventory Service: services_norfab_inventory_service.md
+    - File Service: services_norfab_file_service.md
+    - Jobs Service: services_norfab_jobs_service.md
+    - Events Service: services_norfab_events_service.md
+
+- Clients:
+  - Clients Overview: clients_overview.md
+  - NFCLI Shell Client: clients_nfcli_overview.md
+  - Python API Client: clients_python_api_overview.md
+  - ROBOT Client: clients_robot_client_overview.md
+
 - Tutorials:
   - Docker Deployment: norfab_docker_deployment.md
   - Distributed Deployment: norfab_distributed_deployment.md
-- References:
-    - NORFAB Inventory: reference_norfab_inventory.md
-    - Changelog: norfab_changelog.md
-    - Tags: tags.md
-    - API Reference:
-        - CORE:
-          - NFAPI (Python API): api_reference_core_norfab_nfapi.md
-          - Broker: api_reference_core_norfab_broker.md
-          - Worker: api_reference_core_norfab_worker.md
-          - Client: api_reference_core_norfab_client.md
-          - Simple Inventory: api_reference_core_norfab_simple_inventory.md
-          - Exceptions: api_reference_core_norfab_exceptions.md
-        - Built-in Workers:
-          - Containerlab Worker: workers/containerlab/api_reference_workers_containerlab_worker.md
-          - Nornir Worker: workers/nornir/api_reference_workers_nornir_worker.md
-          - Netbox Worker: workers/netbox/api_reference_workers_netbox_worker.md
-          - FastAPI Worker: workers/fastapi/api_reference_workers_fastapi_worker.md
-          - FastMCP Worker: workers/fastmcp/api_reference_workers_fastmcp_worker.md
-          - Ollama Agent Worker: workers/agent/api_reference_workers_agent_worker.md
-          - Workflow Worker: workers/workflow/api_reference_workers_workflow_worker.md
-        - Built-in Clients:
-          - NFCLI Client API: api_reference_clients_nfcli_client.md
-          - ROBOT Client API: api_reference_clients_robot_client.md
-    - Architecture:
-        - NORFAB Architecture: reference_architecture_norfab.md
-        - NORFAB Protocol RFC: reference_architecture_nfp.md 
-    - Tests:
-        - NORFAB Testing Framework: testing/norfab_testing_framework.md
-        - Netbox Service Tests: testing/netbox_service_tests.md
+
+- Customization:
+  - NORFAB Hooks System: customization/norfab_hooks.md
+  - Service Plugins:
+    - Overview: customization/service_plugin_overview.md
+    - Local Plugin: customization/service_plugin_local.md
+    - Python Module Plugin: customization/service_plugin_module.md
+
+- Concepts:
+  - Architecture:
+    - NORFAB Architecture: reference_architecture_norfab.md
+    - NORFAB Protocol RFC: reference_architecture_nfp.md
+  - Inventory (Reference): reference_norfab_inventory.md
+
+- Reference:
+  - Tags: tags.md
+  - API Reference:
+    - Core:
+      - NFAPI (Python API): api_reference_core_norfab_nfapi.md
+      - Broker: api_reference_core_norfab_broker.md
+      - Worker Base: api_reference_core_norfab_worker.md
+      - Client: api_reference_core_norfab_client.md
+      - Simple Inventory: api_reference_core_norfab_simple_inventory.md
+      - Exceptions: api_reference_core_norfab_exceptions.md
+    - Built-in Workers:
+      - Containerlab Worker: workers/containerlab/api_reference_workers_containerlab_worker.md
+      - Nornir Worker: workers/nornir/api_reference_workers_nornir_worker.md
+      - Netbox Worker: workers/netbox/api_reference_workers_netbox_worker.md
+      - FastAPI Worker: workers/fastapi/api_reference_workers_fastapi_worker.md
+      - FastMCP Worker: workers/fastmcp/api_reference_workers_fastmcp_worker.md
+      - Agent Worker: workers/agent/api_reference_workers_agent_worker.md
+      - Workflow Worker: workers/workflow/api_reference_workers_workflow_worker.md
+    - Built-in Clients:
+      - NFCLI Client API: api_reference_clients_nfcli_client.md
+      - ROBOT Client API: api_reference_clients_robot_client.md
+
+- Development:
+  - Documentation Style Guide: development/documentation_style_guide.md
+  - Testing:
+    - NORFAB Testing Framework: testing/norfab_testing_framework.md
+    - Netbox Service Tests: testing/netbox_service_tests.md
+
 - Contact Us: norfab_help_with_norfab.md

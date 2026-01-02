@@ -40,9 +40,10 @@ def create_api_endpoint(
     Creates an asynchronous FastAPI endpoint function for a given service task.
 
     Args:
-        task (dict): A dictionary containing task information,
-            including 'service' and 'name' keys.
-        worker (object): An object representing the worker
+        service (str): Service name.
+        task_name (str): Task name.
+        schema (dict): Input schema for the task.
+        worker (object): Worker instance.
 
     Returns:
         function: An asynchronous endpoint function
@@ -90,7 +91,7 @@ def create_api_endpoint(
     return endpoint
 
 
-def make_openapi_schema(app, regenerate=False, json_refs=None):
+def make_openapi_schema(app, regenerate: bool = False, json_refs: Optional[dict] = None) -> Dict:
     """
     Generates and returns the OpenAPI schema for a FastAPI application.
 

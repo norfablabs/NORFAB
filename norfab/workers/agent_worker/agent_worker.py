@@ -5,7 +5,7 @@ import sys
 import importlib.metadata
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
-from typing import Union, List, Dict, Callable
+from typing import Any, Dict, List, Union
 from pydantic import BaseModel, Field
 from pydantic import create_model as create_pydantic_model
 
@@ -56,11 +56,11 @@ class AgentWorker(NFPWorker):
 
     def __init__(
         self,
-        inventory,
+        inventory: Any,
         broker: str,
         worker_name: str,
-        exit_event=None,
-        init_done_event=None,
+        exit_event: Any = None,
+        init_done_event: Any = None,
         log_level: str = "WARNING",
         log_queue: object = None,
     ):
@@ -212,7 +212,7 @@ class AgentWorker(NFPWorker):
             return None
 
     @Task(fastapi={"methods": ["GET"]})
-    def get_version(self):
+    def get_version(self) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
         This method collects the version information of several Python packages and system details,
@@ -243,7 +243,7 @@ class AgentWorker(NFPWorker):
         return Result(result=libs)
 
     @Task(fastapi={"methods": ["GET"]})
-    def get_inventory(self):
+    def get_inventory(self) -> Result:
         """
         NorFab task to retrieve the agent's inventory.
 
@@ -253,7 +253,7 @@ class AgentWorker(NFPWorker):
         return Result(result=self.agent_inventory)
 
     @Task(fastapi={"methods": ["GET"]})
-    def get_status(self):
+    def get_status(self) -> Result:
         """
         NorFab Task that retrieves the status of the agent worker.
 

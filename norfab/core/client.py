@@ -14,7 +14,7 @@ from . import NFP
 from .zhelpers import dump
 from norfab.core.inventory import NorFabInventory
 from norfab.utils.markdown_results import markdown_results
-from typing import Union, List, Callable, Any
+from typing import Union, List, Callable, Any, Dict, Optional, Tuple, Iterator
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------------------------
 
 
-def event_filename(suuid: str, events_dir: str):
+def event_filename(suuid: str, events_dir: str) -> str:
     """
     Returns a freshly allocated event filename for the given UUID string.
 
@@ -143,10 +143,10 @@ class NFPClient(object):
     def __init__(
         self,
         inventory: NorFabInventory,
-        broker,
-        name,
-        exit_event=None,
-        event_queue=None,
+        broker: str,
+        name: str,
+        exit_event: Optional[threading.Event] = None,
+        event_queue: Optional[queue.Queue] = None,
     ):
         self.inventory = inventory
         self.name = name
@@ -308,7 +308,7 @@ class NFPClient(object):
             self.broker_socket.send_multipart(msg)
             self.stats_send_to_broker += 1
 
-    def rcv_from_broker(self, command, service, uuid):
+    def rcv_from_broker(self, command: bytes, service: bytes, uuid: bytes) -> Tuple[Any, Any]:
         """
         Wait for a response from the broker for a given command, service, and uuid.
 
@@ -723,7 +723,7 @@ class NFPClient(object):
         pipiline: int = 10,
         timeout: int = 600,
         read: bool = False,
-    ):
+    ) -> Tuple[str, Any]:
         """
         Fetches a file from a given URL and saves it to a specified destination.
 
@@ -854,7 +854,7 @@ class NFPClient(object):
         timeout: int = 600,
         retry: int = 10,
         markdown: bool = False,
-    ):
+    ) -> Any:
         """
         Run a job on the specified service and task, with optional arguments, timeout and retry settings.
 
@@ -956,7 +956,7 @@ class NFPClient(object):
         kwargs: dict = None,
         workers: str = "all",
         timeout: int = 600,
-    ):
+    ) -> Iterator[Any]:
         """
         Run a job on the specified service and task, yielding results as they are received.
 

@@ -9,7 +9,7 @@ import os
 import hashlib
 import ipaddress
 
-from typing import Union, Dict, List, Optional, Any
+from typing import Union, Dict, List, Optional, Any, Tuple
 from norfab.models import Result
 from norfab.core.worker import NFPWorker, WorkerWatchDog, Task, Job
 from norfab.core.inventory import merge_recursively
@@ -140,7 +140,7 @@ class WatchDog(WorkerWatchDog):
             "connections": self.connections_data,
         }
 
-    def connections_update(self, nr, plugin: str) -> None:
+    def connections_update(self, nr: Any, plugin: str) -> None:
         """
         Function to update connection use timestamps for each host
 
@@ -179,8 +179,7 @@ class WatchDog(WorkerWatchDog):
         `idle_connections_cleaned` counter.
 
         Raises:
-            Exception: If an error occurs while attempting to disconnect idle
-            connections, an error message is logged.
+            Exception: If an error occurs while attempting to disconnect idle connections, an error message is logged.
         """
         # dictionary keyed by plugin name and value as a list of hosts
         disconnect = {}
@@ -367,10 +366,6 @@ class NornirWorker(NFPWorker):
 
         Args:
             inventory (dict): A dictionary containing Nornir inventory and configuration options.
-            progress (bool, optional): If True, emits progress events during initialization. Defaults to False.
-
-        Returns:
-            None
         """
         # clean up existing Nornir instance
         with self.connections_lock:
@@ -392,7 +387,9 @@ class NornirWorker(NFPWorker):
                 user_defined=inventory.get("user_defined", {}),
             )
 
-    def filter_hosts_and_validate(self, kwargs: Dict, ret: Result) -> Result:
+    def filter_hosts_and_validate(
+        self, kwargs: Dict[str, Any], ret: Result
+    ) -> Tuple[Any, Result]:
         """
         Helper method to filter hosts and validate results.
 
@@ -636,7 +633,7 @@ class NornirWorker(NFPWorker):
 
         return ret
 
-    def _add_processors(self, nr, kwargs: Dict, job: Job):
+    def _add_processors(self, nr: Any, kwargs: Dict[str, Any], job: Job) -> Any:
         """
         Add various processors to the Nornir object based on the provided keyword arguments.
 
@@ -779,14 +776,14 @@ class NornirWorker(NFPWorker):
 
         return nr.with_processors(processors)
 
-    def load_job_data(self, job_data: Any):
+    def load_job_data(self, job_data: Any) -> Dict:
         """
         Helper function to download job data YAML files and load it.
 
         Args:
             job_data (str): job data NorFab file path to download and load using YAML.
 
-        Returns:
+        Returns:dict
             data: The job data loaded from the YAML string.
 
         Raises:
@@ -949,7 +946,6 @@ class NornirWorker(NFPWorker):
         Retrieve a list of Nornir hosts managed by this worker.
 
         Args:
-            job: NorFab Job object containing relevant metadata
             details (bool): If True, returns detailed information about each host.
             **kwargs (dict): Hosts filters to apply when retrieving hosts.
 
@@ -981,7 +977,6 @@ class NornirWorker(NFPWorker):
         Retrieve running Nornir inventory for requested hosts
 
         Args:
-            job: NorFab Job object containing relevant metadata
             **kwargs (dict): Fx filters used to filter the inventory.
 
         Returns:
@@ -1002,9 +997,6 @@ class NornirWorker(NFPWorker):
         and system details such as the Python version and platform. It attempts to
         import each library and fetch its version. If a library is not found, it is
         skipped.
-
-        Args:
-            job: NorFab Job object containing relevant metadata
 
         Returns:
             dict: a dictionary with the library names as keys and their respective
@@ -1061,9 +1053,6 @@ class NornirWorker(NFPWorker):
         """
         Retrieve the statistics from the watchdog.
 
-        Args:
-            job: NorFab Job object containing relevant metadata
-
         Returns:
             Result: An object containing the statistics from the watchdog.
         """
@@ -1073,9 +1062,6 @@ class NornirWorker(NFPWorker):
     def get_watchdog_configuration(self) -> Result:
         """
         Retrieves the current configuration of the watchdog.
-
-        Args:
-            job: NorFab Job object containing relevant metadata
 
         Returns:
             Result: An object containing the watchdog configuration.
@@ -1087,9 +1073,6 @@ class NornirWorker(NFPWorker):
         """
         Retrieve the list of connections curently managed by watchdog.
 
-        Args:
-            job: NorFab Job object containing relevant metadata
-
         Returns:
             Result: An instance of the Result class containing the current
                 watchdog connections.
@@ -1097,7 +1080,7 @@ class NornirWorker(NFPWorker):
         return Result(result=self.watchdog.connections_get())
 
     @Task(fastapi={"methods": ["POST"]})
-    def task(self, job: Job, plugin: str, **kwargs) -> Result:
+    def task(self, job: Job, plugin: str, **kwargs: Any) -> Result:
         """
         Execute a Nornir task plugin.
 
@@ -1126,12 +1109,12 @@ class NornirWorker(NFPWorker):
             job: NorFab Job object containing relevant metadata
             plugin (str): The path to the plugin function to import, or a NorFab
                 URL to download a custom task or template URL that resolves to a file.
-            **kwargs: Additional arguments to pass to the specified task plugin.
+            **kwargs (Any): Additional arguments to pass to the specified task plugin.
 
-        Keyword Args:
-            add_details (bool): If True, adds task execution details to the results.
-            to_dict (bool): If True, returns results as a dictionary. Defaults to True.
-            Filters: Any additional keyword arguments that match FFun_functions will be used as filters.
+        Notes:
+            - `add_details` (bool): If True, adds task execution details to the results.
+            - `to_dict` (bool): If True, returns results as a dictionary. Defaults to True.
+            - Host filters: keys matching `FFun_functions` are treated as Nornir host filters.
 
         Returns:
             Result: An instance of the Result class containing the task execution results.
@@ -1200,7 +1183,7 @@ class NornirWorker(NFPWorker):
         job_data: Any = None,
         to_dict: bool = True,
         add_details: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Task to collect/retrieve show commands output from network devices using
@@ -1228,7 +1211,7 @@ class NornirWorker(NFPWorker):
         Raises:
             UnsupportedPluginError: If the specified plugin is not supported.
             FileNotFoundError: If the specified TTP template or job data file
-            cannot be downloaded.
+                cannot be downloaded.
         """
         job_data = job_data or {}
         timeout = job.timeout * 0.9
@@ -1321,7 +1304,7 @@ class NornirWorker(NFPWorker):
         to_dict: bool = True,
         add_details: bool = False,
         job_data: Any = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Task to send configuration commands to devices using Command Line Interface (CLI).
@@ -1420,7 +1403,7 @@ class NornirWorker(NFPWorker):
         return_tests_suite: bool = False,
         job_data: Any = None,
         extensive: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Function to test networks using a suite of tests.
@@ -1654,7 +1637,7 @@ class NornirWorker(NFPWorker):
         commands: Union[str, list] = None,
         to_dict: bool = True,
         add_details: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Parse network device output using specified plugin and options.
@@ -1733,7 +1716,7 @@ class NornirWorker(NFPWorker):
         to_dict: bool = True,
         add_details: bool = False,
         dry_run: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Task to transfer files to and from hosts using SCP.
@@ -1800,7 +1783,7 @@ class NornirWorker(NFPWorker):
         return ret
 
     @Task(fastapi={"methods": ["POST"]})
-    def runtime_inventory(self, job: Job, action: str, **kwargs) -> Result:
+    def runtime_inventory(self, job: Job, action: str, **kwargs: Any) -> Result:
         """
         Task to work with Nornir runtime (in-memory) inventory.
 
@@ -1821,7 +1804,7 @@ class NornirWorker(NFPWorker):
         Args:
             job: NorFab Job object containing relevant metadata
             action: action to perform on inventory
-            kwargs: argument to use with the calling action
+            kwargs: arguments to use with the calling action
         """
         # clean up kwargs
         _ = kwargs.pop("progress", None)

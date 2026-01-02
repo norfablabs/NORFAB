@@ -6,7 +6,7 @@ import yaml
 import os
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
-from typing import Union, Dict, List, Tuple
+from typing import Any, Union, Dict, List, Tuple
 
 SERVICE = "workflow"
 
@@ -36,7 +36,7 @@ class WorkflowWorker(NFPWorker):
 
     def __init__(
         self,
-        inventory,
+        inventory: Any,
         broker: str,
         worker_name: str,
         exit_event=None,
@@ -256,8 +256,8 @@ class WorkflowWorker(NFPWorker):
         Executes a workflow defined by a dictionary.
 
         Args:
+            job (Job): NorFab Job object containing relevant metadata.
             workflow (Union[str, Dict]): The workflow to execute. This can be a URL to a YAML file.
-            remove_no_match_results (bool, optional): Whether to remove empty results from the final output. Defaults to True.
 
         Returns:
             Dict: A dictionary containing the results of the workflow execution.

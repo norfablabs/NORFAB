@@ -15,7 +15,7 @@ The test suite is organized into 17 test classes:
 | TestGetInterfaces | Interface retrieval and filtering | [Details](#testgetinterfaces) |
 | TestGetDevices | Device retrieval and filtering | [Details](#testgetdevices) |
 | TestGetConnections | Device connection queries | [Details](#testgetconnections) |
-| TestGetNornirInventory | Nornir inventory generation from Netbox | [Details](#testgetnornirInventory) |
+| TestGetNornirInventory | Nornir inventory generation from Netbox | [Details](#testgetnornirinventory) |
 | TestGetCircuits | Circuit information retrieval | [Details](#testgetcircuits) |
 | TestGetBgpPeerings | BGP peering data | [Details](#testgetbgppeerings) |
 | TestSyncDeviceFacts | Device fact synchronization | [Details](#testsyncdevicefacts) |

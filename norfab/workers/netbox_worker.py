@@ -15,7 +15,7 @@ from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
-from typing import Union
+from typing import Any, Union, List
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.models.netbox import CreatePrefixInput, NetboxFastApiArgs
@@ -266,9 +266,6 @@ class NetboxWorker(NFPWorker):
         """
         NorFab Task to return running inventory for NetBox worker.
 
-        Args:
-            job: NorFab Job object containing relevant metadata
-
         Returns:
             dict: A dictionary containing the NetBox inventory.
         """
@@ -277,12 +274,9 @@ class NetboxWorker(NFPWorker):
         )
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
-    def get_version(self, **kwargs) -> Result:
+    def get_version(self, **kwargs: Any) -> Result:
         """
         Retrieves the version information of Netbox instances.
-
-        Args:
-            job: NorFab Job object containing relevant metadata
 
         Returns:
             dict: A dictionary containing the version information of the Netbox
@@ -315,9 +309,7 @@ class NetboxWorker(NFPWorker):
         queries the status of all instances in the NetBox inventory.
 
         Args:
-            job: NorFab Job object containing relevant metadata
-            instance (str, optional): The name of the specific NetBox instance
-                                      to query.
+            instance (str, optional): The name of the specific NetBox instance to query.
 
         Returns:
             dict: A dictionary containing the status of the requested NetBox
@@ -581,7 +573,6 @@ class NetboxWorker(NFPWorker):
         Retrieve a list of cache keys, optionally with details about each key.
 
         Args:
-            job: NorFab Job object containing relevant metadata
             keys (str): A pattern to match cache keys against. Defaults to "*".
             details (bool): If True, include detailed information about each cache key. Defaults to False.
 
@@ -824,7 +815,7 @@ class NetboxWorker(NFPWorker):
         instance: Union[None, str] = None,
         method: str = "get",
         api: str = "",
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Sends a request to the Netbox REST API.
@@ -2104,7 +2095,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    def get_nornir_hosts(self, kwargs: dict, timeout: int):
+    def get_nornir_hosts(self, kwargs: dict, timeout: int) -> List[str]:
         """
         Retrieves a list of unique Nornir hosts from Nornir service based on provided filter criteria.
 
@@ -2148,7 +2139,7 @@ class NetboxWorker(NFPWorker):
         devices: Union[None, list] = None,
         batch_size: int = 10,
         branch: str = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Updates device facts in NetBox, this task updates this device attributes:
@@ -2298,7 +2289,7 @@ class NetboxWorker(NFPWorker):
         create: bool = True,
         batch_size: int = 10,
         branch: str = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Update or create device interfaces in Netbox using devices interfaces
@@ -2734,7 +2725,7 @@ class NetboxWorker(NFPWorker):
         create: bool = True,
         batch_size: int = 10,
         branch: str = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Result:
         """
         Update the IP addresses of devices in Netbox.
@@ -3977,7 +3968,7 @@ class NetboxWorker(NFPWorker):
         dry_run: bool = False,
         branch: str = None,
         **kwargs: dict,
-    ):
+    ) -> Result:
         """
         Create interfaces for one or more devices in NetBox. This task creates interfaces in bulk and only
         if interfaces does not exist in Netbox.

@@ -376,5 +376,5 @@ status = nfclient.get("mmi.service.broker", "show_workers")
 
 - [NORFAB Getting Started](../norfab_getting_started.md)
 - [NORFAB Architecture](../reference_architecture_norfab.md)
-- [Worker Documentation](../workers/)
+- [Services and Workers Documentation](../services_overview.md)
 - [Service Plugin Development](../customization/service_plugin_overview.md)

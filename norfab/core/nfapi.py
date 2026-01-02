@@ -197,7 +197,7 @@ class NorFab:
         `register_worker_plugin` method.
 
         Raises:
-            Any exceptions raised by the entry point loading or registration process.
+            Exception: Any exceptions raised by the entry point loading or registration process.
         """
         # register worker plugins from entrypoints
         eps = entry_points()
@@ -224,8 +224,7 @@ class NorFab:
             worker_plugin (object): The worker plugin to be registered.
 
         Raises:
-            norfab_exceptions.ServicePluginAlreadyRegistered: If a different plugin
-            is already registered under the same service name.
+            Exception: If a different plugin is already registered under the same service name.
         """
         existing_plugin = self.worker_plugins.get(service_name)
         if existing_plugin is None:
@@ -573,9 +572,6 @@ class NorFab:
         Returns:
             NFPClient: The created client instance if a broker endpoint is defined.
             None: If no broker endpoint is defined.
-
-        Raises:
-            None
 
         Notes:
             If this is the first client being created, it will be assigned to the

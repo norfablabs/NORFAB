@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 
 def service_tasks_discovery(
-    worker, cycles: int = 5, discover_service: str = "all"
+    worker: Any, cycles: int = 5, discover_service: str = "all"
 ) -> None:
     """
     Discovers available tasks from NorFab services and registers them

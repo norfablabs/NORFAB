@@ -13,7 +13,7 @@ import importlib.metadata
 from zmq.auth.thread import ThreadAuthenticator
 from binascii import hexlify
 from multiprocessing import Event
-from typing import Union, Any, List
+from typing import Union, Any, List, Optional
 from . import NFP
 from .zhelpers import dump
 from .inventory import NorFabInventory, logging_config_producer
@@ -71,11 +71,11 @@ class NFPWorker(object):
     def __init__(
         self,
         address: str,
-        socket,
-        socket_lock,
+        socket: Any,
+        socket_lock: Any,
         multiplier: int,  # e.g. 6 times
         keepalive: int,  # e.g. 5000 ms
-        service: NFPService = None,
+        service: Optional[NFPService] = None,
     ):
         self.address = address  # Address to route to
         self.service = service
@@ -87,7 +87,7 @@ class NFPWorker(object):
         self.socket_lock = socket_lock
         self.build_message = NFP.MessageBuilder()
 
-    def start_keepalives(self):
+    def start_keepalives(self) -> None:
         self.keepaliver = KeepAliver(
             address=self.address,
             socket=self.socket,
@@ -101,7 +101,7 @@ class NFPWorker(object):
         )
         self.keepaliver.start()
 
-    def is_ready(self):
+    def is_ready(self) -> bool:
         """
         Check if the worker is ready.
 
@@ -110,7 +110,7 @@ class NFPWorker(object):
         """
         return self.service is not None and self.ready is True
 
-    def destroy(self, disconnect=False):
+    def destroy(self, disconnect: bool = False) -> None:
         """
         Clean up routine for the worker.
 
@@ -371,7 +371,7 @@ class NFPBroker:
             self.auth.stop()
         self.ctx.destroy(0)
 
-    def delete_worker(self, worker, disconnect):
+    def delete_worker(self, worker: NFPWorker, disconnect: bool) -> None:
         """
         Deletes a worker from all data structures and destroys the worker.
 
@@ -385,7 +385,7 @@ class NFPBroker:
         worker.destroy(disconnect)
         self.workers.pop(worker.address, None)
 
-    def purge_workers(self):
+    def purge_workers(self) -> None:
         """
         Look for and delete expired workers.
 
@@ -527,7 +527,7 @@ class NFPBroker:
                 f"NFPBroker - invalid message: {msg}, command: {command}, sender: {sender}"
             )
 
-    def require_worker(self, address):
+    def require_worker(self, address: bytes) -> NFPWorker:
         """
         Finds the worker associated with the given address, creating a new worker if necessary.
 
@@ -551,7 +551,7 @@ class NFPBroker:
 
         return self.workers[address]
 
-    def require_service(self, name):
+    def require_service(self, name: bytes) -> NFPService:
         """
         Locates the service by name, creating it if necessary.
 

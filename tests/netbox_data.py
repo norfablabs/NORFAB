@@ -105,7 +105,7 @@ rear-ports:
 
 
 def slugify(name):
-    return re.sub("\W+", "-", name.lower())
+    return re.sub(r"\W+", "-", name.lower())
 
 
 # list of netbox deice inventory keys to verify device data retrieved from Netbox

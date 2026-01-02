@@ -918,7 +918,7 @@ class WorkerWatchDog(threading.Thread):
                     f"{mem_usage}MByte, killing myself"
                 )
 
-    def get_ram_usage(self):
+    def get_ram_usage(self) -> float:
         """
         Get the RAM usage of the worker process.
 
@@ -1638,7 +1638,7 @@ class NFPWorker:
         juuid: str,
         task: str,
         client_address: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Handles the creation and emission of an event.
@@ -1789,8 +1789,8 @@ class NFPWorker:
         job: Job,
         raise_error: Union[bool, int, str] = None,
         sleep: int = None,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> Result:
         """
         Echoes the job information and optional arguments, optionally sleeping or raising an error.
