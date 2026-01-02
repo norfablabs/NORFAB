@@ -320,7 +320,7 @@ class NFPBroker:
         """
         while True:
             try:
-                items = self.poller.poll(self.keepalive)
+                items = self.poller.poll(1000)
             except KeyboardInterrupt:
                 break  # Interrupted
 

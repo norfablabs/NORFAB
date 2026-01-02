@@ -151,6 +151,1251 @@ File `suite_3.txt` stored on broker and downloaded by Nornir service prior to ru
 
 NorFab interactive shell allows you to format the results of network tests into text tables. This is particularly useful for presenting test results in a clear and organized manner, making it easier to analyze and interpret the data. The NorFab interactive shell supports the `table` command, which relies on the [tabulate](https://pypi.org/project/tabulate/) module to generate text tables. By outputting test results in table format, you can quickly identify issues and take appropriate action.
 
+## Markdown Results Output (client.run_job)
+
+NorFab Python client can return Nornir `test` results as a **Markdown report** by passing `markdown=True` to `client.run_job(...)`.
+
+This is convenient when you want to:
+
+- Save results into a `.md` file
+- Post results into ticketing systems / chat tools
+- Render results in a UI (for example, using a Markdown renderer such as Markwon)
+
+The content of the report depends on the `extensive` keyword in `kwargs`:
+
+- `extensive=False` (default) produces a summary table and debug section, without per-test details and command outputs.
+- `extensive=True` includes hierarchical per-host test details, device command outputs, devices inventory, and test suite definitions.
+
+!!! example "Python: Markdown report (brief)"
+
+    Sample python script that produces brief markdown tests report:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+
+    if __name__ == "__main__":
+        nf = NorFab(inventory="inventory.yaml")
+        nf.start()
+
+        client = nf.make_client()
+
+        report_md = client.run_job(
+            "nornir",
+            "test",
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "FC": ["spine", "leaf"],
+            },
+            markdown=True,
+        )
+
+        print(report_md)
+
+        nf.destroy()
+    ```
+
+    <details>
+    <summary>Sample output (extensive=False)</summary>
+
+    ````markdown
+    # Tests Execution Report
+
+    ## Summary
+
+
+    High-level table with all test results.
+    |Host|Test Name|Result|Exception|
+    | :--- | :--- | :--- | :--- |
+    |ceos-leaf-1|check NTP status|❌ FAIL||
+    |ceos-leaf-1|check ceos version|✅ PASS||
+    |ceos-leaf-2|check NTP status|❌ FAIL||
+    |ceos-leaf-2|check ceos version|✅ PASS||
+    |ceos-leaf-3|check NTP status|❌ FAIL||
+    |ceos-leaf-3|check ceos version|✅ PASS||
+    |ceos-spine-1|check NTP status|❌ FAIL||
+    |ceos-spine-1|check ceos version|✅ PASS||
+    |ceos-spine-2|check NTP status|❌ FAIL||
+    |ceos-spine-2|check ceos version|✅ PASS||
+
+    ## Tests Details
+
+
+    ❌ No detailed results available. Set `extensive` to `True` in input kwargs arguments.
+
+
+    ## Device Outputs
+
+
+    ❌ No hosts outputs available. Set `extensive` to `True` in input kwargs arguments.
+
+
+    ## Debug
+
+
+    This section contains detailed debugging information for troubleshooting and inspection. Includes input arguments and complete raw results data used to produce sections above.
+
+    ❌ No hosts inventory available. Set `extensive` to `True` in input kwargs arguments.
+
+
+
+    ❌ No hosts test suites available. Set `extensive` to `True` in input kwargs arguments.
+
+
+    <details style="margin-left:20px;">
+    <summary>Input Arguments (kwargs)</summary>
+
+    ```json
+    {
+      "suite": "nf://nornir_test_suites/suite_1.txt",
+      "FC": [
+        "spine",
+        "leaf"
+      ]
+    }
+    ```
+
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>Complete Results (JSON)</summary>
+
+    ```json
+    {
+      "status": "202",
+      "results": {
+        "nornir-worker-5": {
+          "result": {},
+          "failed": false,
+          "errors": [],
+          "task": "nornir-worker-5:test",
+          "messages": [
+            "nornir-worker-5 - nothing to do, no hosts matched by filters '{'FC': ['spine', 'leaf']}'"
+          ],
+          "juuid": "6dab68539bc3410d850a78b4fe3c4300",
+          "resources": [],
+          "status": "no_match",
+          "task_started": "Fri Jan  2 18:12:21 2026",
+          "task_completed": "Fri Jan  2 18:12:21 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-6": {
+          "result": {},
+          "failed": false,
+          "errors": [],
+          "task": "nornir-worker-6:test",
+          "messages": [
+            "nornir-worker-6 - nothing to do, no hosts matched by filters '{'FC': ['spine', 'leaf']}'"
+          ],
+          "juuid": "6dab68539bc3410d850a78b4fe3c4300",
+          "resources": [],
+          "status": "no_match",
+          "task_started": "Fri Jan  2 18:12:21 2026",
+          "task_completed": "Fri Jan  2 18:12:21 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-4": {
+          "result": {},
+          "failed": false,
+          "errors": [],
+          "task": "nornir-worker-4:test",
+          "messages": [
+            "nornir-worker-4 - nothing to do, no hosts matched by filters '{'FC': ['spine', 'leaf']}'"
+          ],
+          "juuid": "6dab68539bc3410d850a78b4fe3c4300",
+          "resources": [],
+          "status": "no_match",
+          "task_started": "Fri Jan  2 18:12:21 2026",
+          "task_completed": "Fri Jan  2 18:12:21 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-2": {
+          "result": {
+            "ceos-leaf-2": {
+              "check ceos version": "PASS",
+              "check NTP status": "FAIL"
+            },
+            "ceos-leaf-3": {
+              "check ceos version": "PASS",
+              "check NTP status": "FAIL"
+            },
+            "ceos-leaf-1": {
+              "check ceos version": "PASS",
+              "check NTP status": "FAIL"
+            }
+          },
+          "failed": true,
+          "errors": [],
+          "task": "nornir-worker-2:test",
+          "messages": [],
+          "juuid": "6dab68539bc3410d850a78b4fe3c4300",
+          "resources": [],
+          "status": "completed",
+          "task_started": "Fri Jan  2 18:12:21 2026",
+          "task_completed": "Fri Jan  2 18:12:22 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-1": {
+          "result": {
+            "ceos-spine-1": {
+              "check ceos version": "PASS",
+              "check NTP status": "FAIL"
+            },
+            "ceos-spine-2": {
+              "check ceos version": "PASS",
+              "check NTP status": "FAIL"
+            }
+          },
+          "failed": true,
+          "errors": [],
+          "task": "nornir-worker-1:test",
+          "messages": [],
+          "juuid": "6dab68539bc3410d850a78b4fe3c4300",
+          "resources": [],
+          "status": "completed",
+          "task_started": "Fri Jan  2 18:12:21 2026",
+          "task_completed": "Fri Jan  2 18:12:22 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        }
+      },
+      "errors": [],
+      "workers": {
+        "requested": [
+          "nornir-worker-5",
+          "nornir-worker-6",
+          "nornir-worker-4",
+          "nornir-worker-1",
+          "nornir-worker-2"
+        ],
+        "done": "{'nornir-worker-5', 'nornir-worker-6', 'nornir-worker-4', 'nornir-worker-1', 'nornir-worker-2'}",
+        "dispatched": "{'nornir-worker-5', 'nornir-worker-6', 'nornir-worker-4', 'nornir-worker-1', 'nornir-worker-2'}",
+        "pending": "set()"
+      }
+    }
+    ```
+
+    </details>
+    ````
+
+    </details>
+
+!!! example "Python: Markdown report (extensive)"
+
+    This example produces detailed markdown report:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+
+    if __name__ == "__main__":
+        nf = NorFab(inventory="inventory.yaml")
+        nf.start()
+
+        client = nf.make_client()
+
+        report_md = client.run_job(
+            "nornir",
+            "test",
+            kwargs={
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "FC": ["spine", "leaf"],
+                "extensive": True,
+            },
+            markdown=True,
+        )
+
+        print(report_md)
+
+        nf.destroy()
+    ```
+
+    <details>
+    <summary>Sample output (extensive=True)</summary>
+
+    ````markdown
+    # Tests Execution Report
+
+    ## Summary
+
+
+    High-level table with all test results.
+    |Host|Test Name|Result|Exception|
+    | :--- | :--- | :--- | :--- |
+    |ceos-leaf-1|check NTP status|❌ FAIL|Pattern not in output|
+    |ceos-leaf-1|check ceos version|✅ PASS||
+    |ceos-leaf-2|check NTP status|❌ FAIL|Pattern not in output|
+    |ceos-leaf-2|check ceos version|✅ PASS||
+    |ceos-leaf-3|check NTP status|❌ FAIL|Pattern not in output|
+    |ceos-leaf-3|check ceos version|✅ PASS||
+    |ceos-spine-1|check NTP status|❌ FAIL|Pattern not in output|
+    |ceos-spine-1|check ceos version|✅ PASS||
+    |ceos-spine-2|check NTP status|❌ FAIL|Pattern not in output|
+    |ceos-spine-2|check ceos version|✅ PASS||
+
+    ## Tests Details
+
+
+    Hierarchical expandable sections organized by device, then test name, containing complete test result details.
+    <details style="margin-left:20px;">
+    <summary>ceos-leaf-1 (2 tests, ✅ 1 passed, ❌ 1 failed)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>check NTP status ❌ FAIL</summary>
+
+    - **Result:** FAIL
+    - **Criteria:** 1.1.1.1
+    - **Exception:** Pattern not in output
+    - **Task:** show ntp associations
+    - **Test:** contains_lines
+    - **Success:** False
+    - **Failed:** True
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    <details style="margin-left:40px;">
+    <summary>check ceos version ✅ PASS</summary>
+
+    - **Result:** PASS
+    - **Criteria:** cEOS
+    - **Exception:** None
+    - **Task:** show version
+    - **Test:** contains
+    - **Success:** True
+    - **Failed:** False
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-leaf-2 (2 tests, ✅ 1 passed, ❌ 1 failed)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>check NTP status ❌ FAIL</summary>
+
+    - **Result:** FAIL
+    - **Criteria:** 1.1.1.1
+    - **Exception:** Pattern not in output
+    - **Task:** show ntp associations
+    - **Test:** contains_lines
+    - **Success:** False
+    - **Failed:** True
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    <details style="margin-left:40px;">
+    <summary>check ceos version ✅ PASS</summary>
+
+    - **Result:** PASS
+    - **Criteria:** cEOS
+    - **Exception:** None
+    - **Task:** show version
+    - **Test:** contains
+    - **Success:** True
+    - **Failed:** False
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-leaf-3 (2 tests, ✅ 1 passed, ❌ 1 failed)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>check NTP status ❌ FAIL</summary>
+
+    - **Result:** FAIL
+    - **Criteria:** 1.1.1.1
+    - **Exception:** Pattern not in output
+    - **Task:** show ntp associations
+    - **Test:** contains_lines
+    - **Success:** False
+    - **Failed:** True
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    <details style="margin-left:40px;">
+    <summary>check ceos version ✅ PASS</summary>
+
+    - **Result:** PASS
+    - **Criteria:** cEOS
+    - **Exception:** None
+    - **Task:** show version
+    - **Test:** contains
+    - **Success:** True
+    - **Failed:** False
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-spine-1 (2 tests, ✅ 1 passed, ❌ 1 failed)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>check NTP status ❌ FAIL</summary>
+
+    - **Result:** FAIL
+    - **Criteria:** 1.1.1.1
+    - **Exception:** Pattern not in output
+    - **Task:** show ntp associations
+    - **Test:** contains_lines
+    - **Success:** False
+    - **Failed:** True
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    <details style="margin-left:40px;">
+    <summary>check ceos version ✅ PASS</summary>
+
+    - **Result:** PASS
+    - **Criteria:** cEOS
+    - **Exception:** None
+    - **Task:** show version
+    - **Test:** contains
+    - **Success:** True
+    - **Failed:** False
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-spine-2 (2 tests, ✅ 1 passed, ❌ 1 failed)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>check NTP status ❌ FAIL</summary>
+
+    - **Result:** FAIL
+    - **Criteria:** 1.1.1.1
+    - **Exception:** Pattern not in output
+    - **Task:** show ntp associations
+    - **Test:** contains_lines
+    - **Success:** False
+    - **Failed:** True
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    <details style="margin-left:40px;">
+    <summary>check ceos version ✅ PASS</summary>
+
+    - **Result:** PASS
+    - **Criteria:** cEOS
+    - **Exception:** None
+    - **Task:** show version
+    - **Test:** contains
+    - **Success:** True
+    - **Failed:** False
+    - **Changed:** False
+
+    - **Comments:** N/A
+
+    </details>
+
+    </details>
+
+
+    ## Device Outputs
+
+
+    Expandable sections containing outputs collected during test execution for each host.
+    <details style="margin-left:20px;">
+    <summary>ceos-leaf-1 (2 commands)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>show version</summary>
+
+    ```
+    Arista cEOSLab
+    Hardware version:
+    Serial number: CA49F479A3A974B25CEC002E92F7450D
+    Hardware MAC address: 001c.7372.ebcd
+    System MAC address: 001c.7372.ebcd
+
+    Software image version: 4.30.0F-31408673.4300F (engineering build)
+    Architecture: x86_64
+    Internal build version: 4.30.0F-31408673.4300F
+    Internal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c
+    Image format version: 1.0
+    Image optimization: None
+
+    cEOS tools version: (unknown)
+    Kernel version: 5.15.0-164-generic
+
+    Uptime: 1 hour and 32 minutes
+    Total memory: 32827152 kB
+    Free memory: 15965824 kB
+
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>show ntp associations</summary>
+
+    ```
+    NTP is disabled.
+         remote          refid      st t when  poll reach   delay   offset  jitter
+    ==============================================================================
+    ```
+
+    </details>
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-leaf-2 (2 commands)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>show version</summary>
+
+    ```
+    Arista cEOSLab
+    Hardware version:
+    Serial number: 16921D773C3C0A23581B1260734452FF
+    Hardware MAC address: 001c.7393.6e5d
+    System MAC address: 001c.7393.6e5d
+
+    Software image version: 4.30.0F-31408673.4300F (engineering build)
+    Architecture: x86_64
+    Internal build version: 4.30.0F-31408673.4300F
+    Internal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c
+    Image format version: 1.0
+    Image optimization: None
+
+    cEOS tools version: (unknown)
+    Kernel version: 5.15.0-164-generic
+
+    Uptime: 1 hour and 32 minutes
+    Total memory: 32827152 kB
+    Free memory: 15965824 kB
+
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>show ntp associations</summary>
+
+    ```
+    NTP is disabled.
+         remote          refid      st t when  poll reach   delay   offset  jitter
+    ==============================================================================
+    ```
+
+    </details>
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-leaf-3 (2 commands)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>show version</summary>
+
+    ```
+    Arista cEOSLab
+    Hardware version:
+    Serial number: D03FE1DE81A401F1AAD67A4B15E096C8
+    Hardware MAC address: 001c.73f3.053c
+    System MAC address: 001c.73f3.053c
+
+    Software image version: 4.30.0F-31408673.4300F (engineering build)
+    Architecture: x86_64
+    Internal build version: 4.30.0F-31408673.4300F
+    Internal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c
+    Image format version: 1.0
+    Image optimization: None
+
+    cEOS tools version: (unknown)
+    Kernel version: 5.15.0-164-generic
+
+    Uptime: 1 hour and 32 minutes
+    Total memory: 32827152 kB
+    Free memory: 15965824 kB
+
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>show ntp associations</summary>
+
+    ```
+    NTP is disabled.
+         remote          refid      st t when  poll reach   delay   offset  jitter
+    ==============================================================================
+    ```
+
+    </details>
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-spine-1 (2 commands)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>show version</summary>
+
+    ```
+    Arista cEOSLab
+    Hardware version:
+    Serial number: C4889628D19280228439023C4F0C3EE4
+    Hardware MAC address: 001c.73a9.7d04
+    System MAC address: 001c.73a9.7d04
+
+    Software image version: 4.30.0F-31408673.4300F (engineering build)
+    Architecture: x86_64
+    Internal build version: 4.30.0F-31408673.4300F
+    Internal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c
+    Image format version: 1.0
+    Image optimization: None
+
+    cEOS tools version: (unknown)
+    Kernel version: 5.15.0-164-generic
+
+    Uptime: 1 hour and 32 minutes
+    Total memory: 32827152 kB
+    Free memory: 15965824 kB
+
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>show ntp associations</summary>
+
+    ```
+    NTP is disabled.
+         remote          refid      st t when  poll reach   delay   offset  jitter
+    ==============================================================================
+    ```
+
+    </details>
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>ceos-spine-2 (2 commands)</summary>
+
+    <details style="margin-left:40px;">
+    <summary>show version</summary>
+
+    ```
+    Arista cEOSLab
+    Hardware version:
+    Serial number: F8B8101D77067B49C0437B3711AA1719
+    Hardware MAC address: 001c.735c.3067
+    System MAC address: 001c.735c.3067
+
+    Software image version: 4.30.0F-31408673.4300F (engineering build)
+    Architecture: x86_64
+    Internal build version: 4.30.0F-31408673.4300F
+    Internal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c
+    Image format version: 1.0
+    Image optimization: None
+
+    cEOS tools version: (unknown)
+    Kernel version: 5.15.0-164-generic
+
+    Uptime: 1 hour and 32 minutes
+    Total memory: 32827152 kB
+    Free memory: 15965824 kB
+
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>show ntp associations</summary>
+
+    ```
+    NTP is disabled.
+         remote          refid      st t when  poll reach   delay   offset  jitter
+    ==============================================================================
+    ```
+
+    </details>
+    </details>
+
+
+    ## Debug
+
+
+    This section contains detailed debugging information for troubleshooting and inspection. Includes input arguments and complete raw results data used to produce sections above.
+    <details style="margin-left:20px;">
+    <summary>Devices Inventory</summary>
+
+    <details style="margin-left:40px;">
+    <summary>ceos-leaf-1</summary>
+
+    ```json
+    {
+      "name": "ceos-leaf-1",
+      "connection_options": {
+        "scrapli_netconf": {
+          "extras": null,
+          "hostname": null,
+          "port": 8302,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "napalm": {
+          "extras": {
+            "optional_args": {
+              "transport": "https",
+              "port": 4402
+            }
+          },
+          "hostname": null,
+          "port": null,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "ncclient": {
+          "extras": null,
+          "hostname": null,
+          "port": 8302,
+          "username": null,
+          "password": null,
+          "platform": null
+        }
+      },
+      "groups": [
+        "eos_params"
+      ],
+      "data": {},
+      "hostname": "192.168.1.130",
+      "port": 2202,
+      "username": "admin",
+      "password": "admin",
+      "platform": "arista_eos"
+    }
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-leaf-2</summary>
+
+    ```json
+    {
+      "name": "ceos-leaf-2",
+      "connection_options": {
+        "scrapli_netconf": {
+          "extras": null,
+          "hostname": null,
+          "port": 8303,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "napalm": {
+          "extras": {
+            "optional_args": {
+              "transport": "https",
+              "port": 4403
+            }
+          },
+          "hostname": null,
+          "port": null,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "ncclient": {
+          "extras": null,
+          "hostname": null,
+          "port": 8303,
+          "username": null,
+          "password": null,
+          "platform": null
+        }
+      },
+      "groups": [
+        "eos_params"
+      ],
+      "data": {},
+      "hostname": "192.168.1.130",
+      "port": 2203,
+      "username": "admin",
+      "password": "admin",
+      "platform": "arista_eos"
+    }
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-leaf-3</summary>
+
+    ```json
+    {
+      "name": "ceos-leaf-3",
+      "connection_options": {
+        "scrapli_netconf": {
+          "extras": null,
+          "hostname": null,
+          "port": 8304,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "napalm": {
+          "extras": {
+            "optional_args": {
+              "transport": "https",
+              "port": 4404
+            }
+          },
+          "hostname": null,
+          "port": null,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "ncclient": {
+          "extras": null,
+          "hostname": null,
+          "port": 8304,
+          "username": null,
+          "password": null,
+          "platform": null
+        }
+      },
+      "groups": [
+        "eos_params"
+      ],
+      "data": {},
+      "hostname": "192.168.1.130",
+      "port": 2204,
+      "username": "admin",
+      "password": "admin",
+      "platform": "arista_eos"
+    }
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-spine-1</summary>
+
+    ```json
+    {
+      "name": "ceos-spine-1",
+      "connection_options": {
+        "scrapli_netconf": {
+          "extras": null,
+          "hostname": null,
+          "port": 8300,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "napalm": {
+          "extras": {
+            "optional_args": {
+              "transport": "https",
+              "port": 4400
+            }
+          },
+          "hostname": null,
+          "port": null,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "ncclient": {
+          "extras": null,
+          "hostname": null,
+          "port": 8300,
+          "username": null,
+          "password": null,
+          "platform": null
+        }
+      },
+      "groups": [
+        "eos_params"
+      ],
+      "data": {
+        "interfaces": [
+          "loopback0",
+          "ethernet1"
+        ]
+      },
+      "hostname": "192.168.1.130",
+      "port": 2200,
+      "username": "admin",
+      "password": "admin",
+      "platform": "arista_eos"
+    }
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-spine-2</summary>
+
+    ```json
+    {
+      "name": "ceos-spine-2",
+      "connection_options": {
+        "scrapli_netconf": {
+          "extras": null,
+          "hostname": null,
+          "port": 8301,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "napalm": {
+          "extras": {
+            "optional_args": {
+              "transport": "https",
+              "port": 4401
+            }
+          },
+          "hostname": null,
+          "port": null,
+          "username": null,
+          "password": null,
+          "platform": null
+        },
+        "ncclient": {
+          "extras": null,
+          "hostname": null,
+          "port": 8301,
+          "username": null,
+          "password": null,
+          "platform": null
+        }
+      },
+      "groups": [
+        "eos_params"
+      ],
+      "data": {
+        "interfaces": [
+          "ethernet1"
+        ]
+      },
+      "hostname": "192.168.1.130",
+      "port": 2201,
+      "username": "admin",
+      "password": "admin",
+      "platform": "arista_eos"
+    }
+    ```
+
+    </details>
+    </details>
+
+
+
+    <details style="margin-left:20px;">
+    <summary>Test suites definitions for each host</summary>
+
+    <details style="margin-left:40px;">
+    <summary>ceos-leaf-1 (2 tests)</summary>
+
+    ```json
+    [
+      {
+        "task": "show version",
+        "test": "contains",
+        "pattern": "cEOS",
+        "name": "check ceos version"
+      },
+      {
+        "test": "contains_lines",
+        "pattern": [
+          "1.1.1.1"
+        ],
+        "task": "show ntp associations",
+        "name": "check NTP status"
+      }
+    ]
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-leaf-2 (2 tests)</summary>
+
+    ```json
+    [
+      {
+        "task": "show version",
+        "test": "contains",
+        "pattern": "cEOS",
+        "name": "check ceos version"
+      },
+      {
+        "test": "contains_lines",
+        "pattern": [
+          "1.1.1.1"
+        ],
+        "task": "show ntp associations",
+        "name": "check NTP status"
+      }
+    ]
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-leaf-3 (2 tests)</summary>
+
+    ```json
+    [
+      {
+        "task": "show version",
+        "test": "contains",
+        "pattern": "cEOS",
+        "name": "check ceos version"
+      },
+      {
+        "test": "contains_lines",
+        "pattern": [
+          "1.1.1.1"
+        ],
+        "task": "show ntp associations",
+        "name": "check NTP status"
+      }
+    ]
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-spine-1 (2 tests)</summary>
+
+    ```json
+    [
+      {
+        "task": "show version",
+        "test": "contains",
+        "pattern": "cEOS",
+        "name": "check ceos version"
+      },
+      {
+        "test": "contains_lines",
+        "pattern": [
+          "1.1.1.1"
+        ],
+        "task": "show ntp associations",
+        "name": "check NTP status"
+      }
+    ]
+    ```
+
+    </details>
+    <details style="margin-left:40px;">
+    <summary>ceos-spine-2 (2 tests)</summary>
+
+    ```json
+    [
+      {
+        "task": "show version",
+        "test": "contains",
+        "pattern": "cEOS",
+        "name": "check ceos version"
+      },
+      {
+        "test": "contains_lines",
+        "pattern": [
+          "1.1.1.1"
+        ],
+        "task": "show ntp associations",
+        "name": "check NTP status"
+      }
+    ]
+    ```
+
+    </details>
+
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>Input Arguments (kwargs)</summary>
+
+    ```json
+    {
+      "suite": "nf://nornir_test_suites/suite_1.txt",
+      "FC": [
+        "spine",
+        "leaf"
+      ],
+      "extensive": true
+    }
+    ```
+
+    </details>
+
+    <details style="margin-left:20px;">
+    <summary>Complete Results (JSON)</summary>
+
+    ```json
+    {
+      "status": "202",
+      "results": {
+        "nornir-worker-5": {
+          "result": {
+            "test_results": [],
+            "suite": {},
+            "hosts_inventory": {}
+          },
+          "failed": false,
+          "errors": [],
+          "task": "nornir-worker-5:test",
+          "messages": [
+            "nornir-worker-5 - nothing to do, no hosts matched by filters '{'FC': ['spine', 'leaf']}'"
+          ],
+          "juuid": "4f974374692749019e5cf23e842f5922",
+          "resources": [],
+          "status": "no_match",
+          "task_started": "Fri Jan  2 18:14:10 2026",
+          "task_completed": "Fri Jan  2 18:14:10 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-4": {
+          "result": {
+            "test_results": [],
+            "suite": {},
+            "hosts_inventory": {}
+          },
+          "failed": false,
+          "errors": [],
+          "task": "nornir-worker-4:test",
+          "messages": [
+            "nornir-worker-4 - nothing to do, no hosts matched by filters '{'FC': ['spine', 'leaf']}'"
+          ],
+          "juuid": "4f974374692749019e5cf23e842f5922",
+          "resources": [],
+          "status": "no_match",
+          "task_started": "Fri Jan  2 18:14:10 2026",
+          "task_completed": "Fri Jan  2 18:14:10 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-6": {
+          "result": {
+            "test_results": [],
+            "suite": {},
+            "hosts_inventory": {}
+          },
+          "failed": false,
+          "errors": [],
+          "task": "nornir-worker-6:test",
+          "messages": [
+            "nornir-worker-6 - nothing to do, no hosts matched by filters '{'FC': ['spine', 'leaf']}'"
+          ],
+          "juuid": "4f974374692749019e5cf23e842f5922",
+          "resources": [],
+          "status": "no_match",
+          "task_started": "Fri Jan  2 18:14:10 2026",
+          "task_completed": "Fri Jan  2 18:14:10 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-2": {
+          "result": {
+            "test_results": [
+              {
+                "result": "Arista cEOSLab\nHardware version: \nSerial number: 16921D773C3C0A23581B1260734452FF\nHardware MAC address: 001c.7393.6e5d\nSystem MAC address: 001c.7393.6e5d\n\nSoftware image version: 4.30.0F-31408673.4300F (engineering build)\nArchitecture: x86_64\nInternal build version: 4.30.0F-31408673.4300F\nInternal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c\nImage format version: 1.0\nImage optimization: None\n\ncEOS tools version: (unknown)\nKernel version: 5.15.0-164-generic\n\nUptime: 1 hour and 32 minutes\nTotal memory: 32827152 kB\nFree memory: 15965824 kB\n",
+                "changed": false,
+                "diff": "",
+                "failed": false,
+                "exception": null,
+                "name": "show version",
+                "connection_retry": 0,
+                "task_retry": 0,
+                "host": "ceos-leaf-2"
+              }
+            ],
+            "suite": {},
+            "hosts_inventory": {}
+          },
+          "failed": true,
+          "errors": [],
+          "task": "nornir-worker-2:test",
+          "messages": [],
+          "juuid": "4f974374692749019e5cf23e842f5922",
+          "resources": [],
+          "status": "completed",
+          "task_started": "Fri Jan  2 18:14:10 2026",
+          "task_completed": "Fri Jan  2 18:14:11 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        },
+        "nornir-worker-1": {
+          "result": {
+            "test_results": [],
+            "suite": {},
+            "hosts_inventory": {}
+          },
+          "failed": true,
+          "errors": [],
+          "task": "nornir-worker-1:test",
+          "messages": [],
+          "juuid": "4f974374692749019e5cf23e842f5922",
+          "resources": [],
+          "status": "completed",
+          "task_started": "Fri Jan  2 18:14:10 2026",
+          "task_completed": "Fri Jan  2 18:14:11 2026",
+          "service": "nornir",
+          "diff": null,
+          "dry_run": false
+        }
+      },
+      "errors": [],
+      "workers": {
+        "requested": [
+          "nornir-worker-1",
+          "nornir-worker-4",
+          "nornir-worker-6",
+          "nornir-worker-2",
+          "nornir-worker-5"
+        ],
+        "done": "{'nornir-worker-1', 'nornir-worker-4', 'nornir-worker-6', 'nornir-worker-2', 'nornir-worker-5'}",
+        "dispatched": "{'nornir-worker-1', 'nornir-worker-4', 'nornir-worker-6', 'nornir-worker-2', 'nornir-worker-5'}",
+        "pending": "set()"
+      }
+    }
+    ```
+
+    </details>
+    ````
+
+    </details>
+
 ## Using Jinja2 Templates to Generate Tests
 
 Using Jinja2 Templates enables you to create dynamic test suites based on variables defined in your inventory or passed as job data. This approach allows you to tailor tests to specific devices or scenarios, ensuring that the tests are relevant and accurate. Jinja2 templates provide a powerful way to automate the creation of complex test cases, incorporating conditional logic, loops, and other advanced features to meet your testing requirements.

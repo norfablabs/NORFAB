@@ -1153,7 +1153,7 @@ def recv(worker, destroy_event):
         - Other: Logs an invalid input message.
     """
     while not destroy_event.is_set():
-        # Poll socket for messages every second
+        # Poll socket for messages every 1000ms
         try:
             items = worker.poller.poll(1000)
         except KeyboardInterrupt:

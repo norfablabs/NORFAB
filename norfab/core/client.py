@@ -55,7 +55,7 @@ def recv(client):
         KeyboardInterrupt: If the polling is interrupted by a keyboard interrupt.
     """
     while not client.exit_event.is_set():
-        # Poll socket for messages every 1s interval
+        # Poll socket for messages every 1000ms interval
         try:
             items = client.poller.poll(1000)
         except KeyboardInterrupt:

@@ -7,6 +7,8 @@ tags:
 
 > task api name: `get_bgp_peerings`
 
+This task integrates with [Netbox BGP Plugin](https://github.com/netbox-community/netbox-bgp) and allows to fetch devices' BGP peerings.
+
 ## How It Works
 
 - Requires NetBox BGP plugin: The worker verifies the plugin is installed on the target instance before proceeding.
