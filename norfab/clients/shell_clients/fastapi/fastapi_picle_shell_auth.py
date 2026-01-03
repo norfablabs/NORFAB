@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from picle.models import Outputters
 from pydantic import (
@@ -24,6 +25,7 @@ class CreateAuthToken(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -50,6 +52,7 @@ class ListAuthToken(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -82,6 +85,7 @@ class DeleteAuthToken(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -105,6 +109,7 @@ class CheckAuthToken(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

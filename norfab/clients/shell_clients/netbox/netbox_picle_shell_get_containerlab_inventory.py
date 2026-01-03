@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from picle.models import PipeFunctionsModel, Outputters
 from pydantic import (
@@ -117,6 +118,7 @@ class GetContainerlabInventoryCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
 

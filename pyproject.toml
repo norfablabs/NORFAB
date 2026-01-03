@@ -233,3 +233,12 @@ docs = [
     "pygments",
     "pymdown-extensions",
 ]
+
+[tool.ruff.lint]
+ignore = [
+    "E712", # true-false-comparison
+    "E722", # Do not use bare `except`
+]
+
+[tool.ruff.lint.isort]
+case-sensitive = true

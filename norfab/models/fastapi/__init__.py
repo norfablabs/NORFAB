@@ -3,3 +3,9 @@ from .fastapi_models import (
     ClientGetJobWorkers,
     ClientGetJobResponse,
 )
+
+__all__ = (
+    ClientPostJobResponse,
+    ClientGetJobWorkers,
+    ClientGetJobResponse,
+)

@@ -2,6 +2,7 @@ import logging
 import time
 import os
 import copy
+import builtins
 
 from fnmatch import fnmatchcase
 from picle.models import PipeFunctionsModel
@@ -283,7 +284,7 @@ class NornirDiagramShell(ClientRunJobArgs):
 
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
-        verbose_result = kwargs.pop("verbose_result", False)
+        _ = kwargs.pop("verbose_result", False)
         ctime = time.strftime("%Y-%m-%d_%H-%M-%S")
         FM = kwargs.pop("FM", [])
         n2g_data = {}  # to store collected from devices data
@@ -339,6 +340,7 @@ class NornirDiagramShell(ClientRunJobArgs):
                 for input_name, input_params in inputs.items():
                     cli_kwargs["commands"] = input_params["commands"]
             # collect commands output from devices
+            NFCLIENT = builtins.NFCLIENT
             job_results = NFCLIENT.run_job(
                 "nornir",
                 "cli",

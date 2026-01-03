@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from picle.models import PipeFunctionsModel, Outputters
 from enum import Enum
@@ -105,12 +106,14 @@ class ShowWatchDogModel(NorniHostsFilters):
 
     @staticmethod
     def get_watchdog_stats(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("nornir", "get_watchdog_stats", workers=workers)
         return log_error_or_result(result)
 
     @staticmethod
     def get_watchdog_configuration(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job(
             "nornir", "get_watchdog_configuration", workers=workers
@@ -119,6 +122,7 @@ class ShowWatchDogModel(NorniHostsFilters):
 
     @staticmethod
     def get_watchdog_connections(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("nornir", "get_watchdog_connections", workers=workers)
         return log_error_or_result(result)
@@ -131,6 +135,7 @@ class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -175,6 +180,7 @@ class NornirShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_version(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("nornir", "get_version", workers=workers)
         return log_error_or_result(result)
@@ -210,6 +216,7 @@ class RefreshNornirModel(ClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
@@ -220,6 +227,7 @@ class RefreshNornirModel(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")

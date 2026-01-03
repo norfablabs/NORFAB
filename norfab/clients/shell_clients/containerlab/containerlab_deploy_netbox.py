@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from rich.console import Console
 from picle.models import PipeFunctionsModel, Outputters
@@ -68,6 +69,7 @@ class DeployNetboxCommand(GetContainerlabInventoryCommand):
 
     @staticmethod
     def source_lab_name():
+        NFCLIENT = builtins.NFCLIENT
         ret = []
         result = NFCLIENT.run_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
@@ -77,6 +79,7 @@ class DeployNetboxCommand(GetContainerlabInventoryCommand):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
 

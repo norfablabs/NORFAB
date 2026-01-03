@@ -2,14 +2,13 @@ from pydantic import (
     BaseModel,
     StrictBool,
     StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
     model_validator,
     ConfigDict,
 )
 from enum import Enum
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Any, Dict
 from datetime import datetime
 from norfab.core.exceptions import NorfabJobFailedError
 

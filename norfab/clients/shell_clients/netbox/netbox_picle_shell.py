@@ -6,6 +6,7 @@ Client that implements interactive shell to work with NorFab.
 """
 
 import logging
+import builtins
 
 from rich.console import Console
 from picle.models import PipeFunctionsModel, Outputters
@@ -76,6 +77,7 @@ class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -137,6 +139,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     def get_inventory(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job("netbox", "get_inventory", workers=workers)
@@ -145,6 +148,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     def get_version(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job("netbox", "get_version", workers=workers)
@@ -153,6 +157,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     def get_netbox_status(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job(
@@ -163,6 +168,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     def get_compatibility(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         verbose_result = kwargs.pop("verbose_result", False)
         result = NFCLIENT.run_job(

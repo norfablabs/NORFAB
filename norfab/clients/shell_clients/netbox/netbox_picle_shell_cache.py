@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from picle.models import PipeFunctionsModel, Outputters
 from enum import Enum
@@ -37,6 +38,7 @@ class CacheList(NetboxClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
         )
@@ -45,6 +47,7 @@ class CacheList(NetboxClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         details = kwargs.get("details", False)
@@ -96,6 +99,7 @@ class CacheClear(NetboxClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
         )
@@ -104,6 +108,7 @@ class CacheClear(NetboxClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -134,6 +139,7 @@ class CacheGet(NetboxClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
         )
@@ -142,6 +148,7 @@ class CacheGet(NetboxClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

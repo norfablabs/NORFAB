@@ -1,3 +1,4 @@
+import builtins
 
 from typing import Union, List
 from enum import Enum
@@ -44,6 +45,7 @@ class ListJobsModel(ClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
@@ -53,6 +55,7 @@ class ListJobsModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -99,6 +102,7 @@ class JobDetailsModel(ClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
@@ -108,6 +112,7 @@ class JobDetailsModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

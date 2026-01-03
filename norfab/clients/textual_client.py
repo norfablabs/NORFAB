@@ -3,6 +3,7 @@ import logging
 from textual.app import App, ComposeResult
 from textual import on
 from textual.widgets import Header, RichLog, Footer, Input
+from textual.suggester import Suggester
 from textual.binding import Binding
 
 NFCLIENT = None

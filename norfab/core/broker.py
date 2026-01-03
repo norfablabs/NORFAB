@@ -332,7 +332,7 @@ class NFPBroker:
                     continue
 
                 sender = msg.pop(0)
-                empty = msg.pop(0)
+                empty = msg.pop(0)  # noqa
                 header = msg.pop(0)
 
                 if header == NFP.CLIENT:
@@ -516,7 +516,7 @@ class NFPBroker:
             self.delete_worker(worker, False)
         elif NFP.EVENT == command and worker.is_ready():
             client = msg.pop(0)
-            empty = msg.pop(0)
+            empty = msg.pop(0)  # noqa
             self.send_to_client(client, NFP.EVENT, worker.service.name, msg)
         elif not worker.is_ready():
             self.delete_worker(worker, disconnect=True)
@@ -764,7 +764,6 @@ class NFPBroker:
         )
         data = json.loads(data)
         task = data.get("task")
-        args = data.get("args", [])
         kwargs = data.get("kwargs", {})
         ret = f"Unsupported task '{task}'"
         if task == "show_workers":
@@ -845,7 +844,6 @@ class NFPBroker:
         )
         data = json.loads(data)
         task = data.get("task")
-        args = data.get("args", [])
         kwargs = data.get("kwargs", {})
         ret = f"Unsupported task '{task}'"
         if task == "get_inventory":

@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from picle.models import Outputters
 from pydantic import (
@@ -57,6 +58,7 @@ class SyncDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
@@ -122,6 +124,7 @@ class SyncDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
@@ -187,6 +190,7 @@ class SyncDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9

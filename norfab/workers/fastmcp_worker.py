@@ -185,7 +185,6 @@ class FastMCPWorker(NFPWorker):
 
         libs = {
             "norfab": "",
-            "mcp": "",
             "uvicorn": "",
             "pydantic": "",
             "mcp": "",

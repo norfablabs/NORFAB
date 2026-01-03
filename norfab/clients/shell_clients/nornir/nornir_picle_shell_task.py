@@ -1,4 +1,5 @@
 import json
+import builtins
 
 from pydantic import (
     StrictStr,
@@ -30,6 +31,7 @@ class NornirTaskShell(
 
     @staticmethod
     def source_plugin():
+        NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -38,6 +40,7 @@ class NornirTaskShell(
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

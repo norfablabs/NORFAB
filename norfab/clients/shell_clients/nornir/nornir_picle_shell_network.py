@@ -1,3 +1,4 @@
+import builtins
 
 from pydantic import (
     BaseModel,
@@ -66,6 +67,7 @@ class NornirNetworkPing(
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         kwargs["fun"] = "ping"
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -148,6 +150,7 @@ class NornirNetworkDns(
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         kwargs["fun"] = "resolve_dns"
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

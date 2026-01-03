@@ -92,7 +92,7 @@ class FakenosWorker(NFPWorker):
         whatch_stop_thread = threading.Thread(
             target=whatch_stop,
             args=(
-                network,
+                self.network,
                 exit_event,
             ),
         )

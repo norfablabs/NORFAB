@@ -1,4 +1,5 @@
 import json
+import builtins
 
 from enum import Enum
 from pydantic import (
@@ -63,6 +64,7 @@ class NornirTestShell(
 
     @staticmethod
     def source_suite():
+        NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -70,6 +72,7 @@ class NornirTestShell(
 
     @staticmethod
     def source_job_data():
+        NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -78,6 +81,7 @@ class NornirTestShell(
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

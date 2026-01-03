@@ -1161,7 +1161,7 @@ def recv(worker, destroy_event):
             with worker.socket_lock:
                 msg = worker.broker_socket.recv_multipart()
             log.debug(f"{worker.name} - received '{msg}'")
-            empty = msg.pop(0)
+            empty = msg.pop(0)  # noqa
             header = msg.pop(0)
             command = msg.pop(0)
 

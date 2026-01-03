@@ -1,3 +1,4 @@
+import builtins
 
 from enum import Enum
 from pydantic import (
@@ -55,6 +56,7 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -85,6 +87,7 @@ class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
 
     @staticmethod
     def source_template():
+        NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -93,6 +96,7 @@ class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

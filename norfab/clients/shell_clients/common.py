@@ -3,6 +3,7 @@ Common Pydantic Models for PICLE Client Shells
 """
 
 import logging
+import builtins
 import time
 from datetime import datetime
 import threading
@@ -97,6 +98,7 @@ def listen_events(fun):
 
     @functools.wraps(fun)
     def wrapper(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         events_thread_stop = threading.Event()
         uuid = uuid4().hex
         progress = kwargs.get("progress", True)

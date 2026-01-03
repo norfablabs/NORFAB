@@ -1,3 +1,4 @@
+import builtins
 
 from pydantic import (
     StrictBool,
@@ -27,6 +28,7 @@ class WorkflowRunShell(ClientRunJobArgs):
 
     @staticmethod
     def source_workflow():
+        NFCLIENT = builtins.NFCLIENT
         workflow_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -35,6 +37,7 @@ class WorkflowRunShell(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

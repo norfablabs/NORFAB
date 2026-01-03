@@ -626,7 +626,7 @@ class NetboxWorker(NFPWorker):
         """
         ret = Result(task=f"{self.name}:cache_clear", result=[])
         # check if has keys to clear
-        if key == keys == None:
+        if key == keys == None: # noqa
             ret.result = "Noting to clear, specify key or keys"
             return ret
         # remove specific key from cache
@@ -2542,7 +2542,7 @@ class NetboxWorker(NFPWorker):
 
                 if interfaces_to_create and not dry_run:
                     try:
-                        created_interfaces = nb.dcim.interfaces.create(
+                        _ = nb.dcim.interfaces.create(
                             interfaces_to_create
                         )
                         job.event(
@@ -2960,7 +2960,7 @@ class NetboxWorker(NFPWorker):
         if isinstance(prefix, str):
             # try converting prefix to network, if fails prefix is not an IP network
             try:
-                network = ipaddress.ip_network(prefix)
+                _ = ipaddress.ip_network(prefix)
                 is_network = True
             except:
                 is_network = False
@@ -3205,7 +3205,6 @@ class NetboxWorker(NFPWorker):
         ret = Result(
             task=f"{self.name}:create_ip_bulk", result={}, resources=[instance]
         )
-        processed = {}
 
         # get list of all interfaces
         interfaces = self.get_interfaces(
@@ -3894,8 +3893,6 @@ class NetboxWorker(NFPWorker):
             - Ethernet[1-3] -> ['Ethernet1', 'Ethernet2', 'Ethernet3']
             - [ge,xe]-0/0/[0-9] -> ['ge-0/0/0', 'ge-0/0/1', ..., 'xe-0/0/9']
         """
-        expanded_names = []
-
         # Find all bracketed patterns
         bracket_pattern = r"\[([^\]]+)\]"
         matches = list(re.finditer(bracket_pattern, range_pattern))

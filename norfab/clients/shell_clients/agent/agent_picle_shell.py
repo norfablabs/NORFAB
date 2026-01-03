@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from rich.console import Console
 from picle.models import PipeFunctionsModel, Outputters
@@ -48,6 +49,7 @@ class AgentShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_inventory(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("agent", "get_inventory", workers=workers)
         result = log_error_or_result(result)
@@ -55,6 +57,7 @@ class AgentShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_version(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("agent", "get_version", workers=workers)
         result = log_error_or_result(result)
@@ -62,6 +65,7 @@ class AgentShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_status(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         result = NFCLIENT.run_job("agent", "get_status", workers=workers, kwargs=kwargs)
         result = log_error_or_result(result)
@@ -88,6 +92,7 @@ class AgentInvoke(ClientRunJobArgs):
 
     @staticmethod
     def source_name():
+        NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -96,6 +101,7 @@ class AgentInvoke(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.get("verbose_result", False)

@@ -1,5 +1,6 @@
 import logging
 import json
+import builtins
 
 from picle.models import Outputters
 from pydantic import (
@@ -36,6 +37,7 @@ class GetDevices(NetboxCommonArgs, NetboxClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

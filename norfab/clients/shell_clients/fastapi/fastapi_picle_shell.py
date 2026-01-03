@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from picle.models import PipeFunctionsModel, Outputters
 from pydantic import (
@@ -32,6 +33,7 @@ class FastAPIShowOpenAPISchema(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -53,6 +55,7 @@ class FastAPIShowInventoryModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -91,6 +94,7 @@ class FastAPIShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_version(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("fastapi", "get_version", workers=workers)
         return log_error_or_result(result)

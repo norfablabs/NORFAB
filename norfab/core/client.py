@@ -186,12 +186,6 @@ class NFPClient(object):
         self.poller = zmq.Poller()
         self.reconnect_to_broker()
 
-        # create queue file
-        self.queue_filename = os.path.join(self.jobs_dir, f"{self.name}.jobsqueue.txt")
-        if not os.path.exists(self.queue_filename):
-            with open(self.queue_filename, "w") as f:
-                pass
-
         self.exit_event = threading.Event() if exit_event is None else exit_event
         self.destroy_event = (
             threading.Event()

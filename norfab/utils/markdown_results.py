@@ -125,7 +125,6 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     Convert Nornir test task results to markdown format.
     """
     results = data.get("results", {})
-    errors = data.get("errors", [])
 
     # Unified hosts test results dictionary structure:
     # {

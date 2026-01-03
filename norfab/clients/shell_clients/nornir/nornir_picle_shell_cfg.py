@@ -1,4 +1,5 @@
 import json
+import builtins
 
 from pydantic import (
     BaseModel,
@@ -239,6 +240,7 @@ class NornirCfgShell(
 
     @staticmethod
     def source_config():
+        NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -246,6 +248,7 @@ class NornirCfgShell(
 
     @staticmethod
     def source_job_data():
+        NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.get(
             "fss.service.broker", "walk", kwargs={"url": "nf://"}
         )
@@ -254,6 +257,7 @@ class NornirCfgShell(
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)

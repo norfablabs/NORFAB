@@ -1,4 +1,5 @@
 import json
+import builtins
 
 from enum import Enum
 from pydantic import (
@@ -47,6 +48,7 @@ class CreateHostModel(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "create_host"
@@ -121,6 +123,7 @@ class UpdateHostModel(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "update_host"
@@ -160,6 +163,7 @@ class DeleteHostModel(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "delete_host"
@@ -199,6 +203,7 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "read_host_data"
@@ -265,6 +270,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
@@ -274,6 +280,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
 
     @staticmethod
     def source_lab_name():
+        NFCLIENT = builtins.NFCLIENT
         ret = []
         result = NFCLIENT.run_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
@@ -282,6 +289,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
 
     @staticmethod
     def source_clab_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "containerlab"}
         )
@@ -292,6 +300,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")

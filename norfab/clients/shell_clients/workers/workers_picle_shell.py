@@ -1,4 +1,5 @@
 import logging
+import builtins
 
 from picle.models import PipeFunctionsModel, Outputters
 from enum import Enum
@@ -36,6 +37,7 @@ class ShowWorkersModel(BaseModel):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", args=args, kwargs=kwargs
         )
@@ -71,6 +73,7 @@ class WorkersPingCommand(ClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "all"}
         )
@@ -81,6 +84,7 @@ class WorkersPingCommand(ClientRunJobArgs):
     @staticmethod
     @listen_events
     def run(uuid, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         service = kwargs.pop("service", "all")
         timeout = kwargs.pop("timeout", 600)

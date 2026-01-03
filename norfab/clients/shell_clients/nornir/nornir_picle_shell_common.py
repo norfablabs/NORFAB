@@ -1,4 +1,5 @@
 import json
+import builtins
 
 from enum import Enum
 from pydantic import (
@@ -264,6 +265,7 @@ class NorniHostsFilters(BaseModel):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
@@ -272,6 +274,7 @@ class NorniHostsFilters(BaseModel):
 
     @staticmethod
     def source_hosts():
+        NFCLIENT = builtins.NFCLIENT
         ret = set()
         result = NFCLIENT.run_job("nornir", "get_nornir_hosts")
         result = log_error_or_result(result)
@@ -287,6 +290,7 @@ class NorniHostsFilters(BaseModel):
 
     @staticmethod
     def get_nornir_hosts(**kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")

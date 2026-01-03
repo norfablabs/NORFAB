@@ -1,3 +1,4 @@
+import builtins
 
 from pydantic import (
     StrictStr,
@@ -34,6 +35,7 @@ class ListJobsModel(ClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get("mmi.service.broker", "show_workers")
         workers = [i["name"] for i in reply["results"]]
 
@@ -41,6 +43,7 @@ class ListJobsModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -89,6 +92,7 @@ class JobDetailsModel(ClientRunJobArgs):
 
     @staticmethod
     def source_workers():
+        NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.get("mmi.service.broker", "show_workers")
         workers = [i["name"] for i in reply["results"]]
 
@@ -96,6 +100,7 @@ class JobDetailsModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
