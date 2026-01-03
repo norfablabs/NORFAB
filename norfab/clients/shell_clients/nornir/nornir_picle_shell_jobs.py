@@ -88,11 +88,6 @@ class JobDetailsModel(ClientRunJobArgs):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Workers to return jobs for"
     )
-    data: StrictBool = Field(
-        True,
-        description="Return job data received from client",
-        json_schema_extra={"presence": True},
-    )
     result: StrictBool = Field(
         True, description="Return job result", json_schema_extra={"presence": True}
     )

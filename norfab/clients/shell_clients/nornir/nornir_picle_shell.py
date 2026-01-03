@@ -24,6 +24,7 @@ from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
 from .nornir_picle_shell_jobs import NornirJobsShell
 from .nornir_picle_shell_inventory import NornirInventoryShell
+from .nornir_picle_shell_netconf import NornirNetconfShell
 from typing import Union, Optional, List, Any
 from nornir_salt.plugins.functions import TabulateFormatter
 
@@ -37,7 +38,9 @@ log = logging.getLogger(__name__)
 
 class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel, ClientRunJobArgs):
     details: Optional[StrictBool] = Field(
-        None, description="show hosts details", json_schema_extra={"presence": True},
+        None,
+        description="show hosts details",
+        json_schema_extra={"presence": True},
     )
 
     class PicleConfig:
@@ -271,6 +274,9 @@ class NornirServiceCommands(BaseModel):
         None, description="Work with Nornir inventory"
     )
     refresh: RefreshNornirModel = Field(None, description="Refresh inventory")
+    netconf: NornirNetconfShell = Field(
+        None, description="Manage devices using NETCONF"
+    )
 
     class PicleConfig:
         subshell = True

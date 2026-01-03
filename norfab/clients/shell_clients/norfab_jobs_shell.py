@@ -12,9 +12,7 @@ from picle.models import Outputters
 
 
 class ListJobsModel(ClientRunJobArgs):
-    service: StrictStr = Field(
-        ..., description="Service name to return jobs for"
-    )
+    service: StrictStr = Field(..., description="Service name to return jobs for")
     workers: StrictStr = Field("all", description="Workers to return jobs for")
     last: StrictInt = Field(
         None, description="Return last N completed and last N pending jobs"

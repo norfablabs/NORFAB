@@ -14,6 +14,12 @@ hosts:
     connection_options:
       scrapli_netconf:
         port: 8300
+        extras:
+          ssh_config_file: True
+          auth_strict_key: False
+          transport: paramiko
+          transport_options:
+            netconf_force_pty: False
       napalm:
         extras:
           optional_args:
@@ -21,7 +27,10 @@ hosts:
             port: 4400
       ncclient:
         port: 8300
-        
+        extras:
+          allow_agent: False
+          hostkey_verify: False
+
   ceos-spine-2:
     hostname: 192.168.1.130
     platform: arista_eos
@@ -36,6 +45,12 @@ hosts:
     connection_options:
       scrapli_netconf:
         port: 8301
+        extras:
+          ssh_config_file: True
+          auth_strict_key: False
+          transport: paramiko
+          transport_options:
+            netconf_force_pty: False
       napalm:
         extras:
           optional_args:
@@ -43,6 +58,9 @@ hosts:
             port: 4401
       ncclient:
         port: 8301
+        extras:
+          allow_agent: False
+          hostkey_verify: False
         
 groups: {}
 defaults: {}

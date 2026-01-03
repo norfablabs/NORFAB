@@ -626,7 +626,7 @@ class NetboxWorker(NFPWorker):
         """
         ret = Result(task=f"{self.name}:cache_clear", result=[])
         # check if has keys to clear
-        if key == keys == None: # noqa
+        if key == keys == None:  # noqa
             ret.result = "Noting to clear, specify key or keys"
             return ret
         # remove specific key from cache
@@ -2542,9 +2542,7 @@ class NetboxWorker(NFPWorker):
 
                 if interfaces_to_create and not dry_run:
                     try:
-                        _ = nb.dcim.interfaces.create(
-                            interfaces_to_create
-                        )
+                        _ = nb.dcim.interfaces.create(interfaces_to_create)
                         job.event(
                             f"Bulk created {len(interfaces_to_create)} interfaces"
                         )

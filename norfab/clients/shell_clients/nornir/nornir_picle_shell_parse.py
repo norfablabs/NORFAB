@@ -49,9 +49,7 @@ class NapalmGettersEnum(str, Enum):
 
 
 class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
-    getters: NapalmGettersEnum = Field(
-        ..., description="Select NAPALM getters"
-    )
+    getters: NapalmGettersEnum = Field(..., description="Select NAPALM getters")
 
     @staticmethod
     @listen_events

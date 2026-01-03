@@ -91,7 +91,9 @@ def create_api_endpoint(
     return endpoint
 
 
-def make_openapi_schema(app, regenerate: bool = False, json_refs: Optional[dict] = None) -> Dict:
+def make_openapi_schema(
+    app, regenerate: bool = False, json_refs: Optional[dict] = None
+) -> Dict:
     """
     Generates and returns the OpenAPI schema for a FastAPI application.
 

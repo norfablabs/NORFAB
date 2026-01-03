@@ -300,7 +300,9 @@ class NFPClient(object):
             self.broker_socket.send_multipart(msg)
             self.stats_send_to_broker += 1
 
-    def rcv_from_broker(self, command: bytes, service: bytes, uuid: bytes) -> Tuple[Any, Any]:
+    def rcv_from_broker(
+        self, command: bytes, service: bytes, uuid: bytes
+    ) -> Tuple[Any, Any]:
         """
         Wait for a response from the broker for a given command, service, and uuid.
 

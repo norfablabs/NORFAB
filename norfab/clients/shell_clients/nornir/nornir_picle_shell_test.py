@@ -28,9 +28,7 @@ class EnumTableTypes(str, Enum):
 class NornirTestShell(
     NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
 ):
-    suite: StrictStr = Field(
-        ..., description="Nornir suite nf://path/to/file.py"
-    )
+    suite: StrictStr = Field(..., description="Nornir suite nf://path/to/file.py")
     dry_run: Optional[StrictBool] = Field(
         None,
         description="Return produced per-host tests suite content without running tests",

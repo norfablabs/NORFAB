@@ -18,9 +18,7 @@ class CreateAuthToken(ClientRunJobArgs):
     token: StrictStr = Field(
         None, description="Token string to store, autogenerate if not given"
     )
-    username: StrictStr = Field(
-        ..., description="Name of the user to store token for"
-    )
+    username: StrictStr = Field(..., description="Name of the user to store token for")
     expire: StrictInt = Field(None, description="Seconds before token expire")
 
     @staticmethod
