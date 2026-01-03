@@ -1,6 +1,5 @@
 import logging
 import zmq
-import sys
 import time
 import json
 import os
@@ -11,10 +10,9 @@ from uuid import uuid4  # random uuid
 
 from .security import generate_certificates
 from . import NFP
-from .zhelpers import dump
 from norfab.core.inventory import NorFabInventory
 from norfab.utils.markdown_results import markdown_results
-from typing import Union, List, Callable, Any, Dict, Optional, Tuple, Iterator
+from typing import Any, Optional, Tuple, Iterator
 
 log = logging.getLogger(__name__)
 

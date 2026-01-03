@@ -3,7 +3,7 @@ import pytest
 import random
 import pynetbox
 
-from netbox_data import NB_URL, NB_API_TOKEN
+from .netbox_data import NB_URL, NB_API_TOKEN
 
 cache_options = [True, False, "refresh", "force"]
 

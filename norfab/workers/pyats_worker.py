@@ -6,10 +6,8 @@ TBD
 
 """
 
-import json
 import logging
-import sys
-from norfab.core.worker import NFPWorker, Task
+from norfab.core.worker import NFPWorker
 
 SERVICE = "pyats"
 

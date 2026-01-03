@@ -1,6 +1,4 @@
-import json
 
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
 from pydantic import (
     StrictStr,
     Field,
@@ -9,13 +7,12 @@ from pydantic import (
     StrictBool,
 )
 from .common import ClientRunJobArgs, log_error_or_result
-from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters
 
 
 class ListJobsModel(ClientRunJobArgs):
     service: StrictStr = Field(
-        ..., description="Service name to return jobs for", mandatory=True
+        ..., description="Service name to return jobs for"
     )
     workers: StrictStr = Field("all", description="Workers to return jobs for")
     last: StrictInt = Field(
@@ -69,9 +66,9 @@ class ListJobsModel(ClientRunJobArgs):
 
 
 class JobDetailsModel(ClientRunJobArgs):
-    uuid: StrictStr = Field(..., description="Job UUID", mandatory=True)
+    uuid: StrictStr = Field(..., description="Job UUID")
     service: StrictStr = Field(
-        ..., description="Service name to return job details for", mandatory=True
+        ..., description="Service name to return job details for"
     )
     workers: StrictStr = Field("all", description="Workers to return jobs for")
     data: StrictBool = Field(

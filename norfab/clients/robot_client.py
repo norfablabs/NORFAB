@@ -4,7 +4,7 @@ import yaml
 
 from norfab.core.nfapi import NorFab
 from robot.api.deco import keyword
-from robot.api import ContinuableFailure, FatalError, Error
+from robot.api import ContinuableFailure
 from robot.api import logger
 from nornir_salt.plugins.functions import TabulateFormatter
 
@@ -41,7 +41,7 @@ class NorFabRobot:
         pass
 
     def end_suite(self, data, result):
-        print(f"NorFab ROBOT - Exiting")
+        print("NorFab ROBOT - Exiting")
         self.nf.destroy()
 
     @keyword("Workers")

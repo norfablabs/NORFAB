@@ -14,12 +14,11 @@ from pydantic import (
     BaseModel,
     StrictBool,
     StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
 )
 from enum import Enum
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List
 from rich.console import Console
 
 log = logging.getLogger(__name__)
@@ -35,7 +34,7 @@ def listen_events_thread(uuid, stop, NFCLIENT):
     start_time = time.time()
     time_fmt = "%d-%b-%Y %H:%M:%S.%f"
     richconsole.print(
-        f"-" * 45 + " Job Events " + "-" * 47 + "\n"
+        "-" * 45 + " Job Events " + "-" * 47 + "\n"
         f"{datetime.now().strftime(time_fmt)[:-3]} {uuid} job started"
     )
     while not (stop.is_set() or NFCLIENT.exit_event.is_set()):
@@ -86,7 +85,7 @@ def listen_events_thread(uuid, stop, NFCLIENT):
     elapsed = round(time.time() - start_time, 3)
     richconsole.print(
         f"{datetime.now().strftime(time_fmt)[:-3]} {uuid} job completed in {elapsed} seconds\n\n"
-        + f"-" * 45
+        + "-" * 45
         + " Job Results "
         + "-" * 44
         + "\n"
@@ -154,7 +153,7 @@ def log_error_or_result(
     ret = {}
 
     if data is None:
-        log.error(f"Result data is empty.")
+        log.error("Result data is empty.")
         return
     if not isinstance(data, dict):
         log.error(f"Data is not a dictionary but '{type(data)}'")

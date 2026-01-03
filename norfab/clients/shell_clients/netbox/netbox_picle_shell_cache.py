@@ -1,21 +1,14 @@
 import logging
-import json
-import yaml
 
 from picle.models import PipeFunctionsModel, Outputters
 from enum import Enum
 from pydantic import (
     BaseModel,
-    StrictBool,
-    StrictInt,
-    StrictFloat,
     StrictStr,
-    conlist,
     Field,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events, BoolEnum
-from ..nornir.nornir_picle_shell import NornirCommonArgs, NorniHostsFilters
+from typing import Union, List
+from ..common import log_error_or_result, BoolEnum
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)

@@ -524,7 +524,7 @@ class NetboxWorker(NFPWorker):
         ):
             try:
                 nb_branch = nb.plugins.branching.branches.get(name=branch)
-            except Exception as e:
+            except Exception:
                 msg = "Failed to retrieve branch '{branch}' from Netbox"
                 raise RuntimeError(msg)
 
@@ -784,7 +784,7 @@ class NetboxWorker(NFPWorker):
         )
         try:
             req.raise_for_status()
-        except Exception as e:
+        except Exception:
             raise Exception(
                 f"{self.name} -  Netbox GraphQL query failed, query '{query}', "
                 f"URL '{req.url}', status-code '{req.status_code}', reason '{req.reason}', "

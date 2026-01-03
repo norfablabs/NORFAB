@@ -7,12 +7,12 @@ import signal
 import importlib.metadata
 
 from fnmatch import fnmatch
-from norfab.core.worker import NFPWorker, Task, Job
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
 from diskcache import FanoutCache
 from mcp.server.fastmcp import FastMCP
 from mcp import types
-from typing import Any, Dict, List
+from typing import Any
 
 SERVICE = "fastmcp"
 

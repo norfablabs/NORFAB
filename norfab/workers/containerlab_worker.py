@@ -15,7 +15,7 @@ from norfab.core.inventory import merge_recursively
 from norfab.models.containerlab import DeployTask, DeployTaskResponse
 from norfab.models import Result
 from norfab.utils.platform_map import PlatformMap
-from typing import Union, List, Dict, Any, Annotated, Optional, Tuple
+from typing import Union, Tuple
 
 SERVICE = "containerlab"
 
@@ -76,7 +76,7 @@ class ContainerlabWorker(NFPWorker):
                     break
             else:
                 raise RuntimeError(
-                    f"Containerlab worker failed to get containerlab version"
+                    "Containerlab worker failed to get containerlab version"
                 )
         else:
             raise RuntimeError(
@@ -269,7 +269,7 @@ class ContainerlabWorker(NFPWorker):
                 ret.messages = ["\n".join(logs)]
                 try:
                     ret.result = json.loads(output)
-                except Exception as e:
+                except Exception:
                     # if failed, remove any beginning lines that are not part of json
                     try:
                         line_split = output.splitlines()
@@ -773,14 +773,14 @@ class ContainerlabWorker(NFPWorker):
             lab_name = tenant
 
         # inspect existing containers
-        job.event(f"Checking existing containers")
+        job.event("Checking existing containers")
         get_containers = self.inspect(job=job, details=True)
         if get_containers.failed is True:
             get_containers.task = f"{self.name}:deploy_netbox"
             return get_containers
 
         # collect TCP/UDP ports and subnets in use
-        job.event(f"Existing containers found, retrieving details")
+        job.event("Existing containers found, retrieving details")
         for lname, containers in get_containers.result.items():
             for container in containers:
                 clab_name = container["Labels"]["containerlab"]
@@ -830,7 +830,7 @@ class ContainerlabWorker(NFPWorker):
                     job.event(msg)
                     ipv4_subnet = None
 
-        job.event(f"Collected TCP/UDP ports used by existing containers")
+        job.event("Collected TCP/UDP ports used by existing containers")
 
         # allocate new subnet
         if ipv4_subnet is None:

@@ -2,10 +2,7 @@ import json
 
 from enum import Enum
 from pydantic import (
-    BaseModel,
     StrictBool,
-    StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
 )
@@ -16,7 +13,7 @@ from .nornir_picle_shell_common import (
     NornirCommonArgs,
     print_nornir_results,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, Dict
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import PipeFunctionsModel, Outputters
 
@@ -31,7 +28,7 @@ class NornirTestShell(
     NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
 ):
     suite: StrictStr = Field(
-        ..., description="Nornir suite nf://path/to/file.py", required=True
+        ..., description="Nornir suite nf://path/to/file.py"
     )
     dry_run: Optional[StrictBool] = Field(
         None,

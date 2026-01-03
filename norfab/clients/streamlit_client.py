@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 
 from norfab.core.nfapi import NorFab

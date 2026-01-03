@@ -1,10 +1,8 @@
-import json
 
 from pydantic import (
     BaseModel,
     StrictBool,
     StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
 )
@@ -15,7 +13,7 @@ from .nornir_picle_shell_common import (
     NornirCommonArgs,
     print_nornir_results,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, List
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import PipeFunctionsModel
 

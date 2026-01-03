@@ -9,7 +9,7 @@ import os
 import hashlib
 import ipaddress
 
-from typing import Union, Dict, List, Optional, Any, Tuple
+from typing import Union, Dict, Any, Tuple
 from norfab.models import Result
 from norfab.core.worker import NFPWorker, WorkerWatchDog, Task, Job
 from norfab.core.inventory import merge_recursively
@@ -463,7 +463,7 @@ class NornirWorker(NFPWorker):
             )
             job.event("Pulled Nornir inventory data from Containerlab")
 
-        job.event(f"Pulled inventories, refreshing Nornir instance")
+        job.event("Pulled inventories, refreshing Nornir instance")
 
         self.init_nornir(self.nornir_worker_inventory)
 
@@ -541,7 +541,7 @@ class NornirWorker(NFPWorker):
             log.error(msg)
             raise RuntimeError(msg)
 
-        job.event(f"Pulled Nornir inventory from Netbox")
+        job.event("Pulled Nornir inventory from Netbox")
 
         return ret
 

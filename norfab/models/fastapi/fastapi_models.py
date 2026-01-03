@@ -1,33 +1,28 @@
 from pydantic import (
     BaseModel,
-    StrictBool,
-    StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
-    model_validator,
 )
-from enum import Enum
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import List, Dict
 from norfab.models import Result
 
 
 class ClientPostJobResponse(BaseModel):
-    errors: List[StrictStr] = Field(..., mandatory=True)
-    status: StrictStr = Field(..., mandatory=True)
-    uuid: StrictStr = Field(..., mandatory=True)
-    workers: List[StrictStr] = Field(..., mandatory=True)
+    errors: List[StrictStr] = Field(...)
+    status: StrictStr = Field(...)
+    uuid: StrictStr = Field(...)
+    workers: List[StrictStr] = Field(...)
 
 
 class ClientGetJobWorkers(BaseModel):
-    dispatched: List[StrictStr] = Field(..., mandatory=True)
-    done: List[StrictStr] = Field(..., mandatory=True)
-    pending: List[StrictStr] = Field(..., mandatory=True)
-    requested: StrictStr = Field(..., mandatory=True)
+    dispatched: List[StrictStr] = Field(...)
+    done: List[StrictStr] = Field(...)
+    pending: List[StrictStr] = Field(...)
+    requested: StrictStr = Field(...)
 
 
 class ClientGetJobResponse(BaseModel):
-    errors: List[StrictStr] = Field(..., mandatory=True)
-    status: StrictStr = Field(..., mandatory=True)
-    workers: ClientGetJobWorkers = Field(..., mandatory=True)
-    results: Dict[StrictStr, Result] = Field(..., mandatory=True)
+    errors: List[StrictStr] = Field(...)
+    status: StrictStr = Field(...)
+    workers: ClientGetJobWorkers = Field(...)
+    results: Dict[StrictStr, Result] = Field(...)

@@ -15,7 +15,7 @@ from .nornir_picle_shell_common import (
     NornirCommonArgs,
     print_nornir_results,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import PipeFunctionsModel
 
@@ -259,10 +259,9 @@ class NornirCliShell(
     NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
 ):
     commands: Union[StrictStr, List[StrictStr]] = Field(
-        None,
+        ...,
         description="List of commands to collect form devices",
         json_schema_extra={"multiline": True},
-        required=True,
     )
     plugin: NrCliPlugins = Field(None, description="Connection plugin parameters")
     dry_run: Optional[StrictBool] = Field(

@@ -11,11 +11,9 @@ import signal
 import importlib.metadata
 
 from zmq.auth.thread import ThreadAuthenticator
-from binascii import hexlify
 from multiprocessing import Event
 from typing import Union, Any, List, Optional
 from . import NFP
-from .zhelpers import dump
 from .inventory import NorFabInventory, logging_config_producer
 from .keepalives import KeepAliver
 from .security import generate_certificates
@@ -24,7 +22,7 @@ log = logging.getLogger(__name__)
 
 try:
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-except Exception as e:
+except Exception:
     pass
 
 # ----------------------------------------------------------------------
@@ -362,7 +360,7 @@ class NFPBroker:
         1. Logs an interrupt message indicating that the broker is being killed.
         2. Iterates through all
         """
-        log.info(f"NFPBroker - interrupt received, killing broker")
+        log.info("NFPBroker - interrupt received, killing broker")
         for name in list(self.workers.keys()):
             # in case worker self destroyed while we iterating
             if self.workers.get(name):

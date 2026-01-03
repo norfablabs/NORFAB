@@ -4,14 +4,11 @@ from pydantic import (
     BaseModel,
     StrictBool,
     StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
-    model_validator,
 )
 from enum import Enum
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
-from norfab.models import Result
+from typing import Union, Optional, List
 from .. import NorFabClientRunJob
 
 

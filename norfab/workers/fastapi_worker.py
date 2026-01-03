@@ -16,8 +16,8 @@ from norfab.models.fastapi import (
 from typing import Union, List, Dict, Any, Annotated, Optional
 from diskcache import FanoutCache
 from pydantic import BaseModel
-from datetime import datetime, timedelta
-from fastapi import Depends, FastAPI, Header, HTTPException, Body, Request
+from datetime import datetime
+from fastapi import Depends, FastAPI, HTTPException, Body, Request
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.openapi.utils import get_openapi
 from starlette import status

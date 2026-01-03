@@ -1,22 +1,17 @@
-import json
 
 from enum import Enum
 from pydantic import (
     BaseModel,
-    StrictBool,
-    StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
 )
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    TabulateTableModel,
     NornirCommonArgs,
     print_nornir_results,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, List
 from picle.models import PipeFunctionsModel
 
 
@@ -54,7 +49,7 @@ class NapalmGettersEnum(str, Enum):
 
 class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     getters: NapalmGettersEnum = Field(
-        ..., description="Select NAPALM getters", required=True
+        ..., description="Select NAPALM getters"
     )
 
     @staticmethod
@@ -82,7 +77,7 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
 
 class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     template: StrictStr = Field(
-        ..., description="TTP Template to parse commands output", required=True
+        ..., description="TTP Template to parse commands output"
     )
     commands: Union[List[StrictStr], StrictStr] = Field(
         None, description="Commands to collect form devices"

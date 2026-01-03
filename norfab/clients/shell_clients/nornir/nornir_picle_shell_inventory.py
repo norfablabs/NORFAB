@@ -9,7 +9,7 @@ from pydantic import (
     Field,
 )
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Dict
 from picle.models import Outputters, PipeFunctionsModel
 from .nornir_picle_shell_common import NorniHostsFilters
 
@@ -18,7 +18,7 @@ class CreateHostModel(ClientRunJobArgs):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "any", description="Nornir workers to target"
     )
-    name: StrictStr = Field(..., description="Name of the host", required=True)
+    name: StrictStr = Field(..., description="Name of the host")
     username: StrictInt = Field(None, description="Host connections username")
     password: StrictInt = Field(None, description="Host connections password")
     platform: StrictInt = Field(
@@ -85,7 +85,7 @@ class UpdateHostModel(ClientRunJobArgs):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Nornir workers to target"
     )
-    name: StrictStr = Field(..., description="Name of the host", required=True)
+    name: StrictStr = Field(..., description="Name of the host")
     username: StrictInt = Field(None, description="Host connections username")
     password: StrictInt = Field(None, description="Host connections password")
     platform: StrictInt = Field(
@@ -150,7 +150,7 @@ class DeleteHostModel(ClientRunJobArgs):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Nornir workers to target"
     )
-    name: StrictStr = Field(..., description="Name of the host", required=True)
+    name: StrictStr = Field(..., description="Name of the host")
     progress: Optional[StrictBool] = Field(
         True,
         description="Display progress events",

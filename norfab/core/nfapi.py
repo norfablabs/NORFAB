@@ -3,7 +3,6 @@ import logging.config
 import time
 import os
 import signal
-import sys
 
 from typing import Union
 from multiprocessing import Process, Event, Queue
@@ -173,7 +172,7 @@ class NorFab:
         # when trying to use nfapi to instantiate a client from different process
         try:
             signal.signal(signal.SIGINT, self.handle_ctrl_c)
-        except Exception as e:
+        except Exception:
             pass
 
         # find all workers plugins
@@ -512,7 +511,7 @@ class NorFab:
         """
         if not self.broker and not self.workers_processes:
             log.critical(
-                f"NorFab detected no broker or worker processes running, exiting.."
+                "NorFab detected no broker or worker processes running, exiting.."
             )
             return
 

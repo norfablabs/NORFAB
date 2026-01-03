@@ -6,7 +6,6 @@ import traceback
 import threading
 import queue
 import os
-import pickle
 import psutil
 import signal
 import concurrent.futures
@@ -33,7 +32,7 @@ from pydantic import BaseModel, create_model
 
 try:
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-except Exception as e:
+except Exception:
     pass
 
 log = logging.getLogger(__name__)
@@ -397,10 +396,10 @@ class JobDatabase:
             # Verify JSON1 extension is available
             try:
                 self._local.conn.execute("SELECT json('{}')").fetchone()
-                log.debug(f"SQLite JSON1 extension is available")
+                log.debug("SQLite JSON1 extension is available")
             except sqlite3.OperationalError:
                 log.warning(
-                    f"SQLite JSON1 extension not available - JSON queries will be limited"
+                    "SQLite JSON1 extension not available - JSON queries will be limited"
                 )
         return self._local.conn
 

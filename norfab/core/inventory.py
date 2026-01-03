@@ -78,7 +78,7 @@ import copy
 import sys
 
 from jinja2 import Environment
-from typing import Any, Union, Dict, List
+from typing import Any, Dict, List
 
 log = logging.getLogger(__name__)
 
@@ -245,7 +245,7 @@ def make_hooks(base_dir: str, hooks: List) -> Dict[str, List]:
                 hook["function"] = getattr(hook_module, hook_function_name)
                 ret[attachpoint].append(hook)
                 log.info(f"Successfully loaded hook function {hook['function']}")
-            except Exception as e:
+            except Exception:
                 log.exception(f"Failed loading hook {hook}")
 
     return ret
@@ -312,7 +312,7 @@ def make_plugin(base_dir: str, plugins: Dict, service: str) -> Dict:
             log.info(
                 f"Successfully loaded worker plugin {plugin_class_name} for service {service}"
             )
-        except Exception as e:
+        except Exception:
             log.exception(f"Failed loading worker plugin '{service_data['worker']}'")
     # import nfcli pydantic model
     if service_data.get("nfcli"):
@@ -328,7 +328,7 @@ def make_plugin(base_dir: str, plugins: Dict, service: str) -> Dict:
             log.info(
                 f"Successfully loaded nfcli pydantic model plugin class {plugin_class_name} for service {service}"
             )
-        except Exception as e:
+        except Exception:
             log.exception(
                 f"Failed loading nfcli pydantic model plugin class '{service_data['nfcli']}'"
             )

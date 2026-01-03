@@ -1,11 +1,8 @@
-import json
 
-from typing import Optional
 from enum import Enum
 from pydantic import (
     BaseModel,
     StrictBool,
-    StrictInt,
     StrictFloat,
     StrictStr,
     Field,
@@ -75,7 +72,7 @@ class NornirFileCopyShell(
     NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
 ):
     source_file: StrictStr = Field(
-        ..., description="Source file to copy", mandatory=True, alias="source-file"
+        ..., description="Source file to copy", alias="source-file"
     )
     plugin: NrFileCopyPlugins = Field(None, description="Connection plugin parameters")
     dry_run: StrictBool = Field(

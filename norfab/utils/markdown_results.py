@@ -288,8 +288,8 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
             if host_suite:
                 if not hosts_test_suites_html:
                     hosts_test_suites_html += (
-                        f'\n<details style="margin-left:20px;">\n'
-                        f"<summary>Test suites definitions for each host</summary>\n\n"
+                        '\n<details style="margin-left:20px;">\n'
+                        "<summary>Test suites definitions for each host</summary>\n\n"
                     )
                 suite_json = json.dumps(host_suite, indent=2)
                 hosts_test_suites_html += (
@@ -303,8 +303,8 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
             if host_inventory:
                 if not devices_inventory_html:
                     devices_inventory_html += (
-                        f'<details style="margin-left:20px;">\n'
-                        f"<summary>Devices Inventory</summary>\n\n"
+                        '<details style="margin-left:20px;">\n'
+                        "<summary>Devices Inventory</summary>\n\n"
                     )
                 inventory_json = json.dumps(host_inventory, indent=2, default=str)
                 devices_inventory_html += (

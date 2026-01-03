@@ -3,7 +3,6 @@ import os
 import logging
 import subprocess
 import sys
-import shutil
 
 from norfab.core.nfapi import NorFab
 
@@ -62,10 +61,10 @@ def nfcli():
     """
     argparser = argparse.ArgumentParser(
         description=(
-            f"Norfab PICLE Shell Tool"
-            f"\n\n"
-            f"Sample Usage:\n"
-            f"  nfcli -i ./norfab_lab/inventory.yaml"
+            "Norfab PICLE Shell Tool"
+            "\n\n"
+            "Sample Usage:\n"
+            "  nfcli -i ./norfab_lab/inventory.yaml"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -212,7 +211,7 @@ def nfcli():
         with open(os.path.join(CREATE_ENV, "nornir", "nornir-worker-1.yaml"), "w") as f:
             f.write(nornir_service_base_inventory_worker)
         return (
-            (f"\nDone, run 'nfcli' to start NorFab\n")
+            ("\nDone, run 'nfcli' to start NorFab\n")
             if CREATE_ENV == "."
             else (f"\nDone, 'cd {CREATE_ENV}' and run 'nfcli' to start NorFab\n")
         )

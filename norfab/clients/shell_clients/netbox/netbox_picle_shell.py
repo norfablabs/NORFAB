@@ -6,23 +6,16 @@ Client that implements interactive shell to work with NorFab.
 """
 
 import logging
-import json
-import yaml
 
 from rich.console import Console
 from picle.models import PipeFunctionsModel, Outputters
-from enum import Enum
 from pydantic import (
     BaseModel,
     StrictBool,
-    StrictInt,
-    StrictFloat,
     StrictStr,
-    conlist,
-    root_validator,
     Field,
 )
-from typing import Union, Optional, List, Any, Dict, Tuple
+from typing import Optional, Any
 from ..common import log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_get_devices import GetDevices

@@ -5,8 +5,6 @@ from enum import Enum
 from pydantic import (
     BaseModel,
     StrictBool,
-    StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
 )
@@ -14,8 +12,6 @@ from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
-    NornirCommonArgs,
-    print_nornir_results,
 )
 from .nornir_picle_shell_cli import NornirCliShell
 from .nornir_picle_shell_cfg import NornirCfgShell
@@ -27,7 +23,7 @@ from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
 from .nornir_picle_shell_jobs import NornirJobsShell
 from .nornir_picle_shell_inventory import NornirInventoryShell
-from typing import Union, Optional, List, Any, Dict, Tuple
+from typing import Union, Optional, List, Any
 from nornir_salt.plugins.functions import TabulateFormatter
 
 SERVICE = "nornir"
@@ -40,7 +36,7 @@ log = logging.getLogger(__name__)
 
 class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel, ClientRunJobArgs):
     details: Optional[StrictBool] = Field(
-        None, description="show hosts details", presence=True
+        None, description="show hosts details", json_schema_extra={"presence": True},
     )
 
     class PicleConfig:

@@ -1,7 +1,5 @@
-import json
-import pprint
 
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, List
 from enum import Enum
 from pydantic import (
     StrictStr,
@@ -11,7 +9,6 @@ from pydantic import (
     StrictBool,
 )
 from ..common import ClientRunJobArgs, log_error_or_result
-from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters
 from picle.models import PipeFunctionsModel
 
@@ -84,7 +81,7 @@ class ListJobsModel(ClientRunJobArgs):
 
 
 class JobDetailsModel(ClientRunJobArgs):
-    uuid: StrictStr = Field(..., description="Job UUID", mandatory=True)
+    uuid: StrictStr = Field(..., description="Job UUID")
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Workers to return jobs for"
     )

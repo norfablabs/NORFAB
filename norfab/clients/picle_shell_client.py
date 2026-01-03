@@ -6,28 +6,20 @@ Client that implements interactive shell to work with NorFab.
 """
 
 import logging
-import json
-import yaml
 import builtins
 import importlib.metadata
 import sys
 
 from rich.console import Console
-from rich.table import Table
-from rich.pretty import pprint as rich_pprint
 from picle import App
 from picle.models import PipeFunctionsModel, Outputters
-from enum import Enum
 from pydantic import (
     BaseModel,
     StrictBool,
-    StrictInt,
-    StrictFloat,
     StrictStr,
-    conlist,
     Field,
 )
-from typing import Union, Optional, List, Any, Dict, Tuple
+from typing import Optional, Any
 from norfab.core.nfapi import NorFab
 
 from .shell_clients.nornir import nornir_picle_shell
@@ -41,7 +33,7 @@ from .shell_clients.workers.workers_picle_shell import (
     ShowWorkersModel,
     NorfabWorkersCommands,
 )
-from .shell_clients.common import ClientRunJobArgs, log_error_or_result, listen_events
+from .shell_clients.common import listen_events
 from .shell_clients.fastmcp import fastmcp_picle_shell
 
 NFCLIENT = None

@@ -5,13 +5,11 @@ from pydantic import (
     BaseModel,
     StrictBool,
     StrictInt,
-    StrictFloat,
     StrictStr,
-    model_validator,
     Field,
 )
 from ..common import log_error_or_result
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List, Dict
 from rich.console import Console
 
 RICHCONSOLE = Console()
@@ -197,7 +195,7 @@ class TabulateTableModel(BaseModel):
     table: Union[EnumTableTypes, Dict, StrictBool] = Field(
         None,
         description="Table format (brief, terse, extend) or parameters or True",
-        presence="brief",
+        json_schema_extra={"presence": "brief"},
     )
     headers: Union[StrictStr, List[StrictStr]] = Field(
         None, description="Table headers"

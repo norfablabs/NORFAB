@@ -6,20 +6,12 @@ from ..netbox.netbox_picle_shell_get_containerlab_inventory import (
     NetboxDeviceFilters,
     GetContainerlabInventoryCommand,
 )
-from enum import Enum
 from pydantic import (
-    BaseModel,
     StrictBool,
-    StrictInt,
-    StrictFloat,
-    StrictStr,
-    conlist,
-    root_validator,
     Field,
-    model_validator,
 )
-from typing import Union, Optional, List, Any, Dict, Tuple
-from ..common import log_error_or_result, ClientRunJobArgs, listen_events
+from typing import Optional
+from ..common import log_error_or_result, listen_events
 
 RICHCONSOLE = Console()
 SERVICE = "containerlab"

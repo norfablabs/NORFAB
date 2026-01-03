@@ -14,7 +14,7 @@ from .nornir_picle_shell_common import (
     NornirCommonArgs,
     print_nornir_results,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
+from typing import Union, Optional, List
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import PipeFunctionsModel
 
@@ -229,7 +229,6 @@ class NornirCfgShell(
         ...,
         description="List of configuration commands to send to devices",
         json_schema_extra={"multiline": True},
-        required=True,
     )
     plugin: NrCfgPlugins = Field(None, description="Configuration plugin parameters")
     job_data: Optional[StrictStr] = Field(

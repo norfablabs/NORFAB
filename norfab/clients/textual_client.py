@@ -1,11 +1,9 @@
 import logging
 
 from textual.app import App, ComposeResult
-from textual import events, on
-from textual.suggester import SuggestFromList
-from textual.widgets import Button, Header, Label, Digits, RichLog, Footer, Input
+from textual import on
+from textual.widgets import Header, RichLog, Footer, Input
 from textual.binding import Binding
-from norfab.core.nfapi import NorFab
 
 NFCLIENT = None
 log = logging.getLogger(__name__)

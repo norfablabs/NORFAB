@@ -37,16 +37,16 @@ class EventStatusValues(str, Enum):
 
 
 class NorFabEvent(BaseModel):
-    message: StrictStr = Field(..., mandatory=True)
-    client_address: StrictStr = Field(..., mandatory=True)
-    juuid: StrictStr = Field(..., mandatory=True)
-    task: StrictStr = Field(..., mandatory=True)
-    status: EventStatusValues = Field(EventStatusValues.running, mandatory=False)
-    resource: Union[StrictStr, List[StrictStr]] = Field([], mandatory=False)
-    severity: EventSeverityLevels = Field(EventSeverityLevels.info, mandatory=False)
-    timestamp: Union[StrictStr] = Field(None, mandatory=False)
-    extras: Dict = Field({}, mandatory=False)
-    timeout: StrictInt = Field(None, mandatory=False)
+    message: StrictStr = Field(...)
+    client_address: StrictStr = Field(...)
+    juuid: StrictStr = Field(...)
+    task: StrictStr = Field(...)
+    status: EventStatusValues = Field(default=EventStatusValues.running)
+    resource: Union[StrictStr, List[StrictStr]] = Field(default=[])
+    severity: EventSeverityLevels = Field(default=EventSeverityLevels.info)
+    timestamp: Union[StrictStr] = Field(None)
+    extras: Dict = Field(None)
+    timeout: StrictInt = Field(None)
 
     @model_validator(mode="after")
     def add_defaults(self):

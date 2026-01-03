@@ -1,17 +1,14 @@
-import json
 import yaml
 import logging
 import sys
 import importlib.metadata
-from norfab.core.worker import NFPWorker, Task, Job
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
-from typing import Any, Dict, List, Union
-from pydantic import BaseModel, Field
+from typing import Any, List, Callable
+from pydantic import Field
 from pydantic import create_model as create_pydantic_model
 
 from langchain.agents import create_agent
-from langchain.agents.middleware import wrap_tool_call
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain_ollama import ChatOllama
 from langchain.tools import tool as langchain_tool
@@ -135,7 +132,7 @@ class AgentWorker(NFPWorker):
             )
 
             job.event(f"'{tool_name}' tool call completed")
-            job.event(f"Agent processing tool cal result...")
+            job.event("Agent processing tool cal result...")
 
             return ret
 

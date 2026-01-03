@@ -1,30 +1,23 @@
 import logging
-import json
 import time
 import os
 import copy
 
 from fnmatch import fnmatchcase
-from picle.models import PipeFunctionsModel, Outputters
+from picle.models import PipeFunctionsModel
 from enum import Enum
 from pydantic import (
-    BaseModel,
     StrictBool,
     StrictInt,
-    StrictFloat,
     StrictStr,
     Field,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
+from ..common import ClientRunJobArgs, listen_events
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    TabulateTableModel,
     NornirCommonArgs,
-    print_nornir_results,
 )
-from typing import Union, Optional, List, Any, Dict, Callable, Tuple
-from nornir_salt.plugins.functions import TabulateFormatter
-from picle.models import PipeFunctionsModel
+from typing import Union, List
 
 try:
     import N2G
@@ -286,7 +279,7 @@ class NornirDiagramShell(ClientRunJobArgs):
     @listen_events
     def run(uuid, *args, **kwargs):
         if not (HAS_N2G and HAS_TTP):
-            return f"Failed importing N2G and TTP modules, are they installed?"
+            return "Failed importing N2G and TTP modules, are they installed?"
 
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
