@@ -1,4 +1,7 @@
 import logging
+import sqlite3
+import base64
+import zlib
 import zmq
 import time
 import json
@@ -6,13 +9,14 @@ import os
 import threading
 import queue
 import hashlib
+from contextlib import contextmanager
 from uuid import uuid4  # random uuid
 
 from .security import generate_certificates
 from . import NFP
 from norfab.core.inventory import NorFabInventory
 from norfab.utils.markdown_results import markdown_results
-from typing import Any, Optional, Tuple, Iterator
+from typing import Any, Optional, Tuple, Iterator, Dict, List, Set, Union
 
 log = logging.getLogger(__name__)
 
@@ -21,20 +25,274 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------------------------
 
 
-def event_filename(suuid: str, events_dir: str) -> str:
-    """
-    Returns a freshly allocated event filename for the given UUID string.
+class ClientJobDatabase:
+    """Lightweight client-side job and events store."""
 
-    Args:
-        suuid (str): The UUID string for which to generate the event filename.
-                     If the input is a bytes object, it will be decoded to a string.
-        events_dir (str): The directory where the event file will be stored.
+    def __init__(self, db_path: str, jobs_compress: bool = True):
+        self.db_path = db_path
+        self.jobs_compress = jobs_compress
+        self._local = threading.local()
+        self._lock = threading.Lock()
+        self._initialize_database()
 
-    Returns:
-        str: The full path to the event file, with the filename in the format '{suuid}.json'.
-    """
-    suuid = suuid.decode("utf-8") if isinstance(suuid, bytes) else suuid
-    return os.path.join(events_dir, f"{suuid}.json")
+    def _get_connection(self) -> sqlite3.Connection:
+        if not hasattr(self._local, "conn"):
+            self._local.conn = sqlite3.connect(
+                self.db_path, check_same_thread=False, timeout=30.0
+            )
+            self._local.conn.row_factory = sqlite3.Row
+            self._local.conn.execute("PRAGMA journal_mode=WAL")
+            self._local.conn.execute("PRAGMA synchronous=NORMAL")
+        return self._local.conn
+
+    @contextmanager
+    def _transaction(self, write: bool = False):
+        conn = self._get_connection()
+        if write:
+            with self._lock:
+                try:
+                    yield conn
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
+                    raise
+        else:
+            yield conn
+
+    def _compress(self, data: Dict | List | Any) -> str:
+        if not self.jobs_compress:
+            return json.dumps(data)
+        raw = json.dumps(data).encode("utf-8")
+        return base64.b64encode(zlib.compress(raw)).decode("utf-8")
+
+    def _decompress(self, payload: str) -> Any:
+        if payload is None:
+            return None
+        if not self.jobs_compress:
+            return json.loads(payload)
+        raw = base64.b64decode(payload.encode("utf-8"))
+        return json.loads(zlib.decompress(raw).decode("utf-8"))
+
+    def _initialize_database(self) -> None:
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS jobs (
+                    uuid TEXT PRIMARY KEY,
+                    service TEXT NOT NULL,
+                    task TEXT NOT NULL,
+                    args TEXT,
+                    kwargs TEXT,
+                    timeout INTEGER,
+                    retry INTEGER DEFAULT 0,
+                    status TEXT DEFAULT 'NEW',
+                    workers_requested TEXT,
+                    workers_dispatched TEXT,
+                    workers_started TEXT,
+                    workers_completed TEXT,
+                    result_data TEXT,
+                    errors TEXT,
+                    received_timestamp TEXT NOT NULL,
+                    started_timestamp TEXT,
+                    completed_timestamp TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_uuid TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    severity TEXT DEFAULT 'INFO',
+                    task TEXT,
+                    event_data TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (job_uuid) REFERENCES jobs(uuid) ON DELETE CASCADE
+                )
+                """
+            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_jobs_created ON jobs(created_at)"
+            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_service ON jobs(service)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_events_job_uuid ON events(job_uuid)"
+            )
+
+    def add_job(
+        self,
+        uuid: str,
+        service: str,
+        task: str,
+        workers: Any,
+        args: list,
+        kwargs: dict,
+        timeout: int,
+        retry: int = 0,
+    ) -> None:
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                INSERT INTO jobs (uuid, service, task, args, kwargs, timeout,
+                                  retry, status, workers_requested, received_timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'NEW', ?, ?)
+                """,
+                (
+                    uuid,
+                    service,
+                    task,
+                    self._compress({"args": args or []}),
+                    self._compress({"kwargs": kwargs or {}}),
+                    timeout,
+                    retry,
+                    json.dumps(workers),
+                    time.ctime(),
+                ),
+            )
+
+    def update_job(
+        self,
+        uuid: str,
+        *,
+        status: str | None = None,
+        workers_dispatched: Set[str] | None = None,
+        workers_started: Set[str] | None = None,
+        workers_completed: Set[str] | None = None,
+        result_data: dict | None = None,
+        errors: List[str] | None = None,
+        started_ts: str | None = None,
+        completed_ts: str | None = None,
+        retry: int | None = None,
+    ) -> None:
+        fields = []
+        values: List[Any] = []
+
+        def _store_set(label: str, value: Set[str] | None):
+            if value is None:
+                return
+            fields.append(f"{label} = ?")
+            values.append(json.dumps(sorted(value)))
+
+        if status:
+            fields.append("status = ?")
+            values.append(status)
+        _store_set("workers_dispatched", workers_dispatched)
+        _store_set("workers_started", workers_started)
+        _store_set("workers_completed", workers_completed)
+        if result_data is not None:
+            fields.append("result_data = ?")
+            values.append(self._compress(result_data))
+        if errors is not None:
+            fields.append("errors = ?")
+            values.append(json.dumps(errors))
+        if started_ts:
+            fields.append("started_timestamp = ?")
+            values.append(started_ts)
+        if completed_ts:
+            fields.append("completed_timestamp = ?")
+            values.append(completed_ts)
+        if retry is not None:
+            fields.append("retry = ?")
+            values.append(retry)
+
+        if not fields:
+            return
+
+        fields.append("created_at = created_at")  # keeps SQL valid when join lists
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                f"UPDATE jobs SET {', '.join(fields)} WHERE uuid = ?",
+                (*values, uuid),
+            )
+
+    def fetch_jobs(self, statuses: List[str], limit: int = 10) -> List[dict]:
+        placeholders = ",".join(["?"] * len(statuses))
+        with self._transaction(write=False) as conn:
+            cur = conn.execute(
+                f"""
+                  SELECT uuid, service, task, args, kwargs, workers_requested, timeout, retry,
+                      workers_dispatched, workers_started, workers_completed, status
+                FROM jobs
+                WHERE status IN ({placeholders})
+                ORDER BY created_at ASC
+                LIMIT ?
+                """,
+                (*statuses, limit),
+            )
+            rows = cur.fetchall()
+        return [self._hydrate(row) for row in rows]
+
+    def get_job(self, uuid: str) -> dict | None:
+        with self._transaction(write=False) as conn:
+            cur = conn.execute(
+                """
+                  SELECT uuid, service, task, args, kwargs, timeout, retry, status,
+                       workers_requested, workers_dispatched, workers_started,
+                       workers_completed, result_data, errors
+                FROM jobs WHERE uuid = ?
+                """,
+                (uuid,),
+            )
+            row = cur.fetchone()
+        return self._hydrate(row) if row else None
+
+    def _hydrate(self, row: sqlite3.Row) -> dict:
+        if row is None:
+            return None
+        data = dict(row)
+        data["args"] = self._decompress(data.get("args")) or {"args": []}
+        data["kwargs"] = self._decompress(data.get("kwargs")) or {"kwargs": {}}
+        data["args"] = data["args"].get("args", [])
+        data["kwargs"] = data["kwargs"].get("kwargs", {})
+        for field in [
+            "workers_requested",
+            "workers_dispatched",
+            "workers_started",
+            "workers_completed",
+        ]:
+            if data.get(field):
+                data[field] = json.loads(data[field])
+            else:
+                data[field] = []
+        if data.get("result_data"):
+            data["result_data"] = self._decompress(data["result_data"])
+        if data.get("errors"):
+            data["errors"] = json.loads(data["errors"])
+        else:
+            data["errors"] = []
+        data["retry"] = data.get("retry", 0) or 0
+        return data
+
+    def add_event(
+        self,
+        job_uuid: str,
+        message: str,
+        severity: str = "INFO",
+        task: str | None = None,
+        event_data: dict | None = None,
+    ) -> None:
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                INSERT INTO events (job_uuid, message, severity, task, event_data)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    job_uuid,
+                    message,
+                    severity,
+                    task,
+                    self._compress(json.dumps(event_data or {})),
+                ),
+            )
+
+    def close(self) -> None:
+        if hasattr(self._local, "conn"):
+            self._local.conn.close()
+            delattr(self._local, "conn")
 
 
 def recv(client):
@@ -65,8 +323,44 @@ def recv(client):
                 msg = client.broker_socket.recv_multipart()
             log.debug(f"{client.name} - received '{msg}'")
             if msg[2] == NFP.EVENT:
+                # sample event message:
+                # [
+                #   b'',
+                #   b'NFPC01',
+                #   b'0x08',
+                #   b'nornir',
+                #   b'd5433e88c6a0460fa695e2981aa593f6',
+                #   b'200',
+                #   b'{
+                #       "worker": "nornir-worker-1",
+                #       "service": "nornir",
+                #       "uuid": "d5433e88c6a0460fa695e2981aa593f6",
+                #       "message": "Task completed",
+                #       "task": "cli.netmiko_send_commands",
+                #       "status": "completed",
+                #       "resource": ["ceos-spine-1", "ceos-spine-2"],
+                #       "severity": "INFO",
+                #       "timestamp": "04-Jan-2026 10:00:06.512",
+                #       "extras": {}
+                #   }'
+                # ]
                 client.event_queue.put(msg)
                 client.stats_recv_event_from_broker += 1
+                try:
+                    payload = msg[-1]
+                    event = json.loads(payload.decode("utf-8"))
+                    juuid = event.get("uuid")
+                    client.job_db.add_event(
+                        job_uuid=juuid,
+                        message=event["message"],
+                        severity=event["severity"],
+                        task=event["task"],
+                        event_data=event,
+                    )
+                except Exception:
+                    log.error(
+                        f"{client.name} - failed to store event '{msg}'", exc_info=True
+                    )
             else:
                 client.recv_queue.put(msg)
                 client.stats_recv_from_broker += 1
@@ -153,8 +447,6 @@ class NFPClient(object):
         self.base_dir = os.path.join(
             self.inventory.base_dir, "__norfab__", "files", "client", self.name
         )
-        self.jobs_dir = os.path.join(self.base_dir, "jobs")
-        self.events_dir = os.path.join(self.base_dir, "events")
         self.running_job = None
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.socket_lock = threading.Lock()  # used to protect socket object
@@ -162,8 +454,11 @@ class NFPClient(object):
 
         # create base directories
         os.makedirs(self.base_dir, exist_ok=True)
-        os.makedirs(self.jobs_dir, exist_ok=True)
-        os.makedirs(self.events_dir, exist_ok=True)
+
+        self.job_db = ClientJobDatabase(
+            os.path.join(self.base_dir, f"{self.name}.db"),
+            jobs_compress=True,
+        )
 
         # generate certificates and create directories
         if self.zmq_auth is not False:
@@ -198,6 +493,14 @@ class NFPClient(object):
             target=recv, daemon=True, name=f"{self.name}_recv_thread", args=(self,)
         )
         self.recv_thread.start()
+
+        # start run-to-completion thread
+        self.job_runner_thread = threading.Thread(
+            target=self._run_jobs_to_completion,
+            daemon=True,
+            name=f"{self.name}_job_runner",
+        )
+        self.job_runner_thread.start()
 
     def ensure_bytes(self, value: Any) -> bytes:
         """
@@ -441,10 +744,9 @@ class NFPClient(object):
         # get a list of workers where job was dispatched to
         post_response = json.loads(post_response)
 
-        if "workers" not in post_response:
-            raise RuntimeError(
-                f"{self.name} - '{uuid}' job, POST response missing 'workers' {post_response}"
-            )
+        assert (
+            "workers" in post_response
+        ), f"{self.name} - '{uuid}' job, POST response missing 'workers' {post_response}"
 
         workers_dispatched = set(post_response["workers"])
         log.debug(
@@ -496,7 +798,7 @@ class NFPClient(object):
         task: str = None,
         args: list = None,
         kwargs: dict = None,
-        workers: str = "all",
+        workers: Union[str, list] = "all",
         uuid: hex = None,
         timeout: int = 600,
     ) -> dict:
@@ -546,12 +848,12 @@ class NFPClient(object):
             # dispatch GET request to workers
             self.send_to_broker(NFP.GET, service, workers, uuid, request)
             status, get_response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-            ret["status"] = status
+            # ret["status"] = status
             # received actual GET request results from broker e.g. MMI, SID or FSS services
             if status == b"200":
                 ret["results"] = json.loads(get_response.decode("utf-8"))
                 break
-            # received DISPATCH response from broker
+            # received non DISPATCH response from broker
             if status != b"202":
                 msg = f"{status}, {self.name} job '{uuid}' GET Request not accepted by broker '{get_response}'"
                 log.error(msg)
@@ -570,7 +872,7 @@ class NFPClient(object):
                 log.debug(
                     f"{self.name} - job '{uuid}' response from worker '{response}'"
                 )
-                response = json.loads(response)
+                response = json.loads(response)  # dictionary keyed by worker name
                 if status == b"200":  # OK
                     ret["results"].update(response)
                     log.debug(
@@ -584,8 +886,6 @@ class NFPClient(object):
                     if wkrs["done"] == wkrs["dispatched"]:
                         break
                 elif status == b"300":  # PENDING
-                    # set status to pending if at least one worker is pending
-                    ret["status"] = b"300"
                     wkrs["pending"].add(response["worker"])
                     workers_responded.add(response["worker"])
                 else:
@@ -606,108 +906,184 @@ class NFPClient(object):
             msg = f"{self.name} - '{uuid}' job, broker {timeout}s GET request timeout expired"
             log.info(msg)
             ret["errors"].append(msg)
-            ret["status"] = b"408"
+            # set status to pending if at least one worker is pending
+            if wkrs["pending"]:
+                ret["status"] = b"300"  # PENDING
+            else:
+                ret["status"] = b"408"  # TIMEOUT
 
-        ret["status"] = ret["status"].decode("utf-8")
+        if ret["status"] == b"408":
+            ret["status"] = "408"
+        # set status to pending if at least one worker is pending
+        elif wkrs["pending"]:
+            ret["status"] = "300"
+        else:
+            ret["status"] = ret["status"].decode("utf-8")
 
         return ret
 
-    def get_iter(
-        self,
-        service: str,
-        task: str,
-        args: list = None,
-        kwargs: dict = None,
-        workers: str = "all",
-        uuid: hex = None,
-        timeout: int = 600,
-    ) -> dict:
-        """
-        Send job reply message to broker requesting job results.
-
-        Args:
-            service (str): The service name.
-            task (str): The task name.
-            args (list, optional): The list of arguments for the task. Defaults to None.
-            kwargs (dict, optional): The dictionary of keyword arguments for the task. Defaults to None.
-            workers (str, optional): The workers to dispatch the task to. Defaults to "all".
-            uuid (hex, optional): The unique identifier for the job. Defaults to None.
-            timeout (int, optional): The timeout duration in seconds. Defaults to 600.
-
-        Yields:
-            dict: The response from the worker containing the results of the task.
-
-        Raises:
-            Exception: If the job request is not accepted by the broker or if there is an unexpected response status.
-
-        Notes:
-            - The method sends a GET request to the broker and waits for responses from the workers.
-            - If the timeout is reached or an exit event is set, the method stops waiting for responses.
-            - The method logs errors and debug information during the process.
-        """
-        uuid = uuid or uuid4().hex
-        args = args or []
-        kwargs = kwargs or {}
-
-        service = self.ensure_bytes(service)
-        uuid = self.ensure_bytes(uuid)
-        workers = self.ensure_bytes(workers)
-
-        request = self.ensure_bytes(
-            {"task": task, "kwargs": kwargs or {}, "args": args or []}
-        )
-
-        # run GET response loop
-        start_time = time.time()
-        workers_done = set()
-        while timeout > time.time() - start_time:
-            # check if need to stop
-            if self.exit_event.is_set() or self.destroy_event.is_set():
-                break
-            # dispatch GET request to workers
-            self.send_to_broker(NFP.GET, service, workers, uuid, request)
-            status, get_response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-            # received DISPATCH response from broker
-            if status != b"202":
-                msg = f"{status}, {self.name} job '{uuid}' GET Request not accepted by broker '{get_response}'"
-                log.error(msg)
-                break
-            get_response = json.loads(get_response)
-            workers_dispatched = set(get_response["workers"])
-            # collect GET responses from workers
-            workers_responded = set()
-            while timeout > time.time() - start_time:
-                # check if need to stop
-                if self.exit_event.is_set() or self.destroy_event.is_set():
-                    break
-                status, response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-                log.debug(
-                    f"{self.name} - job '{uuid}' response from worker '{response}'"
+    def _process_new_jobs(self):
+        for job in self.job_db.fetch_jobs(["NEW"], limit=5):
+            deadline = job.get("timeout")
+            now = time.time()
+            if deadline and now >= deadline:
+                self.job_db.update_job(
+                    job["uuid"],
+                    status="FAILED",
+                    errors=["POST timeout reached"],
+                    completed_ts=time.ctime(),
                 )
-                response = json.loads(response)
-                if status == b"200":  # OK
-                    log.debug(
-                        f"{self.name} - job '{uuid}' results returned by worker '{response}'"
+                continue
+            per_call_timeout = job["timeout"]
+            if deadline and isinstance(deadline, (int, float)):
+                remaining = max(1, int(deadline - now))
+                per_call_timeout = remaining
+            try:
+                post_result = self.post(
+                    job["service"],
+                    job["task"],
+                    job["args"],
+                    job["kwargs"],
+                    job["workers_requested"],
+                    job["uuid"],
+                    per_call_timeout,
+                )
+                if post_result.get("status") == "200":
+                    workers_dispatched = post_result["workers"]
+                    self.job_db.update_job(
+                        job["uuid"],
+                        status="DISPATCHED",
+                        workers_dispatched=list(workers_dispatched),
+                        started_ts=time.ctime(),
                     )
-                    yield response
-                    for w in response.keys():
-                        workers_done.add(w)
-                        workers_responded.add(w)
-                    if workers_done == workers_dispatched:
-                        break
-                elif status == b"300":  # PENDING
-                    workers_responded.add(response["worker"])
                 else:
-                    msg = f"{self.name} - unexpected GET Response status '{status}', response '{response}'"
+                    self.job_db.update_job(
+                        job["uuid"],
+                        status="FAILED",
+                        errors=post_result.get("errors", []),
+                        completed_ts=time.ctime(),
+                    )
+            except Exception as exc:  # keep loop resilient
+                msg = f"Failed to process new job: {str(exc)}"
+                log.error(msg, exc_info=True)
+                self.job_db.update_job(
+                    job["uuid"],
+                    status="FAILED",
+                    errors=[msg],
+                    completed_ts=time.ctime(),
+                )
+
+    def _process_active_jobs(self):
+        active_statuses = ["DISPATCHED", "SUBMITTED", "STARTED"]
+        for job in self.job_db.fetch_jobs(active_statuses, limit=10):
+            retries_left = int(job.get("retry", 0) or 0)
+            deadline = job["timeout"]
+            now = time.time()
+            if now >= deadline:
+                self.job_db.update_job(
+                    job["uuid"],
+                    status="FAILED",
+                    errors=["GET timeout reached"],
+                    completed_ts=time.ctime(),
+                    retry=retries_left,
+                )
+                continue
+
+            remaining = max(1, int(deadline - now))
+            per_call_timeout = remaining / retries_left
+
+            try:
+                get_resp = self.get(
+                    job["service"],
+                    job["task"],
+                    job["args"],
+                    job["kwargs"],
+                    job["workers_dispatched"],
+                    job["uuid"],
+                    timeout=per_call_timeout,
+                )
+            except Exception as exc:
+                retries_left -= 1
+                update_status = "FAILED" if retries_left <= 0 else job["status"]
+                msg = (
+                    f"Job GET error, retries left {retries_left}, exception: {str(exc)}"
+                )
+                log.error(msg, exc_info=True)
+                self.job_db.update_job(
+                    job["uuid"],
+                    status=update_status,
+                    errors=[msg],
+                    completed_ts=time.ctime() if update_status == "FAILED" else None,
+                    retry=retries_left,
+                )
+                continue
+
+            status = get_resp["status"]
+            workers_info = get_resp["workers"]
+            dispatched = set(job["workers_dispatched"])
+            started = set(job["workers_started"]) or set()
+            completed = set(job["workers_completed"]) or set()
+
+            if status == "300":  # JOB PENDING or STARTED
+                retries_left -= 1
+                started |= set(workers_info.get("pending", []))
+                now = time.time()
+                timed_out = deadline and now >= deadline
+                exhausted = retries_left <= 0
+                if timed_out or exhausted:
+                    msg = (
+                        "Job GET timeout reached"
+                        if timed_out
+                        else "Job GET retries exhausted"
+                    )
                     log.error(msg)
-                if workers_responded == workers_dispatched:
-                    break
-            if workers_done == workers_dispatched:
-                break
-            time.sleep(0.2)
-        else:
-            msg = f"408, {self.name} job '{uuid}' broker GET Request Timeout"
+                    self.job_db.update_job(
+                        job["uuid"],
+                        status="FAILED",
+                        errors=[msg],
+                        workers_started=list(started),
+                        completed_ts=time.ctime(),
+                        retry=retries_left,
+                    )
+                    continue
+                self.job_db.update_job(
+                    job["uuid"],
+                    status="STARTED",
+                    workers_started=list(started),
+                    retry=retries_left,
+                )
+                continue
+
+            if status == "200":  # JOB COMPLETED
+                completed |= set(workers_info.get("done", []))
+                started |= completed
+                is_complete = completed == dispatched
+                self.job_db.update_job(
+                    job["uuid"],
+                    status="COMPLETED" if is_complete else "STARTED",
+                    workers_started=list(started),
+                    workers_completed=list(completed),
+                    result_data=get_resp["results"],
+                    completed_ts=time.ctime() if is_complete else None,
+                    retry=retries_left,
+                )
+                continue
+
+            msg = f"Job GET error, unexpected status {status}, errors: {get_resp['errors']}"
             log.error(msg)
+            self.job_db.update_job(
+                job["uuid"],
+                status="FAILED",
+                errors=get_resp.get("errors", []),
+                completed_ts=time.ctime(),
+                retry=retries_left,
+            )
+
+    def _run_jobs_to_completion(self):
+        while not self.exit_event.is_set() and not self.destroy_event.is_set():
+            self._process_new_jobs()
+            self._process_active_jobs()
+            time.sleep(0.2)
 
     def fetch_file(
         self,
@@ -844,7 +1220,7 @@ class NFPClient(object):
         uuid: str = None,
         args: list = None,
         kwargs: dict = None,
-        workers: str = "all",
+        workers: Union[str, list] = "all",
         timeout: int = 600,
         retry: int = 10,
         markdown: bool = False,
@@ -869,116 +1245,26 @@ class NFPClient(object):
         Raises:
             Exception: If the POST request to start the job fails or if an unexpected status is returned during the GET request.
         """
-        self.running_job = True
         uuid = uuid or uuid4().hex
-        start_time = int(time.time())
-        ret = None
-        post_retry = max(1, int(retry))
-        get_retry = max(1, int(retry))
+        args = args or []
+        kwargs = kwargs or {}
+        deadline = int(time.time() + timeout)
+        result = None
 
-        # POST job to workers
-        while post_retry:
-            post_result = self.post(service, task, args, kwargs, workers, uuid, timeout)
-            if post_result["status"] == "200":
-                break
-            else:
-                log.warning(
-                    f"{self.name}:run_job - {service}:{task} POST status "
-                    f"to '{workers}' workers is '{post_result['status']}', "
-                    f"errors: {'; '.join(post_result['errors'])}; Retrying "
-                    f"{retry + 1 - post_retry} / {retry}"
-                )
-                time.sleep(3)
-            post_retry -= 1
-        else:
-            log.error(
-                f"{self.name}:run_job - {service}:{task} POST status "
-                f"to '{workers}' workers is not 200 - '{post_result}'"
-            )
-            self.running_job = False
-            return ret
+        self.job_db.add_job(uuid, service, task, workers, args, kwargs, deadline, retry)
 
-        remaining_timeout = timeout - (time.time() - start_time)
-        get_timeout = remaining_timeout / retry
-
-        # GET job results
-        while get_retry:
-            get = self.get(
-                service, task, [], {}, post_result["workers"], uuid, get_timeout
-            )
+        while time.time() < deadline:
             if self.exit_event.is_set() or self.destroy_event.is_set():
                 break
-            elif get["status"] == "300":  # PENDING
-                get_retry -= 1
-                log.debug(
-                    f"{self.name}:run_job - {service}:{task}:{uuid} GET "
-                    f"results pending. Retrying {retry + 1 - get_retry} / {retry}"
-                )
-                continue
-            elif get["status"] == "408":  # TIMEOUT
-                get_retry -= 1
-                log.debug(
-                    f"{self.name}:run_job - {service}:{task}:{uuid} GET "
-                    f"results {get_timeout}s timeout expired. Retrying "
-                    f"{retry + 1 - get_retry} / {retry}"
-                )
-                continue
-            elif get["status"] in ["200", "202"]:  # OK
-                ret = get["results"]
+            job = self.job_db.get_job(uuid)
+            if job["status"] == "COMPLETED":
+                result = job.get("result_data")
                 break
-            else:
-                log.error(
-                    f"{self.name}:run_job - {service}:{task}:{uuid} "
-                    f"stopping, GET returned unexpected results - '{get}'"
-                )
+            if job["status"] == "FAILED":
                 break
-        else:
-            log.error(
-                f"{self.name}:run_job - {service}:{task}:{uuid} {retry} GET retries "
-                f"exceeded, GET returned no results, timeout {timeout}s"
-            )
-        self.running_job = False
+            time.sleep(0.2)
 
-        return markdown_results(get, service, task, kwargs) if markdown else ret
-
-    def run_job_iter(
-        self,
-        service: str,
-        task: str,
-        uuid: str = None,
-        args: list = None,
-        kwargs: dict = None,
-        workers: str = "all",
-        timeout: int = 600,
-    ) -> Iterator[Any]:
-        """
-        Run a job on the specified service and task, yielding results as they are received.
-
-        Args:
-            service (str): The name of the service to run the job on.
-            task (str): The name of the task to run.
-            uuid (str, optional): A unique identifier for the job. If not provided, a new UUID will be generated. Defaults to None.
-            args (list, optional): A list of positional arguments to pass to the task. Defaults to None.
-            kwargs (dict, optional): A dictionary of keyword arguments to pass to the task. Defaults to None.
-            workers (str, optional): The workers to run the job on. Defaults to "all".
-            timeout (int, optional): The timeout for the job in seconds. Defaults to 600.
-
-        Yields:
-            result: The result of the job as it is received from the workers.
-        """
-        self.running_job = True
-        uuid = uuid or uuid4().hex
-
-        # POST job to workers
-        post_result = self.post(service, task, args, kwargs, workers, uuid, timeout)
-
-        # GET job results
-        for result in self.get_iter(
-            service, task, [], {}, post_result["workers"], uuid, timeout
-        ):
-            yield result
-
-        self.running_job = False
+        return markdown_results(job, service, task, kwargs) if markdown else result
 
     def destroy(self):
         """
@@ -989,4 +1275,5 @@ class NFPClient(object):
         """
         log.info(f"{self.name} - client interrupt received, killing client")
         self.destroy_event.set()
+        self.job_db.close()
         self.ctx.destroy()
