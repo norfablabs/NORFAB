@@ -18,7 +18,7 @@
 1. Netbox service - added `create_device_interfaces` task
 2. Netbox service - added `branch_create_timeout` inventory argument to control timer waiting for new branch to be created
 3. Netbox service - added integration with Netbox BGP Plugin in a form of `get_bgp_peerings` task to fetch BGP sessions data for devices, added nfcli shell command to call `get_bgp_peerings` task.
-4. Netbox sefivces - `get_nornir_inventory` task added suport for `bgp_sessions` argument. if True, fetched devices' BGP peerings from netbox and stores them under `bgp_sessions` key in host's data.
+4. Netbox service - `get_nornir_inventory` task added support for `bgp_sessions` argument. if True, fetched devices' BGP peerings from netbox and stores them under `bgp_sessions` key in host's data.
 
 ### BUGS
 
