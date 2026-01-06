@@ -1163,19 +1163,7 @@ class NFPClient(object):
             [JobStatus.NEW], limit=self.dispatch_batch_size
         ):
             juuid = job["uuid"]
-            deadline = job["deadline"]
-            now = time.time()
-
-            # Check if job has timed out
-            if now >= deadline:
-                self.job_db.update_job(
-                    juuid,
-                    status=JobStatus.FAILED,
-                    errors=["Job timeout before dispatch"],
-                    completed_ts=time.ctime(),
-                )
-                continue
-
+            
             try:
                 # Send POST request (non-blocking)
                 service = self.ensure_bytes(job["service"])

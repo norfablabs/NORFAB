@@ -43,10 +43,11 @@ theme:
   favicon: images/logo.jpg
   custom_dir: docs/overrides
   features:
-  - navigation.tabs
-  - navigation.tabs.sticky
-  - navigation.sections
-  - navigation.top
+  #- navigation.tabs
+  #- navigation.tabs.sticky
+  #- navigation.sections
+  #- navigation.top
+  - navigation.footer
   - toc.follow
   - navigation.instant
   - navigation.instant.progress
@@ -75,15 +76,20 @@ theme:
 # -------------------------------------------------------------------
 
 nav:
+
 - Overview:
   - Introduction: index.md
   - Why use NORFAB: norfab_why_use_norfab.md
-  - Changelog: norfab_changelog.md
 
 - Getting Started:
   - Installation: norfab_installation.md
   - Quickstart: norfab_getting_started.md
+  - Inventory: reference_norfab_inventory.md
 
+- Tutorials:
+  - Docker Deployment: norfab_docker_deployment.md
+  - Distributed Deployment: norfab_distributed_deployment.md
+  
 - Services:
   - Services Overview: services_overview.md
   - Containerlab:
@@ -163,10 +169,6 @@ nav:
   - Python API Client: clients_python_api_overview.md
   - ROBOT Client: clients_robot_client_overview.md
 
-- Tutorials:
-  - Docker Deployment: norfab_docker_deployment.md
-  - Distributed Deployment: norfab_distributed_deployment.md
-
 - Customization:
   - NORFAB Hooks System: customization/norfab_hooks.md
   - Service Plugins:
@@ -174,14 +176,12 @@ nav:
     - Local Plugin: customization/service_plugin_local.md
     - Python Module Plugin: customization/service_plugin_module.md
 
-- Concepts:
-  - Architecture:
-    - NORFAB Architecture: reference_architecture_norfab.md
-    - NORFAB Protocol RFC: reference_architecture_nfp.md
-  - Inventory (Reference): reference_norfab_inventory.md
-
 - Reference:
   - Tags: tags.md
+  - Changelog: norfab_changelog.md
+  - Concepts:
+    - NORFAB Architecture: reference_architecture_norfab.md
+    - NORFAB Protocol (NFP) RFC: reference_architecture_nfp.md
   - API Reference:
     - Core:
       - NFAPI (Python API): api_reference_core_norfab_nfapi.md
