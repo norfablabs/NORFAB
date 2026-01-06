@@ -12,13 +12,13 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_update_device_ip/">
+        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_get_bgp_peerings/">
       
       
-        <link rel="prev" href="../services_netbox_service_tasks_update_device_interfaces/">
+        <link rel="prev" href="../services_netbox_service_tasks_get_circuits/">
       
       
-        <link rel="next" href="../../agent/services_agent_service/">
+        <link rel="next" href="../services_netbox_service_tasks_get_nornir_inventory/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>UPDATE Device IP - Network Automations Fabric [NORFAB]</title>
+        <title>Get BGP Peerings - Network Automations Fabric [NORFAB]</title>
       
     
     
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#netbox-update-device-ip-task" class="md-skip">
+        <a href="#netbox-get-bgp-peerings-task" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              UPDATE Device IP
+              Get BGP Peerings
             
           </span>
         </div>
@@ -220,17 +220,77 @@
   
   
   
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../.." class="md-tabs__link">
+          
+  
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../norfab_installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
     
   
   
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../.." class="md-tabs__link">
+        <a href="../../../services_overview/" class="md-tabs__link">
           
   
   
-  NORFAB
+  Services
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../clients_overview/" class="md-tabs__link">
+          
+  
+  
+  Clients
 
         </a>
       </li>
@@ -266,11 +326,81 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../reference_norfab_inventory/" class="md-tabs__link">
+        <a href="../../../customization/norfab_hooks/" class="md-tabs__link">
           
   
   
-  References
+  Customization
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../reference_architecture_norfab/" class="md-tabs__link">
+          
+  
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../tags/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../development/documentation_style_guide/" class="md-tabs__link">
+          
+  
+  
+  Development
 
         </a>
       </li>
@@ -351,38 +481,33 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
         
           
-          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    NORFAB
+    Overview
   
 
     
@@ -393,12 +518,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             
   
-    NORFAB
+    Overview
   
 
           </label>
@@ -467,8 +592,59 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_getting_started/" class="md-nav__link">
+      <a href="../../../norfab_changelog/" class="md-nav__link">
         
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -482,11 +658,19 @@
   
   
 
-      </a>
-    </li>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
   
 
-              
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -520,19 +704,54 @@
                 
   
   
-    
   
   
+    <li class="md-nav__item">
+      <a href="../../../norfab_getting_started/" class="md-nav__link">
+        
   
+  
+  <span class="md-ellipsis">
     
+  
+    Quickstart
+  
+
     
-    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
       
         
-          
-          
+        
+      
+      
         
       
     
@@ -541,10 +760,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -562,8 +781,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -614,24 +833,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_2" id="__nav_1_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Containerlab Service
+    Containerlab
   
 
     
@@ -642,12 +864,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Containerlab Service
+    Containerlab
   
 
           </label>
@@ -729,10 +951,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_2_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_2_3" id="__nav_1_5_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_2_3" id="__nav_3_2_3_label" tabindex="0">
             
   
   
@@ -750,8 +972,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_2_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_2_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -986,24 +1208,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_3" id="__nav_1_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Nornir Service
+    Nornir
   
 
     
@@ -1014,12 +1239,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Nornir Service
+    Nornir
   
 
           </label>
@@ -1101,10 +1326,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_3_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_3_3" id="__nav_1_5_3_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_3_3" id="__nav_3_3_3_label" tabindex="0">
             
   
   
@@ -1122,8 +1347,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_3_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1147,7 +1372,7 @@
   <span class="md-ellipsis">
     
   
-    Nornir Task
+    Task
   
 
     
@@ -1407,7 +1632,7 @@
   <span class="md-ellipsis">
     
   
-    Jina2 Filters
+    Jinja2 Filters
   
 
     
@@ -1444,24 +1669,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_1_5_4" id="__nav_1_5_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Netbox Service
+    Netbox
   
 
     
@@ -1472,12 +1700,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_5_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_4">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Netbox Service
+    Netbox
   
 
           </label>
@@ -1561,10 +1789,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_4_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_1_5_4_3" id="__nav_1_5_4_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4_3" id="__nav_3_4_3_label" tabindex="0">
             
   
   
@@ -1582,8 +1810,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_4_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_5_4_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1663,7 +1891,7 @@
   <span class="md-ellipsis">
     
   
-    GET Devices
+    Get Devices
   
 
     
@@ -1691,7 +1919,7 @@
   <span class="md-ellipsis">
     
   
-    GET Interfaces
+    Get Interfaces
   
 
     
@@ -1719,7 +1947,7 @@
   <span class="md-ellipsis">
     
   
-    GET Connections
+    Get Connections
   
 
     
@@ -1747,7 +1975,7 @@
   <span class="md-ellipsis">
     
   
-    GET Circuits
+    Get Circuits
   
 
     
@@ -1756,6 +1984,125 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get BGP Peerings
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get BGP Peerings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-get-bgp-peerings-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox Get BGP Peerings Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1775,7 +2122,7 @@
   <span class="md-ellipsis">
     
   
-    GET Nornir Inventory
+    Get Nornir Inventory
   
 
     
@@ -1803,7 +2150,7 @@
   <span class="md-ellipsis">
     
   
-    GET Containerlab Inventory
+    Get Containerlab Inventory
   
 
     
@@ -1880,14 +2227,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_update_device_facts/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    UPDATE Device Facts
+    Create Device Interfaces
   
 
     
@@ -1908,14 +2255,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_update_device_interfaces/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    UPDATE Device Interfaces
+    Sync Device Facts
   
 
     
@@ -1933,44 +2280,17 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    UPDATE Device IP
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    UPDATE Device IP
+    Sync Device Interfaces
   
 
     
@@ -1979,81 +2299,34 @@
   
 
       </a>
-      
-        
+    </li>
+  
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+              
+            
+              
+                
   
   
   
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     
   
+    Sync Device IP
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Branching Support
-      
-    </span>
-  </a>
+
+    
+  </span>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Limitations
-      
-    </span>
-  </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#update-device-ip-sample-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Update Device IP Sample Usage
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#norfab-netbox-update-device-ip-command-shell-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        NORFAB Netbox Update Device IP Command Shell Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#python-api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
+
+      </a>
     </li>
   
 
@@ -2088,24 +2361,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_5" id="__nav_1_5_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Agent Service
+    Agent
   
 
     
@@ -2116,12 +2392,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Agent Service
+    Agent
   
 
           </label>
@@ -2203,10 +2479,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_5_3" id="__nav_1_5_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_5_3" id="__nav_3_5_3_label" tabindex="0">
             
   
   
@@ -2224,8 +2500,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_5_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2292,24 +2568,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_6" id="__nav_1_5_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    FastAPI Service
+    FastAPI
   
 
     
@@ -2320,12 +2599,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             
   
-    FastAPI Service
+    FastAPI
   
 
           </label>
@@ -2407,10 +2686,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_6_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_6_3" id="__nav_1_5_6_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6_3" id="__nav_3_6_3_label" tabindex="0">
             
   
   
@@ -2428,8 +2707,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_6_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_6_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2496,24 +2775,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_7" id="__nav_1_5_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    FastMCP Service
+    FastMCP
   
 
     
@@ -2524,12 +2806,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
             <span class="md-nav__icon md-icon"></span>
             
   
-    FastMCP Service
+    FastMCP
   
 
           </label>
@@ -2611,10 +2893,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_7_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_7_3" id="__nav_1_5_7_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_7_3" id="__nav_3_7_3_label" tabindex="0">
             
   
   
@@ -2632,8 +2914,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_7_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_7_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2700,24 +2982,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_8" id="__nav_1_5_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Workflow Service
+    Workflow
   
 
     
@@ -2728,12 +3013,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Workflow Service
+    Workflow
   
 
           </label>
@@ -2815,10 +3100,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_8_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_8_3" id="__nav_1_5_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_8_3" id="__nav_3_8_3_label" tabindex="0">
             
   
   
@@ -2836,8 +3121,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_5_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_8_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_8_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2904,24 +3189,27 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_9" >
         
           
-          <label class="md-nav__link" for="__nav_1_5_9" id="__nav_1_5_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_9" id="__nav_3_9_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    NORFAB Services
+    NORFAB Built-ins
   
 
     
@@ -2932,12 +3220,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_5_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_5_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_9">
             <span class="md-nav__icon md-icon"></span>
             
   
-    NORFAB Services
+    NORFAB Built-ins
   
 
           </label>
@@ -3097,10 +3385,9 @@
     </li>
   
 
-              
-            
-              
-                
+    
+      
+      
   
   
   
@@ -3111,21 +3398,18 @@
     
       
       
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6" >
-        
-          
-          <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -3143,8 +3427,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3272,249 +3556,6 @@
     </li>
   
 
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-          
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
-        
-          
-          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Customization
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Customization
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../customization/norfab_hooks/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NORFAB Hooks System
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_1_7_2" id="__nav_1_7_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Service Plugins
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_7_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Service Plugins
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_overview/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Service Plugins Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_local/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Local Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_module/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Python Module Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
     
       
       
@@ -3536,10 +3577,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -3557,8 +3598,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3651,17 +3692,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    References
+    Customization
   
 
     
@@ -3672,16 +3713,363 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
-    References
+    Customization
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../customization/norfab_hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Hooks System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Plugins
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service Plugins
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../customization/service_plugin_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../customization/service_plugin_local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../customization/service_plugin_module/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Module Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_1" id="__nav_7_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference_architecture_norfab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference_architecture_nfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Protocol RFC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
             
               
                 
@@ -3697,7 +4085,7 @@
   <span class="md-ellipsis">
     
   
-    NORFAB Inventory
+    Inventory (Reference)
   
 
     
@@ -3711,21 +4099,44 @@
 
               
             
-              
-                
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
   
   
   
   
-    <li class="md-nav__item">
-      <a href="../../../norfab_changelog/" class="md-nav__link">
+    
+    
+    
+    
+      
+      
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
     
   
-    Changelog
+    Reference
   
 
     
@@ -3733,11 +4144,19 @@
   
   
 
-      </a>
-    </li>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
   
 
-              
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -3787,10 +4206,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_2" id="__nav_8_2_label" tabindex="0">
             
   
   
@@ -3808,8 +4227,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3839,17 +4258,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_1" id="__nav_3_4_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_2_1" id="__nav_8_2_1_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    CORE
+    Core
   
 
     
@@ -3860,12 +4279,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2_1">
             <span class="md-nav__icon md-icon"></span>
             
   
-    CORE
+    Core
   
 
           </label>
@@ -3941,7 +4360,7 @@
   <span class="md-ellipsis">
     
   
-    Worker
+    Worker Base
   
 
     
@@ -4067,10 +4486,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_2" id="__nav_3_4_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_2_2" id="__nav_8_2_2_label" tabindex="0">
             
   
   
@@ -4088,8 +4507,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4253,7 +4672,7 @@
   <span class="md-ellipsis">
     
   
-    Ollama Agent Worker
+    Agent Worker
   
 
     
@@ -4323,10 +4742,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_3" id="__nav_3_4_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_2_3" id="__nav_8_2_3_label" tabindex="0">
             
   
   
@@ -4344,8 +4763,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4427,6 +4846,93 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/documentation_style_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Style Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
               
                 
   
@@ -4447,17 +4953,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Architecture
+    Testing
   
 
     
@@ -4468,12 +4974,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Architecture
+    Testing
   
 
           </label>
@@ -4486,14 +4992,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_norfab/" class="md-nav__link">
+      <a href="../../../testing/norfab_testing_framework/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    NORFAB Architecture
+    NORFAB Testing Framework
   
 
     
@@ -4514,14 +5020,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_nfp/" class="md-nav__link">
+      <a href="../../../testing/netbox_service_tests/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    NORFAB Protocol RFC
+    Netbox Service Tests
   
 
     
@@ -4604,10 +5110,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        How It Works
       
     </span>
   </a>
@@ -4615,10 +5121,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
+  <a href="#gotchas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Limitations
+        Gotchas
       
     </span>
   </a>
@@ -4626,21 +5132,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#update-device-ip-sample-usage" class="md-nav__link">
+  <a href="#norfab-netbox-get-bgp-peerings-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Update Device IP Sample Usage
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#norfab-netbox-update-device-ip-command-shell-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        NORFAB Netbox Update Device IP Command Shell Reference
+        NORFAB Netbox Get BGP Peerings Command Shell Reference
       
     </span>
   </a>
@@ -4689,85 +5184,141 @@
   
 
 
-<h1 id="netbox-update-device-ip-task">Netbox Update Device IP Task<a class="headerlink" href="#netbox-update-device-ip-task" title="Permanent link">¤</a></h1>
+<h1 id="netbox-get-bgp-peerings-task">Netbox Get BGP Peerings Task<a class="headerlink" href="#netbox-get-bgp-peerings-task" title="Permanent link">¤</a></h1>
 <blockquote>
-<p>task api name: <code>update_device_ip</code></p>
+<p>task api name: <code>get_bgp_peerings</code></p>
 </blockquote>
-<p>The Netbox Update Device IP Task is a feature of the NorFab Netbox Service that allows you to synchronize and update the IP addresses data of your network devices in Netbox. This task ensures that the IP address records in Netbox are accurate and up-to-date, reflecting the current state of your network infrastructure.</p>
-<p><strong>How it works</strong> - Netbox worker on a call to update IP addresses task fetches live data from network devices using nominated datasource, by default it is Nornir service <a href="../../nornir/services_nornir_service_tasks_parse/">parse</a> task using NAPALM <code>get_interfaces_ip</code> getter. Once data retrieved from network, Netbox worker updates records in Netbox database for device interfaces.</p>
-<p><img alt="Netbox Update Device Interfaces" src="../../../images/Netbox_Service_Update_Interfaces.jpg" /></p>
-<ol>
-<li>
-<p>Client submits and on-demand request to NorFab Netbox worker to update device IP addresses</p>
-</li>
-<li>
-<p>Netbox worker sends job request to nominated datasource service to fetch live data from network devices</p>
-</li>
-<li>
-<p>Datasource service fetches data from the network</p>
-</li>
-<li>
-<p>Datasource returns devices IP addresses data back to Netbox Service worker</p>
-</li>
-<li>
-<p>Netbox worker processes device data and updates or creates IP address records in Netbox for requested devices</p>
-</li>
-</ol>
-<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
-<p>Update device IP task is branch aware and can push updates to the branch. <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> need to be installed on Netbox instance.</p>
-<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">¤</a></h2>
-<p>Datasource <code>nornir</code> uses NAPALM <code>get_interfaces_ip</code> getter and as such only supports these device platforms:</p>
+<p>This task integrates with <a href="https://github.com/netbox-community/netbox-bgp">Netbox BGP Plugin</a> and allows to fetch devices' BGP peerings.</p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <ul>
-<li>Arista EOS</li>
-<li>Cisco IOS</li>
-<li>Cisco IOSXR</li>
-<li>Cisco NXOS</li>
-<li>Juniper JUNOS</li>
+<li>Requires NetBox BGP plugin: The worker verifies the plugin is installed on the target instance before proceeding.</li>
+<li>Resolves device IDs: It calls <code>get_devices()</code> to map provided device names to NetBox device IDs for accurate API queries.</li>
+<li>Fetches sessions via REST: Uses <code>pynetbox</code> <code>plugins.bgp.session.filter(device_id=...)</code> to retrieve sessions per device.</li>
+<li>Returns structured data: The result is a dictionary keyed by device name; each device contains a dictionary keyed by BGP session <code>name</code>, with the full session dict as value.</li>
+<li>Smart caching: Per-device cache key <code>get_bgp_peerings::&lt;device&gt;</code> is used. Modes:</li>
+<li><code>True</code>: Uses cache when up-to-date; performs smart update by comparing <code>last_updated</code> and fetching only changed/new sessions.</li>
+<li><code>False</code>: Bypasses cache entirely and does not write to cache.</li>
+<li><code>refresh</code>: Forces re-fetch from NetBox and overwrites cache. </li>
+<li><code>force</code>: Returns cached data if present without freshness checks.</li>
 </ul>
-<h2 id="update-device-ip-sample-usage">Update Device IP Sample Usage<a class="headerlink" href="#update-device-ip-sample-usage" title="Permanent link">¤</a></h2>
-<h2 id="norfab-netbox-update-device-ip-command-shell-reference">NORFAB Netbox Update Device IP Command Shell Reference<a class="headerlink" href="#norfab-netbox-update-device-ip-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>update_device_ip</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf# man tree netbox.update.device.ip-addresses
+<p>Sample BGP session data retrieved from Netbox:</p>
+<div class="highlight"><pre><span></span><code>&quot;fceos4&quot;: {
+    &quot;fceos4-fceos5-eth105&quot;: {
+        &quot;comments&quot;: &quot;&quot;,
+        &quot;created&quot;: &quot;2025-12-31T08:17:39.168208Z&quot;,
+        &quot;custom_fields&quot;: {},
+        &quot;description&quot;: &quot;BGP peering between fceos4 and fceos5 on eth105&quot;,
+        &quot;device&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;display&quot;: &quot;fceos4 (UUID-123451)&quot;,
+            &quot;id&quot;: 111,
+            &quot;name&quot;: &quot;fceos4&quot;,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/dcim/devices/111/&quot;
+        },
+        &quot;display&quot;: &quot;fceos4 (UUID-123451):fceos4-fceos5-eth105&quot;,
+        &quot;export_policies&quot;: [],
+        &quot;id&quot;: 4,
+        &quot;import_policies&quot;: [],
+        &quot;last_updated&quot;: &quot;2025-12-31T08:17:39.168231Z&quot;,
+        &quot;local_address&quot;: {
+            &quot;address&quot;: &quot;10.0.2.1/30&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;display&quot;: &quot;10.0.2.1/30&quot;,
+            &quot;family&quot;: {
+                &quot;label&quot;: &quot;IPv4&quot;,
+                &quot;value&quot;: 4
+            },
+            &quot;id&quot;: 123,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/ip-addresses/123/&quot;
+        },
+        &quot;local_as&quot;: {
+            &quot;asn&quot;: 65100,
+            &quot;description&quot;: &quot;BGP ASN for fceos4&quot;,
+            &quot;display&quot;: &quot;AS65100&quot;,
+            &quot;id&quot;: 3,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/asns/3/&quot;
+        },
+        &quot;name&quot;: &quot;fceos4-fceos5-eth105&quot;,
+        &quot;peer_group&quot;: {
+            &quot;description&quot;: &quot;Test BGP peer group 1 for standard peerings&quot;,
+            &quot;display&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,
+            &quot;id&quot;: 9,
+            &quot;name&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/plugins/bgp/bgppeergroup/9/&quot;
+        },
+        &quot;prefix_list_in&quot;: null,
+        &quot;prefix_list_out&quot;: null,
+        &quot;remote_address&quot;: {
+            &quot;address&quot;: &quot;10.0.2.2/30&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;display&quot;: &quot;10.0.2.2/30&quot;,
+            &quot;family&quot;: {
+                &quot;label&quot;: &quot;IPv4&quot;,
+                &quot;value&quot;: 4
+            },
+            &quot;id&quot;: 124,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/ip-addresses/124/&quot;
+        },
+        &quot;remote_as&quot;: {
+            &quot;asn&quot;: 65101,
+            &quot;description&quot;: &quot;BGP ASN for fceos5&quot;,
+            &quot;display&quot;: &quot;AS65101&quot;,
+            &quot;id&quot;: 4,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/asns/4/&quot;
+        },
+        &quot;site&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;display&quot;: &quot;SALTNORNIR-LAB&quot;,
+            &quot;id&quot;: 16,
+            &quot;name&quot;: &quot;SALTNORNIR-LAB&quot;,
+            &quot;slug&quot;: &quot;saltnornir-lab&quot;,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/dcim/sites/16/&quot;
+        },
+        &quot;status&quot;: {
+            &quot;label&quot;: &quot;Active&quot;,
+            &quot;value&quot;: &quot;active&quot;
+        },
+        &quot;tags&quot;: [],
+        &quot;tenant&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;display&quot;: &quot;SALTNORNIR&quot;,
+            &quot;id&quot;: 11,
+            &quot;name&quot;: &quot;SALTNORNIR&quot;,
+            &quot;slug&quot;: &quot;saltnornir&quot;,
+            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/tenancy/tenants/11/&quot;
+        },
+        &quot;url&quot;: &quot;http://192.168.1.210:8000/api/plugins/bgp/bgpsession/4/&quot;,
+        &quot;virtualmachine&quot;: null
+    },
+    &quot;fceos4-fceos5-eth106&quot;: {
+
+        ...etc...
+</code></pre></div>
+<h2 id="gotchas">Gotchas<a class="headerlink" href="#gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li>Supported and tested Netbox version is 4.4 onwards.</li>
+<li>NetBox BGP plugin required: If missing, the task fails early with an error. Confirm plugin availability and version compatibility.</li>
+<li>Device name must exist: Unknown devices are skipped with warnings; verify names beforehand or use <code>get_devices</code> to inspect inventory.</li>
+<li>Session key uniqueness: Sessions in the result are keyed by <code>name</code>. If session names are not unique per device, later entries overwrite earlier ones.</li>
+<li>Partial-field queries: Smart update relies on <code>fields="id,last_updated,name"</code>. Older Netbox versions may not support <code>fields</code>, impacting cache comparison.</li>
+<li>Large datasets: Fetching many devices or sessions may be slow; prefer cache or limit <code>devices</code> for interactive runs.</li>
+</ul>
+<h2 id="norfab-netbox-get-bgp-peerings-command-shell-reference">NORFAB Netbox Get BGP Peerings Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-bgp-peerings-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Netbox <code>get_bgp_peerings</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.bgp_peerings
 root
 └── netbox:    Netbox service
-    └── update:    Update Netbox data
-        └── device:    Update device data
-            └── ip-addresses:    Update device interface IP addresses
-                ├── timeout:    Job timeout
-                ├── workers:    Filter worker to target, default &#39;any&#39;
-                ├── verbose-result:    Control output details, default &#39;False&#39;
-                ├── progress:    Display progress events, default &#39;True&#39;
-                ├── instance:    Netbox instance name to target
-                ├── dry-run:    Return information that would be pushed to Netbox but do not push it
-                ├── devices:    List of Netbox devices to update
-                ├── datasource:    Service to use to retrieve device data, default &#39;nornir&#39;
-                │   └── nornir:    Use Nornir service to retrieve data from devices
-                │       ├── FO:    Filter hosts using Filter Object
-                │       ├── FB:    Filter hosts by name using Glob Patterns
-                │       ├── FH:    Filter hosts by hostname
-                │       ├── FC:    Filter hosts containment of pattern in name
-                │       ├── FR:    Filter hosts by name using Regular Expressions
-                │       ├── FG:    Filter hosts by group
-                │       ├── FP:    Filter hosts by hostname using IP Prefix
-                │       ├── FL:    Filter hosts by names list
-                │       ├── FM:    Filter hosts by platform
-                │       ├── FN:    Negate the match
-                │       ├── add-details:    Add task details to results, default &#39;False&#39;
-                │       ├── num-workers:    RetryRunner number of threads for tasks execution
-                │       ├── num-connectors:    RetryRunner number of threads for device connections
-                │       ├── connect-retry:    RetryRunner number of connection attempts
-                │       ├── task-retry:    RetryRunner number of attempts to run task
-                │       ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-                │       ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-                │       ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-                │       ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
-                │       ├── tf:    File group name to save task results to on worker file system
-                │       ├── tf-skip-failed:    Save results to file for failed tasks
-                │       ├── diff:    File group name to run the diff for
-                │       ├── diff-last:    File version number to diff, default is 1 (last)
-                │       └── progress:    Display progress events, default &#39;True&#39;
-                ├── batch-size:    Number of devices to process at a time, default &#39;10&#39;
-                └── branch:    Branching plugin branch name to use
+    └── get:    Query data from Netbox
+        └── bgp-peerings:    Query Netbox BGP Peerings data
+            ├── timeout:    Job timeout
+            ├── workers:    Filter worker to target, default &#39;any&#39;
+            ├── verbose-result:    Control output details, default &#39;False&#39;
+            ├── progress:    Display progress events, default &#39;True&#39;
+            ├── instance:    Netbox instance name to target
+            ├── dry-run:    Only return query content, do not run it
+            ├── branch:    Branching plugin branch name to use
+            ├── *devices:    Device names to query data for
+            └── cache:    How to use cache, default &#39;True&#39;
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -4780,7 +5331,7 @@ nf#
 
     <div class="doc doc-contents first">
 
-        <p>Update the IP addresses of devices in Netbox.</p>
+        <p>Retrieve device BGP peerings from Netbox using REST API.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -4819,63 +5370,11 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The Netbox instance name to use.</p>
+                <p>Netbox instance name.</p>
               </div>
             </td>
             <td>
                   <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>dry_run</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If True, no changes will be made.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>datasource</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The data source to use. Supported datasources:</p>
-<ul>
-<li><strong>nornir</strong> - uses Nornir Service parse task to retrieve devices' data
-    using NAPALM get_interfaces_ip getter</li>
-</ul>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;nornir&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>timeout</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The timeout for the operation.</p>
-              </div>
-            </td>
-            <td>
-                  <code>60</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -4887,7 +5386,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The list of devices to update.</p>
+                <p>List of devices to retrieve BGP peerings for.</p>
               </div>
             </td>
             <td>
@@ -4896,66 +5395,24 @@ nf#
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>create</code>
+                <code>cache</code>
             </td>
             <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If True, new IP addresses will be created if they do not exist.</p>
-              </div>
-            </td>
-            <td>
-                  <code>True</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>batch_size</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
+                  <code><span title="typing.Union">Union</span>[<span title="bool">bool</span>, <span title="str">str</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The number of devices to process in each batch.</p>
-              </div>
-            </td>
-            <td>
-                  <code>10</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>branch</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Branch name to use, need to have branching plugin installed,
-automatically creates branch if it does not exist in Netbox.</p>
+                <p>Cache usage options:</p>
+<ul>
+<li>True: Use data stored in cache if it is up to date, refresh it otherwise.</li>
+<li>False: Do not use cache and do not update cache.</li>
+<li>refresh: Ignore data in cache and replace it with data fetched from Netbox.</li>
+<li>force: Use data in cache without checking if it is up to date.</li>
+</ul>
               </div>
             </td>
             <td>
                   <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>**kwargs</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Additional keyword arguments.</p>
-              </div>
-            </td>
-            <td>
-                  <code>{}</code>
             </td>
           </tr>
       </tbody>
@@ -4977,40 +5434,7 @@ automatically creates branch if it does not exist in Netbox.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A dictionary containing the results of the update operation.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If a device does not exist in Netbox.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="UnsupportedServiceError (norfab.core.exceptions.UnsupportedServiceError)" href="../../../api_reference_core_norfab_exceptions/#norfab.core.exceptions.UnsupportedServiceError">UnsupportedServiceError</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If the specified datasource is not supported.</p>
+                <p>Dictionary keyed by device name with BGP peerings details.</p>
               </div>
             </td>
           </tr>
@@ -5020,307 +5444,339 @@ automatically creates branch if it does not exist in Netbox.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2503</span>
-<span class="normal">2504</span>
-<span class="normal">2505</span>
-<span class="normal">2506</span>
-<span class="normal">2507</span>
-<span class="normal">2508</span>
-<span class="normal">2509</span>
-<span class="normal">2510</span>
-<span class="normal">2511</span>
-<span class="normal">2512</span>
-<span class="normal">2513</span>
-<span class="normal">2514</span>
-<span class="normal">2515</span>
-<span class="normal">2516</span>
-<span class="normal">2517</span>
-<span class="normal">2518</span>
-<span class="normal">2519</span>
-<span class="normal">2520</span>
-<span class="normal">2521</span>
-<span class="normal">2522</span>
-<span class="normal">2523</span>
-<span class="normal">2524</span>
-<span class="normal">2525</span>
-<span class="normal">2526</span>
-<span class="normal">2527</span>
-<span class="normal">2528</span>
-<span class="normal">2529</span>
-<span class="normal">2530</span>
-<span class="normal">2531</span>
-<span class="normal">2532</span>
-<span class="normal">2533</span>
-<span class="normal">2534</span>
-<span class="normal">2535</span>
-<span class="normal">2536</span>
-<span class="normal">2537</span>
-<span class="normal">2538</span>
-<span class="normal">2539</span>
-<span class="normal">2540</span>
-<span class="normal">2541</span>
-<span class="normal">2542</span>
-<span class="normal">2543</span>
-<span class="normal">2544</span>
-<span class="normal">2545</span>
-<span class="normal">2546</span>
-<span class="normal">2547</span>
-<span class="normal">2548</span>
-<span class="normal">2549</span>
-<span class="normal">2550</span>
-<span class="normal">2551</span>
-<span class="normal">2552</span>
-<span class="normal">2553</span>
-<span class="normal">2554</span>
-<span class="normal">2555</span>
-<span class="normal">2556</span>
-<span class="normal">2557</span>
-<span class="normal">2558</span>
-<span class="normal">2559</span>
-<span class="normal">2560</span>
-<span class="normal">2561</span>
-<span class="normal">2562</span>
-<span class="normal">2563</span>
-<span class="normal">2564</span>
-<span class="normal">2565</span>
-<span class="normal">2566</span>
-<span class="normal">2567</span>
-<span class="normal">2568</span>
-<span class="normal">2569</span>
-<span class="normal">2570</span>
-<span class="normal">2571</span>
-<span class="normal">2572</span>
-<span class="normal">2573</span>
-<span class="normal">2574</span>
-<span class="normal">2575</span>
-<span class="normal">2576</span>
-<span class="normal">2577</span>
-<span class="normal">2578</span>
-<span class="normal">2579</span>
-<span class="normal">2580</span>
-<span class="normal">2581</span>
-<span class="normal">2582</span>
-<span class="normal">2583</span>
-<span class="normal">2584</span>
-<span class="normal">2585</span>
-<span class="normal">2586</span>
-<span class="normal">2587</span>
-<span class="normal">2588</span>
-<span class="normal">2589</span>
-<span class="normal">2590</span>
-<span class="normal">2591</span>
-<span class="normal">2592</span>
-<span class="normal">2593</span>
-<span class="normal">2594</span>
-<span class="normal">2595</span>
-<span class="normal">2596</span>
-<span class="normal">2597</span>
-<span class="normal">2598</span>
-<span class="normal">2599</span>
-<span class="normal">2600</span>
-<span class="normal">2601</span>
-<span class="normal">2602</span>
-<span class="normal">2603</span>
-<span class="normal">2604</span>
-<span class="normal">2605</span>
-<span class="normal">2606</span>
-<span class="normal">2607</span>
-<span class="normal">2608</span>
-<span class="normal">2609</span>
-<span class="normal">2610</span>
-<span class="normal">2611</span>
-<span class="normal">2612</span>
-<span class="normal">2613</span>
-<span class="normal">2614</span>
-<span class="normal">2615</span>
-<span class="normal">2616</span>
-<span class="normal">2617</span>
-<span class="normal">2618</span>
-<span class="normal">2619</span>
-<span class="normal">2620</span>
-<span class="normal">2621</span>
-<span class="normal">2622</span>
-<span class="normal">2623</span>
-<span class="normal">2624</span>
-<span class="normal">2625</span>
-<span class="normal">2626</span>
-<span class="normal">2627</span>
-<span class="normal">2628</span>
-<span class="normal">2629</span>
-<span class="normal">2630</span>
-<span class="normal">2631</span>
-<span class="normal">2632</span>
-<span class="normal">2633</span>
-<span class="normal">2634</span>
-<span class="normal">2635</span>
-<span class="normal">2636</span>
-<span class="normal">2637</span>
-<span class="normal">2638</span>
-<span class="normal">2639</span>
-<span class="normal">2640</span>
-<span class="normal">2641</span>
-<span class="normal">2642</span>
-<span class="normal">2643</span>
-<span class="normal">2644</span>
-<span class="normal">2645</span>
-<span class="normal">2646</span>
-<span class="normal">2647</span>
-<span class="normal">2648</span>
-<span class="normal">2649</span>
-<span class="normal">2650</span>
-<span class="normal">2651</span>
-<span class="normal">2652</span>
-<span class="normal">2653</span>
-<span class="normal">2654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
-<span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">update_device_ip</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4079</span>
+<span class="normal">4080</span>
+<span class="normal">4081</span>
+<span class="normal">4082</span>
+<span class="normal">4083</span>
+<span class="normal">4084</span>
+<span class="normal">4085</span>
+<span class="normal">4086</span>
+<span class="normal">4087</span>
+<span class="normal">4088</span>
+<span class="normal">4089</span>
+<span class="normal">4090</span>
+<span class="normal">4091</span>
+<span class="normal">4092</span>
+<span class="normal">4093</span>
+<span class="normal">4094</span>
+<span class="normal">4095</span>
+<span class="normal">4096</span>
+<span class="normal">4097</span>
+<span class="normal">4098</span>
+<span class="normal">4099</span>
+<span class="normal">4100</span>
+<span class="normal">4101</span>
+<span class="normal">4102</span>
+<span class="normal">4103</span>
+<span class="normal">4104</span>
+<span class="normal">4105</span>
+<span class="normal">4106</span>
+<span class="normal">4107</span>
+<span class="normal">4108</span>
+<span class="normal">4109</span>
+<span class="normal">4110</span>
+<span class="normal">4111</span>
+<span class="normal">4112</span>
+<span class="normal">4113</span>
+<span class="normal">4114</span>
+<span class="normal">4115</span>
+<span class="normal">4116</span>
+<span class="normal">4117</span>
+<span class="normal">4118</span>
+<span class="normal">4119</span>
+<span class="normal">4120</span>
+<span class="normal">4121</span>
+<span class="normal">4122</span>
+<span class="normal">4123</span>
+<span class="normal">4124</span>
+<span class="normal">4125</span>
+<span class="normal">4126</span>
+<span class="normal">4127</span>
+<span class="normal">4128</span>
+<span class="normal">4129</span>
+<span class="normal">4130</span>
+<span class="normal">4131</span>
+<span class="normal">4132</span>
+<span class="normal">4133</span>
+<span class="normal">4134</span>
+<span class="normal">4135</span>
+<span class="normal">4136</span>
+<span class="normal">4137</span>
+<span class="normal">4138</span>
+<span class="normal">4139</span>
+<span class="normal">4140</span>
+<span class="normal">4141</span>
+<span class="normal">4142</span>
+<span class="normal">4143</span>
+<span class="normal">4144</span>
+<span class="normal">4145</span>
+<span class="normal">4146</span>
+<span class="normal">4147</span>
+<span class="normal">4148</span>
+<span class="normal">4149</span>
+<span class="normal">4150</span>
+<span class="normal">4151</span>
+<span class="normal">4152</span>
+<span class="normal">4153</span>
+<span class="normal">4154</span>
+<span class="normal">4155</span>
+<span class="normal">4156</span>
+<span class="normal">4157</span>
+<span class="normal">4158</span>
+<span class="normal">4159</span>
+<span class="normal">4160</span>
+<span class="normal">4161</span>
+<span class="normal">4162</span>
+<span class="normal">4163</span>
+<span class="normal">4164</span>
+<span class="normal">4165</span>
+<span class="normal">4166</span>
+<span class="normal">4167</span>
+<span class="normal">4168</span>
+<span class="normal">4169</span>
+<span class="normal">4170</span>
+<span class="normal">4171</span>
+<span class="normal">4172</span>
+<span class="normal">4173</span>
+<span class="normal">4174</span>
+<span class="normal">4175</span>
+<span class="normal">4176</span>
+<span class="normal">4177</span>
+<span class="normal">4178</span>
+<span class="normal">4179</span>
+<span class="normal">4180</span>
+<span class="normal">4181</span>
+<span class="normal">4182</span>
+<span class="normal">4183</span>
+<span class="normal">4184</span>
+<span class="normal">4185</span>
+<span class="normal">4186</span>
+<span class="normal">4187</span>
+<span class="normal">4188</span>
+<span class="normal">4189</span>
+<span class="normal">4190</span>
+<span class="normal">4191</span>
+<span class="normal">4192</span>
+<span class="normal">4193</span>
+<span class="normal">4194</span>
+<span class="normal">4195</span>
+<span class="normal">4196</span>
+<span class="normal">4197</span>
+<span class="normal">4198</span>
+<span class="normal">4199</span>
+<span class="normal">4200</span>
+<span class="normal">4201</span>
+<span class="normal">4202</span>
+<span class="normal">4203</span>
+<span class="normal">4204</span>
+<span class="normal">4205</span>
+<span class="normal">4206</span>
+<span class="normal">4207</span>
+<span class="normal">4208</span>
+<span class="normal">4209</span>
+<span class="normal">4210</span>
+<span class="normal">4211</span>
+<span class="normal">4212</span>
+<span class="normal">4213</span>
+<span class="normal">4214</span>
+<span class="normal">4215</span>
+<span class="normal">4216</span>
+<span class="normal">4217</span>
+<span class="normal">4218</span>
+<span class="normal">4219</span>
+<span class="normal">4220</span>
+<span class="normal">4221</span>
+<span class="normal">4222</span>
+<span class="normal">4223</span>
+<span class="normal">4224</span>
+<span class="normal">4225</span>
+<span class="normal">4226</span>
+<span class="normal">4227</span>
+<span class="normal">4228</span>
+<span class="normal">4229</span>
+<span class="normal">4230</span>
+<span class="normal">4231</span>
+<span class="normal">4232</span>
+<span class="normal">4233</span>
+<span class="normal">4234</span>
+<span class="normal">4235</span>
+<span class="normal">4236</span>
+<span class="normal">4237</span>
+<span class="normal">4238</span>
+<span class="normal">4239</span>
+<span class="normal">4240</span>
+<span class="normal">4241</span>
+<span class="normal">4242</span>
+<span class="normal">4243</span>
+<span class="normal">4244</span>
+<span class="normal">4245</span>
+<span class="normal">4246</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_bgp_peerings</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">datasource</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">create</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update the IP addresses of devices in Netbox.</span>
+<span class="sd">    Retrieve device BGP peerings from Netbox using REST API.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object containing relevant metadata</span>
-<span class="sd">        instance (str, optional): The Netbox instance name to use.</span>
-<span class="sd">        dry_run (bool, optional): If True, no changes will be made.</span>
-<span class="sd">        datasource (str, optional): The data source to use. Supported datasources:</span>
+<span class="sd">        instance (str, optional): Netbox instance name.</span>
+<span class="sd">        devices (list, optional): List of devices to retrieve BGP peerings for.</span>
+<span class="sd">        cache (Union[bool, str], optional): Cache usage options:</span>
 
-<span class="sd">            - **nornir** - uses Nornir Service parse task to retrieve devices&#39; data</span>
-<span class="sd">                using NAPALM get_interfaces_ip getter</span>
-
-<span class="sd">        timeout (int, optional): The timeout for the operation.</span>
-<span class="sd">        devices (list, optional): The list of devices to update.</span>
-<span class="sd">        create (bool, optional): If True, new IP addresses will be created if they do not exist.</span>
-<span class="sd">        batch_size (int, optional): The number of devices to process in each batch.</span>
-<span class="sd">        branch (str, optional): Branch name to use, need to have branching plugin installed,</span>
-<span class="sd">            automatically creates branch if it does not exist in Netbox.</span>
-<span class="sd">        **kwargs: Additional keyword arguments.</span>
+<span class="sd">            - True: Use data stored in cache if it is up to date, refresh it otherwise.</span>
+<span class="sd">            - False: Do not use cache and do not update cache.</span>
+<span class="sd">            - refresh: Ignore data in cache and replace it with data fetched from Netbox.</span>
+<span class="sd">            - force: Use data in cache without checking if it is up to date.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: A dictionary containing the results of the update operation.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        Exception: If a device does not exist in Netbox.</span>
-<span class="sd">        UnsupportedServiceError: If the specified datasource is not supported.</span>
+<span class="sd">        dict: Dictionary keyed by device name with BGP peerings details.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cache</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:update_device_ip&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_bgp_peerings&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">datasource</span> <span class="o">==</span> <span class="s2">&quot;nornir&quot;</span><span class="p">:</span>
-        <span class="c1"># source hosts list from Nornir</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">devices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">))</span>
-        <span class="c1"># iterate over devices in batches</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;FL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;getters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;get_interfaces_ip&quot;</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-                <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;parse&quot;</span><span class="p">,</span>
-                <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-                <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
-                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">results</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> get_interfaces_ip failed, errors: </span><span class="si">{</span><span class="s1">&#39;; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">)</span>
-                    <span class="k">continue</span>
-                <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">host_data</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">updated</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">host</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;updated_ip_dry_run&quot;</span> <span class="k">if</span> <span class="n">dry_run</span> <span class="k">else</span> <span class="s2">&quot;updated_ip&quot;</span><span class="p">:</span> <span class="n">updated</span><span class="p">,</span>
-                        <span class="s2">&quot;created_ip_dry_run&quot;</span> <span class="k">if</span> <span class="n">dry_run</span> <span class="k">else</span> <span class="s2">&quot;created_ip&quot;</span><span class="p">:</span> <span class="n">created</span><span class="p">,</span>
-                    <span class="p">}</span>
-                    <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">result</span><span class="p">[</span><span class="n">host</span><span class="p">][</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
-                    <span class="n">interfaces</span> <span class="o">=</span> <span class="n">host_data</span><span class="p">[</span><span class="s2">&quot;napalm_get&quot;</span><span class="p">][</span><span class="s2">&quot;get_interfaces_ip&quot;</span><span class="p">]</span>
-                    <span class="n">nb_device</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">host</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_device</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">&#39; does not exist in Netbox&quot;</span><span class="p">)</span>
-                    <span class="n">nb_interfaces</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                        <span class="n">device_id</span><span class="o">=</span><span class="n">nb_device</span><span class="o">.</span><span class="n">id</span>
-                    <span class="p">)</span>
-                    <span class="c1"># update interface IP addresses</span>
-                    <span class="k">for</span> <span class="n">nb_interface</span> <span class="ow">in</span> <span class="n">nb_interfaces</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="p">:</span>
-                            <span class="k">continue</span>
-                        <span class="n">interface</span> <span class="o">=</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                        <span class="c1"># merge v6 into v4 addresses to save code repetition</span>
-                        <span class="n">ips</span> <span class="o">=</span> <span class="p">{</span>
-                            <span class="o">**</span><span class="n">interface</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-                            <span class="o">**</span><span class="n">interface</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv6&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-                        <span class="p">}</span>
-                        <span class="c1"># update/create IP addresses</span>
-                        <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="n">ips</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                            <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;prefix_length&quot;</span><span class="p">]</span>
-                            <span class="c1"># get IP address info from Netbox</span>
-                            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                                <span class="n">address</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="p">)</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> got multiple </span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s2"> IP addresses from Netbox, &quot;</span>
-                                    <span class="sa">f</span><span class="s2">&quot;NorFab Netbox Service only supports handling of non-duplicate IPs.&quot;</span>
-                                <span class="p">)</span>
-                                <span class="k">continue</span>
-                            <span class="c1"># decide what to do</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_ip</span> <span class="ow">and</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                                <span class="k">continue</span>
-                            <span class="k">elif</span> <span class="ow">not</span> <span class="n">nb_ip</span> <span class="ow">and</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                                <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-                                    <span class="k">try</span><span class="p">:</span>
-                                        <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                                            <span class="n">address</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s2">&quot;</span>
-                                        <span class="p">)</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> failed to create </span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s2">, error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
-                                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
-                                        <span class="k">continue</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">&quot;dcim.interface&quot;</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-                                <span class="n">created</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span>
-                                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> created IP address </span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> interface&quot;</span><span class="p">,</span>
-                                    <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
-                                <span class="p">)</span>
-                            <span class="k">elif</span> <span class="n">nb_ip</span><span class="p">:</span>
-                                <span class="n">nb_ip</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                                <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">&quot;dcim.interface&quot;</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span>
-                                    <span class="n">nb_ip</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-                                <span class="n">updated</span><span class="p">[</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">address</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span>
-                                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2"> updated IP address </span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prefix_length</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> interface&quot;</span><span class="p">,</span>
-                                    <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
-                                <span class="p">)</span>
+    <span class="c1"># Check if BGP plugin is installed</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">&quot;netbox_bgp&quot;</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> Netbox instance has no BGP Plugin installed&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">UnsupportedServiceError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">datasource</span><span class="si">}</span><span class="s2">&#39; datasource service not supported&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>
+
+    <span class="c1"># Get device details to collect device IDs</span>
+    <span class="n">devices_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to retrieve device details: </span><span class="si">{</span><span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="c1"># Skip devices not found in Netbox</span>
+        <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; not found in Netbox&quot;</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">device_id</span> <span class="o">=</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_bgp_peerings::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">cached_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+
+        <span class="c1"># Mode: force with cached data - use cache directly</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span> <span class="ow">and</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cached_data</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Using cached BGP peerings for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; (forced)&quot;</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Mode: cache disabled - fetch without caching</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">}</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> BGP session(s) for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Mode: refresh or no cached data - fetch and cache</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span> <span class="ow">or</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span> <span class="ow">and</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">cache_key</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">],</span> <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span>
+            <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Fetched and cached </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> BGP session(s) for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Mode: cache=True with cached data - smart update (only fetch changed sessions)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+            <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fetch brief session info to compare timestamps</span>
+        <span class="n">brief_sessions</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,last_updated,name&quot;</span>
+        <span class="p">)</span>
+        <span class="n">netbox_sessions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">last_updated</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">brief_sessions</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Build lookup maps</span>
+        <span class="n">cached_by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">session_ids_to_fetch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sessions_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Find stale sessions (exist in both but timestamps differ) and deleted sessions</span>
+        <span class="k">for</span> <span class="n">session_name</span><span class="p">,</span> <span class="n">cached_session</span> <span class="ow">in</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">cached_id</span> <span class="o">=</span> <span class="n">cached_session</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">cached_id</span> <span class="ow">in</span> <span class="n">netbox_sessions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">cached_session</span><span class="p">[</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
+                    <span class="o">!=</span> <span class="n">netbox_sessions</span><span class="p">[</span><span class="n">cached_id</span><span class="p">][</span><span class="s2">&quot;last_updated&quot;</span><span class="p">]</span>
+                <span class="p">):</span>
+                    <span class="n">session_ids_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cached_id</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sessions_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_name</span><span class="p">)</span>
+
+        <span class="c1"># Find new sessions in Netbox not in cache</span>
+        <span class="k">for</span> <span class="n">nb_id</span> <span class="ow">in</span> <span class="n">netbox_sessions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nb_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cached_by_id</span><span class="p">:</span>
+                <span class="n">session_ids_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nb_id</span><span class="p">)</span>
+
+        <span class="c1"># Remove deleted sessions</span>
+        <span class="k">for</span> <span class="n">session_name</span> <span class="ow">in</span> <span class="n">sessions_to_remove</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Removed deleted session &#39;</span><span class="si">{</span><span class="n">session_name</span><span class="si">}</span><span class="s2">&#39; from cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Fetch updated/new sessions</span>
+        <span class="k">if</span> <span class="n">session_ids_to_fetch</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session_ids_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated BGP session(s) for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">session_ids_to_fetch</span><span class="p">):</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+
+        <span class="c1"># Update cache if any changes occurred</span>
+        <span class="k">if</span> <span class="n">session_ids_to_fetch</span> <span class="ow">or</span> <span class="n">sessions_to_remove</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">cache_key</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">],</span> <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span>
+            <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Using cache, it is up to date for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
