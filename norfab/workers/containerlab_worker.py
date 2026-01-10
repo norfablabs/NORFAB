@@ -846,7 +846,6 @@ class ContainerlabWorker(NFPWorker):
             task="get_containerlab_inventory",
             workers="any",
             timeout=timeout,
-            retry=3,
             kwargs={
                 "lab_name": lab_name,
                 "tenant": tenant,

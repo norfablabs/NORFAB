@@ -166,7 +166,6 @@ class ShowCommandsModel(BaseModel):
             },
             "directories": {
                 "base-dir": NFCLIENT.base_dir,
-                "jobs-dir": NFCLIENT.jobs_dir,
                 "events-dir": NFCLIENT.events_dir,
                 "public-keys-dir": NFCLIENT.public_keys_dir,
                 "private-keys-dir": NFCLIENT.private_keys_dir,
