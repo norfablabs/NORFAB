@@ -466,6 +466,10 @@ class NFPBroker:
             msg = self.build_message.broker_to_client_event(
                 client=client, service=service, message=message
             )
+        elif command == NFP.STREAM:
+            msg = self.build_message.broker_to_client_stream(
+                client=client, service=service, message=message
+            )
         else:
             log.error(f"NFPBroker - invalid client command: {command}")
             return
@@ -896,6 +900,10 @@ class NFPBroker:
                     with open(full_path, "rb") as f:
                         f.seek(offset, os.SEEK_SET)
                         reply = f.read(chunk_size)
+                    self.send_to_client(
+                        sender, NFP.STREAM, b"fss.service.broker", [uuid, status, reply]
+                    )
+                    return
                 else:
                     reply = f"Not Found '{full_path}'"
             elif task == "list_files":

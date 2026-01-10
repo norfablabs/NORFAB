@@ -191,6 +191,14 @@ class ListFilesModel(BaseModel):
     url: StrictStr = Field("nf://", description="Directory to list content for")
 
     @staticmethod
+    def source_url():
+        NFCLIENT = builtins.NFCLIENT
+        broker_files = NFCLIENT.get(
+            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        )
+        return broker_files["results"]
+
+    @staticmethod
     def run(*args, **kwargs):
         reply = NFCLIENT.get(
             "fss.service.broker", "list_files", args=args, kwargs=kwargs
@@ -210,6 +218,14 @@ class CopyFileModel(BaseModel):
     read: Optional[StrictBool] = Field(False, description="Print file content")
 
     @staticmethod
+    def source_url():
+        NFCLIENT = builtins.NFCLIENT
+        broker_files = NFCLIENT.get(
+            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        )
+        return broker_files["results"]
+
+    @staticmethod
     def run(*args, **kwargs):
         status, reply = NFCLIENT.fetch_file(**kwargs)
         return reply
@@ -217,6 +233,14 @@ class CopyFileModel(BaseModel):
 
 class ListFileDetails(BaseModel):
     url: StrictStr = Field("nf://", description="File location")
+
+    @staticmethod
+    def source_url():
+        NFCLIENT = builtins.NFCLIENT
+        broker_files = NFCLIENT.get(
+            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        )
+        return broker_files["results"]
 
     @staticmethod
     def run(*args, **kwargs):
@@ -251,6 +275,14 @@ class DeleteFetchedFiles(ClientRunJobArgs):
         )
 
         return log_error_or_result(result, verbose_result=verbose_result)
+
+    @staticmethod
+    def source_filepath():
+        NFCLIENT = builtins.NFCLIENT
+        broker_files = NFCLIENT.get(
+            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        )
+        return broker_files["results"]
 
     @staticmethod
     def source_workers():

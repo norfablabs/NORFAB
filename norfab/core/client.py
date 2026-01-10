@@ -396,19 +396,23 @@ def recv(client):
             status = msg[5].decode("utf-8") 
             payload = json.loads(msg[6].decode("utf-8"))
         except Exception as e:
-            log.error(f"{client.name} - failed to parse message: {e}", exc_info=True)
+            log.error(f"{client.name} - failed to parse message '{msg}', error '{e}'", exc_info=True)
             continue
 
         # Handle EVENT messages
         if command == NFP.EVENT:
             handle_event(client, juuid, payload, msg)
-            continue
 
         # Handle RESPONSE messages
         if command == NFP.RESPONSE:
             handle_response(client, juuid, status, payload)
             # Also put in queue for synchronous callers (backwards compatibility)
             client.recv_queue.put(msg)
+
+        # Handle STREAM messages
+        if command == NFP.STREAM:
+            handle_stream(client, juuid, status, payload)
+
 
 
 def handle_event(client, juuid: str, payload: dict, msg: list):
@@ -545,6 +549,8 @@ def handle_response(client, juuid: str, status: str, payload: dict):
         log.error(f"{client.name} - job {juuid} failed: {error_msg}")
         return
 
+def handle_stream(client, juuid: str, status: str, payload: dict):
+    pass
 
 def dispatch_new_jobs(client):
     """

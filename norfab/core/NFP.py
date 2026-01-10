@@ -21,6 +21,7 @@ RESPONSE = b"0x05"
 GET = b"0x06"
 DELETE = b"0x07"
 EVENT = b"0x08"
+STREAM = b"0x09"
 
 commands = [
     b"OPEN",
@@ -32,13 +33,14 @@ commands = [
     b"GET",
     b"DELETE",
     b"EVENT",
+    b"STREAM",
 ]
 
 client_commands = [OPEN, DISCONNECT, POST, GET, DELETE]
 
 worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE]
 
-broker_commands = [OPEN, KEEPALIVE, DISCONNECT, POST, RESPONSE, GET, DELETE]
+broker_commands = [OPEN, KEEPALIVE, DISCONNECT, POST, RESPONSE, GET, DELETE, STREAM]
 
 # Convenience constants for frame counts
 FRAME_COUNTS = {
@@ -131,3 +133,10 @@ class MessageBuilder:
     ) -> List[bytes]:
         """Build EVENT message from broker to client."""
         return [client, b"", BROKER, EVENT, service] + message
+
+    @staticmethod
+    def broker_to_client_stream(
+        client: bytes, service: bytes, message: List[bytes]
+    ) -> List[bytes]:
+        """Build EVENT message from broker to client."""
+        return [client, b"", BROKER, STREAM, service] + message
