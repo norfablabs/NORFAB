@@ -319,7 +319,7 @@ class TestFastAPIServer:
         pprint.pprint(get_res)
 
         assert get_res["errors"] == []
-        assert get_res["status"] == "202"
+        assert get_res["status"] == "200"
         assert get_res["workers"]["dispatched"] != []
         assert get_res["workers"]["done"] != []
         assert get_res["workers"]["pending"] == []

@@ -710,7 +710,20 @@ class NFPBroker:
                 sender,
                 NFP.RESPONSE,
                 service.name,
-                [uuid, b"400", message.encode("utf-8")],
+                [
+                    uuid, 
+                    b"400", 
+                    json.dumps(
+                        {
+                            "workers": None,
+                            "uuid": uuid.decode("utf-8"),
+                            "target": target.decode("utf-8"),
+                            "status": "FAILED",
+                            "service": service.name.decode("utf-8"),
+                            "errors": [message]
+                        }
+                    ).encode("utf-8")
+                ],
             )
         else:
             # inform client that JOB dispatched

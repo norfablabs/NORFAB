@@ -150,4 +150,4 @@ NorFab CLI supports Tab completions, question mark help together with sub-shells
 
 :star: That's it :star:
 
-For more information or to schedule a demo, [send us an email](mailto:dmulyalin@gmail.com).
+Where to go next? Checkout tutorials section or read about NORFAB concepts.

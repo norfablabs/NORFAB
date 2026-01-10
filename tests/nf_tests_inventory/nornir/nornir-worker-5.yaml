@@ -1,6 +1,5 @@
 netbox:
-  retry: 3
-  retry_timeout: 100
+  timeout: 100
   instance: prod
   interfaces:
     ip_addresses: True

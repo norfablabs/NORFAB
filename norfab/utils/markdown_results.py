@@ -15,7 +15,7 @@ def generic_markdown(data: dict, kwargs: dict = None):
     Convert generic task results to markdown format with per-worker sections.
     """
     kwargs = kwargs or {}
-    results = data.get("results", {})
+    results = data.get("result_data", {})
 
     # Markdown generator
     md = MdUtils(file_name="task_results")
@@ -26,7 +26,7 @@ def generic_markdown(data: dict, kwargs: dict = None):
 
     # Process each worker's results
     if not results:
-        md.new_paragraph("No results available.")
+        md.new_paragraph(f"No results available: {data}")
         return md.file_data_text
 
     # Add main header
@@ -38,19 +38,18 @@ def generic_markdown(data: dict, kwargs: dict = None):
     # Add overall summary section
     md.new_header(level=2, title="Overall Summary")
     overall_status = data.get("status", "Unknown")
-    status_indicator = "✅ Good" if overall_status == "202" else "⚠️ Check Status"
+    status_indicator = "✅ Good" if overall_status == "COMPLETED" else "⚠️ Check Status"
     errors = data["errors"]
-    workers = data["workers"]
-    workers_requested = ",".join(workers["requested"])
-    workers_done = ", ".join(workers["done"])
-    workers_dispatched = ", ".join(workers["dispatched"])
-    workers_pending = ", ".join(workers["pending"])
+    workers_requested = data["workers_requested"]
+    workers_completed = ", ".join(data["workers_completed"])
+    workers_dispatched = ", ".join(data["workers_dispatched"])
+    workers_pending = ", ".join(data["workers_started"])
     summary_text = (
         f"- **Overall Status:** {overall_status} {status_indicator}\n"
         f"- **Errors:** {len(errors)} error(s)\n"
-        f"- **Workers Count:** {len(workers['requested'])}\n"
+        f"- **Workers Count:** {len(data['workers_dispatched'])}\n"
         f"- **Workers Requested:** {workers_requested}\n"
-        f"- **Workers Done:** {workers_done}\n"
+        f"- **Workers Done:** {workers_completed}\n"
         f"- **Workers Dispatched:** {workers_dispatched}\n"
         f"- **Workers Pending:** {workers_pending}\n"
         f"- **Error Details:** {', '.join(errors)}\n"
@@ -124,7 +123,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     """
     Convert Nornir test task results to markdown format.
     """
-    results = data.get("results", {})
+    results = data.get("result_data", {})
 
     # Unified hosts test results dictionary structure:
     # {

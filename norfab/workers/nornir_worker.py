@@ -500,8 +500,7 @@ class NornirWorker(NFPWorker):
             kwargs = self.nornir_worker_inventory["netbox"]
         elif self.nornir_worker_inventory.get("netbox") is True:
             kwargs = {}
-        retry = max(1, kwargs.pop("retry", 3))
-        retry_timeout = max(10, kwargs.pop("retry_timeout", 100))
+        timeout = max(10, kwargs.pop("timeout", 100))
 
         # check if need to add devices list
         if "filters" not in kwargs and "devices" not in kwargs:
@@ -519,8 +518,7 @@ class NornirWorker(NFPWorker):
             task="get_nornir_inventory",
             workers="any",
             kwargs=kwargs,
-            timeout=retry_timeout * retry,
-            retry=retry,
+            timeout=timeout,
         )
 
         if nb_inventory_data is None:

@@ -57,14 +57,14 @@ class MessageBuilder:
         worker_address: bytes, sender: bytes, uuid: bytes, data: bytes
     ) -> List[bytes]:
         """Build a POST message from broker to worker."""
-        return [worker_address, b"", WORKER, POST, sender, b"", uuid, data]
+        return [worker_address, b"", BROKER, POST, sender, b"", uuid, data]
 
     @staticmethod
     def broker_to_worker_get(
         worker_address: bytes, sender: bytes, uuid: bytes, data: bytes
     ) -> List[bytes]:
         """Build a GET message from broker to worker."""
-        return [worker_address, b"", WORKER, GET, sender, b"", uuid, data]
+        return [worker_address, b"", BROKER, GET, sender, b"", uuid, data]
 
     @staticmethod
     def broker_to_worker_disconnect(
@@ -72,7 +72,7 @@ class MessageBuilder:
         service: bytes,
     ) -> List[bytes]:
         """Build a DISCONNECT message from broker to worker."""
-        return [worker_address, b"", WORKER, service, DISCONNECT]
+        return [worker_address, b"", BROKER, service, DISCONNECT]
 
     @staticmethod
     def worker_to_broker_ready(service: bytes) -> List[bytes]:
@@ -123,11 +123,11 @@ class MessageBuilder:
         client: bytes, service: bytes, message: List[bytes]
     ) -> List[bytes]:
         """Build RESPONSE message from broker to client."""
-        return [client, b"", CLIENT, RESPONSE, service] + message
+        return [client, b"", BROKER, RESPONSE, service] + message
 
     @staticmethod
     def broker_to_client_event(
         client: bytes, service: bytes, message: List[bytes]
     ) -> List[bytes]:
         """Build EVENT message from broker to client."""
-        return [client, b"", CLIENT, EVENT, service] + message
+        return [client, b"", BROKER, EVENT, service] + message
