@@ -2,8 +2,12 @@
 
 ### CHANGES
 
-1. 
+1. Introduce sqlite3 DB into client for jobs state persistance
+2. Updated NFP semantics for better performance and readability
 
+### FEATURES
+
+1. Client and worker - added `delete_fetched_files` task to remove files fetched from broker
 ---
 
 ## 0.14.0

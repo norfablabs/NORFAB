@@ -1855,6 +1855,12 @@ class NFPWorker:
             ret.result = [t["schema"] for t in NORFAB_WORKER_TASKS.values()]
         return ret
 
+    @Task(fastapi={"methods": ["GET"]})
+    def delete_fetched_files(self, filepath) -> Result:
+        return Result(
+            result=self.client.delete_fetched_files(filepath)
+        )
+
     def start_threads(self) -> None:
         """
         Starts multiple daemon threads required for the worker's operation.

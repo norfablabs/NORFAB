@@ -33,7 +33,7 @@ from .shell_clients.workers.workers_picle_shell import (
     ShowWorkersModel,
     NorfabWorkersCommands,
 )
-from .shell_clients.common import listen_events
+from .shell_clients.common import listen_events, ClientRunJobArgs, log_error_or_result
 from .shell_clients.fastmcp import fastmcp_picle_shell
 
 NFCLIENT = None
@@ -229,6 +229,40 @@ class ListFileDetails(BaseModel):
         pipe = PipeFunctionsModel
         outputter = Outputters.outputter_nested
 
+class DeleteFetchedFiles(ClientRunJobArgs):
+    filepath: StrictStr = Field("*", description="Files location glob pattern")
+
+    @staticmethod
+    @listen_events
+    def run(uuid, *args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+
+        result = NFCLIENT.run_job(
+            "all",
+            "delete_fetched_files",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            uuid=uuid,
+            timeout=timeout,
+        )
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+    @staticmethod
+    def source_workers():
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.get("mmi.service.broker", "show_workers")
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
 
 class FileServiceCommands(BaseModel):
     """
@@ -264,6 +298,7 @@ class FileServiceCommands(BaseModel):
     list_: ListFilesModel = Field(None, description="List files", alias="list")
     copy_: CopyFileModel = Field(None, description="Copy files", alias="copy")
     details: ListFileDetails = Field(None, description="Show file details")
+    delete_fetched_files: DeleteFetchedFiles = Field(None, description="Delete local client files", alias="delete-fetched-files")
 
 
 # ---------------------------------------------------------------------------------------------

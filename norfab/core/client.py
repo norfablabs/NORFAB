@@ -9,6 +9,8 @@ import os
 import threading
 import queue
 import hashlib
+import glob
+import shutil
 from contextlib import contextmanager
 from uuid import uuid4  # random uuid
 
@@ -1228,6 +1230,52 @@ class NFPClient(object):
             ret["status"] = ret["status"].decode("utf-8")
 
         return ret
+
+    def delete_fetched_files(
+        self,
+        filepath: str = "*"
+    ):
+        """
+        Delete files and folders matching the filepath glob pattern.
+        
+        Args:
+            filepath (str): Glob pattern to match files/folders. Default is "*" (all files).
+        
+        Returns:
+            dict: Dictionary with 'deleted' list of deleted paths and 'errors' list of error messages.
+        """
+        files_folder = os.path.join(
+            self.base_dir, "fetchedfiles"
+        )
+        
+        result = {"deleted": [], "errors": []}
+        
+        # Build full pattern path
+        pattern = os.path.join(files_folder, filepath)
+        
+        # Find all matching files and folders
+        matches = glob.glob(pattern, recursive=True)
+        
+        # Sort by depth (deepest first) to avoid deleting parent before children
+        matches.sort(key=lambda x: x.count(os.sep), reverse=True)
+        
+        for match in matches:
+            try:
+                if os.path.isfile(match):
+                    os.remove(match)
+                    result["deleted"].append(match)
+                    log.debug(f"{self.name} - deleted file: {match}")
+                elif os.path.isdir(match):
+                    shutil.rmtree(match)
+                    result["deleted"].append(match)
+                    log.debug(f"{self.name} - deleted folder: {match}")
+            except Exception as e:
+                error_msg = f"Failed to delete {match}: {str(e)}"
+                result["errors"].append(error_msg)
+                log.error(f"{self.name} - {error_msg}")
+        
+        return result
+
 
     def fetch_file(
         self,
