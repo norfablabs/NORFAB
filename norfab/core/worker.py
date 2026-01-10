@@ -61,6 +61,9 @@ class Job:
         self.kwargs = kwargs or {}
         self.task = task
 
+    def __str__(self):
+        return juuid
+
     def event(self, message, **kwargs):
         kwargs.setdefault("task", self.task)
         if self.kwargs.get("progress", False) and self.juuid and self.worker:
@@ -1022,7 +1025,7 @@ def _post(worker, post_queue, destroy_event):
                 client_address,
                 b"",
                 suuid,
-                b"202",
+                b"201", # JOB CREATED
                 json.dumps(
                     {
                         "worker": worker.name,
@@ -1955,6 +1958,9 @@ class NFPWorker:
             f"job uuid: '{uuid}'"
         )
 
+        # inform client that job started
+        job.event(message=f"starting", status="running")
+
         # run the actual job
         try:
             task_started = time.ctime()
@@ -2005,6 +2011,9 @@ class NFPWorker:
             self.db.fail_job(uuid, result_data)
         else:
             self.db.complete_job(uuid, result_data)
+        
+        # inform client that job completed
+        job.event(message=f"completed", status="completed")
 
     def work(self):
         """
