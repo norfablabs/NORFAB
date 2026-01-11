@@ -36,7 +36,7 @@ class FileSharingWorker(NFPWorker):
         self.base_dir = self.filesharing_inventory.get("base_dir")
 
         self.init_done_event.set()
-        log.error(f"{self.name} - Started, {self.filesharing_inventory}")
+        log.debug(f"{self.name} - Started, {self.filesharing_inventory}")
 
     def worker_exit(self):
         pass

@@ -1043,9 +1043,12 @@ def _put(worker, put_queue, destroy_event):
         # Update job inputs
         try:
             worker.running_jobs[suuid].client_input_queue.put(data)
-            log.debug(f"{worker.name} - '{suuid.decode('utf-8')}' added job input")
+            log.debug(f"{worker.name} - '{suuid}' added job input")
         except Exception as e:
-            log.error(f"{worker.name} - failed to update {suuid} job input: {e}")
+            log.error(
+                f"{worker.name} - failed to update {suuid} job input: {e}",
+                exc_info=True,
+            )
 
         put_queue.task_done()
 
@@ -2063,7 +2066,6 @@ class NFPWorker:
             kwargs=copy.deepcopy(kwargs),
             client_input_queue=queue.Queue(maxsize=0),
         )
-
         self.running_jobs[uuid] = job
 
         log.debug(

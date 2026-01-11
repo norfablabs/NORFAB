@@ -589,7 +589,7 @@ def handle_stream(client, juuid: str, status: str, payload: bytes):
         return
 
     # request next set of chunks up to credit
-    while file_transfer["credit"]:
+    while file_transfer["credit"] > 0 and file_transfer["chunk_requests_remaining"] > 0:
         file_transfer["offset"] += file_transfer[
             "chunk_size"
         ]  # Offset of next chunk request
@@ -603,6 +603,7 @@ def handle_stream(client, juuid: str, status: str, payload: bytes):
         )
         client.send_to_broker(NFP.PUT, service, workers, uuid_bytes, request)
         file_transfer["credit"] -= 1
+        file_transfer["chunk_requests_remaining"] -= 1
 
 
 def dispatch_new_jobs(client):
@@ -951,6 +952,14 @@ class NFPClient(object):
             )
         elif command == NFP.GET:
             msg = self.build_message.client_to_broker_get(
+                command=command,
+                service=service,
+                workers=workers,
+                uuid=uuid,
+                request=request,
+            )
+        elif command == NFP.PUT:
+            msg = self.build_message.client_to_broker_put(
                 command=command,
                 service=service,
                 workers=workers,
@@ -1352,6 +1361,9 @@ class NFPClient(object):
         Raises:
             Exception: If there is an error in fetching the file or if the file's MD5 hash does not match the expected hash.
         """
+        # round up digit e.g. if 2.0 -> 2 if 2.1 -> 3 if 0.01 -> 1
+        round_up = lambda num: max(1, (int(num) + (not num.is_integer())))
+
         uuid = uuid4().hex
         result = {"status": "200", "content": None, "error": None}
         downloaded = False
@@ -1382,6 +1394,9 @@ class NFPClient(object):
                 file_details = w_res["result"]
                 self.file_transfers[uuid].update(file_details)
                 self.file_transfers[uuid]["w_name"] = w_name
+                self.file_transfers[uuid]["chunk_requests_remaining"] = round_up(
+                    file_details["size_bytes"] / chunk_size
+                )
                 break
         else:
             result["status"] = "404"
@@ -1412,6 +1427,8 @@ class NFPClient(object):
                 kwargs={"url": url, "offset": 0, "chunk_size": chunk_size},
                 timeout=timeout,
             )
+            # decrement by 1 as calling fetch_job sends first chunk
+            self.file_transfers[uuid]["chunk_requests_remaining"] -= 1
             file_fetch_job = file_fetch_job[w_name]
 
             if file_fetch_job["failed"]:

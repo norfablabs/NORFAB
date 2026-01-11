@@ -4,10 +4,15 @@
 
 1. Introduce sqlite3 DB into client for jobs state persistance
 2. Updated NFP semantics for better performance and readability
+3. Worker - added support for `job.stream` capability to stream a set of bytes back to client, used for file transfers, added new `NFP.STREAM` command as part of this effort
+4. Added support for new `NFP.PUT` command for client to update running jobs on worker, currently used by client to command worker a number of file offsets to stream back, but can be extended to provide user input mid job execution, e.g. agent requiesting input from user.
+5. Client - refactored `fetch_file` method to use new stream and put capabilities
 
 ### FEATURES
 
 1. Client and worker - added `delete_fetched_files` task to remove files fetched from broker
+2. Create new `filesharing` service worker to host files, by default broker run 1 such a worker locally
+
 ---
 
 ## 0.14.0
