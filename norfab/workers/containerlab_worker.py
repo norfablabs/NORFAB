@@ -335,7 +335,7 @@ class ContainerlabWorker(NFPWorker):
             )
             os.rename(
                 downloaded_topology_file, topology_file
-            )  # move tpology file under desired folder
+            )  # move topology file under desired folder
 
         # form command arguments
         args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]

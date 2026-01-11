@@ -763,7 +763,7 @@ class NFPClient(object):
             Sends a job reply message to the broker requesting job results.
         get_iter(service, task, args=None, kwargs=None, workers="all", uuid=None, timeout=600):
             Sends a job reply message to the broker requesting job results and yields results iteratively.
-        fetch_file(url, destination=None, chunk_size=250000, pipiline=10, timeout=600, read=False):
+        fetch_file(url, destination=None, chunk_size=250000, pipeline=10, timeout=600, read=False):
             Downloads a file from the Broker File Sharing Service.
         run_job(service, task, uuid=None, args=None, kwargs=None, workers="all", timeout=600):
             Runs a job and returns results produced by workers.
@@ -1341,7 +1341,7 @@ class NFPClient(object):
         self,
         url: str,
         chunk_size: int = 256000,
-        pipiline: int = 10,
+        pipeline: int = 10,
         timeout: int = 600,
         read: bool = False,
     ) -> Tuple[str, Any]:
@@ -1351,7 +1351,7 @@ class NFPClient(object):
         Parameters:
             url (str): The URL of the file to be fetched.
             chunk_size (int, optional): The size of each chunk to be fetched. Default is 250000 bytes.
-            pipiline (int, optional): The number of chunks to be fetched in transit. Default is 10.
+            pipeline (int, optional): The number of chunks to be fetched in transit. Default is 10.
             timeout (int, optional): The maximum time (in seconds) to wait for the file to be fetched. Default is 600 seconds.
             read (bool, optional): If True, the file content is read and returned. If False, the file path is returned. Default is False.
 
@@ -1367,16 +1367,23 @@ class NFPClient(object):
         uuid = uuid4().hex
         result = {"status": "200", "content": None, "error": None}
         downloaded = False
+
+        # run sanity checks
+        if not url.startswith("nf://"):
+            result["status"] = "500"
+            result["error"] = "Invalid url format"
+            return result
+
+        # make sure all destination directories exist
         destination = os.path.join(
             self.base_dir, "fetchedfiles", *os.path.split(url.replace("nf://", ""))
         )
-        # make sure all destination directories exist
         os.makedirs(os.path.split(destination)[0], exist_ok=True)
 
         self.file_transfers[uuid] = {
             "total_bytes_received": 0,  # Total bytes received
             "offset": 0,  # Offset of next chunk request
-            "credit": pipiline,  # Up to PIPELINE chunks in transit
+            "credit": pipeline,  # Up to PIPELINE chunks in transit
             "chunk_size": chunk_size,
             "file_hash": hashlib.md5(),
         }
@@ -1404,7 +1411,7 @@ class NFPClient(object):
             _ = self.file_transfers.pop(uuid)
             return result
 
-        log.debug(f"{self.name}:fetch_file - retrieved file details - {file_details}")
+        log.error(f"{self.name}:fetch_file - retrieved file details - {file_details}")
 
         # check if file already downloaded
         if os.path.isfile(destination):
@@ -1419,6 +1426,9 @@ class NFPClient(object):
 
         if file_details["exists"] and not downloaded:
             self.file_transfers[uuid]["destination"] = open(destination, "wb")
+            # decrement by 1 because calling fetch_job sends first chunk
+            self.file_transfers[uuid]["chunk_requests_remaining"] -= 1
+            # run fetch file job
             file_fetch_job = self.run_job(
                 uuid=uuid,
                 service="filesharing",
@@ -1427,8 +1437,6 @@ class NFPClient(object):
                 kwargs={"url": url, "offset": 0, "chunk_size": chunk_size},
                 timeout=timeout,
             )
-            # decrement by 1 as calling fetch_job sends first chunk
-            self.file_transfers[uuid]["chunk_requests_remaining"] -= 1
             file_fetch_job = file_fetch_job[w_name]
 
             if file_fetch_job["failed"]:

@@ -969,7 +969,7 @@ class NetboxWorker(NFPWorker):
                     device_cache_key = f"get_devices::{device['name']}"
                     # check if cache is up to date and use it if so
                     if device_cache_key in self.cache and (
-                        self.cache[device_cache_key]["last_updated"]
+                        self.cache[device_cache_key].get("last_updated")
                         == device["last_updated"]
                         or cache == "force"
                     ):

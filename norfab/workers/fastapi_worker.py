@@ -791,9 +791,6 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
         timeout: Annotated[
             int, Body(description="The timeout for the job in seconds")
         ] = 600,
-        retry: Annotated[
-            int, Body(description="The number of times to try and GET job results")
-        ] = 10,
         token: str = Depends(get_token),
     ) -> Dict[str, Result]:
         """
@@ -811,7 +808,6 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
             workers: The workers to dispatch the task. Defaults to "all".
             uuid: A unique identifier for the job. Defaults to None.
             timeout: The timeout for the job in seconds. Defaults to 600.
-            retry: The number of times to try and GET job results. Defaults to 10.
 
         Returns:
             The response from the NorFab service.
@@ -827,7 +823,6 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
-            retry=retry,
         )
         return res
 

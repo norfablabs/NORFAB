@@ -1,0 +1,2 @@
+This is test file 2 content.
+Different content from file 1.
