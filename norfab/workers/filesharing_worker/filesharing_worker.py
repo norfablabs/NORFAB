@@ -41,6 +41,37 @@ class FileSharingWorker(NFPWorker):
     def worker_exit(self):
         pass
 
+    def _safe_path(self, url: str) -> str:
+        """
+        Resolve a custom 'nf://' URL to a safe filesystem path within the base directory.
+
+        This method ensures that the resolved path:
+
+        - Is derived from a valid 'nf://' URL format.
+        - Does not allow absolute paths.
+        - Prevents directory traversal attacks by ensuring the resolved path remains
+          within the specified base directory.
+
+        Args:
+            url (str): The 'nf://' URL to be resolved into a filesystem path.
+
+        Returns:
+            str: The resolved and validated filesystem path.
+
+        Raises:
+            ValueError: If the URL format is invalid or the resolved path is outside
+                        the base directory.
+        """
+        if not url.startswith("nf://"):
+            raise ValueError(f"'{url}' - invalid URL format")
+        url_path = url.replace("nf://", "")
+        url_path = url_path.lstrip("/\\")
+        base_abs = os.path.abspath(self.base_dir)
+        candidate = os.path.abspath(os.path.join(base_abs, *url_path.split("/")))
+        if os.path.commonpath([base_abs, candidate]) != base_abs:
+            raise ValueError(f"'{url}' - invalid URL path")
+        return candidate
+
     @Task(fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         libs = {
@@ -76,13 +107,12 @@ class FileSharingWorker(NFPWorker):
             Result containing list of files or error message
         """
         ret = Result(result=None)
-        if not url.startswith("nf://"):
+        try:
+            full_path = self._safe_path(url)
+        except ValueError as e:
             ret.failed = True
-            ret.errors = [f"'{url}' - invalid URL format"]
+            ret.errors = [str(e)]
             return ret
-
-        url_path = url.replace("nf://", "")
-        full_path = os.path.join(self.base_dir, url_path)
 
         if os.path.exists(full_path) and os.path.isdir(full_path):
             ret.result = os.listdir(full_path)
@@ -103,13 +133,12 @@ class FileSharingWorker(NFPWorker):
             Result containing md5hash, size_bytes, and exists fields
         """
         ret = Result(result={"md5hash": None, "size_bytes": None, "exists": False})
-        if not url.startswith("nf://"):
+        try:
+            full_path = self._safe_path(url)
+        except ValueError as e:
             ret.failed = True
-            ret.errors = [f"'{url}' - invalid URL format"]
+            ret.errors = [str(e)]
             return ret
-
-        url_path = url.replace("nf://", "")
-        full_path = os.path.join(self.base_dir, url_path)
         exists = os.path.exists(full_path) and os.path.isfile(full_path)
 
         # calculate md5 hash
@@ -146,13 +175,12 @@ class FileSharingWorker(NFPWorker):
             Result containing list of all file paths or error message
         """
         ret = Result(result=None)
-        if not url.startswith("nf://"):
+        try:
+            full_path = self._safe_path(url)
+        except ValueError as e:
             ret.failed = True
-            ret.errors = [f"'{url}' - invalid URL format"]
+            ret.errors = [str(e)]
             return ret
-
-        url_path = url.replace("nf://", "")
-        full_path = os.path.join(self.base_dir, url_path)
 
         if os.path.exists(full_path) and os.path.isdir(full_path):
             files_list = []
@@ -198,13 +226,12 @@ class FileSharingWorker(NFPWorker):
             Result containing file chunk bytes or error message
         """
         ret = Result(result=None)
-        if not url.startswith("nf://"):
+        try:
+            full_path = self._safe_path(url)
+        except ValueError as e:
             ret.failed = True
-            ret.errors = [f"'{url}' file URL format is wrong"]
+            ret.errors = [str(e)]
             return ret
-
-        url_path = url.replace("nf://", "")
-        full_path = os.path.join(self.base_dir, url_path)
 
         if os.path.exists(full_path):
             size = os.path.getsize(full_path)
@@ -212,8 +239,9 @@ class FileSharingWorker(NFPWorker):
                 while True:
                     f.seek(offset, os.SEEK_SET)
                     chunk = f.read(chunk_size)
-                    job.stream(chunk)
-                    if f.tell() == size:
+                    if chunk:
+                        job.stream(chunk)
+                    if f.tell() >= size:
                         break
                     client_response = job.wait_client_input(timeout=chunk_timeout)
                     if not client_response:

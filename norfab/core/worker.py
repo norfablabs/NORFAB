@@ -64,9 +64,9 @@ class Job:
         self.client_input_queue = client_input_queue
 
     def __str__(self):
-        return juuid
+        return self.juuid
 
-    def event(self, message, **kwargs):
+    def event(self, message: str, **kwargs: Any):
         """
         Handles an event by forwarding it to the worker.
 
@@ -1037,16 +1037,16 @@ def _put(worker, put_queue, destroy_event):
         except queue.Empty:
             continue
 
-        suuid = work[2].decode("utf-8")
-        data = json.loads(work[3].decode("utf-8"))
-
         # Update job inputs
+        suuid = None
         try:
+            suuid = work[2].decode("utf-8")
+            data = json.loads(work[3].decode("utf-8"))
             worker.running_jobs[suuid].client_input_queue.put(data)
             log.debug(f"{worker.name} - '{suuid}' added job input")
         except Exception as e:
             log.error(
-                f"{worker.name} - failed to update {suuid} job input: {e}",
+                f"{worker.name} - failed to update {suuid or '<unknown>'} job input: {e}",
                 exc_info=True,
             )
 

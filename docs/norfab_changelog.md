@@ -11,7 +11,7 @@
 ### FEATURES
 
 1. Client and worker - added `delete_fetched_files` task to remove files fetched from broker
-2. Create new `filesharing` service worker to host files, by default broker run 1 such a worker locally
+2. Created new `filesharing` service worker to host files, by default broker run 1 such worker locally, this improves norfab hosting capabilities and open paths toward integrating with external file sharing resources e.g. github, s3, http etc.
 
 ---
 

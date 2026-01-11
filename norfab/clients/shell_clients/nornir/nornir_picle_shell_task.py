@@ -22,7 +22,6 @@ class NornirTaskShell(
     plugin: StrictStr = Field(
         ...,
         description="Nornir task.plugin.name to import or nf://path/to/plugin/file.py",
-        mandatory=True,
     )
     arguments: StrictStr = Field(
         None,

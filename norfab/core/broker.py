@@ -443,7 +443,9 @@ class NFPBroker:
             log.error(f"NFPBroker - invalid worker command: {command}")
             return
         with self.socket_lock:
-            log.debug(f"NFPBroker - sending to worker '{msg}'")
+            log.debug(
+                f"NFPBroker - sending command '{command}' to worker '{worker.address}', job '{uuid}', from client '{sender}'"
+            )
             self.socket.send_multipart(msg)
 
     def send_to_client(
@@ -476,7 +478,9 @@ class NFPBroker:
             log.error(f"NFPBroker - invalid client command: {command}")
             return
         with self.socket_lock:
-            log.debug(f"NFPBroker - sending to client '{msg}'")
+            log.debug(
+                f"NFPBroker - sending to client '{client}', command '{command}', service '{service}'"
+            )
             self.socket.send_multipart(msg)
 
     def process_worker(self, sender: str, msg: list):
@@ -734,8 +738,10 @@ class NFPBroker:
                     ).encode("utf-8"),
                 ],
             )
-        else:
-            # inform client that JOB dispatched
+            return
+
+        # inform client that JOB dispatched for POST requests
+        if command == NFP.POST:
             w_addresses = [w.address.decode("utf-8") for w in workers]
             self.send_to_client(
                 sender,
@@ -755,9 +761,10 @@ class NFPBroker:
                     ).encode("utf-8"),
                 ],
             )
-            # send job to workers
-            for worker in workers:
-                self.send_to_worker(worker, command, sender, uuid, data)
+
+        # send job to workers
+        for worker in workers:
+            self.send_to_worker(worker, command, sender, uuid, data)
 
     def mmi_service(self, sender, command, target, uuid, data):
         """

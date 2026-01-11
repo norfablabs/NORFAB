@@ -204,6 +204,7 @@ nav:
 
 - Development:
   - Documentation Style Guide: development/documentation_style_guide.md
+  - File Streaming (fetch_file): development/file_streaming_fetch_file.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
     - Netbox Service Tests: testing/netbox_service_tests.md

@@ -382,7 +382,6 @@ def recv(client):
             except zmq.Again:
                 continue
 
-        log.debug(f"{client.name} - received '{msg}'")
         client.stats_recv_from_broker += 1
 
         # Message format: [empty, header, command, service, uuid, status, payload]
@@ -393,6 +392,10 @@ def recv(client):
         command = msg[2]
         juuid = msg[4].decode("utf-8")
         status = msg[5].decode("utf-8")
+
+        log.debug(
+            f"{client.name} - received '{command}' message from broker, juuid {juuid}, status {status}"
+        )
 
         if command == NFP.STREAM:
             payload = msg[6]  # payload is a chunk of bytes
@@ -418,7 +421,7 @@ def recv(client):
             client.recv_queue.put(msg)
 
 
-def handle_event(client, juuid: str, payload: dict, msg: list):
+def handle_event(client: object, juuid: str, payload: dict, msg: list):
     """
     Handle EVENT messages and update job database accordingly.
 
@@ -568,7 +571,7 @@ def handle_stream(client, juuid: str, status: str, payload: bytes):
     file_transfer["file_hash"].update(payload)
 
     # check if done
-    if file_transfer["total_bytes_received"] == file_transfer["size_bytes"]:
+    if file_transfer["total_bytes_received"] >= file_transfer["size_bytes"]:
         destination.close()
 
         # check md5hash mismatch
@@ -1297,7 +1300,7 @@ class NFPClient(object):
 
         return ret
 
-    def delete_fetched_files(self, filepath: str = "*"):
+    def delete_fetched_files(self, filepath: str = "*") -> dict:
         """
         Delete files and folders matching the filepath glob pattern.
 
@@ -1374,10 +1377,18 @@ class NFPClient(object):
             result["error"] = "Invalid url format"
             return result
 
-        # make sure all destination directories exist
-        destination = os.path.join(
-            self.base_dir, "fetchedfiles", *os.path.split(url.replace("nf://", ""))
+        # prevent path traversal / absolute paths
+        url_path = url.replace("nf://", "")
+        url_path = url_path.lstrip("/\\")
+        destination = os.path.abspath(
+            os.path.join(self.base_dir, "fetchedfiles", *url_path.split("/"))
         )
+        fetched_root = os.path.abspath(os.path.join(self.base_dir, "fetchedfiles"))
+        if os.path.commonpath([fetched_root, destination]) != fetched_root:
+            result["status"] = "500"
+            result["error"] = "Invalid url path"
+            return result
+
         os.makedirs(os.path.split(destination)[0], exist_ok=True)
 
         self.file_transfers[uuid] = {
@@ -1411,7 +1422,7 @@ class NFPClient(object):
             _ = self.file_transfers.pop(uuid)
             return result
 
-        log.error(f"{self.name}:fetch_file - retrieved file details - {file_details}")
+        log.debug(f"{self.name}:fetch_file - retrieved file details - {file_details}")
 
         # check if file already downloaded
         if os.path.isfile(destination):
@@ -1447,7 +1458,14 @@ class NFPClient(object):
                 downloaded = True
 
         if downloaded:
-            if read:
+            # Verify streaming did not mark job failed (e.g., MD5 mismatch)
+            download_job = self.job_db.get_job(uuid)
+            if download_job and download_job.get("status") == JobStatus.FAILED:
+                result["error"] = (
+                    f"File download job {uuid} failed: {download_job.get('errors', [])}"
+                )
+                result["status"] = "400"
+            elif read:
                 with open(destination, "r", encoding="utf-8") as f:
                     result["content"] = f.read()
             else:

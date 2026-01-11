@@ -139,6 +139,33 @@ class TestListFiles:
                 "Directory Not Found" in results["errors"]
             ), f"{worker} returned wrong error message"
 
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "nf://../pyproject.toml",
+            "nf://..\\pyproject.toml",
+            "nf://filesharing/../../pyproject.toml",
+            "nf://filesharing/..\\..\\pyproject.toml",
+        ],
+    )
+    def test_list_files_rejects_path_traversal(self, nfclient, url):
+        """Worker should reject nf:// paths that escape base_dir."""
+        ret = nfclient.run_job(
+            "filesharing",
+            "list_files",
+            workers=["filesharing-worker-1"],
+            kwargs={"url": url},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] is True, f"{worker} did not fail as expected"
+            assert results.get("errors"), f"{worker} expected errors"
+            assert (
+                "invalid URL path" in results["errors"][0]
+                or "invalid URL format" in results["errors"][0]
+            ), f"{worker} returned wrong error message: {results['errors']}"
+
 
 # ----------------------------------------------------------------------------
 # FILE DETAILS TESTS
@@ -247,6 +274,33 @@ class TestFileDetails:
                 results["result"]["md5hash"] is not None
             ), f"{worker} md5hash should not be None"
 
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "nf://../pyproject.toml",
+            "nf://..\\pyproject.toml",
+            "nf://filesharing/../../pyproject.toml",
+            "nf://filesharing/..\\..\\pyproject.toml",
+        ],
+    )
+    def test_file_details_rejects_path_traversal(self, nfclient, url):
+        """Worker should reject nf:// paths that escape base_dir."""
+        ret = nfclient.run_job(
+            "filesharing",
+            "file_details",
+            workers=["filesharing-worker-1"],
+            kwargs={"url": url},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] is True, f"{worker} did not fail as expected"
+            assert results.get("errors"), f"{worker} expected errors"
+            assert (
+                "invalid URL path" in results["errors"][0]
+                or "invalid URL format" in results["errors"][0]
+            ), f"{worker} returned wrong error message: {results['errors']}"
+
 
 # ----------------------------------------------------------------------------
 # WALK TESTS
@@ -337,6 +391,33 @@ class TestWalk:
                 "Directory Not Found" in results["errors"]
             ), f"{worker} returned wrong error message"
 
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "nf://../pyproject.toml",
+            "nf://..\\pyproject.toml",
+            "nf://filesharing/../../pyproject.toml",
+            "nf://filesharing/..\\..\\pyproject.toml",
+        ],
+    )
+    def test_walk_rejects_path_traversal(self, nfclient, url):
+        """Worker should reject nf:// paths that escape base_dir."""
+        ret = nfclient.run_job(
+            "filesharing",
+            "walk",
+            workers=["filesharing-worker-1"],
+            kwargs={"url": url},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] is True, f"{worker} did not fail as expected"
+            assert results.get("errors"), f"{worker} expected errors"
+            assert (
+                "invalid URL path" in results["errors"][0]
+                or "invalid URL format" in results["errors"][0]
+            ), f"{worker} returned wrong error message: {results['errors']}"
+
 
 # ----------------------------------------------------------------------------
 # FETCH FILE TESTS
@@ -422,3 +503,22 @@ class TestFetchFile:
         assert ret["status"] == "200", f"failed to fetch file"
         assert ret["content"], f"no file path returned"
         assert os.path.exists(ret["content"]), f"file does not exist"
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "nf://../pyproject.toml",
+            "nf://..\\pyproject.toml",
+            "nf://filesharing/../../pyproject.toml",
+            "nf://filesharing/..\\..\\pyproject.toml",
+        ],
+    )
+    def test_fetch_file_rejects_path_traversal(self, nfclient, url):
+        """Client should reject nf:// paths that escape fetchedfiles root."""
+        ret = nfclient.fetch_file(url=url)
+        pprint.pprint(ret)
+
+        assert ret["status"] == "500", "expected client-side rejection"
+        assert ret["content"] is None, "content should be empty"
+        assert ret["error"], "expected error"
+        assert "Invalid url path" in ret["error"], "wrong error message"
