@@ -178,9 +178,6 @@ class NorFab:
         # find all workers plugins
         self.register_plugins()
 
-        # update inventory to include build in services
-        self.add_built_in_workers_inventory()
-
     def __enter__(self):
         self.start()
         self.make_client()
@@ -442,6 +439,8 @@ class NorFab:
 
         # start the broker
         if run_broker is True and self.inventory.topology.get("broker") is True:
+            # update inventory to include build in services
+            self.add_built_in_workers_inventory()
             self.start_broker()
 
         # decide on a set of workers to start
