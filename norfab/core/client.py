@@ -390,13 +390,21 @@ def recv(client):
             log.error(f"{client.name} - received malformed message: {msg}")
             continue
 
+        command = msg[2]
+        juuid = msg[4].decode("utf-8")
+        status = msg[5].decode("utf-8")
+
+        if command == NFP.STREAM:
+            payload = msg[6]  # payload is a chunk of bytes
+            handle_stream(client, juuid, status, payload)
+            continue
+
         try:
-            command = msg[2]
-            juuid = msg[4].decode("utf-8")
-            status = msg[5].decode("utf-8") 
             payload = json.loads(msg[6].decode("utf-8"))
         except Exception as e:
-            log.error(f"{client.name} - failed to parse message '{msg}', error '{e}'", exc_info=True)
+            log.error(
+                f"{client.name} - failed to parse message, error '{e}'", exc_info=True
+            )
             continue
 
         # Handle EVENT messages
@@ -408,11 +416,6 @@ def recv(client):
             handle_response(client, juuid, status, payload)
             # Also put in queue for synchronous callers (backwards compatibility)
             client.recv_queue.put(msg)
-
-        # Handle STREAM messages
-        if command == NFP.STREAM:
-            handle_stream(client, juuid, status, payload)
-
 
 
 def handle_event(client, juuid: str, payload: dict, msg: list):
@@ -427,18 +430,13 @@ def handle_event(client, juuid: str, payload: dict, msg: list):
     """
     client.event_queue.put(msg)
     client.stats_recv_event_from_broker += 1
-    try:
-        client.job_db.add_event(
-            job_uuid=juuid,
-            message=payload.get("message", ""),
-            severity=payload.get("severity", "INFO"),
-            task=payload.get("task"),
-            event_data=payload,
-        )
-    except Exception:
-        log.error(
-            f"{client.name} - failed to store event '{msg}'", exc_info=True
-        )
+    client.job_db.add_event(
+        job_uuid=juuid,
+        message=payload.get("message", ""),
+        severity=payload.get("severity", "INFO"),
+        task=payload.get("task"),
+        event_data=payload,
+    )
 
 
 def handle_response(client, juuid: str, status: str, payload: dict):
@@ -464,7 +462,7 @@ def handle_response(client, juuid: str, status: str, payload: dict):
     job_status = job.get("status")
 
     # Broker accepted POST - contains dispatched workers list
-    if status == "202": # ACCEPTED
+    if status == "202":  # ACCEPTED
         workers_list = payload["workers"]
         client.job_db.update_job(
             juuid,
@@ -472,13 +470,11 @@ def handle_response(client, juuid: str, status: str, payload: dict):
             workers_dispatched=workers_list,
             started_ts=time.ctime(),
         )
-        log.debug(
-            f"{client.name} - job {juuid} dispatched to workers: {workers_list}"
-        )
+        log.debug(f"{client.name} - job {juuid} dispatched to workers: {workers_list}")
         return
 
     # Worker created the job
-    if status == "201": # JOB CREATED
+    if status == "201":  # JOB CREATED
         worker_single = payload["worker"]
         started = set(job.get("workers_started", []))
         started.add(worker_single)
@@ -549,8 +545,65 @@ def handle_response(client, juuid: str, status: str, payload: dict):
         log.error(f"{client.name} - job {juuid} failed: {error_msg}")
         return
 
-def handle_stream(client, juuid: str, status: str, payload: dict):
-    pass
+
+def handle_stream(client, juuid: str, status: str, payload: bytes):
+    job = client.job_db.get_job(juuid)
+    file_transfer = client.file_transfers.get(juuid)
+
+    if not job:
+        log.error(f"{client.name} - received stream for unknown job {juuid}")
+        return
+
+    if not file_transfer:
+        log.error(f"{client.name} - received stream for unknown file transfer {juuid}")
+        return
+
+    destination = file_transfer["destination"]  # file object
+    size = len(payload)
+    file_transfer["credit"] += 1  # Up to PIPELINE chunks in transit
+    file_transfer["total_bytes_received"] += size
+
+    # save received chunk
+    destination.write(payload)
+    file_transfer["file_hash"].update(payload)
+
+    # check if done
+    if file_transfer["total_bytes_received"] == file_transfer["size_bytes"]:
+        destination.close()
+
+        # check md5hash mismatch
+        file_hash = file_transfer["file_hash"].hexdigest()
+        if file_hash != file_transfer["md5hash"]:
+            client.job_db.update_job(
+                juuid,
+                status=JobStatus.FAILED,
+                errors=["Download failed, MD5 hash mismatch"],
+            )
+            log.error(
+                f"{client.name} - file download failed, MD5 hash mismatch, job '{juuid}', filename '{destination.name}'"
+            )
+
+        log.debug(
+            f"{client.name} - finished file download, job '{juuid}', filename '{destination.name}'"
+        )
+        return
+
+    # request next set of chunks up to credit
+    while file_transfer["credit"]:
+        file_transfer["offset"] += file_transfer[
+            "chunk_size"
+        ]  # Offset of next chunk request
+        service = client.ensure_bytes(job["service"])
+        uuid_bytes = client.ensure_bytes(juuid)
+        workers = client.ensure_bytes(job["workers_requested"])
+        request = client.ensure_bytes(
+            {
+                "offset": file_transfer["offset"],
+            }
+        )
+        client.send_to_broker(NFP.PUT, service, workers, uuid_bytes, request)
+        file_transfer["credit"] -= 1
+
 
 def dispatch_new_jobs(client):
     """
@@ -561,7 +614,7 @@ def dispatch_new_jobs(client):
         [JobStatus.NEW], limit=client.dispatch_batch_size
     ):
         juuid = job["uuid"]
-        
+
         try:
             # Send POST request (non-blocking)
             service = client.ensure_bytes(job["service"])
@@ -647,9 +700,7 @@ def poll_active_jobs(client):
             log.debug(f"{client.name} - sent GET poll for job {juuid}")
 
         except Exception as e:
-            log.error(
-                f"{client.name} - failed to poll job {juuid}: {e}", exc_info=True
-            )
+            log.error(f"{client.name} - failed to poll job {juuid}: {e}", exc_info=True)
             # Don't fail the job on poll error, just log and retry next cycle
 
 
@@ -757,7 +808,7 @@ class NFPClient(object):
         self.base_dir = os.path.join(
             self.inventory.base_dir, "__norfab__", "files", "client", self.name
         )
-        self.running_job = None
+        self.file_transfers = {}  # file transfers tracker
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.socket_lock = threading.Lock()  # used to protect socket object
         self.build_message = NFP.MessageBuilder()
@@ -1237,34 +1288,29 @@ class NFPClient(object):
 
         return ret
 
-    def delete_fetched_files(
-        self,
-        filepath: str = "*"
-    ):
+    def delete_fetched_files(self, filepath: str = "*"):
         """
         Delete files and folders matching the filepath glob pattern.
-        
+
         Args:
             filepath (str): Glob pattern to match files/folders. Default is "*" (all files).
-        
+
         Returns:
             dict: Dictionary with 'deleted' list of deleted paths and 'errors' list of error messages.
         """
-        files_folder = os.path.join(
-            self.base_dir, "fetchedfiles"
-        )
-        
+        files_folder = os.path.join(self.base_dir, "fetchedfiles")
+
         result = {"deleted": [], "errors": []}
-        
+
         # Build full pattern path
         pattern = os.path.join(files_folder, filepath)
-        
+
         # Find all matching files and folders
         matches = glob.glob(pattern, recursive=True)
-        
+
         # Sort by depth (deepest first) to avoid deleting parent before children
         matches.sort(key=lambda x: x.count(os.sep), reverse=True)
-        
+
         for match in matches:
             try:
                 if os.path.isfile(match):
@@ -1279,15 +1325,13 @@ class NFPClient(object):
                 error_msg = f"Failed to delete {match}: {str(e)}"
                 result["errors"].append(error_msg)
                 log.error(f"{self.name} - {error_msg}")
-        
-        return result
 
+        return result
 
     def fetch_file(
         self,
         url: str,
-        destination: str = None,
-        chunk_size: int = 250000,
+        chunk_size: int = 256000,
         pipiline: int = 10,
         timeout: int = 600,
         read: bool = False,
@@ -1297,9 +1341,8 @@ class NFPClient(object):
 
         Parameters:
             url (str): The URL of the file to be fetched.
-            destination (str, optional): The local path where the file should be saved. If None, a default path is used.
             chunk_size (int, optional): The size of each chunk to be fetched. Default is 250000 bytes.
-            pipiline (int, optional): The number of chunks to be fetched in parallel. Default is 10.
+            pipiline (int, optional): The number of chunks to be fetched in transit. Default is 10.
             timeout (int, optional): The maximum time (in seconds) to wait for the file to be fetched. Default is 600 seconds.
             read (bool, optional): If True, the file content is read and returned. If False, the file path is returned. Default is False.
 
@@ -1309,32 +1352,44 @@ class NFPClient(object):
         Raises:
             Exception: If there is an error in fetching the file or if the file's MD5 hash does not match the expected hash.
         """
-        uuid = self.ensure_bytes(str(uuid4().hex))
-        total = 0  # Total bytes received
-        chunks = 0  # Total chunks received
-        offset = 0  # Offset of next chunk request
-        credit = pipiline  # Up to PIPELINE chunks in transit
-        service = b"fss.service.broker"
-        workers = b"any"
-        reply = ""
-        status = "200"
+        uuid = uuid4().hex
+        result = {"status": "200", "content": None, "error": None}
         downloaded = False
-        md5hash = None
-
-        # define file destination
-        if destination is None:
-            destination = os.path.join(
-                self.base_dir, "fetchedfiles", *os.path.split(url.replace("nf://", ""))
-            )
-
+        destination = os.path.join(
+            self.base_dir, "fetchedfiles", *os.path.split(url.replace("nf://", ""))
+        )
         # make sure all destination directories exist
         os.makedirs(os.path.split(destination)[0], exist_ok=True)
 
+        self.file_transfers[uuid] = {
+            "total_bytes_received": 0,  # Total bytes received
+            "offset": 0,  # Offset of next chunk request
+            "credit": pipiline,  # Up to PIPELINE chunks in transit
+            "chunk_size": chunk_size,
+            "file_hash": hashlib.md5(),
+        }
+
         # get file details
-        request = self.ensure_bytes({"task": "file_details", "kwargs": {"url": url}})
-        self.send_to_broker(NFP.GET, service, workers, uuid, request)
-        rcv_status, file_details = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-        file_details = json.loads(file_details)
+        file_details = self.run_job(
+            service="filesharing",
+            workers="all",
+            task="file_details",
+            kwargs={"url": url},
+            timeout=timeout,
+        )
+        for w_name, w_res in file_details.items():
+            if not w_res["failed"]:
+                file_details = w_res["result"]
+                self.file_transfers[uuid].update(file_details)
+                self.file_transfers[uuid]["w_name"] = w_name
+                break
+        else:
+            result["status"] = "404"
+            result["error"] = "File download failed - file not found"
+            _ = self.file_transfers.pop(uuid)
+            return result
+
+        log.debug(f"{self.name}:fetch_file - retrieved file details - {file_details}")
 
         # check if file already downloaded
         if os.path.isfile(destination):
@@ -1346,70 +1401,36 @@ class NFPClient(object):
                     chunk = f.read(8192)
             md5hash = file_hash.hexdigest()
             downloaded = md5hash == file_details["md5hash"]
-            log.debug(f"{self.name} - file already downloaded, nothing to do")
 
-        # fetch file content from broker and save to local file
-        if file_details["exists"] is True and downloaded is False:
-            file_hash = hashlib.md5()
-            with open(destination, "wb") as dst_file:
-                start_time = time.time()
-                while timeout > time.time() - start_time:
-                    # check if need to stop
-                    if self.exit_event.is_set() or self.destroy_event.is_set():
-                        return "400", ""
-                    # ask for chunks
-                    while credit:
-                        request = self.ensure_bytes(
-                            {
-                                "task": "fetch_file",
-                                "kwargs": {
-                                    "offset": offset,
-                                    "chunk_size": chunk_size,
-                                    "url": url,
-                                },
-                            }
-                        )
-                        self.send_to_broker(NFP.GET, service, workers, uuid, request)
-                        offset += chunk_size
-                        credit -= 1
-                    # receive chunks from broker
-                    status, chunk = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-                    log.debug(
-                        f"{self.name} - status '{status}', chunk '{chunks}', downloaded '{total}'"
-                    )
-                    dst_file.write(chunk)
-                    file_hash.update(chunk)
-                    chunks += 1
-                    credit += 1
-                    size = len(chunk)
-                    total += size
-                    if size < chunk_size:
-                        break  # Last chunk received; exit
-                else:
-                    reply = "File download failed - timeout"
-                    status = "408"
-            # verify md5hash
-            md5hash = file_hash.hexdigest()
-        elif file_details["exists"] is False:
-            reply = "File download failed - file not found"
-            status = "404"
+        if file_details["exists"] and not downloaded:
+            self.file_transfers[uuid]["destination"] = open(destination, "wb")
+            file_fetch_job = self.run_job(
+                uuid=uuid,
+                service="filesharing",
+                workers=[w_name],
+                task="fetch_file",
+                kwargs={"url": url, "offset": 0, "chunk_size": chunk_size},
+                timeout=timeout,
+            )
+            file_fetch_job = file_fetch_job[w_name]
 
-        # decide on what to reply and status
-        if file_details["exists"] is not True:
-            reply = reply
-        elif md5hash != file_details["md5hash"]:
-            reply = "File download failed - MD5 hash mismatch"
-            status = "417"
-        elif read:
-            with open(destination, "r", encoding="utf-8") as f:
-                reply = f.read()
-        else:
-            reply = destination
-        # decode status
-        if isinstance(status, bytes):
-            status = status.decode("utf-8")
+            if file_fetch_job["failed"]:
+                result["status"] = "404"
+                result["error"] = file_fetch_job["errors"]
+                downloaded = False
+            else:
+                downloaded = True
 
-        return status, reply
+        if downloaded:
+            if read:
+                with open(destination, "r", encoding="utf-8") as f:
+                    result["content"] = f.read()
+            else:
+                result["content"] = destination
+
+        _ = self.file_transfers.pop(uuid)
+
+        return result
 
     def run_job(
         self,
@@ -1466,7 +1487,9 @@ class NFPClient(object):
                 log.warning(f"{self.name} - job {uuid} failed: {job.get('errors', [])}")
                 break
             if job["status"] == JobStatus.STALE:
-                log.warning(f"{self.name} - job {uuid} became stale: {job.get('errors', [])}")
+                log.warning(
+                    f"{self.name} - job {uuid} became stale: {job.get('errors', [])}"
+                )
                 break
             time.sleep(0.2)
 
@@ -1483,3 +1506,6 @@ class NFPClient(object):
         self.destroy_event.set()
         self.job_db.close()
         self.ctx.destroy()
+        # close all file transfer files
+        for file_transfer in self.file_transfers.values():
+            file_transfer["destination"].close()

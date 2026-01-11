@@ -188,8 +188,6 @@ class NFPBroker:
             Handle internal service according to 8/MMI specification.
         inventory_service(self, sender, command, target, uuid, data):
             Handle inventory service requests.
-        file_sharing_service(self, sender, command, target, uuid, data):
-            Handle file sharing service requests.
 
     Args:
         endpoint (str): The endpoint address for the broker to bind to.
@@ -437,6 +435,10 @@ class NFPBroker:
             msg = self.build_message.broker_to_worker_get(
                 worker_address=worker.address, sender=sender, uuid=uuid, data=data
             )
+        elif command == NFP.PUT:
+            msg = self.build_message.broker_to_worker_put(
+                worker_address=worker.address, sender=sender, uuid=uuid, data=data
+            )
         else:
             log.error(f"NFPBroker - invalid worker command: {command}")
             return
@@ -492,6 +494,7 @@ class NFPBroker:
         - NFP.KEEPALIVE: Processes a keepalive message from the worker.
         - NFP.DISCONNECT: Handles worker disconnection.
         - NFP.EVENT: Sends an event to a client.
+        - NFP.STREAM: Sends an stream data to a client.
 
         If the worker is not ready and an invalid command is received, the worker is deleted.
 
@@ -522,6 +525,10 @@ class NFPBroker:
             client = msg.pop(0)
             empty = msg.pop(0)  # noqa
             self.send_to_client(client, NFP.EVENT, worker.service.name, msg)
+        elif NFP.STREAM == command and worker.is_ready():
+            client = msg.pop(0)
+            empty = msg.pop(0)  # noqa
+            self.send_to_client(client, NFP.STREAM, worker.service.name, msg)
         elif not worker.is_ready():
             self.delete_worker(worker, disconnect=True)
         else:
@@ -611,8 +618,6 @@ class NFPBroker:
             self.mmi_service(sender, command, target, uuid, data)
         elif service == b"sid.service.broker":
             self.inventory_service(sender, command, target, uuid, data)
-        elif service == b"fss.service.broker":
-            self.file_sharing_service(sender, command, target, uuid, data)
         else:
             self.dispatch(
                 sender, command, self.require_service(service), target, uuid, data
@@ -715,8 +720,8 @@ class NFPBroker:
                 NFP.RESPONSE,
                 service.name,
                 [
-                    uuid, 
-                    b"400", 
+                    uuid,
+                    b"400",
                     json.dumps(
                         {
                             "workers": None,
@@ -724,9 +729,9 @@ class NFPBroker:
                             "target": target.decode("utf-8"),
                             "status": "FAILED",
                             "service": service.name.decode("utf-8"),
-                            "errors": [message]
+                            "errors": [message],
                         }
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ],
             )
         else:
@@ -874,99 +879,4 @@ class NFPBroker:
         reply = json.dumps(ret).encode("utf-8")
         self.send_to_client(
             sender, NFP.RESPONSE, b"sid.service.broker", [uuid, b"200", reply]
-        )
-
-    def file_sharing_service(self, sender, command, target, uuid, data):
-        log.debug(
-            f"fss.service.broker - processing request: sender '{sender}', "
-            f"command '{command}', target '{target}'"
-            f"data '{data}', uuid '{uuid}'"
-        )
-        data = json.loads(data)
-        task = data.get("task")
-        kwargs = data.get("kwargs", {})
-        url = kwargs.get("url")
-        reply = f"Unsupported task '{task}'"
-        status = b"200"
-        if url is None:
-            reply = "No file URL provided"
-        elif url.startswith("nf://"):
-            url_path = url.replace("nf://", "")
-            if task == "fetch_file":
-                chunk_size = int(kwargs["chunk_size"])
-                offset = int(kwargs["offset"])  # number of chunks to offset
-                full_path = os.path.join(self.base_dir, url_path)
-                if os.path.exists(full_path):
-                    with open(full_path, "rb") as f:
-                        f.seek(offset, os.SEEK_SET)
-                        reply = f.read(chunk_size)
-                    self.send_to_client(
-                        sender, NFP.STREAM, b"fss.service.broker", [uuid, status, reply]
-                    )
-                    return
-                else:
-                    reply = f"Not Found '{full_path}'"
-            elif task == "list_files":
-                full_path = os.path.join(self.base_dir, url_path)
-                if os.path.exists(full_path) and os.path.isdir(full_path):
-                    reply = os.listdir(full_path)
-                    reply = json.dumps(reply).encode("utf-8")
-                else:
-                    reply = json.dumps(["Directory Not Found"]).encode("utf-8")
-            elif task == "file_details":
-                full_path = os.path.join(self.base_dir, url_path)
-                exists = os.path.exists(full_path) and os.path.isfile(full_path)
-                # calculate md5 hash
-                md5hash = None
-                if exists:
-                    with open(full_path, "rb") as f:
-                        file_hash = hashlib.md5()
-                        chunk = f.read(8192)
-                        while chunk:
-                            file_hash.update(chunk)
-                            chunk = f.read(8192)
-                    md5hash = file_hash.hexdigest()
-                # calculate file size
-                size = None
-                if exists:
-                    size = os.path.getsize(full_path)
-                reply = json.dumps(
-                    {
-                        "md5hash": md5hash,
-                        "size_bytes": size,
-                        "exists": exists,
-                    }
-                )
-            # provide list of all files from all subdirectories
-            elif task == "walk":
-                full_path = os.path.join(self.base_dir, url_path)
-                if os.path.exists(full_path) and os.path.isdir(full_path):
-                    reply = []
-                    for root, dirs, files in os.walk(full_path):
-                        # skip path containing folders like __folders__
-                        if root.count("__") >= 2:
-                            continue
-                        root = root.replace(self.base_dir, "")
-                        root = root.lstrip("\\")
-                        root = root.replace("\\", "/")
-                        for file in files:
-                            # skip hidden/system files
-                            if file.startswith("."):
-                                continue
-                            if root:
-                                reply.append(f"nf://{root}/{file}")
-                            else:
-                                reply.append(f"nf://{file}")
-                    reply = json.dumps(reply).encode("utf-8")
-                else:
-                    reply = json.dumps(["Directory Not Found"]).encode("utf-8")
-        else:
-            reply = f"fss.service.broker - unsupported url '{url}', task '{task}'"
-            log.error(reply)
-
-        if isinstance(reply, str):
-            reply = reply.encode("utf-8")
-
-        self.send_to_client(
-            sender, NFP.RESPONSE, b"fss.service.broker", [uuid, status, reply]
         )

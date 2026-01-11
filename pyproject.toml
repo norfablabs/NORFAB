@@ -113,6 +113,7 @@ build-backend = "poetry.core.masonry.api"
 "workflow" = "norfab.workers.workflow_worker:WorkflowWorker"
 "containerlab" = "norfab.workers.containerlab_worker:ContainerlabWorker"
 "fastmcp" = "norfab.workers.fastmcp_worker:FastMCPWorker"
+"filesharing" = "norfab.workers.filesharing_worker.filesharing_worker:FileSharingWorker"
 
 [tool.poetry.scripts]
 nfcli = 'norfab.utils.nfcli:nfcli'

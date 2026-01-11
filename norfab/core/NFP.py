@@ -22,6 +22,7 @@ GET = b"0x06"
 DELETE = b"0x07"
 EVENT = b"0x08"
 STREAM = b"0x09"
+PUT = b"0x10"
 
 commands = [
     b"OPEN",
@@ -34,13 +35,24 @@ commands = [
     b"DELETE",
     b"EVENT",
     b"STREAM",
+    b"PUT",
 ]
 
-client_commands = [OPEN, DISCONNECT, POST, GET, DELETE]
+client_commands = [OPEN, DISCONNECT, POST, GET, DELETE, PUT]
 
-worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE]
+worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE, STREAM]
 
-broker_commands = [OPEN, KEEPALIVE, DISCONNECT, POST, RESPONSE, GET, DELETE, STREAM]
+broker_commands = [
+    OPEN,
+    KEEPALIVE,
+    DISCONNECT,
+    POST,
+    RESPONSE,
+    GET,
+    DELETE,
+    STREAM,
+    PUT,
+]
 
 # Convenience constants for frame counts
 FRAME_COUNTS = {
@@ -77,6 +89,18 @@ class MessageBuilder:
         return [worker_address, b"", BROKER, service, DISCONNECT]
 
     @staticmethod
+    def broker_to_worker_put(
+        worker_address: bytes, sender: bytes, uuid: bytes, data: bytes
+    ) -> List[bytes]:
+        """Build a PUT message from broker to worker."""
+        return [worker_address, b"", BROKER, PUT, sender, b"", uuid, data]
+
+    @staticmethod
+    def broker_to_worker_keepalive(address: bytes, service: bytes) -> List[bytes]:
+        """Build KEEPALIVE message from broker to worker."""
+        return [address, b"", BROKER, KEEPALIVE, service]
+
+    @staticmethod
     def worker_to_broker_ready(service: bytes) -> List[bytes]:
         """Build READY message from worker to broker."""
         return [b"", WORKER, READY, service]
@@ -97,14 +121,14 @@ class MessageBuilder:
         return [b"", WORKER, EVENT] + event_data
 
     @staticmethod
+    def worker_to_broker_stream(data: List[bytes]) -> List[bytes]:
+        """Build EVENT message from worker to broker."""
+        return [b"", WORKER, STREAM] + data
+
+    @staticmethod
     def worker_to_broker_keepalive(service: bytes) -> List[bytes]:
         """Build KEEPALIVE message from worker to broker."""
         return [b"", WORKER, KEEPALIVE, service]
-
-    @staticmethod
-    def broker_to_worker_keepalive(address: bytes, service: bytes) -> List[bytes]:
-        """Build KEEPALIVE message from broker to worker."""
-        return [address, b"", BROKER, KEEPALIVE, service]
 
     @staticmethod
     def client_to_broker_post(
@@ -112,6 +136,13 @@ class MessageBuilder:
     ) -> List[bytes]:
         """Build a POST message from client to broker."""
         return [b"", CLIENT, POST, service, workers, uuid, request]
+
+    @staticmethod
+    def client_to_broker_put(
+        command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
+    ) -> List[bytes]:
+        """Build a PUT message from client to broker."""
+        return [b"", CLIENT, PUT, service, workers, uuid, request]
 
     @staticmethod
     def client_to_broker_get(

@@ -178,6 +178,9 @@ class NorFab:
         # find all workers plugins
         self.register_plugins()
 
+        # update inventory to include build in services
+        self.add_built_in_workers_inventory()
+
     def __enter__(self):
         self.start()
         self.make_client()
@@ -234,6 +237,19 @@ class NorFab:
                 f"service '{service_name}' because plugin '{existing_plugin}' "
                 f"was already registered under this service."
             )
+
+    def add_built_in_workers_inventory(self) -> None:
+        built_in_workers = {
+            "filesharing-worker-1": [
+                {
+                    "service": "filesharing",
+                    "base_dir": self.inventory.base_dir,
+                }
+            ]
+        }
+        self.inventory.workers.data.update(built_in_workers)
+        for name in built_in_workers.keys():
+            self.inventory.topology["workers"].insert(0, name)
 
     def handle_ctrl_c(self, signum, frame) -> None:
         """

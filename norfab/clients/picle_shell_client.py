@@ -193,17 +193,27 @@ class ListFilesModel(BaseModel):
     @staticmethod
     def source_url():
         NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        broker_files = NFCLIENT.run_job(
+            "filesharing",
+            "walk",
+            workers="any",
+            kwargs={"url": "nf://"},
         )
-        return broker_files["results"]
+        print(broker_files)
+        for w_name, wres in broker_files.items():
+            return wres["result"]
 
     @staticmethod
     def run(*args, **kwargs):
-        reply = NFCLIENT.get(
-            "fss.service.broker", "list_files", args=args, kwargs=kwargs
+        reply = NFCLIENT.run_job(
+            "filesharing",
+            "list_files",
+            args=args,
+            kwargs=kwargs,
+            workers="any",
         )
-        return reply
+        for w_name, wres in reply.items():
+            return wres["result"]
 
     class PicleConfig:
         pipe = PipeFunctionsModel
@@ -220,15 +230,21 @@ class CopyFileModel(BaseModel):
     @staticmethod
     def source_url():
         NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        broker_files = NFCLIENT.run_job(
+            "filesharing",
+            "walk",
+            kwargs={"url": "nf://"},
+            workers="any",
         )
-        return broker_files["results"]
+        for w_name, wres in broker_files.items():
+            return wres["result"]
 
     @staticmethod
     def run(*args, **kwargs):
-        status, reply = NFCLIENT.fetch_file(**kwargs)
-        return reply
+        return NFCLIENT.fetch_file(**kwargs)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
 
 
 class ListFileDetails(BaseModel):
@@ -237,21 +253,31 @@ class ListFileDetails(BaseModel):
     @staticmethod
     def source_url():
         NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        broker_files = NFCLIENT.run_job(
+            "filesharing",
+            "walk",
+            kwargs={"url": "nf://"},
+            workers="any",
         )
-        return broker_files["results"]
+        for w_name, wres in broker_files.items():
+            return wres["result"]
 
     @staticmethod
     def run(*args, **kwargs):
-        reply = NFCLIENT.get(
-            "fss.service.broker", "file_details", args=args, kwargs=kwargs
+        reply = NFCLIENT.run_job(
+            "filesharing",
+            "file_details",
+            args=args,
+            kwargs=kwargs,
+            workers="any",
         )
-        return reply
+        for w_name, wres in reply.items():
+            return wres["result"]
 
     class PicleConfig:
         pipe = PipeFunctionsModel
         outputter = Outputters.outputter_nested
+
 
 class DeleteFetchedFiles(ClientRunJobArgs):
     filepath: StrictStr = Field("*", description="Files location glob pattern")
@@ -279,10 +305,11 @@ class DeleteFetchedFiles(ClientRunJobArgs):
     @staticmethod
     def source_filepath():
         NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
+        broker_files = NFCLIENT.run_job(
+            "filesharing", "any", "walk", kwargs={"url": "nf://"}
         )
-        return broker_files["results"]
+        for w_name, wres in broker_files.items():
+            return wres["result"]
 
     @staticmethod
     def source_workers():
@@ -295,6 +322,7 @@ class DeleteFetchedFiles(ClientRunJobArgs):
     class PicleConfig:
         pipe = PipeFunctionsModel
         outputter = Outputters.outputter_nested
+
 
 class FileServiceCommands(BaseModel):
     """
@@ -330,7 +358,9 @@ class FileServiceCommands(BaseModel):
     list_: ListFilesModel = Field(None, description="List files", alias="list")
     copy_: CopyFileModel = Field(None, description="Copy files", alias="copy")
     details: ListFileDetails = Field(None, description="Show file details")
-    delete_fetched_files: DeleteFetchedFiles = Field(None, description="Delete local client files", alias="delete-fetched-files")
+    delete_fetched_files: DeleteFetchedFiles = Field(
+        None, description="Delete local client files", alias="delete-fetched-files"
+    )
 
 
 # ---------------------------------------------------------------------------------------------

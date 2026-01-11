@@ -52,6 +52,7 @@ class Job:
         args: list = None,
         kwargs: dict = None,
         task: str = None,
+        client_input_queue: object = None,
     ):
         self.worker = worker
         self.juuid = juuid
@@ -60,11 +61,19 @@ class Job:
         self.args = args or []
         self.kwargs = kwargs or {}
         self.task = task
+        self.client_input_queue = client_input_queue
 
     def __str__(self):
         return juuid
 
     def event(self, message, **kwargs):
+        """
+        Handles an event by forwarding it to the worker.
+
+        Args:
+            message (str): The message describing the event.
+            **kwargs: Additional keyword arguments to include in the event.
+        """
         kwargs.setdefault("task", self.task)
         if self.kwargs.get("progress", False) and self.juuid and self.worker:
             self.worker.event(
@@ -73,6 +82,43 @@ class Job:
                 client_address=self.client_address,
                 **kwargs,
             )
+
+    def stream(self, data: bytes) -> None:
+        """
+        Streams data to the broker.
+
+        This method sends a message containing the client address, a unique
+        identifier (UUID), a status code, and the provided data to the broker.
+
+        Args:
+            data (bytes): The data to be streamed to the broker.
+        """
+        msg = [
+            self.client_address.encode("utf-8"),
+            b"",
+            self.juuid.encode("utf-8"),
+            b"200",
+            data,
+        ]
+        self.worker.send_to_broker(NFP.STREAM, msg)
+
+    def wait_client_input(self, timeout: int = 10) -> Any:
+        """
+        Waits for input from the client within a specified timeout period if no item
+        is available within the specified timeout, it returns `None`.
+
+        Args:
+            timeout (int, optional): The maximum time (in seconds) to wait for input
+
+        Returns:
+            Any: The item retrieved from the `client_input_queue`
+        """
+        try:
+            return self.client_input_queue.get(block=True, timeout=timeout)
+        except queue.Empty:
+            pass
+
+        return None
 
 
 # --------------------------------------------------------------------------------------------
@@ -652,7 +698,7 @@ class JobDatabase:
         Returns:
             dict: Job information with the following fields:
                 - uuid: Job UUID
-                - status: Job status (PENDING, STARTED, COMPLETED, FAILED)
+                - status: Job status (PENDING, STARTED, COMPLETED, FAILED, WAITING_CLIENT_INPUT)
                 - received_timestamp: When job was received
                 - started_timestamp: When job started execution
                 - completed_timestamp: When job completed
@@ -969,6 +1015,41 @@ class WorkerWatchDog(threading.Thread):
 # --------------------------------------------------------------------------------------------
 
 
+def _put(worker, put_queue, destroy_event):
+    """
+    Continuously processes items from the `put_queue` and updates the input queue
+    of running jobs in the `worker` until the `destroy_event` is set.
+
+    Args:
+        worker (object): The worker instance that manages running jobs.
+        put_queue (queue.Queue): A queue from which work items are retrieved.
+        destroy_event (threading.Event): An event used to signal when the loop should stop
+
+    Behavior:
+        - The function retrieves work items from the `put_queue` with a timeout of 0.1 seconds.
+        - If the queue is empty, it continues to the next iteration.
+        - For each work item, it decodes the job data and updates the corresponding job's
+          input queue in the `worker.running_jobs` dictionary.
+    """
+    while not destroy_event.is_set():
+        try:
+            work = put_queue.get(block=True, timeout=0.1)
+        except queue.Empty:
+            continue
+
+        suuid = work[2].decode("utf-8")
+        data = json.loads(work[3].decode("utf-8"))
+
+        # Update job inputs
+        try:
+            worker.running_jobs[suuid].client_input_queue.put(data)
+            log.debug(f"{worker.name} - '{suuid.decode('utf-8')}' added job input")
+        except Exception as e:
+            log.error(f"{worker.name} - failed to update {suuid} job input: {e}")
+
+        put_queue.task_done()
+
+
 def _post(worker, post_queue, destroy_event):
     """
     Thread to receive POST requests and save them to database.
@@ -1025,7 +1106,7 @@ def _post(worker, post_queue, destroy_event):
                 client_address,
                 b"",
                 suuid,
-                b"201", # JOB CREATED
+                b"201",  # JOB CREATED
                 json.dumps(
                     {
                         "worker": worker.name,
@@ -1081,6 +1162,10 @@ def _get(worker, get_queue, destroy_event):
         elif job_info["status"] in ("PENDING", "STARTED"):
             # Job is still in progress - return status with timestamps
             status = b"300"
+            payload["status"] = job_info["status"]
+        elif job_info["status"] == "WAITING_CLIENT_INPUT":
+            # Job is still in progress - return status with timestamps
+            status = b"102"
             payload["status"] = job_info["status"]
         elif job_info["status"] in ("COMPLETED", "FAILED"):
             result_dict = job_info.get("result_data")
@@ -1174,6 +1259,8 @@ def recv(worker, destroy_event):
                 worker.delete_queue.put(msg)
             elif command == NFP.GET:
                 worker.get_queue.put(msg)
+            elif command == NFP.PUT:
+                worker.put_queue.put(msg)
             elif command == NFP.KEEPALIVE:
                 worker.keepaliver.received_heartbeat([header] + msg)
             elif command == NFP.DISCONNECT:
@@ -1249,17 +1336,22 @@ class NFPWorker:
         db_path = os.path.join(self.base_dir, f"{self.name}.db")
         self.db = JobDatabase(db_path, jobs_compress=self.jobs_compress)
 
+        # dictionary to store currently running jobs
+        self.running_jobs = {}
+
         # create events and queues
         self.destroy_event = threading.Event()
         self.request_thread = None
         self.reply_thread = None
         self.recv_thread = None
         self.event_thread = None
+        self.put_thread = None
 
         self.post_queue = queue.Queue(maxsize=0)
         self.get_queue = queue.Queue(maxsize=0)
         self.delete_queue = queue.Queue(maxsize=0)
         self.event_queue = queue.Queue(maxsize=0)
+        self.put_queue = queue.Queue(maxsize=0)
 
         # generate certificates and create directories
         if self.zmq_auth is not False:
@@ -1405,6 +1497,8 @@ class NFPWorker:
             msg = self.build_message.worker_to_broker_response(response_data=msg)
         elif command == NFP.EVENT:
             msg = self.build_message.worker_to_broker_event(event_data=msg)
+        elif command == NFP.STREAM:
+            msg = self.build_message.worker_to_broker_stream(data=msg)
         else:
             log.error(
                 f"{self.name} - cannot send '{command}' to broker, command unsupported"
@@ -1550,7 +1644,9 @@ class NFPWorker:
         if not self.is_url(url):
             raise ValueError(f"Invalid URL format: {url}")
 
-        status, file_content = self.client.fetch_file(url=url, read=read)
+        result = self.client.fetch_file(url=url, read=read)
+        status = result["status"]
+        file_content = result["content"]
         msg = f"{self.name} - worker '{url}' fetch file failed with status '{status}'"
 
         if status == "200":
@@ -1857,9 +1953,7 @@ class NFPWorker:
 
     @Task(fastapi={"methods": ["GET"]})
     def delete_fetched_files(self, filepath) -> Result:
-        return Result(
-            result=self.client.delete_fetched_files(filepath)
-        )
+        return Result(result=self.client.delete_fetched_files(filepath))
 
     def start_threads(self) -> None:
         """
@@ -1903,6 +1997,17 @@ class NFPWorker:
             args=(self, self.event_queue, self.destroy_event),
         )
         self.event_thread.start()
+        self.put_thread = threading.Thread(
+            target=_put,
+            daemon=True,
+            name=f"{self.name}_put_thread",
+            args=(
+                self,
+                self.put_queue,
+                self.destroy_event,
+            ),
+        )
+        self.put_thread.start()
         # start receive thread after other threads
         self.recv_thread = threading.Thread(
             target=recv,
@@ -1956,7 +2061,10 @@ class NFPWorker:
             timeout=timeout,
             args=copy.deepcopy(args),
             kwargs=copy.deepcopy(kwargs),
+            client_input_queue=queue.Queue(maxsize=0),
         )
+
+        self.running_jobs[uuid] = job
 
         log.debug(
             f"{self.name} - doing task '{task}', timeout: '{timeout}', "
@@ -2017,7 +2125,10 @@ class NFPWorker:
             self.db.fail_job(uuid, result_data)
         else:
             self.db.complete_job(uuid, result_data)
-        
+
+        # remove job from running jobs
+        _ = self.running_jobs.pop(uuid)
+
         # inform client that job completed
         job.event(message=f"completed", status="completed")
 
