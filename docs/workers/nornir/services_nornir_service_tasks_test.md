@@ -1265,7 +1265,6 @@ The content of the report depends on the `extensive` keyword in `kwargs`:
           "result": {
             "test_results": [],
             "suite": {},
-            "hosts_inventory": {}
           },
           "failed": false,
           "errors": [],
@@ -1286,7 +1285,6 @@ The content of the report depends on the `extensive` keyword in `kwargs`:
           "result": {
             "test_results": [],
             "suite": {},
-            "hosts_inventory": {}
           },
           "failed": false,
           "errors": [],
@@ -1307,7 +1305,6 @@ The content of the report depends on the `extensive` keyword in `kwargs`:
           "result": {
             "test_results": [],
             "suite": {},
-            "hosts_inventory": {}
           },
           "failed": false,
           "errors": [],
@@ -1340,7 +1337,6 @@ The content of the report depends on the `extensive` keyword in `kwargs`:
               }
             ],
             "suite": {},
-            "hosts_inventory": {}
           },
           "failed": true,
           "errors": [],
@@ -1359,7 +1355,6 @@ The content of the report depends on the `extensive` keyword in `kwargs`:
           "result": {
             "test_results": [],
             "suite": {},
-            "hosts_inventory": {}
           },
           "failed": true,
           "errors": [],

@@ -7,6 +7,7 @@
 3. Worker - added support for `job.stream` capability to stream a set of bytes back to client, used for file transfers, added new `NFP.STREAM` command as part of this effort
 4. Added support for new `NFP.PUT` command for client to update running jobs on worker, currently used by client to command worker a number of file offsets to stream back, but can be extended to provide user input mid job execution, e.g. agent requiesting input from user.
 5. Client - refactored `fetch_file` method to use new stream and put capabilities
+6. Nornir test markdown - various markdown output improvements such as added total tests to summary, added test numer column to the table, added host name next to every collected command, removed support for hosts inventory as it bogged browser memory for being too long.
 
 ### FEATURES
 

@@ -740,8 +740,8 @@ class NFPBroker:
             )
             return
 
-        # inform client that JOB dispatched for POST requests
-        if command == NFP.POST:
+        # inform client that JOB dispatched for POST / GET requests
+        if command in [NFP.POST, NFP.GET]:
             w_addresses = [w.address.decode("utf-8") for w in workers]
             self.send_to_client(
                 sender,

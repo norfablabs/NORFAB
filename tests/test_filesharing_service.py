@@ -328,9 +328,9 @@ class TestWalk:
             assert results["failed"] is False, f"{worker} failed to walk directory"
             # Check that all files are present
             for f in [
-                "nf://filesharing//large_file.txt",
-                "nf://filesharing//test_file_1.txt",
-                "nf://filesharing//test_file_2.txt",
+                "nf://filesharing/large_file.txt",
+                "nf://filesharing/test_file_1.txt",
+                "nf://filesharing/test_file_2.txt",
                 "nf://filesharing/subdir1/nested_file.txt",
                 "nf://filesharing/subdir2/another_nested.txt",
             ]:

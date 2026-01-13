@@ -1455,8 +1455,6 @@ class NornirWorker(NFPWorker):
         if ret.status == "no_match":
             if return_tests_suite is True:
                 ret.result = {"test_results": [], "suite": {}}
-            if extensive is True:
-                ret.result = {"test_results": [], "suite": {}, "hosts_inventory": {}}
             return ret
 
         # download job data
@@ -1577,12 +1575,6 @@ class NornirWorker(NFPWorker):
         # check if need to return tests suite content
         if return_tests_suite is True:
             ret.result = {"test_results": ret.result, "suite": return_suite}
-
-        # add hosts inventory
-        if extensive is True:
-            ret.result["hosts_inventory"] = self.get_inventory(**filters).result[
-                "hosts"
-            ]
 
         return ret
 
