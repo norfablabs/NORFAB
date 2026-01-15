@@ -12,31 +12,31 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/containerlab/services_containerlab_service/">
+        <link rel="canonical" href="https://docs.norfablabs.com/development/file_streaming_fetch_file/">
       
       
-        <link rel="prev" href="../../../services_overview/">
+        <link rel="prev" href="../documentation_style_guide/">
       
       
-        <link rel="next" href="../services_containerlab_service_inventory/">
+        <link rel="next" href="../../testing/norfab_testing_framework/">
       
       
         
       
       
-      <link rel="icon" href="../../../images/logo.jpg">
+      <link rel="icon" href="../../images/logo.jpg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
-        <title>Overview - Network Automations Fabric [NORFAB]</title>
+        <title>File Streaming (fetch_file) - Network Automations Fabric [NORFAB]</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,9 +55,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#containerlab-service" class="md-skip">
+        <a href="#client-file-streaming-fetch_file-and-nfp-streamput" class="md-skip">
           Skip to content
         </a>
       
@@ -98,9 +98,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              File Streaming (fetch_file)
             
           </span>
         </div>
@@ -233,9 +233,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     Network Automations Fabric [NORFAB]
@@ -309,7 +309,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -337,7 +337,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
+      <a href="../../norfab_why_use_norfab/" class="md-nav__link">
         
   
   
@@ -419,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_installation/" class="md-nav__link">
+      <a href="../../norfab_installation/" class="md-nav__link">
         
   
   
@@ -447,7 +447,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_getting_started/" class="md-nav__link">
+      <a href="../../norfab_getting_started/" class="md-nav__link">
         
   
   
@@ -475,7 +475,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_inventory/" class="md-nav__link">
+      <a href="../../reference_norfab_inventory/" class="md-nav__link">
         
   
   
@@ -557,7 +557,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_docker_deployment/" class="md-nav__link">
+      <a href="../../norfab_docker_deployment/" class="md-nav__link">
         
   
   
@@ -585,7 +585,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_distributed_deployment/" class="md-nav__link">
+      <a href="../../norfab_distributed_deployment/" class="md-nav__link">
         
   
   
@@ -617,20 +617,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -651,7 +649,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -669,7 +667,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_overview/" class="md-nav__link">
+      <a href="../../services_overview/" class="md-nav__link">
         
   
   
@@ -694,20 +692,18 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
         
           
           <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
@@ -728,7 +724,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -743,37 +739,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service/" class="md-nav__link">
         
   
   
@@ -789,103 +758,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#supported-containerlab-versions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Supported Containerlab Versions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#containerlab-service-tasks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Containerlab Service Tasks
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#containerlab-service-tasks-demo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Containerlab Service Tasks Demo
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#containerlab-service-show-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Containerlab Service Show Commands
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#nornir-service-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Nornir Service Integration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#netbox-service-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Netbox Service Integration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-cases" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Use Cases
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -898,7 +770,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
         
   
   
@@ -973,7 +845,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_tasks_deploy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
         
   
   
@@ -1001,7 +873,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
         
   
   
@@ -1029,7 +901,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_tasks_destroy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
         
   
   
@@ -1057,7 +929,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_tasks_save/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
         
   
   
@@ -1085,7 +957,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_tasks_restart/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
         
   
   
@@ -1113,7 +985,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_tasks_inspect/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
         
   
   
@@ -1141,7 +1013,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1232,7 +1104,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service/" class="md-nav__link">
         
   
   
@@ -1260,7 +1132,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
         
   
   
@@ -1335,7 +1207,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_task/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
         
   
   
@@ -1363,7 +1235,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
         
   
   
@@ -1391,7 +1263,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
         
   
   
@@ -1419,7 +1291,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_test/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
         
   
   
@@ -1447,7 +1319,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_network/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
         
   
   
@@ -1475,7 +1347,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
         
   
   
@@ -1503,7 +1375,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
         
   
   
@@ -1531,7 +1403,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
         
   
   
@@ -1559,7 +1431,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
         
   
   
@@ -1595,7 +1467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
         
   
   
@@ -1678,7 +1550,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service/" class="md-nav__link">
         
   
   
@@ -1706,7 +1578,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
         
   
   
@@ -1781,7 +1653,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
         
   
   
@@ -1809,7 +1681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
         
   
   
@@ -1837,7 +1709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
         
   
   
@@ -1865,7 +1737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
         
   
   
@@ -1893,7 +1765,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
         
   
   
@@ -1921,7 +1793,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
         
   
   
@@ -1949,7 +1821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
         
   
   
@@ -1977,7 +1849,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -2005,7 +1877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
         
   
   
@@ -2033,7 +1905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
@@ -2061,7 +1933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
         
   
   
@@ -2089,7 +1961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2117,7 +1989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
         
   
   
@@ -2145,7 +2017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2173,7 +2045,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
   
@@ -2264,7 +2136,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service/" class="md-nav__link">
         
   
   
@@ -2292,7 +2164,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service_inventory/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_inventory/" class="md-nav__link">
         
   
   
@@ -2367,7 +2239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service_tasks_chat/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
         
   
   
@@ -2458,7 +2330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service/" class="md-nav__link">
         
   
   
@@ -2486,7 +2358,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
         
   
   
@@ -2561,7 +2433,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
         
   
   
@@ -2652,7 +2524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
         
   
   
@@ -2680,7 +2552,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
         
   
   
@@ -2755,7 +2627,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
         
   
   
@@ -2846,7 +2718,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service/" class="md-nav__link">
         
   
   
@@ -2874,7 +2746,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
         
   
   
@@ -2949,7 +2821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
         
   
   
@@ -3040,7 +2912,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_norfab_mmi/" class="md-nav__link">
+      <a href="../../services_norfab_mmi/" class="md-nav__link">
         
   
   
@@ -3068,7 +2940,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_norfab_inventory_service/" class="md-nav__link">
+      <a href="../../services_norfab_inventory_service/" class="md-nav__link">
         
   
   
@@ -3096,7 +2968,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_norfab_file_service/" class="md-nav__link">
+      <a href="../../services_norfab_file_service/" class="md-nav__link">
         
   
   
@@ -3124,7 +2996,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_norfab_jobs_service/" class="md-nav__link">
+      <a href="../../services_norfab_jobs_service/" class="md-nav__link">
         
   
   
@@ -3152,7 +3024,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_norfab_events_service/" class="md-nav__link">
+      <a href="../../services_norfab_events_service/" class="md-nav__link">
         
   
   
@@ -3242,7 +3114,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_overview/" class="md-nav__link">
+      <a href="../../clients_overview/" class="md-nav__link">
         
   
   
@@ -3270,7 +3142,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_nfcli_overview/" class="md-nav__link">
+      <a href="../../clients_nfcli_overview/" class="md-nav__link">
         
   
   
@@ -3298,7 +3170,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_python_api_overview/" class="md-nav__link">
+      <a href="../../clients_python_api_overview/" class="md-nav__link">
         
   
   
@@ -3326,7 +3198,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_robot_client_overview/" class="md-nav__link">
+      <a href="../../clients_robot_client_overview/" class="md-nav__link">
         
   
   
@@ -3408,7 +3280,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/norfab_hooks/" class="md-nav__link">
+      <a href="../../customization/norfab_hooks/" class="md-nav__link">
         
   
   
@@ -3483,7 +3355,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_overview/" class="md-nav__link">
+      <a href="../../customization/service_plugin_overview/" class="md-nav__link">
         
   
   
@@ -3511,7 +3383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_local/" class="md-nav__link">
+      <a href="../../customization/service_plugin_local/" class="md-nav__link">
         
   
   
@@ -3539,7 +3411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_module/" class="md-nav__link">
+      <a href="../../customization/service_plugin_module/" class="md-nav__link">
         
   
   
@@ -3629,7 +3501,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tags/" class="md-nav__link">
+      <a href="../../tags/" class="md-nav__link">
         
   
   
@@ -3657,7 +3529,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_changelog/" class="md-nav__link">
+      <a href="../../norfab_changelog/" class="md-nav__link">
         
   
   
@@ -3732,7 +3604,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_norfab/" class="md-nav__link">
+      <a href="../../reference_architecture_norfab/" class="md-nav__link">
         
   
   
@@ -3760,7 +3632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_nfp/" class="md-nav__link">
+      <a href="../../reference_architecture_nfp/" class="md-nav__link">
         
   
   
@@ -3890,7 +3762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_nfapi/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_nfapi/" class="md-nav__link">
         
   
   
@@ -3918,7 +3790,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_broker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_broker/" class="md-nav__link">
         
   
   
@@ -3946,7 +3818,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_worker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_worker/" class="md-nav__link">
         
   
   
@@ -3974,7 +3846,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_client/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_client/" class="md-nav__link">
         
   
   
@@ -4002,7 +3874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
         
   
   
@@ -4030,7 +3902,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_exceptions/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_exceptions/" class="md-nav__link">
         
   
   
@@ -4113,7 +3985,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_workers_containerlab_worker/" class="md-nav__link">
+      <a href="../../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
         
   
   
@@ -4141,7 +4013,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
+      <a href="../../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
         
   
   
@@ -4169,7 +4041,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
+      <a href="../../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
         
   
   
@@ -4197,7 +4069,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
+      <a href="../../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
         
   
   
@@ -4225,7 +4097,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
+      <a href="../../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
         
   
   
@@ -4253,7 +4125,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/api_reference_workers_agent_worker/" class="md-nav__link">
+      <a href="../../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
         
   
   
@@ -4281,7 +4153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+      <a href="../../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
         
   
   
@@ -4364,7 +4236,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_clients_nfcli_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_nfcli_client/" class="md-nav__link">
         
   
   
@@ -4392,7 +4264,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_clients_robot_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_robot_client/" class="md-nav__link">
         
   
   
@@ -4440,18 +4312,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -4472,7 +4346,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -4490,7 +4364,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/documentation_style_guide/" class="md-nav__link">
+      <a href="../documentation_style_guide/" class="md-nav__link">
         
   
   
@@ -4515,10 +4389,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../development/file_streaming_fetch_file/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Streaming (fetch_file)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -4534,6 +4435,226 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Purpose">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-service-lifecycle-nfapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in service lifecycle (NFAPI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-level flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="High-level flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#threading-model-what-runs-where" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Threading model (what runs where)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Threading model (what runs where)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-side-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client-side threads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker-side-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worker-side threads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#messaging-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messaging formats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Messaging formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-broker-dealer-router" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client ↔ Broker (DEALER ↔ ROUTER)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker-broker-dealer-router" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worker ↔ Broker (DEALER ↔ ROUTER)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stream-payload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STREAM payload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-put-is-used-client-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How PUT is used (client → worker)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sliding-window-pipeline-backpressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sliding window / pipeline (backpressure)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#completion-and-integrity-checking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Completion and integrity checking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operational-notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operational notes / gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging tips
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -4593,7 +4714,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../testing/norfab_testing_framework/" class="md-nav__link">
+      <a href="../../testing/norfab_testing_framework/" class="md-nav__link">
         
   
   
@@ -4621,7 +4742,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../testing/netbox_service_tests/" class="md-nav__link">
+      <a href="../../testing/netbox_service_tests/" class="md-nav__link">
         
   
   
@@ -4664,7 +4785,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_help_with_norfab/" class="md-nav__link">
+      <a href="../../norfab_help_with_norfab/" class="md-nav__link">
         
   
   
@@ -4711,10 +4832,155 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#supported-containerlab-versions" class="md-nav__link">
+  <a href="#purpose" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supported Containerlab Versions
+        Purpose
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Purpose">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-service-lifecycle-nfapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in service lifecycle (NFAPI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-level flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="High-level flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#threading-model-what-runs-where" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Threading model (what runs where)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Threading model (what runs where)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-side-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client-side threads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker-side-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worker-side threads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#messaging-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messaging formats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Messaging formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-broker-dealer-router" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client ↔ Broker (DEALER ↔ ROUTER)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker-broker-dealer-router" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worker ↔ Broker (DEALER ↔ ROUTER)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stream-payload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        STREAM payload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-put-is-used-client-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How PUT is used (client → worker)
       
     </span>
   </a>
@@ -4722,10 +4988,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-service-tasks" class="md-nav__link">
+  <a href="#sliding-window-pipeline-backpressure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Service Tasks
+        Sliding window / pipeline (backpressure)
       
     </span>
   </a>
@@ -4733,10 +4999,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-service-tasks-demo" class="md-nav__link">
+  <a href="#completion-and-integrity-checking" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Service Tasks Demo
+        Completion and integrity checking
       
     </span>
   </a>
@@ -4744,10 +5010,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-service-show-commands" class="md-nav__link">
+  <a href="#operational-notes-gotchas" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Service Show Commands
+        Operational notes / gotchas
       
     </span>
   </a>
@@ -4755,32 +5021,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nornir-service-integration" class="md-nav__link">
+  <a href="#debugging-tips" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir Service Integration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#netbox-service-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Netbox Service Integration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-cases" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Use Cases
+        Debugging tips
       
     </span>
   </a>
@@ -4802,205 +5046,214 @@
                 
                   
 
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <a href="../../../tags/#tag:containerlab" class="md-tag">containerlab</a>
-      
-    
-  </nav>
-
 
   
   
 
 
-<h1 id="containerlab-service">Containerlab Service<a class="headerlink" href="#containerlab-service" title="Permanent link">¤</a></h1>
-<p>Containerlab Service is based on <a href="https://containerlab.dev/">Containerlab</a> - an open-source tool for deploying and managing container-based network topologies. It provides a robust framework for automating network lab environments, enabling users to create, manage, and test network configurations efficiently.</p>
-<p><img alt="Containerlab Service Architecture" src="../../../images/Containerlab_Service.jpg" /></p>
-<p>Each NorFab Containerlab worker can manage multiple labs, offering scalability for complex network testing environments. </p>
-<p>By leveraging Containerlab, you can:</p>
+<h1 id="client-file-streaming-fetch_file-and-nfp-streamput">Client file streaming (<code>fetch_file</code>) and NFP <code>STREAM</code>/<code>PUT</code><a class="headerlink" href="#client-file-streaming-fetch_file-and-nfp-streamput" title="Permanent link">¤</a></h1>
+<p>This page documents how the Python client downloads files via the built-in <strong>File Sharing Service</strong> (<code>service="filesharing"</code>) using a streaming data path.</p>
+<p>The implementation is split across:</p>
 <ul>
-<li>Deploy network topologies using YAML-based configuration files.</li>
-<li>Source and deploy lab topologies from Netbox using Netbox Services.</li>
-<li>Inspect and monitor the status of running container labs.</li>
-<li>Save and restore lab configurations.</li>
-<li>Integrate with Nornir Service for automations testing.</li>
+<li>Client: <code>norfab/core/client.py</code></li>
+<li>Broker routing: <code>norfab/core/broker.py</code>](../../norfab/core/broker.py)`</li>
+<li>Worker core queues/threads: <code>norfab/core/worker.py</code></li>
+<li>File Sharing worker tasks: <code>norfab/workers/filesharing_worker/filesharing_worker.py</code></li>
+<li>Protocol constants/builders: <code>norfab/core/NFP.py</code></li>
 </ul>
-<h2 id="supported-containerlab-versions">Supported Containerlab Versions<a class="headerlink" href="#supported-containerlab-versions" title="Permanent link">¤</a></h2>
+<h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">¤</a></h2>
+<p><code>NFPClient.fetch_file()</code> downloads <code>nf://...</code> files from a <code>filesharing</code> worker into the client’s local <code>fetchedfiles/</code> folder.</p>
+<p><code>filesharing</code> is a built-in NORFAB service. When you start NORFAB via <code>NorFab</code> (NFAPI) with broker enabled, NFAPI injects a default File Sharing worker (<code>filesharing-worker-1</code>) into the inventory and adds it to the topology so it is started alongside other workers.</p>
+<p>Unlike most tasks (which return JSON via <code>RESPONSE</code>), file content is delivered as raw bytes over <code>NFP.STREAM</code>. The client uses <code>NFP.PUT</code> to request subsequent chunks (offset-based), implementing a simple <strong>sliding window</strong> ("pipeline") to avoid uncontrolled buffering.</p>
+<h3 id="built-in-service-lifecycle-nfapi">Built-in service lifecycle (NFAPI)<a class="headerlink" href="#built-in-service-lifecycle-nfapi" title="Permanent link">¤</a></h3>
+<p>This is implemented in <code>norfab/core/nfapi.py</code>:</p>
 <ul>
-<li><strong>0.67</strong> - tested and supported by NorfAB before 0.11.0</li>
-<li><strong>0.69</strong> - tested and supported by NorfAB 0.11.0 onwards</li>
+<li><code>NorFab.start()</code> calls <code>add_built_in_workers_inventory()</code> when <code>run_broker</code> is enabled and the inventory topology has <code>broker: true</code>.</li>
+<li><code>add_built_in_workers_inventory()</code> adds <code>filesharing-worker-1</code> with <code>service: filesharing</code> and <code>base_dir: &lt;inventory.base_dir&gt;</code>.</li>
+<li>The worker name is inserted into <code>inventory.topology["workers"]</code> (at the beginning), so it gets started like any other worker.</li>
 </ul>
-<h2 id="containerlab-service-tasks">Containerlab Service Tasks<a class="headerlink" href="#containerlab-service-tasks" title="Permanent link">¤</a></h2>
-<p>Containerlab Service supports the following tasks:</p>
-<table>
-<thead>
-<tr>
-<th>Task</th>
-<th>Description</th>
-<th>Use Cases</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong><a href="../services_containerlab_service_tasks_deploy/">deploy</a></strong></td>
-<td>Deploys a containerlab topology.</td>
-<td>Automating lab deployments, testing network configurations.</td>
-</tr>
-<tr>
-<td><strong><a href="../services_containerlab_service_tasks_deploy_netbox/">deploy_netbox</a></strong></td>
-<td>Deploys a containerlab topology using Netbox devices data.</td>
-<td>Automating lab deployments based on Netbox.</td>
-</tr>
-<tr>
-<td><strong><a href="../services_containerlab_service_tasks_destroy/">destroy_lab</a></strong></td>
-<td>Destroys a specified lab.</td>
-<td>Cleaning up resources, resetting lab environments.</td>
-</tr>
-<tr>
-<td><strong><a href="../services_containerlab_service_tasks_inspect/">inspect</a></strong></td>
-<td>Inspects the container lab containers configuration and status.</td>
-<td>Monitoring lab status, troubleshooting.</td>
-</tr>
-<tr>
-<td><strong><a href="../services_containerlab_service_tasks_save/">save</a></strong></td>
-<td>Saves the configuration of a specified lab.</td>
-<td>Backing up lab configurations.</td>
-</tr>
-<tr>
-<td><strong><a href="../services_containerlab_service_tasks_restart/">restart_lab</a></strong></td>
-<td>Restarts a specified lab.</td>
-<td>Reinitializing lab environments.</td>
-</tr>
-<tr>
-<td><strong><a href="../services_containerlab_service_tasks_nornir_inventory/">get_nornir_inventory</a></strong></td>
-<td>Retrieves the Nornir inventory for a specified lab.</td>
-<td>Generating inventory for network automation tools.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="containerlab-service-tasks-demo">Containerlab Service Tasks Demo<a class="headerlink" href="#containerlab-service-tasks-demo" title="Permanent link">¤</a></h2>
-<div class="admonition demos">
-<p class="admonition-title">Demos</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Deploy</label><label for="__tabbed_1_2">Deploy Netbox</label><label for="__tabbed_1_3">Destroy</label><label for="__tabbed_1_4">Inspect</label><label for="__tabbed_1_5">Save</label><label for="__tabbed_1_6">Restart</label><label for="__tabbed_1_7">Nornir Inventory</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p><img alt="Containerlab Deploy Demo" src="../../../images/containerlab/containerlab_deploy_demo.gif" /></p>
-</div>
-<div class="tabbed-block">
-<p><img alt="Containerlab Deploy Demo Netbox" src="../../../images/containerlab/containerlab_deploy_netbox_demo_devices.gif" /></p>
-</div>
-<div class="tabbed-block">
-<p><img alt="Containerlab Destroy Demo" src="../../../images/containerlab/containerlab_destroy_demo.gif" /></p>
-</div>
-<div class="tabbed-block">
-<p><img alt="Containerlab Inspect Demo" src="../../../images/containerlab/containerlab_inspect_demo.gif" /></p>
-</div>
-<div class="tabbed-block">
-<p><img alt="Containerlab Save Demo" src="../../../images/containerlab/containerlab_save_demo.gif" /></p>
-</div>
-<div class="tabbed-block">
-<p><img alt="Containerlab Restart Demo" src="../../../images/containerlab/containerlab_restart_demo.gif" /> </p>
-</div>
-<div class="tabbed-block">
-<p><img alt="Containerlab Nornir Inventory Demo" src="../../../images/containerlab/containerlab_nornir_inventory_demo.gif" /> </p>
-</div>
-</div>
-</div>
-</div>
-<h2 id="containerlab-service-show-commands">Containerlab Service Show Commands<a class="headerlink" href="#containerlab-service-show-commands" title="Permanent link">¤</a></h2>
-<p>Containerlab service shell comes with a set of show commands to query service details:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree show.containerlab
-root
-└── show:    NorFab show commands
-    └── containerlab:    Show Containerlab service
-        ├── inventory:    show containerlab inventory data
-        ├── version:    show containerlab service version report
-        ├── status:    show containerlab status
-        ├── containers:    show containerlab containers
-        │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── verbose-result:    Control output details, default &#39;False&#39;
-        │   ├── details:    Show container labs details
-        │   └── lab-name:    Show container for given lab only
-        └── labs:    show containerlab running labs
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;all&#39;
-            └── verbose-result:    Control output details, default &#39;False&#39;
-nf#
-</code></pre></div>
-<h2 id="nornir-service-integration">Nornir Service Integration<a class="headerlink" href="#nornir-service-integration" title="Permanent link">¤</a></h2>
-<p>NorFab Containerlab Service integrates seamlessly with the Nornir Service to enable network automation workflows. By using the <code>get_nornir_inventory</code> task, Containerlab Service can generate a Nornir-compatible inventory for a specified lab. This inventory can then be loaded into the Nornir Service, allowing it to manage the containerlab hosts as part of its runtime inventory. Refer to <a href="../../nornir/services_nornir_service_tasks_runtime_inventory/#nornir-and-containerlab-services-integration">Nornir and Containerlab Services Integration</a></p>
-<h2 id="netbox-service-integration">Netbox Service Integration<a class="headerlink" href="#netbox-service-integration" title="Permanent link">¤</a></h2>
-<p>NorFab Containerlab Service integrates with Netbox to automate the deployment of network topologies using real device and link data. By leveraging the <code>deploy_netbox</code> task, users can:</p>
-<ul>
-<li>Fetch device and connection information directly from Netbox, using device lists, tenants, or advanced filters.</li>
-<li>Automatically generate Containerlab topology files based on Netbox inventory.</li>
-<li>Deploy, reconfigure, or update labs using up-to-date data from Netbox.</li>
-<li>Customize node parameters via Netbox device configuration context (e.g., image, kind, interface renaming).</li>
-<li>Seamlessly synchronize lab environments with the source of truth in Netbox.</li>
-</ul>
-<p>For more details and usage examples, see the <a href="../services_containerlab_service_tasks_deploy_netbox/">deploy_netbox task documentation</a>.</p>
-<h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">¤</a></h2>
-<p>The Containerlab Service is ideal for the following scenarios:</p>
+<h2 id="high-level-flow">High-level flow<a class="headerlink" href="#high-level-flow" title="Permanent link">¤</a></h2>
 <ol>
-<li>
-<p><strong>Network Topology Testing</strong>:</p>
-<ul>
-<li>Deploy and test complex network topologies in a controlled environment.</li>
-<li>Validate network configurations and routing protocols before deploying to production.</li>
-</ul>
-</li>
-<li>
-<p><strong>Network Automation Development</strong>:</p>
-<ul>
-<li>Use the <code>get_nornir_inventory</code> task to generate inventories for Nornir Service.</li>
-<li>Develop and test automation scripts against realistic network topologies.</li>
-</ul>
-</li>
-<li>
-<p><strong>Training and Education</strong>:</p>
-<ul>
-<li>Create hands-on labs for network training programs.</li>
-<li>Simulate real-world network scenarios for educational purposes.</li>
-</ul>
-</li>
-<li>
-<p><strong>Troubleshooting and Debugging</strong>:</p>
-<ul>
-<li>Recreate production network issues in a lab environment for debugging.</li>
-<li>Use the <code>inspect</code> task to monitor and analyze the state of network devices.</li>
-</ul>
-</li>
-<li>
-<p><strong>Configuration Management</strong>:</p>
-<ul>
-<li>Save and restore network configurations using the <code>save</code> task.</li>
-<li>Reconfigure existing labs with updated topology files.</li>
-</ul>
-</li>
-<li>
-<p><strong>Continuous Integration/Continuous Deployment (CI/CD)</strong>:</p>
-<ul>
-<li>Integrate with CI/CD pipelines to validate network changes automatically.</li>
-<li>Use the <code>deploy</code> and <code>destroy_lab</code> tasks to spin up and tear down test environments dynamically.</li>
-</ul>
-</li>
+<li>Client validates the URL (<code>nf://...</code>) and prepares a destination path under <code>${base_dir}/fetchedfiles/</code>.</li>
+<li>Client calls <code>filesharing.file_details</code> (normal job/response) to discover:</li>
+<li><code>exists</code>, <code>size_bytes</code>, <code>md5hash</code></li>
+<li>and to pick a worker that has the file</li>
+<li>Client starts a <code>filesharing.fetch_file</code> job on the chosen worker with <code>offset=0</code> and <code>chunk_size=256000</code> (by default but can be adjusted using the <code>chunk_size</code> argument).</li>
+<li>Worker reads the file and pushes each chunk using <code>job.stream(chunk)</code> (NFP <code>STREAM</code>).</li>
+<li>Client receiver thread writes each chunk to disk, updates running MD5, and sends <code>PUT</code> messages to request the next offsets until complete.</li>
+<li>When total received bytes match <code>size_bytes</code>, client closes the file and verifies the MD5.</li>
 </ol>
-<p><img alt="❤" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/72x72/2764.png" title=":heart:" /> <strong>Happy CLABing !!</strong> <img alt="❤" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/72x72/2764.png" title=":heart:" /></p>
+<h3 id="flow-diagram">Flow diagram<a class="headerlink" href="#flow-diagram" title="Permanent link">¤</a></h3>
+<div class="highlight"><pre><span></span><code>sequenceDiagram
+  autonumber
+  participant C as Client (NFPClient)
+  participant B as Broker (NFPBroker)
+  participant W as FileSharingWorker
+  participant J as Worker Job object (Job)
+
+  C-&gt;&gt;B: POST filesharing:file_details {url}
+  B-&gt;&gt;W: POST {url}
+  W--&gt;&gt;B: RESPONSE 200 {exists,size_bytes,md5hash}
+  B--&gt;&gt;C: RESPONSE 200 {…}
+
+  Note over C: allocate transfer state (uuid, credit=pipeline)
+  C-&gt;&gt;B: POST filesharing:fetch_file {url, offset=0, chunk_size}
+  B-&gt;&gt;W: POST {…}
+
+  Note over W,J: Worker creates per-request Job (uuid)
+
+  loop For each chunk
+    W-&gt;&gt;J: job.stream(chunk_bytes)
+    J--&gt;&gt;B: STREAM (uuid, status=200, bytes)
+    B--&gt;&gt;C: STREAM (uuid, status=200, bytes)
+    C-&gt;&gt;B: PUT {offset=next_offset} (0..pipeline in flight)
+    B-&gt;&gt;W: PUT {offset=next_offset}
+    W--&gt;&gt;J: enqueue client_input_queue[{offset}]
+    W-&gt;&gt;J: job.wait_client_input(timeout)
+    J--&gt;&gt;W: {offset}
+  end
+
+  Note over C: close file, verify MD5
+</code></pre></div>
+<h2 id="threading-model-what-runs-where">Threading model (what runs where)<a class="headerlink" href="#threading-model-what-runs-where" title="Permanent link">¤</a></h2>
+<h3 id="client-side-threads">Client-side threads<a class="headerlink" href="#client-side-threads" title="Permanent link">¤</a></h3>
+<p>The client uses a dedicated receiver thread and a dispatcher thread.</p>
+<ul>
+<li><strong>Receiver thread</strong>: <code>recv(client)</code></li>
+<li>The <em>only</em> reader of the ZeroMQ socket.</li>
+<li>Parses incoming multipart frames.</li>
+<li>For <code>NFP.STREAM</code>: calls <code>handle_stream()</code> and (importantly) sends <code>NFP.PUT</code> requests for further chunks.</li>
+<li>
+<p>For <code>NFP.RESPONSE</code>/<code>NFP.EVENT</code>: updates the client-side SQLite job DB and enqueues messages for synchronous consumers.</p>
+</li>
+<li>
+<p><strong>Dispatcher thread</strong>: <code>dispatcher(client)</code></p>
+</li>
+<li>Finds jobs in the local job DB and sends <code>POST</code> / <code>GET</code> to the broker.</li>
+<li><code>fetch_file()</code> uses this job pipeline for:<ul>
+<li><code>filesharing.file_details</code> (a standard JSON response)</li>
+<li><code>filesharing.fetch_file</code> (which primarily streams data)</li>
+</ul>
+</li>
+</ul>
+<h3 id="worker-side-threads">Worker-side threads<a class="headerlink" href="#worker-side-threads" title="Permanent link">¤</a></h3>
+<p>Each worker runs a small set of queue-driven threads.</p>
+<ul>
+<li><code>recv(worker, destroy_event)</code>: reads from broker socket and fan-outs by command into queues</li>
+<li><code>_post(...)</code>: handles <code>NFP.POST</code> (creates job record + ACK)</li>
+<li><code>_get(...)</code>: handles <code>NFP.GET</code> (status/result polling)</li>
+<li><code>_event(...)</code>: emits <code>NFP.EVENT</code></li>
+<li><code>_put(...)</code>: handles <code>NFP.PUT</code> and forwards decoded JSON into <code>running_jobs[uuid].client_input_queue</code></li>
+</ul>
+<p>The File Sharing worker task <code>fetch_file(job, ...)</code> then consumes those inputs using:</p>
+<ul>
+<li><code>job.wait_client_input(timeout=chunk_timeout)</code></li>
+</ul>
+<p>This is how the worker learns which offsets to send next.</p>
+<h2 id="messaging-formats">Messaging formats<a class="headerlink" href="#messaging-formats" title="Permanent link">¤</a></h2>
+<p>This section describes the multipart frame layout as it appears to each endpoint.</p>
+<h3 id="client-broker-dealer-router">Client ↔ Broker (DEALER ↔ ROUTER)<a class="headerlink" href="#client-broker-dealer-router" title="Permanent link">¤</a></h3>
+<p>The client is a <code>zmq.DEALER</code>. The broker is a <code>zmq.ROUTER</code>.</p>
+<p>From the client’s perspective (what <code>recv(client)</code> expects):</p>
+<ul>
+<li>Incoming from broker:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>[ empty, header, command, service, uuid, status, payload ]
+</code></pre></div>
+<p>Where:
+- <code>header</code> is <code>NFP.BROKER</code>
+- <code>command</code> is typically <code>NFP.RESPONSE</code>, <code>NFP.EVENT</code>, or <code>NFP.STREAM</code>
+- <code>payload</code> is:
+  - JSON bytes for <code>RESPONSE</code>/<code>EVENT</code>
+  - raw file bytes for <code>STREAM</code></p>
+<p>From the broker’s perspective, messages include an initial identity frame that the client does not see.</p>
+<h3 id="worker-broker-dealer-router">Worker ↔ Broker (DEALER ↔ ROUTER)<a class="headerlink" href="#worker-broker-dealer-router" title="Permanent link">¤</a></h3>
+<p>Workers are also <code>zmq.DEALER</code>. The broker is <code>zmq.ROUTER</code>.</p>
+<p>Broker → worker (built by <code>NFP.MessageBuilder.broker_to_worker_put</code>):</p>
+<div class="highlight"><pre><span></span><code>[ worker_id, empty, NFP.BROKER, NFP.PUT, sender_id, empty, uuid, request_json ]
+</code></pre></div>
+<p>Worker-side <code>recv(worker, ...)</code> strips the initial <code>empty</code>, reads <code>header</code> + <code>command</code>, then pushes the remaining frames into <code>put_queue</code>.</p>
+<p>In <code>_put(...)</code>, the queued <code>work</code> list is treated as:</p>
+<ul>
+<li><code>work[2]</code> = <code>uuid</code></li>
+<li><code>work[3]</code> = JSON payload</li>
+</ul>
+<h3 id="stream-payload"><code>STREAM</code> payload<a class="headerlink" href="#stream-payload" title="Permanent link">¤</a></h3>
+<p>A stream chunk originates from the worker job via <code>Job.stream(data)</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="n">client_address</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">juuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="n">data_bytes</span>
+<span class="p">]</span>
+<span class="n">worker</span><span class="o">.</span><span class="n">send_to_broker</span><span class="p">(</span><span class="n">NFP</span><span class="o">.</span><span class="n">STREAM</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</code></pre></div>
+<p>The broker forwards <code>STREAM</code> to the client without wrapping the chunk into JSON.</p>
+<h2 id="how-put-is-used-client-worker">How <code>PUT</code> is used (client → worker)<a class="headerlink" href="#how-put-is-used-client-worker" title="Permanent link">¤</a></h2>
+<p>In file download, <code>PUT</code> does not upload file content.</p>
+<p>Instead, <code>PUT</code> is used as a <em>client-to-worker control channel</em> tied to the same job UUID.</p>
+<ul>
+<li>Client sends <code>PUT</code> with JSON: <code>{ "offset": &lt;int&gt; }</code></li>
+<li>Broker routes it to the same worker that is executing the job</li>
+<li>Worker <code>_put</code> thread places that dict into the running job’s <code>client_input_queue</code></li>
+<li>FileSharingWorker’s <code>fetch_file</code> task reads it with <code>job.wait_client_input()</code> and updates <code>offset</code></li>
+</ul>
+<p>This design provides a simple backpressure mechanism: the worker only sends the next chunk after the client requests it.</p>
+<h2 id="sliding-window-pipeline-backpressure">Sliding window / pipeline (backpressure)<a class="headerlink" href="#sliding-window-pipeline-backpressure" title="Permanent link">¤</a></h2>
+<p>Client-side <code>pipeline</code> is implemented as a credit counter in <code>client.file_transfers[uuid]</code>:</p>
+<ul>
+<li>Start: <code>credit = pipeline</code></li>
+<li>Each received chunk: <code>credit += 1</code></li>
+<li>Each <code>PUT</code> request sent: <code>credit -= 1</code></li>
+</ul>
+<p>After writing a chunk, the client sends up to <code>credit</code> additional <code>PUT</code> requests (while there are offsets remaining), which keeps up to ~<code>pipeline</code> requests "in flight".</p>
+<p>This keeps throughput reasonable without letting either side buffer an unbounded amount of data.</p>
+<h2 id="completion-and-integrity-checking">Completion and integrity checking<a class="headerlink" href="#completion-and-integrity-checking" title="Permanent link">¤</a></h2>
+<p>Completion is detected purely by byte count:</p>
+<ul>
+<li>Client tracks <code>total_bytes_received</code> and compares to <code>size_bytes</code>.</li>
+<li>When equal:</li>
+<li>Close the destination file</li>
+<li>Verify MD5 hash against <code>file_details.md5hash</code></li>
+</ul>
+<p>If MD5 mismatches, the client marks the job as failed and logs an error.</p>
+<h2 id="operational-notes-gotchas">Operational notes / gotchas<a class="headerlink" href="#operational-notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Timeouts</strong></li>
+<li>Worker <code>filesharing.fetch_file</code> defaults <code>chunk_timeout=5</code> seconds.</li>
+<li>If the client stops sending <code>PUT</code> requests, the worker raises <code>RuntimeError</code>.</li>
+<li>
+<p>Client <code>fetch_file(timeout=...)</code> limits the overall <code>run_job()</code> operations (details + streaming job).</p>
+</li>
+<li>
+<p><strong>Local storage path</strong></p>
+</li>
+<li>
+<p>Downloads go to <code>${base_dir}/fetchedfiles/&lt;nf-path&gt;</code>.</p>
+</li>
+<li>
+<p><strong>Binary vs text</strong></p>
+</li>
+<li><code>fetch_file(read=True)</code> opens the downloaded file as UTF-8 text (<code>open(..., "r", encoding="utf-8")</code>).</li>
+<li>
+<p>For binary files, prefer <code>read=False</code> and open the returned path in binary mode.</p>
+</li>
+<li>
+<p><strong>Single worker selection</strong></p>
+</li>
+<li><code>file_details</code> is called on <code>workers="all"</code>, but <code>fetch_file</code> streams from the <em>first</em> worker that reports <code>exists</code>.</li>
+</ul>
+<h2 id="debugging-tips">Debugging tips<a class="headerlink" href="#debugging-tips" title="Permanent link">¤</a></h2>
+<ul>
+<li>Enable debug logging for <code>norfab.core.client</code>, <code>norfab.core.broker</code>, and <code>norfab.core.worker</code>.</li>
+<li>Look for:</li>
+<li>Client: <code>received stream for unknown file transfer</code> (mismatched/expired UUID)</li>
+<li>Worker: <code>chunk timeout reached before received next chunk request</code></li>
+<li>Client: <code>MD5 hash mismatch</code></li>
+</ul>
 
 
 
 
 
 
-
-  
-  
 
 
 
@@ -5024,7 +5277,7 @@ nf#
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../../../services_overview/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Services Overview">
+          <a href="../documentation_style_guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Documentation Style Guide">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -5034,20 +5287,20 @@ nf#
                 Previous
               </span>
               <div class="md-ellipsis">
-                Services Overview
+                Documentation Style Guide
               </div>
             </div>
           </a>
         
         
           
-          <a href="../services_containerlab_service_inventory/" class="md-footer__link md-footer__link--next" aria-label="Next: Inventory">
+          <a href="../../testing/norfab_testing_framework/" class="md-footer__link md-footer__link--next" aria-label="Next: NORFAB Testing Framework">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Inventory
+                NORFAB Testing Framework
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -5113,10 +5366,10 @@ nf#
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
     
   </body>
