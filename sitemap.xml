@@ -89,27 +89,19 @@
          <lastmod>2026-01-17</lastmod>
     </url>
     <url>
+         <loc>https://docs.norfablabs.com/reference_norfab_events_subsystem/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
          <loc>https://docs.norfablabs.com/reference_norfab_inventory/</loc>
          <lastmod>2026-01-17</lastmod>
     </url>
     <url>
-         <loc>https://docs.norfablabs.com/services_norfab_events_service/</loc>
+         <loc>https://docs.norfablabs.com/reference_norfab_jobs_subsystem/</loc>
          <lastmod>2026-01-17</lastmod>
     </url>
     <url>
-         <loc>https://docs.norfablabs.com/services_norfab_file_service/</loc>
-         <lastmod>2026-01-17</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.norfablabs.com/services_norfab_inventory_service/</loc>
-         <lastmod>2026-01-17</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.norfablabs.com/services_norfab_jobs_service/</loc>
-         <lastmod>2026-01-17</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.norfablabs.com/services_norfab_mmi/</loc>
+         <loc>https://docs.norfablabs.com/reference_norfab_mmi_subsystem/</loc>
          <lastmod>2026-01-17</lastmod>
     </url>
     <url>
@@ -238,6 +230,34 @@
     </url>
     <url>
          <loc>https://docs.norfablabs.com/workers/fastmcp/services_fastmcp_service_task_get_tools/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.norfablabs.com/workers/filesharing/api_reference_workers_filesharing_worker/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.norfablabs.com/workers/filesharing/services_filesharing_service/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.norfablabs.com/workers/filesharing/services_filesharing_service_inventory/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.norfablabs.com/workers/filesharing/services_filesharing_service_tasks_fetch_file/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.norfablabs.com/workers/filesharing/services_filesharing_service_tasks_file_details/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.norfablabs.com/workers/filesharing/services_filesharing_service_tasks_list_files/</loc>
+         <lastmod>2026-01-17</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.norfablabs.com/workers/filesharing/services_filesharing_service_tasks_walk/</loc>
          <lastmod>2026-01-17</lastmod>
     </url>
     <url>
