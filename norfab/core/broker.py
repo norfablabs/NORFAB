@@ -4,7 +4,6 @@ import json
 import threading
 import random
 import os
-import hashlib
 import zmq
 import zmq.auth
 import signal

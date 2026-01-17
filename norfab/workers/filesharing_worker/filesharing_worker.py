@@ -1,4 +1,3 @@
-import yaml
 import logging
 import sys
 import os
@@ -6,7 +5,7 @@ import hashlib
 import importlib.metadata
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
-from typing import Any, List, Callable
+from typing import Any
 
 SERVICE = "filesharing"
 

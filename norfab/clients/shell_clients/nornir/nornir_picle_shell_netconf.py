@@ -1,12 +1,9 @@
-import json
 import builtins
 
 from enum import Enum
 
 from pydantic import (
     BaseModel,
-    StrictBool,
-    StrictInt,
     StrictStr,
     Field,
 )
@@ -16,7 +13,6 @@ from .nornir_picle_shell_common import (
     NornirCommonArgs,
     print_nornir_results,
 )
-from typing import Union, Optional, List
 from picle.models import PipeFunctionsModel
 
 

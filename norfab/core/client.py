@@ -18,7 +18,7 @@ from .security import generate_certificates
 from . import NFP
 from norfab.core.inventory import NorFabInventory
 from norfab.utils.markdown_results import markdown_results
-from typing import Any, Optional, Tuple, Iterator, Dict, List, Set, Union
+from typing import Any, Optional, Tuple, Dict, List, Set, Union
 
 log = logging.getLogger(__name__)
 
@@ -461,8 +461,6 @@ def handle_response(client, juuid: str, status: str, payload: dict):
     if not job:
         log.debug(f"{client.name} - received response for unknown job {juuid}")
         return
-
-    job_status = job.get("status")
 
     # Broker accepted POST - contains dispatched workers list
     if status == "202":  # ACCEPTED
@@ -1365,7 +1363,8 @@ class NFPClient(object):
             Exception: If there is an error in fetching the file or if the file's MD5 hash does not match the expected hash.
         """
         # round up digit e.g. if 2.0 -> 2 if 2.1 -> 3 if 0.01 -> 1
-        round_up = lambda num: max(1, (int(num) + (not num.is_integer())))
+        def round_up(num):
+            return max(1, (int(num) + (not num.is_integer())))
 
         uuid = uuid4().hex
         result = {"status": "200", "content": None, "error": None}

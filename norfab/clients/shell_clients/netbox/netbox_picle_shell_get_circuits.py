@@ -1,5 +1,4 @@
 import logging
-import json
 import builtins
 
 from picle.models import Outputters

@@ -2075,7 +2075,7 @@ class NFPWorker:
         )
 
         # inform client that job started
-        job.event(message=f"starting", status="running")
+        job.event(message="starting", status="running")
 
         # run the actual job
         try:
@@ -2132,7 +2132,7 @@ class NFPWorker:
         _ = self.running_jobs.pop(uuid)
 
         # inform client that job completed
-        job.event(message=f"completed", status="completed")
+        job.event(message="completed", status="completed")
 
     def work(self):
         """
