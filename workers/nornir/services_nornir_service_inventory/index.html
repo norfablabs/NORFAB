@@ -4696,7 +4696,7 @@ nfcli --show-broker-shared-key
 <p>Sample Nornir worker inventory definition</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Netbox &gt;= 4.3.0</label><label for="__tabbed_1_2">Netbox &lt; 4.3.0</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Netbox &gt;= 4.3.0</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This inventory <code>filters</code> section contains GraphQL query examples 
@@ -4728,8 +4728,6 @@ compatible with Netbox 4.3.0 and above.</p>
 
 <span class="c1"># Netbox Service Nornir Inventory integration</span>
 <span class="nt">netbox</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">retry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">  </span><span class="nt">retry_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
 <span class="w">  </span><span class="nt">interfaces</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">ip_addresses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -4749,72 +4747,17 @@ compatible with Netbox 4.3.0 and above.</p>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;{platform:</span><span class="nv"> </span><span class="s">{name:</span><span class="nv"> </span><span class="s">{exact:</span><span class="nv"> </span><span class="s">&quot;cisco_xr&quot;}}}&#39;</span>
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<p>This inventory <code>filters</code> section contains GraphQL query examples 
-compatible with Netbox below 4.3.0 version.</p>
-<div class="highlight"><span class="filename">nornir/nornir-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
-<span class="nt">watchdog_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
-<span class="nt">connections_idle_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-
-<span class="c1"># these parameters mapped to Nornir inventory</span>
-<span class="c1"># https://nornir.readthedocs.io/en/latest/tutorial/inventory.html</span>
-<span class="nt">runner</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RetryRunner</span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span>
-<span class="w">    </span><span class="nt">num_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="w">    </span><span class="nt">num_connectors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-<span class="w">    </span><span class="nt">connect_retry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">connect_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">    </span><span class="nt">connect_splay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="w">    </span><span class="nt">task_retry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">task_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
-<span class="w">    </span><span class="nt">task_splay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="w">    </span><span class="nt">reconnect_on_fail</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="nt">task_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span>
-<span class="nt">hosts</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="nt">groups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="nt">defaults</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="nt">logging</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="nt">user_defined</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-
-<span class="c1"># Netbox Service Nornir Inventory integration</span>
-<span class="nt">netbox</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">retry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">  </span><span class="nt">retry_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
-<span class="w">  </span><span class="nt">interfaces</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">ip_addresses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="nt">inventory_items</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">connections</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">cables</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">nbdata</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">circuits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">bgp_peerings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">primary_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ipv4&quot;</span>
-<span class="w">  </span><span class="nt">devices</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos4</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos5</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos8</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceos1</span>
-<span class="w">  </span><span class="nt">filters</span><span class="p">:</span><span class="w"> </span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">q</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fceos3</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">manufacturer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cisco</span>
-<span class="w">      </span><span class="nt">platform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cisco_xr</span>
-</code></pre></div>
-</div>
 </div>
 </div>
 </div>
 <p><strong>watchdog_interval</strong></p>
 <p>Watchdog run interval in seconds, default is 30</p>
 <p><strong>connections_idle_timeout</strong></p>
-<p>Watchdog connection idle timeout, default is <code>None</code> - no timeout, connection always kept alive, if set to 0, connections disconnected imminently after task completed, if positive number, connection disconnected after not being used for over <code>connections_idle_timeout</code></p>
+<p>Watchdog connection idle timeout, default is <code>None</code> - no timeout, connection always kept alive, if set to 0, connections disconnected right after task completed, if positive number, connection disconnected after not being used for over <code>connections_idle_timeout</code></p>
 <h2 id="netbox-inventory-integration">Netbox Inventory Integration<a class="headerlink" href="#netbox-inventory-integration" title="Permanent link">¤</a></h2>
 <p>NorFab Nornir Worker supports tight integration with Netbox to fetch devices data such as device interfaces, ip addresses, circuits, configuration context. Netbox 3.7.x and 4.x.x supported. </p>
 <p>Sample Nornir Worker inventory parameters to fetch devices data from Netbox</p>
 <div class="highlight"><pre><span></span><code><span class="nt">netbox</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">retry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">  </span><span class="nt">retry_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
 <span class="w">  </span><span class="nt">interfaces</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">ip_addresses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -4838,10 +4781,6 @@ compatible with Netbox below 4.3.0 version.</p>
 <p>List of Netbox GraphQL filters to pull devices data. Up to 10 filters supported.</p>
 <p><strong>devices</strong></p>
 <p>List of exact device names to retrieve from Netbox, names used as hosts' names in Nornir inventory.</p>
-<p><strong>retry</strong></p>
-<p>Specifies the number of Netbox data retrieval retry attempts for network operations. This parameter is useful for ensuring that transient network issues do not cause the operation to fail. </p>
-<p><strong>retry_interval</strong></p>
-<p>Defines the interval (in seconds) between retry attempts. This parameter works in conjunction with the <code>retry</code> parameter to control the timing of retry attempts. </p>
 <p><strong>instance</strong></p>
 <p>Specifies the name of the NetBox instance to be used. This parameter is useful for environments with multiple NetBox instances, allowing to target a specific instance to fetch devices data.</p>
 <p><strong>interfaces</strong></p>

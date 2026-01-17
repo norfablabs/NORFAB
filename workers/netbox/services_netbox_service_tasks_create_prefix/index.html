@@ -4828,7 +4828,7 @@ nf#
             <td>
               <div class="doc-md-description">
                 <p>Description for the new prefix, prefix description used for
-deduplication to source existng prefixes.</p>
+deduplication to source existing prefixes.</p>
               </div>
             </td>
             <td>
@@ -4845,7 +4845,7 @@ deduplication to source existng prefixes.</p>
             <td>
               <div class="doc-md-description">
                 <p>The prefix length of the new prefix to create, by default
-allocates next availabe /30 point-to-point prefix.</p>
+allocates next available /30 point-to-point prefix.</p>
               </div>
             </td>
             <td>
@@ -5042,7 +5042,11 @@ automatically creates branch if it does not exist in Netbox.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3231</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3227</span>
+<span class="normal">3228</span>
+<span class="normal">3229</span>
+<span class="normal">3230</span>
+<span class="normal">3231</span>
 <span class="normal">3232</span>
 <span class="normal">3233</span>
 <span class="normal">3234</span>
@@ -5287,11 +5291,7 @@ automatically creates branch if it does not exist in Netbox.</p>
 <span class="normal">3473</span>
 <span class="normal">3474</span>
 <span class="normal">3475</span>
-<span class="normal">3476</span>
-<span class="normal">3477</span>
-<span class="normal">3478</span>
-<span class="normal">3479</span>
-<span class="normal">3480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">3476</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreatePrefixInput</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
 <span class="p">)</span>
@@ -5325,9 +5325,9 @@ automatically creates branch if it does not exist in Netbox.</p>
 <span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site__name&quot;: &quot;foo&quot;}`</span>
 
 <span class="sd">        description (str): Description for the new prefix, prefix description used for</span>
-<span class="sd">            deduplication to source existng prefixes.</span>
+<span class="sd">            deduplication to source existing prefixes.</span>
 <span class="sd">        prefixlen (int, optional): The prefix length of the new prefix to create, by default</span>
-<span class="sd">            allocates next availabe /30 point-to-point prefix.</span>
+<span class="sd">            allocates next available /30 point-to-point prefix.</span>
 <span class="sd">        vrf (str, optional): Name of the VRF to associate with the prefix.</span>
 <span class="sd">        tags (Union[None, list], optional): List of tags to assign to the prefix.</span>
 <span class="sd">        tenant (str, optional): Name of the tenant to associate with the prefix.</span>

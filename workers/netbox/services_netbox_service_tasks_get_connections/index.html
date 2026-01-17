@@ -4893,7 +4893,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Regex patter to match interfaces, console ports and
+                <p>Regex pattern to match interfaces, console ports and
 console server ports by name, case insensitive.</p>
               </div>
             </td>
@@ -4976,7 +4976,11 @@ console server ports by name, case insensitive.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1221</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1217</span>
+<span class="normal">1218</span>
+<span class="normal">1219</span>
+<span class="normal">1220</span>
+<span class="normal">1221</span>
 <span class="normal">1222</span>
 <span class="normal">1223</span>
 <span class="normal">1224</span>
@@ -5364,11 +5368,7 @@ console server ports by name, case insensitive.</p>
 <span class="normal">1606</span>
 <span class="normal">1607</span>
 <span class="normal">1608</span>
-<span class="normal">1609</span>
-<span class="normal">1610</span>
-<span class="normal">1611</span>
-<span class="normal">1612</span>
-<span class="normal">1613</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<span class="normal">1609</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -5399,7 +5399,7 @@ console server ports by name, case insensitive.</p>
 <span class="sd">        dry_run (bool, optional): If True, perform a dry run without making actual changes.</span>
 <span class="sd">        cables (bool, optional): if True includes interfaces&#39; directly attached cables details</span>
 <span class="sd">        include_virtual (bool, optional): if True include connections for virtual and LAG interfaces</span>
-<span class="sd">        interface_regex (str, optional): Regex patter to match interfaces, console ports and</span>
+<span class="sd">        interface_regex (str, optional): Regex pattern to match interfaces, console ports and</span>
 <span class="sd">            console server ports by name, case insensitive.</span>
 
 <span class="sd">    Returns:</span>

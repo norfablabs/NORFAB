@@ -4834,7 +4834,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Regex patter to match interfaces by name, case insensitive.</p>
+                <p>Regex pattern to match interfaces by name, case insensitive.</p>
               </div>
             </td>
             <td>
@@ -4941,7 +4941,11 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1041</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
 <span class="normal">1042</span>
 <span class="normal">1043</span>
 <span class="normal">1044</span>
@@ -5115,11 +5119,7 @@ nf#
 <span class="normal">1212</span>
 <span class="normal">1213</span>
 <span class="normal">1214</span>
-<span class="normal">1215</span>
-<span class="normal">1216</span>
-<span class="normal">1217</span>
-<span class="normal">1218</span>
-<span class="normal">1219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<span class="normal">1215</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_interfaces</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -5138,7 +5138,7 @@ nf#
 <span class="sd">        job: NorFab Job object containing relevant metadata</span>
 <span class="sd">        instance (str, optional): Netbox instance name.</span>
 <span class="sd">        devices (list, optional): List of devices to retrieve interfaces for.</span>
-<span class="sd">        interface_regex (str, optional): Regex patter to match interfaces by name, case insensitive.</span>
+<span class="sd">        interface_regex (str, optional): Regex pattern to match interfaces by name, case insensitive.</span>
 <span class="sd">        ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.</span>
 <span class="sd">        inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.</span>
 <span class="sd">        dry_run (bool, optional): If True, only return query content, do not run it. Defaults to False.</span>

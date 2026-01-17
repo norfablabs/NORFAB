@@ -1859,6 +1859,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#norfab-netbox-get-circuits-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4658,6 +4669,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#norfab-netbox-get-circuits-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4714,6 +4736,39 @@
 <blockquote>
 <p>task api name: <code>get_circuits</code></p>
 </blockquote>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<p>Sample devices' circuits data retrieved from Netbox:</p>
+<div class="highlight"><pre><span></span><code>{
+    &quot;netbox-worker-1.1&quot;: {
+        &quot;fceos4&quot;: {
+            &quot;CID1&quot;: {
+                &quot;comments&quot;: &quot;&quot;,
+                &quot;commit_rate&quot;: null,
+                &quot;custom_fields&quot;: {},
+                &quot;description&quot;: &quot;&quot;,
+                &quot;interface&quot;: &quot;eth101&quot;,
+                &quot;is_active&quot;: true,
+                &quot;last_updated&quot;: &quot;2026-01-02T22:50:14.739796+00:00&quot;,
+                &quot;provider&quot;: &quot;Provider1&quot;,
+                &quot;provider_account&quot;: &quot;&quot;,
+                &quot;remote_device&quot;: &quot;fceos5&quot;,
+                &quot;remote_interface&quot;: &quot;eth101&quot;,
+                &quot;status&quot;: &quot;active&quot;,
+                &quot;tags&quot;: [],
+                &quot;tenant&quot;: null,
+                &quot;termination_a&quot;: {
+                    &quot;id&quot;: &quot;36&quot;,
+                    &quot;last_updated&quot;: &quot;2026-01-02T22:50:12.085037+00:00&quot;
+                },
+                &quot;termination_z&quot;: {
+                    &quot;id&quot;: &quot;37&quot;,
+                    &quot;last_updated&quot;: &quot;2026-01-02T22:50:14.498313+00:00&quot;
+                },
+                &quot;type&quot;: &quot;DarkFibre&quot;
+            },
+            &quot;CID2&quot;: {
+              ... etc ...
+</code></pre></div>
 <h2 id="norfab-netbox-get-circuits-command-shell-reference">NORFAB Netbox Get Circuits Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-circuits-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_circuits</code> task:</p>
 <div class="highlight"><pre><span></span><code>nf#man tree netbox.get.circuits
@@ -4886,7 +4941,11 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1745</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1741</span>
+<span class="normal">1742</span>
+<span class="normal">1743</span>
+<span class="normal">1744</span>
+<span class="normal">1745</span>
 <span class="normal">1746</span>
 <span class="normal">1747</span>
 <span class="normal">1748</span>
@@ -5087,11 +5146,7 @@ nf#
 <span class="normal">1943</span>
 <span class="normal">1944</span>
 <span class="normal">1945</span>
-<span class="normal">1946</span>
-<span class="normal">1947</span>
-<span class="normal">1948</span>
-<span class="normal">1949</span>
-<span class="normal">1950</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<span class="normal">1946</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_circuits</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>

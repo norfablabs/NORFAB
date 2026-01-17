@@ -5364,7 +5364,7 @@ have any resources matched by given task.</p>
             <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">worker_result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
                     <span class="n">ret</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">worker_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">worker_result</span>
-            <span class="c1"># add failed tasks irregardless of status content</span>
+            <span class="c1"># add failed tasks regardless of status content</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ret</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">worker_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">worker_result</span>
     <span class="k">return</span> <span class="n">ret</span>

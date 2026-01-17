@@ -5631,7 +5631,7 @@ operation. Defaults to None.</p>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_running_labs&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">[])</span>
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 
-    <span class="c1"># form topologies list if any of them are runing</span>
+    <span class="c1"># form topologies list if any of them are running</span>
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)))</span>
@@ -5741,7 +5741,7 @@ operation. Defaults to None.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>OS Environment variables ti use when running the process</p>
+                <p>OS Environment variables to use when running the process</p>
               </div>
             </td>
             <td>
@@ -5968,7 +5968,7 @@ operation. Defaults to None.</p>
 <span class="sd">        cwd (str, optional): The working directory to execute the command in. Defaults to None.</span>
 <span class="sd">        timeout (int, optional): The timeout for the command execution in seconds. Defaults to None.</span>
 <span class="sd">        ret (Result, optional): An optional Norfab result object to populate with the command&#39;s output. Defaults to None.</span>
-<span class="sd">        env (dict, Optional): OS Environment variables ti use when running the process</span>
+<span class="sd">        env (dict, Optional): OS Environment variables to use when running the process</span>
 <span class="sd">        expect_output (bool, Optional): whether to expect any output from command</span>
 
 <span class="sd">    Returns:</span>
@@ -7245,7 +7245,7 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Use Containerlab default credentials for hosts ot not.</p>
+                <p>Use Containerlab default credentials for hosts or not.</p>
               </div>
             </td>
             <td>
@@ -7478,7 +7478,7 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 <span class="sd">        lab_name (str): The name of the container lab to inspect. If not given loads inventory for all labs.</span>
 <span class="sd">        timeout (int, optional): The timeout value for the inspection operation. Defaults to None.</span>
 <span class="sd">        groups (list, optional): A list of group names to assign to the hosts in the inventory. Defaults to None.</span>
-<span class="sd">        use_default_credentials (bool, optional): Use Containerlab default credentials for hosts ot not.</span>
+<span class="sd">        use_default_credentials (bool, optional): Use Containerlab default credentials for hosts or not.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: A `Result` object containing the Nornir inventory. The `result` attribute</span>
@@ -8211,7 +8211,7 @@ inventory without deploying.</p>
                         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
                         <span class="k">continue</span>
             <span class="n">subnets_in_use</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">subnet</span><span class="p">)</span>
-            <span class="c1"># re-use existing lab subnet</span>
+            <span class="c1"># reuse existing lab subnet</span>
             <span class="k">if</span> <span class="n">clab_name</span> <span class="o">==</span> <span class="n">lab_name</span><span class="p">:</span>
                 <span class="n">ipv4_subnet</span> <span class="o">=</span> <span class="n">subnet</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>

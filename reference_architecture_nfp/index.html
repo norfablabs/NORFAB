@@ -5976,8 +5976,7 @@ W: DISCONNECT           B: DISCONNECT
 <h4 id="sid-implementation">SID Implementation<a class="headerlink" href="#sid-implementation" title="Permanent link">¤</a></h4>
 <p>TBD</p>
 <h3 id="broker-file-sharing-service-fss">Broker File Sharing Service (FSS)<a class="headerlink" href="#broker-file-sharing-service-fss" title="Permanent link">¤</a></h3>
-<p>Broker implements service to serve files to clients and workers from local file system using <code>nf://&lt;filepath&gt;</code> URL for supported arguments.</p>
-<p>Broker should use <code>fss.service.broker</code> service endpoint to listen to worker's requests. </p>
+<p>Broker automatically runs <code>filesharing</code> service worker(s) to serve files to clients and workers from local file system using <code>nf://&lt;filepath&gt;</code> URL for supported arguments.</p>
 <h4 id="fss-implementation">FSS Implementation<a class="headerlink" href="#fss-implementation" title="Permanent link">¤</a></h4>
 <p>TBD</p>
 <h3 id="reliability">Reliability<a class="headerlink" href="#reliability" title="Permanent link">¤</a></h3>
