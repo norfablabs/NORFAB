@@ -156,12 +156,14 @@ nav:
     - Inventory: workers/workflow/services_workflow_service_inventory.md
     - Tasks:
       - Run: workers/workflow/services_workflow_service_tasks_run.md
-  - NORFAB Built-ins:
-    - MMI: services_norfab_mmi.md
-    - Inventory Service: services_norfab_inventory_service.md
-    - File Service: services_norfab_file_service.md
-    - Jobs Service: services_norfab_jobs_service.md
-    - Events Service: services_norfab_events_service.md
+  - Filesharing:
+    - Overview: workers/filesharing/services_filesharing_service.md
+    - Inventory: workers/filesharing/services_filesharing_service_inventory.md
+    - Tasks:
+      - List Files: workers/filesharing/services_filesharing_service_tasks_list_files.md
+      - Walk: workers/filesharing/services_filesharing_service_tasks_walk.md
+      - File Details: workers/filesharing/services_filesharing_service_tasks_file_details.md
+      - Fetch File: workers/filesharing/services_filesharing_service_tasks_fetch_file.md
 
 - Clients:
   - Clients Overview: clients_overview.md
@@ -198,9 +200,14 @@ nav:
       - FastMCP Worker: workers/fastmcp/api_reference_workers_fastmcp_worker.md
       - Agent Worker: workers/agent/api_reference_workers_agent_worker.md
       - Workflow Worker: workers/workflow/api_reference_workers_workflow_worker.md
+      - Filesharing Worker: workers/filesharing/api_reference_workers_filesharing_worker.md
     - Built-in Clients:
       - NFCLI Client API: api_reference_clients_nfcli_client.md
       - ROBOT Client API: api_reference_clients_robot_client.md
+  - NORFAB Subsystems:
+    - MMI: reference_norfab_mmi_subsystem.md
+    - Jobs: reference_norfab_jobs_subsystem.md
+    - Events: reference_norfab_events_subsystem.md
 
 - Development:
   - Documentation Style Guide: development/documentation_style_guide.md

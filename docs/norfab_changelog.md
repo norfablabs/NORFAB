@@ -4,7 +4,9 @@
 
 1. Nornir service watchdog - fixing `connection_idle_timeout` handling
 2. Netbox service - fixing `ssl_verify` handling to suppress `InsecureRequestWarning`
-3. Norfab shell - fixed references to deprecated broker fss calls, replaced with calls to filesharing service
+3. Norfab shell - fixed references to deprecated broker fss calls, replaced with calls to `filesharing` service
+
+---
 
 ## 0.15.0
 
