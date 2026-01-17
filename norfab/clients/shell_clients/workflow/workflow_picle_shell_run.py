@@ -28,11 +28,7 @@ class WorkflowRunShell(ClientRunJobArgs):
 
     @staticmethod
     def source_workflow():
-        NFCLIENT = builtins.NFCLIENT
-        workflow_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return workflow_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events

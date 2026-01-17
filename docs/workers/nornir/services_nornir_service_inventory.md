@@ -60,8 +60,6 @@ Sample Nornir worker inventory definition
 
         # Netbox Service Nornir Inventory integration
         netbox:
-          retry: 3
-          retry_interval: 1
           instance: prod
           interfaces:
             ip_addresses: True
@@ -80,62 +78,6 @@ Sample Nornir worker inventory definition
             - name: '{i_contains: "fceos3"}'
             - '{platform: {name: {exact: "cisco_xr"}}}'
         ```
-        
-    === "Netbox < 4.3.0"
-
-        This inventory `filters` section contains GraphQL query examples 
-        compatible with Netbox below 4.3.0 version.
-        
-        ``` yaml title="nornir/nornir-worker-1.yaml"
-        service: nornir
-        watchdog_interval: 30
-        connections_idle_timeout: null
-
-        # these parameters mapped to Nornir inventory
-        # https://nornir.readthedocs.io/en/latest/tutorial/inventory.html
-        runner:
-          plugin: RetryRunner
-          options: 
-            num_workers: 100
-            num_connectors: 10
-            connect_retry: 1
-            connect_backoff: 1000
-            connect_splay: 100
-            task_retry: 1
-            task_backoff: 1000
-            task_splay: 100
-            reconnect_on_fail: True
-            task_timeout: 600
-        hosts: {}
-        groups: {}
-        defaults: {}
-        logging: {}
-        user_defined: {}
-
-        # Netbox Service Nornir Inventory integration
-        netbox:
-          retry: 3
-          retry_interval: 1
-          instance: prod
-          interfaces:
-            ip_addresses: True
-            inventory_items: True
-          connections:
-            cables: True
-          nbdata: True
-          circuits: True
-          bgp_peerings: True
-          primary_ip: "ipv4"
-          devices:
-            - fceos4
-            - fceos5
-            - fceos8
-            - ceos1
-          filters: 
-            - q: fceos3
-            - manufacturer: cisco
-              platform: cisco_xr
-        ```
 
 **watchdog_interval**
 
@@ -143,7 +85,7 @@ Watchdog run interval in seconds, default is 30
 
 **connections_idle_timeout**
 
-Watchdog connection idle timeout, default is ``None`` - no timeout, connection always kept alive, if set to 0, connections disconnected imminently after task completed, if positive number, connection disconnected after not being used for over ``connections_idle_timeout``
+Watchdog connection idle timeout, default is ``None`` - no timeout, connection always kept alive, if set to 0, connections disconnected right after task completed, if positive number, connection disconnected after not being used for over ``connections_idle_timeout``
 
 ## Netbox Inventory Integration
 
@@ -153,8 +95,6 @@ Sample Nornir Worker inventory parameters to fetch devices data from Netbox
 
 ``` yaml
 netbox:
-  retry: 3
-  retry_interval: 1
   instance: prod
   interfaces:
     ip_addresses: True
@@ -182,14 +122,6 @@ List of Netbox GraphQL filters to pull devices data. Up to 10 filters supported.
 **devices**
 
 List of exact device names to retrieve from Netbox, names used as hosts' names in Nornir inventory.
-
-**retry**
-
-Specifies the number of Netbox data retrieval retry attempts for network operations. This parameter is useful for ensuring that transient network issues do not cause the operation to fail. 
-
-**retry_interval**
-
-Defines the interval (in seconds) between retry attempts. This parameter works in conjunction with the `retry` parameter to control the timing of retry attempts. 
 
 **instance**
 

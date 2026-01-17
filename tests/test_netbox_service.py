@@ -269,7 +269,7 @@ class TestNetboxGrapQL:
         for worker, res in ret.items():
             assert res[
                 "errors"
-            ], f"{worker} did not return errors fro malformed graphql query"
+            ], f"{worker} did not return errors for malformed graphql query"
 
     def test_form_graphql_query_dry_run(self, nfclient):
         if self.nb_version is None:
@@ -3215,7 +3215,7 @@ class TestCreateIP:
         delete_ips("10.0.0.0/24", nfclient)
 
         if self.nb_version[0] == 4:
-            # test dry rin for new ip
+            # test dry run for new ip
             create_1 = nfclient.run_job(
                 "netbox",
                 "create_ip",
@@ -3683,7 +3683,7 @@ class TestNetboxCache:
             for key in res["result"]:
                 assert (
                     "ceos1" in key
-                ), f"{worker} - key '{key}' does not contain 'ceos1' patter "
+                ), f"{worker} - key '{key}' does not contain 'ceos1' pattern "
 
     def test_cache_clear_all(self, nfclient):
         # populate the cache
@@ -3886,7 +3886,7 @@ class TestNetboxCache:
             kwargs={"cache": False, "devices": ["ceos1", "fceos4", "fceos5"]},
         )
 
-        # verify cache is emty
+        # verify cache is empty
         ret_list = nfclient.run_job(
             "netbox",
             "cache_list",

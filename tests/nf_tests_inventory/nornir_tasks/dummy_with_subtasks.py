@@ -3,7 +3,7 @@ from nornir.core.task import Result, Task
 
 def subtask(task: Task) -> Result:
     task.name = "dummy_subtask"
-    return Result(host=task.host, result="dummy substask done")
+    return Result(host=task.host, result="dummy subtask done")
 
 
 def task(task: Task) -> Result:

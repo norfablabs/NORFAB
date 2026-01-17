@@ -75,7 +75,7 @@ class WatchDog(WorkerWatchDog):
     def __init__(self, worker):
         super().__init__(worker)
         self.worker = worker
-        self.connections_idle_timeout = worker.inventory.get(
+        self.connections_idle_timeout = worker.nornir_worker_inventory.get(
             "connections_idle_timeout", None
         )
         self.connections_data = {}  # store connections use timestamps
@@ -1069,7 +1069,7 @@ class NornirWorker(NFPWorker):
     @Task(fastapi={"methods": ["GET"]})
     def get_watchdog_connections(self) -> Result:
         """
-        Retrieve the list of connections curently managed by watchdog.
+        Retrieve the list of connections currently managed by watchdog.
 
         Returns:
             Result: An instance of the Result class containing the current
@@ -1577,15 +1577,6 @@ class NornirWorker(NFPWorker):
             ret.result = {"test_results": ret.result, "suite": return_suite}
 
         return ret
-
-    def netconf(self) -> dict:
-        raise NotImplementedError("NETCONF task is not implemented yet")
-
-    def gnmi(self) -> dict:
-        raise NotImplementedError("GNMI task is not implemented yet")
-
-    def snmp(self) -> dict:
-        raise NotImplementedError("SNMP task is not implemented yet")
 
     @Task(fastapi={"methods": ["POST"]})
     def network(self, job: Job, fun: str, **kwargs) -> Result:

@@ -42,7 +42,7 @@ class GetCircuits(NetboxCommonArgs, NetboxClientRunJobArgs):
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
         if isinstance(kwargs.get("cid"), str):
-            kwargs["cid"] = json.loads(kwargs["cid"])
+            kwargs["cid"] = [kwargs["cid"]]
 
         result = NFCLIENT.run_job(
             "netbox",

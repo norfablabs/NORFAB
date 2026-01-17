@@ -431,11 +431,13 @@ class NetboxWorker(NFPWorker):
         Raises:
             None: All exceptions are caught and handled within the method.
         """
-        params = self.netbox_inventory["instances"][name]
+        params = self._get_instance_params(name)
+
         ret = {
             "error": None,
             "status": True,
         }
+
         try:
             response = requests.get(
                 f"{params['url']}/api/status",
@@ -461,7 +463,7 @@ class NetboxWorker(NFPWorker):
 
         return ret
 
-    def _get_instance_params(self, name: str) -> dict:
+    def _get_instance_params(self, name: str = None) -> dict:
         """
         Retrieve instance parameters from the NetBox inventory.
 
@@ -477,19 +479,16 @@ class NetboxWorker(NFPWorker):
         If the `ssl_verify` parameter is set to False, SSL warnings will be disabled.
         Otherwise, SSL warnings will be enabled.
         """
-
-        if name:
-            ret = self.netbox_inventory["instances"][name]
-        else:
-            ret = self.netbox_inventory["instances"][self.default_instance]
+        name = name or self.default_instance
+        params = self.netbox_inventory["instances"][name]
 
         # check if need to disable SSL warnings
-        if ret.get("ssl_verify") == False:
+        if params.get("ssl_verify") == False:
             requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         else:
             requests.packages.urllib3.enable_warnings(InsecureRequestWarning)
 
-        return ret
+        return params
 
     def _get_pynetbox(self, instance, branch: str = None):
         """
@@ -510,13 +509,10 @@ class NetboxWorker(NFPWorker):
         this function will disable warnings for insecure requests.
         """
         params = self._get_instance_params(instance)
+        nb = pynetbox.api(url=params["url"], token=params["token"])
 
         if params.get("ssl_verify") == False:
-            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-            nb = pynetbox.api(url=params["url"], token=params["token"])
             nb.http_session.verify = False
-        else:
-            nb = pynetbox.api(url=params["url"], token=params["token"])
 
         # add branch
         if branch is not None and self.has_plugin(
@@ -748,7 +744,7 @@ class NetboxWorker(NFPWorker):
             query = query_string
         else:
             raise RuntimeError(
-                f"{self.name} - graphql method expects quieries argument or obj, filters, "
+                f"{self.name} - graphql method expects queries argument or obj, filters, "
                 f"fields arguments or query_string argument provided"
             )
         payload = json.dumps({"query": query})
@@ -1057,7 +1053,7 @@ class NetboxWorker(NFPWorker):
             job: NorFab Job object containing relevant metadata
             instance (str, optional): Netbox instance name.
             devices (list, optional): List of devices to retrieve interfaces for.
-            interface_regex (str, optional): Regex patter to match interfaces by name, case insensitive.
+            interface_regex (str, optional): Regex pattern to match interfaces by name, case insensitive.
             ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.
             inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.
             dry_run (bool, optional): If True, only return query content, do not run it. Defaults to False.
@@ -1249,7 +1245,7 @@ class NetboxWorker(NFPWorker):
             dry_run (bool, optional): If True, perform a dry run without making actual changes.
             cables (bool, optional): if True includes interfaces' directly attached cables details
             include_virtual (bool, optional): if True include connections for virtual and LAG interfaces
-            interface_regex (str, optional): Regex patter to match interfaces, console ports and
+            interface_regex (str, optional): Regex pattern to match interfaces, console ports and
                 console server ports by name, case insensitive.
 
         Returns:
@@ -3262,9 +3258,9 @@ class NetboxWorker(NFPWorker):
                     e.g. `{"prefix": "10.0.0.0/24", "site__name": "foo"}`
 
             description (str): Description for the new prefix, prefix description used for
-                deduplication to source existng prefixes.
+                deduplication to source existing prefixes.
             prefixlen (int, optional): The prefix length of the new prefix to create, by default
-                allocates next availabe /30 point-to-point prefix.
+                allocates next available /30 point-to-point prefix.
             vrf (str, optional): Name of the VRF to associate with the prefix.
             tags (Union[None, list], optional): List of tags to assign to the prefix.
             tenant (str, optional): Name of the tenant to associate with the prefix.

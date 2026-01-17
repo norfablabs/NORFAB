@@ -240,19 +240,11 @@ class NornirCfgShell(
 
     @staticmethod
     def source_config():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return broker_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     def source_job_data():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return broker_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events

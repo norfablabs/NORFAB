@@ -20,7 +20,7 @@ To start with, define these folders structure and create all the files:
             dummy_service.py
 ```
 
-Above are all the files we need, `plugins` directory name is arbitrary and can be anything, NorFab is not hardcoded to search for any of the directories, all plugins mapping defined withing `inventory.yaml` file.
+Above are all the files we need, `plugins` directory name is arbitrary and can be anything, NorFab is not hardcoded to search for any of the directories, all plugins mapping defined within `inventory.yaml` file.
 
 ### Dummy Service Custom Worker
 

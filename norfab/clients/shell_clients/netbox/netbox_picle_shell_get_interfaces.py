@@ -39,7 +39,7 @@ class GetInterfaces(NetboxCommonArgs, NetboxClientRunJobArgs):
     )
     interface_regex: StrictStr = Field(
         None,
-        description="Regex patter to match interfaces and ports",
+        description="Regex pattern to match interfaces and ports",
         alias="interface-regex",
     )
 

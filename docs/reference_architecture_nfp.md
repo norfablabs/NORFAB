@@ -420,9 +420,7 @@ TBD
 
 ### Broker File Sharing Service (FSS)
 
-Broker implements service to serve files to clients and workers from local file system using ``nf://<filepath>`` URL for supported arguments.
-
-Broker should use `fss.service.broker` service endpoint to listen to worker's requests. 
+Broker automatically runs `filesharing` service worker(s) to serve files to clients and workers from local file system using ``nf://<filepath>`` URL for supported arguments.
 
 #### FSS Implementation
 

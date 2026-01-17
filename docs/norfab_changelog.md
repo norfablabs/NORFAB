@@ -1,18 +1,26 @@
+## 0.15.1
+
+### BUGS
+
+1. Nornir service watchdog - fixing `connection_idle_timeout` handling
+2. Netbox service - fixing `ssl_verify` handling to suppress `InsecureRequestWarning`
+3. Norfab shell - fixed references to deprecated broker fss calls, replaced with calls to filesharing service
+
 ## 0.15.0
 
 ### CHANGES
 
-1. Introduce sqlite3 DB into client for jobs state persistance
+1. Introduce sqlite3 DB into client for jobs state persistence
 2. Updated NFP semantics for better performance and readability
 3. Worker - added support for `job.stream` capability to stream a set of bytes back to client, used for file transfers, added new `NFP.STREAM` command as part of this effort
-4. Added support for new `NFP.PUT` command for client to update running jobs on worker, currently used by client to command worker a number of file offsets to stream back, but can be extended to provide user input mid job execution, e.g. agent requiesting input from user.
+4. Added support for new `NFP.PUT` command for client to update running jobs on worker, currently used by client to command worker a number of file offsets to stream back, but can be extended to provide user input mid job execution, e.g. agent requesting input from user.
 5. Client - refactored `fetch_file` method to use new stream and put capabilities
-6. Nornir test markdown - various markdown output improvements such as added total tests to summary, added test numer column to the table, added host name next to every collected command, removed support for hosts inventory as it bogged browser memory for being too long.
+6. Nornir test markdown - various markdown output improvements such as added total tests to summary, added test number column to the table, added host name next to every collected command, removed support for hosts inventory as it bogged browser memory for being too long.
 
 ### FEATURES
 
 1. Client and worker - added `delete_fetched_files` task to remove files fetched from broker
-2. Created new `filesharing` service worker to host files, by default broker run 1 such worker locally, this improves norfab hosting capabilities and open paths toward integrating with external file sharing resources e.g. github, s3, http etc.
+2. Created new `filesharing` service worker to host files, by default broker runs 1 such worker locally, this improves norfab hosting capabilities and open paths toward integrating with external file sharing resources e.g. github, s3, http etc.
 
 ---
 
@@ -28,7 +36,7 @@
 6. Nornir tests markdown - added hosts expandable inventory section
 7. Nornir tests markdown - added total tests number for detailed section for each host
 8. Nornir tests markdown - updated headings and paragraphs content
-9. Enhanced message construction for NFP protocol buy adding message builder
+9. Enhanced message construction for NFP protocol by adding message builder
 10. Enhanced client, worker and broker socket handling by adding thread locks
 
 ### FEATURES
@@ -53,7 +61,7 @@
 
 ### CHANGES
 
-1. Changed worker to use sqllite database for job persistent storage instead of json files
+1. Changed worker to use sqlite database for job persistent storage instead of json files
 2. Netbox sync device facts - enhanced sync logic to use bulk device updates
 
 ### FEATURES
@@ -70,7 +78,7 @@
 ### FEATURES
 
 1. NFAPI logging - added support for `logging->log_events` parameter to emit events as syslog messages
-2. Added context manager support fo NFAPI to simplify invocation from python scripts
+2. Added context manager support for NFAPI to simplify invocation from python scripts
 
 ### CHANGES
 
@@ -121,7 +129,7 @@
 1. Netbox worker - fixing handling of Netbox instance for child subnet creation
 
 
-## FEATURES
+### FEATURES
 
 1. Netbox worker - update interface descriptions task now can supply dictionary of interface descriptions
 
@@ -156,7 +164,7 @@
 
 1. Netbox service - restored Netbox v4.2.0 support
 2. Fixing Picle shell netbox get interfaces to have `interface_regex` argument
-3. Fixing Picle chek netbox get connection arguments
+3. Fixing Picle check netbox get connection arguments
 
 ---
 
@@ -164,7 +172,7 @@
 
 ### BUGS
 
-1. FastAPI Service - fixing json references for OpenAPI schema, which previously broken lead to error in swagger and redoc UIs rendering.
+1. FastAPI Service - fixing JSON references for OpenAPI schema, which previously broken led to error in swagger and redoc UIs rendering.
 
 ### FEATURES
 
@@ -196,8 +204,8 @@
 ### BUGS
 
 1. Fixed containerlab show lab outputting
-2. Enhanced nfcli logic to b able to start broker nad workers only without a client
-3. Updated aio docker file to start broker and workers only
+2. Enhanced nfcli logic to be able to start broker and workers only without a client
+3. Updated aio Dockerfile to start broker and workers only
 
 ---
 
@@ -205,19 +213,19 @@
 
 ### FEATURES
 
-1. FastAPI Services -  enhanced to generate api endpoints for all services tasks automatically using `@Task` decorator data
-2. NFCLI -  Picle show containerlab containers now emits output with nested tables
+1. FastAPI Services - enhanced to generate API endpoints for all services tasks automatically using `@Task` decorator data
+2. NFCLI - Picle show containerlab containers now emits output with nested tables
 3. Netbox Service - `create_ip` task enhanced to source prefixes to allocate next IP from using prefix description string
 4. Netbox Service -  Added `create_prefix` task to allocate next available prefix
 5. Nornir Service - Adding `nb_create_prefix` Jinja2 filter allocate next available prefix during templates rendering
 6. Worker - Added `fastapi` argument to `@Task` decorator to control FastAPI REST API endpoints auto-generation
 7. Containerlab Service - added support for Containerlab 0.69+
-8. Netbox Service - added support for branching plugin, made creat and update tasks be branch aware, updated nfcli shells to support `branch` argument
+8. Netbox Service - added support for branching plugin, made create and update tasks be branch aware, updated nfcli shells to support `branch` argument
 9. Netbox Service - added `delete_branch` task
 
 ### BUGS
 
-1. Fixing nornir test picle shell test task handling for verbouse-result and dry-run
+1. Fixing nornir test picle shell test task handling for verbose-result and dry-run
 2. Fixing nornir test handling for when suite renders to empty tests for a host
 3. Fixed Netbox service `instance` variable options sourcing for CLI shells
 
@@ -256,7 +264,7 @@
 ### FEATURES
 
 1. Adding concurrency to worker jobs execution, adding new worker inventory parameter `max_concurrent_jobs`
-2. Adding `@Task()` decorator to expose worker methods as tasks, this decorator perfoms automatic typechecking using type annotation, alternatively it support input / output pydanti models to verify input arguments and return results.
+2. Adding `@Task()` decorator to expose worker methods as tasks, this decorator performs automatic type checking using type annotation, alternatively it supports input/output pydantic models to verify input arguments and return results.
 3. Passing on `job` argument to all NorFab tasks, `job` is an object that contains relevant metadata - client address, juuid, args, kwargs etc. Job object can be used to emit events.
 4. Adding workers `echo` task to perform tests, added respective nfcli commands tree `workers.ping`.
 5. Adding workers `list_tasks` method to return information about tasks in MCP compatible format.
@@ -308,12 +316,12 @@
 ### CHANGES
 
 1. Restructuring pydantic models structures for better following DRY principles:
-    1. Moved FatAPI models under norfab.models.fastapi
+  1. Moved FastAPI models under norfab.models.fastapi
     2. Added norfab.models.nornir pydantic models
     3. Events and results models moved under norfab.models
 2. Added broker `zmq_auth` inventory parameter to turn zero mq authentication and encryption off
 3. Added `verbose-result` command line argument to relevant tasks to emit result details
-4. Updated to CLI shells to support PICLE 0.9.0
+4. Updated CLI shells to support PICLE 0.9.0
 5. Enhanced Netbox service to support working with instances of Netbox of different major and minor releases
 
 ### BUGS
@@ -322,7 +330,7 @@
 
 ### FEATURES
 
-1. Improved worker jinja2 templates rendering logic to allow render url first and next download its content
+1. Improved worker jinja2 templates rendering logic to allow render URL first and next download its content
 2. Added `nornir refresh` CLI command to refresh Nornir workers instances and reload inventory
 3. Added support for Netbox 4.2
 4. Added support for Nornir service to pull hosts inventory from Containerlab service
@@ -339,7 +347,7 @@
 
 1. NFCLI shells - updated to use nested outputter where appropriate
 2. Nornir worker - updated to set failed flag for its tasks according to test results
-3. Worker - Added `status` filed to worker result object to reflect job execution status
+3. Worker - Added `status` field to worker result object to reflect job execution status
 4. Nornir Service - replaced `cfg_dry_run` and `cli_dry_run` arguments with `dry_run` argument
 5. NFCLI shell - added aliases to use dash instead of underscore
 6. NFCLI shell - Moved Nornir service show commands under `show nornir xyz` path  
@@ -373,7 +381,7 @@
 ### CHANGES
 
 1. Improved netbox get_circuits logic.
-2. Standartised worker `get_version` and `get_inventory` methods
+2. Standardised worker `get_version` and `get_inventory` methods
 
 ### Features
 
@@ -445,7 +453,7 @@
 
 1. Improved libs imports handling to account for distributed deployment
 2. Improved logging handling
-3. Fixed nfcli issue with starting components onf NorFab #2
+3. Fixed nfcli issue with starting components on NorFab #2
 4. Changed CTRL+C handling to trigger graceful NorFab exit
 
 ### FEATURES
@@ -459,7 +467,7 @@
 
 ### CHANGES
 
-1. refactored `get_circuits` to use `threadpoolexecutor` to fetch circuits path from netbox
+1. refactored `get_circuits` to use `ThreadPoolExecutor` to fetch circuits path from netbox
 2. adding `job_data` json load to nornir cli, cfg and test tasks
 
 ### BUGS
@@ -467,10 +475,10 @@
 1. Fixing netbox `get_devices` dry run test
 2. Fixed netbox `get_circuits` devices site retrieval handling
 
-## FEATURES
+### FEATURES
 
 1. Added cache to Netbox `get_circuits` and `get_devices` tasks
-2. Added new `agent` worker to stsart working on use cases to interface with LLMs
+2. Added new `agent` worker to start working on use cases to interface with LLMs
 
 ---
 
@@ -478,7 +486,7 @@
 
 ### BUGS
 
-1. FIxed Netbox CLI Shell handling of NFCLIENT
+1. Fixed Netbox CLI Shell handling of NFCLIENT
 
 ### CHANGES
 
@@ -502,7 +510,7 @@
 
 1. Added support for Nornir parse task to source TTP template from file with autocompletion
 2. Added Nornir File Copy task to copy files to devices using SCP
-3. Added support for logs to  be collected into single file from all NorFab local processes
+3. Added support for logs to be collected into single file from all NorFab local processes
 4. Added to NorFab worker `job_list` and `job_details` methods
 5. Added `show jobs summary` and `show jobs details` commands to NorFab shell and to Nornir shell
 6. Added `--create-env` argument to nfcli utility to create NorFab folders and files to make it easier to get started using norfab

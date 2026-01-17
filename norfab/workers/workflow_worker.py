@@ -113,7 +113,7 @@ class WorkflowWorker(NFPWorker):
                 if worker_result["failed"] is False:
                     if worker_result["status"] != "no_match":
                         ret[step][worker_name] = worker_result
-                # add failed tasks irregardless of status content
+                # add failed tasks regardless of status content
                 else:
                     ret[step][worker_name] = worker_result
         return ret

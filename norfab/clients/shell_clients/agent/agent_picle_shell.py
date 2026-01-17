@@ -92,11 +92,7 @@ class AgentInvoke(ClientRunJobArgs):
 
     @staticmethod
     def source_name():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return ["NorFab"] + broker_files["results"]
+        return ["NorFab"] + ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events

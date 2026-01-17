@@ -283,27 +283,15 @@ class NornirCliShell(
 
     @staticmethod
     def source_commands():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return broker_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     def source_run_ttp():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return broker_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     def source_job_data():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return broker_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
@@ -313,7 +301,7 @@ class NornirCliShell(
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
 
-        # covert use_ps_timeout to timeout as use_ps expects "timeout" argument
+        # convert use_ps_timeout to timeout as use_ps expects "timeout" argument
         if kwargs.get("use_ps") and "use_ps_timeout" in kwargs:
             kwargs["timeout"] = kwargs.pop("use_ps_timeout")
 

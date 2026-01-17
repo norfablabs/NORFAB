@@ -8,7 +8,7 @@ def check_containerlab_worker(nfclient):
     workers = nfclient.get(
         "mmi.service.broker", "show_workers", kwargs={"service": "containerlab"}
     )
-    print(f"Checking if contaienrlab worker running: {workers}")
+    print(f"Checking if containerlab worker running: {workers}")
     return any(w["name"] == "containerlab-worker-1" for w in workers["results"])
 
 
@@ -235,7 +235,7 @@ class TestInspectTask:
             assert all(
                 "clab-three-routers" in cntr["name"]
                 for cntr in r["result"]["three-routers-lab"]
-            ), f"{w} - did not filter contaienr by lab name properly"
+            ), f"{w} - did not filter container by lab name properly"
 
     def test_inspect_details(self, nfclient):
         wait_for_containerlab_worker(nfclient)

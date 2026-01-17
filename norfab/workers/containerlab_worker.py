@@ -173,7 +173,7 @@ class ContainerlabWorker(NFPWorker):
         ret = Result(task=f"{self.name}:get_running_labs", result=[])
         inspect = self.inspect(job=job, timeout=timeout)
 
-        # form topologies list if any of them are runing
+        # form topologies list if any of them are running
         if inspect.result:
             ret.result = inspect.result.keys()
             ret.result = list(sorted(set(ret.result)))
@@ -199,7 +199,7 @@ class ContainerlabWorker(NFPWorker):
             cwd (str, optional): The working directory to execute the command in. Defaults to None.
             timeout (int, optional): The timeout for the command execution in seconds. Defaults to None.
             ret (Result, optional): An optional Norfab result object to populate with the command's output. Defaults to None.
-            env (dict, Optional): OS Environment variables ti use when running the process
+            env (dict, Optional): OS Environment variables to use when running the process
             expect_output (bool, Optional): whether to expect any output from command
 
         Returns:
@@ -585,7 +585,7 @@ class ContainerlabWorker(NFPWorker):
             lab_name (str): The name of the container lab to inspect. If not given loads inventory for all labs.
             timeout (int, optional): The timeout value for the inspection operation. Defaults to None.
             groups (list, optional): A list of group names to assign to the hosts in the inventory. Defaults to None.
-            use_default_credentials (bool, optional): Use Containerlab default credentials for hosts ot not.
+            use_default_credentials (bool, optional): Use Containerlab default credentials for hosts or not.
 
         Returns:
             Result: A `Result` object containing the Nornir inventory. The `result` attribute
@@ -817,7 +817,7 @@ class ContainerlabWorker(NFPWorker):
                             job.event(msg, severity="WARNING")
                             continue
                 subnets_in_use.add(subnet)
-                # re-use existing lab subnet
+                # reuse existing lab subnet
                 if clab_name == lab_name:
                     ipv4_subnet = subnet
                     job.event(

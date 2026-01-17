@@ -254,7 +254,7 @@ class NorFabRobot:
                     has_errors = True
                     logger.error(
                         (
-                            f'<details><summary>{worker} worker, {host} device, comand "{result["name"]}" failed - '
+                            f'<details><summary>{worker} worker, {host} device, command "{result["name"]}" failed - '
                             f'<span style="background-color: #CE3E01">"{result["exception"]}"</span></summary>'
                             f'<p style="margin-left:20px;"><font face="courier new">{result["result"]}'
                             f"</font></p></details>"

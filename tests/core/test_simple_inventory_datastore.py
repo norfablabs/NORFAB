@@ -94,7 +94,7 @@ class TestWorkersInventory:
 
         assert (
             nornir_worker_2["groups"]["valueoverwrite"]["port"] == 777
-        ), "'valueoverwrite.port' not overriden by nested group"
+        ), "'valueoverwrite.port' not overridden by nested group"
 
     def test_jinja2_rendering(self):
         # nornir/common.yaml has default section populated with username and password sourced

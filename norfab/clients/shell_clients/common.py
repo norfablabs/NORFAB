@@ -207,3 +207,10 @@ class ClientRunJobArgs(BaseModel):
         description="Display progress events",
         json_schema_extra={"presence": True},
     )
+
+    @staticmethod
+    def walk_norfab_files():
+        NFCLIENT = builtins.NFCLIENT
+        response = NFCLIENT.run_job("filesharing", "walk", kwargs={"url": "nf://"})
+        wname, wres = next(iter(response.items()))
+        return wres["result"]

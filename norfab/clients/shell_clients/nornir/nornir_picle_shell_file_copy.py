@@ -85,11 +85,7 @@ class NornirFileCopyShell(
 
     @staticmethod
     def source_source_file():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return broker_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events

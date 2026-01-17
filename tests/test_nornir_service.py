@@ -505,7 +505,7 @@ class TestNornirTask:
             for host, res in results["result"].items():
                 assert res == {
                     "dummy": "dummy task done",
-                    "dummy_subtask": "dummy substask done",
+                    "dummy_subtask": "dummy subtask done",
                 }
 
     def test_task_netmiko_send_command(self, nfclient):

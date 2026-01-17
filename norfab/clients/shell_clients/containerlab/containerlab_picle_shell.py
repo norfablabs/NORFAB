@@ -44,11 +44,7 @@ class DeployCommand(ClientRunJobArgs):
 
     @staticmethod
     def source_topology():
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.get(
-            "fss.service.broker", "walk", kwargs={"url": "nf://"}
-        )
-        return broker_files["results"]
+        return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
