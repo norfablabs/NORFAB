@@ -14,7 +14,7 @@ First, install NorFab using pip:
 ```
 pip install norfab
 pip install norfab[nfcli]
-pip install norfab[nornir]
+pip install norfab[nornirservice]
 ```
 
 Above installs NorFab core components plus extras needed to run nfcli anf Nornir service workers. 
