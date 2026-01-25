@@ -5,7 +5,7 @@ CLAB_VERSION = None
 
 
 def check_containerlab_worker(nfclient):
-    workers = nfclient.get(
+    workers = nfclient.mmi(
         "mmi.service.broker", "show_workers", kwargs={"service": "containerlab"}
     )
     print(f"Checking if containerlab worker running: {workers}")
@@ -13,7 +13,7 @@ def check_containerlab_worker(nfclient):
 
 
 def check_netbox_worker(nfclient):
-    workers = nfclient.get(
+    workers = nfclient.mmi(
         "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
     )
     print(f"Checking if netbox worker running: {workers}")

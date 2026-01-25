@@ -5,7 +5,7 @@ import random
 
 class TestDummyPluginLocal:
     def test_dummy_worker_running(self, nfclient):
-        ret = nfclient.get("mmi.service.broker", "show_workers")
+        ret = nfclient.mmi("mmi.service.broker", "show_workers")
         assert any(
             "dummy" in w["name"] and w["status"] == "alive" for w in ret["results"]
         ), "dummy worker not running"

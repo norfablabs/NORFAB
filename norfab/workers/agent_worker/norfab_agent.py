@@ -22,9 +22,9 @@ workers and services.
 
 class get_service_task_information_input(BaseModel):
     service: StrictStr = Field(
-        None, description="NorFab service name to get task information for"
+        None, description="Lowercase NorFab service name to get task information for"
     )
-    name: StrictStr = Field(None, description="Task name to get information for")
+    name: StrictStr = Field(None, description="Lowercase Task name to get information for")
 
 
 tools = {
@@ -33,7 +33,7 @@ tools = {
         "norfab": {"service": "all", "task": "list_tasks", "kwargs": {"brief": True}},
     },
     "get_service_task_details": {
-        "description": "Retrieve NorFab services tasks information",
+        "description": "Retrieve specific NorFab service task detailed information",
         "model_args_schema": get_service_task_information_input,
         "norfab": {"task": "list_tasks", "kwargs": {}},
     },

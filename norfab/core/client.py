@@ -418,7 +418,11 @@ def recv(client):
         if command == NFP.RESPONSE:
             handle_response(client, juuid, status, payload)
             # Also put in queue for synchronous callers (backwards compatibility)
-            client.recv_queue.put(msg)
+            # client.recv_queue.put(msg)
+
+        # handle MMI messages
+        if command == NFP.MMI:
+            client.mmi_queue.put(msg)
 
 
 def handle_event(client: object, juuid: str, payload: dict, msg: list):
@@ -848,7 +852,8 @@ class NFPClient(object):
         self.destroy_event = (
             threading.Event()
         )  # destroy event, used by worker to stop its client
-        self.recv_queue = queue.Queue(maxsize=0)
+        # self.recv_queue = queue.Queue(maxsize=0)
+        self.mmi_queue = queue.Queue(maxsize=0)
         self.event_queue = event_queue or queue.Queue(maxsize=1000)
 
         # Configuration for dispatcher
@@ -967,6 +972,14 @@ class NFPClient(object):
                 uuid=uuid,
                 request=request,
             )
+        elif command == NFP.MMI:
+            msg = self.build_message.client_to_broker_mmi(
+                command=command,
+                service=service,
+                workers=workers,
+                uuid=uuid,
+                request=request,
+            )
         else:
             log.error(
                 f"{self.name} - cannot send '{command}' to broker, command unsupported"
@@ -979,39 +992,258 @@ class NFPClient(object):
             self.broker_socket.send_multipart(msg)
             self.stats_send_to_broker += 1
 
-    def rcv_from_broker(
-        self, command: bytes, service: bytes, uuid: bytes
-    ) -> Tuple[Any, Any]:
+    # def rcv_from_broker(
+    #     self, command: bytes, service: bytes, uuid: bytes
+    # ) -> Tuple[Any, Any]:
+    #     """
+    #     Wait for a response from the broker for a given command, service, and uuid.
+# 
+    #     Args:
+    #         command (str): The command sent to the broker.
+    #         service (str): The service to which the command is sent.
+    #         uuid (str): The unique identifier for the request.
+# 
+    #     Returns:
+    #         tuple: A tuple containing the reply status and the reply task result.
+# 
+    #     Raises:
+    #         AssertionError: If the reply header, command, or service does not match the expected values.
+    #     """
+    #     retries = 3
+    #     while retries > 0:
+    #         # check if need to stop
+    #         if self.exit_event.is_set() or self.destroy_event.is_set():
+    #             break
+    #         try:
+    #             msg = self.recv_queue.get(block=True, timeout=3)
+    #             self.recv_queue.task_done()
+    #         except queue.Empty:
+    #             if retries:
+    #                 log.warning(
+    #                     f"{self.name} - '{uuid}:{service}:{command}' job, "
+    #                     f"no reply from broker '{self.broker}', reconnecting"
+    #                 )
+    #                 self.reconnect_to_broker()
+    #             retries -= 1
+    #             continue
+# 
+    #         (
+    #             empty,
+    #             reply_header,
+    #             reply_command,
+    #             reply_service,
+    #             reply_uuid,
+    #             reply_status,
+    #             reply_task_result,
+    #         ) = msg
+# 
+    #         # find message from recv queue for given uuid
+    #         if reply_uuid == uuid:
+    #             assert (
+    #                 reply_header == NFP.BROKER
+    #             ), f"Was expecting broker header '{NFP.BROKER}' received '{reply_header}'"
+    #             assert (
+    #                 reply_command == command
+    #             ), f"Was expecting reply command '{command}' received '{reply_command}'"
+    #             if service != b"all":
+    #                 assert (
+    #                     reply_service == service
+    #                 ), f"Was expecting reply from '{service}' but received reply from '{reply_service}' service"
+# 
+    #             return reply_status, reply_task_result
+    #         else:
+    #             self.recv_queue.put(msg)
+    #     else:
+    #         log.error(
+    #             f"{self.name} - '{uuid}:{service}:{command}' job, "
+    #             f"client {retries} retries attempts exceeded"
+    #         )
+    #         return b"408", b'{"status": "Request Timeout"}'
+
+    # def post(
+    #     self,
+    #     service: str,
+    #     task: str,
+    #     args: list = None,
+    #     kwargs: dict = None,
+    #     workers: str = "all",
+    #     uuid: hex = None,
+    #     timeout: int = 600,
+    # ) -> dict:
+    #     """
+    #     Send a job POST request to the broker.
+# 
+    #     Args:
+    #         service (str): The name of the service to send the request to.
+    #         task (str): The task to be executed by the service.
+    #         args (list, optional): A list of positional arguments to pass to the task. Defaults to None.
+    #         kwargs (dict, optional): A dictionary of keyword arguments to pass to the task. Defaults to None.
+    #         workers (str, optional): The workers to handle the task. Defaults to "all".
+    #         uuid (hex, optional): The unique identifier for the job. Defaults to None.
+    #         timeout (int, optional): The timeout for the request in seconds. Defaults to 600.
+# 
+    #     Returns:
+    #         A dictionary containing the ``status``, ``workers``, ``errors``, and ``uuid`` keys of the request:
+# 
+    #             - ``status``: Status of the request.
+    #             - ``uuid``: Unique identifier of the request.
+    #             - ``errors``: List of error strings.
+    #             - ``workers``: A list of worker names who acknowledged this POST request.
+    #     """
+    #     uuid = uuid or uuid4().hex
+    #     args = args or []
+    #     kwargs = kwargs or {}
+    #     ret = {"status": b"200", "workers": [], "errors": [], "uuid": uuid}
+# 
+    #     service = self.ensure_bytes(service)
+    #     uuid = self.ensure_bytes(uuid)
+    #     workers = self.ensure_bytes(workers)
+# 
+    #     request = self.ensure_bytes(
+    #         {"task": task, "kwargs": kwargs or {}, "args": args or []}
+    #     )
+# 
+    #     # run POST response loop
+    #     start_time = time.time()
+    #     while timeout > time.time() - start_time:
+    #         # check if need to stop
+    #         if self.exit_event.is_set() or self.destroy_event.is_set():
+    #             return ret
+    #         self.send_to_broker(
+    #             NFP.POST, service, workers, uuid, request
+    #         )  # 1 send POST to broker
+    #         status, post_response = self.rcv_from_broker(
+    #             NFP.RESPONSE, service, uuid
+    #         )  # 2 receive RESPONSE from broker
+    #         if status == b"202":  # 3 go over RESPONSE status and decide what to do
+    #             break
+    #         else:
+    #             msg = f"{self.name} - '{uuid}' job, POST Request not accepted by broker '{post_response}'"
+    #             log.error(msg)
+    #             ret["errors"].append(msg)
+    #             ret["status"] = status
+    #             return ret
+    #     else:
+    #         msg = f"{self.name} - '{uuid}' job, broker POST Request Timeout"
+    #         log.error(msg)
+    #         ret["errors"].append(msg)
+    #         ret["status"] = b"408"
+    #         return ret
+# 
+    #     # get a list of workers where job was dispatched to
+    #     post_response = json.loads(post_response)
+# 
+    #     assert (
+    #         "workers" in post_response
+    #     ), f"{self.name} - '{uuid}' job, POST response missing 'workers' {post_response}"
+# 
+    #     workers_dispatched = set(post_response["workers"])
+    #     log.debug(
+    #         f"{self.name} - broker dispatched job '{uuid}' POST request to workers {workers_dispatched}"
+    #     )
+# 
+    #     # wait workers to ACK POSTed job
+    #     start_time = time.time()
+    #     workers_acked = set()
+    #     while timeout > time.time() - start_time:
+    #         # check if need to stop
+    #         if self.exit_event.is_set() or self.destroy_event.is_set():
+    #             return ret
+    #         status, response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
+    #         response = json.loads(response)
+    #         if status == b"201":  # CREATED JOB
+    #             log.debug(
+    #                 f"{self.name} - '{uuid}' job, acknowledged by worker '{response}'"
+    #             )
+    #             workers_acked.add(response["worker"])
+    #             if workers_acked == workers_dispatched:
+    #                 break
+    #         else:
+    #             msg = (
+    #                 f"{self.name} - '{uuid}:{service}:{task}' job, "
+    #                 f"unexpected POST request status '{status}', response '{response}'"
+    #             )
+    #             log.error(msg)
+    #             ret["errors"].append(msg)
+    #     else:
+    #         msg = (
+    #             f"{self.name} - '{uuid}' job, POST request timeout exceeded, these workers did not "
+    #             f"acknowledge the job {workers_dispatched - workers_acked}"
+    #         )
+    #         log.error(msg)
+    #         ret["errors"].append(msg)
+    #         ret["status"] = b"408"
+# 
+    #     ret["workers"] = list(workers_acked)
+    #     ret["status"] = ret["status"].decode("utf-8")
+# 
+    #     log.debug(f"{self.name} - '{uuid}' job POST request completed '{ret}'")
+# 
+    #     return ret
+
+    def mmi(
+        self,
+        service: str,
+        task: str = None,
+        args: list = None,
+        kwargs: dict = None,
+        workers: Union[str, list] = "all",
+        uuid: hex = None,
+        timeout: int = 30,
+    ):
         """
-        Wait for a response from the broker for a given command, service, and uuid.
+        Send an MMI (management interface) request to a service via the broker.
+
+        MMI requests are intended for lightweight, broker-routed management or
+        introspection operations (e.g., service metadata, health, inventory-like
+        queries) that return a single aggregated response payload.
 
         Args:
-            command (str): The command sent to the broker.
-            service (str): The service to which the command is sent.
-            uuid (str): The unique identifier for the request.
+            service: Target service name.
+            task: Service task name to execute.
+            args: Positional arguments for the task.
+            kwargs: Keyword arguments for the task.
+            workers: Workers selector. Can be ``"all"``, ``"any"``, or a list of names.
+            uuid: Optional request UUID. If not provided, a random UUID is generated.
+            timeout: Maximum time (seconds) to wait for the MMI reply.
 
         Returns:
-            tuple: A tuple containing the reply status and the reply task result.
+            Dictionary containing ``status``, ``results``, and ``errors`` keys:
 
-        Raises:
-            AssertionError: If the reply header, command, or service does not match the expected values.
+                - ``status``: HTTP-like status code as a string (e.g., ``"200"``, ``"408"``).
+                - ``results``: Decoded JSON payload from the broker/service.
+                - ``errors``: List of error strings.
         """
-        retries = 3
-        while retries > 0:
+        service_str = service
+        uuid_str = uuid or uuid4().hex
+        args = args or []
+        kwargs = kwargs or {}
+        ret = {"status": "200", "results": {}, "errors": []}
+
+        service = self.ensure_bytes(service_str)
+        uuid = self.ensure_bytes(uuid_str)
+        workers = self.ensure_bytes(workers)
+
+        request = self.ensure_bytes(
+            {"task": task, "kwargs": kwargs or {}, "args": args or []}
+        )
+
+        self.send_to_broker(NFP.MMI, service, workers, uuid, request)
+
+        deadline = time.time() + timeout
+        while time.time() < deadline:
             # check if need to stop
             if self.exit_event.is_set() or self.destroy_event.is_set():
+                ret["errors"].append(
+                    f"{self.name} - '{uuid_str}:{service_str}' MMI interrupted (client stopping)"
+                )
+                ret["status"] = "499"
                 break
+
             try:
-                msg = self.recv_queue.get(block=True, timeout=3)
-                self.recv_queue.task_done()
+                msg = self.mmi_queue.get(block=True, timeout=0.5)
+                self.mmi_queue.task_done()
             except queue.Empty:
-                if retries:
-                    log.warning(
-                        f"{self.name} - '{uuid}:{service}:{command}' job, "
-                        f"no reply from broker '{self.broker}', reconnecting"
-                    )
-                    self.reconnect_to_broker()
-                retries -= 1
                 continue
 
             (
@@ -1024,279 +1256,166 @@ class NFPClient(object):
                 reply_task_result,
             ) = msg
 
-            # find message from recv queue for given uuid
-            if reply_uuid == uuid:
-                assert (
-                    reply_header == NFP.BROKER
-                ), f"Was expecting broker header '{NFP.BROKER}' received '{reply_header}'"
-                assert (
-                    reply_command == command
-                ), f"Was expecting reply command '{command}' received '{reply_command}'"
-                if service != b"all":
-                    assert (
-                        reply_service == service
-                    ), f"Was expecting reply from '{service}' but received reply from '{reply_service}' service"
+            # Defer unrelated replies and continue scanning.
+            if reply_uuid != uuid:
+                self.mmi_queue.put(m)
+                continue
 
-                return reply_status, reply_task_result
-            else:
-                self.recv_queue.put(msg)
-        else:
-            log.error(
-                f"{self.name} - '{uuid}:{service}:{command}' job, "
-                f"client {retries} retries attempts exceeded"
-            )
-            return b"408", b'{"status": "Request Timeout"}'
-
-    def post(
-        self,
-        service: str,
-        task: str,
-        args: list = None,
-        kwargs: dict = None,
-        workers: str = "all",
-        uuid: hex = None,
-        timeout: int = 600,
-    ) -> dict:
-        """
-        Send a job POST request to the broker.
-
-        Args:
-            service (str): The name of the service to send the request to.
-            task (str): The task to be executed by the service.
-            args (list, optional): A list of positional arguments to pass to the task. Defaults to None.
-            kwargs (dict, optional): A dictionary of keyword arguments to pass to the task. Defaults to None.
-            workers (str, optional): The workers to handle the task. Defaults to "all".
-            uuid (hex, optional): The unique identifier for the job. Defaults to None.
-            timeout (int, optional): The timeout for the request in seconds. Defaults to 600.
-
-        Returns:
-            A dictionary containing the ``status``, ``workers``, ``errors``, and ``uuid`` keys of the request:
-
-                - ``status``: Status of the request.
-                - ``uuid``: Unique identifier of the request.
-                - ``errors``: List of error strings.
-                - ``workers``: A list of worker names who acknowledged this POST request.
-        """
-        uuid = uuid or uuid4().hex
-        args = args or []
-        kwargs = kwargs or {}
-        ret = {"status": b"200", "workers": [], "errors": [], "uuid": uuid}
-
-        service = self.ensure_bytes(service)
-        uuid = self.ensure_bytes(uuid)
-        workers = self.ensure_bytes(workers)
-
-        request = self.ensure_bytes(
-            {"task": task, "kwargs": kwargs or {}, "args": args or []}
-        )
-
-        # run POST response loop
-        start_time = time.time()
-        while timeout > time.time() - start_time:
-            # check if need to stop
-            if self.exit_event.is_set() or self.destroy_event.is_set():
-                return ret
-            self.send_to_broker(
-                NFP.POST, service, workers, uuid, request
-            )  # 1 send POST to broker
-            status, post_response = self.rcv_from_broker(
-                NFP.RESPONSE, service, uuid
-            )  # 2 receive RESPONSE from broker
-            if status == b"202":  # 3 go over RESPONSE status and decide what to do
+            if reply_header != NFP.BROKER and reply_command != NFP.MMI:
+                ret["errors"].append(
+                    f"{self.name} - '{uuid_str}:{service_str}' MMI unexpected reply header/command"
+                )
+                ret["status"] = reply_status.decode("utf-8")
                 break
-            else:
-                msg = f"{self.name} - '{uuid}' job, POST Request not accepted by broker '{post_response}'"
-                log.error(msg)
-                ret["errors"].append(msg)
-                ret["status"] = status
-                return ret
+
+            try:
+                ret["results"] = json.loads(reply_task_result.decode("utf-8"))
+                ret["status"] = reply_status.decode("utf-8")
+            except Exception as e:
+                ret["errors"].append(
+                    f"{self.name} - '{uuid_str}:{service_str}' MMI failed to decode reply payload: {e}"
+                )
+                ret["results"] = {"status": "Invalid MMI response payload"}
+                ret["status"] = "500"
+            break
         else:
-            msg = f"{self.name} - '{uuid}' job, broker POST Request Timeout"
+            msg = f"{self.name} - '{uuid_str}:{service_str}' MMI request {timeout}s timeout exceeded."
             log.error(msg)
             ret["errors"].append(msg)
-            ret["status"] = b"408"
-            return ret
-
-        # get a list of workers where job was dispatched to
-        post_response = json.loads(post_response)
-
-        assert (
-            "workers" in post_response
-        ), f"{self.name} - '{uuid}' job, POST response missing 'workers' {post_response}"
-
-        workers_dispatched = set(post_response["workers"])
-        log.debug(
-            f"{self.name} - broker dispatched job '{uuid}' POST request to workers {workers_dispatched}"
-        )
-
-        # wait workers to ACK POSTed job
-        start_time = time.time()
-        workers_acked = set()
-        while timeout > time.time() - start_time:
-            # check if need to stop
-            if self.exit_event.is_set() or self.destroy_event.is_set():
-                return ret
-            status, response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-            response = json.loads(response)
-            if status == b"201":  # CREATED JOB
-                log.debug(
-                    f"{self.name} - '{uuid}' job, acknowledged by worker '{response}'"
-                )
-                workers_acked.add(response["worker"])
-                if workers_acked == workers_dispatched:
-                    break
-            else:
-                msg = (
-                    f"{self.name} - '{uuid}:{service}:{task}' job, "
-                    f"unexpected POST request status '{status}', response '{response}'"
-                )
-                log.error(msg)
-                ret["errors"].append(msg)
-        else:
-            msg = (
-                f"{self.name} - '{uuid}' job, POST request timeout exceeded, these workers did not "
-                f"acknowledge the job {workers_dispatched - workers_acked}"
-            )
-            log.error(msg)
-            ret["errors"].append(msg)
-            ret["status"] = b"408"
-
-        ret["workers"] = list(workers_acked)
-        ret["status"] = ret["status"].decode("utf-8")
-
-        log.debug(f"{self.name} - '{uuid}' job POST request completed '{ret}'")
-
-        return ret
-
-    def get(
-        self,
-        service: str,
-        task: str = None,
-        args: list = None,
-        kwargs: dict = None,
-        workers: Union[str, list] = "all",
-        uuid: hex = None,
-        timeout: int = 600,
-    ) -> dict:
-        """
-        Send job GET request message to broker requesting job results.
-
-        Args:
-            task (str): service task name to run
-            args (list): list of positional arguments for the task
-            kwargs (dict): dictionary of keyword arguments for the task
-            workers (list): workers to target - ``all``, ``any``, or list of workers' names
-            timeout (int): job timeout in seconds, for how long client waits for job result before giving up
-
-        Returns:
-            Dictionary containing ``status``, ``results``, ``errors``, and ``workers`` keys:
-
-                - ``status``: Status of the request.
-                - ``results``: Dictionary keyed by workers' names containing the results.
-                - ``errors``: List of error strings.
-                - ``workers``: Dictionary containing worker states (requested, done, dispatched, pending).
-        """
-        uuid = uuid or uuid4().hex
-        args = args or []
-        kwargs = kwargs or {}
-        wkrs = {
-            "requested": workers,
-            "done": set(),
-            "dispatched": set(),
-            "pending": set(),
-        }
-        ret = {"status": b"200", "results": {}, "errors": [], "workers": wkrs}
-
-        service = self.ensure_bytes(service)
-        uuid = self.ensure_bytes(uuid)
-        workers = self.ensure_bytes(workers)
-
-        request = self.ensure_bytes(
-            {"task": task, "kwargs": kwargs or {}, "args": args or []}
-        )
-
-        # run GET response loop
-        start_time = time.time()
-        while timeout > time.time() - start_time:
-            # check if need to stop
-            if self.exit_event.is_set() or self.destroy_event.is_set():
-                return None
-            # dispatch GET request to workers
-            self.send_to_broker(NFP.GET, service, workers, uuid, request)
-            status, get_response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-            # ret["status"] = status
-            # received actual GET request results from broker e.g. MMI, SID or FSS services
-            if status == b"200":
-                ret["results"] = json.loads(get_response.decode("utf-8"))
-                break
-            # received non DISPATCH response from broker
-            if status != b"202":
-                msg = f"{status}, {self.name} job '{uuid}' GET Request not accepted by broker '{get_response}'"
-                log.error(msg)
-                ret["status"] = status
-                ret["errors"].append(msg)
-                break
-            get_response = json.loads(get_response)
-            wkrs["dispatched"] = set(get_response["workers"])
-            # collect GET responses from individual workers
-            workers_responded = set()
-            while timeout > time.time() - start_time:
-                # check if need to stop
-                if self.exit_event.is_set() or self.destroy_event.is_set():
-                    return None
-                status, response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
-                log.debug(
-                    f"{self.name} - job '{uuid}' response from worker '{response}'"
-                )
-                response = json.loads(response)  # dictionary keyed by worker name
-                if status == b"200":  # OK
-                    ret["results"].update(response)
-                    log.debug(
-                        f"{self.name} - job '{uuid}' results returned by worker '{response}'"
-                    )
-                    for w in response.keys():
-                        wkrs["done"].add(w)
-                        workers_responded.add(w)
-                        if w in wkrs["pending"]:
-                            wkrs["pending"].remove(w)
-                    if wkrs["done"] == wkrs["dispatched"]:
-                        break
-                elif status == b"300":  # PENDING
-                    wkrs["pending"].add(response["worker"])
-                    workers_responded.add(response["worker"])
-                else:
-                    if response.get("worker"):
-                        workers_responded.add(response["worker"])
-                    msg = (
-                        f"{self.name} - '{uuid}:{service}:{task}' job, "
-                        f"unexpected GET Response status '{status}', response '{response}'"
-                    )
-                    log.error(msg)
-                    ret["errors"].append(msg)
-                if workers_responded == wkrs["dispatched"]:
-                    break
-            if wkrs["done"] == wkrs["dispatched"]:
-                break
-            time.sleep(0.2)
-        else:
-            msg = f"{self.name} - '{uuid}' job, broker {timeout}s GET request timeout expired"
-            log.info(msg)
-            ret["errors"].append(msg)
-            # set status to pending if at least one worker is pending
-            if wkrs["pending"]:
-                ret["status"] = b"300"  # PENDING
-            else:
-                ret["status"] = b"408"  # TIMEOUT
-
-        if ret["status"] == b"408":
+            ret["results"] = {"status": "MMI Request Timeout"}
             ret["status"] = "408"
-        # set status to pending if at least one worker is pending
-        elif wkrs["pending"]:
-            ret["status"] = "300"
-        else:
-            ret["status"] = ret["status"].decode("utf-8")
 
         return ret
+
+    # def get(
+    #     self,
+    #     service: str,
+    #     task: str = None,
+    #     args: list = None,
+    #     kwargs: dict = None,
+    #     workers: Union[str, list] = "all",
+    #     uuid: hex = None,
+    #     timeout: int = 600,
+    # ) -> dict:
+    #     """
+    #     Send job GET request message to broker requesting job results.
+# 
+    #     Args:
+    #         task (str): service task name to run
+    #         args (list): list of positional arguments for the task
+    #         kwargs (dict): dictionary of keyword arguments for the task
+    #         workers (list): workers to target - ``all``, ``any``, or list of workers' names
+    #         timeout (int): job timeout in seconds, for how long client waits for job result before giving up
+# 
+    #     Returns:
+    #         Dictionary containing ``status``, ``results``, ``errors``, and ``workers`` keys:
+# 
+    #             - ``status``: Status of the request.
+    #             - ``results``: Dictionary keyed by workers' names containing the results.
+    #             - ``errors``: List of error strings.
+    #             - ``workers``: Dictionary containing worker states (requested, done, dispatched, pending).
+    #     """
+    #     uuid = uuid or uuid4().hex
+    #     args = args or []
+    #     kwargs = kwargs or {}
+    #     wkrs = {
+    #         "requested": workers,
+    #         "done": set(),
+    #         "dispatched": set(),
+    #         "pending": set(),
+    #     }
+    #     ret = {"status": b"200", "results": {}, "errors": [], "workers": wkrs}
+# 
+    #     service = self.ensure_bytes(service)
+    #     uuid = self.ensure_bytes(uuid)
+    #     workers = self.ensure_bytes(workers)
+# 
+    #     request = self.ensure_bytes(
+    #         {"task": task, "kwargs": kwargs or {}, "args": args or []}
+    #     )
+# 
+    #     # run GET response loop
+    #     start_time = time.time()
+    #     while timeout > time.time() - start_time:
+    #         # check if need to stop
+    #         if self.exit_event.is_set() or self.destroy_event.is_set():
+    #             return None
+    #         # dispatch GET request to workers
+    #         self.send_to_broker(NFP.GET, service, workers, uuid, request)
+    #         status, get_response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
+    #         # ret["status"] = status
+    #         # received actual GET request results from broker e.g. MMI, SID or FSS services
+    #         if status == b"200":
+    #             ret["results"] = json.loads(get_response.decode("utf-8"))
+    #             break
+    #         # received non DISPATCH response from broker
+    #         if status != b"202":
+    #             msg = f"{status}, {self.name} job '{uuid}' GET Request not accepted by broker '{get_response}'"
+    #             log.error(msg)
+    #             ret["status"] = status
+    #             ret["errors"].append(msg)
+    #             break
+    #         get_response = json.loads(get_response)
+    #         wkrs["dispatched"] = set(get_response["workers"])
+    #         # collect GET responses from individual workers
+    #         workers_responded = set()
+    #         while timeout > time.time() - start_time:
+    #             # check if need to stop
+    #             if self.exit_event.is_set() or self.destroy_event.is_set():
+    #                 return None
+    #             status, response = self.rcv_from_broker(NFP.RESPONSE, service, uuid)
+    #             log.debug(
+    #                 f"{self.name} - job '{uuid}' response from worker '{response}'"
+    #             )
+    #             response = json.loads(response)  # dictionary keyed by worker name
+    #             if status == b"200":  # OK
+    #                 ret["results"].update(response)
+    #                 log.debug(
+    #                     f"{self.name} - job '{uuid}' results returned by worker '{response}'"
+    #                 )
+    #                 for w in response.keys():
+    #                     wkrs["done"].add(w)
+    #                     workers_responded.add(w)
+    #                     if w in wkrs["pending"]:
+    #                         wkrs["pending"].remove(w)
+    #                 if wkrs["done"] == wkrs["dispatched"]:
+    #                     break
+    #             elif status == b"300":  # PENDING
+    #                 wkrs["pending"].add(response["worker"])
+    #                 workers_responded.add(response["worker"])
+    #             else:
+    #                 if response.get("worker"):
+    #                     workers_responded.add(response["worker"])
+    #                 msg = (
+    #                     f"{self.name} - '{uuid}:{service}:{task}' job, "
+    #                     f"unexpected GET Response status '{status}', response '{response}'"
+    #                 )
+    #                 log.error(msg)
+    #                 ret["errors"].append(msg)
+    #             if workers_responded == wkrs["dispatched"]:
+    #                 break
+    #         if wkrs["done"] == wkrs["dispatched"]:
+    #             break
+    #         time.sleep(0.2)
+    #     else:
+    #         msg = f"{self.name} - '{uuid}' job, broker {timeout}s GET request timeout expired"
+    #         log.info(msg)
+    #         ret["errors"].append(msg)
+    #         # set status to pending if at least one worker is pending
+    #         if wkrs["pending"]:
+    #             ret["status"] = b"300"  # PENDING
+    #         else:
+    #             ret["status"] = b"408"  # TIMEOUT
+# 
+    #     if ret["status"] == b"408":
+    #         ret["status"] = "408"
+    #     # set status to pending if at least one worker is pending
+    #     elif wkrs["pending"]:
+    #         ret["status"] = "300"
+    #     else:
+    #         ret["status"] = ret["status"].decode("utf-8")
+# 
+    #     return ret
 
     def delete_fetched_files(self, filepath: str = "*") -> dict:
         """

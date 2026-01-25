@@ -10,9 +10,13 @@ extra:
 markdown_extensions:
 - admonition
 - pymdownx.details
+- pymdownx.superfences:
+    custom_fences:
+      - name: mermaid
+        class: mermaid
+        format: !!python/name:pymdownx.superfences.fence_div_format
 - attr_list
 - md_in_html
-- pymdownx.superfences
 - tables
 - pymdownx.tabbed:
     alternate_style: true
@@ -43,10 +47,6 @@ theme:
   favicon: images/logo.jpg
   custom_dir: docs/overrides
   features:
-  #- navigation.tabs
-  #- navigation.tabs.sticky
-  #- navigation.sections
-  #- navigation.top
   - navigation.footer
   - toc.follow
   - navigation.instant
@@ -71,6 +71,13 @@ theme:
       primary: orange
       accent: deep orange
       
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid.js
+
 # -------------------------------------------------------------------
 # NAVIGATION sections
 # -------------------------------------------------------------------

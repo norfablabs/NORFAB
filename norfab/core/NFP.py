@@ -16,6 +16,8 @@ OPEN = b"0x00"
 READY = b"0x01"
 KEEPALIVE = b"0x02"
 DISCONNECT = b"0x03"
+
+# NORFAB Protocol JOB commands, as strings
 POST = b"0x04"
 RESPONSE = b"0x05"
 GET = b"0x06"
@@ -23,6 +25,9 @@ DELETE = b"0x07"
 EVENT = b"0x08"
 STREAM = b"0x09"
 PUT = b"0x10"
+
+# NORFAB Protocol MMI commands, as strings
+MMI = b"0x11"
 
 commands = [
     b"OPEN",
@@ -36,11 +41,12 @@ commands = [
     b"EVENT",
     b"STREAM",
     b"PUT",
+    b"MMI",
 ]
 
-client_commands = [OPEN, DISCONNECT, POST, GET, DELETE, PUT]
+client_commands = [OPEN, DISCONNECT, POST, GET, DELETE, PUT, MMI]
 
-worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE, STREAM]
+worker_commands = [OPEN, READY, KEEPALIVE, DISCONNECT, RESPONSE, STREAM, MMI]
 
 broker_commands = [
     OPEN,
@@ -52,6 +58,7 @@ broker_commands = [
     DELETE,
     STREAM,
     PUT,
+    MMI,
 ]
 
 # Convenience constants for frame counts
@@ -100,6 +107,12 @@ class MessageBuilder:
         """Build KEEPALIVE message from broker to worker."""
         return [address, b"", BROKER, KEEPALIVE, service]
 
+    def broker_to_worker_mmi(
+        worker_address: bytes, sender: bytes, uuid: bytes, data: bytes
+    ) -> List[bytes]:
+        """Build a MMI message from broker to worker."""
+        return [worker_address, b"", BROKER, MMI, sender, b"", uuid, data]
+
     @staticmethod
     def worker_to_broker_ready(service: bytes) -> List[bytes]:
         """Build READY message from worker to broker."""
@@ -131,6 +144,11 @@ class MessageBuilder:
         return [b"", WORKER, KEEPALIVE, service]
 
     @staticmethod
+    def worker_to_broker_mmi(response_data: List[bytes]) -> List[bytes]:
+        """Build MMI message from worker to broker."""
+        return [b"", WORKER, MMI] + response_data
+
+    @staticmethod
     def client_to_broker_post(
         command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
     ) -> List[bytes]:
@@ -152,11 +170,25 @@ class MessageBuilder:
         return [b"", CLIENT, GET, service, workers, uuid, request]
 
     @staticmethod
+    def client_to_broker_mmi(
+        command: bytes, service: bytes, workers: bytes, uuid: bytes, request: bytes
+    ) -> List[bytes]:
+        """Build a MMI message from client to broker."""
+        return [b"", CLIENT, MMI, service, workers, uuid, request]
+
+    @staticmethod
     def broker_to_client_response(
         client: bytes, service: bytes, message: List[bytes]
     ) -> List[bytes]:
         """Build RESPONSE message from broker to client."""
         return [client, b"", BROKER, RESPONSE, service] + message
+
+    @staticmethod
+    def broker_to_client_mmi(
+        client: bytes, service: bytes, message: List[bytes]
+    ) -> List[bytes]:
+        """Build MMI message from broker to client."""
+        return [client, b"", BROKER, MMI, service] + message
 
     @staticmethod
     def broker_to_client_event(

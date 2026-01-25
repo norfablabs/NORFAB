@@ -44,7 +44,7 @@ def service_tasks_discovery(
         services = []
         try:
             # get a list of workers and construct a list of services
-            services = worker.client.get("mmi.service.broker", "show_workers")
+            services = worker.client.mmi("mmi.service.broker", "show_workers")
             services = [
                 s["service"]
                 for s in services["results"]

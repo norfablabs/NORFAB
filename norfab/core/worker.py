@@ -1523,7 +1523,7 @@ class NFPWorker:
         Returns:
             dict: The inventory data results if available, otherwise an empty dictionary.
         """
-        inventory_data = self.client.get(
+        inventory_data = self.client.mmi(
             "sid.service.broker", "get_inventory", kwargs={"name": self.name}
         )
 

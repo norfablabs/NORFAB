@@ -132,7 +132,7 @@ class AgentWorker(NFPWorker):
             )
 
             job.event(f"'{tool_name}' tool call completed")
-            job.event("Agent processing tool cal result...")
+            job.event("Agent processing tool call result...")
 
             return ret
 
