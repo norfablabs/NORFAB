@@ -245,32 +245,87 @@ class ClientJobDatabase:
 
     def fetch_jobs(
         self,
-        statuses: List[str],
+        statuses: List[str] = None,
         limit: int = 10,
         min_poll_age: float = 0,
+        service: str = None,
+        task: str = None,
+        workers_completed: List[str] = None,
+        last: int = None,
     ) -> List[dict]:
-        """Fetch jobs by status, optionally filtering by last poll age.
+        """Fetch jobs with flexible filtering and complete job attributes.
 
         Args:
-            statuses: List of job statuses to fetch
-            limit: Maximum number of jobs to return
+            statuses: List of job statuses to filter by (default: all statuses)
+            limit: Maximum number of jobs to return (used when last is not specified)
             min_poll_age: Minimum seconds since last poll (for rate limiting GET requests)
+            service: Service name to filter by (optional)
+            task: Task name to filter by (optional)
+            workers_completed: List of worker names that completed the job (optional)
+            last: Return only the last x number of jobs (newest first), overrides limit (optional)
+
+        Returns:
+            List of job dictionaries with complete attributes including:
+            uuid, service, task, args, kwargs, workers_*, status, result_data,
+            errors, timestamps, etc.
         """
-        placeholders = ",".join(["?"] * len(statuses))
-        poll_threshold = time.time() - min_poll_age
+        conditions = []
+        params = []
+
+        # Filter by statuses
+        if statuses:
+            placeholders = ",".join(["?"] * len(statuses))
+            conditions.append(f"status IN ({placeholders})")
+            params.extend(statuses)
+
+        # Filter by poll age (for dispatcher throttling)
+        if min_poll_age > 0:
+            poll_threshold = time.time() - min_poll_age
+            conditions.append(
+                "(last_poll_timestamp IS NULL OR last_poll_timestamp <= ?)"
+            )
+            params.append(poll_threshold)
+
+        # Filter by service
+        if service:
+            conditions.append("service = ?")
+            params.append(service)
+
+        # Filter by task
+        if task:
+            conditions.append("task = ?")
+            params.append(task)
+
+        # Filter by workers_completed (JSON contains check)
+        if workers_completed:
+            # For each worker, check if it's in the JSON array
+            worker_conditions = []
+            for worker in workers_completed:
+                # SQLite JSON string contains check
+                worker_conditions.append("workers_completed LIKE ?")
+                params.append(f'%"{worker}"%')
+            conditions.append(f"({' OR '.join(worker_conditions)})")
+
+        # Build WHERE clause
+        where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+        # Determine order and limit based on 'last' parameter
+        order_direction = "DESC" if last is not None else "ASC"
+        result_limit = last if last is not None else limit
+
         with self._transaction(write=False) as conn:
             cur = conn.execute(
                 f"""
-                  SELECT uuid, service, task, args, kwargs, workers_requested, timeout, deadline,
-                      workers_dispatched, workers_started, workers_completed, status,
-                      last_poll_timestamp
+                SELECT uuid, service, task, args, kwargs, workers_requested, timeout, deadline,
+                       workers_dispatched, workers_started, workers_completed, status,
+                       result_data, errors, received_timestamp, started_timestamp,
+                       completed_timestamp, created_at, last_poll_timestamp
                 FROM jobs
-                WHERE status IN ({placeholders})
-                  AND (last_poll_timestamp IS NULL OR last_poll_timestamp <= ?)
-                ORDER BY created_at ASC
+                WHERE {where_clause}
+                ORDER BY created_at {order_direction}
                 LIMIT ?
                 """,
-                (*statuses, poll_threshold, limit),
+                (*params, result_limit),
             )
             rows = cur.fetchall()
         return [self._hydrate(row) for row in rows]
@@ -281,7 +336,7 @@ class ClientJobDatabase:
                 """
                   SELECT uuid, service, task, args, kwargs, timeout, deadline, status,
                        workers_requested, workers_dispatched, workers_started,
-                       workers_completed, result_data, errors,
+                       workers_completed, result_data, errors, created_at, completed_timestamp,
                        last_poll_timestamp
                 FROM jobs WHERE uuid = ?
                 """,

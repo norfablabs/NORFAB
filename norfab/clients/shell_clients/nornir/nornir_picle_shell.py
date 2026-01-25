@@ -55,9 +55,13 @@ class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel, ClientRunJobAr
         headers_exclude = kwargs.pop("headers_exclude", [])  # tabulate
         sortby = kwargs.pop("sortby", "host")  # tabulate
         reverse = kwargs.pop("reverse", False)  # tabulate
+        nowait = kwargs.pop("nowait", False)
 
         # run task
         result = NorniHostsFilters.get_nornir_hosts(**kwargs)
+
+        if nowait:
+            return result
 
         # form table results
         if table:
@@ -111,23 +115,32 @@ class ShowWatchDogModel(NorniHostsFilters):
     def get_watchdog_stats(**kwargs):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
+        nowait = kwargs.pop("nowait", False)
         result = NFCLIENT.run_job("nornir", "get_watchdog_stats", workers=workers)
+        if nowait:
+            return result
         return log_error_or_result(result)
 
     @staticmethod
     def get_watchdog_configuration(**kwargs):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
+        nowait = kwargs.pop("nowait", False)
         result = NFCLIENT.run_job(
             "nornir", "get_watchdog_configuration", workers=workers
         )
+        if nowait:
+            return result
         return log_error_or_result(result)
 
     @staticmethod
     def get_watchdog_connections(**kwargs):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
+        nowait = kwargs.pop("nowait", False)
         result = NFCLIENT.run_job("nornir", "get_watchdog_connections", workers=workers)
+        if nowait:
+            return result
         return log_error_or_result(result)
 
 
@@ -142,6 +155,7 @@ class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -150,6 +164,9 @@ class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
             workers=workers,
             timeout=timeout,
         )
+        if nowait:
+            return result
+
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
@@ -185,7 +202,12 @@ class NornirShowCommandsModel(BaseModel):
     def get_version(**kwargs):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("nornir", "get_version", workers=workers)
+        nowait = kwargs.pop("nowait", False)
+        result = NFCLIENT.run_job(
+            "nornir", "get_version", workers=workers, nowait=nowait
+        )
+        if nowait:
+            return result
         return log_error_or_result(result)
 
 
@@ -234,6 +256,7 @@ class RefreshNornirModel(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
+        nowait = kwargs.pop("verbose_result", False)
 
         if isinstance(kwargs.get("external_inventories"), str):
             kwargs["external_inventories"] = [kwargs["external_inventories"]]
@@ -246,6 +269,8 @@ class RefreshNornirModel(ClientRunJobArgs):
             timeout=timeout,
             uuid=uuid,
         )
+        if nowait:
+            return result
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
