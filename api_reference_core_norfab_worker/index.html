@@ -10328,7 +10328,7 @@ It logs the received inventory data and returns the results if available.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: The inventory data results if available, otherwise an empty dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">inventory_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+    <span class="n">inventory_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">mmi</span><span class="p">(</span>
         <span class="s2">&quot;sid.service.broker&quot;</span><span class="p">,</span> <span class="s2">&quot;get_inventory&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
     <span class="p">)</span>
 

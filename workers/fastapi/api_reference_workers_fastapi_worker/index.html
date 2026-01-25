@@ -7437,7 +7437,7 @@ exit event is set, with a 10-second delay between cycles.</p>
         <span class="n">services</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># get a list of workers and construct a list of services</span>
-            <span class="n">services</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">,</span> <span class="s2">&quot;show_workers&quot;</span><span class="p">)</span>
+            <span class="n">services</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">mmi</span><span class="p">(</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">,</span> <span class="s2">&quot;show_workers&quot;</span><span class="p">)</span>
             <span class="n">services</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">s</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">services</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
@@ -7880,106 +7880,106 @@ against the worker's token database.</p>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">auth</span><span class="o">.</span><span class="n">credentials</span>
 
-    <span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">api_prefix</span><span class="si">}</span><span class="s2">/job&quot;</span><span class="p">,</span>
-        <span class="n">responses</span><span class="o">=</span><span class="p">{</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">UnauthorizedMessage</span><span class="p">)},</span>
-        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NORFAB&quot;</span><span class="p">],</span>
-    <span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The name of the service to post the job to&quot;</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">task</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The task to be executed by the service&quot;</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">args</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;A list of positional arguments for the task&quot;</span><span class="p">)</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-            <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;A dictionary of keyword arguments for the task&quot;</span><span class="p">),</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">workers</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The workers to dispatch the task&quot;</span><span class="p">)</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
-        <span class="n">uuid</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Optional a unique identifier to use for the job&quot;</span><span class="p">)</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">timeout</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">int</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The timeout for the job in seconds&quot;</span><span class="p">)</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
-        <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_token</span><span class="p">),</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientPostJobResponse</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to post the job to NorFab.</span>
+    <span class="c1"># @app.post(</span>
+    <span class="c1">#     f&quot;{worker.api_prefix}/job&quot;,</span>
+    <span class="c1">#     responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},</span>
+    <span class="c1">#     tags=[&quot;NORFAB&quot;],</span>
+    <span class="c1"># )</span>
+    <span class="c1"># def post_job(</span>
+    <span class="c1">#     service: Annotated[</span>
+    <span class="c1">#         str, Body(description=&quot;The name of the service to post the job to&quot;)</span>
+    <span class="c1">#     ],</span>
+    <span class="c1">#     task: Annotated[</span>
+    <span class="c1">#         str, Body(description=&quot;The task to be executed by the service&quot;)</span>
+    <span class="c1">#     ],</span>
+    <span class="c1">#     args: Annotated[</span>
+    <span class="c1">#         List[Any], Body(description=&quot;A list of positional arguments for the task&quot;)</span>
+    <span class="c1">#     ] = None,</span>
+    <span class="c1">#     kwargs: Annotated[</span>
+    <span class="c1">#         Dict[str, Any],</span>
+    <span class="c1">#         Body(description=&quot;A dictionary of keyword arguments for the task&quot;),</span>
+    <span class="c1">#     ] = None,</span>
+    <span class="c1">#     workers: Annotated[</span>
+    <span class="c1">#         Union[str, List[str]], Body(description=&quot;The workers to dispatch the task&quot;)</span>
+    <span class="c1">#     ] = &quot;all&quot;,</span>
+    <span class="c1">#     uuid: Annotated[</span>
+    <span class="c1">#         str, Body(description=&quot;Optional a unique identifier to use for the job&quot;)</span>
+    <span class="c1">#     ] = None,</span>
+    <span class="c1">#     timeout: Annotated[</span>
+    <span class="c1">#         int, Body(description=&quot;The timeout for the job in seconds&quot;)</span>
+    <span class="c1">#     ] = 600,</span>
+    <span class="c1">#     token: str = Depends(get_token),</span>
+    <span class="c1"># ) -&gt; ClientPostJobResponse:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Method to post the job to NorFab.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         service: The name of the service to post the job to.</span>
+    <span class="c1">#         task: The task to be executed by the service.</span>
+    <span class="c1">#         args: A list of positional arguments for the task. Defaults to None.</span>
+    <span class="c1">#         kwargs: A dictionary of keyword arguments for the task. Defaults to None.</span>
+    <span class="c1">#         workers: The workers to dispatch the task. Defaults to &quot;all&quot;.</span>
+    <span class="c1">#         uuid: Optional a unique identifier to use for the job. Defaults to None.</span>
+    <span class="c1">#         timeout: The timeout for the job in seconds. Defaults to 600.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#         The response from the NorFab service.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     log.debug(</span>
+    <span class="c1">#         f&quot;{worker.name} - received job post request, service {service}, task {task}, args {args}, kwargs {kwargs}&quot;</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     res = worker.client.post(</span>
+    <span class="c1">#         service=service,</span>
+    <span class="c1">#         task=task,</span>
+    <span class="c1">#         args=args,</span>
+    <span class="c1">#         kwargs=kwargs,</span>
+    <span class="c1">#         workers=workers,</span>
+    <span class="c1">#         timeout=timeout,</span>
+    <span class="c1">#         uuid=uuid,</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     return res</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            service: The name of the service to post the job to.</span>
-<span class="sd">            task: The task to be executed by the service.</span>
-<span class="sd">            args: A list of positional arguments for the task. Defaults to None.</span>
-<span class="sd">            kwargs: A dictionary of keyword arguments for the task. Defaults to None.</span>
-<span class="sd">            workers: The workers to dispatch the task. Defaults to &quot;all&quot;.</span>
-<span class="sd">            uuid: Optional a unique identifier to use for the job. Defaults to None.</span>
-<span class="sd">            timeout: The timeout for the job in seconds. Defaults to 600.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The response from the NorFab service.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - received job post request, service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">, task </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">, args </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">, kwargs </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-            <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
-            <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
-            <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-            <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">res</span>
-
-    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">api_prefix</span><span class="si">}</span><span class="s2">/job&quot;</span><span class="p">,</span>
-        <span class="n">responses</span><span class="o">=</span><span class="p">{</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">UnauthorizedMessage</span><span class="p">)},</span>
-        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NORFAB&quot;</span><span class="p">],</span>
-    <span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_job</span><span class="p">(</span>
-        <span class="n">service</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The name of the service to get the job from&quot;</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">uuid</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;A unique identifier for the job&quot;</span><span class="p">)],</span>
-        <span class="n">workers</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-            <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The workers to dispatch the get request to&quot;</span><span class="p">),</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
-        <span class="n">timeout</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-            <span class="nb">int</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The timeout for the job in seconds&quot;</span><span class="p">)</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
-        <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_token</span><span class="p">),</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClientGetJobResponse</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to get job results from NorFab.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            service: The name of the service to get the job from.</span>
-<span class="sd">            workers: The workers to dispatch the get request to. Defaults to &quot;all&quot;.</span>
-<span class="sd">            uuid: A unique identifier for the job.</span>
-<span class="sd">            timeout: The timeout for the job get requests in seconds. Defaults to 600.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The response from the NorFab service.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - received job get request, service </span><span class="si">{</span><span class="n">service</span><span class="si">}</span><span class="s2">, uuid </span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
-            <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
-            <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">res</span>
+    <span class="c1"># @app.get(</span>
+    <span class="c1">#     f&quot;{worker.api_prefix}/job&quot;,</span>
+    <span class="c1">#     responses={status.HTTP_401_UNAUTHORIZED: dict(model=UnauthorizedMessage)},</span>
+    <span class="c1">#     tags=[&quot;NORFAB&quot;],</span>
+    <span class="c1"># )</span>
+    <span class="c1"># def get_job(</span>
+    <span class="c1">#     service: Annotated[</span>
+    <span class="c1">#         str, Body(description=&quot;The name of the service to get the job from&quot;)</span>
+    <span class="c1">#     ],</span>
+    <span class="c1">#     uuid: Annotated[str, Body(description=&quot;A unique identifier for the job&quot;)],</span>
+    <span class="c1">#     workers: Annotated[</span>
+    <span class="c1">#         Union[str, List[str]],</span>
+    <span class="c1">#         Body(description=&quot;The workers to dispatch the get request to&quot;),</span>
+    <span class="c1">#     ] = &quot;all&quot;,</span>
+    <span class="c1">#     timeout: Annotated[</span>
+    <span class="c1">#         int, Body(description=&quot;The timeout for the job in seconds&quot;)</span>
+    <span class="c1">#     ] = 600,</span>
+    <span class="c1">#     token: str = Depends(get_token),</span>
+    <span class="c1"># ) -&gt; ClientGetJobResponse:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Method to get job results from NorFab.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         service: The name of the service to get the job from.</span>
+    <span class="c1">#         workers: The workers to dispatch the get request to. Defaults to &quot;all&quot;.</span>
+    <span class="c1">#         uuid: A unique identifier for the job.</span>
+    <span class="c1">#         timeout: The timeout for the job get requests in seconds. Defaults to 600.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#         The response from the NorFab service.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     log.debug(</span>
+    <span class="c1">#         f&quot;{worker.name} - received job get request, service {service}, uuid {uuid}&quot;</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     res = worker.client.mmi(</span>
+    <span class="c1">#         service=service,</span>
+    <span class="c1">#         uuid=uuid,</span>
+    <span class="c1">#         workers=workers,</span>
+    <span class="c1">#         timeout=timeout,</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     return res</span>
 
     <span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="o">.</span><span class="n">api_prefix</span><span class="si">}</span><span class="s2">/job/run&quot;</span><span class="p">,</span>

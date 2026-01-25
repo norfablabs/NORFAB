@@ -6264,7 +6264,7 @@ are discovered. Defaults to "all".</p>
         <span class="n">services</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># get a list of workers and construct a list of services</span>
-            <span class="n">services</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">,</span> <span class="s2">&quot;show_workers&quot;</span><span class="p">)</span>
+            <span class="n">services</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">mmi</span><span class="p">(</span><span class="s2">&quot;mmi.service.broker&quot;</span><span class="p">,</span> <span class="s2">&quot;show_workers&quot;</span><span class="p">)</span>
             <span class="n">services</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">s</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">services</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
