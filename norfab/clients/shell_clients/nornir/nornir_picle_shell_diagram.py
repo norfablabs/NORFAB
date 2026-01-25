@@ -285,6 +285,7 @@ class NornirDiagramShell(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         _ = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
         ctime = time.strftime("%Y-%m-%d_%H-%M-%S")
         FM = kwargs.pop("FM", [])
         n2g_data = {}  # to store collected from devices data
@@ -348,7 +349,12 @@ class NornirDiagramShell(ClientRunJobArgs):
                 kwargs=cli_kwargs,
                 uuid=uuid,
                 timeout=timeout,
+                nowait=nowait,
             )
+
+            if nowait:
+                return job_results, Outputters.outputter_nested
+
             # populate n2g data dictionary keyed by platform and save results to files
             for worker, results in job_results.items():
                 if results["failed"]:

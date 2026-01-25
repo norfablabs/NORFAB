@@ -27,6 +27,7 @@ class CreateAuthToken(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if "token" not in kwargs:
             kwargs["token"] = uuid4().hex
@@ -37,7 +38,11 @@ class CreateAuthToken(ClientRunJobArgs):
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -54,6 +59,7 @@ class ListAuthToken(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "fastapi",
@@ -61,7 +67,12 @@ class ListAuthToken(ClientRunJobArgs):
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
         result = log_error_or_result(result, verbose_result=verbose_result)
         ret = []
         for wname, wdata in result.items():
@@ -87,6 +98,7 @@ class DeleteAuthToken(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "fastapi",
@@ -94,7 +106,11 @@ class DeleteAuthToken(ClientRunJobArgs):
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -111,6 +127,7 @@ class CheckAuthToken(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "fastapi",
@@ -118,7 +135,11 @@ class CheckAuthToken(ClientRunJobArgs):
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 

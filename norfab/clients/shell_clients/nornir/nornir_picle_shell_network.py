@@ -16,7 +16,7 @@ from .nornir_picle_shell_common import (
 )
 from typing import Union, List
 from nornir_salt.plugins.functions import TabulateFormatter
-from picle.models import PipeFunctionsModel
+from picle.models import PipeFunctionsModel, Outputters
 
 
 class NornirNetworkPing(
@@ -72,6 +72,7 @@ class NornirNetworkPing(
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if "ping_timeout" in kwargs:
             kwargs["timeout"] = kwargs.pop("ping_timeout")
@@ -95,7 +96,11 @@ class NornirNetworkPing(
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         result = log_error_or_result(result, verbose_result=verbose_result)
 
@@ -155,6 +160,7 @@ class NornirNetworkDns(
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if "dns_timeout" in kwargs:
             kwargs["timeout"] = kwargs.pop("dns_timeout")
@@ -178,7 +184,11 @@ class NornirNetworkDns(
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         result = log_error_or_result(result, verbose_result=verbose_result)
 

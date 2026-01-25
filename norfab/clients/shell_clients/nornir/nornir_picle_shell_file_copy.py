@@ -16,7 +16,7 @@ from .nornir_picle_shell_common import (
     print_nornir_results,
 )
 from nornir_salt.plugins.functions import TabulateFormatter
-from picle.models import PipeFunctionsModel
+from picle.models import PipeFunctionsModel, Outputters
 
 
 class SCPDirection(str, Enum):
@@ -94,6 +94,7 @@ class NornirFileCopyShell(
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         # extract Tabulate arguments
         table = kwargs.pop("table", {})  # tabulate
@@ -114,7 +115,11 @@ class NornirFileCopyShell(
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         result = log_error_or_result(result, verbose_result=verbose_result)
 

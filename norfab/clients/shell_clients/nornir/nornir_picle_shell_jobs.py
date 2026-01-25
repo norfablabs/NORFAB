@@ -46,7 +46,7 @@ class ListJobsModel(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
         workers = [i["name"] for i in reply["results"]]
@@ -59,6 +59,7 @@ class ListJobsModel(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if kwargs.get("client") == "self":
             kwargs["client"] = NFCLIENT.zmq_name
@@ -70,7 +71,12 @@ class ListJobsModel(ClientRunJobArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
         result = log_error_or_result(result, verbose_result=verbose_result)
 
         ret = []
@@ -98,7 +104,7 @@ class JobDetailsModel(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
         workers = [i["name"] for i in reply["results"]]
@@ -111,6 +117,7 @@ class JobDetailsModel(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -119,7 +126,12 @@ class JobDetailsModel(ClientRunJobArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
         result = log_error_or_result(result, verbose_result=verbose_result)
 
         return result

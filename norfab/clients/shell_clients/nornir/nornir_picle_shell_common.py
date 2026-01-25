@@ -266,7 +266,7 @@ class NorniHostsFilters(BaseModel):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
         reply = reply["results"]

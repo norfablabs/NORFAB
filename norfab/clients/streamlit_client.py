@@ -18,7 +18,7 @@ def about():
 def run_streamlit_app():
 
     nf = NorFab(inventory="inventory.yaml")
-    NFCLIENT = nf.make_client() # noqa
+    NFCLIENT = nf.make_client()  # noqa
 
     pages = {
         "Overview": [

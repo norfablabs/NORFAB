@@ -220,7 +220,7 @@ class RefreshNornirModel(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
         workers = [i["name"] for i in reply["results"]]

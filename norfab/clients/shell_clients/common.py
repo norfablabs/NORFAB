@@ -102,9 +102,10 @@ def listen_events(fun):
         events_thread_stop = threading.Event()
         uuid = uuid4().hex
         progress = kwargs.get("progress", True)
+        nowait = kwargs.get("nowait", False)
 
         # start events thread to handle job events printing
-        if progress:
+        if progress and nowait is False:
             events_thread = threading.Thread(
                 target=listen_events_thread,
                 name="NornirCliShell_events_listen_thread",
@@ -121,7 +122,7 @@ def listen_events(fun):
             res = fun(uuid, *args, **kwargs)
         finally:
             # stop events thread
-            if NFCLIENT and progress:
+            if NFCLIENT and progress and nowait is False:
                 events_thread_stop.set()
                 events_thread.join()
 
@@ -205,6 +206,11 @@ class ClientRunJobArgs(BaseModel):
     progress: Optional[StrictBool] = Field(
         True,
         description="Display progress events",
+        json_schema_extra={"presence": True},
+    )
+    nowait: Optional[StrictBool] = Field(
+        False,
+        description="Do not wait for job to complete",
         json_schema_extra={"presence": True},
     )
 

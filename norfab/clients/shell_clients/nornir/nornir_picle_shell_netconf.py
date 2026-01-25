@@ -13,7 +13,7 @@ from .nornir_picle_shell_common import (
     NornirCommonArgs,
     print_nornir_results,
 )
-from picle.models import PipeFunctionsModel
+from picle.models import PipeFunctionsModel, Outputters
 
 
 class EnumNetconfPlugins(str, Enum):
@@ -111,6 +111,7 @@ class NornirNetconfShell(BaseModel):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -120,7 +121,11 @@ class NornirNetconfShell(BaseModel):
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         ret = log_error_or_result(result, verbose_result=verbose_result)
 

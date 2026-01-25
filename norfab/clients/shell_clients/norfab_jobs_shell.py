@@ -34,7 +34,7 @@ class ListJobsModel(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get("mmi.service.broker", "show_workers")
+        reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
         workers = [i["name"] for i in reply["results"]]
 
         return ["all", "any"] + workers
@@ -45,6 +45,7 @@ class ListJobsModel(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             kwargs.pop("service"),
@@ -53,7 +54,12 @@ class ListJobsModel(ClientRunJobArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result
+
         result = log_error_or_result(result, verbose_result=verbose_result)
 
         ret = []
@@ -66,60 +72,15 @@ class ListJobsModel(ClientRunJobArgs):
         outputter = Outputters.outputter_rich_table
 
 
-class JobDetailsModel(ClientRunJobArgs):
-    uuid: StrictStr = Field(..., description="Job UUID")
-    service: StrictStr = Field(
-        ..., description="Service name to return job details for"
-    )
-    workers: StrictStr = Field("all", description="Workers to return jobs for")
-    data: StrictBool = Field(
-        True,
-        description="Return job data received from client",
-        json_schema_extra={"presence": True},
-    )
-    result: StrictBool = Field(
-        True, description="Return job result", json_schema_extra={"presence": True}
-    )
-    events: StrictBool = Field(
-        True, description="Return job events", json_schema_extra={"presence": True}
-    )
-
-    @staticmethod
-    def source_service():
-        return ["netbox", "nornir"]
-
-    @staticmethod
-    def source_workers():
-        NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get("mmi.service.broker", "show_workers")
-        workers = [i["name"] for i in reply["results"]]
-
-        return ["all", "any"] + workers
+class NorFabJobsShellCommands(BaseModel):
+    summary: ListJobsModel = Field(None, description="List jobs")
+    uuid: StrictStr = Field(None, description="Job UUID")
 
     @staticmethod
     def run(*args, **kwargs):
         NFCLIENT = builtins.NFCLIENT
-        workers = kwargs.pop("workers", "all")
-        timeout = kwargs.pop("timeout", 600)
-        verbose_result = kwargs.pop("verbose_result", False)
 
-        result = NFCLIENT.run_job(
-            kwargs.pop("service"),
-            "job_details",
-            workers=workers,
-            args=args,
-            kwargs=kwargs,
-            timeout=timeout,
-        )
-        result = log_error_or_result(result, verbose_result=verbose_result)
-
-        return result
-
-
-class NorFabJobsShellCommands(BaseModel):
-    summary: ListJobsModel = Field(None, description="List jobs")
-    details: JobDetailsModel = Field(None, description="Show job details")
+        return NFCLIENT.job_db.get_job(kwargs["uuid"])
 
     class PicleConfig:
         subshell = True
-        prompt = "nf[jobs]#"

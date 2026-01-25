@@ -43,6 +43,7 @@ class UpdateInterfacesDescription(NetboxCommonArgs, NetboxClientRunJobArgs):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -54,7 +55,11 @@ class UpdateInterfacesDescription(NetboxCommonArgs, NetboxClientRunJobArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 

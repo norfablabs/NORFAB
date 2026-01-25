@@ -53,6 +53,7 @@ class CreateHostModel(ClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "create_host"
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if kwargs.get("connection_options"):
             kwargs["connection_options"] = json.loads(kwargs["connection_options"])
@@ -69,7 +70,11 @@ class CreateHostModel(ClientRunJobArgs):
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -128,6 +133,7 @@ class UpdateHostModel(ClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "update_host"
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if kwargs.get("connection_options"):
             kwargs["connection_options"] = json.loads(kwargs["connection_options"])
@@ -144,7 +150,11 @@ class UpdateHostModel(ClientRunJobArgs):
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -168,6 +178,7 @@ class DeleteHostModel(ClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "delete_host"
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "nornir",
@@ -177,7 +188,11 @@ class DeleteHostModel(ClientRunJobArgs):
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -208,6 +223,7 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "read_host_data"
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs["keys"], str):
             kwargs["keys"] = [kwargs["keys"]]
@@ -220,7 +236,11 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -271,7 +291,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
         )
         workers = [i["name"] for i in reply["results"]]
@@ -290,7 +310,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
     @staticmethod
     def source_clab_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "containerlab"}
         )
         workers = [i["name"] for i in reply["results"]]
@@ -304,6 +324,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("groups"), str):
             kwargs["groups"] = [kwargs["groups"]]
@@ -315,7 +336,11 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
             workers=workers,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 

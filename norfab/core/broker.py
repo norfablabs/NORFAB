@@ -479,7 +479,7 @@ class NFPBroker:
             )
         elif command == NFP.MMI:
             msg = self.build_message.broker_to_client_mmi(
-                client=client, service=service, message=message  
+                client=client, service=service, message=message
             )
         else:
             log.error(f"NFPBroker - invalid client command: {command}")
@@ -874,7 +874,6 @@ class NFPBroker:
         self.send_to_client(
             sender, NFP.MMI, b"mmi.service.broker", [uuid, b"200", reply]
         )
-
 
     def inventory_service(self, sender, command, target, uuid, data):
         log.debug(

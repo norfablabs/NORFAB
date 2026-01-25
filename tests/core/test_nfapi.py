@@ -7,7 +7,7 @@ from uuid import uuid4
 class TestNfApi:
     def test_load_inventory_from_dictionary(self, nfclient_dict_inventory):
         # test that NorFab started and workers are started as well
-        reply = nfclient_dict_inventory.get("mmi.service.broker", "show_workers")
+        reply = nfclient_dict_inventory.mmi("mmi.service.broker", "show_workers")
 
         ret = reply["results"]
         pprint.pprint(ret)

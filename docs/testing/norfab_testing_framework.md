@@ -369,7 +369,7 @@ kill -9 <PID>  # Kill process
 Check worker status using the MMI service:
 
 ```python
-status = nfclient.get("mmi.service.broker", "show_workers")
+status = nfclient.mmi("mmi.service.broker", "show_workers")
 ```
 
 ## Related Documentation

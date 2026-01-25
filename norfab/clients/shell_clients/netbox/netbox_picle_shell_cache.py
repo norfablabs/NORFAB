@@ -39,7 +39,7 @@ class CacheList(NetboxClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
         )
         reply = reply["results"]
@@ -53,6 +53,7 @@ class CacheList(NetboxClientRunJobArgs):
         details = kwargs.get("details", False)
         table = kwargs.pop("table", False)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -61,7 +62,12 @@ class CacheList(NetboxClientRunJobArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
         result = log_error_or_result(result, verbose_result=verbose_result)
 
         if details:
@@ -100,7 +106,7 @@ class CacheClear(NetboxClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
         )
         reply = reply["results"]
@@ -112,6 +118,7 @@ class CacheClear(NetboxClientRunJobArgs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -120,7 +127,11 @@ class CacheClear(NetboxClientRunJobArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -140,7 +151,7 @@ class CacheGet(NetboxClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
         )
         reply = reply["results"]
@@ -152,6 +163,7 @@ class CacheGet(NetboxClientRunJobArgs):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -160,7 +172,11 @@ class CacheGet(NetboxClientRunJobArgs):
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 

@@ -694,7 +694,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     # ) -> ClientPostJobResponse:
     #     """
     #     Method to post the job to NorFab.
-# 
+    #
     #     Args:
     #         service: The name of the service to post the job to.
     #         task: The task to be executed by the service.
@@ -703,7 +703,7 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     #         workers: The workers to dispatch the task. Defaults to "all".
     #         uuid: Optional a unique identifier to use for the job. Defaults to None.
     #         timeout: The timeout for the job in seconds. Defaults to 600.
-# 
+    #
     #     Returns:
     #         The response from the NorFab service.
     #     """
@@ -742,13 +742,13 @@ def make_fast_api_app(worker: object, config: dict) -> FastAPI:
     # ) -> ClientGetJobResponse:
     #     """
     #     Method to get job results from NorFab.
-# 
+    #
     #     Args:
     #         service: The name of the service to get the job from.
     #         workers: The workers to dispatch the get request to. Defaults to "all".
     #         uuid: A unique identifier for the job.
     #         timeout: The timeout for the job get requests in seconds. Defaults to 600.
-# 
+    #
     #     Returns:
     #         The response from the NorFab service.
     #     """

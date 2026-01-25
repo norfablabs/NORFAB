@@ -38,7 +38,7 @@ class ShowWorkersModel(BaseModel):
     @staticmethod
     def run(*args, **kwargs):
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", args=args, kwargs=kwargs
         )
         if reply["errors"]:
@@ -74,7 +74,7 @@ class WorkersPingCommand(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get(
+        reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "all"}
         )
         workers = [i["name"] for i in reply["results"]]

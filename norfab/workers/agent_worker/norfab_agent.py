@@ -24,7 +24,9 @@ class get_service_task_information_input(BaseModel):
     service: StrictStr = Field(
         None, description="Lowercase NorFab service name to get task information for"
     )
-    name: StrictStr = Field(None, description="Lowercase Task name to get information for")
+    name: StrictStr = Field(
+        None, description="Lowercase Task name to get information for"
+    )
 
 
 tools = {

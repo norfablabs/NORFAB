@@ -63,6 +63,7 @@ class SyncDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -74,7 +75,11 @@ class SyncDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
             kwargs=kwargs,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         result = log_error_or_result(result, verbose_result=verbose_result)
 
@@ -129,6 +134,7 @@ class SyncDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -140,7 +146,11 @@ class SyncDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
             kwargs=kwargs,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         result = log_error_or_result(result, verbose_result=verbose_result)
 
@@ -195,6 +205,7 @@ class SyncDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = timeout * 0.9
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -206,7 +217,11 @@ class SyncDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
             kwargs=kwargs,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         result = log_error_or_result(result, verbose_result=verbose_result)
 

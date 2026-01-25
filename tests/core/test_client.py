@@ -16,7 +16,9 @@ class TestClientApi:
             assert all(k in worker for k in ["holdtime", "name", "service", "status"])
 
     def test_mmi_show_workers_nornir(self, nfclient):
-        reply = nfclient.mmi(b"mmi.service.broker", "show_workers", kwargs={"service": "nornir"})
+        reply = nfclient.mmi(
+            b"mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
+        )
 
         ret = reply["results"]
         pprint.pprint(ret)
@@ -66,7 +68,9 @@ class TestClientApi:
             assert ret[k], "Some broker params seems wrong"
 
     def test_mmi_sid_inventory(self, nfclient):
-        reply = nfclient.mmi("sid.service.broker", "get_inventory", kwargs={"name": "nornir-worker-1"})
+        reply = nfclient.mmi(
+            "sid.service.broker", "get_inventory", kwargs={"name": "nornir-worker-1"}
+        )
 
         ret = reply["results"]
         pprint.pprint(ret)

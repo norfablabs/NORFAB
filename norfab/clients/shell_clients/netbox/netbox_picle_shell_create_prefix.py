@@ -18,6 +18,7 @@ class CreatePrefixShell(NetboxClientRunJobArgs, CreatePrefixInput):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("tags"), str):
             kwargs["tags"] = [kwargs["tags"]]
@@ -33,7 +34,11 @@ class CreatePrefixShell(NetboxClientRunJobArgs, CreatePrefixInput):
             kwargs=kwargs,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 

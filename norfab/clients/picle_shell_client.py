@@ -62,11 +62,11 @@ class ShowBrokerModel(BaseModel):
     @staticmethod
     def run(*args, **kwargs):
         if kwargs.get("version"):
-            reply = NFCLIENT.get("mmi.service.broker", "show_broker_version")
+            reply = NFCLIENT.mmi("mmi.service.broker", "show_broker_version")
         elif kwargs.get("inventory"):
-            reply = NFCLIENT.get("mmi.service.broker", "show_broker_inventory")
+            reply = NFCLIENT.mmi("mmi.service.broker", "show_broker_inventory")
         else:
-            reply = NFCLIENT.get("mmi.service.broker", "show_broker")
+            reply = NFCLIENT.mmi("mmi.service.broker", "show_broker")
         if reply["errors"]:
             return "\n".join(reply["errors"])
         else:
@@ -157,7 +157,6 @@ class ShowCommandsModel(BaseModel):
             "status": "connected",
             "name": NFCLIENT.name,
             "zmq-name": NFCLIENT.zmq_name,
-            "recv-queue-size": NFCLIENT.recv_queue.qsize(),
             "broker": {
                 "endpoint": NFCLIENT.broker,
                 "reconnects": NFCLIENT.stats_reconnect_to_broker,
@@ -166,7 +165,6 @@ class ShowCommandsModel(BaseModel):
             },
             "directories": {
                 "base-dir": NFCLIENT.base_dir,
-                "events-dir": NFCLIENT.events_dir,
                 "public-keys-dir": NFCLIENT.public_keys_dir,
                 "private-keys-dir": NFCLIENT.private_keys_dir,
             },
@@ -314,7 +312,7 @@ class DeleteFetchedFiles(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get("mmi.service.broker", "show_workers")
+        reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
         workers = [i["name"] for i in reply["results"]]
 
         return ["all", "any"] + workers

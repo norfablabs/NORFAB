@@ -16,7 +16,7 @@ class NetboxClientRunJobArgs(ClientRunJobArgs):
     @staticmethod
     def source_workers():
         NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.get("mmi.service.broker", "show_workers")
+        reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
         reply = reply["results"]
         return ["all", "any"] + [
             w["name"] for w in reply if w["service"].startswith("netbox")

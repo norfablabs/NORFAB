@@ -18,7 +18,7 @@ from .nornir_picle_shell_common import (
 )
 from typing import Union, Optional, List
 from nornir_salt.plugins.functions import TabulateFormatter
-from picle.models import PipeFunctionsModel
+from picle.models import PipeFunctionsModel, Outputters
 
 
 class NrCliPluginNetmiko(BaseModel):
@@ -300,6 +300,7 @@ class NornirCliShell(
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
+        nowait = kwargs.pop("nowait", False)
 
         # convert use_ps_timeout to timeout as use_ps expects "timeout" argument
         if kwargs.get("use_ps") and "use_ps_timeout" in kwargs:
@@ -329,7 +330,12 @@ class NornirCliShell(
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
         result = log_error_or_result(result, verbose_result=verbose_result)
 
         # form table results

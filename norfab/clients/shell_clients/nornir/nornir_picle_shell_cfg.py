@@ -17,7 +17,7 @@ from .nornir_picle_shell_common import (
 )
 from typing import Union, Optional, List
 from nornir_salt.plugins.functions import TabulateFormatter
-from picle.models import PipeFunctionsModel
+from picle.models import PipeFunctionsModel, Outputters
 
 
 class NrCfgPluginNetmiko(BaseModel):
@@ -253,6 +253,7 @@ class NornirCfgShell(
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         # extract job_data
         if kwargs.get("job_data") and not kwargs["job_data"].startswith("nf://"):
@@ -277,7 +278,11 @@ class NornirCfgShell(
             kwargs=kwargs,
             uuid=uuid,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         result = log_error_or_result(result, verbose_result=verbose_result)
 
