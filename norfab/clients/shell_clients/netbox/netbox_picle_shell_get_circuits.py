@@ -8,7 +8,7 @@ from pydantic import (
     Field,
 )
 from typing import Union, List
-from ..common import log_error_or_result
+from ..common import log_error_or_result, listen_events
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_cache import CacheEnum
 from norfab.models.netbox import NetboxCommonArgs
@@ -32,7 +32,8 @@ class GetCircuits(NetboxCommonArgs, NetboxClientRunJobArgs):
     cache: CacheEnum = Field(True, description="How to use cache")
 
     @staticmethod
-    def run(*args, **kwargs):
+    @listen_events
+    def run(uuid, *args, **kwargs):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
@@ -47,6 +48,7 @@ class GetCircuits(NetboxCommonArgs, NetboxClientRunJobArgs):
         result = NFCLIENT.run_job(
             "netbox",
             "get_circuits",
+            uuid=uuid,
             workers=workers,
             args=args,
             kwargs=kwargs,

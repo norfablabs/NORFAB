@@ -1,0 +1,248 @@
+---
+# NetBox Design - Sample Sites and Devices
+
+# Foundation Objects - Created First
+dcim:
+  manufacturers:
+    - name: Cisco
+    - name: Arista
+    - name: Juniper
+    - name: Alcatel
+    - name: Huawei
+
+  device_roles:
+    - name: Core Router
+      color: 2196f3
+    - name: Edge Router
+      color: 4caf50
+    - name: Distribution Switch
+      color: ff9800
+    - name: Access Switch
+      color: 9c27b0
+
+  device_types:
+    - manufacturer: Cisco
+      model: Catalyst 9300
+      slug: catalyst-9300
+      interfaces:
+        - name: GigabitEthernet1/0/1
+          type: 1000base-t
+        - name: GigabitEthernet1/0/2
+          type: 1000base-t
+        - name: GigabitEthernet1/0/3
+          type: 1000base-t
+        - name: GigabitEthernet1/0/4
+          type: 1000base-t
+        - name: TenGigabitEthernet1/1/1
+          type: 10gbase-x-sfpp
+        - name: TenGigabitEthernet1/1/2
+          type: 10gbase-x-sfpp
+    - manufacturer: Arista
+      model: 7050SX3-48YC12
+      slug: 7050sx3-48yc12
+      interfaces:
+        - name: Ethernet1
+          type: 25gbase-x-sfp28
+        - name: Ethernet2
+          type: 25gbase-x-sfp28
+        - name: Ethernet3
+          type: 25gbase-x-sfp28
+        - name: Ethernet4
+          type: 25gbase-x-sfp28
+        - name: Ethernet49
+          type: 100gbase-x-qsfp28
+        - name: Ethernet50
+          type: 100gbase-x-qsfp28
+        - name: Management1
+          type: 1000base-t
+    - manufacturer: Juniper
+      model: MX204
+      slug: mx204
+      interfaces:
+        - name: ge-0/0/0
+          type: 1000base-x-sfp
+        - name: ge-0/0/1
+          type: 1000base-x-sfp
+        - name: xe-0/0/0
+          type: 10gbase-x-sfpp
+        - name: xe-0/0/1
+          type: 10gbase-x-sfpp
+        - name: et-0/0/0
+          type: 100gbase-x-qsfp28
+        - name: fxp0
+          type: 1000base-t
+
+  platforms:
+    - name: Cisco IOS-XE
+      manufacturer: Cisco
+    - name: Arista EOS
+      manufacturer: Arista
+    - name: Juniper Junos
+      manufacturer: Juniper
+
+  regions:
+    - name: North America
+      slug: north-america
+    - name: Europe
+      slug: europe
+    - name: Asia Pacific
+      slug: asia-pacific
+
+  sites:
+    - name: Thunderdome Data Center
+      slug: thunderdome-dc
+      status: active
+      region: North America
+      tenant: QuantumLeap Networks
+      description: Primary core data center facility
+      physical_address: 123 Silicon Valley Blvd, San Jose, CA 95110
+      latitude: 37.3382
+      longitude: -121.8863
+
+    - name: Phoenix Rising Facility
+      slug: phoenix-rising
+      status: active
+      region: North America
+      tenant: QuantumLeap Networks
+      description: Phoenix backup and DR site
+      physical_address: 456 Desert Sky Pkwy, Phoenix, AZ 85021
+      latitude: 33.4484
+      longitude: -112.0740
+
+    - name: Northern Lights NOC
+      slug: northern-lights-noc
+      status: active
+      region: Europe
+      tenant: QuantumLeap Networks
+      description: Stockholm network operations center
+      physical_address: 789 Birger Jarlsgatan, Stockholm, 114 34
+      latitude: 59.3293
+      longitude: 18.0686
+
+    - name: Dragon Gate Hub
+      slug: dragon-gate-hub
+      status: active
+      region: Asia Pacific
+      tenant: QuantumLeap Networks
+      description: Singapore regional hub
+      physical_address: 321 Marina Bay Blvd, Singapore 018980
+      latitude: 1.2794
+      longitude: 103.8544
+
+    - name: Avalon Edge Site
+      slug: avalon-edge
+      status: planned
+      region: Europe
+      tenant: QuantumLeap Networks
+      description: UK edge computing facility
+      physical_address: 111 Oxford Street, London, W1D 2HH
+      latitude: 51.5074
+      longitude: -0.1278
+
+  # Devices - Must Reference Sites
+  devices:
+    - name: thunderdome-core-rtr01
+      device_type: MX204
+      role: Core Router
+      site: Thunderdome Data Center
+      status: active
+      platform: Juniper Junos
+      tenant: QuantumLeap Networks
+      description: Primary core router
+
+    - name: thunderdome-core-rtr02
+      device_type: MX204
+      role: Core Router
+      site: Thunderdome Data Center
+      status: active
+      platform: Juniper Junos
+      tenant: QuantumLeap Networks
+      description: Secondary core router for redundancy
+
+    - name: thunderdome-dist-sw01
+      device_type: 7050SX3-48YC12
+      role: Distribution Switch
+      site: Thunderdome Data Center
+      status: active
+      platform: Arista EOS
+      tenant: QuantumLeap Networks
+      description: Distribution layer switch
+
+    - name: thunderdome-access-sw01
+      device_type: Catalyst 9300
+      role: Access Switch
+      site: Thunderdome Data Center
+      status: active
+      platform: Cisco IOS-XE
+      tenant: QuantumLeap Networks
+      description: Access layer switch for server racks
+
+    - name: phoenix-edge-rtr01
+      device_type: MX204
+      role: Edge Router
+      site: Phoenix Rising Facility
+      status: active
+      platform: Juniper Junos
+      tenant: QuantumLeap Networks
+      description: Edge router for DR site
+
+    - name: phoenix-dist-sw01
+      device_type: 7050SX3-48YC12
+      role: Distribution Switch
+      site: Phoenix Rising Facility
+      status: active
+      platform: Arista EOS
+      tenant: QuantumLeap Networks
+      description: Distribution switch for backup facility
+
+    - name: northern-core-rtr01
+      device_type: MX204
+      role: Core Router
+      site: Northern Lights NOC
+      status: active
+      platform: Juniper Junos
+      tenant: QuantumLeap Networks
+      description: Stockholm NOC core router
+
+    - name: northern-access-sw01
+      device_type: Catalyst 9300
+      role: Access Switch
+      site: Northern Lights NOC
+      status: active
+      platform: Cisco IOS-XE
+      tenant: QuantumLeap Networks
+      description: NOC access switch
+
+    - name: dragon-edge-rtr01
+      device_type: MX204
+      role: Edge Router
+      site: Dragon Gate Hub
+      status: active
+      platform: Juniper Junos
+      tenant: QuantumLeap Networks
+      description: Singapore hub edge router
+
+    - name: dragon-dist-sw01
+      device_type: 7050SX3-48YC12
+      role: Distribution Switch
+      site: Dragon Gate Hub
+      status: active
+      platform: Arista EOS
+      tenant: QuantumLeap Networks
+      description: Regional hub distribution switch
+
+    - name: avalon-edge-rtr01
+      device_type: MX204
+      role: Edge Router
+      site: Avalon Edge Site
+      status: planned
+      platform: Juniper Junos
+      tenant: QuantumLeap Networks
+      description: UK edge site router - pending deployment
+
+# Tenancy Objects
+tenancy:
+  tenants:
+    - name: QuantumLeap Networks
+      slug: quantumleap-networks
+      description: Global network infrastructure provider

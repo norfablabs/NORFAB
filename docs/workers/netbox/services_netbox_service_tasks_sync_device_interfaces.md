@@ -92,4 +92,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.sync_device_interfaces
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.sync_device_interfaces

@@ -150,4 +150,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.get_bgp_peerings
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_bgp_peerings

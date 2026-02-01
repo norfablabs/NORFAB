@@ -846,6 +846,34 @@ class TestGetInterfaces:
                         "loopback" in intf_name.lower()
                     ), f"{worker}:{device}:{intf_name} interface name does not match regex pattern"
 
+    def test_get_interfaces_with_interface_list(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_interfaces",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4"],
+                "interfaces": ["eth9", "eth8"],
+            },
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
+            for device, interfaces in res["result"].items():
+                assert isinstance(
+                    interfaces, dict
+                ), f"{worker}:{device} did not return interfaces dictionary"
+                assert (
+                    "eth8" in interfaces
+                ), f"{worker}:{device}:{eth8} no interface data"
+                assert (
+                    "eth9" in interfaces
+                ), f"{worker}:{device}:{eth9} no interface data"
+                assert (
+                    len(interfaces) == 2
+                ), f"{worker}:{device} was expecting only 2 interfaces"
+
 
 class TestGetDevices:
     nb_version = None
@@ -1592,6 +1620,27 @@ class TestGetCircuits:
                                 "remote_interface",
                             ]
                         ), f"{worker}:{device}:{cid} not all circuit data returned"
+
+    def test_get_circuits_with_interface_details(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_circuits",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4"],
+                "add_interface_details": True,
+            },
+        )
+        pprint.pprint(ret, width=200)
+        for worker, res in ret.items():
+            assert all(
+                k in res["result"]["fceos4"]["CID2"]
+                for k in [
+                    "child_interfaces",
+                    "vrf",
+                    "ip_addresses",
+                ]
+            ), f"{worker}:fcoes4:CID2 no interface details data returned"
 
     def test_get_circuits_by_cid(self, nfclient):
         ret = nfclient.run_job(
@@ -5037,3 +5086,20 @@ class TestCreateIPBulk:
                     },
                 },
             }
+
+
+class TestCreateDesign:
+    nb_version = None
+
+    def test_design_create(self, nfclient):
+        res = nfclient.run_job(
+            "netbox",
+            "create_design",
+            workers="any",
+            kwargs={
+                "design_data": "nf://netbox/designs/base_design.yaml",
+                "dry_run": True,
+            },
+        )
+        print("created design:")
+        pprint.pprint(res, width=200)

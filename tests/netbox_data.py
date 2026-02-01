@@ -2935,13 +2935,11 @@ if __name__ == "__main__":
             f"Netbox url '{NB_URL}', token ends with '..{NB_API_TOKEN[-6:]}', error '{e}'"
         )
         raise SystemExit()
-    todo = input(
-        """Select what to do with Netbox:
+    todo = input("""Select what to do with Netbox:
 1 - cleanup
 2 - populate
 3 - cleanup first, next populate
-[1,2,3]: """
-    )
+[1,2,3]: """)
     if todo == "1":
         clean_up_netbox()
     elif todo == "2":

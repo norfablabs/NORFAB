@@ -52,4 +52,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.create_prefix
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.create_prefix

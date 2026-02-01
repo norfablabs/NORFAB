@@ -153,4 +153,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.get_containerlab_inventory
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_containerlab_inventory

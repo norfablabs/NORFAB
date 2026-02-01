@@ -138,6 +138,7 @@ nav:
       - Get Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
       - Get Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
       - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
+      - Create IP Bulk: workers/netbox/services_netbox_service_tasks_create_ip_bulk.md
       - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md
       - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
       - Sync Device Facts: workers/netbox/services_netbox_service_tasks_sync_device_facts.md

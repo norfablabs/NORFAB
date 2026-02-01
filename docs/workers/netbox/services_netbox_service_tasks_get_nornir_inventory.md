@@ -29,4 +29,4 @@ NorFab shell supports these command options for Netbox `get_nornir_inventory` ta
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.get_nornir_inventory
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_nornir_inventory

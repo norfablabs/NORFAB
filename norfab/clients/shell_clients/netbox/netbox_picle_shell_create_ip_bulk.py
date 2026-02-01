@@ -35,8 +35,12 @@ class CreateIpBulk(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=Tru
         ..., description="List of device names to create IP address for"
     )
     interface_regex: StrictStr = Field(
-        ...,
+        None,
         description="Regular expression of device interface names to create IP address for",
+    )
+    interface_list: StrictStr = Field(
+        None,
+        description="List of interface names to create IP address for",
     )
     description: StrictStr = Field(None, description="IP address description")
     vrf: StrictStr = Field(None, description="VRF to associate with IP address")
@@ -78,6 +82,8 @@ class CreateIpBulk(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=Tru
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
+        if isinstance(kwargs.get("interface_list"), str):
+            kwargs["interface_list"] = [kwargs["interface_list"]]
         if isinstance(kwargs.get("tags"), str):
             kwargs["tags"] = [kwargs["tags"]]
 

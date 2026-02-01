@@ -516,8 +516,7 @@ class JobDatabase:
         """Initialize the database schema."""
         with self._transaction(write=True) as conn:
             # Jobs table - using JSON TEXT fields instead of BLOB
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS jobs (
                     uuid TEXT PRIMARY KEY,
                     client_address TEXT NOT NULL,
@@ -532,12 +531,10 @@ class JobDatabase:
                     result_data TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """
-            )
+            """)
 
             # Events table
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_uuid TEXT NOT NULL,
@@ -548,8 +545,7 @@ class JobDatabase:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (job_uuid) REFERENCES jobs(uuid) ON DELETE CASCADE
                 )
-            """
-            )
+            """)
 
             # Create indexes for performance
             conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
@@ -624,14 +620,12 @@ class JobDatabase:
         """
         with self._transaction(write=True) as conn:
             # order jobs by their creation timestamp in ascending order - oldest first
-            cursor = conn.execute(
-                """
+            cursor = conn.execute("""
                 SELECT uuid, received_timestamp FROM jobs
                 WHERE status = 'PENDING'
                 ORDER BY created_at ASC
                 LIMIT 1
-            """
-            )
+            """)
             row = cursor.fetchone()
             if row:
                 uuid = row["uuid"]
@@ -1664,7 +1658,7 @@ class NFPWorker:
         self, templates: list[str], context: dict = None, filters: dict = None
     ) -> str:
         """
-        Renders a list of Jinja2 templates with the given context and optional filters.
+        Download (if needed) and render a list of Jinja2 templates with the given context and optional filters.
 
         Args:
             templates (list[str]): A list of Jinja2 template strings or NorFab file paths.

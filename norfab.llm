@@ -1,0 +1,73 @@
+# NorFab Overview
+
+## What is NorFab?
+NorFab (Network Automation Fabric) is a distributed task automation and orchestration framework designed for real-world network operations. It simplifies and accelerates network automation by integrating tools, delivering ready-to-use solutions, and enabling engineers to focus on outcomes rather than integration challenges.
+
+## Key Features
+- **Flexibility**: Supports centralized, distributed, and hybrid deployments.
+- **Scalability**: Horizontally scalable with a brokered architecture.
+- **Ease of Use**: Pythonic, CLI, REST, and model-driven interfaces.
+- **Security**: Built-in encryption using CurveZMQ.
+- **Reliability**: Persistent messaging and fault tolerance.
+- **Extensibility**: Plugin ecosystem for custom protocols and workflows.
+
+## Architecture
+- **Clients**: Submit jobs and consume services.
+- **Broker**: Routes jobs and manages services.
+- **Workers**: Execute tasks and manage resources.
+- **Resources**: Devices, databases, filesystems, etc.
+
+## Services
+### Network Automation Services
+- **Nornir Service**: Automates network device operations using libraries like Netmiko and NAPALM.
+- **Workflow Service**: YAML-based workflows for complex processes.
+- **Agent Service**: AI-enhanced automation for compliance checks and fault detection.
+- **Containerlab Service**: Manages containerized network topologies.
+
+### Data Management Services
+- **Netbox Service**: Synchronizes and updates network inventory data.
+
+### REST API Services
+- **FastAPI Service**: Provides REST API endpoints for integration with external systems.
+
+## Deployment
+### Local Deployment
+1. Install NorFab using pip:
+   ```
+   pip install norfab
+   pip install norfab[nfcli]
+   pip install norfab[nornirservice]
+   ```
+2. Create the environment:
+   ```
+   nfcli --create-env norfab
+   ```
+3. Configure `inventory.yaml` for broker and workers.
+
+### Docker Deployment
+1. Clone the repository:
+   ```
+   git clone https://github.com/norfablabs/NORFAB.git norfab
+   ```
+2. Build and start Docker containers:
+   ```
+   cd norfab/docker/norfab-docker
+   docker compose build
+   docker compose start
+   ```
+
+## Why Choose NorFab?
+- **Unified Platform**: Bridges disparate tools, teams, and technologies.
+- **Future-Proof**: Adapts to evolving network needs.
+- **Vendor-Neutral**: Manages multi-vendor environments seamlessly.
+- **Model-Driven**: Ensures robust validation and documentation.
+
+## Protocol
+The NorFab Protocol (NFP) defines a reliable service-oriented request-reply dialog between clients, a broker, and workers. It supports presence, heartbeating, and persistent messaging, ensuring reliable communication even across network partitions.
+
+## References
+- [Getting Started](docs/norfab_getting_started.md)
+- [Why Use NorFab](docs/norfab_why_use_norfab.md)
+- [Services Overview](docs/services_overview.md)
+- [Docker Deployment](docs/norfab_docker_deployment.md)
+- [Protocol Details](docs/reference_architecture_nfp.md)

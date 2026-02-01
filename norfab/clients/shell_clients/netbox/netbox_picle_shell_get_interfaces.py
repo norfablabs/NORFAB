@@ -42,6 +42,11 @@ class GetInterfaces(NetboxCommonArgs, NetboxClientRunJobArgs):
         description="Regex pattern to match interfaces and ports",
         alias="interface-regex",
     )
+    interface_list: Union[StrictStr, List[StrictStr]] = Field(
+        None,
+        description="List of interfaces names to filter",
+        alias="interface-list",
+    )
 
     @staticmethod
     @listen_events
@@ -53,6 +58,8 @@ class GetInterfaces(NetboxCommonArgs, NetboxClientRunJobArgs):
         nowait = kwargs.pop("nowait", False)
         if isinstance(kwargs["devices"], str):
             kwargs["devices"] = [kwargs["devices"]]
+        if isinstance(kwargs.get("interface_list"), str):
+            kwargs["interface_list"] = [kwargs["interface_list"]]
         result = NFCLIENT.run_job(
             "netbox",
             "get_interfaces",

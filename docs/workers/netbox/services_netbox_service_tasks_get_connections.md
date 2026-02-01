@@ -33,4 +33,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.get_connections
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_connections

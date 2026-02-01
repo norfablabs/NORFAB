@@ -15,4 +15,4 @@ NorFab shell supports these command options for Netbox `rest` task:
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.rest
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.rest

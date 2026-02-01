@@ -155,4 +155,4 @@ Task handles several error conditions gracefully:
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.create_device_interfaces
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.create_device_interfaces

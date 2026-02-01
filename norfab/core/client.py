@@ -88,8 +88,7 @@ class ClientJobDatabase:
 
     def _initialize_database(self) -> None:
         with self._transaction(write=True) as conn:
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS jobs (
                     uuid TEXT PRIMARY KEY,
                     service TEXT NOT NULL,
@@ -111,10 +110,8 @@ class ClientJobDatabase:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_poll_timestamp REAL DEFAULT 0
                 )
-                """
-            )
-            conn.execute(
-                """
+                """)
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_uuid TEXT NOT NULL,
@@ -125,8 +122,7 @@ class ClientJobDatabase:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (job_uuid) REFERENCES jobs(uuid) ON DELETE CASCADE
                 )
-                """
-            )
+                """)
             conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_jobs_created ON jobs(created_at)"
@@ -1053,7 +1049,7 @@ class NFPClient(object):
         workers: Union[str, list] = "all",
         uuid: hex = None,
         timeout: int = 30,
-    ):
+    ) -> dict:
         """
         Send an MMI (management interface) request to a service via the broker.
 

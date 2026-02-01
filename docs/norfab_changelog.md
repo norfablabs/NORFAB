@@ -1,3 +1,32 @@
+## 0.15.3
+
+### FEATURES
+
+1. Netbox service - `get_interfaces` task added `interface_list` argument to filter interfaces by a list of names
+2. Netbox service - `get_circuits` task added `add_interface_details` argument to add ip addresses, vrf and child interface info to the circuits when set to True
+3. Netbox service - `create_ip_bulk` task added `interface_list` argument to filter interfaces by a list of names
+
+----
+
+## 0.15.2
+
+### BUGS
+
+1. NorFab nfcli - Fixing show jobs call
+
+### CHANGES
+
+1. NorfabNfcli - enhancing jobs commands on the client to query local database
+2. NorFab client - refactored `mmi` calls, removed `get`, `post` and `recv_from_broker` methods as not needed anymore
+3. FastAPI - removed `job_post` and `job_get` api as no longer needed, might need to refactor it in the future
+4. NorFab client - enhanced `fetch_jobs` db method to allow filter by service, workers, last N jobs etc.
+
+### FEATURES
+
+1. NorFab nfcli - added `nowait` argument to not wait for job results and return prompt straight away
+
+---
+
 ## 0.15.1
 
 ### BUGS

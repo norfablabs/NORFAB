@@ -66,4 +66,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.NetboxWorker.get_circuits
+::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_circuits
