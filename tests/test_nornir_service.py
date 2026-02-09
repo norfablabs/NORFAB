@@ -1496,7 +1496,6 @@ class TestNornirTest:
         assert "No detailed results available" in ret
         assert "|Host|Test Name|Result|Exception|" in ret
         assert "Input Arguments (kwargs)" in ret
-        assert "Complete Results (JSON)" in ret
 
     def test_nornir_test_with_extensive(self, nfclient):
         ret = nfclient.run_job(
@@ -1529,7 +1528,6 @@ class TestNornirTest:
         print(ret)
         assert "|Host|Test Name|Result|Exception|" in ret
         assert "Input Arguments (kwargs)" in ret
-        assert "Complete Results (JSON)" in ret
         assert "Test suites definitions for each host" in ret
         assert (
             "Expandable sections containing outputs collected during test execution for each host"

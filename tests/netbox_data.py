@@ -11,8 +11,10 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 NB_VERSION = None
-NB_URL = "http://192.168.1.210:8000/"
-NB_URL_SSL = "https://192.168.1.210:443/"
+# NB_URL = "http://192.168.1.210:8000/"
+# NB_URL_SSL = "https://192.168.1.210:443/"
+NB_URL = "http://192.168.1.50:8000/"
+NB_URL_SSL = "https://192.168.1.50:443/"
 NB_USERNAME = "admin"
 NB_PASSWORD = "admin"
 NB_API_TOKEN = "0123456789abcdef0123456789abcdef01234567"
@@ -257,31 +259,87 @@ device_types = [
             {
                 "name": "FrontPort1",
                 "type": "lc",
-                "rear_port": "RearPortTrunk1",
-                "rear_port_position": 1,
+                # "rear_port": "RearPortTrunk1",
+                # "rear_port_position": 1,
+                "rear_ports": [
+                    {
+                        "position": 1,
+                        "rear_port": "RearPortTrunk1",
+                        "rear_port_position": 1,
+                    }
+                ],
             },
             {
                 "name": "FrontPort2",
                 "type": "lc",
-                "rear_port": "RearPortTrunk1",
-                "rear_port_position": 2,
+                # "rear_port": "RearPortTrunk1",
+                # "rear_port_position": 2,
+                "rear_ports": [
+                    {
+                        "position": 2,
+                        "rear_port": "RearPortTrunk1",
+                        "rear_port_position": 2,
+                    }
+                ],
             },
             {
                 "name": "FrontPort3",
                 "type": "lc",
-                "rear_port": "RearPortTrunk1",
-                "rear_port_position": 3,
+                # "rear_port": "RearPortTrunk1",
+                # "rear_port_position": 3,
+                "rear_ports": [
+                    {
+                        "position": 3,
+                        "rear_port": "RearPortTrunk1",
+                        "rear_port_position": 3,
+                    }
+                ],
             },
             {
                 "name": "FrontPort4",
                 "type": "lc",
-                "rear_port": "RearPortTrunk1",
-                "rear_port_position": 4,
+                # "rear_port": "RearPortTrunk1",
+                # "rear_port_position": 4,
+                "rear_ports": [
+                    {
+                        "position": 4,
+                        "rear_port": "RearPortTrunk1",
+                        "rear_port_position": 4,
+                    }
+                ],
             },
-            {"name": "FrontPort5", "type": "lc", "rear_port": "RearPort5"},
-            {"name": "FrontPort6", "type": "lc", "rear_port": "RearPort6"},
-            {"name": "FrontPort7", "type": "lc", "rear_port": "RearPort7"},
-            {"name": "FrontPort8", "type": "lc", "rear_port": "RearPort8"},
+            {
+                "name": "FrontPort5",
+                "type": "lc",
+                # "rear_port": "RearPort5"
+                "rear_ports": [
+                    {"position": 1, "rear_port": "RearPort5", "rear_port_position": 1}
+                ],
+            },
+            {
+                "name": "FrontPort6",
+                "type": "lc",
+                # "rear_port": "RearPort6"
+                "rear_ports": [
+                    {"position": 1, "rear_port": "RearPort6", "rear_port_position": 1}
+                ],
+            },
+            {
+                "name": "FrontPort7",
+                "type": "lc",
+                # "rear_port": "RearPort7"
+                "rear_ports": [
+                    {"position": 1, "rear_port": "RearPort7", "rear_port_position": 1}
+                ],
+            },
+            {
+                "name": "FrontPort8",
+                "type": "lc",
+                # "rear_port": "RearPort8"
+                "rear_ports": [
+                    {"position": 1, "rear_port": "RearPort8", "rear_port_position": 1}
+                ],
+            },
         ],
         "rear-ports": [
             {"name": "RearPortTrunk1", "type": "mpo", "positions": 4},
@@ -343,8 +401,9 @@ ip_addresses = [
     {"address": "10.0.2.2/30"},  # eth105 fceos5
     {"address": "10.0.2.4/31"},  # eth106 fceos4
     {"address": "10.0.2.5/31"},  # eth106 fceos5
-    {"address": "10.0.2.9/30"},  # eth107 fceos4
     {"address": "10.0.2.10/30"},  # eth107 fceos5
+    {"address": "10.0.2.8/30"},  # fceos4-fceos5-eth107-vrf
+    {"address": "10.0.2.9/30"},  # fceos5-fceos4-eth107-vrf
 ]
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
@@ -1844,14 +1903,21 @@ def create_device_types():
                 )
             # add rear ports
             for front_port in front_ports:
+                front_port_rear_ports = front_port.pop("rear_ports")
                 rear_port = nb.dcim.rear_port_templates.get(
-                    devicetype_id=device_type.id, name=front_port.pop("rear_port")
+                    devicetype_id=device_type.id,
+                    name=front_port_rear_ports[0]["rear_port"],
                 )
+                front_port_rear_ports[0]["rear_port"] = rear_port.id
                 nb.dcim.front_port_templates.create(
-                    **front_port, device_type=device_type.id, rear_port=rear_port.id
+                    **front_port,
+                    device_type=device_type.id,
+                    rear_ports=front_port_rear_ports,
                 )
         except Exception as e:
-            log.error(f"creating device type '{device_type}' error '{e}'")
+            log.error(
+                f"creating device type '{device_type}' error '{e}'", exc_info=True
+            )
 
 
 def create_device_roles():
@@ -2402,7 +2468,9 @@ def create_bgp_peerings():
             ip_b = nb.ipam.ip_addresses.get(address=peering["ip_b"])
 
             if not ip_a or not ip_b:
-                log.error(f"BGP peering '{peering['name']}': IP addresses not found")
+                log.error(
+                    f"BGP peering '{peering['name']}': IP addresses not found - {peering}"
+                )
                 continue
 
             # Prepare BGP session data

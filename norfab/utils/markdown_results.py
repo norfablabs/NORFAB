@@ -109,10 +109,6 @@ def generic_markdown(data: dict, kwargs: dict = None):
         f"<summary>Input Arguments (kwargs)</summary>\n\n"
         f"```json\n{json.dumps(kwargs, indent=2, default=str)}\n```\n\n"
         f"</details>\n\n"
-        f"<details>\n"
-        f"<summary>Complete Results (JSON)</summary>\n\n"
-        f"```json\n{json.dumps(data, indent=2, default=str)}\n```\n\n"
-        f"</details>\n"
     )
     md.new_line(debug_html)
 
@@ -291,15 +287,12 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
             hosts_test_suites_html += "\n</details>\n"
 
     # Prepare Debug section HTML
+    kwargs["suite"] = kwargs["suite"][:100]  # limit suite content
     debug_html = (
         f'<details style="margin-left:20px;">\n'
         f"<summary>Input Arguments (kwargs)</summary>\n\n"
         f"```json\n{json.dumps(kwargs, indent=2, default=str)}\n```\n\n"
         f"</details>\n\n"
-        f'<details style="margin-left:20px;">\n'
-        f"<summary>Complete Results (JSON)</summary>\n\n"
-        f"```json\n{json.dumps(data, indent=2, default=str)}\n```\n\n"
-        f"</details>\n"
     )
 
     # ==================== MD OUTPUT SECTION ====================

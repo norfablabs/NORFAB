@@ -5,6 +5,15 @@
 1. Netbox service - `get_interfaces` task added `interface_list` argument to filter interfaces by a list of names
 2. Netbox service - `get_circuits` task added `add_interface_details` argument to add ip addresses, vrf and child interface info to the circuits when set to True
 3. Netbox service - `create_ip_bulk` task added `interface_list` argument to filter interfaces by a list of names
+4. Netbox worker - support added for 4.5 Netbox version
+
+### CHANGES
+
+1. Nornir - Removed complete output from tests markdown report
+
+### BUGS
+
+1. Netbox - `get_connections` fixing parent endpoint handling for virtual interfaces
 
 ----
 

@@ -832,6 +832,7 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
         """
         ret = Result(task=f"{self.name}:rest", result={})
         nb_params = self._get_instance_params(instance)
+        api = api.strip("/")
 
         # send request to Netbox REST API
         response = getattr(requests, method)(
@@ -845,7 +846,13 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
             **kwargs,
         )
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            log.error(f"REST API request failed, error: {e}")
+            ret.result = response.status_code
+            return ret
+
         try:
             ret.result = response.json()
         except Exception as e:
@@ -1593,7 +1600,7 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
                         continue
                 else:
                     log.error(
-                        f"{device_name}:{interface_name} parent '{parent}' has no connected endpoints"
+                        f"{device_name}:{interface_name} parent has no connected endpoints"
                     )
                     continue
                 connection["remote_device"] = endpoint["device"]["name"]
@@ -1697,15 +1704,18 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
         termination_a = termination_a["id"] if termination_a else None
         termination_z = termination_z["id"] if termination_z else None
 
-        log.info(f"{self.name}:get_circuits - {cid} tracing circuit terminations path")
+        msg = f"{cid} tracing circuit terminations path"
+        log.info(msg)
+        job.event(msg)
 
         # retrieve A or Z termination path using Netbox REST API
+        circuit_path = None
         if termination_a is not None:
             resp = self.rest(
                 job=job,
                 instance=instance,
                 method="get",
-                api=f"/circuits/circuit-terminations/{termination_a}/paths/",
+                api=f"circuits/circuit-terminations/{termination_a}/paths",
             )
             circuit_path = resp.result
         elif termination_z is not None:
@@ -1713,11 +1723,9 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
                 job=job,
                 instance=instance,
                 method="get",
-                api=f"/circuits/circuit-terminations/{termination_z}/paths/",
+                api=f"circuits/circuit-terminations/{termination_z}/paths",
             )
             circuit_path = resp.result
-        else:
-            return True
 
         # check if circuit ends connect to device or provider network
         if (
@@ -1725,9 +1733,9 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
             or "name" not in circuit_path[0]["path"][0][0]
             or "name" not in circuit_path[0]["path"][-1][-1]
         ):
-            log.warning(
-                f"{self.name}:get_circuits - {cid} has no terminations, cannot trace the path"
-            )
+            msg = f"{cid} does not have two terminations, cannot trace the path"
+            log.warning(msg)
+            job.event(msg)
             return True
 
         # form A and Z connection endpoints
@@ -1750,6 +1758,11 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
         circuit["is_active"] = circuit_path[0]["is_active"]
 
         # map path ends to devices
+        if not end_a["device"] and not end_z["device"]:
+            msg = f"{cid} path trace ends have no devices connected"
+            log.error(msg)
+            job.event(msg, severity="ERROR")
+            return True
         if end_a["device"]:
             device_data = copy.deepcopy(circuit)
             device_data["interface"] = end_a["name"]
@@ -1786,9 +1799,9 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
                     f"{self.name}:get_circuits - {cid} cached circuit data for future use"
                 )
 
-        log.info(
-            f"{self.name}:get_circuits - {cid} circuit data mapped to devices using data from Netbox"
-        )
+        msg = f"{cid} circuit data mapped to devices using data from Netbox"
+        log.info(msg)
+        job.event(msg)
         return True
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
@@ -1800,7 +1813,7 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
         instance: Union[None, str] = None,
         dry_run: bool = False,
         cache: Union[bool, str] = True,
-        add_interface_details: bool = True,
+        add_interface_details: bool = False,
     ) -> Result:
         """
         Retrieve circuit information for specified devices from Netbox.
@@ -2393,7 +2406,6 @@ class NetboxWorker(NFPWorker, NetboxDesignTasks):
                         current_state = {
                             "serial": nb_device["serial"],
                         }
-
                         # Compare and get fields that need updating
                         updates, diff = compare_netbox_object_state(
                             desired_state=desired_state,

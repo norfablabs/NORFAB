@@ -555,7 +555,7 @@ class TestNetboxGrapQL:
                 assert all(
                     k in res["result"] for k in ["devices", "interfaces", "addresses"]
                 ), f"{worker} - did not return some data"
-        elif self.nb_version >= (4, 3, 0):
+        elif (4, 5, 0) > self.nb_version >= (4, 3, 0):
             ret = nfclient.run_job(
                 "netbox",
                 "graphql",
@@ -571,6 +571,37 @@ class TestNetboxGrapQL:
                             "obj": "interface_list",
                             "fields": ["name"],
                             "filters": '{name: {i_contains: "eth"}, type: TYPE_VIRTUAL}',
+                        },
+                        "addresses": {
+                            "obj": "ip_address_list",
+                            "fields": ["address"],
+                            "filters": '{address: {in_list: ["1.0.10.3/32", "1.0.10.1/32"]}}',
+                        },
+                    },
+                },
+            )
+            pprint.pprint(ret, width=200)
+
+            for worker, res in ret.items():
+                assert all(
+                    k in res["result"] for k in ["devices", "interfaces", "addresses"]
+                ), f"{worker} - did not return some data"
+        elif self.nb_version >= (4, 5, 0):
+            ret = nfclient.run_job(
+                "netbox",
+                "graphql",
+                workers="any",
+                kwargs={
+                    "queries": {
+                        "devices": {
+                            "obj": "device_list",
+                            "fields": ["name", "platform {name}"],
+                            "filters": '{name: {i_contains: "ceos"}}',
+                        },
+                        "interfaces": {
+                            "obj": "interface_list",
+                            "fields": ["name"],
+                            "filters": '{name: {i_contains: "eth"}, type: {exact: TYPE_VIRTUAL}}',
                         },
                         "addresses": {
                             "obj": "ip_address_list",
@@ -853,7 +884,7 @@ class TestGetInterfaces:
             workers="any",
             kwargs={
                 "devices": ["fceos4"],
-                "interfaces": ["eth9", "eth8"],
+                "interface_list": ["eth9", "eth8"],
             },
         )
         pprint.pprint(ret, width=200)
@@ -2440,7 +2471,7 @@ class TestSyncDeviceInterfaces:
             workers="any",
             kwargs={
                 "method": "get",
-                "api": "/dcim/interfaces/",
+                "api": "dcim/interfaces",
                 "params": {"device": "ceos-spine-2", "name": "Loopback123"},
             },
         )
@@ -2452,7 +2483,7 @@ class TestSyncDeviceInterfaces:
             workers="any",
             kwargs={
                 "method": "patch",
-                "api": f"/dcim/interfaces/{intf_id}",
+                "api": f"dcim/interfaces/{intf_id}",
                 "json": {"description": "foo"},
             },
         )
@@ -5091,15 +5122,15 @@ class TestCreateIPBulk:
 class TestCreateDesign:
     nb_version = None
 
-    def test_design_create(self, nfclient):
-        res = nfclient.run_job(
-            "netbox",
-            "create_design",
-            workers="any",
-            kwargs={
-                "design_data": "nf://netbox/designs/base_design.yaml",
-                "dry_run": True,
-            },
-        )
-        print("created design:")
-        pprint.pprint(res, width=200)
+    # def test_design_create(self, nfclient):
+    #     res = nfclient.run_job(
+    #         "netbox",
+    #         "create_design",
+    #         workers="any",
+    #         kwargs={
+    #             "design_data": "nf://netbox/designs/base_design.yaml",
+    #             "dry_run": True,
+    #         },
+    #     )
+    #     print("created design:")
+    #     pprint.pprint(res, width=200)

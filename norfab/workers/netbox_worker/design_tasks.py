@@ -357,18 +357,10 @@ class NetboxDesignTasks:
         return "model" in model.model_fields
 
     def slugify(self, value: str) -> str:
-        """Convert a string to a slug format (lowercase, hyphens instead of spaces/underscores)."""
-        # Convert to lowercase
-        slug = value.lower().strip()
-        # Replace spaces and underscores with hyphens
-        slug = re.sub(r"[\s_]+", "-", slug)
-        # Remove any characters that aren't alphanumeric or hyphens
-        slug = re.sub(r"[^a-z0-9\-]", "", slug)
-        # Remove consecutive hyphens
-        slug = re.sub(r"-+", "-", slug)
-        # Strip leading/trailing hyphens
-        slug = slug.strip("-")
-        return slug
+        """Convert a string to Django slug format"""
+        value = str(value).strip()
+        value = re.sub(r"[^\w\s-]", "", value.lower())
+        return re.sub(r"[-\s]+", "-", value).strip("-_")
 
     def mutate_input_data(
         self, error: dict, design_data: dict, netbox_api_model: Type[BaseModel]
@@ -487,7 +479,9 @@ class NetboxDesignTasks:
             app, obj_type = entity.split(".")
 
             if data := design_data.get(app, {}).get(obj_type, []):
-                # deduplicate objects
+                jon.event(f"creating {app}.{obj_type}")
+
+                # identify existing objects to not create them
                 new_objects = []
                 while data:
                     object_data = data.pop(0)
@@ -501,6 +495,7 @@ class NetboxDesignTasks:
                     )
                     if not nb_object:
                         new_objects.append(object_data)
+
                 # create new objects
                 if new_objects:
                     result = getattr(getattr(nb, app), obj_type).create(new_objects)
