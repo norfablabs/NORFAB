@@ -22,15 +22,27 @@ system_prompt: |
     Include brief recommendations for any problematic interfaces.
 
 tools:
-  retrieve_interface_details:
+  get_devices_list:
+    description: Get a complete list of all available devices names
+    norfab:
+      service: nornir
+      task: get_nornir_hosts        
+  retrieve_interfaces_details:
     description: Get interface details from network device
-    model_args_schema: 
-      FC:
-        type: string
-        description: Filter Contains - name of the device to get information from
-      interface_name: 
-        type: string
-        description: Name of interface to get status for
+    input_schema: 
+      properties:
+        FC:
+          type: string
+          description: |
+            Filter Contains - list of complete device names to get information from or 
+            list of device names containment patterns e.g spine, core, access
+        interface_name: 
+          type: string
+          description: |
+            Optional name of specific interface to get status for, retrieves all interfaces 
+            if not provided
+      required:
+        - FC
     norfab:
       job_data: 
         - interface_name
@@ -38,11 +50,21 @@ tools:
       task: cli
       kwargs:
         commands: |
-          {% if "arista " in device.platform %}
+          {% if "arista" in host.platform %}
+          {% if job_data.interface_name %}
           show interface {{ job_data.interface_name }}
           show ip interface {{ job_data.interface_name }}
-          {% elif "juniper" in device.platform %}
+          {% else %}
+          show interface
+          show ip interface
+          {% endif %}
+          {% elif "juniper" in host.platform %}
+          {% if job_data.interface_name %}
           show interface {{ job_data.interface_name }}
           show interface diagnostics optics {{ job_data.interface_name }}
+          {% else %}
+          show interface
+          show interface diagnostics optics
+          {% endif %}
           {% endif %}
       

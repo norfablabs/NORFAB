@@ -1,0 +1,17 @@
+{% if "arista" in host.platform %}
+{% if job_data.interface_name %}
+show interface {{ job_data.interface_name }}
+show ip interface {{ job_data.interface_name }}
+{% else %}
+show interface
+show ip interface
+{% endif %}
+{% elif "juniper" in host.platform %}
+{% if job_data.interface_name %}
+show interface {{ job_data.interface_name }}
+show interface diagnostics optics {{ job_data.interface_name }}
+{% else %}
+show interface
+show interface diagnostics optics
+{% endif %}
+{% endif %}

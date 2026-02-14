@@ -5,7 +5,7 @@ tags:
 
 NorFab comes with a set of docker files to get NorFab up and running on the Docker.
 
-![Network Automations Fabric Architecture](images/docker_run.jpg)
+![Network Automations Fabric Architecture](../images/docker_run.jpg)
 
 Broker and workers deployed in docker environment, while clients can run on Windows, Linux or MAC machine connecting to the broker instance.
 
@@ -190,4 +190,4 @@ nf#
 
 Successfully running `show broker` and `show workers` commands is a good indication that everything works well and you did a great job setting up NorFab in a distributed dockerized fashion :smile:.
 
-Next steps would be to adjust `inventory.yaml` file on the docker host to configure Nornir Service workers to manage your environment, for further details on how to do it refer to [Nornir Service documentations](workers/nornir/services_nornir_service.md). Good Luck 🤞
+Next steps would be to adjust `inventory.yaml` file on the docker host to configure Nornir Service workers to manage your environment, for further details on how to do it refer to [Nornir Service documentations](../workers/nornir/services_nornir_service.md). Good Luck 🤞

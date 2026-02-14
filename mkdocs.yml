@@ -94,8 +94,9 @@ nav:
   - Inventory: reference_norfab_inventory.md
 
 - Tutorials:
-  - Docker Deployment: norfab_docker_deployment.md
-  - Distributed Deployment: norfab_distributed_deployment.md
+  - Docker Deployment: tutorials/norfab_docker_deployment.md
+  - Distributed Deployment: tutorials/norfab_distributed_deployment.md
+  - VSCode MCP Integration: tutorials/norfab_vscode_mcp_integration.md
   
 - Services:
   - Services Overview: services_overview.md

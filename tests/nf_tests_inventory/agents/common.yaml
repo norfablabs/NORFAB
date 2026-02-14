@@ -1,2 +1,12 @@
 service: agent
 broker_endpoint: "tcp://127.0.0.1:5555"
+
+# default_llm:
+#   provider: ollama
+#   model: qwen3:8b
+#   base_url: http://127.0.0.1:11434
+
+default_llm:
+  provider: groq
+  model: llama-3.1-8b-instant
+  groq_api_key: "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"

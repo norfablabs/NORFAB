@@ -12,7 +12,7 @@ from norfab.models import Result
 from diskcache import FanoutCache
 from mcp.server.fastmcp import FastMCP
 from mcp import types
-from typing import Any
+from typing import Any, Dict, Optional
 
 SERVICE = "fastmcp"
 
@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 def service_tasks_discovery(
     worker: Any, cycles: int = 5, discover_service: str = "all"
-) -> None:
+) -> dict:
     """
     Discovers available tasks from NorFab services and registers them
     as tools for the worker. This function periodically queries the
@@ -114,11 +114,11 @@ class FastMCPWorker(NFPWorker):
         inventory: str,
         broker: str,
         worker_name: str,
-        exit_event=None,
-        init_done_event=None,
-        log_level: str = None,
-        log_queue: object = None,
-    ):
+        exit_event: Optional[threading.Event] = None,
+        init_done_event: Optional[threading.Event] = None,
+        log_level: Optional[str] = None,
+        log_queue: Optional[object] = None,
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -169,7 +169,7 @@ class FastMCPWorker(NFPWorker):
             size_limit=1073741824,  #  1 GigaByte
         )
 
-    def worker_exit(self):
+    def worker_exit(self) -> None:
         os.kill(os.getpid(), signal.SIGTERM)
 
     @Task(fastapi={"methods": ["GET"]})
@@ -291,7 +291,7 @@ class FastMCPWorker(NFPWorker):
             task=f"{self.name}:get_status",
         )
 
-    def fastmcp_start(self):
+    def fastmcp_start(self) -> None:
         """
         Starts the FastMCP server for the NorFab MCP application.
 
@@ -325,7 +325,7 @@ class FastMCPWorker(NFPWorker):
 
         @self.app._mcp_server.call_tool()
         async def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
-            log.error(f"Calling tool '{name}' with arguments: '{arguments}'")
+            log.info(f"Calling tool '{name}' with arguments: '{arguments}'")
 
             # form NorFab service and task names
             service, tool_name = name.split("__")
@@ -333,18 +333,16 @@ class FastMCPWorker(NFPWorker):
             tool_name = tool_name[5:]
             task_name = self.norfab_services_tasks[service][name]["task"]["name"]
 
-            log.error(
+            log.info(
                 f"Calling NorFab service '{service}' task '{task_name}' with arguments: '{arguments}'"
             )
 
-            res = self.client.run_job(
+            return self.client.run_job(
                 service=service,
                 task=task_name,
                 kwargs=arguments,
                 workers="all",
             )
-
-            return {"result": res}
 
         self.app_server_thread = threading.Thread(
             target=self.app.run, kwargs={"transport": "streamable-http"}

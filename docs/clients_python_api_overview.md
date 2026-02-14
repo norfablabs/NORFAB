@@ -17,24 +17,49 @@ how to construct  `inventory.yaml` file.
 
 All interaction with NorFab happens via client, to create a client need to call `make_client` method:
 
-```
-import pprint
-from norfab.core.nfapi import NorFab
+!!! example
 
-nf = NorFab(inventory="./inventory.yaml")
-nf.start()
+    === "Direct Invocation"
 
-client = nf.make_client()
+        This example demonstrates steps to create NorFab instance, create client,
+        run job and destroy NorFab instance.
 
-result = nf.client.run_job(
-    service="nornir",
-    task="cli",
-    kwargs={"commands": ["show version", "show clock"]}
-)
+        ```
+        import pprint
+        from norfab.core.nfapi import NorFab
 
-pprint.pprint(ret)
+        nf = NorFab(inventory="./inventory.yaml")
+        nf.start()
 
-nf.destroy()
-```
+        client = nf.make_client()
+
+        result = nf.client.run_job(
+            service="nornir",
+            task="cli",
+            kwargs={"commands": ["show version", "show clock"]}
+        )
+
+        pprint.pprint(result)
+
+        nf.destroy()
+        ```
+
+    === "With Context Manager"
+
+        Context manager simplifies code and handles client creation and NorFab cleanup.
+
+        ```
+        import pprint
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="./inventory.yaml") as nf:
+            result = nf.client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={"commands": ["show version", "show clock"]}
+            )
+
+        pprint.pprint(result)
+        ```
 
 Calling `destroy` method will kill all the clients as well.

@@ -126,6 +126,13 @@ class NorFab:
         nf = NorFab(inventory_data=data, base_dir="./")
         nf.start(run_broker=True, run_workers=["my-worker-1"])
         NFCLIENT = nf.make_client()
+
+    Example using NorFab with context manager invocation:
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory=inventory) as nf:
+           ret = nf.client.run_job("nornir", "get_version")
     """
 
     client = None

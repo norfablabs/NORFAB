@@ -4,6 +4,7 @@ import yaml
 from typing import Any, Union, List, Optional, Dict, Type, Literal
 from norfab.core.worker import Task
 from norfab.models import Result
+from norfab.utils.text import slugify
 from norfab.models.netbox import NetboxFastApiArgs
 from pydantic import BaseModel, Field, create_model, ConfigDict, ValidationError
 
@@ -356,12 +357,6 @@ class NetboxDesignTasks:
         """Check if the Pydantic model has a 'model' field."""
         return "model" in model.model_fields
 
-    def slugify(self, value: str) -> str:
-        """Convert a string to Django slug format"""
-        value = str(value).strip()
-        value = re.sub(r"[^\w\s-]", "", value.lower())
-        return re.sub(r"[-\s]+", "-", value).strip("-_")
-
     def mutate_input_data(
         self, error: dict, design_data: dict, netbox_api_model: Type[BaseModel]
     ) -> bool:
@@ -403,7 +398,7 @@ class NetboxDesignTasks:
             transform_value = lambda v: v  # no transformation needed for name
         elif self.model_has_slug_field(target_model):
             ref_field = "slug"
-            transform_value = self.slugify
+            transform_value = slugify
         elif self.model_has_model_field(target_model):
             ref_field = "model"
             transform_value = lambda v: v  # no transformation needed for model

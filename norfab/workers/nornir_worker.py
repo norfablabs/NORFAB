@@ -1187,6 +1187,8 @@ class NornirWorker(NFPWorker):
         Task to collect/retrieve show commands output from network devices using
         Command Line Interface (CLI).
 
+        Must either provide list of commands to run or TTP template to run.
+
         Args:
             job: NorFab Job object containing relevant metadata
             commands (list, optional): List of commands to send to devices or URL to a file or template

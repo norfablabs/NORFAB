@@ -98,6 +98,7 @@ class AgentInvoke(ClientRunJobArgs):
     @listen_events
     def run(uuid, *args, **kwargs):
         NFCLIENT = builtins.NFCLIENT
+        nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.get("verbose_result", False)
@@ -111,7 +112,11 @@ class AgentInvoke(ClientRunJobArgs):
             kwargs=kwargs,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
+        if nowait:
+            return result, Outputters.outputter_nested
+
         result = log_error_or_result(result, verbose_result=verbose_result)
 
         if verbose_result:

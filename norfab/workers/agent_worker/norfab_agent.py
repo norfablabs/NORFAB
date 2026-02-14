@@ -1,11 +1,5 @@
 from pydantic import BaseModel, StrictStr, Field
 
-llm = {
-    "provider": "ollama",
-    "model": "qwen3:8b",
-    "base_url": "http://127.0.0.1:11434",
-}
-
 name = "NorFab"
 
 system_prompt = """
@@ -19,16 +13,6 @@ workers and services.
 # Tools definitions
 # -------------------------------------------------------------------------
 
-
-class get_service_task_information_input(BaseModel):
-    service: StrictStr = Field(
-        None, description="Lowercase NorFab service name to get task information for"
-    )
-    name: StrictStr = Field(
-        None, description="Lowercase Task name to get information for"
-    )
-
-
 tools = {
     "get_available_services_and_tasks_summary": {
         "description": "Retrieve all available services and tasks names in dictionary format of {service_name: list[tasks_names]}",
@@ -36,7 +20,19 @@ tools = {
     },
     "get_service_task_details": {
         "description": "Retrieve specific NorFab service task detailed information",
-        "model_args_schema": get_service_task_information_input,
+        "input_schema": {
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "description": "Lowercase NorFab service name to get task information for",
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Lowercase Task name to get information for",
+                },
+            },
+            "required": ["service", "name"],
+        },
         "norfab": {"task": "list_tasks", "kwargs": {}},
     },
 }

@@ -1,16 +1,18 @@
 import yaml
 import logging
 import sys
+import json
 import importlib.metadata
 from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
+from norfab.utils.text import slugify
 from typing import Any, List, Callable
 from pydantic import Field
 from pydantic import create_model as create_pydantic_model
+from datamodel_code_generator import generate_dynamic_models, GenerateConfig, Formatter
 
 from langchain.agents import create_agent
 from langchain_core.runnables import RunnableLambda
-from langchain_ollama import ChatOllama
 from langchain.tools import tool as langchain_tool
 from . import norfab_agent
 
@@ -76,12 +78,9 @@ class AgentWorker(NFPWorker):
     def worker_exit(self):
         pass
 
-    def get_llm(self, model: str = None, provider: str = None, **kwargs) -> object:
+    def get_llm(self, model: str, provider: str = None, **kwargs) -> object:
         """
         Retrieve or create an LLM instance.
-
-        If no model_name is provided, this method consults agent service inventory for the
-        ``default_model`` definition.
 
         Args:
             model (str | None): Name of the model to obtain.
@@ -91,17 +90,19 @@ class AgentWorker(NFPWorker):
         Returns:
             object | None: The LLM instance (e.g. ChatOllama)
         """
-        # use inventory defined model or defaults
-        if model is None:
-            model_data = self.agent_inventory.get("default_model")
-        else:
-            model_data = {"model": model, **kwargs}
+        model_data = {"model": model, **kwargs}
 
         # instantiate llm object
         if model in self.llms:
             llm = self.llms[model]
         elif provider == "ollama":
+            from langchain_ollama import ChatOllama
+
             llm = ChatOllama(**model_data)
+        elif provider == "groq":
+            from langchain_groq import ChatGroq
+
+            llm = ChatGroq(**model_data)
         else:
             log.error(f"Unsupported LLM provider '{provider}'")
             return None
@@ -112,8 +113,13 @@ class AgentWorker(NFPWorker):
         return llm
 
     def make_runnable(self, job, tool: dict, tool_name: str) -> Callable:
-        def run_norfab_task(kwargs) -> dict:
-            job.event(f"'{tool_name}' agent calling tool, arguments {kwargs}")
+        def run_norfab_task(kwargs: dict) -> dict:
+            """
+            Args:
+                kwargs (dict): arguments passed on by LLM
+            """
+            job.event(f"'{tool_name}' agent calling tool")
+            log.debug(f"'{tool_name}' agent calling tool with kwargs: {kwargs}")
 
             # get service name
             tool_defined_service = tool["norfab"].get("service")
@@ -124,55 +130,49 @@ class AgentWorker(NFPWorker):
                     f"No service name provided for '{tool_name}' tool call"
                 )
 
+            # extract job data from LLM kwargs
+            job_data = tool["norfab"].get("kwargs", {}).pop("job_data", {})
+            if tool["norfab"].get("job_data"):
+                for key in tool["norfab"]["job_data"]:
+                    if key in kwargs:
+                        job_data[key] = kwargs.pop(key)
+
+            # merge arguments for NorFab task call
+            all_kwargs = {**kwargs, **tool["norfab"].get("kwargs", {})}
+            if job_data:
+                all_kwargs["job_data"] = job_data
+
             # run norfab task
             ret = self.client.run_job(
                 service=service,
                 task=tool["norfab"]["task"],
-                kwargs={**tool["norfab"].get("kwargs", {}), **kwargs},
+                kwargs=all_kwargs,
             )
 
-            job.event(f"'{tool_name}' tool call completed")
-            job.event("Agent processing tool call result...")
+            job.event(f"'{tool_name}' call completed, agent processing results")
 
             return ret
 
         return RunnableLambda(run_norfab_task).with_types(
-            input_type=tool.get("model_args_schema", {})
+            input_type=tool.get("input_schema", {})
         )
 
-    def make_pydantic_model(self, properties, model_name):
-        fields = {}
-        for field, definition in properties.items():
-            field_type = definition.pop("type", "string")
-            if field_type == "string":
-                fields[field] = (
-                    str,
-                    Field(
-                        definition.pop("default", None),
-                        json_scham_extra={
-                            "job_data": definition.pop("job_data", False),
-                        },
-                        **definition,
-                    ),
-                )
-            else:
-                raise TypeError(
-                    f"Failed creating Pydantic model, unsupported field "
-                    f"type '{field_type}' for '{model_name}' definition"
-                )
+    def make_pydantic_model(self, schema, model_name):
+        schema.setdefault("type", "object")
+        config = GenerateConfig(
+            formatters=[Formatter.RUFF_FORMAT, Formatter.RUFF_CHECK]
+        )
+        models = generate_dynamic_models(schema, config=config)
 
-        if fields:
-            return create_pydantic_model(f"DynamicModel_{model_name}", **fields)
-        else:
-            return {}
+        return models["Model"]
 
     def make_tools(self, job, tools: dict) -> List[langchain_tool]:
         ret = []
 
         for tool_name, tool in tools.items():
-            if isinstance(tool.get("model_args_schema"), dict):
-                tool["model_args_schema"] = self.make_pydantic_model(
-                    tool["model_args_schema"], tool_name
+            if isinstance(tool.get("input_schema"), dict):
+                tool["input_schema"] = self.make_pydantic_model(
+                    tool["input_schema"], tool_name
                 )
             ret.append(
                 langchain_tool(
@@ -181,7 +181,7 @@ class AgentWorker(NFPWorker):
                     infer_schema=False,
                     parse_docstring=False,
                     description=tool["description"],
-                    args_schema=tool.get("model_args_schema", {}),
+                    args_schema=tool.get("input_schema", {}),
                 )
             )
 
@@ -189,11 +189,15 @@ class AgentWorker(NFPWorker):
 
     def get_agent(self, job, agent: str = "NorFab"):
         if agent == "NorFab":
+            if not self.agent_inventory.get("default_llm"):
+                raise RuntimeError(
+                    f"Failed to make NorFab agent, no 'default_llm' defined in inventory"
+                )
             return {
                 "name": norfab_agent.name,
                 "system_prompt": norfab_agent.system_prompt,
                 "tools": self.make_tools(job, norfab_agent.tools),
-                "llm": norfab_agent.llm,
+                "llm": self.agent_inventory["default_llm"],
             }
         elif self.is_url(agent):
             agent_definition = self.fetch_file(agent, raise_on_fail=True, read=True)
@@ -202,7 +206,7 @@ class AgentWorker(NFPWorker):
                 "name": agent_data["name"],
                 "system_prompt": agent_data["system_prompt"],
                 "tools": self.make_tools(job, agent_data.get("tools", {})),
-                "llm": agent_data.get("llm", {}),
+                "llm": agent_data.get("llm", {}) or self.agent_inventory["default_llm"],
             }
         else:
             log.error(f"Unsupported agent type '{agent}'")
@@ -279,7 +283,7 @@ class AgentWorker(NFPWorker):
             tools=agent_data["tools"],
         )
 
-        job.event(f"{name} agent thinking..")
+        job.event(f"{name} agent thinking")
 
         ret.result = agent_instance.invoke(
             {"messages": [{"role": "user", "content": instructions}]}

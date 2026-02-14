@@ -1,3 +1,16 @@
+## 0.15.4
+
+### BUGS
+
+1. Fixing FastMCP service tool calling results validation and adding additional tool calling tests
+
+### FEATURES
+
+1. Agent service - adding support to build agents using YAML definition
+2. Agent service - adding support for groq LLM provider
+
+---
+
 ## 0.15.3
 
 ### FEATURES
