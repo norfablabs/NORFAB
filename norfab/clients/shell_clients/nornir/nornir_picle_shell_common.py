@@ -206,7 +206,9 @@ class TabulateTableModel(BaseModel):
     )
     sortby: StrictStr = Field(None, description="Table header column to sort by")
     reverse: StrictBool = Field(
-        None, description="Table reverse the sort by order", presence=True
+        None,
+        description="Table reverse the sort by order",
+        json_schema_extra={"presence": True},
     )
 
     def source_table():

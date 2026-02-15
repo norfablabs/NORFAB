@@ -57,7 +57,7 @@ class NornirTestShell(
     table: Union[EnumTableTypes, Dict, StrictBool] = Field(
         "brief",
         description="Table format (brief, terse, extend) or parameters or True",
-        presence="brief",
+        json_schema_extra={"presence": "brief"},
     )
 
     @staticmethod

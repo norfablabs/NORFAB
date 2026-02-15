@@ -13,3 +13,4 @@ docs/Makefile
 *__norfab__*
 site
 *ipynb_checkpoints*
+tests/nf_tests_inventory/agents/common.yaml

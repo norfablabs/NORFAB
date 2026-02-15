@@ -7,7 +7,41 @@
 ### FEATURES
 
 1. Agent service - adding support to build agents using YAML definition
-2. Agent service - adding support for groq LLM provider
+2. Agent service - adding support for grok LLM provider
+
+### CHANGES
+
+1. Dependencies updates:
+
+    - pyyaml: 6.0.2 → 6.0.3
+    - pyzmq: 27.0.2 → 27.1.0
+    - psutil: 7.0.0 → 7.2.2
+    - tornado: 6.5.2 → 6.5.4
+    - pydantic: 2.11.7 → 2.12.5
+    - rich: 14.1.0 → 14.3.2
+    - pyreadline3: 3.4.1 → 3.5.4
+    - cerberus: 1.3.5 → 1.3.8
+    - jmespath: 1.0.1 → 1.1.0
+    - ncclient: 0.6.15 → 0.7.0
+    - ntc-templates: 8.0.0 → 8.1.0
+    - scrapli-netconf: 2025.01.30 → 2026.1.12
+    - xmltodict: 0.13.0 → 1.0.2
+    - lxml: 4.9.4 → 6.0.2
+    - textfsm: 1.1.3 → 2.1.0
+    - dnspython: 2.4.2 → 2.8.0
+    - robotframework: 7.3.2 → 7.4.1
+    - langchain: 1.0.2 → 1.2.10
+    - langchain-ollama: 1.0.0 → 1.0.1
+    - ollama: 0.6.0 → 0.6.1
+    - pynetbox: 7.5.0 → 7.6.1
+    - fastapi: 0.116.1 → 0.129.0
+    - uvicorn: 0.35.0 → 0.40.0
+    - python-multipart: 0.0.20 → 0.0.22
+    - mcp pinned to 1.26.0
+    
+### DOCS
+
+1. Updating FastMCP service documentation
 
 ---
 
