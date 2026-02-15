@@ -559,7 +559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_docker_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_docker_deployment/" class="md-nav__link">
         
   
   
@@ -587,7 +587,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_distributed_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
         
   
   
@@ -595,6 +595,34 @@
     
   
     Distributed Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VSCode MCP Integration
   
 
     
@@ -2001,6 +2029,34 @@
     
   
     Create IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP Bulk
   
 
     
@@ -5143,6 +5199,23 @@ nf#
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>add_interface_details</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, add interface details using <code>get_interfaces</code> call
+including interface subinterfaces - ip addresses, vrf, child interfaces with their IPs and vrf</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>cache</code>
             </td>
             <td>
@@ -5182,84 +5255,76 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>dictionary keyed by device names with circuits data.</p>
+                <p>dictionary keyed by device names with circuits data:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox get circuits device-list fceos5
+{
+    &quot;netbox-worker-1.1&quot;: {
+        &quot;fceos5&quot;: {
+            &quot;CID1&quot;: {
+                &quot;comments&quot;: &quot;&quot;,
+                &quot;commit_rate&quot;: null,
+                &quot;custom_fields&quot;: {},
+                &quot;description&quot;: &quot;&quot;,
+                &quot;interface&quot;: &quot;eth101&quot;,
+                &quot;is_active&quot;: true,
+                &quot;provider&quot;: &quot;Provider1&quot;,
+                &quot;provider_account&quot;: &quot;&quot;,
+                &quot;remote_device&quot;: &quot;fceos4&quot;,
+                &quot;remote_interface&quot;: &quot;eth101&quot;,
+                &quot;status&quot;: &quot;active&quot;,
+                &quot;tags&quot;: [],
+                &quot;tenant&quot;: null,
+                &quot;type&quot;: &quot;DarkFibre&quot;
+            }
+        }
+    }
+}
+nf#
+</code></pre></div>
               </div>
             </td>
           </tr>
       </tbody>
     </table>
-        <p>Task to retrieve device's circuits data from Netbox.</p>
+        <p>If <code>add_interface_details</code> is True returns this extra information:</p>
+<div class="highlight"><pre><span></span><code>{
+    &quot;netbox-worker-1.1&quot;: {
+        &quot;fceos4&quot;: {
+            &quot;CID2&quot;: {
+                &quot;child_interfaces&quot;: [
+                    {
+                        &quot;ip_addresses&quot;: [
+                            {
+                                &quot;address&quot;: &quot;10.0.0.12/24&quot;,
+                                ...
+                            }
+                        ],
+                        &quot;name&quot;: &quot;eth11.123&quot;,
+                        &quot;vrf&quot;: {
+                            &quot;name&quot;: &quot;MGMT&quot;
+                        }
+                    }
+                ],
+                &quot;interface&quot;: &quot;eth11&quot;,
+                &quot;ip_addresses&quot;: [
+                    {
+                        &quot;address&quot;: &quot;10.0.0.14/24&quot;,
+                        ...
+                    }
+                ],
+                &quot;vrf&quot;: {
+                    &quot;name&quot;: &quot;OOB_CTRL&quot;
+                }
+            }
+        }
+    }
+}
+</code></pre></div>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1741</span>
-<span class="normal">1742</span>
-<span class="normal">1743</span>
-<span class="normal">1744</span>
-<span class="normal">1745</span>
-<span class="normal">1746</span>
-<span class="normal">1747</span>
-<span class="normal">1748</span>
-<span class="normal">1749</span>
-<span class="normal">1750</span>
-<span class="normal">1751</span>
-<span class="normal">1752</span>
-<span class="normal">1753</span>
-<span class="normal">1754</span>
-<span class="normal">1755</span>
-<span class="normal">1756</span>
-<span class="normal">1757</span>
-<span class="normal">1758</span>
-<span class="normal">1759</span>
-<span class="normal">1760</span>
-<span class="normal">1761</span>
-<span class="normal">1762</span>
-<span class="normal">1763</span>
-<span class="normal">1764</span>
-<span class="normal">1765</span>
-<span class="normal">1766</span>
-<span class="normal">1767</span>
-<span class="normal">1768</span>
-<span class="normal">1769</span>
-<span class="normal">1770</span>
-<span class="normal">1771</span>
-<span class="normal">1772</span>
-<span class="normal">1773</span>
-<span class="normal">1774</span>
-<span class="normal">1775</span>
-<span class="normal">1776</span>
-<span class="normal">1777</span>
-<span class="normal">1778</span>
-<span class="normal">1779</span>
-<span class="normal">1780</span>
-<span class="normal">1781</span>
-<span class="normal">1782</span>
-<span class="normal">1783</span>
-<span class="normal">1784</span>
-<span class="normal">1785</span>
-<span class="normal">1786</span>
-<span class="normal">1787</span>
-<span class="normal">1788</span>
-<span class="normal">1789</span>
-<span class="normal">1790</span>
-<span class="normal">1791</span>
-<span class="normal">1792</span>
-<span class="normal">1793</span>
-<span class="normal">1794</span>
-<span class="normal">1795</span>
-<span class="normal">1796</span>
-<span class="normal">1797</span>
-<span class="normal">1798</span>
-<span class="normal">1799</span>
-<span class="normal">1800</span>
-<span class="normal">1801</span>
-<span class="normal">1802</span>
-<span class="normal">1803</span>
-<span class="normal">1804</span>
-<span class="normal">1805</span>
-<span class="normal">1806</span>
-<span class="normal">1807</span>
+              <summary>Source code in <code>norfab\workers\netbox_worker\netbox_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1807</span>
 <span class="normal">1808</span>
 <span class="normal">1809</span>
 <span class="normal">1810</span>
@@ -5398,7 +5463,178 @@ nf#
 <span class="normal">1943</span>
 <span class="normal">1944</span>
 <span class="normal">1945</span>
-<span class="normal">1946</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<span class="normal">1946</span>
+<span class="normal">1947</span>
+<span class="normal">1948</span>
+<span class="normal">1949</span>
+<span class="normal">1950</span>
+<span class="normal">1951</span>
+<span class="normal">1952</span>
+<span class="normal">1953</span>
+<span class="normal">1954</span>
+<span class="normal">1955</span>
+<span class="normal">1956</span>
+<span class="normal">1957</span>
+<span class="normal">1958</span>
+<span class="normal">1959</span>
+<span class="normal">1960</span>
+<span class="normal">1961</span>
+<span class="normal">1962</span>
+<span class="normal">1963</span>
+<span class="normal">1964</span>
+<span class="normal">1965</span>
+<span class="normal">1966</span>
+<span class="normal">1967</span>
+<span class="normal">1968</span>
+<span class="normal">1969</span>
+<span class="normal">1970</span>
+<span class="normal">1971</span>
+<span class="normal">1972</span>
+<span class="normal">1973</span>
+<span class="normal">1974</span>
+<span class="normal">1975</span>
+<span class="normal">1976</span>
+<span class="normal">1977</span>
+<span class="normal">1978</span>
+<span class="normal">1979</span>
+<span class="normal">1980</span>
+<span class="normal">1981</span>
+<span class="normal">1982</span>
+<span class="normal">1983</span>
+<span class="normal">1984</span>
+<span class="normal">1985</span>
+<span class="normal">1986</span>
+<span class="normal">1987</span>
+<span class="normal">1988</span>
+<span class="normal">1989</span>
+<span class="normal">1990</span>
+<span class="normal">1991</span>
+<span class="normal">1992</span>
+<span class="normal">1993</span>
+<span class="normal">1994</span>
+<span class="normal">1995</span>
+<span class="normal">1996</span>
+<span class="normal">1997</span>
+<span class="normal">1998</span>
+<span class="normal">1999</span>
+<span class="normal">2000</span>
+<span class="normal">2001</span>
+<span class="normal">2002</span>
+<span class="normal">2003</span>
+<span class="normal">2004</span>
+<span class="normal">2005</span>
+<span class="normal">2006</span>
+<span class="normal">2007</span>
+<span class="normal">2008</span>
+<span class="normal">2009</span>
+<span class="normal">2010</span>
+<span class="normal">2011</span>
+<span class="normal">2012</span>
+<span class="normal">2013</span>
+<span class="normal">2014</span>
+<span class="normal">2015</span>
+<span class="normal">2016</span>
+<span class="normal">2017</span>
+<span class="normal">2018</span>
+<span class="normal">2019</span>
+<span class="normal">2020</span>
+<span class="normal">2021</span>
+<span class="normal">2022</span>
+<span class="normal">2023</span>
+<span class="normal">2024</span>
+<span class="normal">2025</span>
+<span class="normal">2026</span>
+<span class="normal">2027</span>
+<span class="normal">2028</span>
+<span class="normal">2029</span>
+<span class="normal">2030</span>
+<span class="normal">2031</span>
+<span class="normal">2032</span>
+<span class="normal">2033</span>
+<span class="normal">2034</span>
+<span class="normal">2035</span>
+<span class="normal">2036</span>
+<span class="normal">2037</span>
+<span class="normal">2038</span>
+<span class="normal">2039</span>
+<span class="normal">2040</span>
+<span class="normal">2041</span>
+<span class="normal">2042</span>
+<span class="normal">2043</span>
+<span class="normal">2044</span>
+<span class="normal">2045</span>
+<span class="normal">2046</span>
+<span class="normal">2047</span>
+<span class="normal">2048</span>
+<span class="normal">2049</span>
+<span class="normal">2050</span>
+<span class="normal">2051</span>
+<span class="normal">2052</span>
+<span class="normal">2053</span>
+<span class="normal">2054</span>
+<span class="normal">2055</span>
+<span class="normal">2056</span>
+<span class="normal">2057</span>
+<span class="normal">2058</span>
+<span class="normal">2059</span>
+<span class="normal">2060</span>
+<span class="normal">2061</span>
+<span class="normal">2062</span>
+<span class="normal">2063</span>
+<span class="normal">2064</span>
+<span class="normal">2065</span>
+<span class="normal">2066</span>
+<span class="normal">2067</span>
+<span class="normal">2068</span>
+<span class="normal">2069</span>
+<span class="normal">2070</span>
+<span class="normal">2071</span>
+<span class="normal">2072</span>
+<span class="normal">2073</span>
+<span class="normal">2074</span>
+<span class="normal">2075</span>
+<span class="normal">2076</span>
+<span class="normal">2077</span>
+<span class="normal">2078</span>
+<span class="normal">2079</span>
+<span class="normal">2080</span>
+<span class="normal">2081</span>
+<span class="normal">2082</span>
+<span class="normal">2083</span>
+<span class="normal">2084</span>
+<span class="normal">2085</span>
+<span class="normal">2086</span>
+<span class="normal">2087</span>
+<span class="normal">2088</span>
+<span class="normal">2089</span>
+<span class="normal">2090</span>
+<span class="normal">2091</span>
+<span class="normal">2092</span>
+<span class="normal">2093</span>
+<span class="normal">2094</span>
+<span class="normal">2095</span>
+<span class="normal">2096</span>
+<span class="normal">2097</span>
+<span class="normal">2098</span>
+<span class="normal">2099</span>
+<span class="normal">2100</span>
+<span class="normal">2101</span>
+<span class="normal">2102</span>
+<span class="normal">2103</span>
+<span class="normal">2104</span>
+<span class="normal">2105</span>
+<span class="normal">2106</span>
+<span class="normal">2107</span>
+<span class="normal">2108</span>
+<span class="normal">2109</span>
+<span class="normal">2110</span>
+<span class="normal">2111</span>
+<span class="normal">2112</span>
+<span class="normal">2113</span>
+<span class="normal">2114</span>
+<span class="normal">2115</span>
+<span class="normal">2116</span>
+<span class="normal">2117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_circuits</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -5407,6 +5643,7 @@ nf#
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_interface_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve circuit information for specified devices from Netbox.</span>
@@ -5417,6 +5654,8 @@ nf#
 <span class="sd">        cid (list, optional): List of circuit IDs to filter by.</span>
 <span class="sd">        instance (str, optional): Netbox instance to query.</span>
 <span class="sd">        dry_run (bool, optional): If True, perform a dry run without making changes. Defaults to False.</span>
+<span class="sd">        add_interface_details (bool, optional): If True, add interface details using `get_interfaces` call</span>
+<span class="sd">            including interface subinterfaces - ip addresses, vrf, child interfaces with their IPs and vrf</span>
 <span class="sd">        cache (Union[bool, str], optional): Cache usage options:</span>
 
 <span class="sd">            - True: Use data stored in cache if it is up to date, refresh it otherwise.</span>
@@ -5425,9 +5664,71 @@ nf#
 <span class="sd">            - &quot;force&quot;: Use data in cache without checking if it is up to date.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: dictionary keyed by device names with circuits data.</span>
+<span class="sd">        dict: dictionary keyed by device names with circuits data:</span>
 
-<span class="sd">    Task to retrieve device&#39;s circuits data from Netbox.</span>
+<span class="sd">            ```</span>
+<span class="sd">            nf#netbox get circuits device-list fceos5</span>
+<span class="sd">            {</span>
+<span class="sd">                &quot;netbox-worker-1.1&quot;: {</span>
+<span class="sd">                    &quot;fceos5&quot;: {</span>
+<span class="sd">                        &quot;CID1&quot;: {</span>
+<span class="sd">                            &quot;comments&quot;: &quot;&quot;,</span>
+<span class="sd">                            &quot;commit_rate&quot;: null,</span>
+<span class="sd">                            &quot;custom_fields&quot;: {},</span>
+<span class="sd">                            &quot;description&quot;: &quot;&quot;,</span>
+<span class="sd">                            &quot;interface&quot;: &quot;eth101&quot;,</span>
+<span class="sd">                            &quot;is_active&quot;: true,</span>
+<span class="sd">                            &quot;provider&quot;: &quot;Provider1&quot;,</span>
+<span class="sd">                            &quot;provider_account&quot;: &quot;&quot;,</span>
+<span class="sd">                            &quot;remote_device&quot;: &quot;fceos4&quot;,</span>
+<span class="sd">                            &quot;remote_interface&quot;: &quot;eth101&quot;,</span>
+<span class="sd">                            &quot;status&quot;: &quot;active&quot;,</span>
+<span class="sd">                            &quot;tags&quot;: [],</span>
+<span class="sd">                            &quot;tenant&quot;: null,</span>
+<span class="sd">                            &quot;type&quot;: &quot;DarkFibre&quot;</span>
+<span class="sd">                        }</span>
+<span class="sd">                    }</span>
+<span class="sd">                }</span>
+<span class="sd">            }</span>
+<span class="sd">            nf#</span>
+<span class="sd">            ```</span>
+
+<span class="sd">    If `add_interface_details` is True returns this extra information:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;netbox-worker-1.1&quot;: {</span>
+<span class="sd">            &quot;fceos4&quot;: {</span>
+<span class="sd">                &quot;CID2&quot;: {</span>
+<span class="sd">                    &quot;child_interfaces&quot;: [</span>
+<span class="sd">                        {</span>
+<span class="sd">                            &quot;ip_addresses&quot;: [</span>
+<span class="sd">                                {</span>
+<span class="sd">                                    &quot;address&quot;: &quot;10.0.0.12/24&quot;,</span>
+<span class="sd">                                    ...</span>
+<span class="sd">                                }</span>
+<span class="sd">                            ],</span>
+<span class="sd">                            &quot;name&quot;: &quot;eth11.123&quot;,</span>
+<span class="sd">                            &quot;vrf&quot;: {</span>
+<span class="sd">                                &quot;name&quot;: &quot;MGMT&quot;</span>
+<span class="sd">                            }</span>
+<span class="sd">                        }</span>
+<span class="sd">                    ],</span>
+<span class="sd">                    &quot;interface&quot;: &quot;eth11&quot;,</span>
+<span class="sd">                    &quot;ip_addresses&quot;: [</span>
+<span class="sd">                        {</span>
+<span class="sd">                            &quot;address&quot;: &quot;10.0.0.14/24&quot;,</span>
+<span class="sd">                            ...</span>
+<span class="sd">                        }</span>
+<span class="sd">                    ],</span>
+<span class="sd">                    &quot;vrf&quot;: {</span>
+<span class="sd">                        &quot;name&quot;: &quot;OOB_CTRL&quot;</span>
+<span class="sd">                    }</span>
+<span class="sd">                }</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -5490,6 +5791,7 @@ nf#
 
     <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - retrieving circuits data from cache&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;retrieving circuits data from cache&quot;</span><span class="p">)</span>
         <span class="n">cid_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#  new cid list for follow up query</span>
         <span class="c1"># retrieve last updated data from Netbox for circuits and their terminations</span>
         <span class="n">last_updated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphql</span><span class="p">(</span>
@@ -5572,6 +5874,7 @@ nf#
         <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">circuits_filters</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching circuits data from Netbox&quot;</span><span class="p">)</span>
         <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphql</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">obj</span><span class="o">=</span><span class="s2">&quot;circuit_list&quot;</span><span class="p">,</span>
@@ -5589,10 +5892,12 @@ nf#
         <span class="n">all_circuits</span> <span class="o">=</span> <span class="n">query_result</span><span class="o">.</span><span class="n">result</span>
 
         <span class="c1"># iterate over circuits and map them to devices</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_circuits - retrieved data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_circuits</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;circuits from netbox, mapping circuits to devices&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;retrieved data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_circuits</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;circuits from Netbox, mapping circuits to devices&quot;</span>
         <span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
             <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
@@ -5602,6 +5907,42 @@ nf#
             <span class="p">]</span>
             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">as_completed</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
                 <span class="k">continue</span>
+
+    <span class="k">if</span> <span class="n">add_interface_details</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching circuits interface details&quot;</span><span class="p">)</span>
+        <span class="c1"># collect devices and interfaces to get details for</span>
+        <span class="n">fetch_interfaces</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">fetch_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">circuits</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">ckt_data</span> <span class="ow">in</span> <span class="n">circuits</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">fetch_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">ckt_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_device&quot;</span><span class="p">):</span>
+                    <span class="n">fetch_devices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">])</span>
+                    <span class="n">fetch_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;remote_interface&quot;</span><span class="p">])</span>
+        <span class="c1"># fetch interfaces data with IP addresses</span>
+        <span class="n">interfaces_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">fetch_devices</span><span class="p">),</span>
+            <span class="n">interface_list</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">fetch_interfaces</span><span class="p">),</span>
+            <span class="n">ip_addresses</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">result</span>
+        <span class="c1"># map interfaces details to circuits</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">circuits</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">circuit_id</span><span class="p">,</span> <span class="n">ckt_data</span> <span class="ow">in</span> <span class="n">circuits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">interface_name</span> <span class="o">=</span> <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">interface_name</span> <span class="ow">in</span> <span class="n">interfaces_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{}):</span>
+                    <span class="n">interface_data</span> <span class="o">=</span> <span class="n">interfaces_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">interface_name</span><span class="p">]</span>
+                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;child_interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                        <span class="s2">&quot;child_interfaces&quot;</span><span class="p">,</span> <span class="p">[]</span>
+                    <span class="p">)</span>
+                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                        <span class="s2">&quot;ip_addresses&quot;</span><span class="p">,</span> <span class="p">[]</span>
+                    <span class="p">)</span>
+                    <span class="n">ckt_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">circuit_id</span><span class="si">}</span><span class="s2"> failed to find &#39;</span><span class="si">{</span><span class="n">interface_name</span><span class="si">}</span><span class="s2">&#39; interface details&quot;</span>
+                    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

@@ -559,7 +559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_docker_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_docker_deployment/" class="md-nav__link">
         
   
   
@@ -587,7 +587,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_distributed_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
         
   
   
@@ -595,6 +595,34 @@
     
   
     Distributed Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VSCode MCP Integration
   
 
     
@@ -2001,6 +2029,34 @@
     
   
     Create IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP Bulk
   
 
     
@@ -5113,7 +5169,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>if True includes interfaces' directly attached cables details</p>
+                <p>if True includes interfaces' directly attached cables and peers details</p>
               </div>
             </td>
             <td>
@@ -5227,65 +5283,8 @@ console server ports by name, case insensitive.</p>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>norfab\workers\netbox_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1217</span>
-<span class="normal">1218</span>
-<span class="normal">1219</span>
-<span class="normal">1220</span>
-<span class="normal">1221</span>
-<span class="normal">1222</span>
-<span class="normal">1223</span>
-<span class="normal">1224</span>
-<span class="normal">1225</span>
-<span class="normal">1226</span>
-<span class="normal">1227</span>
-<span class="normal">1228</span>
-<span class="normal">1229</span>
-<span class="normal">1230</span>
-<span class="normal">1231</span>
-<span class="normal">1232</span>
-<span class="normal">1233</span>
-<span class="normal">1234</span>
-<span class="normal">1235</span>
-<span class="normal">1236</span>
-<span class="normal">1237</span>
-<span class="normal">1238</span>
-<span class="normal">1239</span>
-<span class="normal">1240</span>
-<span class="normal">1241</span>
-<span class="normal">1242</span>
-<span class="normal">1243</span>
-<span class="normal">1244</span>
-<span class="normal">1245</span>
-<span class="normal">1246</span>
-<span class="normal">1247</span>
-<span class="normal">1248</span>
-<span class="normal">1249</span>
-<span class="normal">1250</span>
-<span class="normal">1251</span>
-<span class="normal">1252</span>
-<span class="normal">1253</span>
-<span class="normal">1254</span>
-<span class="normal">1255</span>
-<span class="normal">1256</span>
-<span class="normal">1257</span>
-<span class="normal">1258</span>
-<span class="normal">1259</span>
-<span class="normal">1260</span>
-<span class="normal">1261</span>
-<span class="normal">1262</span>
-<span class="normal">1263</span>
-<span class="normal">1264</span>
-<span class="normal">1265</span>
-<span class="normal">1266</span>
-<span class="normal">1267</span>
-<span class="normal">1268</span>
-<span class="normal">1269</span>
-<span class="normal">1270</span>
-<span class="normal">1271</span>
-<span class="normal">1272</span>
-<span class="normal">1273</span>
-<span class="normal">1274</span>
+              <summary>Source code in <code>norfab\workers\netbox_worker\netbox_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1274</span>
 <span class="normal">1275</span>
 <span class="normal">1276</span>
 <span class="normal">1277</span>
@@ -5620,7 +5619,67 @@ console server ports by name, case insensitive.</p>
 <span class="normal">1606</span>
 <span class="normal">1607</span>
 <span class="normal">1608</span>
-<span class="normal">1609</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span>
+<span class="normal">1612</span>
+<span class="normal">1613</span>
+<span class="normal">1614</span>
+<span class="normal">1615</span>
+<span class="normal">1616</span>
+<span class="normal">1617</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
+<span class="normal">1660</span>
+<span class="normal">1661</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span>
+<span class="normal">1666</span>
+<span class="normal">1667</span>
+<span class="normal">1668</span>
+<span class="normal">1669</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -5649,7 +5708,7 @@ console server ports by name, case insensitive.</p>
 <span class="sd">        devices (list): List of device names to retrieve connections for.</span>
 <span class="sd">        instance (str, optional): Netbox instance name for the GraphQL query.</span>
 <span class="sd">        dry_run (bool, optional): If True, perform a dry run without making actual changes.</span>
-<span class="sd">        cables (bool, optional): if True includes interfaces&#39; directly attached cables details</span>
+<span class="sd">        cables (bool, optional): if True includes interfaces&#39; directly attached cables and peers details</span>
 <span class="sd">        include_virtual (bool, optional): if True include connections for virtual and LAG interfaces</span>
 <span class="sd">        interface_regex (str, optional): Regex pattern to match interfaces, console ports and</span>
 <span class="sd">            console server ports by name, case insensitive.</span>
@@ -5745,8 +5804,6 @@ console server ports by name, case insensitive.</p>
 <span class="sd">            ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}</span>
 <span class="sd">        }</span>
 <span class="sd">        &quot;&quot;&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-    <span class="n">interfaces_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        link_peers {</span>
 <span class="sd">            __typename</span>
@@ -5754,8 +5811,8 @@ console server ports by name, case insensitive.</p>
 <span class="sd">            ... on FrontPortType {name device {name, status}}</span>
 <span class="sd">            ... on RearPortType {name device {name, status}}</span>
 <span class="sd">        }</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="p">)</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
     <span class="n">console_ports_fields</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;name&quot;</span><span class="p">,</span>
         <span class="s2">&quot;device {name, status}&quot;</span><span class="p">,</span>
@@ -5949,6 +6006,11 @@ console server ports by name, case insensitive.</p>
                     <span class="n">endpoint</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="s2">&quot;connected_endpoints&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface_name</span><span class="si">}</span><span class="s2"> parent has no connected endpoints&quot;</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
             <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
             <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;remote_device_status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span>
             <span class="n">remote_termination_type</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="s2">&quot;__typename&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>

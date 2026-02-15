@@ -12,31 +12,31 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/norfab_distributed_deployment/">
+        <link rel="canonical" href="https://docs.norfablabs.com/tutorials/norfab_docker_deployment/">
       
       
-        <link rel="prev" href="../norfab_docker_deployment/">
+        <link rel="prev" href="../../reference_norfab_inventory/">
       
       
-        <link rel="next" href="../services_overview/">
+        <link rel="next" href="../norfab_distributed_deployment/">
       
       
         
       
       
-      <link rel="icon" href="../images/logo.jpg">
+      <link rel="icon" href="../../images/logo.jpg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
-        <title>Distributed Deployment - Network Automations Fabric [NORFAB]</title>
+        <title>Docker Deployment - Network Automations Fabric [NORFAB]</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,11 +55,11 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -83,6 +83,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#broker-and-workers-containers-deployment" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -95,9 +100,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -114,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Distributed Deployment
+              Docker Deployment
             
           </span>
         </div>
@@ -230,9 +235,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     Network Automations Fabric [NORFAB]
@@ -306,7 +311,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -334,7 +339,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../norfab_why_use_norfab/" class="md-nav__link">
+      <a href="../../norfab_why_use_norfab/" class="md-nav__link">
         
   
   
@@ -416,7 +421,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../norfab_installation/" class="md-nav__link">
+      <a href="../../norfab_installation/" class="md-nav__link">
         
   
   
@@ -444,7 +449,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../norfab_getting_started/" class="md-nav__link">
+      <a href="../../norfab_getting_started/" class="md-nav__link">
         
   
   
@@ -472,7 +477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference_norfab_inventory/" class="md-nav__link">
+      <a href="../../reference_norfab_inventory/" class="md-nav__link">
         
   
   
@@ -553,10 +558,35 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../norfab_docker_deployment/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Deployment
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -564,6 +594,74 @@
     
   
     Docker Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#broker-and-workers-containers-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Broker and Workers Containers Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../norfab_distributed_deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distributed Deployment
   
 
     
@@ -581,24 +679,17 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../norfab_vscode_mcp_integration/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Distributed Deployment
+    VSCode MCP Integration
   
 
     
@@ -607,7 +698,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -674,7 +764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_overview/" class="md-nav__link">
+      <a href="../../services_overview/" class="md-nav__link">
         
   
   
@@ -749,7 +839,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service/" class="md-nav__link">
         
   
   
@@ -777,7 +867,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
         
   
   
@@ -852,7 +942,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
         
   
   
@@ -880,7 +970,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
         
   
   
@@ -908,7 +998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
         
   
   
@@ -936,7 +1026,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
         
   
   
@@ -964,7 +1054,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
         
   
   
@@ -992,7 +1082,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
         
   
   
@@ -1020,7 +1110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1111,7 +1201,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service/" class="md-nav__link">
         
   
   
@@ -1139,7 +1229,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
         
   
   
@@ -1214,7 +1304,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
         
   
   
@@ -1242,7 +1332,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
         
   
   
@@ -1270,7 +1360,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
         
   
   
@@ -1298,7 +1388,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
         
   
   
@@ -1326,7 +1416,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
         
   
   
@@ -1354,7 +1444,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
         
   
   
@@ -1382,7 +1472,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
         
   
   
@@ -1410,7 +1500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
         
   
   
@@ -1438,7 +1528,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
         
   
   
@@ -1474,7 +1564,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
         
   
   
@@ -1557,7 +1647,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service/" class="md-nav__link">
         
   
   
@@ -1585,7 +1675,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
         
   
   
@@ -1660,7 +1750,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
         
   
   
@@ -1688,7 +1778,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
         
   
   
@@ -1716,7 +1806,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
         
   
   
@@ -1744,7 +1834,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
         
   
   
@@ -1772,7 +1862,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
         
   
   
@@ -1800,7 +1890,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
         
   
   
@@ -1828,7 +1918,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
         
   
   
@@ -1856,7 +1946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1884,7 +1974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
         
   
   
@@ -1912,7 +2002,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
@@ -1940,7 +2030,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP Bulk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
         
   
   
@@ -1968,7 +2086,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
         
   
   
@@ -1996,7 +2114,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
         
   
   
@@ -2024,7 +2142,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2052,7 +2170,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
   
@@ -2143,7 +2261,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/agent/services_agent_service/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service/" class="md-nav__link">
         
   
   
@@ -2171,7 +2289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/agent/services_agent_service_inventory/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_inventory/" class="md-nav__link">
         
   
   
@@ -2246,7 +2364,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
         
   
   
@@ -2337,7 +2455,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastapi/services_fastapi_service/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service/" class="md-nav__link">
         
   
   
@@ -2365,7 +2483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
         
   
   
@@ -2440,7 +2558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
         
   
   
@@ -2531,7 +2649,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
         
   
   
@@ -2559,7 +2677,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
         
   
   
@@ -2634,7 +2752,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
         
   
   
@@ -2725,7 +2843,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/workflow/services_workflow_service/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service/" class="md-nav__link">
         
   
   
@@ -2753,7 +2871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
         
   
   
@@ -2828,7 +2946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
         
   
   
@@ -2919,7 +3037,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/filesharing/services_filesharing_service/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service/" class="md-nav__link">
         
   
   
@@ -2947,7 +3065,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/filesharing/services_filesharing_service_inventory/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_inventory/" class="md-nav__link">
         
   
   
@@ -3022,7 +3140,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
         
   
   
@@ -3050,7 +3168,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
         
   
   
@@ -3078,7 +3196,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
         
   
   
@@ -3106,7 +3224,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
         
   
   
@@ -3204,7 +3322,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clients_overview/" class="md-nav__link">
+      <a href="../../clients_overview/" class="md-nav__link">
         
   
   
@@ -3232,7 +3350,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clients_nfcli_overview/" class="md-nav__link">
+      <a href="../../clients_nfcli_overview/" class="md-nav__link">
         
   
   
@@ -3260,7 +3378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clients_python_api_overview/" class="md-nav__link">
+      <a href="../../clients_python_api_overview/" class="md-nav__link">
         
   
   
@@ -3288,7 +3406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clients_robot_client_overview/" class="md-nav__link">
+      <a href="../../clients_robot_client_overview/" class="md-nav__link">
         
   
   
@@ -3370,7 +3488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../customization/norfab_hooks/" class="md-nav__link">
+      <a href="../../customization/norfab_hooks/" class="md-nav__link">
         
   
   
@@ -3445,7 +3563,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../customization/service_plugin_overview/" class="md-nav__link">
+      <a href="../../customization/service_plugin_overview/" class="md-nav__link">
         
   
   
@@ -3473,7 +3591,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../customization/service_plugin_local/" class="md-nav__link">
+      <a href="../../customization/service_plugin_local/" class="md-nav__link">
         
   
   
@@ -3501,7 +3619,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../customization/service_plugin_module/" class="md-nav__link">
+      <a href="../../customization/service_plugin_module/" class="md-nav__link">
         
   
   
@@ -3591,7 +3709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tags/" class="md-nav__link">
+      <a href="../../tags/" class="md-nav__link">
         
   
   
@@ -3619,7 +3737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../norfab_changelog/" class="md-nav__link">
+      <a href="../../norfab_changelog/" class="md-nav__link">
         
   
   
@@ -3694,7 +3812,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference_architecture_norfab/" class="md-nav__link">
+      <a href="../../reference_architecture_norfab/" class="md-nav__link">
         
   
   
@@ -3722,7 +3840,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference_architecture_nfp/" class="md-nav__link">
+      <a href="../../reference_architecture_nfp/" class="md-nav__link">
         
   
   
@@ -3852,7 +3970,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_core_norfab_nfapi/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_nfapi/" class="md-nav__link">
         
   
   
@@ -3880,7 +3998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_core_norfab_broker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_broker/" class="md-nav__link">
         
   
   
@@ -3908,7 +4026,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_core_norfab_worker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_worker/" class="md-nav__link">
         
   
   
@@ -3936,7 +4054,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_core_norfab_client/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_client/" class="md-nav__link">
         
   
   
@@ -3964,7 +4082,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
         
   
   
@@ -3992,7 +4110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_core_norfab_exceptions/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_exceptions/" class="md-nav__link">
         
   
   
@@ -4075,7 +4193,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
+      <a href="../../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
         
   
   
@@ -4103,7 +4221,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
+      <a href="../../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
         
   
   
@@ -4131,7 +4249,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
+      <a href="../../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
         
   
   
@@ -4159,7 +4277,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
+      <a href="../../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
         
   
   
@@ -4187,7 +4305,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
+      <a href="../../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
         
   
   
@@ -4215,7 +4333,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
+      <a href="../../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
         
   
   
@@ -4243,7 +4361,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+      <a href="../../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
         
   
   
@@ -4271,7 +4389,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workers/filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
+      <a href="../../workers/filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
         
   
   
@@ -4354,7 +4472,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_clients_nfcli_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_nfcli_client/" class="md-nav__link">
         
   
   
@@ -4382,7 +4500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_clients_robot_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_robot_client/" class="md-nav__link">
         
   
   
@@ -4473,7 +4591,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference_norfab_mmi_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_mmi_subsystem/" class="md-nav__link">
         
   
   
@@ -4501,7 +4619,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference_norfab_jobs_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_jobs_subsystem/" class="md-nav__link">
         
   
   
@@ -4529,7 +4647,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference_norfab_events_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_events_subsystem/" class="md-nav__link">
         
   
   
@@ -4619,7 +4737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/documentation_style_guide/" class="md-nav__link">
+      <a href="../../development/documentation_style_guide/" class="md-nav__link">
         
   
   
@@ -4647,7 +4765,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/file_streaming_fetch_file/" class="md-nav__link">
+      <a href="../../development/file_streaming_fetch_file/" class="md-nav__link">
         
   
   
@@ -4722,7 +4840,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../testing/norfab_testing_framework/" class="md-nav__link">
+      <a href="../../testing/norfab_testing_framework/" class="md-nav__link">
         
   
   
@@ -4750,7 +4868,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../testing/netbox_service_tests/" class="md-nav__link">
+      <a href="../../testing/netbox_service_tests/" class="md-nav__link">
         
   
   
@@ -4793,7 +4911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../norfab_help_with_norfab/" class="md-nav__link">
+      <a href="../../norfab_help_with_norfab/" class="md-nav__link">
         
   
   
@@ -4831,6 +4949,36 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#broker-and-workers-containers-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Broker and Workers Containers Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -4844,20 +4992,172 @@
                 
                   
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <a href="../../tags/#tag:norfab" class="md-tag">norfab</a>
+      
+    
+  </nav>
+
 
   
   
 
 
-  <h1>Distributed Deployment</h1>
+  <h1>Docker Deployment</h1>
 
-<p>TBD</p>
+<p>NorFab comes with a set of docker files to get NorFab up and running on the Docker.</p>
+<p><img alt="Network Automations Fabric Architecture" src="../../images/docker_run.jpg" /></p>
+<p>Broker and workers deployed in docker environment, while clients can run on Windows, Linux or MAC machine connecting to the broker instance.</p>
+<p>Prerequisites:</p>
+<ol>
+<li>Docker setup is independent from this guide and assumption is that docker is installed and running </li>
+<li>Docker compose utility is available on the docker host</li>
+<li>GIT also need to be installed on the docker host</li>
+</ol>
+<p>Assumptions:</p>
+<ol>
+<li>Docker host IP address is 192.168.1.130 and it is accessible by clients on TCP port 5555, docker host IP address of course will be different in your setup, adjust clients <code>inventory.yaml</code> file accordingly.</li>
+</ol>
+<h2 id="broker-and-workers-containers-deployment">Broker and Workers Containers Deployment<a class="headerlink" href="#broker-and-workers-containers-deployment" title="Permanent link">¤</a></h2>
+<p>First, need to clone NorFab repository to the local folder on the docker host:</p>
+<div class="highlight"><pre><span></span><code>cd ~/
+git clone https://github.com/norfablabs/NORFAB.git norfab
+</code></pre></div>
+<p>To build NorFab docker images we are going to use <code>docker compose</code> utility, it will create broker and nornir service workers containers:</p>
+<div class="highlight"><pre><span></span><code>cd norfab/docker/norfab-docker
+docker compose build
+</code></pre></div>
+<p>Once build finishes we can start the containers:</p>
+<div class="highlight"><pre><span></span><code>docker compose start
+</code></pre></div>
+<p>After broker reports that it is started and worker shows that it is registered with broker, this is a good indication that things are going ok:</p>
+<div class="highlight"><pre><span></span><code>root@dockervm:/home/user/norfab/docker/norfab-docker# docker compose up
+[+] Running 2/0
+ ✔ Container norfab-broker          Created                   0.0s 
+ ✔ Container norfab-service-nornir  Created                   0.0s 
+Attaching to norfab-broker, norfab-service-nornir
+norfab-broker          | 2025-02-02 10:40:20.453 INFO [norfab.core.nfapi:210 ] -- Started broker, broker listening for connections on &#39;tcp://10.0.0.100:5555&#39;
+norfab-service-nornir  | 2025-02-02 10:40:21.528 INFO [norfab.core.worker:557 ] -- nornir-worker-1 - registered to broker at &#39;tcp://10.0.0.100:5555&#39;, service &#39;nornir&#39;
+norfab-broker          | 2025-02-02 10:40:21.530 INFO [norfab.core.broker:317 ] -- NFPBroker - registered new worker nornir-worker-1
+norfab-service-nornir  | 2025-02-02 10:40:21.554 INFO [nornir_salt.plugins.inventory.DictInventory:138 ] -- nornir-salt.DictInventory inventory data validated
+norfab-service-nornir  | 2025-02-02 10:40:21.566 INFO [norfab.workers.nornir_worker:246 ] -- nornir-worker-1 - Started
+...
+</code></pre></div>
+<p>Folder <code>norfab/docker/norfab/norfab-docker</code> mounted to the containers as a volume under <code>/etc/norfab</code> path and this is the content of <code>inventory.yaml</code> file:</p>
+<div class="highlight"><pre><span></span><code># broker settings
+broker:
+  endpoint: &quot;tcp://10.0.0.100:5555&quot;
+
+# workers inventory section
+workers:
+  nornir-*:
+    - nornir/common.yaml  
+  nornir-worker-1:
+    - nornir/nornir-worker-1.yaml
+
+# list what entities we want to start on this node
+topology:
+  broker: True
+  workers:
+    - nornir-worker-1
+</code></pre></div>
+<p>Docker compose starts a broker process on <code>norfab-broker</code> container that uses <code>10.0.0.100</code> IP address and starts a single Nornir Service worker process named <code>nornir-worker-1</code> on a <code>norfab-service-nornir</code> container. </p>
+<p>File <code>inventory.yaml</code> can be adjusted to configure additional Nornir service workers to make <code>norfab-service-nornir</code> container run as many Nornir Service worker processes as needed.</p>
+<p>Before we proceed with setting up the client, need to grab encryption public key value from the broker, run these commands:</p>
+<div class="highlight"><pre><span></span><code>docker exec -it norfab-broker bash
+cd /etc/norfab/
+nfcli --show-broker-shared-key
+</code></pre></div>
+<p>Running above commands will produce similar to this output:</p>
+<div class="highlight"><pre><span></span><code>root@user:/home/user/norfab/docker/norfab-docker# docker exec -it norfab-broker bash
+root@norfab-broker:/# cd /etc/norfab
+root@norfab-broker:/etc/norfab# nfcli --show-broker-shared-key
+NorFab broker public key content:
+
+&#39;&#39;&#39;
+#   ****  Generated on 2025-02-02 09:31:04.387927 by pyzmq  ****
+#   ZeroMQ CURVE Public Certificate
+#   Exchange securely, or use a secure mechanism to verify the contents
+#   of this file after exchange. Store public certificates in your home
+#   directory, in the .curve subdirectory.
+
+metadata
+curve
+    public-key = &quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+
+&#39;&#39;&#39;
+
+Key file location: &#39;__norfab__/files/broker/public_keys/broker.key&#39;
+
+Copy above key into NorFab clients and workers &#39;public_keys/broker.key&#39; file or 
+put public-key value into clients and workers inventory.yaml &#39;broker&#39; section 
+under &#39;shared_key&#39; parameter:
+
+broker:
+  shared_key: &quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+
+root@norfab-broker:/etc/norfab# 
+</code></pre></div>
+<p>Public key value NorFab clients will need in this case is:</p>
+<div class="highlight"><pre><span></span><code>&quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+</code></pre></div>
+<h2 id="client-setup">Client Setup<a class="headerlink" href="#client-setup" title="Permanent link">¤</a></h2>
+<p>After broker and worker containers are running need to setup a NorFab client, client can run on any machine that can connect to the docker host on its IP address on TCP port 5555.</p>
+<p>First, lets install NorFab on the client machine:</p>
+<div class="highlight"><pre><span></span><code>pip install norfab[nfcli]
+</code></pre></div>
+<p>Second, need to create a folder to host NorFab files:</p>
+<div class="highlight"><pre><span></span><code>nfcli --create-env norfab-env
+</code></pre></div>
+<p>Next need to configure broker endpoint pointing to docker host IP (<code>192.168.1.130</code> in this example) and broker encryption key in the <code>norfab-env/inventory.yaml</code> under <code>broker</code> section:</p>
+<div class="highlight"><pre><span></span><code># broker settings
+broker:
+  endpoint: &quot;tcp://192.168.1.130:5555&quot;
+  shared_key: &quot;j{5-J9&lt;Qs:!@CVFsO$)UH&gt;mf%mP&lt;05[#%bBf(ofo&quot;
+</code></pre></div>
+<p>All the other <code>inventory.yaml</code> file content can be deleted, folder <code>norfab-env/nornir</code> also can be deleted. Client only need <code>inventory.yaml</code> file with broker endpoint and broker shared key details to successfully connect with the broker.</p>
+<p>Lastly, run <code>nfcli</code> client from within <code>norfab-env</code> folder:</p>
+<div class="highlight"><pre><span></span><code>cd norfab-env
+nfcli -c
+</code></pre></div>
+<p>NorFan interactive shell should start:</p>
+<div class="highlight"><pre><span></span><code>Welcome to NorFab Interactive Shell.
+
+nf#show broker
+ status: active
+ keepalives:
+   interval: 2500
+   multiplier: 6
+ workers count: 1
+ services count: 1
+ directories:
+   base-dir: /etc/norfab
+   private-keys-dir: /etc/norfab/__norfab__/files/broker/private_keys
+   public-keys-dir: /etc/norfab/__norfab__/files/broker/public_keys
+ security:
+   broker-private-key-file: /etc/norfab/__norfab__/files/broker/private_keys/broker.key_secret
+   broker-public-key-file: /etc/norfab/__norfab__/files/broker/public_keys/broker.key
+nf#show workers
+ name             service  status  holdtime  keepalives tx/rx  alive (s) 
+ nornir-worker-1  nornir   alive   12.6      835 / 835         2104
+nf#
+</code></pre></div>
+<p>Successfully running <code>show broker</code> and <code>show workers</code> commands is a good indication that everything works well and you did a great job setting up NorFab in a distributed dockerized fashion <img alt="😄" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/72x72/1f604.png" title=":smile:" />.</p>
+<p>Next steps would be to adjust <code>inventory.yaml</code> file on the docker host to configure Nornir Service workers to manage your environment, for further details on how to do it refer to <a href="../../workers/nornir/services_nornir_service/">Nornir Service documentations</a>. Good Luck 🤞</p>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -4881,7 +5181,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../norfab_docker_deployment/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Docker Deployment">
+          <a href="../../reference_norfab_inventory/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Inventory">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -4891,20 +5191,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Docker Deployment
+                Inventory
               </div>
             </div>
           </a>
         
         
           
-          <a href="../services_overview/" class="md-footer__link md-footer__link--next" aria-label="Next: Services Overview">
+          <a href="../norfab_distributed_deployment/" class="md-footer__link md-footer__link--next" aria-label="Next: Distributed Deployment">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Services Overview
+                Distributed Deployment
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -4970,14 +5270,14 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
-        <script src="../javascripts/mermaid.js"></script>
+        <script src="../../javascripts/mermaid.js"></script>
       
     
   </body>

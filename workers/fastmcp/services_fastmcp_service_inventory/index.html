@@ -83,6 +83,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#fastmcp-worker-inventory" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -554,7 +559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_docker_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_docker_deployment/" class="md-nav__link">
         
   
   
@@ -582,7 +587,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_distributed_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
         
   
   
@@ -590,6 +595,34 @@
     
   
     Distributed Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VSCode MCP Integration
   
 
     
@@ -1932,6 +1965,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP Bulk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
         
   
@@ -2558,6 +2619,8 @@
       
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
+      
+        
       
       
       <a href="./" class="md-nav__link md-nav__link--active">
@@ -4832,6 +4895,8 @@
   
   
   
+    
+  
   
 </nav>
                   </div>
@@ -4851,9 +4916,49 @@
   
 
 
-  <h1>Inventory</h1>
+<h1 id="fastmcp-worker-inventory">FastMCP Worker Inventory<a class="headerlink" href="#fastmcp-worker-inventory" title="Permanent link">¤</a></h1>
+<p>Content of <code>inventory.yaml</code> need to be updated to include FastMCP worker details:</p>
+<div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">broker</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span>
+<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CHANGE_ME&quot;</span>
 
+<span class="nt">workers</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">fastmcp-worker-1</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp/fastmcp-worker-1.yaml</span>
 
+<span class="nt">topology</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">workers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp-worker-1</span>
+</code></pre></div>
+<p>To obtain broker <code>shared_key</code> run this command on broker:</p>
+<div class="highlight"><pre><span></span><code>cd &lt;path/to/broker/inventory.yaml&gt;
+nfcli --show-broker-shared-key
+</code></pre></div>
+<p>Sample FastMCP worker inventory definition</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Minimal</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">fastmcp/fastmcp-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
+
+<span class="c1"># MCP server bind settings</span>
+<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
+<span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
+
+<span class="c1"># Optional sections reserved for future/extended configuration</span>
+<span class="nt">fastmcp</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="nt">uvicorn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>host</strong></p>
+<p>IP address to bind the MCP HTTP server to. Default is <code>0.0.0.0</code>.
+For local development and VS Code MCP integration, prefer <code>127.0.0.1</code>.</p>
+<p><strong>port</strong></p>
+<p>TCP port to serve MCP HTTP endpoint on. Default is <code>8001</code>.</p>
 
 
 

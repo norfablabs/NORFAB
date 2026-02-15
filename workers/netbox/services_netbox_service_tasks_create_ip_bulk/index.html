@@ -12,31 +12,31 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/development/file_streaming_fetch_file/">
+        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_create_ip_bulk/">
       
       
-        <link rel="prev" href="../documentation_style_guide/">
+        <link rel="prev" href="../services_netbox_service_tasks_create_ip/">
       
       
-        <link rel="next" href="../../testing/norfab_testing_framework/">
+        <link rel="next" href="../services_netbox_service_tasks_create_prefix/">
       
       
         
       
       
-      <link rel="icon" href="../../images/logo.jpg">
+      <link rel="icon" href="../../../images/logo.jpg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
-        <title>File Streaming (fetch_file) - Network Automations Fabric [NORFAB]</title>
+        <title>Create IP Bulk - Network Automations Fabric [NORFAB]</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,11 +55,11 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#client-file-streaming-fetch_file-and-nfp-streamput" class="md-skip">
+        <a href="#netbox-create-ip-bulk-task" class="md-skip">
           Skip to content
         </a>
       
@@ -100,9 +100,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../images/logo.jpg" alt="logo">
+  <img src="../../../images/logo.jpg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              File Streaming (fetch_file)
+              Create IP Bulk
             
           </span>
         </div>
@@ -235,9 +235,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../images/logo.jpg" alt="logo">
+  <img src="../../../images/logo.jpg" alt="logo">
 
     </a>
     Network Automations Fabric [NORFAB]
@@ -311,7 +311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -339,7 +339,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../norfab_why_use_norfab/" class="md-nav__link">
+      <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
         
   
   
@@ -421,7 +421,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../norfab_installation/" class="md-nav__link">
+      <a href="../../../norfab_installation/" class="md-nav__link">
         
   
   
@@ -449,7 +449,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../norfab_getting_started/" class="md-nav__link">
+      <a href="../../../norfab_getting_started/" class="md-nav__link">
         
   
   
@@ -477,7 +477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference_norfab_inventory/" class="md-nav__link">
+      <a href="../../../reference_norfab_inventory/" class="md-nav__link">
         
   
   
@@ -559,7 +559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/norfab_docker_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_docker_deployment/" class="md-nav__link">
         
   
   
@@ -587,7 +587,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
         
   
   
@@ -615,7 +615,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+      <a href="../../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
         
   
   
@@ -647,18 +647,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -679,7 +681,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -697,7 +699,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../services_overview/" class="md-nav__link">
+      <a href="../../../services_overview/" class="md-nav__link">
         
   
   
@@ -772,7 +774,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service/" class="md-nav__link">
         
   
   
@@ -800,7 +802,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_inventory/" class="md-nav__link">
         
   
   
@@ -875,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
         
   
   
@@ -903,7 +905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
         
   
   
@@ -931,7 +933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
         
   
   
@@ -959,7 +961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
         
   
   
@@ -987,7 +989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
         
   
   
@@ -1015,7 +1017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
         
   
   
@@ -1043,7 +1045,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
+      <a href="../../containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1134,7 +1136,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service/" class="md-nav__link">
         
   
   
@@ -1162,7 +1164,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_inventory/" class="md-nav__link">
         
   
   
@@ -1237,7 +1239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_task/" class="md-nav__link">
         
   
   
@@ -1265,7 +1267,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
         
   
   
@@ -1293,7 +1295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
         
   
   
@@ -1321,7 +1323,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_test/" class="md-nav__link">
         
   
   
@@ -1349,7 +1351,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_network/" class="md-nav__link">
         
   
   
@@ -1377,7 +1379,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
         
   
   
@@ -1405,7 +1407,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
         
   
   
@@ -1433,7 +1435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
         
   
   
@@ -1461,7 +1463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
         
   
   
@@ -1497,7 +1499,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
+      <a href="../../nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
         
   
   
@@ -1530,18 +1532,20 @@
                 
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
@@ -1562,7 +1566,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1580,7 +1584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service/" class="md-nav__link">
+      <a href="../services_netbox_service/" class="md-nav__link">
         
   
   
@@ -1608,7 +1612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
+      <a href="../services_netbox_service_inventory/" class="md-nav__link">
         
   
   
@@ -1633,18 +1637,20 @@
                 
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4_3" checked>
         
           
           <label class="md-nav__link" for="__nav_4_4_3" id="__nav_4_4_3_label" tabindex="0">
@@ -1665,7 +1671,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_4_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_4_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4_4_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1683,7 +1689,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_graphql/" class="md-nav__link">
         
   
   
@@ -1711,7 +1717,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_rest/" class="md-nav__link">
         
   
   
@@ -1739,7 +1745,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_get_devices/" class="md-nav__link">
         
   
   
@@ -1767,7 +1773,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
         
   
   
@@ -1795,7 +1801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_get_connections/" class="md-nav__link">
         
   
   
@@ -1823,7 +1829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_get_circuits/" class="md-nav__link">
         
   
   
@@ -1851,7 +1857,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
         
   
   
@@ -1879,7 +1885,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1907,7 +1913,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
         
   
   
@@ -1935,7 +1941,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
@@ -1960,10 +1966,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP Bulk
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1979,6 +2012,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#branching-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branching Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-create-ip-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox Create IP Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1991,7 +2077,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_create_prefix/" class="md-nav__link">
         
   
   
@@ -2019,7 +2105,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2047,7 +2133,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
         
   
   
@@ -2075,7 +2161,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2103,7 +2189,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+      <a href="../services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
   
@@ -2194,7 +2280,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/agent/services_agent_service/" class="md-nav__link">
+      <a href="../../agent/services_agent_service/" class="md-nav__link">
         
   
   
@@ -2222,7 +2308,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/agent/services_agent_service_inventory/" class="md-nav__link">
+      <a href="../../agent/services_agent_service_inventory/" class="md-nav__link">
         
   
   
@@ -2297,7 +2383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
+      <a href="../../agent/services_agent_service_tasks_chat/" class="md-nav__link">
         
   
   
@@ -2388,7 +2474,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastapi/services_fastapi_service/" class="md-nav__link">
+      <a href="../../fastapi/services_fastapi_service/" class="md-nav__link">
         
   
   
@@ -2416,7 +2502,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
+      <a href="../../fastapi/services_fastapi_service_inventory/" class="md-nav__link">
         
   
   
@@ -2491,7 +2577,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
+      <a href="../../fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
         
   
   
@@ -2582,7 +2668,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
+      <a href="../../fastmcp/services_fastmcp_service/" class="md-nav__link">
         
   
   
@@ -2610,7 +2696,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
+      <a href="../../fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
         
   
   
@@ -2685,7 +2771,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
+      <a href="../../fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
         
   
   
@@ -2776,7 +2862,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/workflow/services_workflow_service/" class="md-nav__link">
+      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
         
   
   
@@ -2804,7 +2890,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
+      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
         
   
   
@@ -2879,7 +2965,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
         
   
   
@@ -2970,7 +3056,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/filesharing/services_filesharing_service/" class="md-nav__link">
+      <a href="../../filesharing/services_filesharing_service/" class="md-nav__link">
         
   
   
@@ -2998,7 +3084,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/filesharing/services_filesharing_service_inventory/" class="md-nav__link">
+      <a href="../../filesharing/services_filesharing_service_inventory/" class="md-nav__link">
         
   
   
@@ -3073,7 +3159,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
+      <a href="../../filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
         
   
   
@@ -3101,7 +3187,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
+      <a href="../../filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
         
   
   
@@ -3129,7 +3215,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
+      <a href="../../filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
         
   
   
@@ -3157,7 +3243,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
+      <a href="../../filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
         
   
   
@@ -3255,7 +3341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../clients_overview/" class="md-nav__link">
+      <a href="../../../clients_overview/" class="md-nav__link">
         
   
   
@@ -3283,7 +3369,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../clients_nfcli_overview/" class="md-nav__link">
+      <a href="../../../clients_nfcli_overview/" class="md-nav__link">
         
   
   
@@ -3311,7 +3397,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../clients_python_api_overview/" class="md-nav__link">
+      <a href="../../../clients_python_api_overview/" class="md-nav__link">
         
   
   
@@ -3339,7 +3425,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../clients_robot_client_overview/" class="md-nav__link">
+      <a href="../../../clients_robot_client_overview/" class="md-nav__link">
         
   
   
@@ -3421,7 +3507,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../customization/norfab_hooks/" class="md-nav__link">
+      <a href="../../../customization/norfab_hooks/" class="md-nav__link">
         
   
   
@@ -3496,7 +3582,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../customization/service_plugin_overview/" class="md-nav__link">
+      <a href="../../../customization/service_plugin_overview/" class="md-nav__link">
         
   
   
@@ -3524,7 +3610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../customization/service_plugin_local/" class="md-nav__link">
+      <a href="../../../customization/service_plugin_local/" class="md-nav__link">
         
   
   
@@ -3552,7 +3638,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../customization/service_plugin_module/" class="md-nav__link">
+      <a href="../../../customization/service_plugin_module/" class="md-nav__link">
         
   
   
@@ -3642,7 +3728,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tags/" class="md-nav__link">
+      <a href="../../../tags/" class="md-nav__link">
         
   
   
@@ -3670,7 +3756,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../norfab_changelog/" class="md-nav__link">
+      <a href="../../../norfab_changelog/" class="md-nav__link">
         
   
   
@@ -3745,7 +3831,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference_architecture_norfab/" class="md-nav__link">
+      <a href="../../../reference_architecture_norfab/" class="md-nav__link">
         
   
   
@@ -3773,7 +3859,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference_architecture_nfp/" class="md-nav__link">
+      <a href="../../../reference_architecture_nfp/" class="md-nav__link">
         
   
   
@@ -3903,7 +3989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_core_norfab_nfapi/" class="md-nav__link">
+      <a href="../../../api_reference_core_norfab_nfapi/" class="md-nav__link">
         
   
   
@@ -3931,7 +4017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_core_norfab_broker/" class="md-nav__link">
+      <a href="../../../api_reference_core_norfab_broker/" class="md-nav__link">
         
   
   
@@ -3959,7 +4045,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_core_norfab_worker/" class="md-nav__link">
+      <a href="../../../api_reference_core_norfab_worker/" class="md-nav__link">
         
   
   
@@ -3987,7 +4073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_core_norfab_client/" class="md-nav__link">
+      <a href="../../../api_reference_core_norfab_client/" class="md-nav__link">
         
   
   
@@ -4015,7 +4101,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
+      <a href="../../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
         
   
   
@@ -4043,7 +4129,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_core_norfab_exceptions/" class="md-nav__link">
+      <a href="../../../api_reference_core_norfab_exceptions/" class="md-nav__link">
         
   
   
@@ -4126,7 +4212,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
+      <a href="../../containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
         
   
   
@@ -4154,7 +4240,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
+      <a href="../../nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
         
   
   
@@ -4182,7 +4268,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
+      <a href="../api_reference_workers_netbox_worker/" class="md-nav__link">
         
   
   
@@ -4210,7 +4296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
+      <a href="../../fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
         
   
   
@@ -4238,7 +4324,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
+      <a href="../../fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
         
   
   
@@ -4266,7 +4352,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
+      <a href="../../agent/api_reference_workers_agent_worker/" class="md-nav__link">
         
   
   
@@ -4294,7 +4380,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
         
   
   
@@ -4322,7 +4408,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workers/filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
+      <a href="../../filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
         
   
   
@@ -4405,7 +4491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_clients_nfcli_client/" class="md-nav__link">
+      <a href="../../../api_reference_clients_nfcli_client/" class="md-nav__link">
         
   
   
@@ -4433,7 +4519,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api_reference_clients_robot_client/" class="md-nav__link">
+      <a href="../../../api_reference_clients_robot_client/" class="md-nav__link">
         
   
   
@@ -4524,7 +4610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference_norfab_mmi_subsystem/" class="md-nav__link">
+      <a href="../../../reference_norfab_mmi_subsystem/" class="md-nav__link">
         
   
   
@@ -4552,7 +4638,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference_norfab_jobs_subsystem/" class="md-nav__link">
+      <a href="../../../reference_norfab_jobs_subsystem/" class="md-nav__link">
         
   
   
@@ -4580,7 +4666,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference_norfab_events_subsystem/" class="md-nav__link">
+      <a href="../../../reference_norfab_events_subsystem/" class="md-nav__link">
         
   
   
@@ -4620,20 +4706,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -4654,7 +4738,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -4672,7 +4756,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../documentation_style_guide/" class="md-nav__link">
+      <a href="../../../development/documentation_style_guide/" class="md-nav__link">
         
   
   
@@ -4697,37 +4781,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    File Streaming (fetch_file)
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../development/file_streaming_fetch_file/" class="md-nav__link">
         
   
   
@@ -4743,226 +4800,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#purpose" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Purpose
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Purpose">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#built-in-service-lifecycle-nfapi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Built-in service lifecycle (NFAPI)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#high-level-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        High-level flow
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="High-level flow">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#flow-diagram" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Flow diagram
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#threading-model-what-runs-where" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Threading model (what runs where)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Threading model (what runs where)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#client-side-threads" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client-side threads
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#worker-side-threads" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Worker-side threads
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#messaging-formats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Messaging formats
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Messaging formats">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#client-broker-dealer-router" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client ↔ Broker (DEALER ↔ ROUTER)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#worker-broker-dealer-router" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Worker ↔ Broker (DEALER ↔ ROUTER)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stream-payload" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        STREAM payload
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-put-is-used-client-worker" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How PUT is used (client → worker)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sliding-window-pipeline-backpressure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Sliding window / pipeline (backpressure)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#completion-and-integrity-checking" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Completion and integrity checking
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#operational-notes-gotchas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Operational notes / gotchas
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#debugging-tips" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Debugging tips
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -5022,7 +4859,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../testing/norfab_testing_framework/" class="md-nav__link">
+      <a href="../../../testing/norfab_testing_framework/" class="md-nav__link">
         
   
   
@@ -5050,7 +4887,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../testing/netbox_service_tests/" class="md-nav__link">
+      <a href="../../../testing/netbox_service_tests/" class="md-nav__link">
         
   
   
@@ -5093,7 +4930,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../norfab_help_with_norfab/" class="md-nav__link">
+      <a href="../../../norfab_help_with_norfab/" class="md-nav__link">
         
   
   
@@ -5140,155 +4977,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#purpose" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Purpose
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Purpose">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#built-in-service-lifecycle-nfapi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Built-in service lifecycle (NFAPI)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#high-level-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        High-level flow
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="High-level flow">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#flow-diagram" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Flow diagram
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#threading-model-what-runs-where" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Threading model (what runs where)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Threading model (what runs where)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#client-side-threads" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client-side threads
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#worker-side-threads" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Worker-side threads
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#messaging-formats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Messaging formats
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Messaging formats">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#client-broker-dealer-router" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client ↔ Broker (DEALER ↔ ROUTER)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#worker-broker-dealer-router" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Worker ↔ Broker (DEALER ↔ ROUTER)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stream-payload" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        STREAM payload
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-put-is-used-client-worker" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How PUT is used (client → worker)
+        Branching Support
       
     </span>
   </a>
@@ -5296,10 +4988,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sliding-window-pipeline-backpressure" class="md-nav__link">
+  <a href="#norfab-netbox-create-ip-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sliding window / pipeline (backpressure)
+        NORFAB Netbox Create IP Command Shell Reference
       
     </span>
   </a>
@@ -5307,32 +4999,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#completion-and-integrity-checking" class="md-nav__link">
+  <a href="#python-api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Completion and integrity checking
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#operational-notes-gotchas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Operational notes / gotchas
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#debugging-tips" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Debugging tips
+        Python API Reference
       
     </span>
   </a>
@@ -5354,213 +5024,368 @@
                 
                   
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <a href="../../../tags/#tag:netbox" class="md-tag">netbox</a>
+      
+    
+  </nav>
+
 
   
   
 
 
-<h1 id="client-file-streaming-fetch_file-and-nfp-streamput">Client file streaming (<code>fetch_file</code>) and NFP <code>STREAM</code>/<code>PUT</code><a class="headerlink" href="#client-file-streaming-fetch_file-and-nfp-streamput" title="Permanent link">¤</a></h1>
-<p>This page documents how the Python client downloads files via the built-in <strong>File Sharing Service</strong> (<code>service="filesharing"</code>) using a streaming data path.</p>
-<p>The implementation is split across:</p>
-<ul>
-<li>Client: <code>norfab/core/client.py</code></li>
-<li>Broker routing: <code>norfab/core/broker.py</code>](../../norfab/core/broker.py)`</li>
-<li>Worker core queues/threads: <code>norfab/core/worker.py</code></li>
-<li>File Sharing worker tasks: <code>norfab/workers/filesharing_worker/filesharing_worker.py</code></li>
-<li>Protocol constants/builders: <code>norfab/core/NFP.py</code></li>
-</ul>
-<h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">¤</a></h2>
-<p><code>NFPClient.fetch_file()</code> downloads <code>nf://...</code> files from a <code>filesharing</code> worker into the client’s local <code>fetchedfiles/</code> folder.</p>
-<p><code>filesharing</code> is a built-in NORFAB service. When you start NORFAB via <code>NorFab</code> (NFAPI) with broker enabled, NFAPI injects a default File Sharing worker (<code>filesharing-worker-1</code>) into the inventory and adds it to the topology so it is started alongside other workers.</p>
-<p>Unlike most tasks (which return JSON via <code>RESPONSE</code>), file content is delivered as raw bytes over <code>NFP.STREAM</code>. The client uses <code>NFP.PUT</code> to request subsequent chunks (offset-based), implementing a simple <strong>sliding window</strong> ("pipeline") to avoid uncontrolled buffering.</p>
-<h3 id="built-in-service-lifecycle-nfapi">Built-in service lifecycle (NFAPI)<a class="headerlink" href="#built-in-service-lifecycle-nfapi" title="Permanent link">¤</a></h3>
-<p>This is implemented in <code>norfab/core/nfapi.py</code>:</p>
-<ul>
-<li><code>NorFab.start()</code> calls <code>add_built_in_workers_inventory()</code> when <code>run_broker</code> is enabled and the inventory topology has <code>broker: true</code>.</li>
-<li><code>add_built_in_workers_inventory()</code> adds <code>filesharing-worker-1</code> with <code>service: filesharing</code> and <code>base_dir: &lt;inventory.base_dir&gt;</code>.</li>
-<li>The worker name is inserted into <code>inventory.topology["workers"]</code> (at the beginning), so it gets started like any other worker.</li>
-</ul>
-<h2 id="high-level-flow">High-level flow<a class="headerlink" href="#high-level-flow" title="Permanent link">¤</a></h2>
-<ol>
-<li>Client validates the URL (<code>nf://...</code>) and prepares a destination path under <code>${base_dir}/fetchedfiles/</code>.</li>
-<li>Client calls <code>filesharing.file_details</code> (normal job/response) to discover:</li>
-<li><code>exists</code>, <code>size_bytes</code>, <code>md5hash</code></li>
-<li>and to pick a worker that has the file</li>
-<li>Client starts a <code>filesharing.fetch_file</code> job on the chosen worker with <code>offset=0</code> and <code>chunk_size=256000</code> (by default but can be adjusted using the <code>chunk_size</code> argument).</li>
-<li>Worker reads the file and pushes each chunk using <code>job.stream(chunk)</code> (NFP <code>STREAM</code>).</li>
-<li>Client receiver thread writes each chunk to disk, updates running MD5, and sends <code>PUT</code> messages to request the next offsets until complete.</li>
-<li>When total received bytes match <code>size_bytes</code>, client closes the file and verifies the MD5.</li>
-</ol>
-<h3 id="flow-diagram">Flow diagram<a class="headerlink" href="#flow-diagram" title="Permanent link">¤</a></h3>
-<div class="mermaid">sequenceDiagram
-  autonumber
-  participant C as Client (NFPClient)
-  participant B as Broker (NFPBroker)
-  participant W as FileSharingWorker
-  participant J as Worker Job object (Job)
-
-  C-&gt;&gt;B: POST filesharing:file_details {url}
-  B-&gt;&gt;W: POST {url}
-  W--&gt;&gt;B: RESPONSE 200 {exists,size_bytes,md5hash}
-  B--&gt;&gt;C: RESPONSE 200 {…}
-
-  Note over C: allocate transfer state (uuid, credit=pipeline)
-  C-&gt;&gt;B: POST filesharing:fetch_file {url, offset=0, chunk_size}
-  B-&gt;&gt;W: POST {…}
-
-  Note over W,J: Worker creates per-request Job (uuid)
-
-  loop For each chunk
-    W-&gt;&gt;J: job.stream(chunk_bytes)
-    J--&gt;&gt;B: STREAM (uuid, status=200, bytes)
-    B--&gt;&gt;C: STREAM (uuid, status=200, bytes)
-    C-&gt;&gt;B: PUT {offset=next_offset} (0..pipeline in flight)
-    B-&gt;&gt;W: PUT {offset=next_offset}
-    W--&gt;&gt;J: enqueue client_input_queue[{offset}]
-    W-&gt;&gt;J: job.wait_client_input(timeout)
-    J--&gt;&gt;W: {offset}
-  end
-
-  Note over C: close file, verify MD5</div>
-<h2 id="threading-model-what-runs-where">Threading model (what runs where)<a class="headerlink" href="#threading-model-what-runs-where" title="Permanent link">¤</a></h2>
-<h3 id="client-side-threads">Client-side threads<a class="headerlink" href="#client-side-threads" title="Permanent link">¤</a></h3>
-<p>The client uses a dedicated receiver thread and a dispatcher thread.</p>
-<ul>
-<li><strong>Receiver thread</strong>: <code>recv(client)</code></li>
-<li>The <em>only</em> reader of the ZeroMQ socket.</li>
-<li>Parses incoming multipart frames.</li>
-<li>For <code>NFP.STREAM</code>: calls <code>handle_stream()</code> and (importantly) sends <code>NFP.PUT</code> requests for further chunks.</li>
-<li>
-<p>For <code>NFP.RESPONSE</code>/<code>NFP.EVENT</code>: updates the client-side SQLite job DB and enqueues messages for synchronous consumers.</p>
-</li>
-<li>
-<p><strong>Dispatcher thread</strong>: <code>dispatcher(client)</code></p>
-</li>
-<li>Finds jobs in the local job DB and sends <code>POST</code> / <code>GET</code> to the broker.</li>
-<li><code>fetch_file()</code> uses this job pipeline for:<ul>
-<li><code>filesharing.file_details</code> (a standard JSON response)</li>
-<li><code>filesharing.fetch_file</code> (which primarily streams data)</li>
-</ul>
-</li>
-</ul>
-<h3 id="worker-side-threads">Worker-side threads<a class="headerlink" href="#worker-side-threads" title="Permanent link">¤</a></h3>
-<p>Each worker runs a small set of queue-driven threads.</p>
-<ul>
-<li><code>recv(worker, destroy_event)</code>: reads from broker socket and fan-outs by command into queues</li>
-<li><code>_post(...)</code>: handles <code>NFP.POST</code> (creates job record + ACK)</li>
-<li><code>_get(...)</code>: handles <code>NFP.GET</code> (status/result polling)</li>
-<li><code>_event(...)</code>: emits <code>NFP.EVENT</code></li>
-<li><code>_put(...)</code>: handles <code>NFP.PUT</code> and forwards decoded JSON into <code>running_jobs[uuid].client_input_queue</code></li>
-</ul>
-<p>The File Sharing worker task <code>fetch_file(job, ...)</code> then consumes those inputs using:</p>
-<ul>
-<li><code>job.wait_client_input(timeout=chunk_timeout)</code></li>
-</ul>
-<p>This is how the worker learns which offsets to send next.</p>
-<h2 id="messaging-formats">Messaging formats<a class="headerlink" href="#messaging-formats" title="Permanent link">¤</a></h2>
-<p>This section describes the multipart frame layout as it appears to each endpoint.</p>
-<h3 id="client-broker-dealer-router">Client ↔ Broker (DEALER ↔ ROUTER)<a class="headerlink" href="#client-broker-dealer-router" title="Permanent link">¤</a></h3>
-<p>The client is a <code>zmq.DEALER</code>. The broker is a <code>zmq.ROUTER</code>.</p>
-<p>From the client’s perspective (what <code>recv(client)</code> expects):</p>
-<ul>
-<li>Incoming from broker:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>[ empty, header, command, service, uuid, status, payload ]
+<h1 id="netbox-create-ip-bulk-task">Netbox Create IP Bulk Task<a class="headerlink" href="#netbox-create-ip-bulk-task" title="Permanent link">¤</a></h1>
+<blockquote>
+<p>task api name: <code>create_ip_bulk</code></p>
+</blockquote>
+<p>Task to allocate next available IP from prefix or get existing IP address for multiple devices and interfaces.</p>
+<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
+<p>Create IP task is branch aware and can create IP addresses within the branch. <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> need to be installed on Netbox instance.</p>
+<h2 id="norfab-netbox-create-ip-command-shell-reference">NORFAB Netbox Create IP Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-ip-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Netbox <code>create_ip</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf# man tree netbox.create.ip_bulk
+root
+└── netbox:    Netbox service
+    └── create:    Create objects in Netbox
+        └── ip-bulk:    Allocate next available IP address from prefix for multiple devices and interfaces
+            ├── timeout:    Job timeout
+            ├── workers:    Filter worker to target, default &#39;any&#39;
+            ├── verbose-result:    Control output details, default &#39;False&#39;
+            ├── progress:    Display progress events, default &#39;True&#39;
+            ├── nowait:    Do not wait for job to complete, default &#39;False&#39;
+            ├── instance:    Netbox instance name to target
+            ├── dry-run:    Do not commit to database
+            ├── branch:    Branching plugin branch name to use
+            ├── *prefix:    Prefix to allocate IP address from, can also provide prefix name or filters
+            ├── *devices:    List of device names to create IP address for
+            ├── interface_regex:    Regular expression of device interface names to create IP address for
+            ├── interface_list:    List of interface names to create IP address for
+            ├── description:    IP address description
+            ├── vrf:    VRF to associate with IP address
+            ├── tags:    Tags to add to IP address
+            ├── dns_name:    IP address DNS name
+            ├── tenant:    Tenant name to associate with IP address
+            ├── comments:    IP address comments field
+            ├── role:    IP address functional role
+            ├── mask-len:    Mask length to use for IP address
+            ├── create-peer-ip:    Create link peer IP address as well
+            └── status:    IP address status
+nf#
 </code></pre></div>
-<p>Where:
-- <code>header</code> is <code>NFP.BROKER</code>
-- <code>command</code> is typically <code>NFP.RESPONSE</code>, <code>NFP.EVENT</code>, or <code>NFP.STREAM</code>
-- <code>payload</code> is:
-  - JSON bytes for <code>RESPONSE</code>/<code>EVENT</code>
-  - raw file bytes for <code>STREAM</code></p>
-<p>From the broker’s perspective, messages include an initial identity frame that the client does not see.</p>
-<h3 id="worker-broker-dealer-router">Worker ↔ Broker (DEALER ↔ ROUTER)<a class="headerlink" href="#worker-broker-dealer-router" title="Permanent link">¤</a></h3>
-<p>Workers are also <code>zmq.DEALER</code>. The broker is <code>zmq.ROUTER</code>.</p>
-<p>Broker → worker (built by <code>NFP.MessageBuilder.broker_to_worker_put</code>):</p>
-<div class="highlight"><pre><span></span><code>[ worker_id, empty, NFP.BROKER, NFP.PUT, sender_id, empty, uuid, request_json ]
-</code></pre></div>
-<p>Worker-side <code>recv(worker, ...)</code> strips the initial <code>empty</code>, reads <code>header</code> + <code>command</code>, then pushes the remaining frames into <code>put_queue</code>.</p>
-<p>In <code>_put(...)</code>, the queued <code>work</code> list is treated as:</p>
-<ul>
-<li><code>work[2]</code> = <code>uuid</code></li>
-<li><code>work[3]</code> = JSON payload</li>
+<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Bulk assigns IP addresses to interfaces of specified devices.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Job(worker: object = None, juuid: str = None, client_address: str = None, timeout: int = None, args: list = None, kwargs: dict = None, task: str = None, client_input_queue: object = None) (norfab.core.worker.Job)" href="../../../api_reference_core_norfab_worker/#norfab.core.worker.Job">Job</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The job instance used for logging and tracking the task.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>prefix</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The IP prefix or a dictionary containing prefix details.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>devices</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of device names to process. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>interface_list</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of specific interfaces to target. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>interface_regex</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A regex pattern to match interfaces. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>instance</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The instance name to use. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>kwargs</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional arguments to pass to the <code>create_ip</code> method calls.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Result</code></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A Result object containing the task details, results, and resources.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>If both <code>interface_list</code> and <code>interface_regex</code> are provided, <code>interface_list</code> takes precedence.</li>
+<li>The <code>prefix</code> parameter can be a string representing the prefix or a dictionary with additional details.</li>
 </ul>
-<h3 id="stream-payload"><code>STREAM</code> payload<a class="headerlink" href="#stream-payload" title="Permanent link">¤</a></h3>
-<p>A stream chunk originates from the worker job via <code>Job.stream(data)</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">msg</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="n">client_address</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">juuid</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="n">data_bytes</span>
-<span class="p">]</span>
-<span class="n">worker</span><span class="o">.</span><span class="n">send_to_broker</span><span class="p">(</span><span class="n">NFP</span><span class="o">.</span><span class="n">STREAM</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-</code></pre></div>
-<p>The broker forwards <code>STREAM</code> to the client without wrapping the chunk into JSON.</p>
-<h2 id="how-put-is-used-client-worker">How <code>PUT</code> is used (client → worker)<a class="headerlink" href="#how-put-is-used-client-worker" title="Permanent link">¤</a></h2>
-<p>In file download, <code>PUT</code> does not upload file content.</p>
-<p>Instead, <code>PUT</code> is used as a <em>client-to-worker control channel</em> tied to the same job UUID.</p>
-<ul>
-<li>Client sends <code>PUT</code> with JSON: <code>{ "offset": &lt;int&gt; }</code></li>
-<li>Broker routes it to the same worker that is executing the job</li>
-<li>Worker <code>_put</code> thread places that dict into the running job’s <code>client_input_queue</code></li>
-<li>FileSharingWorker’s <code>fetch_file</code> task reads it with <code>job.wait_client_input()</code> and updates <code>offset</code></li>
-</ul>
-<p>This design provides a simple backpressure mechanism: the worker only sends the next chunk after the client requests it.</p>
-<h2 id="sliding-window-pipeline-backpressure">Sliding window / pipeline (backpressure)<a class="headerlink" href="#sliding-window-pipeline-backpressure" title="Permanent link">¤</a></h2>
-<p>Client-side <code>pipeline</code> is implemented as a credit counter in <code>client.file_transfers[uuid]</code>:</p>
-<ul>
-<li>Start: <code>credit = pipeline</code></li>
-<li>Each received chunk: <code>credit += 1</code></li>
-<li>Each <code>PUT</code> request sent: <code>credit -= 1</code></li>
-</ul>
-<p>After writing a chunk, the client sends up to <code>credit</code> additional <code>PUT</code> requests (while there are offsets remaining), which keeps up to ~<code>pipeline</code> requests "in flight".</p>
-<p>This keeps throughput reasonable without letting either side buffer an unbounded amount of data.</p>
-<h2 id="completion-and-integrity-checking">Completion and integrity checking<a class="headerlink" href="#completion-and-integrity-checking" title="Permanent link">¤</a></h2>
-<p>Completion is detected purely by byte count:</p>
-<ul>
-<li>Client tracks <code>total_bytes_received</code> and compares to <code>size_bytes</code>.</li>
-<li>When equal:</li>
-<li>Close the destination file</li>
-<li>Verify MD5 hash against <code>file_details.md5hash</code></li>
-</ul>
-<p>If MD5 mismatches, the client marks the job as failed and logs an error.</p>
-<h2 id="operational-notes-gotchas">Operational notes / gotchas<a class="headerlink" href="#operational-notes-gotchas" title="Permanent link">¤</a></h2>
-<ul>
-<li><strong>Timeouts</strong></li>
-<li>Worker <code>filesharing.fetch_file</code> defaults <code>chunk_timeout=5</code> seconds.</li>
-<li>If the client stops sending <code>PUT</code> requests, the worker raises <code>RuntimeError</code>.</li>
-<li>
-<p>Client <code>fetch_file(timeout=...)</code> limits the overall <code>run_job()</code> operations (details + streaming job).</p>
-</li>
-<li>
-<p><strong>Local storage path</strong></p>
-</li>
-<li>
-<p>Downloads go to <code>${base_dir}/fetchedfiles/&lt;nf-path&gt;</code>.</p>
-</li>
-<li>
-<p><strong>Binary vs text</strong></p>
-</li>
-<li><code>fetch_file(read=True)</code> opens the downloaded file as UTF-8 text (<code>open(..., "r", encoding="utf-8")</code>).</li>
-<li>
-<p>For binary files, prefer <code>read=False</code> and open the returned path in binary mode.</p>
-</li>
-<li>
-<p><strong>Single worker selection</strong></p>
-</li>
-<li><code>file_details</code> is called on <code>workers="all"</code>, but <code>fetch_file</code> streams from the <em>first</em> worker that reports <code>exists</code>.</li>
-</ul>
-<h2 id="debugging-tips">Debugging tips<a class="headerlink" href="#debugging-tips" title="Permanent link">¤</a></h2>
-<ul>
-<li>Enable debug logging for <code>norfab.core.client</code>, <code>norfab.core.broker</code>, and <code>norfab.core.worker</code>.</li>
-<li>Look for:</li>
-<li>Client: <code>received stream for unknown file transfer</code> (mismatched/expired UUID)</li>
-<li>Worker: <code>chunk timeout reached before received next chunk request</code></li>
-<li>Client: <code>MD5 hash mismatch</code></li>
-</ul>
+</details>
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>norfab\workers\netbox_worker\netbox_worker.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3356</span>
+<span class="normal">3357</span>
+<span class="normal">3358</span>
+<span class="normal">3359</span>
+<span class="normal">3360</span>
+<span class="normal">3361</span>
+<span class="normal">3362</span>
+<span class="normal">3363</span>
+<span class="normal">3364</span>
+<span class="normal">3365</span>
+<span class="normal">3366</span>
+<span class="normal">3367</span>
+<span class="normal">3368</span>
+<span class="normal">3369</span>
+<span class="normal">3370</span>
+<span class="normal">3371</span>
+<span class="normal">3372</span>
+<span class="normal">3373</span>
+<span class="normal">3374</span>
+<span class="normal">3375</span>
+<span class="normal">3376</span>
+<span class="normal">3377</span>
+<span class="normal">3378</span>
+<span class="normal">3379</span>
+<span class="normal">3380</span>
+<span class="normal">3381</span>
+<span class="normal">3382</span>
+<span class="normal">3383</span>
+<span class="normal">3384</span>
+<span class="normal">3385</span>
+<span class="normal">3386</span>
+<span class="normal">3387</span>
+<span class="normal">3388</span>
+<span class="normal">3389</span>
+<span class="normal">3390</span>
+<span class="normal">3391</span>
+<span class="normal">3392</span>
+<span class="normal">3393</span>
+<span class="normal">3394</span>
+<span class="normal">3395</span>
+<span class="normal">3396</span>
+<span class="normal">3397</span>
+<span class="normal">3398</span>
+<span class="normal">3399</span>
+<span class="normal">3400</span>
+<span class="normal">3401</span>
+<span class="normal">3402</span>
+<span class="normal">3403</span>
+<span class="normal">3404</span>
+<span class="normal">3405</span>
+<span class="normal">3406</span>
+<span class="normal">3407</span>
+<span class="normal">3408</span>
+<span class="normal">3409</span>
+<span class="normal">3410</span>
+<span class="normal">3411</span>
+<span class="normal">3412</span>
+<span class="normal">3413</span>
+<span class="normal">3414</span>
+<span class="normal">3415</span>
+<span class="normal">3416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_ip_bulk</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">devices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">interface_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">interface_regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bulk assigns IP addresses to interfaces of specified devices.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        job (Job): The job instance used for logging and tracking the task.</span>
+<span class="sd">        prefix (Union[str, dict]): The IP prefix or a dictionary containing prefix details.</span>
+<span class="sd">        devices (list[str], optional): A list of device names to process. Defaults to None.</span>
+<span class="sd">        interface_list (list[str], optional): A list of specific interfaces to target. Defaults to None.</span>
+<span class="sd">        interface_regex (str, optional): A regex pattern to match interfaces. Defaults to None.</span>
+<span class="sd">        instance (Union[None, str], optional): The instance name to use. Defaults to None.</span>
+<span class="sd">        kwargs (dict, optional): Additional arguments to pass to the `create_ip` method calls.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result: A Result object containing the task details, results, and resources.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - If both `interface_list` and `interface_regex` are provided, `interface_list` takes precedence.</span>
+<span class="sd">        - The `prefix` parameter can be a string representing the prefix or a dictionary with additional details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip_bulk&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># get list of all interfaces</span>
+    <span class="n">interfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+        <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
+        <span class="n">interface_list</span><span class="o">=</span><span class="n">interface_list</span><span class="p">,</span>
+        <span class="n">interface_regex</span><span class="o">=</span><span class="n">interface_regex</span><span class="p">,</span>
+        <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># iterate over interfaces and assign IP addresses</span>
+    <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">device_interfaces</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">device_interfaces</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">create_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_ip</span><span class="p">(</span>
+                <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
+                <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">interface</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_ip</span><span class="o">.</span><span class="n">result</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -5584,7 +5409,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../documentation_style_guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Documentation Style Guide">
+          <a href="../services_netbox_service_tasks_create_ip/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Create IP">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -5594,20 +5419,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Documentation Style Guide
+                Create IP
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../testing/norfab_testing_framework/" class="md-footer__link md-footer__link--next" aria-label="Next: NORFAB Testing Framework">
+          <a href="../services_netbox_service_tasks_create_prefix/" class="md-footer__link md-footer__link--next" aria-label="Next: Create Prefix">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                NORFAB Testing Framework
+                Create Prefix
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -5673,14 +5498,14 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
-        <script src="../../javascripts/mermaid.js"></script>
+        <script src="../../../javascripts/mermaid.js"></script>
       
     
   </body>
