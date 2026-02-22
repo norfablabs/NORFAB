@@ -1,3 +1,18 @@
+# 0.16.0
+
+## FEATURES
+
+1. Nornir Tests task - adding support for `groups` argument, added support to nfcli shell as well
+2. Markdown Tests report - added description, comments and groups to the output for individual tests
+
+## CHANGES
+
+1. Dependencies updates:
+
+    - picle: 0.9.0 → 0.10.0
+
+---
+
 ## 0.15.4
 
 ### BUGS

@@ -23,7 +23,6 @@ dcim:
   device_types:
     - manufacturer: Cisco
       model: Catalyst 9300
-      slug: catalyst-9300
       interfaces:
         - name: GigabitEthernet1/0/1
           type: 1000base-t
@@ -39,7 +38,6 @@ dcim:
           type: 10gbase-x-sfpp
     - manufacturer: Arista
       model: 7050SX3-48YC12
-      slug: 7050sx3-48yc12
       interfaces:
         - name: Ethernet1
           type: 25gbase-x-sfp28
@@ -57,7 +55,6 @@ dcim:
           type: 1000base-t
     - manufacturer: Juniper
       model: MX204
-      slug: mx204
       interfaces:
         - name: ge-0/0/0
           type: 1000base-x-sfp
@@ -82,15 +79,11 @@ dcim:
 
   regions:
     - name: North America
-      slug: north-america
     - name: Europe
-      slug: europe
     - name: Asia Pacific
-      slug: asia-pacific
 
   sites:
     - name: Thunderdome Data Center
-      slug: thunderdome-dc
       status: active
       region: North America
       tenant: QuantumLeap Networks
@@ -100,7 +93,6 @@ dcim:
       longitude: -121.8863
 
     - name: Phoenix Rising Facility
-      slug: phoenix-rising
       status: active
       region: North America
       tenant: QuantumLeap Networks
@@ -110,7 +102,6 @@ dcim:
       longitude: -112.0740
 
     - name: Northern Lights NOC
-      slug: northern-lights-noc
       status: active
       region: Europe
       tenant: QuantumLeap Networks
@@ -120,7 +111,6 @@ dcim:
       longitude: 18.0686
 
     - name: Dragon Gate Hub
-      slug: dragon-gate-hub
       status: active
       region: Asia Pacific
       tenant: QuantumLeap Networks
@@ -130,7 +120,6 @@ dcim:
       longitude: 103.8544
 
     - name: Avalon Edge Site
-      slug: avalon-edge
       status: planned
       region: Europe
       tenant: QuantumLeap Networks
@@ -244,5 +233,4 @@ dcim:
 tenancy:
   tenants:
     - name: QuantumLeap Networks
-      slug: quantumleap-networks
       description: Global network infrastructure provider

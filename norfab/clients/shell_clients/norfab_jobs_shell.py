@@ -9,7 +9,6 @@ from pydantic import (
     StrictBool,
 )
 from typing import List, Union
-from .common import ClientRunJobArgs, log_error_or_result
 from picle.models import Outputters, PipeFunctionsModel
 
 
@@ -21,18 +20,6 @@ class JobStatus(str, Enum):
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     STALE = "STALE"  # Job exceeded deadline without completion
-
-
-class ListJobsSummaryModel(ClientRunJobArgs):
-
-    @staticmethod
-    def run(*args, **kwargs):
-        NFCLIENT = builtins.NFCLIENT
-
-        return None
-
-    class PicleConfig:
-        outputter = Outputters.outputter_rich_table
 
 
 class NorFabJobsShellCommands(BaseModel):

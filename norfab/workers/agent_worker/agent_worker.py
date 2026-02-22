@@ -1,14 +1,10 @@
 import yaml
 import logging
 import sys
-import json
 import importlib.metadata
 from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
-from norfab.utils.text import slugify
 from typing import Any, List, Callable
-from pydantic import Field
-from pydantic import create_model as create_pydantic_model
 from datamodel_code_generator import generate_dynamic_models, GenerateConfig, Formatter
 
 from langchain.agents import create_agent
@@ -191,7 +187,7 @@ class AgentWorker(NFPWorker):
         if agent == "NorFab":
             if not self.agent_inventory.get("default_llm"):
                 raise RuntimeError(
-                    f"Failed to make NorFab agent, no 'default_llm' defined in inventory"
+                    "Failed to make NorFab agent, no 'default_llm' defined in inventory"
                 )
             return {
                 "name": norfab_agent.name,

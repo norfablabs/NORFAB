@@ -1023,6 +1023,37 @@ class TestNornirTest:
                         "FAIL",
                     ], f"{worker}:{host}:{test_name} unexpected test result"
 
+    def test_nornir_test_suite_with_groups(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={"suite": "nf://nornir_test_suites/test_suite_with_groups.txt", "FC": "spine", "groups": ["SYS"], "add_details": True},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["result"], f"{worker} returned no test results"
+            for host, res in results["result"].items():
+                for test_name, test_res in res.items():
+                    assert "SYS" in test_res["groups"], f"{worker}:{host}:{test_name} unexpected test, not part of SYS group"
+
+    def test_nornir_test_suite_with_comments(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={"suite": "nf://nornir_test_suites/test_suite_with_comments.txt", "FC": "spine", "add_details": True},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["result"], f"{worker} returned no test results"
+            for host, res in results["result"].items():
+                for test_name, test_res in res.items():
+                    assert "comments" in test_res, f"{worker}:{host}:{test_name} no comments in result"
+                    assert "description" in test_res, f"{worker}:{host}:{test_name} no description in result"
+
     def test_nornir_test_suite_empty_suite(self, nfclient):
         # this test renders empty test for any host except for spine 1
         ret = nfclient.run_job(
@@ -1538,6 +1569,21 @@ class TestNornirTest:
             in ret
         )
 
+    def test_nornir_test_markdown_with_comments(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            kwargs={
+                "suite": "nf://nornir_test_suites/test_suite_with_comments.txt",
+                "FC": ["spine", "leaf"],
+                "extensive": True,
+            },
+            markdown=True,
+        )
+        print(ret)
+        assert "comments foo" in ret, "No comments in output"
+        assert "**Groups:** SYS" in ret, "No groups in output"
+        assert "**Description:** bar" in ret, "No description in output"
 
 # ----------------------------------------------------------------------------
 # NORNIR.NETWORK FUNCTION TESTS

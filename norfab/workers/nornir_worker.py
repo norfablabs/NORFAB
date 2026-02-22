@@ -683,6 +683,7 @@ class NornirWorker(NFPWorker):
         tests = kwargs.pop("tests", None)  # tests
         subset = kwargs.pop("subset", [])  # tests
         failed_only = kwargs.pop("failed_only", False)  # tests
+        groups = kwargs.pop("groups", [])  # tests
         xpath = kwargs.pop("xpath", "")  # xpath DataProcessor
         jmespath = kwargs.pop("jmespath", "")  # jmespath DataProcessor
         iplkp = kwargs.pop("iplkp", "")  # iplkp - ip lookup - DataProcessor
@@ -746,6 +747,7 @@ class NornirWorker(NFPWorker):
                     build_per_host_tests=True,
                     subset=subset,
                     render_tests=False,
+                    groups=groups,
                 )
             )
         if diff:
@@ -1403,6 +1405,7 @@ class NornirWorker(NFPWorker):
         return_tests_suite: bool = False,
         job_data: Any = None,
         extensive: bool = False,
+        groups: list = None,
         **kwargs: Any,
     ) -> Result:
         """
@@ -1427,6 +1430,8 @@ class NornirWorker(NFPWorker):
                 - return_tests_suite = True
                 - add_details = True
                 - to_dict = False
+
+            groups (list, optional): list of test group names to run
 
             **kwargs: Any additional arguments to pass on to the Nornir service task.
 
@@ -1552,6 +1557,7 @@ class NornirWorker(NFPWorker):
                     "remove_tasks": remove_tasks,
                     "failed_only": failed_only,
                     "subset": subset,
+                    "groups": groups,
                 }
                 result = getattr(self, nrtask)(
                     job=job, **function_kwargs

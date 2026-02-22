@@ -14,7 +14,7 @@ from .nornir_picle_shell_common import (
     NornirCommonArgs,
     print_nornir_results,
 )
-from typing import Union, Optional, Dict
+from typing import Union, Optional, Dict, List
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import PipeFunctionsModel, Outputters
 
@@ -59,6 +59,10 @@ class NornirTestShell(
         description="Table format (brief, terse, extend) or parameters or True",
         json_schema_extra={"presence": "brief"},
     )
+    groups: Union[StrictStr, List[StrictStr]] = Field(
+        None,
+        description="Test groups to run",
+    )
 
     @staticmethod
     def source_suite():
@@ -81,6 +85,9 @@ class NornirTestShell(
         # extract job_data
         if kwargs.get("job_data") and not kwargs["job_data"].startswith("nf://"):
             kwargs["job_data"] = json.loads(kwargs["job_data"])
+
+        if kwargs.get("groups") and isinstance(kwargs["groups"], str):
+            kwargs["groups"] = [kwargs["groups"]]
 
         # extract Tabulate arguments
         table = kwargs.pop("table", {})  # tabulate

@@ -1117,7 +1117,7 @@ class NFPClient(object):
 
             # Defer unrelated replies and continue scanning.
             if reply_uuid != uuid:
-                self.mmi_queue.put(m)
+                self.mmi_queue.put(msg)
                 continue
 
             if reply_header != NFP.BROKER and reply_command != NFP.MMI:

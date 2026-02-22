@@ -1,0 +1,22 @@
+- task: "show version"
+  test: contains
+  pattern: "cEOS"
+  name: check ceos version
+  groups: ["SYS"]
+  comments: foo
+  description: bar
+- test: contains_lines
+  pattern: ["1.1.1.1"]
+  task: "show ntp associations"
+  name: check NTP status
+  groups: ["SYS"]
+- name: Check Mgmt Interface Status
+  test: contains
+  pattern: "is up, line protocol is up"
+  task: "show interface management0" 
+  groups: ["INTF"]
+- name: Check Mgmt Interface Status - many groups
+  test: contains
+  pattern: "is up, line protocol is up"
+  task: "show interface management0" 
+  groups: ["INTF", "MGMT", "SYS"]

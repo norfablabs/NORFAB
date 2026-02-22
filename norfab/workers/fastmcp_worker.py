@@ -12,7 +12,7 @@ from norfab.models import Result
 from diskcache import FanoutCache
 from mcp.server.fastmcp import FastMCP
 from mcp import types
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 SERVICE = "fastmcp"
 

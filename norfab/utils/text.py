@@ -2,6 +2,8 @@
 Collection of common text processing utils
 """
 
+import re
+
 
 def slugify(value: str) -> str:
     """Convert a string to Django slug format"""

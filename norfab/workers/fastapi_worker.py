@@ -9,10 +9,6 @@ import uvicorn
 
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
-from norfab.models.fastapi import (
-    ClientPostJobResponse,
-    ClientGetJobResponse,
-)
 from typing import Union, List, Dict, Any, Annotated, Optional
 from diskcache import FanoutCache
 from pydantic import BaseModel

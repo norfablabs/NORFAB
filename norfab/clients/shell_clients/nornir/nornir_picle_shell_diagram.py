@@ -5,7 +5,7 @@ import copy
 import builtins
 
 from fnmatch import fnmatchcase
-from picle.models import PipeFunctionsModel
+from picle.models import PipeFunctionsModel, Outputters
 from enum import Enum
 from pydantic import (
     StrictBool,

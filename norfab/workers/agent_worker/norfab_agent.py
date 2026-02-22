@@ -1,5 +1,3 @@
-from pydantic import BaseModel, StrictStr, Field
-
 name = "NorFab"
 
 system_prompt = """

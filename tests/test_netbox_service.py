@@ -759,23 +759,26 @@ class TestGetInterfaces:
         )
         pprint.pprint(ret)
 
+        # for worker, res in ret.items():
+        #     assert res["result"]["data"] == (
+        #         '{"query": "query {interfaces: '
+        #         + "interface_list(filters: {device: "
+        #         + '{name: {in_list: [\\"ceos1\\", '
+        #         + '\\"fceos4\\"]}}}) {name enabled '
+        #         + "description mtu parent {name} mode "
+        #         + "untagged_vlan {vid name} vrf {name} "
+        #         + "tagged_vlans {vid name} tags {name} "
+        #         + "custom_fields last_updated bridge "
+        #         + "{name} child_interfaces {name} "
+        #         + "bridge_interfaces {name} "
+        #         + "member_interfaces {name} wwn duplex "
+        #         + "speed id device {name} label "
+        #         + "mark_connected mac_addresses "
+        #         + '{mac_address}}}"}'
+        #     ), f"{worker} did not return correct query string"
+
         for worker, res in ret.items():
-            assert res["result"]["data"] == (
-                '{"query": "query {interfaces: '
-                + "interface_list(filters: {device: "
-                + '{name: {in_list: [\\"ceos1\\", '
-                + '\\"fceos4\\"]}}}) {name enabled '
-                + "description mtu parent {name} mode "
-                + "untagged_vlan {vid name} vrf {name} "
-                + "tagged_vlans {vid name} tags {name} "
-                + "custom_fields last_updated bridge "
-                + "{name} child_interfaces {name} "
-                + "bridge_interfaces {name} "
-                + "member_interfaces {name} wwn duplex "
-                + "speed id device {name} label "
-                + "mark_connected mac_addresses "
-                + '{mac_address}}}"}'
-            ), f"{worker} did not return correct query string"
+            assert res["result"] == {'filter_params': {'device__in': ['ceos1', 'fceos4']}}, f"{worker} did not return correct query string"
 
     def test_get_interfaces_add_ip(self, nfclient):
         ret = nfclient.run_job(
@@ -4185,7 +4188,7 @@ class TestGetContainerlabInventory:
                 workers="any",
                 kwargs={
                     "filters": [
-                        '{name: {i_contains: "ceos-spine"}, status: STATUS_ACTIVE}'
+                        '{name: {i_contains: "ceos-spine"}, status: {exact: STATUS_ACTIVE}}'
                     ],
                     "lab_name": "foobar",
                 },
@@ -5122,15 +5125,15 @@ class TestCreateIPBulk:
 class TestCreateDesign:
     nb_version = None
 
-    # def test_design_create(self, nfclient):
-    #     res = nfclient.run_job(
-    #         "netbox",
-    #         "create_design",
-    #         workers="any",
-    #         kwargs={
-    #             "design_data": "nf://netbox/designs/base_design.yaml",
-    #             "dry_run": True,
-    #         },
-    #     )
-    #     print("created design:")
-    #     pprint.pprint(res, width=200)
+    def test_design_create(self, nfclient):
+        res = nfclient.run_job(
+            "netbox",
+            "create_design",
+            workers="any",
+            kwargs={
+                "design_data": "nf://netbox/designs/base_design.yaml",
+                "dry_run": True,
+            },
+        )
+        print("created design:")
+        pprint.pprint(res, width=200)

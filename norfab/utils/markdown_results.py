@@ -240,8 +240,10 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
                         f"- **Test:** {test.get('test', 'N/A')}\n"
                         f"- **Success:** {test.get('success', 'N/A')}\n"
                         f"- **Failed:** {test.get('failed', 'N/A')}\n"
-                        f"- **Changed:** {test.get('changed', 'N/A')}\n\n"
-                        f"- **Comments:** {test.get('Comments', 'N/A')}\n\n"
+                        f"- **Changed:** {test.get('changed', 'N/A')}\n"
+                        f"- **Groups:** {', '.join(test.get('groups', []))}\n"
+                        f"- **Description:** {test.get('description', '')}\n"
+                        f"- **Comments:** {test.get('comments', '')}\n\n"
                         f"</details>\n\n"
                     )
 
