@@ -4,7 +4,7 @@ import logging
 from typing import Union
 from norfab.core.worker import Task, Job
 from norfab.models import Result
-from norfab.models.netbox import CreatePrefixInput, NetboxFastApiArgs
+from .netbox_models import CreatePrefixInput, NetboxFastApiArgs
 from .netbox_exceptions import NetboxAllocationError
 
 log = logging.getLogger(__name__)

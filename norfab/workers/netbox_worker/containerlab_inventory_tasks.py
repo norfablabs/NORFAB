@@ -5,7 +5,7 @@ import re
 from typing import Union
 from norfab.core.worker import Task, Job
 from norfab.models import Result
-from norfab.models.netbox import NetboxFastApiArgs
+from .netbox_models import NetboxFastApiArgs
 from .netbox_exceptions import UnsupportedNetboxVersion
 
 log = logging.getLogger(__name__)

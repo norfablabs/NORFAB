@@ -11,7 +11,7 @@ from typing import Union, List
 from ..common import log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_cache import CacheEnum
-from norfab.models.netbox import NetboxCommonArgs
+from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 

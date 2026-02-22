@@ -9,7 +9,7 @@ from pydantic import (
 )
 from enum import Enum
 from typing import Union, Optional, List
-from .. import NorFabClientRunJob
+from norfab.models import NorFabClientRunJob
 
 
 class NetboxCommonArgs(BaseModel):

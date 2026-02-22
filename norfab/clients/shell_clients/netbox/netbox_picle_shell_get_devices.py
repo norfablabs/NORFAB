@@ -2,7 +2,7 @@ import logging
 import json
 import builtins
 
-from picle.models import Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     StrictBool,
     StrictStr,
@@ -12,7 +12,7 @@ from typing import Union, List
 from ..common import log_error_or_result, listen_events
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_cache import CacheEnum
-from norfab.models.netbox import NetboxCommonArgs
+from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 
@@ -66,3 +66,4 @@ class GetDevices(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     class PicleConfig:
         outputter = Outputters.outputter_json
+        pipe = PipeFunctionsModel

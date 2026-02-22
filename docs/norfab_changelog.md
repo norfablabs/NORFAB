@@ -11,6 +11,8 @@
 
     - picle: 0.9.0 → 0.10.0
 
+2. Netbox worker refactoring - moving tasks out to dedicated files to shrink main worker .py file.
+
 ---
 
 ## 0.15.4

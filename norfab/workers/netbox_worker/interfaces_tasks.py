@@ -5,8 +5,9 @@ import copy
 from typing import Union, Any
 from norfab.core.worker import Task, Job
 from norfab.models import Result
-from norfab.models.netbox import NetboxFastApiArgs
-from .netbox_exceptions import UnsupportedNetboxVersion, UnsupportedServiceError
+from .netbox_models import NetboxFastApiArgs
+from .netbox_exceptions import UnsupportedNetboxVersion
+from norfab.core.exceptions import UnsupportedServiceError
 
 log = logging.getLogger(__name__)
 

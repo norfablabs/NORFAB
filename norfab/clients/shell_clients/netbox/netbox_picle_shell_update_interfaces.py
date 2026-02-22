@@ -11,7 +11,7 @@ from pydantic import (
 from typing import Union, List
 from ..common import log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
-from norfab.models.netbox import NetboxCommonArgs
+from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 

@@ -11,7 +11,7 @@ from datamodel_code_generator import (
 from norfab.core.worker import Task
 from norfab.models import Result
 from norfab.utils.text import slugify
-from norfab.models.netbox import NetboxFastApiArgs
+from .netbox_models import NetboxFastApiArgs
 from pydantic import BaseModel, Field, create_model, ConfigDict, ValidationError
 
 log = logging.getLogger(__name__)

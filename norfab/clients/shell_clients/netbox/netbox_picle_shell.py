@@ -34,7 +34,7 @@ from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
 from .netbox_picle_shell_create_prefix import CreatePrefixShell
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
 from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
-from norfab.models.netbox import NetboxCommonArgs
+from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"

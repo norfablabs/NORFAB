@@ -239,7 +239,10 @@ docs = [
 [tool.ruff.lint]
 ignore = [
     "E712", # true-false-comparison
+    "E501", # line too long
+    "ANN401", # disallow Any annotation
 ]
+select = ["E", "F", "I", "ANN"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true

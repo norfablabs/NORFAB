@@ -14,7 +14,7 @@ from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
 from typing import Any, Union
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from norfab.models.netbox import NetboxFastApiArgs
+from .netbox_models import NetboxFastApiArgs
 from diskcache import FanoutCache
 
 from .design_tasks import NetboxDesignTasks
