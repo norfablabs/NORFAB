@@ -9,9 +9,9 @@ logging:
   log_events: True
   handlers:
     terminal:
-      level: {{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}
+      level: '{{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}'
     file: 
-      level: {{ env.get("FILE_LOGGING_LEVEL", "INFO") }}
+      level: '{{ env.get("FILE_LOGGING_LEVEL", "INFO") }}'
       
 # workers inventory section
 workers:

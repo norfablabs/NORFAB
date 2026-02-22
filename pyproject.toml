@@ -36,11 +36,11 @@ jinja2 = "3.1.6"
 pydantic = "2.12.5"
 mdutils = "1.8.1"
 
-# PICLE Client Dependencies
+# PICLE NFCLI Shell Dependencies
 picle = { version = "0.10.0", optional = true }
 rich = { version = "14.3.2", optional = true }
 tabulate = { version = "0.9.0", optional = true }
-pyreadline3 = {version = "3.5.4", optional = true }
+pyreadline3 = {version = "3.5.4", platform = "win32", optional = true }
 
 # Nornir Service Dependencies
 nornir = { version = "3.5.0", optional = true }

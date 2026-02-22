@@ -21,6 +21,7 @@ from pydantic import (
 )
 from typing import Optional, Any
 from norfab.core.nfapi import NorFab
+from norfab.models.norfab_configuration import NorFabInventory
 
 from .shell_clients.nornir import nornir_picle_shell
 from .shell_clients.netbox import netbox_picle_shell
@@ -58,6 +59,7 @@ class ShowBrokerModel(BaseModel):
     class PicleConfig:
         outputter = Outputters.outputter_yaml
         outputter_kwargs = {"absolute_indent": 2}
+        pipe = PipeFunctionsModel
 
     @staticmethod
     def run(*args, **kwargs):
@@ -388,6 +390,7 @@ class NorFabShell(BaseModel):
         None, description="Containerlab service"
     )
     workers: NorfabWorkersCommands = Field(None, description="NorFab workers commands")
+    configure: NorFabInventory = Field(None, description="Configure NorFab inventory")
 
     class PicleConfig:
         subshell = True
