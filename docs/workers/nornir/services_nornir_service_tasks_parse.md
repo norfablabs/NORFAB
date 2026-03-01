@@ -97,4 +97,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.nornir_worker.NornirWorker.parse
+::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse

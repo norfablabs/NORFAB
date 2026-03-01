@@ -448,4 +448,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.nornir_worker.NornirWorker.cli
+::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.cli

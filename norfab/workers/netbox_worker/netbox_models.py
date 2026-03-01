@@ -12,7 +12,7 @@ from typing import Union, Optional, List, Dict
 from norfab.models import NorFabClientRunJob
 
 # --------------------------------------------------------------------------
-# CONFIGURATION MODEL
+# NETBOX WORKER CONFIGURATION MODEL
 # --------------------------------------------------------------------------
 
 
@@ -41,7 +41,7 @@ class NetboxConfigModel(BaseModel):
 
 
 # --------------------------------------------------------------------------
-# CORE MODELs
+# CORE NETBOX WORKER MODELS
 # --------------------------------------------------------------------------
 
 
@@ -102,5 +102,5 @@ class CreateDeviceInterfacesInput(NetboxCommonArgs, use_enum_values=True):
     description: Union[None, StrictStr] = Field(
         None, description="Interface description"
     )
-    speed: StrictInt = Field(None, description="Interface speed in Kbps")
+    speed: StrictInt = Field(None, description="Interface speed in Kbit/s")
     mtu: StrictInt = Field(None, description="Maximum transmission unit size in bytes")
