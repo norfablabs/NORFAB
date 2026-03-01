@@ -25,6 +25,7 @@
 3. Netbox get_interfaces - refactored to use rest api via pynetbox instead of GraphQL API
 4. Enhancing nornir tests markdown results report - adding groups, description,m comments to test details, added total failed an success rate counters, modified table output to display failed tests first.
 5. Enhancing workers and client jobs database operations toward reducing memory usage and improving speed - switching to orjson instead of json, dropping text columns in favour of blobs and switching zlib compression to level 1
+6. Adding `orjson` lib to core dependencies
 
 ## BUGS
 
