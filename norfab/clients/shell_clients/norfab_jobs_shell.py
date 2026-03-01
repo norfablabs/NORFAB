@@ -8,7 +8,7 @@ from pydantic import (
     StrictInt,
     StrictBool,
 )
-from typing import List, Union
+from typing import List, Union, Any
 from picle.models import Outputters, PipeFunctionsModel
 
 
@@ -27,7 +27,7 @@ class NorFabJobsShellCommands(BaseModel):
     uuid: StrictStr = Field(None, description="Job UUID")
     service: StrictStr = Field(None, description="Service name to return jobs for")
     workers_completed: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="Workers to return jobs for"
+        None, description="Workers to return jobs for", alias="workers-completed"
     )
     last: StrictInt = Field(10, description="Return last N jobs")
     statuses: List[JobStatus] = Field(None, description="Return jobs by status")
@@ -37,6 +37,17 @@ class NorFabJobsShellCommands(BaseModel):
         None,
         description="Return complete jobs details",
         json_schema_extra={"presence": True},
+    )
+    statistics: Any = Field(
+        None,
+        description="Return jobs stats info",
+        json_schema_extra={"function": "jobs_statistics"},
+    )
+    database_statistics: Any = Field(
+        None,
+        description="Return jobs database stats info",
+        json_schema_extra={"function": "jobs_database_statistics"},
+        alias="database-statistics",
     )
 
     @staticmethod
@@ -87,3 +98,11 @@ class NorFabJobsShellCommands(BaseModel):
 
     class PicleConfig:
         pipe = PipeFunctionsModel
+
+    @staticmethod
+    def jobs_statistics(*args, **kwargs):
+        return NFCLIENT.job_db.jobs_stats(), Outputters.outputter_nested
+
+    @staticmethod
+    def jobs_database_statistics(*args, **kwargs):
+        return NFCLIENT.job_db.jobs_db_stats(), Outputters.outputter_kv

@@ -1,10 +1,9 @@
 import logging
 import sqlite3
-import base64
 import zlib
 import zmq
 import time
-import json
+import orjson
 import os
 import threading
 import queue
@@ -72,19 +71,14 @@ class ClientJobDatabase:
         else:
             yield conn
 
-    def _compress(self, data: Dict | List | Any) -> str:
-        if not self.jobs_compress:
-            return json.dumps(data)
-        raw = json.dumps(data).encode("utf-8")
-        return base64.b64encode(zlib.compress(raw)).decode("utf-8")
+    def _compress(self, data: Dict | List | Any) -> bytes:
+        raw = orjson.dumps(data)
+        return zlib.compress(raw, level=1) if self.jobs_compress else raw
 
-    def _decompress(self, payload: str) -> Any:
+    def _decompress(self, payload: bytes | None) -> Any:
         if payload is None:
             return None
-        if not self.jobs_compress:
-            return json.loads(payload)
-        raw = base64.b64decode(payload.encode("utf-8"))
-        return json.loads(zlib.decompress(raw).decode("utf-8"))
+        return orjson.loads(zlib.decompress(payload) if self.jobs_compress else payload)
 
     def _initialize_database(self) -> None:
         with self._transaction(write=True) as conn:
@@ -93,8 +87,8 @@ class ClientJobDatabase:
                     uuid TEXT PRIMARY KEY,
                     service TEXT NOT NULL,
                     task TEXT NOT NULL,
-                    args TEXT,
-                    kwargs TEXT,
+                    args BLOB,
+                    kwargs BLOB,
                     timeout INTEGER,
                     deadline REAL,
                     status TEXT DEFAULT 'NEW',
@@ -102,7 +96,7 @@ class ClientJobDatabase:
                     workers_dispatched TEXT,
                     workers_started TEXT,
                     workers_completed TEXT,
-                    result_data TEXT,
+                    result_data BLOB,
                     errors TEXT,
                     received_timestamp TEXT NOT NULL,
                     started_timestamp TEXT,
@@ -118,7 +112,7 @@ class ClientJobDatabase:
                     message TEXT NOT NULL,
                     severity TEXT DEFAULT 'INFO',
                     task TEXT,
-                    event_data TEXT,
+                    event_data BLOB,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (job_uuid) REFERENCES jobs(uuid) ON DELETE CASCADE
                 )
@@ -162,7 +156,7 @@ class ClientJobDatabase:
                     self._compress({"kwargs": kwargs or {}}),
                     timeout,
                     deadline,
-                    json.dumps(workers),
+                    orjson.dumps(workers).decode("utf-8"),
                     time.ctime(),
                 ),
             )
@@ -191,7 +185,7 @@ class ClientJobDatabase:
             if isinstance(value, set):
                 value = sorted(value)
             fields.append(f"{label} = ?")
-            values.append(json.dumps(value))
+            values.append(orjson.dumps(value).decode("utf-8"))
 
         if status:
             fields.append("status = ?")
@@ -204,7 +198,7 @@ class ClientJobDatabase:
             values.append(self._compress(result_data))
         if errors is not None:
             fields.append("errors = ?")
-            values.append(json.dumps(errors))
+            values.append(orjson.dumps(errors).decode("utf-8"))
         if started_ts:
             fields.append("started_timestamp = ?")
             values.append(started_ts)
@@ -224,11 +218,11 @@ class ClientJobDatabase:
                 cur = conn.execute("SELECT errors FROM jobs WHERE uuid = ?", (uuid,))
                 row = cur.fetchone()
                 existing_errors = (
-                    json.loads(row["errors"]) if row and row["errors"] else []
+                    orjson.loads(row["errors"]) if row and row["errors"] else []
                 )
             existing_errors.extend(append_errors)
             fields.append("errors = ?")
-            values.append(json.dumps(existing_errors))
+            values.append(orjson.dumps(existing_errors).decode("utf-8"))
 
         if not fields:
             return
@@ -356,13 +350,13 @@ class ClientJobDatabase:
             "workers_completed",
         ]:
             if data.get(field):
-                data[field] = json.loads(data[field])
+                data[field] = orjson.loads(data[field])
             else:
                 data[field] = []
         if data.get("result_data"):
             data["result_data"] = self._decompress(data["result_data"])
         if data.get("errors"):
-            data["errors"] = json.loads(data["errors"])
+            data["errors"] = orjson.loads(data["errors"])
         else:
             data["errors"] = []
         data["timeout"] = data.get("timeout", 600) or 600
@@ -389,7 +383,7 @@ class ClientJobDatabase:
                     message,
                     severity,
                     task,
-                    self._compress(json.dumps(event_data or {})),
+                    self._compress(event_data or {}),
                 ),
             )
 
@@ -397,6 +391,163 @@ class ClientJobDatabase:
         if hasattr(self._local, "conn"):
             self._local.conn.close()
             delattr(self._local, "conn")
+
+    def jobs_stats(self) -> dict:
+        """Return job-level statistics from the jobs database."""
+        stats = {
+            # job counts
+            "total_jobs": 0,  # Total number of jobs in the database
+            "total_events": 0,  # Total number of events in the database
+            "jobs_by_status": {},  # Job counts keyed by status string
+            "jobs_by_service": {},  # Job counts keyed by service name
+            "events_by_severity": {},  # Event counts keyed by severity level
+            # job timing
+            "jobs_last_24h": 0,  # Jobs created in the last 24 hours
+            "oldest_job_ts": None,  # received_timestamp of the oldest job
+            "newest_job_ts": None,  # received_timestamp of the newest job
+            "avg_completion_seconds": None,  # Average completion time in seconds for COMPLETED jobs
+        }
+
+        with self._transaction(write=False) as conn:
+            # ── Job counts ────────────────────────────────────────────────
+            stats["total_jobs"] = conn.execute("SELECT COUNT(*) FROM jobs").fetchone()[
+                0
+            ]
+
+            cur = conn.execute("SELECT status, COUNT(*) FROM jobs GROUP BY status")
+            stats["jobs_by_status"] = {row[0]: row[1] for row in cur.fetchall()}
+
+            cur = conn.execute("SELECT service, COUNT(*) FROM jobs GROUP BY service")
+            stats["jobs_by_service"] = {row[0]: row[1] for row in cur.fetchall()}
+
+            stats["total_events"] = conn.execute(
+                "SELECT COUNT(*) FROM events"
+            ).fetchone()[0]
+
+            cur = conn.execute(
+                "SELECT severity, COUNT(*) FROM events GROUP BY severity"
+            )
+            stats["events_by_severity"] = {row[0]: row[1] for row in cur.fetchall()}
+
+            # ── Job timing ────────────────────────────────────────────────
+            cutoff = time.strftime(
+                "%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 86400)
+            )
+            stats["jobs_last_24h"] = conn.execute(
+                "SELECT COUNT(*) FROM jobs WHERE created_at >= ?", (cutoff,)
+            ).fetchone()[0]
+
+            row = conn.execute(
+                "SELECT MIN(received_timestamp), MAX(received_timestamp) FROM jobs"
+            ).fetchone()
+            if row:
+                stats["oldest_job_ts"] = row[0]
+                stats["newest_job_ts"] = row[1]
+
+            # Average completion time for jobs that have both timestamps recorded.
+            # Timestamps are stored as ctime() strings, so we parse them in Python.
+            cur = conn.execute("""
+                SELECT received_timestamp, completed_timestamp
+                FROM jobs
+                WHERE status = 'COMPLETED'
+                  AND received_timestamp IS NOT NULL
+                  AND completed_timestamp IS NOT NULL
+                """)
+            completed_rows = cur.fetchall()
+            if completed_rows:
+                import calendar
+
+                durations = []
+                for r in completed_rows:
+                    try:
+                        start = calendar.timegm(time.strptime(r[0]))
+                        end = calendar.timegm(time.strptime(r[1]))
+                        durations.append(end - start)
+                    except (ValueError, OverflowError):
+                        pass
+                if durations:
+                    stats["avg_completion_seconds"] = round(
+                        sum(durations) / len(durations), 3
+                    )
+
+        return stats
+
+    def jobs_db_stats(self) -> dict:
+        """Return SQLite database-level statistics."""
+        stats = {
+            # file sizes
+            "db_size_bytes": 0,  # Database file size on disk in bytes
+            "db_wal_size_bytes": 0,  # WAL file size on disk in bytes (0 if absent)
+            "db_shm_size_bytes": 0,  # SHM file size on disk in bytes (0 if absent)
+            "db_total_disk_bytes": 0,  # Sum of db + wal + shm file sizes
+            # page / space
+            "db_page_size": 0,  # SQLite page size in bytes
+            "db_page_count": 0,  # Total number of pages allocated in the database
+            "db_max_page_count": 0,  # Maximum allowed number of pages
+            "db_freelist_count": 0,  # Number of unused (free) pages
+            "db_used_size_bytes": 0,  # Approximate used space = (page_count - freelist_count) * page_size
+            # configuration / runtime
+            "db_cache_size": 0,  # Current cache size setting (number of pages)
+            "db_journal_mode": "",  # Journal mode (e.g. 'wal', 'delete')
+            "db_wal_autocheckpoint": 0,  # WAL auto-checkpoint page threshold (0 = disabled)
+            "db_mmap_size": 0,  # Memory-mapped I/O size in bytes
+            "db_soft_heap_limit": 0,  # SQLite soft heap memory limit in bytes (0 = none)
+            "db_hard_heap_limit": 0,  # SQLite hard heap memory limit in bytes (0 = none)
+            "db_data_version": 0,  # Monotonic counter incremented on each external write
+            "db_sqlite_version": sqlite3.sqlite_version,  # SQLite library version string
+        }
+
+        # File sizes on disk (main db, WAL, SHM)
+        for attr, suffix in [
+            ("db_size_bytes", ""),
+            ("db_wal_size_bytes", "-wal"),
+            ("db_shm_size_bytes", "-shm"),
+        ]:
+            path = self.db_path + suffix
+            try:
+                stats[attr] = os.path.getsize(path) if os.path.exists(path) else 0
+            except OSError:
+                stats[attr] = 0
+        stats["db_total_disk_bytes"] = (
+            stats["db_size_bytes"]
+            + stats["db_wal_size_bytes"]
+            + stats["db_shm_size_bytes"]
+        )
+
+        with self._transaction(write=False) as conn:
+            stats["db_page_size"] = conn.execute("PRAGMA page_size").fetchone()[0]
+            stats["db_page_count"] = conn.execute("PRAGMA page_count").fetchone()[0]
+            stats["db_max_page_count"] = conn.execute(
+                "PRAGMA max_page_count"
+            ).fetchone()[0]
+            stats["db_freelist_count"] = conn.execute(
+                "PRAGMA freelist_count"
+            ).fetchone()[0]
+            stats["db_cache_size"] = conn.execute("PRAGMA cache_size").fetchone()[0]
+            stats["db_journal_mode"] = conn.execute("PRAGMA journal_mode").fetchone()[0]
+            stats["db_wal_autocheckpoint"] = conn.execute(
+                "PRAGMA wal_autocheckpoint"
+            ).fetchone()[0]
+            stats["db_mmap_size"] = conn.execute("PRAGMA mmap_size").fetchone()[0]
+            stats["db_data_version"] = conn.execute("PRAGMA data_version").fetchone()[0]
+            try:
+                stats["db_soft_heap_limit"] = conn.execute(
+                    "PRAGMA soft_heap_limit"
+                ).fetchone()[0]
+            except Exception:
+                pass
+            try:
+                stats["db_hard_heap_limit"] = conn.execute(
+                    "PRAGMA hard_heap_limit"
+                ).fetchone()[0]
+            except Exception:
+                pass
+
+        page_size = stats["db_page_size"]
+        used_pages = stats["db_page_count"] - stats["db_freelist_count"]
+        stats["db_used_size_bytes"] = max(0, used_pages) * page_size
+
+        return stats
 
 
 def recv(client):
@@ -454,7 +605,7 @@ def recv(client):
             continue
 
         try:
-            payload = json.loads(msg[6].decode("utf-8"))
+            payload = orjson.loads(msg[6])
         except Exception as e:
             log.error(
                 f"{client.name} - failed to parse message, error '{e}'", exc_info=True
@@ -934,7 +1085,7 @@ class NFPClient(object):
             return value.encode("utf-8")
         # convert value to json string
         else:
-            return json.dumps(value).encode("utf-8")
+            return orjson.dumps(value)
 
     def reconnect_to_broker(self):
         """
@@ -1130,7 +1281,7 @@ class NFPClient(object):
                 break
 
             try:
-                ret["results"] = json.loads(reply_task_result.decode("utf-8"))
+                ret["results"] = orjson.loads(reply_task_result)
                 ret["status"] = reply_status.decode("utf-8")
             except Exception as e:
                 ret["errors"].append(

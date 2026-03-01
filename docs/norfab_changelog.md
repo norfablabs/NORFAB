@@ -7,6 +7,7 @@
 3. NFCLI - adding history and commands history persistency across runs
 4. Nornir netbox get inventory task added support to pass on `cache` variable to control overall cache behaviour
 5. Netbox get_interfaces task uses REST API now and return interfaces extra information, such as connected endpoints
+6. NFCLI - adding new `show jobs statistics` and `show jobs database-statistics` commands to view local jobs database statistics
 
 ## CHANGES
 
@@ -23,6 +24,7 @@
 
 3. Netbox get_interfaces - refactored to use rest api via pynetbox instead of GraphQL API
 4. Enhancing nornir tests markdown results report - adding groups, description,m comments to test details, added total failed an success rate counters, modified table output to display failed tests first.
+5. Enhancing workers and client jobs database operations toward reducing memory usage and improving speed - switching to orjson instead of json, dropping text columns in favour of blobs and switching zlib compression to level 1
 
 ## BUGS
 

@@ -1,7 +1,7 @@
 import logging
 import time
 import zmq
-import json
+import orjson
 import traceback
 import threading
 import queue
@@ -14,7 +14,6 @@ import inspect
 import functools
 import sqlite3
 import zlib
-import base64
 from contextlib import contextmanager
 
 from . import NFP
@@ -478,57 +477,53 @@ class JobDatabase:
             except Exception:
                 raise
 
-    def _compress_data(self, data: dict) -> str:
+    def _compress_data(self, data: dict) -> bytes:
         """
-        Compress dictionary data to base64-encoded string if compression is enabled.
+        Serialize and optionally compress dictionary data to bytes for BLOB storage.
 
         Args:
-            data (dict): Dictionary to compress.
+            data (dict): Dictionary to serialize.
 
         Returns:
-            str: Compressed and base64-encoded string if compression enabled, otherwise JSON string.
+            bytes: zlib-compressed JSON bytes if compression enabled, otherwise raw JSON bytes.
         """
         if self.jobs_compress:
-            json_str = json.dumps(data)
-            compressed = zlib.compress(json_str.encode("utf-8"))
-            return base64.b64encode(compressed).decode("utf-8")
+            return zlib.compress(orjson.dumps(data), level=1)
         else:
-            return json.dumps(data)
+            return orjson.dumps(data)
 
-    def _decompress_data(self, data_str: str) -> dict:
+    def _decompress_data(self, data_blob: bytes) -> dict:
         """
-        Decompress base64-encoded compressed string back to dictionary.
+        Deserialize bytes retrieved from a BLOB column back to a dictionary.
 
         Args:
-            data_str (str): Compressed base64 string or plain JSON string.
+            data_blob (bytes): Raw or zlib-compressed JSON bytes.
 
         Returns:
-            dict: Decompressed dictionary.
+            dict: Deserialized dictionary.
         """
         if self.jobs_compress:
-            compressed = base64.b64decode(data_str.encode("utf-8"))
-            decompressed = zlib.decompress(compressed)
-            return json.loads(decompressed.decode("utf-8"))
+            return orjson.loads(zlib.decompress(data_blob))
         else:
-            return json.loads(data_str)
+            return orjson.loads(data_blob)
 
     def _initialize_database(self):
         """Initialize the database schema."""
         with self._transaction(write=True) as conn:
-            # Jobs table - using JSON TEXT fields instead of BLOB
+            # Jobs table - args, kwargs, result_data stored as BLOBs
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS jobs (
                     uuid TEXT PRIMARY KEY,
                     client_address TEXT NOT NULL,
                     task TEXT NOT NULL,
-                    args TEXT,
-                    kwargs TEXT,
+                    args BLOB,
+                    kwargs BLOB,
                     timeout INTEGER,
                     status TEXT DEFAULT 'PENDING',
                     received_timestamp TEXT NOT NULL,
                     started_timestamp TEXT,
                     completed_timestamp TEXT,
-                    result_data TEXT,
+                    result_data BLOB,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
@@ -586,13 +581,9 @@ class JobDatabase:
             timestamp (str): Received timestamp.
         """
         with self._transaction(write=True) as conn:
-            # Compress args and kwargs if compression is enabled
-            if self.jobs_compress:
-                compressed_args = self._compress_data({"args": args})
-                compressed_kwargs = self._compress_data({"kwargs": kwargs})
-            else:
-                compressed_args = json.dumps(args)
-                compressed_kwargs = json.dumps(kwargs)
+            # Serialize args and kwargs to BLOB
+            compressed_args = self._compress_data({"args": args})
+            compressed_kwargs = self._compress_data({"kwargs": kwargs})
 
             conn.execute(
                 """
@@ -743,22 +734,13 @@ class JobDatabase:
             result.setdefault("result_data", None)
             result.setdefault("job_events", [])
 
-            # Decompress args and kwargs
-            if self.jobs_compress:
-                result["args"] = self._decompress_data(row["args"]).get("args", [])
-                result["kwargs"] = self._decompress_data(row["kwargs"]).get(
-                    "kwargs", {}
-                )
-            else:
-                result["args"] = json.loads(row["args"])
-                result["kwargs"] = json.loads(row["kwargs"])
+            # Deserialize args and kwargs from BLOB
+            result["args"] = self._decompress_data(row["args"]).get("args", [])
+            result["kwargs"] = self._decompress_data(row["kwargs"]).get("kwargs", {})
 
             # Include result data if requested
             if include_result and row["result_data"]:
-                if self.jobs_compress:
-                    result["result_data"] = self._decompress_data(row["result_data"])
-                else:
-                    result["result_data"] = row["result_data"]
+                result["result_data"] = self._decompress_data(row["result_data"])
 
             # Include events if requested
             if include_events:
@@ -785,7 +767,13 @@ class JobDatabase:
                 INSERT INTO events (job_uuid, message, severity, task, event_data)
                 VALUES (?, ?, ?, ?, ?)
             """,
-                (job_uuid, message, severity, task, json.dumps(event_data)),
+                (
+                    job_uuid,
+                    message,
+                    severity,
+                    task,
+                    orjson.dumps(event_data).decode("utf-8"),
+                ),
             )
 
     def get_job_events(self, uuid: str) -> list:
@@ -812,7 +800,7 @@ class JobDatabase:
                     "message": row["message"],
                     "severity": row["severity"],
                     "task": row["task"],
-                    **json.loads(row["event_data"]),
+                    **orjson.loads(row["event_data"]),
                     "created_at": row["created_at"],
                 }
                 for row in cursor.fetchall()
@@ -1035,7 +1023,7 @@ def _put(worker, put_queue, destroy_event):
         suuid = None
         try:
             suuid = work[2].decode("utf-8")
-            data = json.loads(work[3].decode("utf-8"))
+            data = orjson.loads(work[3])
             worker.running_jobs[suuid].client_input_queue.put(data)
             log.debug(f"{worker.name} - '{suuid}' added job input")
         except Exception as e:
@@ -1070,7 +1058,7 @@ def _post(worker, post_queue, destroy_event):
         timestamp = time.ctime()
         client_address = work[0]
         suuid = work[2]
-        data = json.loads(work[3].decode("utf-8"))
+        data = orjson.loads(work[3])
 
         task = data.get("task")
         args = data.get("args", [])
@@ -1104,14 +1092,14 @@ def _post(worker, post_queue, destroy_event):
                 b"",
                 suuid,
                 b"201",  # JOB CREATED
-                json.dumps(
+                orjson.dumps(
                     {
                         "worker": worker.name,
                         "uuid": suuid.decode("utf-8"),
                         "status": "ACCEPTED",
                         "service": worker.service.decode("utf-8"),
                     }
-                ).encode("utf-8"),
+                ),
             ],
         )
         log.debug(
@@ -1174,7 +1162,7 @@ def _get(worker, get_queue, destroy_event):
             payload["status"] = f"UNKNOWN STATUS: {job_info['status']}"
 
         reply.append(status)
-        reply.append(json.dumps(payload).encode("utf-8"))
+        reply.append(orjson.dumps(payload))
         worker.send_to_broker(NFP.RESPONSE, reply)
         get_queue.task_done()
 
@@ -1202,14 +1190,14 @@ def _event(worker, event_queue, destroy_event):
             b"",
             uuid.encode("utf-8"),
             b"200",
-            json.dumps(
+            orjson.dumps(
                 {
                     "worker": worker.name,
                     "service": worker.service.decode("utf-8"),
                     "uuid": uuid,
                     **event_data,
                 }
-            ).encode("utf-8"),
+            ),
         ]
         worker.send_to_broker(NFP.EVENT, event)
         event_queue.task_done()
