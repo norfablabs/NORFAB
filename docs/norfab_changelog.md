@@ -26,7 +26,12 @@
 4. Enhancing nornir tests markdown results report - adding groups, description, comments to test details, added total failed an success rate counters, modified table output to display failed tests first.
 5. Enhancing workers and client jobs database operations toward reducing memory usage and improving speed - switching to orjson instead of json, dropping text columns in favour of byte blobs and switching zlib compression to level 1
 6. Adding `orjson` lib to core dependencies
-7. Refactored Nornir worker splitting tasks into dedicated files and moving all in dedicated folder
+7. Refactored Nornir worker:
+  
+  - splitting tasks into dedicated files and moving all in dedicated folder
+  - moving related pydantic models under new nornir_worker folder
+
+8. Refactoring broker to use `orjson` instead of `json` library
 
 ## BUGS
 

@@ -807,14 +807,7 @@ class TestGetInterfaces:
                             k in ip
                             for k in [
                                 "address",
-                                "status",
-                                "role",
-                                "dns_name",
-                                "description",
-                                "custom_fields",
-                                "last_updated",
-                                "tenant",
-                                "tags",
+                                "family",
                             ]
                         ), f"{worker}:{device}:{intf_name} not all IP data returned"
 
@@ -849,12 +842,7 @@ class TestGetInterfaces:
                                 "role",
                                 "manufacturer",
                                 "custom_fields",
-                                "label",
-                                "description",
-                                "tags",
-                                "asset_tag",
                                 "serial",
-                                "part_id",
                             ]
                         ), f"{worker}:{device}:{intf_name} not all inventory item data returned"
 

@@ -11,6 +11,83 @@ from norfab.core.exceptions import UnsupportedServiceError
 
 log = logging.getLogger(__name__)
 
+# -----------------------------------------------------------------------
+# HELPER FUNCTIONS
+# -----------------------------------------------------------------------
+
+
+def flatten_tags(tags: list) -> list:
+    tags = tags or []
+    return [t["name"] for t in tags]
+
+
+def flatten_ip_data(ip: dict) -> dict:
+    try:
+        ip = {"address": ip["address"], "family": (ip.get("family") or {}).get("value")}
+    except Exception as e:
+        log.error(f"Failed to flatten IP address data: {e}", exc_info=True)
+
+    return ip
+
+
+def flatten_inventory_item(iidata: dict) -> dict:
+    try:
+        iidata = {
+            "name": iidata["name"],
+            "role": (iidata.get("role") or {}).get("name"),
+            "manufacturer": (iidata.get("manufacturer") or {}).get("name"),
+            "serial": iidata["serial"],
+            "custom_fields": iidata["custom_fields"],
+        }
+    except Exception as e:
+        log.error(f"Failed to flatten Inventory Item address data: {e}", exc_info=True)
+
+    return iidata
+
+
+def flatten_interface_data(intf: dict) -> dict:
+    try:
+        intf.pop("display", None)
+        intf.pop("display_url", None)
+        intf.pop("name", None)
+        intf.pop("device", None)
+        intf.pop("url", None)
+        intf["occupied"] = intf.pop("_occupied", None)
+        intf["mode"] = (intf.get("mode") or {}).get("value")
+        intf["duplex"] = (intf.get("duplex") or {}).get("value")
+        intf["type"] = (intf.get("type") or {}).get("value")
+        intf["vrf"] = (intf.get("vrf") or {}).get("name")
+        intf["parent"] = (intf.get("parent") or {}).get("name")
+        intf["tags"] = flatten_tags(intf["tags"])
+        # flatten cable
+        if intf["cable"]:
+            intf["cable"] = intf["cable"].get("label") or intf["cable"].get("id")
+        # flatten endpoints
+        for endpoint in intf.pop("connected_endpoints", None) or []:
+            intf.setdefault("connected_endpoints", [])
+            intf["connected_endpoints"].append(
+                {
+                    "device": (endpoint.get("device") or {}).get("name"),
+                    "interface": endpoint.pop("name", None),
+                }
+            )
+        # flatten link peers
+        for peer in intf.pop("link_peers", None) or []:
+            intf.setdefault("link_peers", [])
+            intf["link_peers"].append(
+                {
+                    "device": (peer.get("device") or {}).get("name"),
+                    "interface": peer.pop("name", None),
+                }
+            )
+        # flatten mac_addresses
+        if intf.get("mac_addresses"):
+            intf["mac_addresses"] = [m["mac_address"] for m in intf["mac_addresses"]]
+    except Exception as e:
+        log.error(f"Failed to flatten Interface address data: {e}", exc_info=True)
+
+    return intf
+
 
 class NetboxInterfacesTasks:
 
@@ -48,45 +125,26 @@ class NetboxInterfacesTasks:
 
             ```
             "eth9": {
-                "_occupied": true,
                 "bridge": null,
                 "bridge_interfaces": [],
-                "cable": {
-                    "description": "",
-                    "display": "#216",
-                    "id": 216,
-                    "label": "",
-                },
+                "cable": 216,
                 "cable_end": "A",
                 "child_interfaces": [
                     {
+                        "ip_addresses": [
+                            {
+                                "address": "1.0.10.9/32",
+                                "family": 4
+                            }
+                        ],
                         "name": "eth9.19",
-                        "vrf": {
-                            "name": "Voice"
-                        }
+                        "vrf": "Voice"
                     }
                 ],
-                ip_addresses: [],
-                inventory_items: [],
                 "connected_endpoints": [
                     {
-                        "_occupied": true,
-                        "cable": {
-                            "description": "",
-                            "display": "#216",
-                            "id": 216,
-                            "label": "",
-                        },
-                        "description": "Interface 3 description",
-                        "device": {
-                            "description": "",
-                            "display": "fceos5",
-                            "id": 310,
-                            "name": "fceos5",
-                        },
-                        "display": "eth3",
-                        "id": 1018,
-                        "name": "eth3",
+                        "device": "fceos5",
+                        "interface": "eth3"
                     }
                 ],
                 "connected_endpoints_reachable": true,
@@ -96,39 +154,20 @@ class NetboxInterfacesTasks:
                 "created": "2026-02-09T10:40:15.684115Z",
                 "custom_fields": {},
                 "description": "Interface 9 description",
-                "device": {
-                    "description": "",
-                    "display": "fceos4 (UUID-123451)",
-                    "id": 309,
-                    "name": "fceos4",
-                },
-                "display": "eth9",
+                "device": "fceos4",
                 "duplex": null,
                 "enabled": true,
-                "id": "1014",
+                "id": 1014,
+                "inventory_items": [],
+                "ip_addresses": [],
                 "l2vpn_termination": null,
                 "label": "",
                 "lag": null,
                 "last_updated": "2026-02-09T10:40:43.179809Z",
                 "link_peers": [
                     {
-                        "_occupied": true,
-                        "cable": {
-                            "description": "",
-                            "display": "#216",
-                            "id": 216,
-                            "label": "",
-                        },
-                        "description": "Interface 3 description",
-                        "device": {
-                            "description": "",
-                            "display": "fceos5",
-                            "id": 310,
-                            "name": "fceos5",
-                        },
-                        "display": "eth3",
-                        "id": 1018,
-                        "name": "eth3",
+                        "device": "fceos5",
+                        "interface": "eth3"
                     }
                 ],
                 "link_peers_type": "dcim.interface",
@@ -140,7 +179,7 @@ class NetboxInterfacesTasks:
                 "mode": "tagged",
                 "module": null,
                 "mtu": 1500,
-                "name": "eth9",
+                "occupied": true,
                 "owner": null,
                 "parent": null,
                 "poe_mode": null,
@@ -155,10 +194,7 @@ class NetboxInterfacesTasks:
                 "tagged_vlans": [],
                 "tags": [],
                 "tx_power": null,
-                "type": {
-                    "label": "1000BASE-T (1GE)",
-                    "value": "1000base-t"
-                },
+                "type": "1000base-t",
                 "untagged_vlan": null,
                 "vdcs": [],
                 "vlan_translation_policy": null,
@@ -166,7 +202,7 @@ class NetboxInterfacesTasks:
                 "wireless_lans": [],
                 "wireless_link": null,
                 "wwn": null
-            }
+            },
             ```
         """
         instance = instance or self.default_instance
@@ -219,13 +255,17 @@ class NetboxInterfacesTasks:
                     ip.assigned_object_id
                     and ip.assigned_object_type == "dcim.interface"
                 ):
-                    ip_by_intf_id.setdefault(ip.assigned_object_id, []).append(dict(ip))
+                    ip_by_intf_id.setdefault(ip.assigned_object_id, []).append(
+                        flatten_ip_data(dict(ip))
+                    )
 
         # fetch inventory items if requested (one bulk call keyed by component_id)
         if inventory_items:
             for item in nb.dcim.inventory_items.filter(device__in=devices):
                 if item.component_id and item.component_type == "dcim.interface":
-                    inv_by_intf_id.setdefault(item.component_id, []).append(dict(item))
+                    inv_by_intf_id.setdefault(item.component_id, []).append(
+                        flatten_inventory_item(dict(item))
+                    )
 
         # transform pynetbox records into result dict keyed by device / interface name
         for intf in all_interfaces:
@@ -239,7 +279,7 @@ class NetboxInterfacesTasks:
                 child_interfaces = [
                     {
                         "name": c.name,
-                        "vrf": {"name": c.vrf.name} if c.vrf else None,
+                        "vrf": c.vrf.name if c.vrf else None,
                         "ip_addresses": ip_by_intf_id.get(c.id, []),
                     }
                     for c in children
@@ -249,20 +289,17 @@ class NetboxInterfacesTasks:
                 child_interfaces = [
                     {
                         "name": c.name,
-                        "vrf": {"name": c.vrf.name} if c.vrf else None,
+                        "vrf": c.vrf.name if c.vrf else None,
                     }
                     for c in children
                 ]
                 intf_ip_addresses = []
 
-            intf_data = dict(intf)
-            # normalize fields to match get_interfaces (GraphQL) output format
-            intf_data["id"] = str(intf.id)
-            intf_data["mode"] = intf.mode.value if intf.mode else None
-            intf_data["duplex"] = intf.duplex.value if intf.duplex else None
+            intf_data = flatten_interface_data(dict(intf))
+            # add extra fields
             intf_data["child_interfaces"] = child_interfaces
             intf_data["member_interfaces"] = [
-                {"name": m.name} for m in member_intf_by_lag_id.get(intf.id, [])
+                m.name for m in member_intf_by_lag_id.get(intf.id, [])
             ]
             intf_data["ip_addresses"] = []
             if ip_addresses:
@@ -742,10 +779,7 @@ class NetboxInterfacesTasks:
                                 if mac_address and mac_address not in ["none", ""]:
                                     # Check if MAC already exists
                                     for nb_mac in nb_intf.get("mac_addresses") or []:
-                                        if (
-                                            nb_mac.get("mac_address", "").lower()
-                                            == mac_address
-                                        ):
+                                        if nb_mac.lower() == mac_address:
                                             break
                                     else:
                                         # Prepare MAC address for creation

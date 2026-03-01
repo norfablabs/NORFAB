@@ -42,6 +42,17 @@ log = logging.getLogger(__name__)
 
 
 class Job:
+    __slots__ = (
+        "worker",
+        "juuid",
+        "client_address",
+        "timeout",
+        "args",
+        "kwargs",
+        "task",
+        "client_input_queue",
+    )
+
     def __init__(
         self,
         worker: object = None,
@@ -440,6 +451,12 @@ class JobDatabase:
             # Enable WAL mode for better concurrent access
             self._local.conn.execute("PRAGMA journal_mode=WAL")
             self._local.conn.execute("PRAGMA synchronous=NORMAL")
+            # performance PRagmas
+            self._local.conn.execute("PRAGMA cache_size=5000")  # 5MB cache
+            self._local.conn.execute("PRAGMA temp_store=MEMORY")  # Use RAM for temp
+            self._local.conn.execute("PRAGMA mmap_size=30000000")  # Memory-mapped I/O
+            self._local.conn.execute("PRAGMA query_only=False")  # Default
+            self._local.conn.execute("PRAGMA busy_timeout=5000")  # 5s timeout
 
             # Verify JSON1 extension is available
             try:
@@ -488,7 +505,7 @@ class JobDatabase:
             bytes: zlib-compressed JSON bytes if compression enabled, otherwise raw JSON bytes.
         """
         if self.jobs_compress:
-            return zlib.compress(orjson.dumps(data), level=1)
+            return zlib.compress(orjson.dumps(data), level=6)
         else:
             return orjson.dumps(data)
 
@@ -556,6 +573,9 @@ class JobDatabase:
             )
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_events_job_uuid ON events(job_uuid)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_events_severity ON events(severity)"
             )
 
     def add_job(
@@ -1939,6 +1959,10 @@ class NFPWorker:
     @Task(fastapi={"methods": ["GET"]})
     def delete_fetched_files(self, filepath) -> Result:
         return Result(result=self.client.delete_fetched_files(filepath))
+
+    @Task(fastapi={"methods": ["GET"]})
+    def get_worker_stats(self) -> Result:
+        pass
 
     def start_threads(self) -> None:
         """

@@ -1,6 +1,6 @@
 import logging
 import sys
-import json
+import orjson
 import threading
 import random
 import os
@@ -31,6 +31,8 @@ except Exception:
 
 class NFPService(object):
     """A single NFP Service"""
+
+    __slots__ = ("name", "workers")
 
     def __init__(self, name: str):
         self.name = name  # Service name
@@ -657,7 +659,7 @@ class NFPBroker:
                 ret = [self.workers[target]]
             else:  # target list of workers
                 try:
-                    target = json.loads(target)
+                    target = orjson.loads(target)
                     if isinstance(target, list):
                         for w in target:
                             w = w.encode("utf-8")
@@ -681,7 +683,7 @@ class NFPBroker:
             ret = [self.workers[target]]
         else:  # target list of workers
             try:
-                target = json.loads(target)
+                target = orjson.loads(target)
                 if isinstance(target, list):
                     for w in target:
                         w = w.encode("utf-8")
@@ -733,7 +735,7 @@ class NFPBroker:
                 [
                     uuid,
                     b"400",
-                    json.dumps(
+                    orjson.dumps(
                         {
                             "workers": None,
                             "uuid": uuid.decode("utf-8"),
@@ -742,7 +744,7 @@ class NFPBroker:
                             "service": service.name.decode("utf-8"),
                             "errors": [message],
                         }
-                    ).encode("utf-8"),
+                    ),
                 ],
             )
             return
@@ -757,7 +759,7 @@ class NFPBroker:
                 [
                     uuid,
                     b"202",
-                    json.dumps(
+                    orjson.dumps(
                         {
                             "workers": w_addresses,
                             "uuid": uuid.decode("utf-8"),
@@ -765,7 +767,7 @@ class NFPBroker:
                             "status": "DISPATCHED",
                             "service": service.name.decode("utf-8"),
                         }
-                    ).encode("utf-8"),
+                    ),
                 ],
             )
 
@@ -798,7 +800,7 @@ class NFPBroker:
             f"command '{command}', target '{target}'"
             f"data '{data}', uuid '{uuid}'"
         )
-        data = json.loads(data)
+        data = orjson.loads(data)
         task = data.get("task")
         kwargs = data.get("kwargs", {})
         ret = f"Unsupported task '{task}'"
@@ -867,7 +869,7 @@ class NFPBroker:
                     pass
         elif task == "show_broker_inventory":
             ret = self.inventory.dict()
-        reply = json.dumps(ret).encode("utf-8")
+        reply = orjson.dumps(ret)
         self.send_to_client(
             sender, NFP.RESPONSE, b"mmi.service.broker", [uuid, b"200", reply]
         )
@@ -881,7 +883,7 @@ class NFPBroker:
             f"command '{command}', target '{target}'"
             f"data '{data}', uuid '{uuid}'"
         )
-        data = json.loads(data)
+        data = orjson.loads(data)
         task = data.get("task")
         kwargs = data.get("kwargs", {})
         ret = f"Unsupported task '{task}'"
@@ -893,7 +895,7 @@ class NFPBroker:
                 log.error(f"sid.service.broker - no inventory data found for '{name}'")
                 ret = None
 
-        reply = json.dumps(ret).encode("utf-8")
+        reply = orjson.dumps(ret)
         self.send_to_client(
             sender, NFP.RESPONSE, b"sid.service.broker", [uuid, b"200", reply]
         )

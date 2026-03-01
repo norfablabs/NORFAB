@@ -53,8 +53,16 @@ class ClientJobDatabase:
                 self.db_path, check_same_thread=False, timeout=30.0
             )
             self._local.conn.row_factory = sqlite3.Row
+            # Enable WAL mode for better concurrent access
             self._local.conn.execute("PRAGMA journal_mode=WAL")
             self._local.conn.execute("PRAGMA synchronous=NORMAL")
+            # performance PRagmas
+            self._local.conn.execute("PRAGMA cache_size=5000")  # 5MB cache
+            self._local.conn.execute("PRAGMA temp_store=MEMORY")  # Use RAM for temp
+            self._local.conn.execute("PRAGMA mmap_size=30000000")  # Memory-mapped I/O
+            self._local.conn.execute("PRAGMA query_only=False")  # Default
+            self._local.conn.execute("PRAGMA busy_timeout=5000")  # 5s timeout
+
         return self._local.conn
 
     @contextmanager
@@ -73,7 +81,7 @@ class ClientJobDatabase:
 
     def _compress(self, data: Dict | List | Any) -> bytes:
         raw = orjson.dumps(data)
-        return zlib.compress(raw, level=1) if self.jobs_compress else raw
+        return zlib.compress(raw, level=6) if self.jobs_compress else raw
 
     def _decompress(self, payload: bytes | None) -> Any:
         if payload is None:
@@ -123,7 +131,13 @@ class ClientJobDatabase:
             )
             conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_service ON jobs(service)")
             conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_jobs_deadline ON jobs(deadline)"
+            )
+            conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_events_job_uuid ON events(job_uuid)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_events_severity ON events(severity)"
             )
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_jobs_last_poll ON jobs(last_poll_timestamp)"
