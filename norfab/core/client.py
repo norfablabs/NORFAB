@@ -1037,6 +1037,8 @@ class NFPClient(object):
         log.debug(f"{self.name} - sending '{msg}'")
 
         with self.socket_lock:
+            if self.destroy_event.is_set():
+                return
             self.broker_socket.send_multipart(msg)
             self.stats_send_to_broker += 1
 
@@ -1400,11 +1402,20 @@ class NFPClient(object):
         """
         Gracefully shuts down the client.
 
-        This method logs an interrupt message, sets the destroy event, and
-        destroys the client context to ensure a clean shutdown.
+        This method logs an interrupt message, sets the destroy event, waits
+        for background threads to stop, then destroys the client context to
+        ensure a clean shutdown.
         """
         log.info(f"{self.name} - client interrupt received, killing client")
         self.destroy_event.set()
+        # Wait for background threads to exit before destroying the ZMQ context.
+        # Without this, the dispatcher/receiver threads may still be executing
+        # between their destroy_event check and a socket call, causing
+        # "not a socket" ZMQError when ctx.destroy() closes sockets under them.
+        if self.recv_thread.is_alive():
+            self.recv_thread.join(timeout=2)
+        if self.dispatcher_thread.is_alive():
+            self.dispatcher_thread.join(timeout=2)
         self.job_db.close()
         self.ctx.destroy()
         # close all file transfer files

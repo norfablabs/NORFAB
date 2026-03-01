@@ -97,13 +97,40 @@ class TestNornirCli:
                     "dry_run" in res and res["dry_run"] == "show version\nshow clock"
                 ), f"{worker}:{host} dry run output is wrong"
 
-    @pytest.mark.skip(reason="TBD")
     def test_commands_with_hosts_filters(self, nfclient):
-        pass
+        ret = nfclient.run_job(
+            "nornir",
+            "cli",
+            kwargs={"commands": ["show version", "show clock"], "FC": "spine"},
+        )
+        pprint.pprint(ret)
 
-    @pytest.mark.skip(reason="TBD")
+        for worker, results in ret.items():
+            for host, res in results["result"].items():
+                assert (
+                    "show clock" in res and "Traceback" not in res["show clock"]
+                ), f"{worker}:{host} show clock output is wrong"
+                assert (
+                    "show version" in res and "Traceback" not in res["show version"]
+                ), f"{worker}:{host} show clock output is wrong"
+
     def test_commands_with_worker_target(self, nfclient):
-        pass
+        ret = nfclient.run_job(
+            "nornir",
+            "cli",
+            workers="nornir-worker-1",
+            kwargs={"commands": ["show version", "show clock"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            for host, res in results["result"].items():
+                assert (
+                    "show clock" in res and "Traceback" not in res["show clock"]
+                ), f"{worker}:{host} show clock output is wrong"
+                assert (
+                    "show version" in res and "Traceback" not in res["show version"]
+                ), f"{worker}:{host} show clock output is wrong"
 
     @pytest.mark.skip(reason="TBD")
     def test_commands_add_details(self, nfclient):
@@ -121,13 +148,41 @@ class TestNornirCli:
     def test_commands_wrong_plugin(self, nfclient):
         pass
 
-    @pytest.mark.skip(reason="TBD")
     def test_commands_plugin_scrapli(self, nfclient):
-        pass
+        ret = nfclient.run_job(
+            "nornir",
+            "cli",
+            workers="nornir-worker-1",
+            kwargs={"commands": ["show version", "show clock"], "plugin": "scrapli"},
+        )
+        pprint.pprint(ret)
 
-    @pytest.mark.skip(reason="TBD")
+        for worker, results in ret.items():
+            for host, res in results["result"].items():
+                assert (
+                    "show clock" in res and "Traceback" not in res["show clock"]
+                ), f"{worker}:{host} show clock output is wrong"
+                assert (
+                    "show version" in res and "Traceback" not in res["show version"]
+                ), f"{worker}:{host} show clock output is wrong"
+
     def test_commands_plugin_napalm(self, nfclient):
-        pass
+        ret = nfclient.run_job(
+            "nornir",
+            "cli",
+            workers="nornir-worker-1",
+            kwargs={"commands": ["show version", "show clock"], "plugin": "napalm"},
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            for host, res in results["result"].items():
+                assert (
+                    "show clock" in res and "Traceback" not in res["show clock"]
+                ), f"{worker}:{host} show clock output is wrong"
+                assert (
+                    "show version" in res and "Traceback" not in res["show version"]
+                ), f"{worker}:{host} show clock output is wrong"
 
     def test_commands_from_file_dry_run(self, nfclient):
         ret = nfclient.run_job(
@@ -1028,7 +1083,12 @@ class TestNornirTest:
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/test_suite_with_groups.txt", "FC": "spine", "groups": ["SYS"], "add_details": True},
+            kwargs={
+                "suite": "nf://nornir_test_suites/test_suite_with_groups.txt",
+                "FC": "spine",
+                "groups": ["SYS"],
+                "add_details": True,
+            },
         )
         pprint.pprint(ret)
 
@@ -1036,14 +1096,20 @@ class TestNornirTest:
             assert results["result"], f"{worker} returned no test results"
             for host, res in results["result"].items():
                 for test_name, test_res in res.items():
-                    assert "SYS" in test_res["groups"], f"{worker}:{host}:{test_name} unexpected test, not part of SYS group"
+                    assert (
+                        "SYS" in test_res["groups"]
+                    ), f"{worker}:{host}:{test_name} unexpected test, not part of SYS group"
 
     def test_nornir_test_suite_with_comments(self, nfclient):
         ret = nfclient.run_job(
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/test_suite_with_comments.txt", "FC": "spine", "add_details": True},
+            kwargs={
+                "suite": "nf://nornir_test_suites/test_suite_with_comments.txt",
+                "FC": "spine",
+                "add_details": True,
+            },
         )
         pprint.pprint(ret)
 
@@ -1051,8 +1117,12 @@ class TestNornirTest:
             assert results["result"], f"{worker} returned no test results"
             for host, res in results["result"].items():
                 for test_name, test_res in res.items():
-                    assert "comments" in test_res, f"{worker}:{host}:{test_name} no comments in result"
-                    assert "description" in test_res, f"{worker}:{host}:{test_name} no description in result"
+                    assert (
+                        "comments" in test_res
+                    ), f"{worker}:{host}:{test_name} no comments in result"
+                    assert (
+                        "description" in test_res
+                    ), f"{worker}:{host}:{test_name} no description in result"
 
     def test_nornir_test_suite_empty_suite(self, nfclient):
         # this test renders empty test for any host except for spine 1
@@ -1584,6 +1654,7 @@ class TestNornirTest:
         assert "comments foo" in ret, "No comments in output"
         assert "**Groups:** SYS" in ret, "No groups in output"
         assert "**Description:** bar" in ret, "No description in output"
+
 
 # ----------------------------------------------------------------------------
 # NORNIR.NETWORK FUNCTION TESTS

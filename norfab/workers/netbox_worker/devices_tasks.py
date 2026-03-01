@@ -22,7 +22,7 @@ class NetboxDevicesTasks:
         instance: Union[None, str] = None,
         dry_run: bool = False,
         devices: Union[None, list] = None,
-        cache: Union[bool, str] = None,
+        cache: Union[None, bool, str] = None,
     ) -> Result:
         """
         Retrieves device data from Netbox using the GraphQL API.

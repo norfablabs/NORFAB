@@ -12,7 +12,7 @@ from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
 from norfab.core.worker import NFPWorker, Task, Job
 from norfab.models import Result
-from typing import Any, Union
+from typing import Any, Union, List
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from .netbox_models import NetboxFastApiArgs
 from diskcache import FanoutCache
@@ -892,14 +892,6 @@ class NetboxWorker(
 
         Example:
             >>> desired = {"serial": "ABC123", "asset_tag": "TAG001", "comments": "New comment"}
-            >>> current = {"serial": "OLD123", "asset_tag": "TAG001", "comments": "Existing"}
-            >>> ignore_fields = ["comments"]
-            >>> ignore_if_not_empty = []
-            >>> updates, diff = compare_netbox_object_state(desired, current, ignore_fields, ignore_if_not_empty)
-            >>> updates
-            {"serial": "ABC123"}
-
-            >>> desired = {"serial": "ABC123", "asset_tag": "TAG001", "comments": "New comment"}
             >>> current = {"serial": "OLD123", "asset_tag": "", "comments": "Existing"}
             >>> ignore_fields = []
             >>> ignore_if_not_empty = ["comments"]
@@ -933,3 +925,34 @@ class NetboxWorker(
                 }
 
         return updates, diff
+
+    def get_nornir_hosts(self, kwargs: dict, timeout: int) -> List[str]:
+        """
+        Retrieves a list of unique Nornir hosts from Nornir service based on provided filter criteria.
+
+        Args:
+            kwargs (dict): Dictionary of keyword arguments, where keys starting with 'F' are used as filters.
+            timeout (int): Timeout value (in seconds) for the job execution.
+
+        Returns:
+            list: Sorted list of unique Nornir host names that match the filter criteria.
+
+        Notes:
+            - Only filters with keys starting with 'F' are considered.
+            - Hosts are collected from all workers where the job did not fail.
+        """
+        ret = []
+        filters = {k: v for k, v in kwargs.items() if k.startswith("F")}
+        if filters:
+            nornir_hosts = self.client.run_job(
+                "nornir",
+                "get_nornir_hosts",
+                kwargs=filters,
+                workers="all",
+                timeout=timeout,
+            )
+            for w, r in nornir_hosts.items():
+                if r["failed"] is False and isinstance(r["result"], list):
+                    ret.extend(r["result"])
+
+        return list(sorted(set(ret)))

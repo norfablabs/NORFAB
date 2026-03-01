@@ -16,7 +16,7 @@ class NetboxBgpPeeringsTasks:
         job: Job,
         instance: Union[None, str] = None,
         devices: Union[None, list] = None,
-        cache: Union[bool, str] = None,
+        cache: Union[None, bool, str] = None,
     ) -> Result:
         """
         Retrieve device BGP peerings from Netbox using REST API.

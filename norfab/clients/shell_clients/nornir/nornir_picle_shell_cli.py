@@ -283,7 +283,9 @@ class NornirCliShell(
 
     @staticmethod
     def source_commands():
-        return ClientRunJobArgs.walk_norfab_files()
+        completions = ClientRunJobArgs.walk_norfab_files()
+        completions.append("load-terminal")
+        return completions
 
     @staticmethod
     def source_run_ttp():

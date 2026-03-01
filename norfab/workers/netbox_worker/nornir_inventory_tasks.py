@@ -23,6 +23,7 @@ class NetboxNornirInventoryTasks:
         nbdata: bool = True,
         bgp_peerings: Union[dict, bool] = False,
         primary_ip: str = "ip4",
+        cache: Union[bool, str] = None,
     ) -> Result:
         """
         Retrieve and construct Nornir inventory from NetBox data.
@@ -41,6 +42,12 @@ class NetboxNornirInventoryTasks:
             nbdata (bool, optional): If True, include a copy of NetBox device's data in the host's data.
             primary_ip (str, optional): Specify whether to use 'ip4' or 'ip6' for the primary
                     IP address. Defaults to 'ip4'.
+            cache (Union[bool, str], optional): Cache usage options:
+
+                - True: Use data stored in cache if it is up to date, refresh it otherwise.
+                - False: Do not use cache and do not update cache.
+                - "refresh": Ignore data in cache and replace it with data fetched from Netbox.
+                - "force": Use data in cache without checking if it is up to date.
 
         Returns:
             dict: Nornir inventory dictionary containing hosts and their respective data.
@@ -58,7 +65,7 @@ class NetboxNornirInventoryTasks:
 
         # retrieve devices data
         nb_devices = self.get_devices(
-            job=job, filters=filters, devices=devices, instance=instance
+            job=job, filters=filters, devices=devices, instance=instance, cache=cache
         )
 
         # form Nornir hosts inventory
@@ -94,6 +101,7 @@ class NetboxNornirInventoryTasks:
         if interfaces:
             # decide on get_interfaces arguments
             kwargs = interfaces if isinstance(interfaces, dict) else {}
+            kwargs.setdefault("cache", cache)
             # add 'interfaces' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("interfaces", {})
@@ -110,6 +118,7 @@ class NetboxNornirInventoryTasks:
         if connections:
             # decide on get_interfaces arguments
             kwargs = connections if isinstance(connections, dict) else {}
+            kwargs.setdefault("cache", cache)
             # add 'connections' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("connections", {})
@@ -126,6 +135,7 @@ class NetboxNornirInventoryTasks:
         if circuits:
             # decide on get_interfaces arguments
             kwargs = circuits if isinstance(circuits, dict) else {}
+            kwargs.setdefault("cache", cache)
             # add 'circuits' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("circuits", {})
@@ -142,6 +152,7 @@ class NetboxNornirInventoryTasks:
         if bgp_peerings:
             # decide on get_interfaces arguments
             kwargs = bgp_peerings if isinstance(bgp_peerings, dict) else {}
+            kwargs.setdefault("cache", cache)
             # add 'bgp_peerings' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("bgp_peerings", {})
@@ -155,34 +166,3 @@ class NetboxNornirInventoryTasks:
                 hosts[device]["data"]["bgp_peerings"] = device_bgp_peerings
 
         return ret
-
-    def get_nornir_hosts(self, kwargs: dict, timeout: int) -> List[str]:
-        """
-        Retrieves a list of unique Nornir hosts from Nornir service based on provided filter criteria.
-
-        Args:
-            kwargs (dict): Dictionary of keyword arguments, where keys starting with 'F' are used as filters.
-            timeout (int): Timeout value (in seconds) for the job execution.
-
-        Returns:
-            list: Sorted list of unique Nornir host names that match the filter criteria.
-
-        Notes:
-            - Only filters with keys starting with 'F' are considered.
-            - Hosts are collected from all workers where the job did not fail.
-        """
-        ret = []
-        filters = {k: v for k, v in kwargs.items() if k.startswith("F")}
-        if filters:
-            nornir_hosts = self.client.run_job(
-                "nornir",
-                "get_nornir_hosts",
-                kwargs=filters,
-                workers="all",
-                timeout=timeout,
-            )
-            for w, r in nornir_hosts.items():
-                if r["failed"] is False and isinstance(r["result"], list):
-                    ret.extend(r["result"])
-
-        return list(sorted(set(ret)))

@@ -141,6 +141,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     ]  # Header row for summary table
     total_rows = 1  # Counter for total table rows (includes header)
     table_rows = []  # List to collect and sort table rows
+    total_failed = 0  # number of tests failed
 
     # HTML output buffers
     tests_details_html = ""  # HTML for hierarchical tests details section
@@ -203,10 +204,20 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     if total_rows > 1:
         # Sort table rows by host name, then by test name
         table_rows.sort(key=lambda x: (x[0], x[1]))
-        # Rebuild table_text with sorted rows
-        for index, row in enumerate(table_rows, start=1):
-            row.insert(0, index)
-            table_text.extend(row)
+        index = 1
+        # Add failed tests to the top
+        for row in table_rows:
+            if "FAIL" in row[2]:
+                row.insert(0, index)
+                table_text.extend(row)
+                index += 1
+                total_failed += 1
+        # Append successful tests
+        for row in table_rows:
+            if "PASS" in row[2]:
+                row.insert(0, index)
+                table_text.extend(row)
+                index += 1
 
     # Prepare Tests HTMLs
     if hosts_tests_results:
@@ -230,20 +241,24 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
                     result = test.get("result", "N/A")
                     status_icon = "✅ PASS" if result == "PASS" else "❌ FAIL"
 
+                    # form comments section
+                    comments = []
+                    for comment_line in test.get("comments", "").splitlines():
+                        comments.append(f"\n> {comment_line}")
+                    comments = "".join(comments)
+
                     tests_details_html += (
                         f'<details style="margin-left:40px;">\n'
                         f"<summary>{name} {status_icon}</summary>\n\n"
-                        f"- **Result:** {result}\n"
-                        f"- **Criteria:** {test.get('criteria', 'N/A')}\n"
-                        f"- **Exception:** {test.get('exception', 'N/A')}\n"
                         f"- **Task:** {test.get('task', 'N/A')}\n"
                         f"- **Test:** {test.get('test', 'N/A')}\n"
-                        f"- **Success:** {test.get('success', 'N/A')}\n"
+                        f"- **Criteria:** {test.get('criteria', 'N/A')}\n"
+                        f"- **Result:** {result}\n"
+                        f"- **Exception:** {test.get('exception', 'N/A')}\n"
                         f"- **Failed:** {test.get('failed', 'N/A')}\n"
-                        f"- **Changed:** {test.get('changed', 'N/A')}\n"
                         f"- **Groups:** {', '.join(test.get('groups', []))}\n"
                         f"- **Description:** {test.get('description', '')}\n"
-                        f"- **Comments:** {test.get('comments', '')}\n\n"
+                        f"- **Comments:** {comments}\n\n"
                         f"</details>\n\n"
                     )
 
@@ -305,7 +320,11 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     # Tests Summary section
     md.new_header(level=2, title="Summary")
     if total_rows > 1:
-        md.new_paragraph(f"Total tests completed - {total_rows - 1}\n\n")
+        md.new_paragraph(
+            f"Tests total - {total_rows - 1}, "
+            f"failed - {total_failed}, "
+            f"success rate - {int((total_failed / (total_rows - 1)) * 100)}%\n\n"
+        )
         md.new_table(columns=5, rows=total_rows, text=table_text, text_align="left")
     else:
         md.new_paragraph("❌ Failed to produce summary results.\n\n")

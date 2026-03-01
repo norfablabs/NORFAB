@@ -15,235 +15,6 @@ log = logging.getLogger(__name__)
 class NetboxInterfacesTasks:
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
-    def get_interfaces_graphql(
-        self,
-        job: Job,
-        instance: Union[None, str] = None,
-        devices: Union[None, list] = None,
-        interface_list: Union[None, list] = None,
-        interface_regex: Union[None, str] = None,
-        ip_addresses: bool = False,
-        inventory_items: bool = False,
-        dry_run: bool = False,
-        cache: Union[bool, str] = None,
-        branch: str = None,
-    ) -> Result:
-        """
-        Retrieve device interfaces from Netbox using GraphQL API.
-
-        Args:
-            job: NorFab Job object containing relevant metadata
-            instance (str, optional): Netbox instance name.
-            devices (list, optional): List of devices to retrieve interfaces for.
-            interface_list (list, optional): List of interface names to retrieve.
-            interface_regex (str, optional): Regex pattern to match interfaces by name, case insensitive.
-            ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.
-            inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.
-            dry_run (bool, optional): If True, only return query content, do not run it. Defaults to False.
-
-        Returns:
-            dict: Dictionary keyed by device name with interface details:
-
-                ```
-                nf#netbox get interfaces devices fceos4 interface-regex "eth9.*"
-                {
-                    "netbox-worker-1.2": {
-                        "fceos4": {
-                            "eth9": {
-                                "bridge": null,
-                                "bridge_interfaces": [],
-                                "child_interfaces": [],
-                                "custom_fields": {},
-                                "description": "Interface 9 description",
-                                "duplex": null,
-                                "enabled": true,
-                                "id": "495",
-                                "label": "",
-                                "last_updated": "2026-01-02T22:49:34.905510+00:00",
-                                "mac_addresses": [],
-                                "mark_connected": false,
-                                "member_interfaces": [],
-                                "mode": "tagged",
-                                "mtu": 1500,
-                                "parent": null,
-                                "speed": null,
-                                "tagged_vlans": [],
-                                "tags": [],
-                                "untagged_vlan": null,
-                                "vrf": null,
-                                "wwn": null
-                            }
-                        }
-                    }
-                }
-                nf#
-                ```
-        """
-        instance = instance or self.default_instance
-        devices = devices or []
-        ret = Result(
-            task=f"{self.name}:get_interfaces",
-            result={d: {} for d in devices},
-            resources=[instance],
-        )
-
-        intf_fields = [
-            "name",
-            "enabled",
-            "description",
-            "mtu",
-            "parent {name}",
-            "mode",
-            "untagged_vlan {vid name}",
-            "vrf {name}",
-            "tagged_vlans {vid name}",
-            "tags {name}",
-            "custom_fields",
-            "last_updated",
-            "bridge {name}",
-            "bridge_interfaces {name}",
-            "member_interfaces {name}",
-            "wwn",
-            "duplex",
-            "speed",
-            "id",
-            "device {name}",
-            "label",
-            "mark_connected",
-        ]
-        intf_fields.append("mac_addresses {mac_address}")
-
-        # add IP addresses to interfaces fields
-        if ip_addresses:
-            intf_fields.append(
-                "ip_addresses {address status role dns_name description custom_fields last_updated tenant {name} tags {name}}"
-            )
-            intf_fields.append(
-                "child_interfaces {name vrf {name} ip_addresses {address status role dns_name description custom_fields last_updated tenant {name} tags {name}}}"
-            )
-        else:
-            intf_fields.append("child_interfaces {name vrf {name}}")
-
-        # form interfaces query dictionary
-        dlist = str(devices).replace("'", '"')  # swap quotes
-        if self.nb_version[instance] >= (4, 4, 0):
-            # add interface name regex filter
-            if interface_regex:
-                filters = (
-                    "{device: {name: {in_list: "
-                    + dlist
-                    + "}}"
-                    + ", name: {i_regex: "
-                    + f'"{interface_regex}"'
-                    + "}}"
-                )
-            elif interface_list:
-                ilist = str(interface_list).replace("'", '"')  # swap quotes
-                filters = (
-                    "{device: {name: {in_list: "
-                    + dlist
-                    + "}}"
-                    + ", name: {in_list: "
-                    + ilist
-                    + "}}"
-                )
-            else:
-                filters = "{device: {name: {in_list: " + dlist + "}}}"
-        else:
-            raise UnsupportedNetboxVersion(
-                f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
-                f"minimum required version is {self.compatible_ge_v4}"
-            )
-
-        queries = {
-            "interfaces": {
-                "obj": "interface_list",
-                "filters": filters,
-                "fields": intf_fields,
-            }
-        }
-
-        # add query to retrieve inventory items
-        if inventory_items:
-            if self.nb_version[instance] >= (4, 4, 0):
-                dlist = str(devices).replace("'", '"')  # swap quotes
-                inv_filters = (
-                    "{device: {name: {in_list: "
-                    + dlist
-                    + '}}, component_type: {app_label: {exact: "dcim"}}}'
-                )
-            else:
-                raise UnsupportedNetboxVersion(
-                    f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
-                    f"minimum required version is {self.compatible_ge_v4}"
-                )
-            inv_fields = [
-                "name",
-                "component {... on InterfaceType {id}}",
-                "role {name}",
-                "manufacturer {name}",
-                "custom_fields",
-                "label",
-                "description",
-                "tags {name}",
-                "asset_tag",
-                "serial",
-                "part_id",
-            ]
-            queries["inventor_items"] = {
-                "obj": "inventory_item_list",
-                "filters": inv_filters,
-                "fields": inv_fields,
-            }
-
-        query_result = self.graphql(
-            job=job, instance=instance, queries=queries, dry_run=dry_run
-        )
-
-        # return dry run result
-        if dry_run:
-            return query_result
-
-        interfaces_data = query_result.result
-
-        # exit if no Interfaces returned
-        if interfaces_data is None or not interfaces_data.get("interfaces"):
-            raise Exception(
-                f"{self.name} - no interfaces data in '{interfaces_data}' returned by '{instance}' "
-                f"for devices {', '.join(devices)}"
-            )
-
-        # process query results
-        interfaces_list = interfaces_data.pop("interfaces")
-
-        # process inventory items
-        if inventory_items:
-            inventory_items_list = interfaces_data.pop("inventor_items")
-            # transform inventory items list to a dictionary keyed by intf_id
-            inventory_items_dict = {}
-            while inventory_items_list:
-                inv_item = inventory_items_list.pop()
-                # skip inventory items that does not assigned to components
-                if inv_item.get("component") is None:
-                    continue
-                intf_id = str(inv_item.pop("component").pop("id"))
-                inventory_items_dict.setdefault(intf_id, [])
-                inventory_items_dict[intf_id].append(inv_item)
-            # iterate over interfaces and add inventory items
-            for intf in interfaces_list:
-                intf["inventory_items"] = inventory_items_dict.pop(intf["id"], [])
-
-        # transform interfaces list to dictionary keyed by device and interfaces names
-        while interfaces_list:
-            intf = interfaces_list.pop()
-            device_name = intf.pop("device").pop("name")
-            intf_name = intf.pop("name")
-            if device_name in ret.result:  # Netbox issue #16299
-                ret.result[device_name][intf_name] = intf
-
-        return ret
-
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_interfaces(
         self,
         job: Job,
@@ -254,11 +25,11 @@ class NetboxInterfacesTasks:
         ip_addresses: bool = False,
         inventory_items: bool = False,
         dry_run: bool = False,
-        cache: Union[bool, str] = None,
+        cache: Union[None, bool, str] = None,
         branch: str = None,
     ) -> Result:
         """
-        Retrieve device interfaces from Netbox using pynetbox REST API.
+        Retrieve device interfaces from Netbox using Pynetbox REST API.
 
         Args:
             job: NorFab Job object containing relevant metadata
@@ -272,6 +43,131 @@ class NetboxInterfacesTasks:
 
         Returns:
             dict: Dictionary keyed by device name with interface details.
+
+        Example of return data for single interface:
+
+            ```
+            "eth9": {
+                "_occupied": true,
+                "bridge": null,
+                "bridge_interfaces": [],
+                "cable": {
+                    "description": "",
+                    "display": "#216",
+                    "id": 216,
+                    "label": "",
+                },
+                "cable_end": "A",
+                "child_interfaces": [
+                    {
+                        "name": "eth9.19",
+                        "vrf": {
+                            "name": "Voice"
+                        }
+                    }
+                ],
+                ip_addresses: [],
+                inventory_items: [],
+                "connected_endpoints": [
+                    {
+                        "_occupied": true,
+                        "cable": {
+                            "description": "",
+                            "display": "#216",
+                            "id": 216,
+                            "label": "",
+                        },
+                        "description": "Interface 3 description",
+                        "device": {
+                            "description": "",
+                            "display": "fceos5",
+                            "id": 310,
+                            "name": "fceos5",
+                        },
+                        "display": "eth3",
+                        "id": 1018,
+                        "name": "eth3",
+                    }
+                ],
+                "connected_endpoints_reachable": true,
+                "connected_endpoints_type": "dcim.interface",
+                "count_fhrp_groups": 0,
+                "count_ipaddresses": 0,
+                "created": "2026-02-09T10:40:15.684115Z",
+                "custom_fields": {},
+                "description": "Interface 9 description",
+                "device": {
+                    "description": "",
+                    "display": "fceos4 (UUID-123451)",
+                    "id": 309,
+                    "name": "fceos4",
+                },
+                "display": "eth9",
+                "duplex": null,
+                "enabled": true,
+                "id": "1014",
+                "l2vpn_termination": null,
+                "label": "",
+                "lag": null,
+                "last_updated": "2026-02-09T10:40:43.179809Z",
+                "link_peers": [
+                    {
+                        "_occupied": true,
+                        "cable": {
+                            "description": "",
+                            "display": "#216",
+                            "id": 216,
+                            "label": "",
+                        },
+                        "description": "Interface 3 description",
+                        "device": {
+                            "description": "",
+                            "display": "fceos5",
+                            "id": 310,
+                            "name": "fceos5",
+                        },
+                        "display": "eth3",
+                        "id": 1018,
+                        "name": "eth3",
+                    }
+                ],
+                "link_peers_type": "dcim.interface",
+                "mac_address": null,
+                "mac_addresses": [],
+                "mark_connected": false,
+                "member_interfaces": [],
+                "mgmt_only": false,
+                "mode": "tagged",
+                "module": null,
+                "mtu": 1500,
+                "name": "eth9",
+                "owner": null,
+                "parent": null,
+                "poe_mode": null,
+                "poe_type": null,
+                "primary_mac_address": null,
+                "qinq_svlan": null,
+                "rf_channel": null,
+                "rf_channel_frequency": null,
+                "rf_channel_width": null,
+                "rf_role": null,
+                "speed": null,
+                "tagged_vlans": [],
+                "tags": [],
+                "tx_power": null,
+                "type": {
+                    "label": "1000BASE-T (1GE)",
+                    "value": "1000base-t"
+                },
+                "untagged_vlan": null,
+                "vdcs": [],
+                "vlan_translation_policy": null,
+                "vrf": null,
+                "wireless_lans": [],
+                "wireless_link": null,
+                "wwn": null
+            }
+            ```
         """
         instance = instance or self.default_instance
         nb = self._get_pynetbox(instance, branch=branch)
@@ -368,8 +264,10 @@ class NetboxInterfacesTasks:
             intf_data["member_interfaces"] = [
                 {"name": m.name} for m in member_intf_by_lag_id.get(intf.id, [])
             ]
+            intf_data["ip_addresses"] = []
             if ip_addresses:
                 intf_data["ip_addresses"] = intf_ip_addresses
+            intf_data["inventory_items"] = []
             if inventory_items:
                 intf_data["inventory_items"] = inv_by_intf_id.get(intf.id, [])
 

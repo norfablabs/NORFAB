@@ -778,7 +778,9 @@ class TestGetInterfaces:
         #     ), f"{worker} did not return correct query string"
 
         for worker, res in ret.items():
-            assert res["result"] == {'filter_params': {'device__in': ['ceos1', 'fceos4']}}, f"{worker} did not return correct query string"
+            assert res["result"] == {
+                "filter_params": {"device__in": ["ceos1", "fceos4"]}
+            }, f"{worker} did not return correct query string"
 
     def test_get_interfaces_add_ip(self, nfclient):
         ret = nfclient.run_job(

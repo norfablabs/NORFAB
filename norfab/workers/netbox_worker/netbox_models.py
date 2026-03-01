@@ -8,8 +8,41 @@ from pydantic import (
     Field,
 )
 from enum import Enum
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 from norfab.models import NorFabClientRunJob
+
+# --------------------------------------------------------------------------
+# CONFIGURATION MODEL
+# --------------------------------------------------------------------------
+
+
+class CacheUseEnum(str, Enum):
+    force = "force"
+    refresh = "refrresh"
+
+
+class NetboxInstanceConfig(BaseModel):
+    default: StrictBool = Field(
+        None, description="Is this default instance of Netbox or not"
+    )
+    url: StrictStr = Field(None, description="Netbox URL")
+    token: StrictStr = Field(None, description="Netbox auth token")
+    ssl_verify: StrictBool = Field(True, description="Verify SSL vertsor not")
+
+
+class NetboxConfigModel(BaseModel):
+    cache_use: Union[CacheUseEnum, StrictBool] = Field(
+        True, description="Use cache or not"
+    )
+    cache_ttl: StrictInt = Field(True, description="Cache TTL")
+    instances: Dict[StrictStr, NetboxInstanceConfig] = Field(
+        None, description="Netbox instance config keyed by instance name"
+    )
+
+
+# --------------------------------------------------------------------------
+# CORE MODELs
+# --------------------------------------------------------------------------
 
 
 class NetboxCommonArgs(BaseModel):
@@ -42,45 +75,6 @@ class NetboxFastApiArgs(NorFabClientRunJob):
 
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "any", description="Filter worker to target"
-    )
-
-
-class PrefixStatusEnum(str, Enum):
-    active = "active"
-    reserved = "reserved"
-    container = "container"
-    deprecated = "deprecated"
-
-
-class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True):
-    parent: Union[StrictStr, dict] = Field(
-        ...,
-        description="Parent prefix to allocate new prefix from",
-    )
-    description: Union[None, StrictStr] = Field(
-        None, description="Description for new prefix"
-    )
-    prefixlen: StrictInt = Field(30, description="The prefix length of the new prefix")
-    vrf: Union[None, StrictStr] = Field(
-        None, description="Name of the VRF to associate with the prefix"
-    )
-    tags: Union[None, StrictStr, list[StrictStr]] = Field(
-        None, description="List of tags to assign to the prefix"
-    )
-    tenant: Union[None, StrictStr] = Field(
-        None, description="Name of the tenant to associate with the prefix"
-    )
-    comments: Union[None, StrictStr] = Field(
-        None, description="Comments for the prefix"
-    )
-    role: Union[None, StrictStr] = Field(
-        None, description="Role to assign to the prefix"
-    )
-    site: Union[None, StrictStr] = Field(
-        None, description="Name of the site to associate with the prefix"
-    )
-    status: Union[None, PrefixStatusEnum] = Field(
-        None, description="Status of the prefix"
     )
 
 

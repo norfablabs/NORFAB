@@ -397,6 +397,7 @@ class NorFabShell(BaseModel):
         prompt = "nf#"
         intro = "Welcome to NorFab Interactive Shell."
         methods_override = {"preloop": "cmd_preloop_override"}
+        history_file = "./__norfab__/nfcli_history.txt"
 
     @classmethod
     def cmd_preloop_override(self):

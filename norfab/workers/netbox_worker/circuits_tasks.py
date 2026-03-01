@@ -157,7 +157,7 @@ class NetboxCircuitsTasks:
         cid: Union[None, list] = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
-        cache: Union[bool, str] = True,
+        cache: Union[None, bool, str] = None,
         add_interface_details: bool = False,
     ) -> Result:
         """

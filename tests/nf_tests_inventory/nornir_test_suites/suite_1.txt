@@ -2,7 +2,20 @@
   test: contains
   pattern: "cEOS"
   name: check ceos version
+  description: Test that cEOS pattern present in show version output
+  groups:
+    - SYS
+    - SOFTWARE
+  comments: If software version fails need to upgrade software
 - test: contains_lines
   pattern: ["1.1.1.1"]
   task: "show ntp associations"
   name: check NTP status
+  description: Verify that NTP server 1.1.1.1 is in configuration
+  groups:
+    - SYS
+  comments: |
+    To fix this issue need to add to configuration:
+
+    ntp server 1.1.1.1
+    

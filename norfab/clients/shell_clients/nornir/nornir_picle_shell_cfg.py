@@ -240,7 +240,9 @@ class NornirCfgShell(
 
     @staticmethod
     def source_config():
-        return ClientRunJobArgs.walk_norfab_files()
+        completions = ClientRunJobArgs.walk_norfab_files()
+        completions.append("load-terminal")
+        return completions
 
     @staticmethod
     def source_job_data():

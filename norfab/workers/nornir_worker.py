@@ -537,9 +537,9 @@ class NornirWorker(NFPWorker):
                 f"'{', '.join(list(nb_inventory_data.keys()))}' returned no hosts data."
             )
             log.error(msg)
-            raise RuntimeError(msg)
+            job.event(msg, severity="ERROR")
 
-        job.event("Pulled Nornir inventory from Netbox")
+        job.event("Completed processing Nornir inventory from Netbox")
 
         return ret
 

@@ -10,7 +10,7 @@ from norfab.clients.picle_shell_client import mount_shell_plugins, NorFabShell
 from picle import App
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def nfclient():
     """
     Fixture to start NorFab and return client object,
@@ -23,7 +23,7 @@ def nfclient():
     nf.destroy()  # teardown
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def nfclient_dict_inventory():
     """
     Fixture to start NorFab and return client object,
@@ -31,7 +31,7 @@ def nfclient_dict_inventory():
     """
     data = {
         "broker": {
-            "endpoint": "tcp://127.0.0.1:5555",
+            "endpoint": "tcp://127.0.0.1:7777",
             "shared_key": "D>[[2]NH9#dN5?!o5DtibYYvV)ev?oRl}#P[>(q3",
         },
         "topology": {"broker": True, "workers": ["nornir-worker-1", "nornir-worker-2"]},
@@ -65,7 +65,7 @@ def nfclient_dict_inventory():
     nf.destroy()  # teardown
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def picle_shell():
     mock_stdin = unittest.mock.create_autospec(sys.stdin)
     mock_stdout = unittest.mock.create_autospec(sys.stdout)

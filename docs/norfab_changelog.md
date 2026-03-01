@@ -1,20 +1,35 @@
-# 0.16.0
+# 0.15.5
 
 ## FEATURES
 
 1. Nornir Tests task - adding support for `groups` argument, added support to nfcli shell as well
-2. Markdown Tests report - added description, comments and groups to the output for individual tests
+2. Adding configuration model to edit NorFab configuration using NFCLI shell
+3. NFCLI - adding history and commands history persistency across runs
+4. Nornir netbox get inventory task added support to pass on `cache` variable to control overall cache behaviour
+5. Netbox get_interfaces task uses REST API now and return interfaces extra information, such as connected endpoints
 
 ## CHANGES
 
 1. Dependencies updates:
 
-    - picle: 0.9.0 → 0.10.0
+    - picle: 0.9.0 → 0.11.0 - enhanced command help and man tree output, commands history
 
 2. Netbox worker refactoring:
   
    - moving tasks out to dedicated files to shrink main worker .py file
    - moved Netbox worker related models under worker folder itself
+   - get_circuit changing cache argument to None to honor global cache setting
+   - get_interfaces task refactored to use REST API instead of GraphQL API
+
+3. Netbox get_interfaces - refactored to use rest api via pynetbox instead of GraphQL API
+4. Enhancing nornir tests markdown results report - adding groups, description,m comments to test details, added total failed an success rate counters, modified table output to display failed tests first.
+
+## BUGS
+
+1. NFCLI netbox get functions - adding missing pipe models
+2. Client - fixing race condition when calling destroy and dispatcher threads still using zmq socket
+3. NFCLI fixing Nornir cli and cfg tasks multiline collection of commands
+4. Nornir worker - fixing not to raise error when not able to load Nebtox inventory.
 
 ---
 

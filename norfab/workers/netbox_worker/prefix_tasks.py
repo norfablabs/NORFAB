@@ -1,13 +1,69 @@
 import ipaddress
 import logging
 
-from typing import Union
+from pydantic import (
+    BaseModel,
+    StrictBool,
+    StrictInt,
+    StrictStr,
+    Field,
+)
+from enum import Enum
+from typing import Union, Optional, List
 from norfab.core.worker import Task, Job
 from norfab.models import Result
-from .netbox_models import CreatePrefixInput, NetboxFastApiArgs
+from .netbox_models import NetboxFastApiArgs, NetboxCommonArgs
 from .netbox_exceptions import NetboxAllocationError
 
 log = logging.getLogger(__name__)
+
+# --------------------------------------------------------------------------
+# PREFIX TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class PrefixStatusEnum(str, Enum):
+    active = "active"
+    reserved = "reserved"
+    container = "container"
+    deprecated = "deprecated"
+
+
+class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True):
+    parent: Union[StrictStr, dict] = Field(
+        ...,
+        description="Parent prefix to allocate new prefix from",
+    )
+    description: Union[None, StrictStr] = Field(
+        None, description="Description for new prefix"
+    )
+    prefixlen: StrictInt = Field(30, description="The prefix length of the new prefix")
+    vrf: Union[None, StrictStr] = Field(
+        None, description="Name of the VRF to associate with the prefix"
+    )
+    tags: Union[None, StrictStr, list[StrictStr]] = Field(
+        None, description="List of tags to assign to the prefix"
+    )
+    tenant: Union[None, StrictStr] = Field(
+        None, description="Name of the tenant to associate with the prefix"
+    )
+    comments: Union[None, StrictStr] = Field(
+        None, description="Comments for the prefix"
+    )
+    role: Union[None, StrictStr] = Field(
+        None, description="Role to assign to the prefix"
+    )
+    site: Union[None, StrictStr] = Field(
+        None, description="Name of the site to associate with the prefix"
+    )
+    status: Union[None, PrefixStatusEnum] = Field(
+        None, description="Status of the prefix"
+    )
+
+
+# --------------------------------------------------------------------------
+# PREFIX TASKS
+# --------------------------------------------------------------------------
 
 
 class NetboxPrefixTasks:

@@ -19,7 +19,7 @@ class NetboxConnectionsTasks:
         instance: Union[None, str] = None,
         dry_run: bool = False,
         cables: bool = False,
-        cache: Union[bool, str] = None,
+        cache: Union[None, bool, str] = None,
         include_virtual: bool = True,
         interface_regex: Union[None, str] = None,
     ) -> Result:
