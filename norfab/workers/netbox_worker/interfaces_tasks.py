@@ -222,7 +222,7 @@ class NetboxInterfacesTasks:
 
         # build REST filter params
         if devices:
-            filter_params["device__in"] = devices
+            filter_params["device"] = devices
         if interface_list:
             filter_params["name"] = interface_list
         if interface_regex:
@@ -250,7 +250,7 @@ class NetboxInterfacesTasks:
 
         # fetch IP addresses if requested (one bulk call keyed by assigned_object_id)
         if ip_addresses:
-            for ip in nb.ipam.ip_addresses.filter(device__in=devices):
+            for ip in nb.ipam.ip_addresses.filter(device=devices):
                 if (
                     ip.assigned_object_id
                     and ip.assigned_object_type == "dcim.interface"
@@ -261,7 +261,7 @@ class NetboxInterfacesTasks:
 
         # fetch inventory items if requested (one bulk call keyed by component_id)
         if inventory_items:
-            for item in nb.dcim.inventory_items.filter(device__in=devices):
+            for item in nb.dcim.inventory_items.filter(device=devices):
                 if item.component_id and item.component_type == "dcim.interface":
                     inv_by_intf_id.setdefault(item.component_id, []).append(
                         flatten_inventory_item(dict(item))

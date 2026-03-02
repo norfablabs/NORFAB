@@ -759,27 +759,9 @@ class TestGetInterfaces:
         )
         pprint.pprint(ret)
 
-        # for worker, res in ret.items():
-        #     assert res["result"]["data"] == (
-        #         '{"query": "query {interfaces: '
-        #         + "interface_list(filters: {device: "
-        #         + '{name: {in_list: [\\"ceos1\\", '
-        #         + '\\"fceos4\\"]}}}) {name enabled '
-        #         + "description mtu parent {name} mode "
-        #         + "untagged_vlan {vid name} vrf {name} "
-        #         + "tagged_vlans {vid name} tags {name} "
-        #         + "custom_fields last_updated bridge "
-        #         + "{name} child_interfaces {name} "
-        #         + "bridge_interfaces {name} "
-        #         + "member_interfaces {name} wwn duplex "
-        #         + "speed id device {name} label "
-        #         + "mark_connected mac_addresses "
-        #         + '{mac_address}}}"}'
-        #     ), f"{worker} did not return correct query string"
-
         for worker, res in ret.items():
             assert res["result"] == {
-                "filter_params": {"device__in": ["ceos1", "fceos4"]}
+                "filter_params": {"device": ["ceos1", "fceos4"]}
             }, f"{worker} did not return correct query string"
 
     def test_get_interfaces_add_ip(self, nfclient):

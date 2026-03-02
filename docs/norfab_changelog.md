@@ -1,3 +1,12 @@
+# 0.16.1
+
+## BUGS
+
+1. Fixing Netbox dependency for data-model-generator library
+2. Fixing Netbox get_interface queries performance
+
+---
+
 # 0.16.0
 
 ## FEATURES

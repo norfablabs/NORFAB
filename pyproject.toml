@@ -3,7 +3,7 @@ name = "norfab"
 
 [tool.poetry]
 name = "norfab"
-version = "0.16.0"
+version = "0.16.1"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
 authors = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
 maintainers = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
@@ -162,7 +162,8 @@ nornirservice = [
 netboxservice = [
     "requests",
     "pynetbox",
-    "diskcache"
+    "diskcache",
+    "datamodel-code-generator"
 ]
 fastapiservice = [
     "fastapi",
@@ -178,6 +179,7 @@ agentservice = [
     "langchain-community",
     "langchain-ollama",
     "ollama",
+    "datamodel-code-generator"
 ]
 fastmcpservice = [
     "mcp"
