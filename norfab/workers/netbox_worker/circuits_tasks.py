@@ -163,6 +163,14 @@ class NetboxCircuitsTasks:
         """
         Retrieve circuit information for specified devices from Netbox.
 
+        **How it works:**
+        1. User requests circuits for devices: `["device1", "device2"]`
+        2. Fetch device data → Extract their sites: `["site1", "site2"]`
+        3. Query circuits WHERE `terminations.site IN (site1, site2)` ← **Broad query!**
+        4. For each circuit, trace termination paths
+        5. Map terminations to specific requested devices
+        6. Filter results client-side
+
         Args:
             job: NorFab Job object containing relevant metadata
             devices (list): List of device names to retrieve circuits for.

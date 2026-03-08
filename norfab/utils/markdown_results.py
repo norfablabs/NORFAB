@@ -323,7 +323,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         md.new_paragraph(
             f"Tests total - {total_rows - 1}, "
             f"failed - {total_failed}, "
-            f"success rate - {int((total_failed / (total_rows - 1)) * 100)}%\n\n"
+            f"success rate - {100 - int((total_failed / (total_rows - 1)) * 100)}%\n\n"
         )
         md.new_table(columns=5, rows=total_rows, text=table_text, text_align="left")
     else:

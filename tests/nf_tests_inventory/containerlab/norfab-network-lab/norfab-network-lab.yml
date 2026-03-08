@@ -6,7 +6,7 @@ topology:
   nodes:
     ceos-spine-1:
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.100.10
       ports:
         - 2200:22
@@ -14,7 +14,7 @@ topology:
         - 8300:830
     ceos-spine-2: 
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.100.11
       ports:
         - 2201:22
@@ -22,7 +22,7 @@ topology:
         - 8301:830
     ceos-leaf-1: 
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.100.12
       ports:
         - 2202:22
@@ -30,7 +30,7 @@ topology:
         - 8302:830
     ceos-leaf-2: 
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.100.13
       ports:
         - 2203:22
@@ -38,7 +38,7 @@ topology:
         - 8303:830
     ceos-leaf-3: 
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.100.14
       ports:
         - 2204:22
@@ -46,7 +46,7 @@ topology:
         - 8304:830
     vmx-1:
       kind: juniper_vmx
-      image: vrnetlab/juniper_vmx:23.2R2-S1.3
+      image: juniper_vmx:23.2R2-S1.3
       mgmt-ipv4: 172.100.100.15
       ports:
         - 2205:22
@@ -61,7 +61,7 @@ topology:
     - endpoints: ["ceos-spine-2:eth3", "ceos-leaf-2:eth2"]
     - endpoints: ["ceos-spine-1:eth4", "ceos-leaf-3:eth1"]
     - endpoints: ["ceos-spine-2:eth4", "ceos-leaf-3:eth2"]
-    - endpoints: ["ceos-spine-2:eth5", "vmx-1:eth1"]    
+    - endpoints: ["ceos-spine-2:eth5", "vmx-1:eth1"]  
     
 mgmt:
   network: norfab_network_lab_mgmt    # management network name

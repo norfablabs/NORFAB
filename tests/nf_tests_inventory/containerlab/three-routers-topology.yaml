@@ -4,7 +4,7 @@ topology:
   nodes:
     r1: 
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.101.12
       ports:
         - 12202:22
@@ -13,7 +13,7 @@ topology:
         - 14402:443
     r2: 
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.101.13
       ports:
         - 12203:22
@@ -22,7 +22,7 @@ topology:
         - 14403:443
     r3: 
       kind: ceos
-      image: ceosimage:4.30.0F
+      image: ceosimage:4.35.2F  
       mgmt-ipv4: 172.100.101.14
       ports:
         - 12204:22

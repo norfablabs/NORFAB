@@ -1,3 +1,11 @@
+# 0.16.2
+
+## BUGS
+
+1. Fixing markdown tests report to calculate success rate correctly
+
+---
+
 # 0.16.1
 
 ## BUGS
