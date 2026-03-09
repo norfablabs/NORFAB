@@ -36,6 +36,7 @@ from .shell_clients.workers.workers_picle_shell import (
 )
 from .shell_clients.common import listen_events, ClientRunJobArgs, log_error_or_result
 from .shell_clients.fastmcp import fastmcp_picle_shell
+from .shell_clients.fakenos import fakenos_picle_shell
 
 NFCLIENT = None
 RICHCONSOLE = Console()
@@ -110,6 +111,9 @@ class ShowCommandsModel(BaseModel):
     )
     fastmcp: fastmcp_picle_shell.FastMCPShowCommandsModel = Field(
         None, description="Show FastMCP service"
+    )
+    fakenos: fakenos_picle_shell.FakeNOSShowCommands = Field(
+        None, description="Show FakeNOS service"
     )
     agent: agent_picle_shell.AgentShowCommandsModel = Field(
         None, description="Show AI Agent service"
@@ -382,6 +386,9 @@ class NorFabShell(BaseModel):
     )
     fastapi: fastapi_picle_shell.FastAPIServiceCommands = Field(
         None, description="FastAPI service"
+    )
+    fakenos: fakenos_picle_shell.FakeNOSServiceCommands = Field(
+        None, description="FakeNOS service"
     )
     workflow: workflow_picle_shell.WorkflowServiceCommands = Field(
         None, description="Workflow service"

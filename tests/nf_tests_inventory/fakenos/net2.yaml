@@ -1,0 +1,7 @@
+hosts:
+  xr1:
+    username: admin
+    password: admin
+    port: 7001
+    nos:
+      plugin: NFIOSXR

@@ -1,1 +1,1 @@
-::: norfab.workers.netbox_worker
+::: norfab.workers.netbox_worker.netbox_worker

@@ -4,6 +4,16 @@
 
 1. Fixing markdown tests report to calculate success rate correctly
 
+## CHANGES
+
+1. Dependencies upgrades:
+
+  - picle 0.11.0 -> 0.11.1
+
+## FEATURES
+
+1. Adding new FakeNOS service to simulate networks interactions for automation testing
+
 ---
 
 # 0.16.1

@@ -1,0 +1,15 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Denis\AppData\Local\pypoetry\Cache\virtualenvs\norfab-BOcgwfhR-py3.11\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Denis\YandexDisk\Python\norfab
+configfile: pyproject.toml
+plugins: anyio-4.12.0, langsmith-0.4.56, typeguard-4.4.4
+collecting ... collected 13 items
+
+test_fakenos_service.py::TestFakenosWorker::test_get_inventory PASSED    [  7%]
+test_fakenos_service.py::TestFakenosWorker::test_get_version PASSED      [ 15%]
+test_fakenos_service.py::TestStartTask::test_start_task_net1 PASSED      [ 23%]
+test_fakenos_service.py::TestStartTask::test_start_task_net2 PASSED      [ 30%]
+test_fakenos_service.py::TestStartTask::test_start_task_both_networks PASSED [ 38%]
+test_fakenos_service.py::TestInspectNetworks::test_inspect_networks_all_details PASSED [ 46%]
+test_fakenos_service.py::TestInspectNetworks::test_inspect_networks_no_details PASSED [ 53%]

@@ -194,7 +194,7 @@ description = "Reusable constraint types to use with typing.Annotated"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\")"
+markers = "python_version < \"3.13\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fakenosservice\") or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\") or (python_version == \"3.13\" or python_full_version == \"3.14.0\") and (extra == \"fastapiservice\" or extra == \"full\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"agentservice\" or extra == \"netboxservice\")"
 files = [
     {file = "annotated_types-0.7.0-py3-none-any.whl", hash = "sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53"},
     {file = "annotated_types-0.7.0.tar.gz", hash = "sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89"},
@@ -307,7 +307,7 @@ description = "Modern password hashing for your software and your servers"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"nornirservice\" or extra == \"full\""
+markers = "python_version < \"3.13\" and (extra == \"fakenosservice\" or extra == \"nornirservice\" or extra == \"full\") or extra == \"nornirservice\" or extra == \"full\""
 files = [
     {file = "bcrypt-5.0.0-cp313-cp313t-macosx_10_12_universal2.whl", hash = "sha256:f3c08197f3039bec79cee59a606d62b96b16669cff3949f21e74796b6e3cd2be"},
     {file = "bcrypt-5.0.0-cp313-cp313t-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:200af71bc25f22006f4069060c88ed36f8aa4ff7f53e67ff04d2ab3f1e79a5b2"},
@@ -464,7 +464,7 @@ description = "Foreign Function Interface for Python calling C code."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "implementation_name == \"pypy\" or extra == \"nornirservice\" or extra == \"full\" or python_version < \"3.12\" and (extra == \"nornirservice\" or extra == \"full\" or extra == \"fastmcpservice\") and platform_python_implementation != \"PyPy\""
+markers = "implementation_name == \"pypy\" or (extra == \"nornirservice\" or extra == \"full\" or extra == \"fakenosservice\") and platform_python_implementation != \"PyPy\" and python_version < \"3.13\" or extra == \"nornirservice\" or extra == \"full\" or python_version < \"3.12\" and (extra == \"nornirservice\" or extra == \"full\" or extra == \"fakenosservice\" or extra == \"fastmcpservice\") and platform_python_implementation != \"PyPy\""
 files = [
     {file = "cffi-2.0.0-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:0cf2d91ecc3fcc0625c2c530fe004f82c110405f101548512cce44322fa8ac44"},
     {file = "cffi-2.0.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:f73b96c41e3b2adedc34a7356e64c8eb96e03a3782b535e043a986276ce12a49"},
@@ -714,7 +714,7 @@ description = "cryptography is a package which provides cryptographic recipes an
 optional = true
 python-versions = "!=3.9.0,!=3.9.1,>=3.8"
 groups = ["main"]
-markers = "extra == \"nornirservice\" or extra == \"full\" or python_version < \"3.12\" and (extra == \"fastmcpservice\" or extra == \"full\" or extra == \"nornirservice\")"
+markers = "python_version < \"3.13\" and (extra == \"fakenosservice\" or extra == \"nornirservice\" or extra == \"full\") or python_version < \"3.12\" and (extra == \"fakenosservice\" or extra == \"nornirservice\" or extra == \"full\" or extra == \"fastmcpservice\") or extra == \"nornirservice\" or extra == \"full\""
 files = [
     {file = "cryptography-46.0.5-cp311-abi3-macosx_10_9_universal2.whl", hash = "sha256:351695ada9ea9618b3500b490ad54c739860883df6c1f555e088eaf25b1bbaad"},
     {file = "cryptography-46.0.5-cp311-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:c18ff11e86df2e28854939acde2d003f7984f721eba450b56a200ad90eeb0e6b"},
@@ -833,6 +833,18 @@ validation = ["openapi-spec-validator (>=0.2.8,<0.8)", "prance (>=0.18.2)"]
 watch = ["watchfiles (>=1.1)"]
 
 [[package]]
+name = "detect"
+version = "2020.12.3"
+description = "detect OS and Python versions"
+optional = true
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"fakenosservice\" and python_version < \"3.13\""
+files = [
+    {file = "detect-2020.12.3.tar.gz", hash = "sha256:eecd6c41c17072b4db8dbfa850d979bda40b33b4f349ab4378205bceb74d712e"},
+]
+
+[[package]]
 name = "dictdiffer"
 version = "0.9.0"
 description = "Dictdiffer is a library that helps you to diff and patch dictionaries."
@@ -921,6 +933,25 @@ typing-extensions = {version = ">=4.6.0", markers = "python_version < \"3.13\""}
 
 [package.extras]
 test = ["pytest (>=6)"]
+
+[[package]]
+name = "fakenos"
+version = "1.0.0"
+description = "Fake Network Operating System"
+optional = true
+python-versions = "<3.13,>=3.8"
+groups = ["main"]
+markers = "extra == \"fakenosservice\" and python_version < \"3.13\""
+files = [
+    {file = "fakenos-1.0.0-py3-none-any.whl", hash = "sha256:a9a650ccc72cbb08d187b6ccf2bedc636cb2243f838b9afb28e4ea5a10707f52"},
+    {file = "fakenos-1.0.0.tar.gz", hash = "sha256:39cc786539967a7639425172d1d60d7d0c241fa3ff5459e27feb1f892628351a"},
+]
+
+[package.dependencies]
+detect = "==2020.12.*"
+paramiko = "<4.0"
+pydantic = "<3.0"
+pyyaml = "<7.0"
 
 [[package]]
 name = "fastapi"
@@ -1698,7 +1729,7 @@ description = "Pythonic task execution"
 optional = true
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "extra == \"nornirservice\" or extra == \"full\""
+markers = "(python_version == \"3.13\" or python_full_version == \"3.14.0\") and (extra == \"nornirservice\" or extra == \"full\")"
 files = [
     {file = "invoke-2.2.1-py3-none-any.whl", hash = "sha256:2413bc441b376e5cd3f55bb5d364f973ad8bdd7bf87e53c79de3c11bf3feecc8"},
     {file = "invoke-2.2.1.tar.gz", hash = "sha256:515bf49b4a48932b79b024590348da22f39c4942dff991ad1fb8b8baea1be707"},
@@ -3482,12 +3513,35 @@ lint = ["black"]
 
 [[package]]
 name = "paramiko"
+version = "3.5.1"
+description = "SSH2 protocol library"
+optional = true
+python-versions = ">=3.6"
+groups = ["main"]
+markers = "python_version < \"3.13\" and (extra == \"fakenosservice\" or extra == \"nornirservice\" or extra == \"full\")"
+files = [
+    {file = "paramiko-3.5.1-py3-none-any.whl", hash = "sha256:43b9a0501fc2b5e70680388d9346cf252cfb7d00b0667c39e80eb43a408b8f61"},
+    {file = "paramiko-3.5.1.tar.gz", hash = "sha256:b2c665bc45b2b215bd7d7f039901b14b067da00f3a11e6640995fd58f2664822"},
+]
+
+[package.dependencies]
+bcrypt = ">=3.2"
+cryptography = ">=3.3"
+pynacl = ">=1.5"
+
+[package.extras]
+all = ["gssapi (>=1.4.1) ; platform_system != \"Windows\"", "invoke (>=2.0)", "pyasn1 (>=0.1.7)", "pywin32 (>=2.1.8) ; platform_system == \"Windows\""]
+gssapi = ["gssapi (>=1.4.1) ; platform_system != \"Windows\"", "pyasn1 (>=0.1.7)", "pywin32 (>=2.1.8) ; platform_system == \"Windows\""]
+invoke = ["invoke (>=2.0)"]
+
+[[package]]
+name = "paramiko"
 version = "4.0.0"
 description = "SSH2 protocol library"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"nornirservice\" or extra == \"full\""
+markers = "(python_version == \"3.13\" or python_full_version == \"3.14.0\") and (extra == \"nornirservice\" or extra == \"full\")"
 files = [
     {file = "paramiko-4.0.0-py3-none-any.whl", hash = "sha256:0e20e00ac666503bf0b4eda3b6d833465a2b7aff2e2b3d79a8bba5ef144ee3b9"},
     {file = "paramiko-4.0.0.tar.gz", hash = "sha256:6a25f07b380cc9c9a88d2b920ad37167ac4667f8d9886ccebd8f90f654b5d69f"},
@@ -3522,15 +3576,15 @@ tests = ["pytest (>=9)", "typing-extensions (>=4.15)"]
 
 [[package]]
 name = "picle"
-version = "0.11.0"
+version = "0.11.1"
 description = "Python Interactive Command Line Shells"
 optional = true
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 markers = "extra == \"nfcli\" or extra == \"full\""
 files = [
-    {file = "picle-0.11.0-py3-none-any.whl", hash = "sha256:eb2daf39e1d6d7f65d156da2b7bb4e7eefe8e94788f802afb233f64365c2daa4"},
-    {file = "picle-0.11.0.tar.gz", hash = "sha256:02128351e0bff0855ea604eeb6bcca736578881a28636c865a07fd8eddf4c399"},
+    {file = "picle-0.11.1-py3-none-any.whl", hash = "sha256:c0d354c0d5c4e53d272b394a4d77231b047f0698b10731b3fee9379888a03bf8"},
+    {file = "picle-0.11.1.tar.gz", hash = "sha256:435f2117220b5b81fbec704685b2524ef48e9b38a2f4ac821321c9f033144b4f"},
 ]
 
 [package.dependencies]
@@ -3804,7 +3858,7 @@ description = "C parser in Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "implementation_name != \"PyPy\" and (extra == \"nornirservice\" or extra == \"full\") or implementation_name == \"pypy\" or python_version < \"3.12\" and (extra == \"nornirservice\" or extra == \"full\" or extra == \"fastmcpservice\") and platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\""
+markers = "(extra == \"nornirservice\" or extra == \"full\" or extra == \"fakenosservice\") and platform_python_implementation != \"PyPy\" and python_version < \"3.13\" and implementation_name != \"PyPy\" or implementation_name != \"PyPy\" and (extra == \"nornirservice\" or extra == \"full\") or implementation_name == \"pypy\" or python_version < \"3.12\" and (extra == \"nornirservice\" or extra == \"full\" or extra == \"fakenosservice\" or extra == \"fastmcpservice\") and platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\""
 files = [
     {file = "pycparser-3.0-py3-none-any.whl", hash = "sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"},
     {file = "pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"},
@@ -3817,7 +3871,7 @@ description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\")"
+markers = "python_version < \"3.13\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fakenosservice\") or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\" or extra == \"fakenosservice\") or extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\""
 files = [
     {file = "pydantic-2.12.5-py3-none-any.whl", hash = "sha256:e561593fccf61e8a20fc46dfc2dfe075b8be7d0188df33f221ad1f0139180f9d"},
     {file = "pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49"},
@@ -3841,7 +3895,7 @@ description = "Core functionality for Pydantic validation and serialization"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\")"
+markers = "python_version < \"3.13\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fakenosservice\") or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\") or (python_version == \"3.13\" or python_full_version == \"3.14.0\") and (extra == \"fastapiservice\" or extra == \"full\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"agentservice\" or extra == \"netboxservice\")"
 files = [
     {file = "pydantic_core-2.41.5-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:77b63866ca88d804225eaa4af3e664c5faf3568cea95360d21f4725ab6e07146"},
     {file = "pydantic_core-2.41.5-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:dfa8a0c812ac681395907e71e1274819dec685fec28273a28905df579ef137e2"},
@@ -4123,7 +4177,7 @@ description = "Python binding to the Networking and Cryptography (NaCl) library"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"nornirservice\" or extra == \"full\""
+markers = "python_version < \"3.13\" and (extra == \"fakenosservice\" or extra == \"nornirservice\" or extra == \"full\") or extra == \"nornirservice\" or extra == \"full\""
 files = [
     {file = "pynacl-1.6.2-cp314-cp314t-macosx_10_10_universal2.whl", hash = "sha256:622d7b07cc5c02c666795792931b50c91f3ce3c2649762efb1ef0d5684c81594"},
     {file = "pynacl-1.6.2-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:d071c6a9a4c94d79eb665db4ce5cedc537faf74f2355e4d502591d850d3913c0"},
@@ -5624,7 +5678,7 @@ files = [
     {file = "typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"},
     {file = "typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"},
 ]
-markers = {main = "python_version == \"3.10\" or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\") or extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\"", dev = "python_version == \"3.10\""}
+markers = {main = "python_version == \"3.10\" or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\" or extra == \"fakenosservice\") or python_version < \"3.13\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fakenosservice\") or extra == \"fastapiservice\" or extra == \"full\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"agentservice\" or extra == \"netboxservice\"", dev = "python_version == \"3.10\""}
 
 [[package]]
 name = "typing-inspect"
@@ -5650,7 +5704,7 @@ description = "Runtime typing introspection tools"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or python_version < \"3.12\" and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\")"
+markers = "(python_version < \"3.13\" or extra == \"fastapiservice\" or extra == \"full\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"agentservice\" or extra == \"netboxservice\") and (python_version < \"3.12\" or extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fakenosservice\") and (extra == \"agentservice\" or extra == \"full\" or extra == \"fastapiservice\" or extra == \"nfcli\" or extra == \"nornirservice\" or extra == \"netboxservice\" or extra == \"fastmcpservice\" or extra == \"fakenosservice\")"
 files = [
     {file = "typing_inspection-0.4.2-py3-none-any.whl", hash = "sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7"},
     {file = "typing_inspection-0.4.2.tar.gz", hash = "sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464"},
@@ -6513,6 +6567,7 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [extras]
 agentservice = ["datamodel-code-generator", "langchain", "langchain-community", "langchain-ollama", "ollama"]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-material-extensions", "mkdocstrings", "pygments", "pymdown-extensions"]
+fakenosservice = ["fakenos"]
 fastapiservice = ["diskcache", "fastapi", "python-multipart", "uvicorn"]
 fastmcpservice = ["mcp"]
 full = ["N2G", "cerberus", "diskcache", "dnspython", "fastapi", "jmespath", "langchain", "langchain-community", "langchain-ollama", "lxml", "mcp", "napalm", "ncclient", "netmiko", "nornir", "nornir-napalm", "nornir-netmiko", "nornir-salt", "nornir-scrapli", "ntc-templates", "ollama", "paramiko", "picle", "puresnmp", "pydantic", "pydantic", "pygnmi", "pynetbox", "python-multipart", "pythonping", "requests", "requests", "rich", "robotframework", "scrapli", "scrapli-community", "scrapli-netconf", "tabulate", "tabulate", "textfsm", "ttp", "ttp-templates", "uvicorn", "xmltodict"]
@@ -6524,4 +6579,4 @@ robot = []
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<=3.14"
-content-hash = "5e30c84f7b7982c4ac9677c5f3a6a71ef6fe3eaa3f33a8247eabef28d82093ad"
+content-hash = "39e7d3ca1ebb829aaf673b5900415284dc21fc764d99e493383cc3e0b4003e52"

@@ -1,0 +1,293 @@
+name: NFIOSXR
+
+initial_prompt: "{base_prompt}#"
+
+commands:
+  show running-config:
+    output: |
+      Sun Mar 08 12:00:00.000 UTC
+      Building configuration...
+      !! IOS XR Configuration 7.5.2
+      !! Last configuration change at Sun Mar 08 11:59:00 2026 by admin
+      !
+      hostname {base_prompt}
+      !
+      username admin
+       group root-lr
+       group cisco-support
+       secret 5 $1$abcd$XXXXXXXXXXXXXXXXXXXXXXXXX
+      !
+      aaa accounting exec default start-stop group tacacs+ local
+      aaa accounting system default start-stop group tacacs+
+      aaa authentication login default group tacacs+ local
+      aaa authorization exec default group tacacs+ local
+      !
+      ntp server 10.0.0.1
+      ntp server 10.0.0.2
+      !
+      call-home
+       service active
+       contact smart-licensing
+       profile CiscoTAC-1
+        active
+        destination transport-method email disable
+        destination transport-method http
+       !
+      !
+      interface Loopback0
+       description Management Loopback
+       ipv4 address 10.255.0.1 255.255.255.255
+      !
+      interface MgmtEth0/RSP0/CPU0/0
+       description OOB Management
+       ipv4 address 192.168.1.1 255.255.255.0
+      !
+      interface GigabitEthernet0/0/0/0
+       description Link to core-rtr1
+       mtu 9216
+       ipv4 address 10.1.0.1 255.255.255.252
+       ipv6 address 2001:db8:1::1/64
+       no shutdown
+      !
+      interface GigabitEthernet0/0/0/1
+       description Link to core-rtr2
+       mtu 9216
+       ipv4 address 10.1.0.5 255.255.255.252
+       ipv6 address 2001:db8:2::1/64
+       no shutdown
+      !
+      interface GigabitEthernet0/0/0/2
+       description Customer-A PE-CE Link
+       mtu 1514
+       ipv4 address 172.16.0.1 255.255.255.252
+       no shutdown
+      !
+      interface GigabitEthernet0/0/0/3
+       description VRRP LAN Segment - Core
+       mtu 1500
+       ipv4 address 10.10.0.2 255.255.255.0
+       no shutdown
+      !
+      interface GigabitEthernet0/0/0/4
+       description VRRP LAN Segment - Customer-B
+       mtu 1500
+       ipv4 address 10.10.1.2 255.255.255.0
+       no shutdown
+      !
+      router vrrp
+       interface GigabitEthernet0/0/0/3
+        address-family ipv4
+         vrrp 10
+          priority 110
+          preempt delay 30
+          timer advertise 1
+          address 10.10.0.1
+          track object TRACK-GE0 decrement 20
+         !
+        !
+       !
+       interface GigabitEthernet0/0/0/4
+        address-family ipv4
+         vrrp 30
+          priority 120
+          preempt delay 15
+          timer advertise 1
+          address 10.10.1.1
+          accept-mode disable
+         !
+        !
+       !
+      !
+      track object TRACK-GE0
+       type interface GigabitEthernet0/0/0/0 line-protocol
+      !
+      track object TRACK-GE1
+       type interface GigabitEthernet0/0/0/1 line-protocol
+      !
+      route-policy PASS-ALL
+        pass
+      end-policy
+      !
+      route-policy BGP-IN-CUSTOMER-A
+        if destination in PREFIX-LIST-CUSTOMER-A then
+          set local-preference 100
+          pass
+        else
+          drop
+        endif
+      end-policy
+      !
+      route-policy BGP-OUT-CUSTOMER-A
+        pass
+      end-policy
+      !
+      router ospf CORE
+       router-id 10.255.0.1
+       area 0
+        interface Loopback0
+         passive enable
+        !
+        interface GigabitEthernet0/0/0/0
+         cost 10
+         network point-to-point
+        !
+        interface GigabitEthernet0/0/0/1
+         cost 10
+         network point-to-point
+        !
+       !
+      !
+      router bgp 65000
+       bgp router-id 10.255.0.1
+       address-family ipv4 unicast
+        network 10.255.0.1/32
+        network 172.31.0.0/24
+        network 172.31.1.0/24
+       !
+       address-family ipv6 unicast
+        network 2001:db8:ffff::1/128
+       !
+       neighbor-group IBGP-PEERS
+        remote-as 65000
+        update-source Loopback0
+        address-family ipv4 unicast
+         next-hop-self
+        !
+        address-family ipv6 unicast
+         next-hop-self
+        !
+       !
+       neighbor-group EBGP-TRANSIT
+        address-family ipv4 unicast
+         route-policy PASS-ALL in
+         route-policy PASS-ALL out
+         send-community-ebgp
+        !
+       !
+       neighbor 10.255.0.2
+        use neighbor-group IBGP-PEERS
+        description core-rtr1
+       !
+       neighbor 10.255.0.3
+        use neighbor-group IBGP-PEERS
+        description core-rtr2
+       !
+       neighbor 10.255.0.4
+        use neighbor-group IBGP-PEERS
+        description rr1.lab
+       !
+       neighbor 10.255.0.5
+        use neighbor-group IBGP-PEERS
+        description rr2.lab
+       !
+       neighbor 203.0.113.1
+        use neighbor-group EBGP-TRANSIT
+        remote-as 1234
+        description ISP-A Transit
+        address-family ipv4 unicast
+         route-policy BGP-IN-ISP-A in
+         route-policy BGP-OUT-ISP-A out
+         maximum-prefix 800000 90
+        !
+       !
+       neighbor 203.0.113.5
+        use neighbor-group EBGP-TRANSIT
+        remote-as 5678
+        description ISP-B Transit
+        address-family ipv4 unicast
+         route-policy BGP-IN-ISP-B in
+         route-policy BGP-OUT-ISP-B out
+         maximum-prefix 800000 90
+        !
+       !
+       neighbor 198.51.100.1
+        remote-as 64512
+        description Peering-Partner-X
+        address-family ipv4 unicast
+         route-policy PASS-ALL in
+         route-policy PASS-ALL out
+        !
+       !
+       vrf CUSTOMER-A
+        rd 65000:100
+        address-family ipv4 unicast
+         redistribute connected
+         redistribute static
+        !
+        neighbor 172.16.0.2
+         remote-as 65100
+         description Customer-A CE Router - Site1
+         address-family ipv4 unicast
+          route-policy BGP-IN-CUSTOMER-A in
+          route-policy BGP-OUT-CUSTOMER-A out
+          as-override
+         !
+        !
+        neighbor 172.16.0.6
+         remote-as 65100
+         description Customer-A CE Router - Site2
+         address-family ipv4 unicast
+          route-policy BGP-IN-CUSTOMER-A in
+          route-policy BGP-OUT-CUSTOMER-A out
+          as-override
+         !
+        !
+       !
+       vrf CUSTOMER-B
+        rd 65000:200
+        address-family ipv4 unicast
+         redistribute connected
+         redistribute static
+        !
+        neighbor 172.16.1.2
+         remote-as 65200
+         description Customer-B CE Router - Site1
+         address-family ipv4 unicast
+          route-policy PASS-ALL in
+          route-policy PASS-ALL out
+         !
+        !
+        neighbor 172.16.1.6
+         remote-as 65200
+         description Customer-B CE Router - Site2
+         address-family ipv4 unicast
+          route-policy PASS-ALL in
+          route-policy PASS-ALL out
+         !
+        !
+       !
+       vrf MGMT
+        rd 65000:999
+        address-family ipv4 unicast
+         redistribute connected
+        !
+       !
+      !
+      mpls ldp
+       interface GigabitEthernet0/0/0/0
+       !
+       interface GigabitEthernet0/0/0/1
+       !
+      !
+      snmp-server community public RO
+      snmp-server community private RW
+      snmp-server host 10.0.0.100 traps version 2c public
+      !
+      logging 10.0.0.200
+      logging facility local7
+      logging source-interface Loopback0
+      !
+      ssh server v2
+      ssh server vrf default
+      !
+      line console
+       exec-timeout 10 0
+      !
+      line default
+       exec-timeout 10 0
+       transport input ssh
+      !
+      end
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: "Output to print for unknown commands"

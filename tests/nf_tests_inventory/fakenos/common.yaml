@@ -1,0 +1,4 @@
+service: fakenos
+
+nos_plugins:
+  NFIOSXR: nf://fakenos/custom_nos/norfab_ios_xr.yaml

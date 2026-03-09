@@ -13,8 +13,6 @@ from ..common import log_error_or_result
 from typing import Union, Optional, List, Dict
 from rich.console import Console
 
-RICHCONSOLE = Console()
-
 # ---------------------------------------------------------------------------------------------
 # COMMON FUNCTIONS
 # ---------------------------------------------------------------------------------------------
@@ -34,7 +32,6 @@ def print_nornir_results(data: Union[list, dict]):
         data = data.replace("FAIL", "[bold red]FAIL[/bold red]")
         data = data.replace("PASS", "[bold green]PASS[/bold green]")
         data = data.replace("ERROR", "[bold yellow]ERROR[/bold yellow]")
-        # RICHCONSOLE.print(data)
         return data
 
     # iterate over Nornir results dictionary, unpack and pretty print it

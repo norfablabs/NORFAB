@@ -1,11 +1,12 @@
 from norfab.models import Result
 from norfab.core.worker import Task, Job
 from nornir_salt.plugins.functions import InventoryFun
+from typing import Any
 
 
 class RuntimeInventoryTask:
     @Task(fastapi={"methods": ["POST"]})
-    def runtime_inventory(self, job: Job, action: str, **kwargs) -> Result:
+    def runtime_inventory(self, job: Job, action: str, **kwargs: Any) -> Result:
         """
         Task to work with Nornir runtime (in-memory) inventory.
 

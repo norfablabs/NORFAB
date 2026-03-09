@@ -111,6 +111,15 @@ nav:
       - Restart: workers/containerlab/services_containerlab_service_tasks_restart.md
       - Inspect: workers/containerlab/services_containerlab_service_tasks_inspect.md
       - Get Nornir Inventory: workers/containerlab/services_containerlab_service_tasks_nornir_inventory.md
+  - FakeNOS:
+    - Overview: workers/fakenos/services_fakenos_service.md
+    - Inventory: workers/fakenos/services_fakenos_service_inventory.md
+    - Tasks:
+      - Start: workers/fakenos/services_fakenos_service_tasks_start.md
+      - Stop: workers/fakenos/services_fakenos_service_tasks_stop.md
+      - Restart: workers/fakenos/services_fakenos_service_tasks_restart.md
+      - Inspect Networks: workers/fakenos/services_fakenos_service_tasks_inspect_networks.md
+      - Get Nornir Inventory: workers/fakenos/services_fakenos_service_tasks_get_nornir_inventory.md
   - Nornir:
     - Overview: workers/nornir/services_nornir_service.md
     - Inventory: workers/nornir/services_nornir_service_inventory.md
@@ -203,6 +212,7 @@ nav:
       - Exceptions: api_reference_core_norfab_exceptions.md
     - Built-in Workers:
       - Containerlab Worker: workers/containerlab/api_reference_workers_containerlab_worker.md
+      - FakeNOS Worker: workers/fakenos/api_reference_workers_fakenos_worker.md
       - Nornir Worker: workers/nornir/api_reference_workers_nornir_worker.md
       - Netbox Worker: workers/netbox/api_reference_workers_netbox_worker.md
       - FastAPI Worker: workers/fastapi/api_reference_workers_fastapi_worker.md

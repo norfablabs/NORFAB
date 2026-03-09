@@ -38,7 +38,7 @@ mdutils = "1.8.1"
 orjson = "3.11.5"
 
 # PICLE NFCLI Shell Dependencies
-picle = { version = "0.11.0", optional = true }
+picle = { version = "0.11.1", optional = true }
 rich = { version = "14.3.2", optional = true }
 tabulate = { version = "0.9.0", optional = true }
 pyreadline3 = {version = "3.5.4", platform = "win32", optional = true }
@@ -55,7 +55,7 @@ nornir-napalm = { version = "0.5.0", optional = true }
 nornir-netmiko = { version = "1.0.1", optional = true }
 nornir-scrapli = { version = "2025.01.30", optional = true }
 ntc-templates = { version = "8.1.0", optional = true }
-paramiko = { version = "4.0.0", optional = true }
+paramiko = { version = "<=4.0.0", optional = true }
 pygnmi = { version = "0.8.15", optional = true }
 puresnmp = { version = "2.0.1", optional = true, extras = ['crypto'] }
 requests = { version = "2.32.5", optional = true }
@@ -91,6 +91,9 @@ fastapi = { version = "0.129.0", optional = true, extras = ["standard"] }
 uvicorn = { version = "0.40.0", optional = true }
 python-multipart = { version = "0.0.22", optional = true }
 
+# FakeNOS Service Dependencies
+fakenos = { version = "1.0.0", optional = true, python = ">=3.10,<3.13" }
+
 # docs dependencies
 mkdocs = { version = "*", optional = true }
 mkdocs-material = { version = "*", optional = true }
@@ -116,6 +119,7 @@ build-backend = "poetry.core.masonry.api"
 "containerlab" = "norfab.workers.containerlab_worker:ContainerlabWorker"
 "fastmcp" = "norfab.workers.fastmcp_worker:FastMCPWorker"
 "filesharing" = "norfab.workers.filesharing_worker.filesharing_worker:FileSharingWorker"
+"fakenos" = "norfab.workers.fakenos_worker.fakenos_worker:FakeNOSWorker"
 
 [tool.poetry.scripts]
 nfcli = 'norfab.utils.nfcli:nfcli'
@@ -183,6 +187,9 @@ agentservice = [
 ]
 fastmcpservice = [
     "mcp"
+]
+fakenosservice = [
+    "fakenos"
 ]
 full = [
     "picle",
