@@ -1,23 +1,25 @@
-import logging
-import sqlite3
-import zlib
-import zmq
-import time
-import orjson
-import os
-import threading
-import queue
-import hashlib
 import glob
+import hashlib
+import logging
+import os
+import queue
 import shutil
+import sqlite3
+import threading
+import time
+import zlib
 from contextlib import contextmanager
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from uuid import uuid4  # random uuid
 
-from .security import generate_certificates
-from . import NFP
+import orjson
+import zmq
+
 from norfab.core.inventory import NorFabInventory
 from norfab.utils.markdown_results import markdown_results
-from typing import Any, Optional, Tuple, Dict, List, Set, Union
+
+from . import NFP
+from .security import generate_certificates
 
 log = logging.getLogger(__name__)
 

@@ -4,12 +4,12 @@ References:
 - https://pyzmq.readthedocs.io/en/latest/api/zmq.auth.html
 """
 
+import logging
 import os
 import shutil
 from typing import Union
 
 import zmq.auth
-import logging
 
 log = logging.getLogger(__name__)
 

@@ -1,15 +1,15 @@
 import builtins
-
 from enum import Enum
-from pydantic import (
-    StrictStr,
-    Field,
-    BaseModel,
-    StrictInt,
-    StrictBool,
-)
-from typing import List, Union, Any
+from typing import Any, List, Union
+
 from picle.models import Outputters, PipeFunctionsModel
+from pydantic import (
+    BaseModel,
+    Field,
+    StrictBool,
+    StrictInt,
+    StrictStr,
+)
 
 
 class JobStatus(str, Enum):

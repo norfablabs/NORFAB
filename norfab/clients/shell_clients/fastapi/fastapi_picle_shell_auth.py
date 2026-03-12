@@ -1,15 +1,16 @@
-import logging
 import builtins
+import logging
+from uuid import uuid4  # random uuid
 
 from picle.models import Outputters
 from pydantic import (
     BaseModel,
+    Field,
     StrictInt,
     StrictStr,
-    Field,
 )
+
 from ..common import ClientRunJobArgs, log_error_or_result
-from uuid import uuid4  # random uuid
 
 log = logging.getLogger(__name__)
 

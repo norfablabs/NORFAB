@@ -1,19 +1,21 @@
-import logging
-import json
 import builtins
+import json
+import logging
+from enum import Enum
+from typing import Union
 
 from picle.models import Outputters
-from enum import Enum
 from pydantic import (
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
-from typing import Union
-from ..common import log_error_or_result, listen_events
-from .netbox_picle_shell_common import NetboxClientRunJobArgs
+
 from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+
+from ..common import listen_events, log_error_or_result
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
 

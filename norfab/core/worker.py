@@ -1,33 +1,35 @@
-import logging
-import time
-import zmq
-import orjson
-import traceback
-import threading
-import queue
-import os
-import psutil
-import signal
 import concurrent.futures
 import copy
-import inspect
 import functools
+import inspect
+import logging
+import os
+import queue
+import signal
 import sqlite3
+import threading
+import time
+import traceback
 import zlib
 from contextlib import contextmanager
+from typing import Any, Callable, Dict, List, Optional, Union
+
+import orjson
+import psutil
+import zmq
+from jinja2 import Environment, FileSystemLoader
+from jinja2.nodes import Include
+from pydantic import BaseModel, create_model
+
+from norfab import models
+from norfab.core.inventory import NorFabInventory
+from norfab.models import NorFabEvent, Result
 
 from . import NFP
 from .client import NFPClient
+from .inventory import logging_config_producer
 from .keepalives import KeepAliver
 from .security import generate_certificates
-from .inventory import logging_config_producer
-from typing import Any, Callable, Dict, List, Optional, Union
-from norfab.models import NorFabEvent, Result
-from norfab import models
-from norfab.core.inventory import NorFabInventory
-from jinja2.nodes import Include
-from jinja2 import Environment, FileSystemLoader
-from pydantic import BaseModel, create_model
 
 try:
     signal.signal(signal.SIGINT, signal.SIG_IGN)

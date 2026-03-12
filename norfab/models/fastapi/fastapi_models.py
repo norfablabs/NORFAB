@@ -1,9 +1,11 @@
+from typing import Dict, List
+
 from pydantic import (
     BaseModel,
-    StrictStr,
     Field,
+    StrictStr,
 )
-from typing import List, Dict
+
 from norfab.models import Result
 
 

@@ -1,11 +1,13 @@
-import logging
-import sys
 import importlib.metadata
-import yaml
+import logging
 import os
-from norfab.core.worker import NFPWorker, Task, Job
+import sys
+from typing import Any, Dict, Tuple, Union
+
+import yaml
+
+from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
-from typing import Any, Union, Dict, Tuple
 
 SERVICE = "workflow"
 

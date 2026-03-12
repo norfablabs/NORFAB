@@ -1,16 +1,16 @@
-import json
 import builtins
-
 from enum import Enum
+from typing import Dict, List, Optional, Union
+
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
+
 from ..common import log_error_or_result
-from typing import Union, Optional, List, Dict
 
 # ---------------------------------------------------------------------------------------------
 # COMMON MODELS

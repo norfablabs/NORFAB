@@ -1,18 +1,19 @@
-import logging
 import builtins
-
-from rich.console import Console
-from picle.models import PipeFunctionsModel, Outputters
-from ..netbox.netbox_picle_shell_get_containerlab_inventory import (
-    NetboxDeviceFilters,
-    GetContainerlabInventoryCommand,
-)
-from pydantic import (
-    StrictBool,
-    Field,
-)
+import logging
 from typing import Optional
-from ..common import log_error_or_result, listen_events
+
+from picle.models import Outputters, PipeFunctionsModel
+from pydantic import (
+    Field,
+    StrictBool,
+)
+from rich.console import Console
+
+from ..common import listen_events, log_error_or_result
+from ..netbox.netbox_picle_shell_get_containerlab_inventory import (
+    GetContainerlabInventoryCommand,
+    NetboxDeviceFilters,
+)
 
 RICHCONSOLE = Console()
 SERVICE = "containerlab"

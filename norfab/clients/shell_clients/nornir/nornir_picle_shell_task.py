@@ -1,18 +1,19 @@
-﻿import json
-import builtins
+﻿import builtins
+import json
 
+from nornir_salt.plugins.functions import TabulateFormatter
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
-    StrictStr,
     Field,
+    StrictStr,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    TabulateTableModel,
     NornirCommonArgs,
+    TabulateTableModel,
 )
-from nornir_salt.plugins.functions import TabulateFormatter
-from picle.models import PipeFunctionsModel, Outputters
 
 
 class NornirTaskShell(

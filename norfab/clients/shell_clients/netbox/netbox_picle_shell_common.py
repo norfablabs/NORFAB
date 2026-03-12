@@ -1,10 +1,11 @@
 import builtins
+from typing import List, Union
 
 from pydantic import (
-    StrictStr,
     Field,
+    StrictStr,
 )
-from typing import Union, List
+
 from ..common import ClientRunJobArgs
 
 

@@ -1,53 +1,56 @@
+import copy
+import hashlib
+import importlib.metadata
+import ipaddress
 import json
 import logging
-import sys
-import importlib.metadata
-import yaml
-import time
-import copy
 import os
-import hashlib
-import ipaddress
+import sys
+import time
+from threading import Lock
+from typing import Any, Dict, Tuple, Union
 
-from typing import Union, Dict, Any, Tuple
-from norfab.models import Result
-from norfab.core.worker import NFPWorker, WorkerWatchDog, Task, Job
-from norfab.core.inventory import merge_recursively
+import yaml
+from nornir import InitNornir
+from nornir_napalm.plugins.tasks import napalm_get
+from nornir_netmiko.tasks import netmiko_file_transfer
+from nornir_salt.plugins.functions import (
+    FFun,
+    FFun_functions,
+    HostsKeepalive,
+    InventoryFun,
+    ResultSerializer,
+)
+from nornir_salt.plugins.processors import (
+    DataProcessor,
+    DiffProcessor,
+    NorFabEventProcessor,
+    TestsProcessor,
+    ToFileProcessor,
+)
+from nornir_salt.plugins.tasks import (
+    connections as nr_connections,
+)
+from nornir_salt.plugins.tasks import (
+    napalm_configure,
+    napalm_send_commands,
+    netmiko_send_commands,
+    netmiko_send_config,
+    nr_test,
+    scrapli_send_commands,
+    scrapli_send_config,
+)
+from nornir_salt.utils.pydantic_models import modelTestsProcessorSuite
+
+from norfab.clients.shell_clients.nornir.nornir_picle_shell_cli import NorniCliInput
 from norfab.core.exceptions import UnsupportedPluginError
+from norfab.core.inventory import merge_recursively
+from norfab.core.worker import Job, NFPWorker, Task, WorkerWatchDog
+from norfab.models import Result
 from norfab.workers.nornir_worker.nornir_models import (
     GetNornirHosts,
     GetNornirHostsResponse,
 )
-from nornir import InitNornir
-from nornir_salt.plugins.tasks import (
-    netmiko_send_commands,
-    scrapli_send_commands,
-    napalm_send_commands,
-    napalm_configure,
-    netmiko_send_config,
-    scrapli_send_config,
-    nr_test,
-    connections as nr_connections,
-)
-from nornir_salt.plugins.functions import (
-    FFun_functions,
-    FFun,
-    ResultSerializer,
-    HostsKeepalive,
-    InventoryFun,
-)
-from nornir_salt.plugins.processors import (
-    TestsProcessor,
-    ToFileProcessor,
-    DiffProcessor,
-    DataProcessor,
-    NorFabEventProcessor,
-)
-from nornir_napalm.plugins.tasks import napalm_get
-from nornir_netmiko.tasks import netmiko_file_transfer
-from nornir_salt.utils.pydantic_models import modelTestsProcessorSuite
-from threading import Lock
-from norfab.clients.shell_clients.nornir.nornir_picle_shell_cli import NorniCliInput
 
 SERVICE = "nornir"
 

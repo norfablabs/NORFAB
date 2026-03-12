@@ -1,16 +1,17 @@
-import logging
 import builtins
+import logging
+from typing import Any, Optional
 
-from rich.console import Console
-from picle.models import PipeFunctionsModel, Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictStr,
-    Field,
 )
-from typing import Optional, Any
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
+from rich.console import Console
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 
 RICHCONSOLE = Console()
 SERVICE = "agent"

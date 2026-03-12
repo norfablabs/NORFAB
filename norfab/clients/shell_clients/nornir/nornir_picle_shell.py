@@ -1,32 +1,33 @@
-import logging
 import builtins
-
-from picle.models import PipeFunctionsModel, Outputters
+import logging
 from enum import Enum
+from typing import Any, List, Optional, Union
+
+from nornir_salt.plugins.functions import TabulateFormatter
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictStr,
-    Field,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from .nornir_picle_shell_cfg import NornirCfgShell
+from .nornir_picle_shell_cli import NornirCliShell
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
 )
-from .nornir_picle_shell_cli import NornirCliShell
-from .nornir_picle_shell_cfg import NornirCfgShell
-from .nornir_picle_shell_task import NornirTaskShell
-from .nornir_picle_shell_parse import NornirParseShell
-from .nornir_picle_shell_test import NornirTestShell
-from .nornir_picle_shell_network import NornirNetworkShell
 from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
-from .nornir_picle_shell_jobs import NornirJobsShell
 from .nornir_picle_shell_inventory import NornirInventoryShell
+from .nornir_picle_shell_jobs import NornirJobsShell
 from .nornir_picle_shell_netconf import NornirNetconfShell
-from typing import Union, Optional, List, Any
-from nornir_salt.plugins.functions import TabulateFormatter
+from .nornir_picle_shell_network import NornirNetworkShell
+from .nornir_picle_shell_parse import NornirParseShell
+from .nornir_picle_shell_task import NornirTaskShell
+from .nornir_picle_shell_test import NornirTestShell
 
 SERVICE = "nornir"
 log = logging.getLogger(__name__)

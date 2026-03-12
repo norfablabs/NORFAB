@@ -1,23 +1,24 @@
-import logging
-import sys
 import importlib
+import logging
 import multiprocessing
 import queue
+import sys
 import time
-import yaml
+from typing import Any, List, Union
 
 import psutil
-
-from norfab.core.worker import NFPWorker, Task, Job
-from norfab.models import Result
-from typing import Any, Dict, List, Union
+import yaml
+from fakenos import FakeNOS
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictStr,
-    Field,
 )
-from fakenos import FakeNOS
+
+from norfab.core.worker import Job, NFPWorker, Task
+from norfab.models import Result
+
 from .nornir_inventory_tasks import FakeNOSNornirInventoryTasks
 
 log = logging.getLogger(__name__)

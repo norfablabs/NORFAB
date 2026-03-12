@@ -1,7 +1,9 @@
-from norfab.models import Result
-from norfab.core.worker import Task, Job
-from nornir_salt.plugins.functions import InventoryFun
 from typing import Any
+
+from nornir_salt.plugins.functions import InventoryFun
+
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 
 class RuntimeInventoryTask:

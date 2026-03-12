@@ -1,17 +1,18 @@
-import logging
 import builtins
-
-from picle.models import PipeFunctionsModel, Outputters
+import logging
 from enum import Enum
+from typing import List, Union
+
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
-from typing import Union, List
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 
 log = logging.getLogger(__name__)
 

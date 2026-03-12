@@ -1,14 +1,14 @@
 import logging
+from typing import List, Union
 
-from typing import Union, List
-from norfab.core.worker import Task, Job
-from norfab.models import Result
 from pydantic import (
     BaseModel,
-    StrictBool,
-    StrictStr,
     Field,
+    StrictStr,
 )
+
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 log = logging.getLogger(__name__)
 

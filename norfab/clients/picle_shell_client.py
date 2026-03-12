@@ -5,38 +5,39 @@ PICLE Shell CLient
 Client that implements interactive shell to work with NorFab.
 """
 
-import logging
 import builtins
 import importlib.metadata
+import logging
 import sys
+from typing import Any, Optional
 
-from rich.console import Console
 from picle import App
-from picle.models import PipeFunctionsModel, Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictStr,
-    Field,
 )
-from typing import Optional, Any
+from rich.console import Console
+
 from norfab.core.nfapi import NorFab
 from norfab.models.norfab_configuration import NorFabInventory
 
-from .shell_clients.nornir import nornir_picle_shell
-from .shell_clients.netbox import netbox_picle_shell
 from .shell_clients.agent import agent_picle_shell
-from .shell_clients.fastapi import fastapi_picle_shell
-from .shell_clients.norfab_jobs_shell import NorFabJobsShellCommands
-from .shell_clients.workflow import workflow_picle_shell
+from .shell_clients.common import ClientRunJobArgs, listen_events, log_error_or_result
 from .shell_clients.containerlab import containerlab_picle_shell
-from .shell_clients.workers.workers_picle_shell import (
-    ShowWorkersModel,
-    NorfabWorkersCommands,
-)
-from .shell_clients.common import listen_events, ClientRunJobArgs, log_error_or_result
-from .shell_clients.fastmcp import fastmcp_picle_shell
 from .shell_clients.fakenos import fakenos_picle_shell
+from .shell_clients.fastapi import fastapi_picle_shell
+from .shell_clients.fastmcp import fastmcp_picle_shell
+from .shell_clients.netbox import netbox_picle_shell
+from .shell_clients.norfab_jobs_shell import NorFabJobsShellCommands
+from .shell_clients.nornir import nornir_picle_shell
+from .shell_clients.workers.workers_picle_shell import (
+    NorfabWorkersCommands,
+    ShowWorkersModel,
+)
+from .shell_clients.workflow import workflow_picle_shell
 
 NFCLIENT = None
 RICHCONSOLE = Console()

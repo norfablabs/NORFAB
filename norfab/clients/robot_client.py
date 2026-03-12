@@ -1,12 +1,12 @@
 import logging
 import pprint
+
 import yaml
+from nornir_salt.plugins.functions import TabulateFormatter
+from robot.api import ContinuableFailure, logger
+from robot.api.deco import keyword
 
 from norfab.core.nfapi import NorFab
-from robot.api.deco import keyword
-from robot.api import ContinuableFailure
-from robot.api import logger
-from nornir_salt.plugins.functions import TabulateFormatter
 
 log = logging.getLogger(__name__)
 

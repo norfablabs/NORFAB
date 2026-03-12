@@ -1,16 +1,16 @@
 import logging
 import logging.config
-import time
 import os
 import signal
-
+import time
+from importlib.metadata import EntryPoint, entry_points
+from multiprocessing import Event, Process, Queue
 from typing import Union
-from multiprocessing import Process, Event, Queue
+
+from norfab.core import exceptions as norfab_exceptions
 from norfab.core.broker import NFPBroker
 from norfab.core.client import NFPClient
 from norfab.core.inventory import NorFabInventory
-from norfab.core import exceptions as norfab_exceptions
-from importlib.metadata import entry_points, EntryPoint
 
 log = logging.getLogger(__name__)
 

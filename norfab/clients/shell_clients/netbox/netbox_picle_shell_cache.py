@@ -1,15 +1,16 @@
-import logging
 import builtins
-
-from picle.models import PipeFunctionsModel, Outputters
+import logging
 from enum import Enum
+from typing import List, Union
+
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
-    StrictStr,
     Field,
+    StrictStr,
 )
-from typing import Union, List
-from ..common import log_error_or_result, BoolEnum
+
+from ..common import BoolEnum, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)

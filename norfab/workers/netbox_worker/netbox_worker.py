@@ -1,34 +1,35 @@
+import importlib.metadata
 import json
 import logging
-import sys
-import importlib.metadata
-import requests
 import os
-import pynetbox
 import re
+import sys
 import time
-
-from fnmatch import fnmatchcase
 from datetime import datetime, timedelta
-from norfab.core.worker import NFPWorker, Task, Job
-from norfab.models import Result
-from typing import Any, Union, List
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from .netbox_models import NetboxFastApiArgs
-from diskcache import FanoutCache
+from fnmatch import fnmatchcase
+from typing import Any, List, Union
 
-from .design_tasks import NetboxDesignTasks
-from .interfaces_tasks import NetboxInterfacesTasks
-from .devices_tasks import NetboxDevicesTasks
-from .connections_tasks import NetboxConnectionsTasks
-from .netbox_exceptions import UnsupportedNetboxVersion
-from .circuits_tasks import NetboxCircuitsTasks
-from .nornir_inventory_tasks import NetboxNornirInventoryTasks
+import pynetbox
+import requests
+from diskcache import FanoutCache
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+from norfab.core.worker import Job, NFPWorker, Task
+from norfab.models import Result
+
 from .bgp_peerings_tasks import NetboxBgpPeeringsTasks
-from .prefix_tasks import NetboxPrefixTasks
-from .containerlab_inventory_tasks import NetboxContainerlabInventoryTasks
-from .ip_tasks import NetboxIpTasks
 from .branch_tasks import NetboxBranchTasks
+from .circuits_tasks import NetboxCircuitsTasks
+from .connections_tasks import NetboxConnectionsTasks
+from .containerlab_inventory_tasks import NetboxContainerlabInventoryTasks
+from .design_tasks import NetboxDesignTasks
+from .devices_tasks import NetboxDevicesTasks
+from .interfaces_tasks import NetboxInterfacesTasks
+from .ip_tasks import NetboxIpTasks
+from .netbox_exceptions import UnsupportedNetboxVersion
+from .netbox_models import NetboxFastApiArgs
+from .nornir_inventory_tasks import NetboxNornirInventoryTasks
+from .prefix_tasks import NetboxPrefixTasks
 
 SERVICE = "netbox"
 

@@ -1,24 +1,27 @@
-import logging
-
 import copy
+import logging
+from typing import Any, Dict, List, Union
 
-from pydantic import BaseModel, Field
-from typing import Union, Any, Dict, List
-from norfab.core.worker import Task, Job
-from norfab.models import Result
-from .netbox_models import NetboxFastApiArgs
-from .netbox_exceptions import UnsupportedNetboxVersion
+from pydantic import BaseModel
+
 from norfab.core.exceptions import UnsupportedServiceError
+from norfab.core.worker import Job, Task
+from norfab.models import Result
+
+from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
+
 
 class GetDevicesSite(BaseModel):
     name: str
     slug: str
     tags: List[str] = []
 
+
 class GetDevicesIP(BaseModel):
     address: str
+
 
 class GetDevicesResult(BaseModel):
     id: str
@@ -41,13 +44,17 @@ class GetDevicesResult(BaseModel):
     airflow: Union[str, None] = None
     position: Union[str, None] = None
 
+
 class GetDevicesOutput(Result):
     result: Dict[str, GetDevicesResult]
 
 
 class NetboxDevicesTasks:
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()}, output=GetDevicesOutput)
+    @Task(
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        output=GetDevicesOutput,
+    )
     def get_devices(
         self,
         job: Job,
@@ -66,7 +73,7 @@ class NetboxDevicesTasks:
             instance: Netbox instance name, uses default if omitted
             dry_run: if True returns filter params without making REST calls
             devices: list of device names to fetch, merged into filters as ``{"name": devices}``
-            cache: ``True`` - use cache if up to date; ``False`` - skip cache; 
+            cache: ``True`` - use cache if up to date; ``False`` - skip cache;
                 ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check
 
         Returns:
@@ -75,9 +82,7 @@ class NetboxDevicesTasks:
             primary_ip4, primary_ip6, airflow, position, id
         """
         instance = instance or self.default_instance
-        ret = Result(
-            task=f"{self.name}:get_devices", result={}, resources=[instance]
-        )
+        ret = Result(task=f"{self.name}:get_devices", result={}, resources=[instance])
         cache = self.cache_use if cache is None else cache
         filters = list(filters) if filters else []
         devices = devices or []
@@ -174,7 +179,9 @@ class NetboxDevicesTasks:
                         ),
                         "airflow": device.airflow.value if device.airflow else None,
                         "position": (
-                            str(device.position) if device.position is not None else None
+                            str(device.position)
+                            if device.position is not None
+                            else None
                         ),
                         "id": str(device.id),
                     }

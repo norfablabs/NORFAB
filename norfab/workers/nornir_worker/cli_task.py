@@ -1,17 +1,18 @@
 import logging
+from typing import Any, Union
 
-from typing import Union, Any
-from norfab.models import Result
-from norfab.core.worker import Task, Job
-from norfab.core.exceptions import UnsupportedPluginError
-from nornir_salt.plugins.tasks import (
-    netmiko_send_commands,
-    scrapli_send_commands,
-    napalm_send_commands,
-    nr_test,
-)
 from nornir_salt.plugins.functions import ResultSerializer
+from nornir_salt.plugins.tasks import (
+    napalm_send_commands,
+    netmiko_send_commands,
+    nr_test,
+    scrapli_send_commands,
+)
+
 from norfab.clients.shell_clients.nornir.nornir_picle_shell_cli import NorniCliInput
+from norfab.core.exceptions import UnsupportedPluginError
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 log = logging.getLogger(__name__)
 

@@ -1,11 +1,12 @@
-import logging
 import builtins
+import logging
 
-from picle.models import PipeFunctionsModel, Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
 )
+
 from ..common import ClientRunJobArgs, log_error_or_result
 from .workflow_picle_shell_run import WorkflowRunShell
 

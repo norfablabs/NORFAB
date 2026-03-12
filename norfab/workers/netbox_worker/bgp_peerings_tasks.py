@@ -1,8 +1,9 @@
 import logging
-
 from typing import Union
-from norfab.core.worker import Task, Job
+
+from norfab.core.worker import Job, Task
 from norfab.models import Result
+
 from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)

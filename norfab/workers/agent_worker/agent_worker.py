@@ -1,15 +1,17 @@
-import yaml
+import importlib.metadata
 import logging
 import sys
-import importlib.metadata
+from typing import Any, Callable, List
+
+import yaml
+from datamodel_code_generator import Formatter, GenerateConfig, generate_dynamic_models
+from langchain.agents import create_agent
+from langchain.tools import tool as langchain_tool
+from langchain_core.runnables import RunnableLambda
+
 from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
-from typing import Any, List, Callable
-from datamodel_code_generator import generate_dynamic_models, GenerateConfig, Formatter
 
-from langchain.agents import create_agent
-from langchain_core.runnables import RunnableLambda
-from langchain.tools import tool as langchain_tool
 from . import norfab_agent
 
 SERVICE = "agent"

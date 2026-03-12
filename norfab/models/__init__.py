@@ -1,15 +1,17 @@
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+
 from pydantic import (
     BaseModel,
+    ConfigDict,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
     model_validator,
-    ConfigDict,
 )
-from enum import Enum
-from typing import Union, Optional, List, Any, Dict
-from datetime import datetime
+
 from norfab.core.exceptions import NorfabJobFailedError
 
 # ------------------------------------------------------

@@ -1,21 +1,22 @@
 ﻿import builtins
+from typing import List, Union
 
+from nornir_salt.plugins.functions import TabulateFormatter
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    TabulateTableModel,
     NornirCommonArgs,
+    TabulateTableModel,
 )
-from typing import Union, List
-from nornir_salt.plugins.functions import TabulateFormatter
-from picle.models import PipeFunctionsModel, Outputters
 
 
 class NornirNetworkPing(

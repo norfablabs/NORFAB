@@ -1,24 +1,25 @@
-import logging
-import time
-import os
-import copy
 import builtins
-
-from fnmatch import fnmatchcase
-from picle.models import PipeFunctionsModel, Outputters
+import copy
+import logging
+import os
+import time
 from enum import Enum
+from fnmatch import fnmatchcase
+from typing import List, Union
+
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
+
 from ..common import ClientRunJobArgs, listen_events
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     NornirCommonArgs,
 )
-from typing import Union, List
 
 try:
     import N2G

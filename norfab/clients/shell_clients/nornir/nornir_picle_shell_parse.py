@@ -1,18 +1,19 @@
 ﻿import builtins
-
 from enum import Enum
+from typing import List, Union
+
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
-    StrictStr,
     Field,
+    StrictStr,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     NornirCommonArgs,
 )
-from typing import Union, List
-from picle.models import PipeFunctionsModel, Outputters
 
 
 class NapalmGettersEnum(str, Enum):

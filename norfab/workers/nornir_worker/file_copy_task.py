@@ -1,13 +1,14 @@
 import logging
 import os
-
 from typing import Any
-from norfab.models import Result
-from norfab.core.worker import Task, Job
-from norfab.core.exceptions import UnsupportedPluginError
+
 from nornir_netmiko.tasks import netmiko_file_transfer
-from nornir_salt.plugins.tasks import nr_test
 from nornir_salt.plugins.functions import ResultSerializer
+from nornir_salt.plugins.tasks import nr_test
+
+from norfab.core.exceptions import UnsupportedPluginError
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 log = logging.getLogger(__name__)
 

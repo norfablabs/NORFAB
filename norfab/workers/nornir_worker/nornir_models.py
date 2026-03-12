@@ -1,11 +1,13 @@
-from typing import Union, Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional, Union
+
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictStr,
-    Field,
     model_validator,
 )
+
 from norfab.models import Result
 
 

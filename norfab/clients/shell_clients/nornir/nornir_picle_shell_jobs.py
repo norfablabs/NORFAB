@@ -1,17 +1,17 @@
 import builtins
-
-from typing import Union, List
 from enum import Enum
+from typing import List, Union
+
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
-    StrictStr,
-    Field,
     BaseModel,
-    StrictInt,
+    Field,
     StrictBool,
+    StrictInt,
+    StrictStr,
 )
+
 from ..common import ClientRunJobArgs, log_error_or_result
-from picle.models import Outputters
-from picle.models import PipeFunctionsModel
 
 
 class NornirTaskEnum(str, Enum):

@@ -1,13 +1,12 @@
-import logging
-
 import copy
+import logging
+from typing import Any, Union
 
-from typing import Union, Any
-from norfab.core.worker import Task, Job
-from norfab.models import Result
-from .netbox_models import NetboxFastApiArgs
-from .netbox_exceptions import UnsupportedNetboxVersion
 from norfab.core.exceptions import UnsupportedServiceError
+from norfab.core.worker import Job, Task
+from norfab.models import Result
+
+from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
 

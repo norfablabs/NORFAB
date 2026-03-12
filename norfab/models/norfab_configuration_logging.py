@@ -7,8 +7,9 @@ The top-level model is LoggingConfig, which is a full, typed representation of
 the dictConfig dictionary schema including the NorFab-specific log_events extension.
 """
 
-from pydantic import BaseModel, StrictBool, StrictInt, StrictStr, Field, ConfigDict
-from typing import Literal, Union, List, Any, Dict
+from typing import Any, Dict, List, Literal, Union
+
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 
 # ------------------------------------------------------
 # Formatter models

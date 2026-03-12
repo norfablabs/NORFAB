@@ -1,10 +1,10 @@
 import logging
 
-from textual.app import App, ComposeResult
 from textual import on
-from textual.widgets import Header, RichLog, Footer, Input
-from textual.suggester import Suggester
+from textual.app import App, ComposeResult
 from textual.binding import Binding
+from textual.suggester import Suggester
+from textual.widgets import Footer, Header, Input, RichLog
 
 NFCLIENT = None
 log = logging.getLogger(__name__)

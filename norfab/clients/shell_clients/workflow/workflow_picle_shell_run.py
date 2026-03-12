@@ -1,13 +1,14 @@
 import builtins
+from typing import Optional
 
+from picle.models import Outputters
 from pydantic import (
+    Field,
     StrictBool,
     StrictStr,
-    Field,
 )
-from picle.models import Outputters
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
-from typing import Optional
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 
 
 class WorkflowRunShell(ClientRunJobArgs):

@@ -1,43 +1,44 @@
-import logging
-import sys
 import importlib.metadata
-import yaml
-import time
-import os
 import ipaddress
+import logging
+import os
+import sys
+import time
+from threading import Lock
+from typing import Any, Dict, Tuple, Union
 
-from typing import Union, Dict, Any, Tuple
-from norfab.models import Result
-from norfab.core.worker import NFPWorker, WorkerWatchDog, Task, Job
-from norfab.core.inventory import merge_recursively
-from .nornir_models import GetNornirHosts, GetNornirHostsResponse
+import yaml
 from nornir import InitNornir
-from nornir_salt.plugins.tasks import (
-    connections as nr_connections,
-)
 from nornir_salt.plugins.functions import (
-    FFun_functions,
     FFun,
+    FFun_functions,
     HostsKeepalive,
 )
 from nornir_salt.plugins.processors import (
+    DataProcessor,
+    DiffProcessor,
+    NorFabEventProcessor,
     TestsProcessor,
     ToFileProcessor,
-    DiffProcessor,
-    DataProcessor,
-    NorFabEventProcessor,
 )
-from threading import Lock
+from nornir_salt.plugins.tasks import (
+    connections as nr_connections,
+)
 
-from .task_task import TaskTask
-from .cli_task import CliTask
+from norfab.core.inventory import merge_recursively
+from norfab.core.worker import Job, NFPWorker, Task, WorkerWatchDog
+from norfab.models import Result
+
 from .cfg_task import CfgTask
-from .test_task import TestTask
-from .network_task import NetworkTask
-from .runtime_inventory_task import RuntimeInventoryTask
-from .parse_task import ParseTask
+from .cli_task import CliTask
 from .file_copy_task import FileCopyTask
 from .netconf_task import NetconfTask
+from .network_task import NetworkTask
+from .nornir_models import GetNornirHosts, GetNornirHostsResponse
+from .parse_task import ParseTask
+from .runtime_inventory_task import RuntimeInventoryTask
+from .task_task import TaskTask
+from .test_task import TestTask
 
 SERVICE = "nornir"
 

@@ -2,14 +2,15 @@ import copy
 import hashlib
 import json
 import logging
-import yaml
+from typing import Any, Union
 
-from typing import Union, Any
-from norfab.models import Result
-from norfab.core.worker import Task, Job
-from nornir_salt.plugins.tasks import nr_test
+import yaml
 from nornir_salt.plugins.functions import FFun_functions, ResultSerializer
+from nornir_salt.plugins.tasks import nr_test
 from nornir_salt.utils.pydantic_models import modelTestsProcessorSuite
+
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 log = logging.getLogger(__name__)
 

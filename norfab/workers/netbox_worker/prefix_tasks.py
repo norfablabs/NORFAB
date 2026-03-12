@@ -1,19 +1,19 @@
 import ipaddress
 import logging
+from enum import Enum
+from typing import Union
 
 from pydantic import (
-    BaseModel,
-    StrictBool,
+    Field,
     StrictInt,
     StrictStr,
-    Field,
 )
-from enum import Enum
-from typing import Union, Optional, List
-from norfab.core.worker import Task, Job
+
+from norfab.core.worker import Job, Task
 from norfab.models import Result
-from .netbox_models import NetboxFastApiArgs, NetboxCommonArgs
+
 from .netbox_exceptions import NetboxAllocationError
+from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
 

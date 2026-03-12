@@ -2,24 +2,25 @@
 Common Pydantic Models for PICLE Client Shells
 """
 
-import logging
 import builtins
-import time
-from datetime import datetime
-import threading
 import functools
 import json
+import logging
 import queue
+import threading
+import time
+from datetime import datetime
+from enum import Enum
+from typing import List, Optional, Union
 from uuid import uuid4  # random uuid
+
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
-from enum import Enum
-from typing import Union, Optional, List
 from rich.console import Console
 
 log = logging.getLogger(__name__)

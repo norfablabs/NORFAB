@@ -5,36 +5,38 @@ PICLE Shell CLient
 Client that implements interactive shell to work with NorFab.
 """
 
-import logging
 import builtins
+import logging
+from typing import Any, Optional
 
-from rich.console import Console
-from picle.models import PipeFunctionsModel, Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictStr,
-    Field,
 )
-from typing import Optional, Any
+from rich.console import Console
+
+from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+
 from ..common import log_error_or_result
-from .netbox_picle_shell_common import NetboxClientRunJobArgs
-from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_cache import NetboxServiceCache
-from .netbox_picle_shell_get_circuits import GetCircuits
-from .netbox_picle_shell_get_interfaces import GetInterfaces
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
+from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
+from .netbox_picle_shell_create_ip import CreateIp
+from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
+from .netbox_picle_shell_create_prefix import CreatePrefixShell
 from .netbox_picle_shell_get_bgp_peerings import GetBGPPeerings
-from .netbox_picle_shell_sync_device import SyncDeviceCommands
+from .netbox_picle_shell_get_circuits import GetCircuits
 from .netbox_picle_shell_get_connections import GetConnections
 from .netbox_picle_shell_get_containerlab_inventory import (
     GetContainerlabInventoryCommand,
 )
-from .netbox_picle_shell_create_ip import CreateIp
-from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
-from .netbox_picle_shell_create_prefix import CreatePrefixShell
+from .netbox_picle_shell_get_devices import GetDevices
+from .netbox_picle_shell_get_interfaces import GetInterfaces
+from .netbox_picle_shell_sync_device import SyncDeviceCommands
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
-from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"

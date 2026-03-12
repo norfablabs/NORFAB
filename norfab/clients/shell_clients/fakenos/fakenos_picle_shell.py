@@ -1,23 +1,22 @@
-import logging
 import builtins
+from typing import Any
 
-from picle.models import PipeFunctionsModel, Outputters
-from enum import Enum
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
-    StrictBool,
-    StrictStr,
     Field,
+    StrictBool,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
+
 from norfab.workers.fakenos_worker.fakenos_worker import (
+    FakeNOSListNetworksInput,
+    FakeNOSRestartInput,
     FakeNOSStartInput,
     FakeNOSStopInput,
-    FakeNOSRestartInput,
-    FakeNOSListNetworksInput,
 )
 from norfab.workers.fakenos_worker.nornir_inventory_tasks import GetNornirInventoryInput
-from typing import Any, Union, List, Optional
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 
 # ---------------------------------------------------------------------------------------------
 # FAKENOS SERVICE SHELL SHOW COMMANDS MODELS

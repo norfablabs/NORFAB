@@ -1,21 +1,22 @@
+import importlib.metadata
+import ipaddress
+import json
 import logging
-import sys
-import time
 import os
 import signal
-import importlib.metadata
-import subprocess
-import yaml
-import json
 import socket
-import ipaddress
+import subprocess
+import sys
+import time
+from typing import Tuple, Union
 
-from norfab.core.worker import NFPWorker, Task, Job
+import yaml
+
 from norfab.core.inventory import merge_recursively
-from norfab.models.containerlab import DeployTask, DeployTaskResponse
+from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
+from norfab.models.containerlab import DeployTask, DeployTaskResponse
 from norfab.utils.platform_map import PlatformMap
-from typing import Union, Tuple
 
 SERVICE = "containerlab"
 

@@ -1,18 +1,20 @@
-import yaml
 import logging
+from typing import Any, Dict, List, Optional, Type, Union
 
-from typing import Any, Union, List, Optional, Dict, Type
+import yaml
 from datamodel_code_generator import (
-    generate_dynamic_models,
-    GenerateConfig,
-    Formatter,
     DataModelType,
+    Formatter,
+    GenerateConfig,
+    generate_dynamic_models,
 )
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, create_model
+
 from norfab.core.worker import Task
 from norfab.models import Result
 from norfab.utils.text import slugify
+
 from .netbox_models import NetboxFastApiArgs
-from pydantic import BaseModel, Field, create_model, ConfigDict, ValidationError
 
 log = logging.getLogger(__name__)
 

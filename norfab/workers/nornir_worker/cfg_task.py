@@ -1,16 +1,17 @@
 import logging
+from typing import Any, Union
 
-from typing import Union, Any
-from norfab.models import Result
-from norfab.core.worker import Task, Job
-from norfab.core.exceptions import UnsupportedPluginError
+from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import (
     napalm_configure,
     netmiko_send_config,
-    scrapli_send_config,
     nr_test,
+    scrapli_send_config,
 )
-from nornir_salt.plugins.functions import ResultSerializer
+
+from norfab.core.exceptions import UnsupportedPluginError
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 log = logging.getLogger(__name__)
 

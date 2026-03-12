@@ -1,17 +1,18 @@
+import importlib.metadata
 import logging
-import sys
-import orjson
-import threading
-import random
 import os
+import random
+import signal
+import sys
+import threading
+from multiprocessing import Event
+from typing import Any, List, Optional, Union
+
+import orjson
 import zmq
 import zmq.auth
-import signal
-import importlib.metadata
-
 from zmq.auth.thread import ThreadAuthenticator
-from multiprocessing import Event
-from typing import Union, Any, List, Optional
+
 from . import NFP
 from .inventory import NorFabInventory, logging_config_producer
 from .keepalives import KeepAliver

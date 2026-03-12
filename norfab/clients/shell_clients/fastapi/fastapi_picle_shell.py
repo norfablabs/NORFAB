@@ -1,14 +1,15 @@
-import logging
 import builtins
+import logging
+from typing import Any
 
-from picle.models import PipeFunctionsModel, Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
-    StrictBool,
     Field,
+    StrictBool,
 )
+
 from ..common import ClientRunJobArgs, log_error_or_result
-from typing import Any
 from .fastapi_picle_shell_auth import FastAPIAuthCommandsModel
 from .fastapi_picle_shell_discover import Discover
 

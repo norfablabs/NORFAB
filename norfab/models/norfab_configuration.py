@@ -1,14 +1,12 @@
-from pydantic import BaseModel, StrictBool, StrictInt, StrictStr, Field, ConfigDict
-from typing import Union, List, Any, Dict
+from typing import Any, Dict, List, Union
+
+from picle.models import ConfigModel
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
+
 from norfab.models.norfab_configuration_logging import (
     LoggingConfig,
-    LoggingFormatterConfig,
-    LoggingFilterConfig,
-    LoggingHandlerConfig,
-    LoggingLoggerConfig,
 )
 from norfab.workers.netbox_worker.netbox_models import NetboxConfigModel
-from picle.models import ConfigModel
 
 # ------------------------------------------------------
 # Broker configuration models

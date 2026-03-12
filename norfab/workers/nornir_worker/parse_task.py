@@ -1,10 +1,11 @@
-from typing import Union, Any
+from typing import Any, Union
 
-from norfab.models import Result
-from norfab.core.worker import Task, Job
-from norfab.core.exceptions import UnsupportedPluginError
-from nornir_salt.plugins.functions import FFun_functions, ResultSerializer
 from nornir_napalm.plugins.tasks import napalm_get
+from nornir_salt.plugins.functions import FFun_functions, ResultSerializer
+
+from norfab.core.exceptions import UnsupportedPluginError
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 
 class ParseTask:

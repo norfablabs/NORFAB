@@ -1,17 +1,18 @@
-import json
 import builtins
-
+import json
 from enum import Enum
+from typing import Dict, List, Optional, Union
+
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
-from ..common import ClientRunJobArgs, log_error_or_result, listen_events
-from typing import Union, Optional, List, Dict
-from picle.models import Outputters, PipeFunctionsModel
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import NorniHostsFilters
 
 

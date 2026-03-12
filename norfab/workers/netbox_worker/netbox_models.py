@@ -1,14 +1,15 @@
 import builtins
+from enum import Enum
+from typing import Dict, List, Optional, Union
 
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
-from enum import Enum
-from typing import Union, Optional, List, Dict
+
 from norfab.models import NorFabClientRunJob
 
 # --------------------------------------------------------------------------

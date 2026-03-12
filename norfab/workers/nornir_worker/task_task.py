@@ -1,9 +1,10 @@
 import logging
-
 from typing import Any
-from norfab.models import Result
-from norfab.core.worker import Task, Job
+
 from nornir_salt.plugins.functions import ResultSerializer
+
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 log = logging.getLogger(__name__)
 

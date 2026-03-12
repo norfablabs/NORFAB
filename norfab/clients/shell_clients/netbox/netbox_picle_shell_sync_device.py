@@ -1,19 +1,21 @@
-import logging
 import builtins
+import logging
+from typing import List, Optional, Union
 
 from picle.models import Outputters
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Field,
 )
-from typing import Union, Optional, List
-from ..common import log_error_or_result, listen_events
-from ..nornir.nornir_picle_shell_common import NornirCommonArgs, NorniHostsFilters
-from .netbox_picle_shell_common import NetboxClientRunJobArgs
+
 from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+
+from ..common import listen_events, log_error_or_result
+from ..nornir.nornir_picle_shell_common import NorniHostsFilters, NornirCommonArgs
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
 

@@ -70,15 +70,15 @@ Simple Inventory iterates over `workers` dictionary and recursively merges
 data for keys (glob patterns) that matched worker name.
 """
 
-import os
-import fnmatch
-import yaml
-import logging
 import copy
+import fnmatch
+import logging
+import os
 import sys
-
-from jinja2 import Environment
 from typing import Any, Dict, List
+
+import yaml
+from jinja2 import Environment
 
 log = logging.getLogger(__name__)
 

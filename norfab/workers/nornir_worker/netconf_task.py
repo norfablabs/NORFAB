@@ -1,7 +1,7 @@
 from typing import Any
 
+from norfab.core.worker import Job, Task
 from norfab.models import Result
-from norfab.core.worker import Task, Job
 
 
 class NetconfTask:

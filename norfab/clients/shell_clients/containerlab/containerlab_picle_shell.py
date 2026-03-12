@@ -1,17 +1,18 @@
+import builtins
 import logging
 import os
-import builtins
+from typing import Any, List, Optional, Union
 
-from rich.console import Console
-from picle.models import PipeFunctionsModel, Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
+    Field,
     StrictBool,
     StrictStr,
-    Field,
 )
-from typing import Union, Optional, List, Any
-from ..common import log_error_or_result, ClientRunJobArgs, listen_events
+from rich.console import Console
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .containerlab_deploy_netbox import DeployNetboxCommand
 
 RICHCONSOLE = Console()

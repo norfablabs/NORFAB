@@ -1,23 +1,24 @@
+import importlib.metadata
 import logging
+import os
+import signal
 import sys
 import threading
 import time
-import os
-import signal
-import importlib.metadata
-import uvicorn
-
-from norfab.core.worker import NFPWorker, Task, Job
-from norfab.models import Result
-from typing import Union, List, Dict, Any, Annotated, Optional
-from diskcache import FanoutCache
-from pydantic import BaseModel
 from datetime import datetime
-from fastapi import Depends, FastAPI, HTTPException, Body, Request
-from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
+from typing import Annotated, Any, Dict, List, Optional, Union
+
+import uvicorn
+from diskcache import FanoutCache
+from fastapi import Body, Depends, FastAPI, HTTPException, Request
 from fastapi.openapi.utils import get_openapi
+from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel
 from starlette import status
 from starlette.routing import Route
+
+from norfab.core.worker import Job, NFPWorker, Task
+from norfab.models import Result
 
 SERVICE = "fastapi"
 API_TITLE = "NORFAB REST API"
