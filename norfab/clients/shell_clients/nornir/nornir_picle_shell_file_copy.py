@@ -1,4 +1,4 @@
-import builtins
+﻿import builtins
 
 from enum import Enum
 from pydantic import (
@@ -13,7 +13,6 @@ from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import PipeFunctionsModel, Outputters
@@ -60,7 +59,7 @@ class NrFileCopyPluginNetmiko(BaseModel):
         return NornirFileCopyShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrFileCopyPlugins(BaseModel):
@@ -146,5 +145,5 @@ class NornirFileCopyShell(
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-file-copy]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel

@@ -2,7 +2,8 @@ import logging
 
 import copy
 
-from typing import Union, Any
+from pydantic import BaseModel, Field
+from typing import Union, Any, Dict, List
 from norfab.core.worker import Task, Job
 from norfab.models import Result
 from .netbox_models import NetboxFastApiArgs
@@ -11,10 +12,42 @@ from norfab.core.exceptions import UnsupportedServiceError
 
 log = logging.getLogger(__name__)
 
+class GetDevicesSite(BaseModel):
+    name: str
+    slug: str
+    tags: List[str] = []
+
+class GetDevicesIP(BaseModel):
+    address: str
+
+class GetDevicesResult(BaseModel):
+    id: str
+    last_updated: str
+    device_type: str
+    role: str
+    custom_field_data: Dict[str, Any] = {}
+    tags: List[str] = []
+    config_context: Dict[str, Any] = {}
+    tenant: Union[str, None] = None
+    platform: Union[str, None] = None
+    serial: Union[str, None] = None
+    asset_tag: Union[str, None] = None
+    site: Union[GetDevicesSite, None] = None
+    location: Union[str, None] = None
+    rack: Union[str, None] = None
+    status: str = None
+    primary_ip4: Union[GetDevicesIP, None] = None
+    primary_ip6: Union[GetDevicesIP, None] = None
+    airflow: Union[str, None] = None
+    position: Union[str, None] = None
+
+class GetDevicesOutput(Result):
+    result: Dict[str, GetDevicesResult]
+
 
 class NetboxDevicesTasks:
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()}, output=GetDevicesOutput)
     def get_devices(
         self,
         job: Job,
@@ -25,174 +58,132 @@ class NetboxDevicesTasks:
         cache: Union[None, bool, str] = None,
     ) -> Result:
         """
-        Retrieves device data from Netbox using the GraphQL API.
+        Retrieve device data from Netbox REST API using Pynetbox.
 
         Args:
-            job: NorFab Job object containing relevant metadata
-            filters (list, optional): A list of filter dictionaries to filter devices.
-            instance (str, optional): The Netbox instance name.
-            dry_run (bool, optional): If True, only returns the query content without executing it. Defaults to False.
-            devices (list, optional): A list of device names to query data for.
-            cache (Union[bool, str], optional): Cache usage options:
-
-                - True: Use data stored in cache if it is up to date, refresh it otherwise.
-                - False: Do not use cache and do not update cache.
-                - "refresh": Ignore data in cache and replace it with data fetched from Netbox.
-                - "force": Use data in cache without checking if it is up to date.
+            job: NorFab Job object
+            filters: list of filter dicts applied to ``dcim/devices/`` endpoint, e.g. ``[{"site": "NYC", "status": "active"}]``
+            instance: Netbox instance name, uses default if omitted
+            dry_run: if True returns filter params without making REST calls
+            devices: list of device names to fetch, merged into filters as ``{"name": devices}``
+            cache: ``True`` - use cache if up to date; ``False`` - skip cache; 
+                ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check
 
         Returns:
-            dict: A dictionary keyed by device name with device data.
-
-        Raises:
-            Exception: If the GraphQL query fails or if there are errors in the query result.
+            dict keyed by device name with fields: last_updated, custom_field_data, tags, device_type,
+            role, config_context, tenant, platform, serial, asset_tag, site, location, rack, status,
+            primary_ip4, primary_ip6, airflow, position, id
         """
         instance = instance or self.default_instance
-        ret = Result(task=f"{self.name}:get_devices", result={}, resources=[instance])
+        ret = Result(
+            task=f"{self.name}:get_devices", result={}, resources=[instance]
+        )
         cache = self.cache_use if cache is None else cache
-        filters = filters or []
+        filters = list(filters) if filters else []
         devices = devices or []
-        queries = {}  # devices queries
-        device_fields = [
-            "name",
-            "last_updated",
-            "custom_field_data",
-            "tags {name}",
-            "device_type {model}",
-            "role {name}",
-            "config_context",
-            "tenant {name}",
-            "platform {name}",
-            "serial",
-            "asset_tag",
-            "site {name slug tags{name} }",
-            "location {name}",
-            "rack {name}",
-            "status",
-            "primary_ip4 {address}",
-            "primary_ip6 {address}",
-            "airflow",
-            "position",
-            "id",
-        ]
+
+        # merge named devices into filters as a name filter
+        if devices:
+            filters.append({"name": devices})
+
+        # return dry run result
+        if dry_run:
+            ret.result["get_devices_dry_run"] = {"filters": filters}
+            return ret
+
+        filters_to_fetch = list(filters)
 
         if cache == True or cache == "force":
-            # retrieve last updated data from Netbox for devices
-            last_updated_query = {
-                f"devices_by_filter_{index}": {
-                    "obj": "device_list",
-                    "filters": filter_item,
-                    "fields": ["name", "last_updated"],
-                }
-                for index, filter_item in enumerate(filters)
-            }
-            if devices:
-                # use cache data without checking if it is up to date for cached devices
-                if cache == "force":
-                    for device_name in list(devices):
-                        device_cache_key = f"get_devices::{device_name}"
-                        if device_cache_key in self.cache:
-                            devices.remove(device_name)
-                            ret.result[device_name] = self.cache[device_cache_key]
-                # query netbox last updated data for devices
-                if self.nb_version[instance] >= (4, 4, 0):
-                    dlist = '["{dl}"]'.format(dl='", "'.join(devices))
-                    filters_dict = {"name": f"{{in_list: {dlist}}}"}
-                else:
-                    raise UnsupportedNetboxVersion(
-                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
-                        f"minimum required version is {self.compatible_ge_v4}"
-                    )
-                last_updated_query["devices_by_devices_list"] = {
-                    "obj": "device_list",
-                    "filters": filters_dict,
-                    "fields": ["name", "last_updated"],
-                }
-            last_updated = self.graphql(
-                job=job,
-                queries=last_updated_query,
-                instance=instance,
-                dry_run=dry_run,
-            )
-            last_updated.raise_for_status(f"{self.name} - get devices query failed")
-
-            # return dry run result
-            if dry_run:
-                ret.result["get_devices_dry_run"] = last_updated.result
-                return ret
+            # retrieve last_updated data from Netbox for all filters using REST
+            last_updated_data = {}
+            for filter_item in filters:
+                result = self.rest(
+                    job=job,
+                    instance=instance,
+                    api="dcim/devices",
+                    params={**filter_item, "fields": "name,last_updated"},
+                )
+                for device in result.result.get("results", []):
+                    last_updated_data[device["name"]] = device["last_updated"]
 
             # try to retrieve device data from cache
             self.cache.expire()  # remove expired items from cache
-            for devices_list in last_updated.result.values():
-                for device in devices_list:
-                    device_cache_key = f"get_devices::{device['name']}"
-                    # check if cache is up to date and use it if so
-                    if device_cache_key in self.cache and (
-                        self.cache[device_cache_key].get("last_updated")
-                        == device["last_updated"]
-                        or cache == "force"
-                    ):
-                        ret.result[device["name"]] = self.cache[device_cache_key]
-                        # remove device from list of devices to retrieve
-                        if device["name"] in devices:
-                            devices.remove(device["name"])
-                    # cache old or no cache, fetch device data
-                    elif device["name"] not in devices:
-                        devices.append(device["name"])
-        # ignore cache data, fetch data from netbox
-        elif cache == False or cache == "refresh":
-            queries = {
-                f"devices_by_filter_{index}": {
-                    "obj": "device_list",
-                    "filters": filter_item,
-                    "fields": device_fields,
-                }
-                for index, filter_item in enumerate(filters)
-            }
-
-        # fetch devices data from Netbox
-        if devices or queries:
-            if devices:
-                if self.nb_version[instance] >= (4, 4, 0):
-                    dlist = '["{dl}"]'.format(dl='", "'.join(devices))
-                    filters_dict = {"name": f"{{in_list: {dlist}}}"}
+            devices_to_fetch = []
+            for device_name, last_updated in last_updated_data.items():
+                device_cache_key = f"get_devices::{device_name}"
+                # check if cache is up to date and use it if so
+                if device_cache_key in self.cache and (
+                    self.cache[device_cache_key].get("last_updated") == last_updated
+                    or cache == "force"
+                ):
+                    ret.result[device_name] = self.cache[device_cache_key]
+                # cache old or no cache, fetch device data
                 else:
-                    raise UnsupportedNetboxVersion(
-                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
-                        f"minimum required version is {self.compatible_ge_v4}"
-                    )
-                queries["devices_by_devices_list"] = {
-                    "obj": "device_list",
-                    "filters": filters_dict,
-                    "fields": device_fields,
-                }
+                    devices_to_fetch.append(device_name)
 
-            # send queries
-            query_result = self.graphql(
-                job=job, queries=queries, instance=instance, dry_run=dry_run
-            )
+            # only fetch devices missing from or stale in cache
+            filters_to_fetch = [{"name": devices_to_fetch}] if devices_to_fetch else []
+        # ignore cache, fetch data from Netbox
+        elif cache == False or cache == "refresh":
+            pass  # filters_to_fetch already set to all filters above
 
-            # check for errors
-            if query_result.errors:
-                msg = f"{self.name} - get devices query failed with errors:\n{query_result.errors}"
-                raise Exception(msg)
+        # fetch full device data from Netbox
+        if filters_to_fetch:
+            nb = self._get_pynetbox(instance)
+            all_devices_raw = {}
 
-            # return dry run result
-            if dry_run:
-                ret.result["get_devices_dry_run"] = query_result.result
-                return ret
+            for filter_item in filters_to_fetch:
+                for device in nb.dcim.devices.filter(**filter_item):
+                    all_devices_raw.setdefault(device.name, device)
 
             # process devices data
-            devices_data = query_result.result
-            for devices_list in devices_data.values():
-                for device in devices_list:
-                    if device["name"] not in ret.result:
-                        device_name = device.pop("name")
-                        # cache device data
-                        if cache != False:
-                            cache_key = f"get_devices::{device_name}"
-                            self.cache.set(cache_key, device, expire=self.cache_ttl)
-                        # add device data to return result
-                        ret.result[device_name] = device
+            for device_name, device in all_devices_raw.items():
+                if device_name not in ret.result:
+                    device_data = {
+                        "last_updated": str(device.last_updated),
+                        "custom_field_data": (
+                            dict(device.custom_fields) if device.custom_fields else {}
+                        ),
+                        "tags": [t.name for t in device.tags] if device.tags else [],
+                        "device_type": device.device_type.model,
+                        "role": device.role.name,
+                        "config_context": (
+                            dict(device.config_context) if device.config_context else {}
+                        ),
+                        "tenant": device.tenant.name,
+                        "platform": device.platform.name if device.platform else None,
+                        "serial": device.serial,
+                        "asset_tag": device.asset_tag,
+                        "site": {
+                            "name": device.site.name,
+                            "slug": device.site.slug,
+                            "tags": device.site.tags,
+                        },
+                        "location": device.location.name if device.location else None,
+                        "rack": device.rack.name if device.rack else None,
+                        "status": device.status.value,
+                        "primary_ip4": (
+                            {"address": device.primary_ip4.address}
+                            if device.primary_ip4
+                            else None
+                        ),
+                        "primary_ip6": (
+                            {"address": device.primary_ip6.address}
+                            if device.primary_ip6
+                            else None
+                        ),
+                        "airflow": device.airflow.value if device.airflow else None,
+                        "position": (
+                            str(device.position) if device.position is not None else None
+                        ),
+                        "id": str(device.id),
+                    }
+                    # cache device data
+                    if cache != False:
+                        cache_key = f"get_devices::{device_name}"
+                        self.cache.set(cache_key, device_data, expire=self.cache_ttl)
+                    # add device data to return result
+                    ret.result[device_name] = device_data
 
         return ret
 

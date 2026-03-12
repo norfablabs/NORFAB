@@ -1,4 +1,4 @@
-import json
+﻿import json
 import builtins
 
 from enum import Enum
@@ -12,7 +12,6 @@ from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from typing import Union, Optional, Dict, List
 from nornir_salt.plugins.functions import TabulateFormatter
@@ -144,5 +143,5 @@ class NornirTestShell(
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-test]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel

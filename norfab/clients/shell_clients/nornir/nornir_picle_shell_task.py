@@ -1,4 +1,4 @@
-import json
+﻿import json
 import builtins
 
 from pydantic import (
@@ -10,7 +10,6 @@ from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import PipeFunctionsModel, Outputters
@@ -96,5 +95,5 @@ class NornirTaskShell(
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-task]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel

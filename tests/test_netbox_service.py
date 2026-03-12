@@ -927,45 +927,18 @@ class TestGetDevices:
                 ), f"{worker}:{device} nodevice role info returned"
 
     def test_with_filters(self, nfclient):
-        if self.nb_version is None:
-            self.nb_version = get_nb_version(nfclient)
-
-        if (4, 0, 0) <= self.nb_version < (4, 3, 0):
-            ret = nfclient.run_job(
-                "netbox",
-                "get_devices",
-                workers="any",
-                kwargs={
-                    "filters": [
-                        {"name": '{in_list: ["ceos1", "fceos4"]}'},
-                        {"q": "390"},
-                    ]
-                },
-            )
-        elif self.nb_version >= (4, 3, 0):
-            ret = nfclient.run_job(
-                "netbox",
-                "get_devices",
-                workers="any",
-                kwargs={
-                    "filters": [
-                        {"name": '{in_list: ["ceos1", "fceos4"]}'},
-                        {"name": '{i_contains: "390"}'},
-                    ]
-                },
-            )
-        elif self.nb_version[0] == 3:
-            ret = nfclient.run_job(
-                "netbox",
-                "get_devices",
-                workers="any",
-                kwargs={
-                    "filters": [
-                        {"name": ["ceos1", "fceos4"]},
-                        {"name__ic": "390"},
-                    ]
-                },
-            )
+        # REST API filter syntax: plain dicts with standard query params
+        ret = nfclient.run_job(
+            "netbox",
+            "get_devices",
+            workers="any",
+            kwargs={
+                "filters": [
+                    {"name": ["ceos1", "fceos4"]},
+                    {"name__ic": "390"},
+                ]
+            },
+        )
         pprint.pprint(ret)
 
         for worker, res in ret.items():
@@ -1005,9 +978,6 @@ class TestGetDevices:
                 ), f"{worker}:{device} nodevice role info returned"
 
     def test_with_filters_dry_run(self, nfclient):
-        if self.nb_version is None:
-            self.nb_version = get_nb_version(nfclient)
-
         ret = nfclient.run_job(
             "netbox",
             "get_devices",
@@ -1015,7 +985,7 @@ class TestGetDevices:
             kwargs={
                 "filters": [
                     {"name": ["ceos1", "fceos4"]},
-                    {"q": "390"},
+                    {"name__ic": "390"},
                 ],
                 "dry_run": True,
             },
@@ -1024,58 +994,54 @@ class TestGetDevices:
 
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
-            assert all(
-                k in res["result"]["get_devices_dry_run"]
-                for k in ["headers", "data", "verify", "url"]
-            ), f"{worker} - not all dry run data returned"
+            assert "get_devices_dry_run" in res["result"], (
+                f"{worker} - dry run key missing from result"
+            )
+            dry_run_data = res["result"]["get_devices_dry_run"]
+            assert "filters" in dry_run_data, (
+                f"{worker} - 'filters' key missing from dry run result"
+            )
+            assert isinstance(dry_run_data["filters"], list), (
+                f"{worker} - dry run filters should be a list"
+            )
+
+    def test_dry_run_with_devices_only(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_devices",
+            workers="any",
+            kwargs={"devices": ["ceos1", "fceos4"], "dry_run": True},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            dry_run_data = res["result"]["get_devices_dry_run"]
+            assert "filters" in dry_run_data, (
+                f"{worker} - 'filters' key missing from dry run result"
+            )
+            # devices should be merged into filters as {"name": devices}
+            filters = dry_run_data["filters"]
+            assert any(
+                "name" in f for f in filters
+            ), f"{worker} - device names not merged into filters"
 
     @pytest.mark.parametrize("cache", cache_options)
     def test_get_devices_cache(self, nfclient, cache):
-        if self.nb_version is None:
-            self.nb_version = get_nb_version(nfclient)
-
-        if (4, 0, 0) <= self.nb_version < (4, 3, 0):
-            ret = nfclient.run_job(
-                "netbox",
-                "get_devices",
-                workers="any",
-                kwargs={
-                    "devices": ["ceos1", "fceos4"],
-                    "filters": [
-                        {"name": '{in_list: ["ceos1", "fceos4"]}'},
-                        {"q": "390"},
-                    ],
-                    "cache": cache,
-                },
-            )
-        elif self.nb_version >= (4, 3, 0):
-            ret = nfclient.run_job(
-                "netbox",
-                "get_devices",
-                workers="any",
-                kwargs={
-                    "devices": ["ceos1", "fceos4"],
-                    "filters": [
-                        {"name": '{in_list: ["ceos1", "fceos4"]}'},
-                        {"name": '{i_contains: "390"}'},
-                    ],
-                    "cache": cache,
-                },
-            )
-        elif self.nb_version[0] == 3:
-            ret = nfclient.run_job(
-                "netbox",
-                "get_devices",
-                workers="any",
-                kwargs={
-                    "devices": ["ceos1", "fceos4"],
-                    "filters": [
-                        {"name": ["ceos1", "fceos4"]},
-                        {"name__ic": "390"},
-                    ],
-                    "cache": cache,
-                },
-            )
+        # REST API filter syntax works across all Netbox versions
+        ret = nfclient.run_job(
+            "netbox",
+            "get_devices",
+            workers="any",
+            kwargs={
+                "devices": ["ceos1", "fceos4"],
+                "filters": [
+                    {"name": ["ceos1", "fceos4"]},
+                    {"name__ic": "390"},
+                ],
+                "cache": cache,
+            },
+        )
         pprint.pprint(ret)
 
         for worker, res in ret.items():
@@ -1110,6 +1076,85 @@ class TestGetDevices:
                 assert (
                     "role" in device_data or "devcie_role" in device_data
                 ), f"{worker}:{device} nodevice role info returned"
+
+    def test_with_devices_list_data_structure(self, nfclient):
+        """Verify the exact data format returned by get_devices."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_devices",
+            workers="any",
+            kwargs={"devices": ["fceos4"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
+            d = res["result"]["fceos4"]
+            # tags - list of strings
+            assert isinstance(d["tags"], list), f"{worker}:fceos4 tags should be a list"
+            if d["tags"]:
+                assert all(
+                    isinstance(t, str) for t in d["tags"]
+                ), f"{worker}:fceos4 each tag should be a string"
+            # device_type - flat string (model name)
+            assert isinstance(d["device_type"], str), (
+                f"{worker}:fceos4 device_type should be a string"
+            )
+            # role - flat string
+            assert isinstance(d["role"], str), f"{worker}:fceos4 role should be a string"
+            # site - dict with name, slug, tags
+            assert isinstance(d["site"], dict), f"{worker}:fceos4 site should be a dict"
+            assert all(
+                k in d["site"] for k in ["name", "slug", "tags"]
+            ), f"{worker}:fceos4 site missing expected keys"
+            # status - string value
+            assert isinstance(d["status"], str), (
+                f"{worker}:fceos4 status should be a string"
+            )
+            # primary_ip4 when present - dict with address
+            if d["primary_ip4"] is not None:
+                assert isinstance(d["primary_ip4"], dict), (
+                    f"{worker}:fceos4 primary_ip4 should be a dict"
+                )
+                assert "address" in d["primary_ip4"], (
+                    f"{worker}:fceos4 primary_ip4 missing 'address' key"
+                )
+            # id - string
+            assert isinstance(d["id"], str), f"{worker}:fceos4 id should be a string"
+
+    def test_with_devices_and_filters_combined(self, nfclient):
+        """Devices list and filters are merged; results contain union of matches."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_devices",
+            workers="any",
+            kwargs={
+                "devices": ["ceos1"],
+                "filters": [{"name__ic": "390"}],
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "ceos1" in res["result"], f"{worker} ceos1 missing from result"
+            assert "fceos3_390" in res["result"], f"{worker} fceos3_390 missing from result"
+
+    def test_with_nonexistent_device(self, nfclient):
+        """Querying a device that does not exist returns an empty result."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_devices",
+            workers="any",
+            kwargs={"devices": ["nonexistent_device_xyz"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert res["result"] == {}, (
+                f"{worker} - expected empty result for nonexistent device"
+            )
 
 
 class TestGetConnections:

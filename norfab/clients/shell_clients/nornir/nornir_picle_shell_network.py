@@ -1,4 +1,4 @@
-import builtins
+﻿import builtins
 
 from pydantic import (
     BaseModel,
@@ -12,7 +12,6 @@ from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from typing import Union, List
 from nornir_salt.plugins.functions import TabulateFormatter
@@ -62,7 +61,7 @@ class NornirNetworkPing(
     source: StrictStr = Field(None, description="Source IP address")
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
     @staticmethod
     @listen_events
@@ -150,7 +149,7 @@ class NornirNetworkDns(
     )
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
     @staticmethod
     @listen_events
@@ -220,5 +219,5 @@ class NornirNetworkShell(BaseModel):
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-net]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel

@@ -13,7 +13,6 @@ from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from typing import Union, Optional, List
 from nornir_salt.plugins.functions import TabulateFormatter
@@ -126,7 +125,7 @@ class NrCfgPluginNetmiko(BaseModel):
         return NornirCfgShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrCfgPluginScrapli(BaseModel):
@@ -175,7 +174,7 @@ class NrCfgPluginScrapli(BaseModel):
         return NornirCfgShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrCfgPluginNapalm(BaseModel):
@@ -202,7 +201,7 @@ class NrCfgPluginNapalm(BaseModel):
         return NornirCfgShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrCfgPlugins(BaseModel):
@@ -311,5 +310,5 @@ class NornirCfgShell(
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-cfg]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel

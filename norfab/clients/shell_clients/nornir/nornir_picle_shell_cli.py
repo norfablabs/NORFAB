@@ -1,4 +1,4 @@
-import json
+﻿import json
 import builtins
 
 from enum import Enum
@@ -8,13 +8,13 @@ from pydantic import (
     StrictInt,
     StrictStr,
     Field,
+    model_validator,
 )
 from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from typing import Union, Optional, List
 from nornir_salt.plugins.functions import TabulateFormatter
@@ -153,7 +153,7 @@ class NrCliPluginNetmiko(BaseModel):
         return NornirCliShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrCliPluginScrapli(BaseModel):
@@ -214,7 +214,7 @@ class NrCliPluginScrapli(BaseModel):
         return NornirCliShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrCliPluginNapalm(BaseModel):
@@ -241,7 +241,7 @@ class NrCliPluginNapalm(BaseModel):
         return NornirCliShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrCliPlugins(BaseModel):
@@ -257,10 +257,13 @@ class NrCliPlugins(BaseModel):
 
 
 class NornirCliShell(
-    NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
+    NorniHostsFilters, 
+    TabulateTableModel, 
+    NornirCommonArgs, 
+    ClientRunJobArgs
 ):
     commands: Union[StrictStr, List[StrictStr]] = Field(
-        ...,
+        None,
         description="List of commands to collect form devices",
         json_schema_extra={"multiline": True},
     )
@@ -280,6 +283,15 @@ class NornirCliShell(
     job_data: Optional[StrictStr] = Field(
         None, description="Path to YAML file with job data", alias="job-data"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def check_commands_or_run_ttp(cls, values):
+        commands = values.get("commands")
+        run_ttp = values.get("run_ttp")
+        if not commands and not run_ttp:
+            raise ValueError("Either 'commands' or 'run-ttp' must be provided")
+        return values
 
     @staticmethod
     def source_commands():
@@ -363,7 +375,7 @@ class NornirCliShell(
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-cli]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel
 
 

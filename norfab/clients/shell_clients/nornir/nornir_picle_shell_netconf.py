@@ -1,4 +1,4 @@
-import builtins
+﻿import builtins
 
 from enum import Enum
 
@@ -11,7 +11,6 @@ from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from picle.models import PipeFunctionsModel, Outputters
 
@@ -34,7 +33,7 @@ class NrNetconfPluginNcclient(BaseModel):
         return NornirNetconfShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrNetconfPluginScrapli(BaseModel):
@@ -45,7 +44,7 @@ class NrNetconfPluginScrapli(BaseModel):
         return NornirNetconfShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NrNetconfPlugins(BaseModel):
@@ -74,7 +73,7 @@ class CallGetConfig(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
         return NornirNetconfShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class CallCapabilities(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
@@ -91,7 +90,7 @@ class CallCapabilities(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
         return NornirNetconfShell.run(*args, **kwargs)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NornirNetconfShell(BaseModel):
@@ -134,5 +133,5 @@ class NornirNetconfShell(BaseModel):
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-netconf]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel

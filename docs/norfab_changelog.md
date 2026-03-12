@@ -3,12 +3,15 @@
 ## BUGS
 
 1. Fixing markdown tests report to calculate success rate correctly
+2. Fixing Nornir cli input model to allow either commands or run_ttp to be provided
 
 ## CHANGES
 
 1. Dependencies upgrades:
 
   - picle 0.11.0 -> 0.11.1
+
+2. Netbox get_devices task refactored to use Pynetbox and REST API, as a result Netbox inventory filters for devices now can use Pynetbox device style filtering instead of GraphQL filters.
 
 ## FEATURES
 

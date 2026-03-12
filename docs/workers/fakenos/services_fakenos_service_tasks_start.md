@@ -41,7 +41,7 @@ The `start` task returns the same structure as [inspect_networks](services_faken
 | `memory_vms_mb` | `float` | Virtual memory size in MB. |
 | `num_threads` | `int` | Number of threads in the child process. |
 
-## FakeNOS Restart Command Shell Reference
+## FakeNOS Start Command Shell Reference
 
 NorFab shell supports these command options for Netbox `create_prefix` task:
 

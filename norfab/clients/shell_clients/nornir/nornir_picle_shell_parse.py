@@ -1,4 +1,4 @@
-import builtins
+﻿import builtins
 
 from enum import Enum
 from pydantic import (
@@ -10,7 +10,6 @@ from ..common import ClientRunJobArgs, log_error_or_result, listen_events
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     NornirCommonArgs,
-    print_nornir_results,
 )
 from typing import Union, List
 from picle.models import PipeFunctionsModel, Outputters
@@ -77,7 +76,7 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
@@ -118,7 +117,7 @@ class TTPParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
 
 
 class NornirParseShell(BaseModel):
@@ -132,5 +131,5 @@ class NornirParseShell(BaseModel):
     class PicleConfig:
         subshell = True
         prompt = "nf[nornir-parse]#"
-        outputter = print_nornir_results
+        outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel
