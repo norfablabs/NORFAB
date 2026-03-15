@@ -711,7 +711,7 @@ class NetboxWorker(
 
         # form and return dry run response
         if dry_run:
-            log.into(f"{self.name} - GraphQL dry run, returning query payload without executing")
+            log.info(f"{self.name} - GraphQL dry run, returning query payload without executing")
             ret.result = {
                 "url": f"{nb_params['url']}/graphql/",
                 "data": payload,

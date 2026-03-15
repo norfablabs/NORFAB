@@ -49,9 +49,15 @@ class GetDevicesResult(BaseModel):
     position: Union[str, None] = None
 
 
-class GetDevicesOutput(Result):
-    result: Dict[str, GetDevicesResult]
+class GetDevicesDryRunResult(BaseModel):
+    filter_params: Dict = None
 
+
+class GetDevicesOutput(Result):
+    result: Union[
+        Dict[str, GetDevicesResult], 
+        GetDevicesDryRunResult
+    ]
 
 # -----------------------------------------------------------------------
 # MAIN CLASS WITH TASKS
