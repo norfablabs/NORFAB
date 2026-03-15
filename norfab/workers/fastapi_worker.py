@@ -601,7 +601,7 @@ class FastAPIWorker(NFPWorker):
         Returns:
             Result: An object containing the discovery results for the specified service.
         """
-        job.event("Discovering NorFab services tasks")
+        job.event("discovering NorFab services tasks")
         ret = Result(task=f"{self.name}:discover")
         ret.result = service_tasks_api_discovery(
             self, cycles=1, discover_service=service

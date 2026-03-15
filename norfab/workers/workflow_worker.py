@@ -281,7 +281,7 @@ class WorkflowWorker(NFPWorker):
         workflow_description = workflow.pop("description", "")
         remove_no_match_results = workflow.pop("remove_no_match_results", True)
 
-        job.event(f"Starting workflow '{workflow_name}'")
+        job.event(f"starting workflow '{workflow_name}'")
         log.info(f"Starting workflow '{workflow_name}': {workflow_description}")
 
         ret.result[workflow_name] = {}
@@ -305,7 +305,7 @@ class WorkflowWorker(NFPWorker):
                     }
                 }
                 job.event(
-                    f"Skipping workflow step '{step}', one of run_if_x conditions not satisfied"
+                    f"skipping workflow step '{step}', one of run_if_x conditions not satisfied"
                 )
                 continue
             # stop workflow execution on error
@@ -325,7 +325,7 @@ class WorkflowWorker(NFPWorker):
                 log.error(message)
                 break
 
-            job.event(f"Doing workflow step '{step}'")
+            job.event(f"doing workflow step '{step}'")
 
             ret.result[workflow_name][step] = self.client.run_job(
                 service=data["service"],
@@ -342,7 +342,7 @@ class WorkflowWorker(NFPWorker):
                 is True
             ):
                 job.event(
-                    f"Stopping workflow, step '{step}' failed and has stop_if_fail flag"
+                    f"stopping workflow, step '{step}' failed and has stop_if_fail flag"
                 )
                 break
 
@@ -350,5 +350,9 @@ class WorkflowWorker(NFPWorker):
             ret.result[workflow_name] = self.remove_no_match_results(
                 ret.result[workflow_name]
             )
+
+        log.info(
+            f"Completed workflow '{workflow_name}' with {len(ret.result[workflow_name])} step result(s)"
+        )
 
         return ret

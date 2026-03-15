@@ -24,7 +24,7 @@ from .security import generate_certificates
 log = logging.getLogger(__name__)
 
 # --------------------------------------------------------------------------------------------
-# NIRFAB client, credits to https://rfc.zeromq.org/spec/9/
+# NORFAB client, credits to https://rfc.zeromq.org/spec/9/
 # --------------------------------------------------------------------------------------------
 
 
@@ -150,7 +150,7 @@ class ClientJobDatabase:
         uuid: str,
         service: str,
         task: str,
-        workers: Any,
+        workers: Union[str, List[str]],
         args: list,
         kwargs: dict,
         timeout: int,
@@ -662,7 +662,7 @@ def handle_event(client: object, juuid: str, payload: dict, msg: list):
     )
 
 
-def handle_response(client, juuid: str, status: str, payload: dict):
+def handle_response(client: object, juuid: str, status: str, payload: dict):
     """
     Handle RESPONSE messages and update job database accordingly.
 
@@ -691,6 +691,9 @@ def handle_response(client, juuid: str, status: str, payload: dict):
             workers_dispatched=workers_list,
             started_ts=time.ctime(),
         )
+        log.info(
+            f"{client.name} - Job {juuid} dispatched to {len(workers_list)} worker(s)"
+        )
         log.debug(f"{client.name} - job {juuid} dispatched to workers: {workers_list}")
         return
 
@@ -707,13 +710,6 @@ def handle_response(client, juuid: str, status: str, payload: dict):
         log.debug(
             f"{client.name} - job {juuid} acknowledged by worker: {worker_single}"
         )
-        return
-
-        # GET dispatched to workers (broker 202 response to GET)
-        if workers_list:
-            log.debug(
-                f"{client.name} - job {juuid} GET dispatched to workers: {workers_list}"
-            )
         return
 
     # Handle 200 OK - GET completed with results
@@ -739,6 +735,7 @@ def handle_response(client, juuid: str, status: str, payload: dict):
         )
 
         if is_complete:
+            log.info(f"{client.name} - Job {juuid} completed")
             log.debug(f"{client.name} - job {juuid} completed")
         return
 
@@ -763,7 +760,7 @@ def handle_response(client, juuid: str, status: str, payload: dict):
             append_errors=[error_msg],
             completed_ts=time.ctime(),
         )
-        log.error(f"{client.name} - job {juuid} failed: {error_msg}")
+        log.error(f"{client.name} - Job {juuid} failed with status {status}: {error_msg}")
         return
 
 
@@ -1090,7 +1087,7 @@ class NFPClient(object):
         )
         self.dispatcher_thread.start()
 
-    def ensure_bytes(self, value: Any) -> bytes:
+    def ensure_bytes(self, value: Union[bytes, str]) -> bytes:
         """
         Helper function to convert value to bytes.
         """
@@ -1256,6 +1253,9 @@ class NFPClient(object):
             {"task": task, "kwargs": kwargs or {}, "args": args or []}
         )
 
+        log.info(
+            f"{self.name} - Submitting MMI task '{task}' to service '{service_str}' with request uuid '{uuid_str}'"
+        )
         self.send_to_broker(NFP.MMI, service, workers, uuid, request)
 
         deadline = time.time() + timeout
@@ -1299,6 +1299,9 @@ class NFPClient(object):
             try:
                 ret["results"] = orjson.loads(reply_task_result)
                 ret["status"] = reply_status.decode("utf-8")
+                log.info(
+                    f"{self.name} - Completed MMI task '{task}' request '{uuid_str}' with status {ret['status']}"
+                )
             except Exception as e:
                 ret["errors"].append(
                     f"{self.name} - '{uuid_str}:{service_str}' MMI failed to decode reply payload: {e}"
@@ -1535,6 +1538,9 @@ class NFPClient(object):
         self.job_db.add_job(
             uuid, service, task, workers, args, kwargs, timeout, deadline
         )
+        log.info(
+            f"{self.name} - Submitted job {uuid} to service '{service}', task '{task}', workers '{workers}'"
+        )
 
         if nowait:
             return {
@@ -1550,6 +1556,7 @@ class NFPClient(object):
                     break
                 if job["status"] == JobStatus.COMPLETED:
                     result = job.get("result_data")
+                    log.info(f"{self.name} - Job {uuid} completed")
                     break
                 if job["status"] == JobStatus.FAILED:
                     log.warning(

@@ -1,7 +1,7 @@
 import importlib.metadata
 import logging
 import sys
-from typing import Any, Callable, List
+from typing import Callable, List, Union
 
 import yaml
 from datamodel_code_generator import Formatter, GenerateConfig, generate_dynamic_models
@@ -9,7 +9,7 @@ from langchain.agents import create_agent
 from langchain.tools import tool as langchain_tool
 from langchain_core.runnables import RunnableLambda
 
-from norfab.core.worker import NFPWorker, Task
+from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
 from . import norfab_agent
@@ -53,11 +53,11 @@ class AgentWorker(NFPWorker):
 
     def __init__(
         self,
-        inventory: Any,
+        inventory: object,
         broker: str,
         worker_name: str,
-        exit_event: Any = None,
-        init_done_event: Any = None,
+        exit_event: object = None,
+        init_done_event: object = None,
         log_level: str = "WARNING",
         log_queue: object = None,
     ):
@@ -110,7 +110,7 @@ class AgentWorker(NFPWorker):
 
         return llm
 
-    def make_runnable(self, job, tool: dict, tool_name: str) -> Callable:
+    def make_runnable(self, job: Job, tool: dict, tool_name: str) -> Callable:
         def run_norfab_task(kwargs: dict) -> dict:
             """
             Args:
@@ -164,7 +164,7 @@ class AgentWorker(NFPWorker):
 
         return models["Model"]
 
-    def make_tools(self, job, tools: dict) -> List[langchain_tool]:
+    def make_tools(self, job: Job, tools: dict) -> List[langchain_tool]:
         ret = []
 
         for tool_name, tool in tools.items():
@@ -185,7 +185,7 @@ class AgentWorker(NFPWorker):
 
         return ret
 
-    def get_agent(self, job, agent: str = "NorFab"):
+    def get_agent(self, job: Job, agent: str = "NorFab") -> Union[dict, None]:
         if agent == "NorFab":
             if not self.agent_inventory.get("default_llm"):
                 raise RuntimeError(
@@ -264,13 +264,14 @@ class AgentWorker(NFPWorker):
     @Task(fastapi={"methods": ["POST"]})
     def invoke(
         self,
-        job,
+        job: Job,
         instructions: str,
         name: str = "NorFab",
         verbose_result: bool = False,
     ) -> Result:
         ret = Result()
-        job.event(f"Getting {name} agent ready")
+        log.info(f"{self.name} - Invoke: Processing instructions with '{name}' agent")
+        job.event(f"getting {name} agent ready")
 
         agent_data = self.get_agent(job, name)
 

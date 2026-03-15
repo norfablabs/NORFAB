@@ -257,10 +257,13 @@ class NetboxWorker(
         """
         ret = Result(result={}, task=f"{self.name}:get_netbox_status")
         if instance:
+            log.info(f"{self.name} - fetching '{instance}' Netbox status")
             ret.result[instance] = self._query_netbox_status(instance)
         else:
             for name in self.netbox_inventory["instances"].keys():
+                log.info(f"{self.name} - fetching '{name}' Netbox status")
                 ret.result[name] = self._query_netbox_status(name)
+        log.info(f"{self.name} - Netbox instance(s) status retrieval completed")
         return ret
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
@@ -285,7 +288,7 @@ class NetboxWorker(
         for instance, params in netbox_status.result.items():
             if params["status"] is not True:
                 log.warning(f"{self.name} - {instance} Netbox instance not reachable")
-                job.event(f"Instance '{instance}' is not reachable")
+                job.event(f"instance '{instance}' is not reachable")
                 ret.result[instance] = None
             else:
                 if "-docker-" in params["netbox-version"].lower():
@@ -305,7 +308,9 @@ class NetboxWorker(
                 # check Netbox 4.4+ compatibility
                 if self.nb_version[instance] >= self.compatible_ge_v4:
                     ret.result[instance] = True
-                    job.event(f"Instance '{instance}' version {'.'.join(str(v) for v in self.nb_version[instance])} is compatible")
+                    msg = f"instance '{instance}' version {'.'.join(str(v) for v in self.nb_version[instance])} is compatible"
+                    log.info(msg)
+                    job.event(msg)
                 else:
                     ret.result[instance] = False
                     msg = (
@@ -572,7 +577,7 @@ class NetboxWorker(
         ret = Result(task=f"{self.name}:cache_clear", result=[])
         # check if has keys to clear
         if key == keys == None:  # noqa
-            ret.result = "Noting to clear, specify key or keys"
+            ret.result = "Nothing to clear, specify key or keys"
             return ret
         # remove specific key from cache
         if key:
@@ -580,7 +585,7 @@ class NetboxWorker(
                 if self.cache.delete(key, retry=True):
                     ret.result.append(key)
                     log.debug(f"{self.name} - Removed cache key '{key}'")
-                    job.event(f"Removed cache key '{key}'")
+                    job.event(f"removed cache key '{key}'")
                 else:
                     raise RuntimeError(f"Failed to remove {key} from cache")
             else:
@@ -596,7 +601,7 @@ class NetboxWorker(
                         log.info(f"{self.name} - Removed cache key '{cache_key}'")
                     else:
                         raise RuntimeError(f"Failed to remove {cache_key} from cache")
-            job.event(f"Removed {len(ret.result)} cache key(s) matching pattern '{keys}'")
+            job.event(f"removed {len(ret.result)} cache key(s) matching pattern '{keys}'")
         return ret
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
@@ -977,7 +982,7 @@ class NetboxWorker(
                 if r["failed"] is False and isinstance(r["result"], list):
                     ret.extend(r["result"])
                 elif r["failed"]:
-                    log.warning(f"{self.name} - get_nornir_hosts worker '{w}' failed: {r.get('errors')}")
+                    log.warning(f"{self.name} - Get nornir hosts worker '{w}' failed: {r.get('errors')}")
 
         unique_hosts = list(sorted(set(ret)))
         log.info(f"{self.name} - get_nornir_hosts resolved {len(unique_hosts)} host(s)")

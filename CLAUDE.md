@@ -139,6 +139,12 @@ poetry run ruff check .
 poetry run ruff check . --fix
 ```
 
+### Important formatting Rules
+
+1. Workers `job.event` calls messages must start with lowercase letter, `job.event` call support setting event seveiryt through `severity=WARNING/INFO/ERROR`  
+2. Logging calls e.f. `log.info` messages us tstart with uppercase letters
+3. Any spelling mistakes in docstrings, comments or variable names must be fixed
+
 ### Documentation
 
 ```bash

@@ -343,6 +343,7 @@ class NetboxInterfacesTasks:
         nb = self._get_pynetbox(instance, branch=branch)
         devices = devices or []
         cache = self.cache_use if cache is None else cache
+        log.info(f"{self.name} - Get interfaces: Fetching interfaces for {len(devices)} device(s) from '{instance}'")
         ret = Result(
             task=f"{self.name}:get_interfaces_pynetbox",
             result={d: {} for d in devices},
@@ -566,6 +567,7 @@ class NetboxInterfacesTasks:
             resources=[instance],
         )
         nb = self._get_pynetbox(instance, branch=branch)
+        log.info(f"{self.name} - Create device interfaces: Creating interfaces for {len(devices)} device(s) in '{instance}'")
 
         # Normalize interface_name to a list
         if isinstance(interface_name, str):
@@ -713,6 +715,7 @@ class NetboxInterfacesTasks:
             resources=[instance],
         )
         nb = self._get_pynetbox(instance, branch=branch)
+        log.info(f"{self.name} - Update interfaces description: Updating descriptions for {len(devices)} device(s) in '{instance}'")
 
         job.event(f"updating interface descriptions for {len(devices)} device(s)")
 
@@ -849,6 +852,7 @@ class NetboxInterfacesTasks:
             diff={},
         )
         nb = self._get_pynetbox(instance, branch=branch)
+        log.info(f"{self.name} - Sync device interfaces: Syncing interfaces for {len(devices)} device(s) in '{instance}'")
         kwargs["add_details"] = True
 
         if datasource == "nornir":
@@ -895,7 +899,7 @@ class NetboxInterfacesTasks:
 
                 for worker, results in data.items():
                     if results["failed"]:
-                        msg = f"{worker} get_interfaces failed, errors: {'; '.join(results['errors'])}"
+                        msg = f"{worker} Get interfaces failed, errors: {'; '.join(results['errors'])}"
                         ret.errors.append(msg)
                         log.error(msg)
                         continue

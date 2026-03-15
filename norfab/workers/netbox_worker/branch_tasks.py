@@ -38,8 +38,9 @@ class NetboxBranchTasks:
             resources=[instance],
         )
         nb = self._get_pynetbox(instance)
+        log.info(f"{self.name} - Delete branch: Deleting '{branch}' from '{instance}' Netbox")
 
-        job.event(f"Deleting branch '{branch}', Netbo instance '{instance}'")
+        job.event(f"deleting branch '{branch}', Netbox instance '{instance}'")
 
         nb_branch = nb.plugins.branching.branches.get(name=branch)
 

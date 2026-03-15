@@ -38,6 +38,7 @@ class NetboxBgpPeeringsTasks:
         """
         instance = instance or self.default_instance
         devices = devices or []
+        log.info(f"{self.name} - Get BGP peerings: Fetching BGP peerings for {len(devices)} device(s) from '{instance}' Netbox")
         cache = self.cache_use if cache is None else cache
         ret = Result(
             task=f"{self.name}:get_bgp_peerings",
@@ -81,7 +82,7 @@ class NetboxBgpPeeringsTasks:
             if cache == "force" and cached_data is not None:
                 ret.result[device_name] = cached_data
                 job.event(
-                    f"Using cached BGP peerings for '{device_name}' (forced)",
+                    f"using cached BGP peerings for '{device_name}' (forced)",
                     resource=instance,
                 )
                 continue
@@ -91,7 +92,7 @@ class NetboxBgpPeeringsTasks:
                 bgp_sessions = nb.plugins.bgp.session.filter(device_id=device_id)
                 ret.result[device_name] = {s.name: dict(s) for s in bgp_sessions}
                 job.event(
-                    f"Retrieved {len(ret.result[device_name])} BGP session(s) for '{device_name}'",
+                    f"retrieved {len(ret.result[device_name])} BGP session(s) for '{device_name}'",
                     resource=instance,
                 )
                 continue
@@ -106,7 +107,7 @@ class NetboxBgpPeeringsTasks:
                     cache_key, ret.result[device_name], expire=self.cache_ttl
                 )
                 job.event(
-                    f"Fetched and cached {len(ret.result[device_name])} BGP session(s) for '{device_name}'",
+                    f"fetched and cached {len(ret.result[device_name])} BGP session(s) for '{device_name}'",
                     resource=instance,
                 )
                 continue
@@ -114,7 +115,7 @@ class NetboxBgpPeeringsTasks:
             # Mode: cache=True with cached data - smart update (only fetch changed sessions)
             ret.result[device_name] = dict(cached_data)
             job.event(
-                f"Retrieved {len(cached_data)} BGP session(s) from cache for '{device_name}'",
+                f"retrieved {len(cached_data)} BGP session(s) from cache for '{device_name}'",
                 resource=instance,
             )
 
@@ -153,14 +154,14 @@ class NetboxBgpPeeringsTasks:
             for session_name in sessions_to_remove:
                 ret.result[device_name].pop(session_name, None)
                 job.event(
-                    f"Removed deleted session '{session_name}' from cache for '{device_name}'",
+                    f"removed deleted session '{session_name}' from cache for '{device_name}'",
                     resource=instance,
                 )
 
             # Fetch updated/new sessions
             if session_ids_to_fetch:
                 job.event(
-                    f"Fetching {len(session_ids_to_fetch)} updated BGP session(s) for '{device_name}'",
+                    f"fetching {len(session_ids_to_fetch)} updated BGP session(s) for '{device_name}'",
                     resource=instance,
                 )
                 for session in nb.plugins.bgp.session.filter(id=session_ids_to_fetch):
@@ -171,10 +172,10 @@ class NetboxBgpPeeringsTasks:
                 self.cache.set(
                     cache_key, ret.result[device_name], expire=self.cache_ttl
                 )
-                job.event(f"Updated cache for '{device_name}'", resource=instance)
+                job.event(f"updated cache for '{device_name}'", resource=instance)
             else:
                 job.event(
-                    f"Using cache, it is up to date for '{device_name}'",
+                    f"using cache, it is up to date for '{device_name}'",
                     resource=instance,
                 )
 

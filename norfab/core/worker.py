@@ -2050,7 +2050,7 @@ class NFPWorker:
         Raises:
             TypeError: If the executed task does not return a Result object.
         """
-        log.debug(f"{self.name} - processing job request {uuid}")
+        log.info(f"{self.name} - Processing job request {uuid}")
 
         # Load job data from database
         job_data = self.db.get_job_info(uuid)
@@ -2081,6 +2081,7 @@ class NFPWorker:
             f"args: '{args}', kwargs: '{kwargs}', client: '{client_address}', "
             f"job uuid: '{uuid}'"
         )
+        log.info(f"{self.name} - Starting task '{task}' for job {uuid}")
 
         # inform client that job started
         job.event(message="starting", status="running")
@@ -2133,8 +2134,10 @@ class NFPWorker:
         # Save job result to database
         if job_failed:
             self.db.fail_job(uuid, result_data)
+            log.error(f"{self.name} - Task '{task}' failed for job {uuid}")
         else:
             self.db.complete_job(uuid, result_data)
+            log.info(f"{self.name} - Completed task '{task}' for job {uuid}")
 
         # remove job from running jobs
         _ = self.running_jobs.pop(uuid)

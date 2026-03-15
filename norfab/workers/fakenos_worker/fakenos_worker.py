@@ -238,7 +238,7 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
             try:
                 ret.append(yaml.safe_load(self.fetch_file(plugin, raise_on_fail=True)))
             except Exception as e:
-                log.error(f"{name} - plugin load failed, error: {e}", exc_info=True)
+                log.error(f"{name} - Plugin load failed, error: {e}", exc_info=True)
         return ret
 
     @Task(fastapi={"methods": ["GET"]})
@@ -301,7 +301,7 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
                 entry["stop_event"].set()
                 entry["process"].join(timeout=1)
                 if entry["process"].is_alive():
-                    log.warning(f"{name} did not stop in 1 second - killing process")
+                    log.warning(f"{name} Did not stop in 1 second - killing process")
                     entry["process"].kill()
                     entry["process"].join()
                 self.networks.pop(name, None)
@@ -342,6 +342,7 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
             inventory = self.fetch_file(inventory, raise_on_fail=True)
             inventory = yaml.safe_load(inventory)
 
+        log.info(f"{self.name} - Start: Starting '{network}' FakeNOS network")
         job.event(f"{network} starting network")
 
         stop_event = multiprocessing.Event()
@@ -385,6 +386,7 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
                 exist in ``self.networks``.
         """
         ret = Result()
+        log.info(f"{self.name} - Restart: Restarting '{network}' FakeNOS network")
         inventory = self.networks[network]["inventory"]
         self.stop(job, network)
         self.start(job, network, inventory)
@@ -446,7 +448,7 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
                         }
                     )
                 except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                    log.warning(f"{net_name} - psutil metrics unavailable: {e}")
+                    log.warning(f"{net_name} - Psutil metrics unavailable: {e}")
                 ret.result[net_name] = proc_info
         else:
             ret.result = names

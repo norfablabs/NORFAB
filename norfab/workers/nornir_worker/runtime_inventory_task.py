@@ -33,5 +33,5 @@ class RuntimeInventoryTask:
         """
         # clean up kwargs
         _ = kwargs.pop("progress", None)
-        job.event(f"Performing '{action}' action")
+        job.event(f"performing '{action}' action")
         return Result(result=InventoryFun(self.nr, call=action, **kwargs))

@@ -80,7 +80,7 @@ class NetboxNornirInventoryTasks:
                 if device["platform"]:
                     host["platform"] = device["platform"]
                 else:
-                    log.warning(f"{self.name} - no platform found for '{name}' device")
+                    log.warning(f"{self.name} - No platform found for '{name}' device")
             # add hostname if not provided in config context
             if not host.get("hostname"):
                 if device["primary_ip4"] and primary_ip in ["ip4", "ipv4"]:
@@ -95,7 +95,7 @@ class NetboxNornirInventoryTasks:
 
         # return if no hosts found for provided parameters
         if not hosts:
-            log.warning(f"{self.name} - no viable hosts returned by Netbox")
+            log.warning(f"{self.name} - No viable hosts returned by Netbox")
             return ret
 
         # add interfaces data

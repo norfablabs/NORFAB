@@ -121,6 +121,7 @@ class NetboxPrefixTasks:
             Result: An object containing the outcome, including status, details of the prefix, and resources used.
         """
         instance = instance or self.default_instance
+        log.info(f"{self.name} - Create prefix: Creating /{prefixlen} prefix within '{parent}' from '{instance}' Netbox")
         changed = {}
         ret = Result(
             task=f"{self.name}:create_prefix",
@@ -133,7 +134,7 @@ class NetboxPrefixTasks:
         nb = self._get_pynetbox(instance, branch=branch)
 
         job.event(
-            f"Processing prefix create request within '{parent}' for '/{prefixlen}' subnet"
+            f"processing prefix create request within '{parent}' for '/{prefixlen}' subnet"
         )
 
         # source parent prefix from Netbox
@@ -184,7 +185,7 @@ class NetboxPrefixTasks:
 
         # create new prefix
         if not nb_prefix:
-            job.event(f"Creating new '/{prefixlen}' prefix within '{parent}' prefix")
+            job.event(f"creating new '/{prefixlen}' prefix within '{parent}' prefix")
             # execute dry run on new prefix
             if dry_run is True:
                 nb_prefixes = nb_parent_prefix.available_prefixes.list()
@@ -199,7 +200,7 @@ class NetboxPrefixTasks:
                             nb_parent_prefix.prefix.split("/")[0] + f"/{prefixlen}"
                         )
                         break
-                    # find child prefix by prefixlenght
+                    # find child prefix by prefix length
                     elif str(pfx).endswith(f"/{prefixlen}"):
                         nb_prefix = str(pfx)
                         break
@@ -231,7 +232,7 @@ class NetboxPrefixTasks:
                         f"Failed creating child prefix of '/{prefixlen}' prefix length "
                         f"within parent prefix '{str(nb_parent_prefix)}', error: {e}"
                     )
-            job.event(f"Created new '{nb_prefix}' prefix within '{parent}' prefix")
+            job.event(f"created new '{nb_prefix}' prefix within '{parent}' prefix")
             ret.status = "created"
         else:
             # check existing prefix length matching requested length
@@ -240,7 +241,7 @@ class NetboxPrefixTasks:
                     f"Found existing child prefix '{nb_prefix.prefix}' with mismatch "
                     f"requested prefix length '/{prefixlen}'"
                 )
-            job.event(f"Using existing prefix {nb_prefix}")
+            job.event(f"using existing prefix {nb_prefix}")
 
         # update prefix parameters
         if description and description != nb_prefix.description:

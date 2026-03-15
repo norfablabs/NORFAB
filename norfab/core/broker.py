@@ -71,8 +71,8 @@ class NFPWorker(object):
     def __init__(
         self,
         address: str,
-        socket: Any,
-        socket_lock: Any,
+        socket: zmq.Socket,
+        socket_lock: threading.Lock,
         multiplier: int,  # e.g. 6 times
         keepalive: int,  # e.g. 5000 ms
         service: Optional[NFPService] = None,
@@ -704,7 +704,7 @@ class NFPBroker:
         service: NFPService,
         target: Union[str, List[str]],
         uuid: str,
-        data: Any,
+        data: object,
     ) -> None:
         """
         Dispatch requests to waiting workers as possible
@@ -715,7 +715,7 @@ class NFPBroker:
             service (Service): The service object associated with the request.
             target (str): A string indicating the addresses of the workers to dispatch to.
             uuid (str): A unique identifier for the request.
-            data (Any): The data to be sent to the workers.
+            data (object): The data to be sent to the workers.
         """
         log.debug(
             f"NFPBroker - dispatching request to workers or clients: sender '{sender}', "
@@ -798,12 +798,15 @@ class NFPBroker:
         """
         log.debug(
             f"mmi.service.broker - processing request: sender '{sender}', "
-            f"command '{command}', target '{target}'"
+            f"command '{command}', target '{target}', "
             f"data '{data}', uuid '{uuid}'"
         )
         data = orjson.loads(data)
         task = data.get("task")
         kwargs = data.get("kwargs", {})
+        log.info(
+            f"MMI.service.broker - Processing task '{task}' from sender '{sender}'"
+        )
         ret = f"Unsupported task '{task}'"
         if task == "show_workers":
             if self.workers:

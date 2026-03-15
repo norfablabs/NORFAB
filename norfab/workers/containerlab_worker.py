@@ -322,6 +322,7 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:deploy")
+        log.info(f"{self.name} - Deploy: Deploying topology '{topology}'")
 
         # create folder to store topology
         topology_folder = os.path.split(os.path.split(topology)[0])[-1]
@@ -342,9 +343,9 @@ class ContainerlabWorker(NFPWorker):
         args = ["containerlab", "deploy", "-f", "json", "-t", topology_file]
         if reconfigure is True:
             args.append("--reconfigure")
-            job.event(f"Re-deploying lab {os.path.split(topology_file)[-1]}")
+            job.event(f"re-deploying lab {os.path.split(topology_file)[-1]}")
         else:
-            job.event(f"Deploying lab {os.path.split(topology_file)[-1]}")
+            job.event(f"deploying lab {os.path.split(topology_file)[-1]}")
         if node_filter:
             args.append("--node-filter")
             args.append(node_filter)
@@ -380,6 +381,8 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:destroy_lab")
+        log.info(f"{self.name} - Destroy lab: Destroying '{lab_name}' lab")
+        job.event(f"destroying lab '{lab_name}'")
 
         # get lab details
         inspect = self.inspect(
@@ -437,6 +440,11 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:inspect")
+        log.info(f"{self.name} - Inspect: Inspecting {'all labs' if lab_name is None else lab_name + ' lab'}")
+        if lab_name:
+            job.event(f"inspecting lab '{lab_name}'")
+        else:
+            job.event("inspecting all labs")
 
         if lab_name:
             args = ["containerlab", "inspect", "-f", "json", "--name", lab_name]
@@ -476,6 +484,8 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:save")
+        log.info(f"{self.name} - Save: Saving running config for '{lab_name}' lab")
+        job.event(f"saving running config for lab '{lab_name}'")
 
         # get lab details
         inspect = self.inspect(
@@ -490,7 +500,7 @@ class ContainerlabWorker(NFPWorker):
             topology_file = inspect.result[lab_name][0]["Labels"]["clab-topo-file"]
             topology_folder = os.path.split(topology_file)[0]
 
-            # run destroy command
+            # run save command
             args = ["containerlab", "save", "-t", topology_file]
             ret = self.run_containerlab_command(
                 args=args,
@@ -524,6 +534,8 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:restart_lab")
+        log.info(f"{self.name} - Restart lab: Restarting '{lab_name}' lab")
+        job.event(f"restarting lab '{lab_name}'")
 
         # get lab details
         inspect = self.inspect(
@@ -613,6 +625,8 @@ class ContainerlabWorker(NFPWorker):
         timeout = timeout or 600
         groups = groups or []
         ret = Result(task=f"{self.name}:get_nornir_inventory", result={"hosts": {}})
+        log.info(f"{self.name} - Get Nornir inventory: Building inventory for '{lab_name or 'all'}' lab(s)")
+        job.event(f"building nornir inventory for '{lab_name or 'all'}' lab(s)")
 
         # get lab details
         inspect = self.inspect(
@@ -658,7 +672,7 @@ class ContainerlabWorker(NFPWorker):
                             host_ip = port["host_ip"]
                         break
                 else:
-                    log.error(f"{self.name} - {host_name} failed to map SSH port.")
+                    log.error(f"{self.name} - {host_name} Failed to map SSH port.")
                     continue
 
                 # add host to Nornir inventory
@@ -679,7 +693,7 @@ class ContainerlabWorker(NFPWorker):
                     ]
                 else:
                     log.warning(
-                        f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not mapped to Netmiko platform."
+                        f"{self.name} - {host_name} Clab-node-kind '{clab_platform_name}' not mapped to Netmiko platform."
                     )
                     continue
 
@@ -688,7 +702,7 @@ class ContainerlabWorker(NFPWorker):
                     clab_platform = PlatformMap.get("containerlab", clab_platform_name)
                     if not clab_platform:
                         log.warning(
-                            f"{self.name} - {host_name} clab-node-kind '{clab_platform_name}' not found."
+                            f"{self.name} - {host_name} Clab-node-kind '{clab_platform_name}' not found."
                         )
                         continue
                     if clab_platform.get("username"):
@@ -766,6 +780,7 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:deploy_netbox")
+        log.info(f"{self.name} - Deploy Netbox: Preparing topology for lab '{lab_name or tenant or 'auto'}'")
         subnets_in_use = set()
         ports_in_use = {}
 
@@ -774,14 +789,14 @@ class ContainerlabWorker(NFPWorker):
             lab_name = tenant
 
         # inspect existing containers
-        job.event("Checking existing containers")
+        job.event("checking existing containers")
         get_containers = self.inspect(job=job, details=True)
         if get_containers.failed is True:
             get_containers.task = f"{self.name}:deploy_netbox"
             return get_containers
 
         # collect TCP/UDP ports and subnets in use
-        job.event("Existing containers found, retrieving details")
+        job.event("existing containers found, retrieving details")
         for lname, containers in get_containers.result.items():
             for container in containers:
                 clab_name = container["Labels"]["containerlab"]
@@ -831,7 +846,7 @@ class ContainerlabWorker(NFPWorker):
                     job.event(msg)
                     ipv4_subnet = None
 
-        job.event("Collected TCP/UDP ports used by existing containers")
+        job.event("collected TCP/UDP ports used by existing containers")
 
         # allocate new subnet
         if ipv4_subnet is None:

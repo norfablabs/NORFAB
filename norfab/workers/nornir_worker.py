@@ -458,7 +458,7 @@ class NornirWorker(NFPWorker):
         # pull Nornir inventory from Netbox
         if "netbox" in self.nornir_worker_inventory:
             self.nornir_inventory_load_netbox(job=job)
-            job.event("Pulled Nornir inventory data from Netbox")
+            job.event("pulled Nornir inventory data from Netbox")
 
         # pull Nornir inventory from Containerlab
         if "containerlab" in self.nornir_worker_inventory:
@@ -467,13 +467,13 @@ class NornirWorker(NFPWorker):
                 **self.nornir_worker_inventory["containerlab"],
                 re_init_nornir=False,
             )
-            job.event("Pulled Nornir inventory data from Containerlab")
+            job.event("pulled Nornir inventory data from Containerlab")
 
-        job.event("Pulled inventories, refreshing Nornir instance")
+        job.event("pulled inventories, refreshing Nornir instance")
 
         self.init_nornir(self.nornir_worker_inventory)
 
-        job.event("Nornir instance refreshed")
+        job.event("nornir instance refreshed")
 
         return ret
 
@@ -545,7 +545,7 @@ class NornirWorker(NFPWorker):
             log.error(msg)
             job.event(msg, severity="ERROR")
 
-        job.event("Completed processing Nornir inventory from Netbox")
+        job.event("completed processing Nornir inventory from Netbox")
 
         return ret
 
@@ -589,7 +589,7 @@ class NornirWorker(NFPWorker):
             task=f"{self.name}:nornir_inventory_load_containerlab", result=True
         )
         job.event(
-            f"Pulling Containerlab '{lab_name or 'all'}' inventory from '{clab_workers}' workers"
+            f"pulling Containerlab '{lab_name or 'all'}' inventory from '{clab_workers}' workers"
         )
 
         clab_inventory_data = self.client.run_job(
@@ -608,7 +608,7 @@ class NornirWorker(NFPWorker):
             log.error(msg)
             raise RuntimeError(msg)
 
-        job.event(f"Pulled Containerlab '{lab_name or 'all'}' lab inventory")
+        job.event(f"pulled Containerlab '{lab_name or 'all'}' lab inventory")
 
         if dry_run is True:
             ret.result = {w: r["result"] for w, r in clab_inventory_data.items()}
@@ -628,12 +628,12 @@ class NornirWorker(NFPWorker):
             raise RuntimeError(msg)
 
         job.event(
-            f"Merged Containerlab '{lab_name or 'all'}' lab inventory with Nornir runtime inventory"
+            f"merged Containerlab '{lab_name or 'all'}' lab inventory with Nornir runtime inventory"
         )
 
         if re_init_nornir is True:
             self.init_nornir(self.nornir_worker_inventory)
-            job.event("Nornir instance re-initialized")
+            job.event("nornir instance re-initialized")
 
         return ret
 
@@ -1803,7 +1803,7 @@ class NornirWorker(NFPWorker):
         """
         # clean up kwargs
         _ = kwargs.pop("progress", None)
-        job.event(f"Performing '{action}' action")
+        job.event(f"performing '{action}' action")
         return Result(result=InventoryFun(self.nr, call=action, **kwargs))
 
     @Task(fastapi={"methods": ["POST"]})

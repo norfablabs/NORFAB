@@ -10,7 +10,7 @@ from datamodel_code_generator import (
 )
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, create_model
 
-from norfab.core.worker import Task
+from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import slugify
 
@@ -444,15 +444,17 @@ class NetboxDesignTasks:
     )
     def create_design(
         self,
-        job,
+        job: Job,
         design_data: Union[str, dict],
         context: Union[str, dict] = {},
         instance: str = None,
         dry_run: bool = False,
         branch: str = None,
     ) -> Result:
+        instance = instance or self.default_instance
+        log.info(f"{self.name} - Create design: Processing design data for '{instance}'")
         ret = Result(task=f"{self.name}:design_create", result={})
-        nb = self._get_pynetbox(instance or self.default_instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch)
 
         if self.is_url(context):
             context = self.fetch_file(context)
@@ -485,15 +487,11 @@ class NetboxDesignTasks:
                 self.mutate_input_data(error, design_data, netbox_api_model)
 
         # push data to Netbox
-        import pprint
-
-        pprint.pprint(design_data)
         for entity in design_data.get("create_order", DEFAULT_CREATE_ORDER):
             app, obj_type = entity.split(".")
 
             if data := design_data.get(app, {}).get(obj_type, []):
                 job.event(f"creating {app}.{obj_type}")
-                print(f"creating {app}.{obj_type}")
                 # identify existing objects to not create them
                 new_objects = []
                 while data:

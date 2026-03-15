@@ -159,7 +159,7 @@ class NetboxContainerlabInventoryTasks:
         log.debug(
             f"Fetching devices from {instance} Netbox instance, devices '{devices}', filters '{filters}'"
         )
-        job.event("Fetching devices data from Netbox")
+        job.event("fetching devices data from Netbox")
         nb_devices = self.get_devices(
             job=job,
             filters=filters,
@@ -217,21 +217,21 @@ class NetboxContainerlabInventoryTasks:
 
             # save node content
             nodes[device_name] = node
-            job.event(f"Node added {device_name}")
+            job.event(f"node added {device_name}")
 
         # return if no nodes found for provided parameters
         if not nodes:
-            msg = f"{self.name} - no devices found in Netbox"
+            msg = f"{self.name} - No devices found in Netbox"
             log.error(msg)
             ret.failed = True
             ret.messages = [
-                f"{self.name} - no devices found in Netbox, "
+                f"{self.name} - No devices found in Netbox, "
                 f"devices - '{devices}', filters - '{filters}'"
             ]
             ret.errors = [msg]
             return ret
 
-        job.event("Fetching connections data from Netbox")
+        job.event("fetching connections data from Netbox")
 
         # query interface connections data from netbox
         nb_connections = self.get_connections(
@@ -282,7 +282,7 @@ class NetboxContainerlabInventoryTasks:
                     endpts_done.append(b_end)
                     links.append(link)
                     job.event(
-                        f"Link added {endpoints[0]['node']}:{endpoints[0]['interface']}"
+                        f"link added {endpoints[0]['node']}:{endpoints[0]['interface']}"
                         f" - {endpoints[1]['node']}:{endpoints[1]['interface']}"
                     )
 
@@ -333,7 +333,7 @@ class NetboxContainerlabInventoryTasks:
                     endpts_done.append(b_end)
                     links.append(link)
                     job.event(
-                        f"Link added {endpoints[0]['node']}:{endpoints[0]['interface']}"
+                        f"link added {endpoints[0]['node']}:{endpoints[0]['interface']}"
                         f" - {endpoints[1]['node']}:{endpoints[1]['interface']}"
                     )
 
@@ -341,7 +341,7 @@ class NetboxContainerlabInventoryTasks:
         for node_name, node_data in nodes.items():
             interfaces_rename = node_data.pop("interfaces_rename", [])
             if interfaces_rename:
-                job.event(f"Renaming {node_name} interfaces")
+                job.event(f"renaming {node_name} interfaces")
             for item in interfaces_rename:
                 if not item.get("find") or not item.get("replace"):
                     log.error(

@@ -465,7 +465,7 @@ class NetboxCircuitsTasks:
                         ckt_data["vrf"] = interface_data.get("vrf", {})
                     else:
                         log.error(
-                            f"{device_name}:{circuit_id} failed to find '{interface_name}' interface details"
+                            f"{device_name}:{circuit_id} Failed to find '{interface_name}' interface details"
                         )
 
         return ret

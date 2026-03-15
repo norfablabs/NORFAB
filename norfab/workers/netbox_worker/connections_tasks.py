@@ -78,6 +78,8 @@ class NetboxConnectionsTasks:
             Exception: If there is an error in the GraphQL query or data retrieval process.
         """
         instance = instance or self.default_instance
+        log.info(f"{self.name} - Get connections: Fetching connections for {len(devices)} device(s) from '{instance}'")
+        job.event(f"fetching connections for {len(devices)} device(s)")
         ret = Result(
             task=f"{self.name}:get_connections",
             result={d: {} for d in devices},
@@ -251,6 +253,7 @@ class NetboxConnectionsTasks:
 
         all_ports = query_result.result
         if not all_ports:
+            log.info(f"{self.name} - Get connections: No ports returned for {len(devices)} device(s)")
             return ret
 
         # extract physical interfaces connections
@@ -341,7 +344,7 @@ class NetboxConnectionsTasks:
                         continue
                 else:
                     log.error(
-                        f"{device_name}:{interface_name} parent has no connected endpoints"
+                        f"{device_name}:{interface_name} Parent has no connected endpoints"
                     )
                     continue
                 connection["remote_device"] = endpoint["device"]["name"]
@@ -406,5 +409,8 @@ class NetboxConnectionsTasks:
                     connection["remote_device_status"] = endpoint["device"]["status"]
                 # add lag interface connection to results
                 ret.result[device_name][interface_name] = connection
+
+        log.info(f"{self.name} - get_connections: completed with connection data for {len(ret.result)} device(s)")
+        job.event(f"retrieved connections for {len(ret.result)} device(s)")
 
         return ret

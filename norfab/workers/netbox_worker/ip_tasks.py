@@ -1,6 +1,6 @@
 import ipaddress
 import logging
-from typing import Any, Union
+from typing import Union, Any
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
@@ -98,6 +98,7 @@ class NetboxIpTasks:
         7. If changes were made and not a dry run, saves the IP and device updates to NetBox.
         """
         instance = instance or self.default_instance
+        log.info(f"{self.name} - Create IP: Allocating IP from '{prefix}' for '{device}:{interface}' in '{instance}' Netbox")
         ret = Result(task=f"{self.name}:create_ip", result={}, resources=[instance])
         tags = tags or []
         has_changes = False
@@ -196,7 +197,7 @@ class NetboxIpTasks:
                         nb_prefix = nb_peer_prefix
                         mask_len = None  # cancel subnet creation
                         job.event(
-                            f"Using link peer '{peer['remote_device']}:{peer['remote_interface']}' "
+                            f"using link peer '{peer['remote_device']}:{peer['remote_interface']}' "
                             f"prefix '{nb_peer_prefix}' to create IP address"
                         )
             # if mask_len provided create new subnet
@@ -249,11 +250,11 @@ class NetboxIpTasks:
             else:
                 nb_ip = nb_prefix.available_ips.create()
                 job.event(
-                    f"Created '{nb_ip}' IP address for '{device}:{interface}' within '{nb_prefix}' prefix"
+                    f"created '{nb_ip}' IP address for '{device}:{interface}' within '{nb_prefix}' prefix"
                 )
             ret.status = "created"
         else:
-            job.event(f"Using existing IP address {nb_ip}")
+            job.event(f"using existing IP address {nb_ip}")
             ret.status = "updated"
 
         # update IP address parameters
@@ -307,7 +308,7 @@ class NetboxIpTasks:
             ret.dry_run = True
         elif has_changes:
             nb_ip.save()
-            job.event(f"Updated '{str(nb_ip)}' IP address parameters")
+            job.event(f"updated '{str(nb_ip)}' IP address parameters")
             # make IP primary for device
             if is_primary is True and nb_device:
                 nb_device.save()
@@ -329,7 +330,7 @@ class NetboxIpTasks:
         # create IP address for peer
         if create_peer_ip and create_peer_ip_data:
             job.event(
-                f"Creating IP address for link peer '{create_peer_ip_data['device']}:{create_peer_ip_data['interface']}'"
+                f"creating IP address for link peer '{create_peer_ip_data['device']}:{create_peer_ip_data['interface']}'"
             )
             peer_ip = self.create_ip(
                 **create_peer_ip_data, prefix=str(nb_prefix), job=job
@@ -372,6 +373,7 @@ class NetboxIpTasks:
             - The `prefix` parameter can be a string representing the prefix or a dictionary with additional details.
         """
         instance = instance or self.default_instance
+        log.info(f"{self.name} - Create IP bulk: Assigning IPs for {len(devices or [])} device(s) from '{instance}' Netbox")
         ret = Result(
             task=f"{self.name}:create_ip_bulk", result={}, resources=[instance]
         )
@@ -451,6 +453,7 @@ class NetboxIpTasks:
             task=f"{self.name}:sync_device_ip", result=result, resources=[instance]
         )
         nb = self._get_pynetbox(instance, branch=branch)
+        log.info(f"{self.name} - Sync device IP: Syncing IP addresses for {len(devices)} device(s) from '{instance}' Netbox")
 
         if datasource == "nornir":
             # source hosts list from Nornir
@@ -470,7 +473,7 @@ class NetboxIpTasks:
                 for worker, results in data.items():
                     if results["failed"]:
                         log.error(
-                            f"{worker} get_interfaces_ip failed, errors: {'; '.join(results['errors'])}"
+                            f"{worker} Get interfaces IP failed, errors: {'; '.join(results['errors'])}"
                         )
                         continue
                     for host, host_data in results["result"].items():
@@ -507,7 +510,7 @@ class NetboxIpTasks:
                                 )
                                 if len(nb_ip) > 1:
                                     log.warning(
-                                        f"{host} got multiple {ip}/{prefix_length} IP addresses from Netbox, "
+                                        f"{host} Got multiple {ip}/{prefix_length} IP addresses from Netbox, "
                                         f"NorFab Netbox Service only supports handling of non-duplicate IPs."
                                     )
                                     continue
