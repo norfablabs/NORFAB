@@ -1,6 +1,8 @@
 import copy
 import logging
-from typing import Any, Union
+from typing import Any, Dict, List, Union
+
+from pydantic import BaseModel
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
@@ -9,6 +11,103 @@ from norfab.models import Result
 from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
+
+
+# -----------------------------------------------------------------------
+# PYDANTIC OUTPUT MODELS
+# -----------------------------------------------------------------------
+
+
+class GetInterfacesIPAddress(BaseModel):
+    address: str
+    family: Union[int, None] = None
+
+
+class GetInterfacesInventoryItem(BaseModel):
+    name: str
+    role: Union[str, None] = None
+    manufacturer: Union[str, None] = None
+    serial: str = ""
+    custom_fields: Dict[str, Any] = {}
+
+
+class GetInterfacesChildInterface(BaseModel):
+    name: str
+    vrf: Union[str, None] = None
+    ip_addresses: List[GetInterfacesIPAddress] = []
+
+
+class GetInterfacesEndpoint(BaseModel):
+    device: Union[str, None] = None
+    interface: Union[str, None] = None
+
+
+class GetInterfacesResult(BaseModel):
+    id: int
+    label: Union[str, None] = None
+    type: Union[str, None] = None
+    enabled: bool = True
+    parent: Union[str, None] = None
+    lag: Union[str, None] = None
+    mtu: Union[int, None] = None
+    duplex: Union[str, None] = None
+    mac_address: Union[str, None] = None
+    mac_addresses: List[str] = []
+    primary_mac_address: Union[str, None] = None
+    speed: Union[int, None] = None
+    wwn: Union[str, None] = None
+    mgmt_only: bool = False
+    description: str = ""
+    mode: Union[str, None] = None
+    rf_role: Union[str, None] = None
+    rf_channel: Union[str, None] = None
+    rf_channel_frequency: Union[float, None] = None
+    rf_channel_width: Union[float, None] = None
+    tx_power: Union[int, None] = None
+    untagged_vlan: Union[Dict, None] = None
+    qinq_svlan: Union[Dict, None] = None
+    vrf: Union[str, None] = None
+    l2vpn_termination: Union[str, None] = None
+    vlan_translation_policy: Union[Dict, None] = None
+    wireless_link: Union[str, None] = None
+    mark_connected: bool = False
+    cable: Union[int, str, None] = None
+    cable_end: Union[str, None] = None
+    wireless_lans: List[Any] = []
+    poe_mode: Union[str, None] = None
+    poe_type: Union[str, None] = None
+    bridge: Union[str, None] = None
+    module: Union[str, None] = None
+    owner: Union[str, None] = None
+    link_peers_type: Union[str, None] = None
+    connected_endpoints_type: Union[str, None] = None
+    connected_endpoints_reachable: Union[bool, None] = None
+    count_ipaddresses: int = 0
+    count_fhrp_groups: int = 0
+    occupied: Union[bool, None] = None
+    tags: List[str] = []
+    custom_fields: Dict[str, Any] = {}
+    created: Union[str, None] = None
+    last_updated: Union[str, None] = None
+    bridge_interfaces: List[Any] = []
+    tagged_vlans: Union[List[Dict], None] = None
+    vdcs: List[Any] = []
+    link_peers: List[GetInterfacesEndpoint] = []
+    connected_endpoints: List[GetInterfacesEndpoint] = []
+    # extra fields populated by get_interfaces
+    child_interfaces: List[GetInterfacesChildInterface] = []
+    member_interfaces: List[str] = []
+    ip_addresses: List[GetInterfacesIPAddress] = []
+    inventory_items: List[GetInterfacesInventoryItem] = []
+
+
+class GetInterfacesDryRunResult(BaseModel):
+    filter_params: Dict = None
+
+
+class GetInterfacesOutput(Result):
+    result: Union[Dict[str, Dict[str, GetInterfacesResult]], GetInterfacesDryRunResult]
+
 
 # -----------------------------------------------------------------------
 # HELPER FUNCTIONS
@@ -29,6 +128,19 @@ def flatten_ip_data(ip: dict) -> dict:
     return ip
 
 
+def flatten_vlan_data(vlan: dict) -> dict:
+    try:
+        vlan = {
+            "description": vlan["description"],
+            "name": vlan["name"],
+            "vid": vlan["vid"],
+        }
+    except Exception as e:
+        log.error(f"Failed to flatten VLAN data: {e}", exc_info=True)
+
+    return vlan
+
+
 def flatten_inventory_item(iidata: dict) -> dict:
     try:
         iidata = {
@@ -46,9 +158,9 @@ def flatten_inventory_item(iidata: dict) -> dict:
 
 def flatten_interface_data(intf: dict) -> dict:
     try:
+        intf_name = intf.pop("name", None)
         intf.pop("display", None)
         intf.pop("display_url", None)
-        intf.pop("name", None)
         intf.pop("device", None)
         intf.pop("url", None)
         intf["occupied"] = intf.pop("_occupied", None)
@@ -57,31 +169,49 @@ def flatten_interface_data(intf: dict) -> dict:
         intf["type"] = (intf.get("type") or {}).get("value")
         intf["vrf"] = (intf.get("vrf") or {}).get("name")
         intf["parent"] = (intf.get("parent") or {}).get("name")
+        intf["lag"] = (intf.get("lag") or {}).get("name")
         intf["tags"] = flatten_tags(intf["tags"])
         # flatten cable
         if intf["cable"]:
             intf["cable"] = intf["cable"].get("label") or intf["cable"].get("id")
         # flatten endpoints
-        for endpoint in intf.pop("connected_endpoints", None) or []:
-            intf.setdefault("connected_endpoints", [])
-            intf["connected_endpoints"].append(
-                {
-                    "device": (endpoint.get("device") or {}).get("name"),
-                    "interface": endpoint.pop("name", None),
-                }
-            )
+        endpoints = []
+        for endpoint in intf.pop("connected_endpoints") or []:
+            if intf["connected_endpoints_type"] == "circuits.providernetwork":
+                endpoints.append(
+                    {
+                        "providernetwork": endpoint["name"],
+                    }
+                )
+            else:
+                endpoints.append(
+                    {
+                        "device": endpoint["device"]["name"],
+                        "interface": endpoint["name"],
+                    }
+                )
+        intf["connected_endpoints"] = endpoints
         # flatten link peers
-        for peer in intf.pop("link_peers", None) or []:
-            intf.setdefault("link_peers", [])
-            intf["link_peers"].append(
-                {
-                    "device": (peer.get("device") or {}).get("name"),
-                    "interface": peer.pop("name", None),
-                }
-            )
+        link_peers = []
+        for peer in intf.get("link_peers") or []:
+            if intf["link_peers_type"] == "circuits.circuittermination":
+                link_peers.append({"circuit": peer["circuit"]["cid"]})
+            else:
+                link_peers.append(
+                    {
+                        "device": peer["device"]["name"],
+                        "interface": peer["name"],
+                    }
+                )
+        intf["link_peers"] = link_peers
         # flatten mac_addresses
         if intf.get("mac_addresses"):
             intf["mac_addresses"] = [m["mac_address"] for m in intf["mac_addresses"]]
+        # flatten vlans
+        if intf["untagged_vlan"]:
+            intf["untagged_vlan"] = flatten_vlan_data(intf["untagged_vlan"])
+        if intf["tagged_vlans"]:
+            intf["tagged_vlans"] = [flatten_vlan_data(v) for v in intf["tagged_vlans"]]
     except Exception as e:
         log.error(f"Failed to flatten Interface address data: {e}", exc_info=True)
 
@@ -90,7 +220,10 @@ def flatten_interface_data(intf: dict) -> dict:
 
 class NetboxInterfacesTasks:
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        output=GetInterfacesOutput,
+    )
     def get_interfaces(
         self,
         job: Job,
@@ -116,6 +249,8 @@ class NetboxInterfacesTasks:
             ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.
             inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.
             dry_run (bool, optional): If True, only return REST filter params, do not run. Defaults to False.
+            cache: ``True`` - use cache if up to date; ``False`` - skip cache;
+                ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check
 
         Returns:
             dict: Dictionary keyed by device name with interface details.
@@ -207,6 +342,7 @@ class NetboxInterfacesTasks:
         instance = instance or self.default_instance
         nb = self._get_pynetbox(instance, branch=branch)
         devices = devices or []
+        cache = self.cache_use if cache is None else cache
         ret = Result(
             task=f"{self.name}:get_interfaces_pynetbox",
             result={d: {} for d in devices},
@@ -218,6 +354,7 @@ class NetboxInterfacesTasks:
         member_intf_by_lag_id = {}  # lag_id    -> [member intf, ...]
         ip_by_intf_id = {}
         inv_by_intf_id = {}
+        all_interfaces = []
 
         # build REST filter params
         if devices:
@@ -231,10 +368,66 @@ class NetboxInterfacesTasks:
             ret.result = {"filter_params": filter_params}
             return ret
 
-        # fetch all matching interfaces in one call
-        all_interfaces = list(nb.dcim.interfaces.filter(**filter_params))
+        job.event(f"retrieving interfaces for {len(devices)} device(s)")
 
-        if not all_interfaces:
+        devices_to_fetch = list(devices)
+
+        if cache == True or cache == "force":
+            job.event(f"checking cache for {len(devices)} device(s)")
+            # quick REST call to get current last_updated for all matching interfaces
+            result = self.rest(
+                job=job,
+                instance=instance,
+                api="dcim/interfaces",
+                params={**filter_params, "fields": "name,last_updated,device"},
+            )
+            # build per-device last_updated map
+            last_updated_by_device = {}
+            for intf in result.result.get("results", []):
+                dev_name = intf["device"]["name"]
+                last_updated_by_device.setdefault(dev_name, {})[intf["name"]] = intf[
+                    "last_updated"
+                ]
+
+            self.cache.expire()  # remove expired items from cache
+            devices_to_fetch = []
+            for device_name, intf_last_updated in last_updated_by_device.items():
+                device_cache_key = f"get_interfaces::{device_name}"
+                if device_cache_key in self.cache and (
+                    cache == "force"
+                    or all(
+                        self.cache[device_cache_key]
+                        .get(intf_name, {})
+                        .get("last_updated")
+                        == lu
+                        for intf_name, lu in intf_last_updated.items()
+                    )
+                ):
+                    # serve requested interfaces from cache
+                    for intf_name in intf_last_updated.keys():
+                        ret.result[device_name][intf_name] = self.cache[
+                            device_cache_key
+                        ][intf_name]
+                    job.event(f"serving '{device_name}' interfaces from cache ({len(intf_last_updated)} interface(s))")
+                else:
+                    devices_to_fetch.append(device_name)
+                    job.event(f"'{device_name}' cache miss or stale, fetching fresh data")
+        elif cache == False or cache == "refresh":
+            pass  # fetch all devices fresh
+
+        # build fetch filter params restricted to devices needing fresh data
+        if devices and cache in (True, "force"):
+            fetch_filter_params = {**filter_params, "device": devices_to_fetch}
+        else:
+            fetch_filter_params = filter_params
+
+        # fetch all matching interfaces in one call
+        if devices_to_fetch:
+            job.event(f"fetching interfaces from NetBox for {len(devices_to_fetch)} device(s)")
+            all_interfaces = list(nb.dcim.interfaces.filter(**fetch_filter_params))
+            job.event(f"retrieved {len(all_interfaces)} interface(s) from NetBox")
+
+        if not all_interfaces and not any(ret.result.get(d) for d in devices):
             raise Exception(
                 f"{self.name} - no interfaces data returned by '{instance}' "
                 f"for devices {', '.join(devices)}"
@@ -248,8 +441,9 @@ class NetboxInterfacesTasks:
                 member_intf_by_lag_id.setdefault(intf.lag.id, []).append(intf)
 
         # fetch IP addresses if requested (one bulk call keyed by assigned_object_id)
-        if ip_addresses:
-            for ip in nb.ipam.ip_addresses.filter(device=devices):
+        if ip_addresses and devices_to_fetch:
+            job.event(f"fetching IP addresses for {len(devices_to_fetch)} device(s)")
+            for ip in nb.ipam.ip_addresses.filter(device=devices_to_fetch):
                 if (
                     ip.assigned_object_id
                     and ip.assigned_object_type == "dcim.interface"
@@ -259,8 +453,9 @@ class NetboxInterfacesTasks:
                     )
 
         # fetch inventory items if requested (one bulk call keyed by component_id)
-        if inventory_items:
-            for item in nb.dcim.inventory_items.filter(device=devices):
+        if inventory_items and devices_to_fetch:
+            job.event(f"fetching inventory items for {len(devices_to_fetch)} device(s)")
+            for item in nb.dcim.inventory_items.filter(device=devices_to_fetch):
                 if item.component_id and item.component_type == "dcim.interface":
                     inv_by_intf_id.setdefault(item.component_id, []).append(
                         flatten_inventory_item(dict(item))
@@ -308,6 +503,18 @@ class NetboxInterfacesTasks:
                 intf_data["inventory_items"] = inv_by_intf_id.get(intf.id, [])
 
             ret.result[device_name][intf.name] = intf_data
+
+        # cache freshly fetched interfaces per device
+        if cache != False:
+            job.event(f"caching interfaces data for {len(devices_to_fetch)} device(s)")
+            for device_name in devices_to_fetch:
+                if device_name in ret.result:
+                    cache_key = f"get_interfaces::{device_name}"
+                    self.cache.set(
+                        cache_key,
+                        ret.result[device_name],
+                        expire=self.cache_ttl,
+                    )
 
         return ret
 
@@ -372,7 +579,7 @@ class NetboxInterfacesTasks:
             all_interface_names.extend(self.expand_alphanumeric_range(name_pattern))
 
         job.event(
-            f"Expanded interface names to {len(all_interface_names)} interface(s)"
+            f"expanded interface names to {len(all_interface_names)} interface(s)"
         )
 
         # Process each device
@@ -386,7 +593,7 @@ class NetboxInterfacesTasks:
                 # Get device from NetBox
                 nb_device = nb.dcim.devices.get(name=device_name)
                 if not nb_device:
-                    msg = f"Device '{device_name}' not found in NetBox"
+                    msg = f"device '{device_name}' not found in NetBox"
                     ret.errors.append(msg)
                     job.event(msg)
                     continue
@@ -401,6 +608,7 @@ class NetboxInterfacesTasks:
                 for intf_name in all_interface_names:
                     if intf_name in existing_interface_names:
                         result[device_name]["skipped"].append(intf_name)
+                        job.event(f"skipping '{intf_name}' on '{device_name}' - already exists")
                         continue
 
                     # Build interface data
@@ -418,14 +626,14 @@ class NetboxInterfacesTasks:
                 if interfaces_to_create and not dry_run:
                     try:
                         nb.dcim.interfaces.create(interfaces_to_create)
-                        msg = f"Created {len(interfaces_to_create)} interface(s) on device '{device_name}'"
+                        msg = f"created {len(interfaces_to_create)} interface(s) on device '{device_name}'"
                         job.event(msg)
                     except Exception as e:
                         msg = f"Failed to create interfaces on device '{device_name}': {e}"
                         ret.errors.append(msg)
                         log.error(msg)
                 elif interfaces_to_create and dry_run:
-                    msg = f"[DRY RUN] Would create {len(interfaces_to_create)} interface(s) on device '{device_name}'"
+                    msg = f"dry-run, would create {len(interfaces_to_create)} interface(s) on device '{device_name}'"
                     job.event(msg)
 
             except Exception as e:
@@ -506,6 +714,8 @@ class NetboxInterfacesTasks:
         )
         nb = self._get_pynetbox(instance, branch=branch)
 
+        job.event(f"updating interface descriptions for {len(devices)} device(s)")
+
         if description_template:
             # get list of all interfaces connections
             nb_connections = self.get_connections(
@@ -520,6 +730,7 @@ class NetboxInterfacesTasks:
             while nb_connections.result:
                 device, device_connections = nb_connections.result.popitem()
                 ret.result.setdefault(device, {})
+                job.event(f"processing {len(device_connections)} interface(s) for '{device}'")
                 for interface, connection in device_connections.items():
                     job.event(f"{device}:{interface} updating description")
                     if connection["termination_type"] == "consoleport":
@@ -560,6 +771,7 @@ class NetboxInterfacesTasks:
                     if dry_run is False:
                         nb_interface.save()
         if descriptions:
+            job.event(f"applying {len(descriptions)} description(s) to {len(devices)} device(s)")
             for device in devices:
                 ret.result.setdefault(device, {})
                 for interface, description in descriptions.items():
@@ -829,7 +1041,7 @@ class NetboxInterfacesTasks:
                     try:
                         nb.dcim.interfaces.update(interfaces_to_update)
                         job.event(
-                            f"Bulk updated {len(interfaces_to_update)} interfaces"
+                            f"bulk updated {len(interfaces_to_update)} interfaces"
                         )
                     except Exception as e:
                         msg = f"Bulk interface update failed: {e}"
@@ -840,7 +1052,7 @@ class NetboxInterfacesTasks:
                     try:
                         _ = nb.dcim.interfaces.create(interfaces_to_create)
                         job.event(
-                            f"Bulk created {len(interfaces_to_create)} interfaces"
+                            f"bulk created {len(interfaces_to_create)} interfaces"
                         )
                     except Exception as e:
                         msg = f"Bulk interface creation failed: {e}"
@@ -852,7 +1064,7 @@ class NetboxInterfacesTasks:
                     try:
                         nb.dcim.mac_addresses.create(mac_addresses_to_create)
                         job.event(
-                            f"Bulk created {len(mac_addresses_to_create)} MAC addresses"
+                            f"bulk created {len(mac_addresses_to_create)} MAC addresses"
                         )
                     except Exception as e:
                         msg = f"Bulk MAC address creation failed: {e}"

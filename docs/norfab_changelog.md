@@ -12,10 +12,12 @@
   - picle 0.11.0 -> 0.11.1
 
 2. Netbox get_devices task refactored to use Pynetbox and REST API, as a result Netbox inventory filters for devices now can use Pynetbox device style filtering instead of GraphQL filters.
+3. Enhanced logging for Netbox worker and tasks
 
 ## FEATURES
 
 1. Adding new FakeNOS service to simulate networks interactions for automation testing
+2. Netbox `get_interfaces` task added caching
 
 ---
 

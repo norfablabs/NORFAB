@@ -173,6 +173,8 @@ class NetboxWorker(
         else:
             self.default_instance = name
 
+        log.info(f"{self.name} - Default Netbox instance: '{self.default_instance}'")
+
         # check Netbox compatibility
         self._verify_compatibility()
 
@@ -283,6 +285,7 @@ class NetboxWorker(
         for instance, params in netbox_status.result.items():
             if params["status"] is not True:
                 log.warning(f"{self.name} - {instance} Netbox instance not reachable")
+                job.event(f"Instance '{instance}' is not reachable")
                 ret.result[instance] = None
             else:
                 if "-docker-" in params["netbox-version"].lower():
@@ -302,12 +305,15 @@ class NetboxWorker(
                 # check Netbox 4.4+ compatibility
                 if self.nb_version[instance] >= self.compatible_ge_v4:
                     ret.result[instance] = True
+                    job.event(f"Instance '{instance}' version {'.'.join(str(v) for v in self.nb_version[instance])} is compatible")
                 else:
                     ret.result[instance] = False
-                    log.error(
+                    msg = (
                         f"{self.name} - {instance} Netbox version {self.nb_version[instance]} is not supported, "
                         f"minimum required version is {self.compatible_ge_v4}"
                     )
+                    log.error(msg)
+                    job.event(msg)
 
         return ret
 
@@ -328,6 +334,7 @@ class NetboxWorker(
             raise RuntimeError(
                 f"{self.name} - not all Netbox instances are compatible: {compatibility.result}"
             )
+        log.info(f"{self.name} - All Netbox instances passed compatibility check: {compatibility.result}")
 
     def has_plugin(self, plugin_name: str, instance: str, strict: bool = False) -> bool:
         """
@@ -464,10 +471,14 @@ class NetboxWorker(
 
             # create new branch
             if not nb_branch:
+                log.info(f"{self.name} - Creating new branch '{branch}' in instance '{instance}'")
                 nb_branch = nb.plugins.branching.branches.create(name=branch)
+            else:
+                log.info(f"{self.name} - Using existing branch '{branch}' in instance '{instance}'")
 
             # wait for branch provisioning to complete
             if not nb_branch.status.value.lower() == "ready":
+                log.info(f"{self.name} - Waiting for branch '{branch}' to become ready (timeout: {self.branch_create_timeout}s)")
                 retries = 0
                 while retries < self.branch_create_timeout:
                     nb_branch = nb.plugins.branching.branches.get(name=branch)
@@ -480,7 +491,7 @@ class NetboxWorker(
 
             nb.http_session.headers["X-NetBox-Branch"] = nb_branch.schema_id
 
-            log.info(f"Instantiated pynetbox instance with branch '{branch}'")
+            log.info(f"{self.name} - Instantiated pynetbox for instance '{instance}' with branch '{branch}'")
 
         return nb
 
@@ -568,18 +579,24 @@ class NetboxWorker(
             if key in self.cache:
                 if self.cache.delete(key, retry=True):
                     ret.result.append(key)
+                    log.debug(f"{self.name} - Removed cache key '{key}'")
+                    job.event(f"Removed cache key '{key}'")
                 else:
                     raise RuntimeError(f"Failed to remove {key} from cache")
             else:
+                log.warning(f"{self.name} - Cache key '{key}' not found")
                 ret.messages.append(f"Key {key} not in cache.")
         # remove all keys matching glob pattern
         if keys:
+            log.info(f"{self.name} - Clearing cache keys matching pattern '{keys}'")
             for cache_key in self.cache:
                 if fnmatchcase(cache_key, keys):
                     if self.cache.delete(cache_key, retry=True):
                         ret.result.append(cache_key)
+                        log.info(f"{self.name} - Removed cache key '{cache_key}'")
                     else:
-                        raise RuntimeError(f"Failed to remove {key} from cache")
+                        raise RuntimeError(f"Failed to remove {cache_key} from cache")
+            job.event(f"Removed {len(ret.result)} cache key(s) matching pattern '{keys}'")
         return ret
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
@@ -689,6 +706,7 @@ class NetboxWorker(
 
         # form and return dry run response
         if dry_run:
+            log.into(f"{self.name} - GraphQL dry run, returning query payload without executing")
             ret.result = {
                 "url": f"{nb_params['url']}/graphql/",
                 "data": payload,
@@ -770,6 +788,8 @@ class NetboxWorker(
         nb_params = self._get_instance_params(instance)
         api = api.strip("/")
 
+        log.info(f"{self.name} - REST {method.upper()} '{nb_params['url']}/api/{api}/'")
+
         # send request to Netbox REST API
         response = getattr(requests, method)(
             url=f"{nb_params['url']}/api/{api}/",
@@ -785,7 +805,7 @@ class NetboxWorker(
         try:
             response.raise_for_status()
         except Exception as e:
-            log.error(f"REST API request failed, error: {e}")
+            log.error(f"{self.name} - REST {method.upper()} '{nb_params['url']}/api/{api}/' failed, status {response.status_code}, error: {e}")
             ret.result = response.status_code
             return ret
 
@@ -945,6 +965,7 @@ class NetboxWorker(
         ret = []
         filters = {k: v for k, v in kwargs.items() if k.startswith("F")}
         if filters:
+            log.info(f"{self.name} - get_nornir_hosts querying Nornir service with filters: {filters}")
             nornir_hosts = self.client.run_job(
                 "nornir",
                 "get_nornir_hosts",
@@ -955,5 +976,9 @@ class NetboxWorker(
             for w, r in nornir_hosts.items():
                 if r["failed"] is False and isinstance(r["result"], list):
                     ret.extend(r["result"])
+                elif r["failed"]:
+                    log.warning(f"{self.name} - get_nornir_hosts worker '{w}' failed: {r.get('errors')}")
 
-        return list(sorted(set(ret)))
+        unique_hosts = list(sorted(set(ret)))
+        log.info(f"{self.name} - get_nornir_hosts resolved {len(unique_hosts)} host(s)")
+        return unique_hosts

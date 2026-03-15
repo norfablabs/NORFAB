@@ -110,7 +110,15 @@ def delete_ips(prefix, nfclient):
             },
         )
         # print("delete ip address:")
-        # pprint.pprint(delete_ip)
+        # pprint.pprint(delete_ip)'
+
+def clear_nb_cache(keys, nfclient):
+    return nfclient.run_job(
+        "netbox",
+        "cache_clear",
+        workers="all",
+        kwargs={"keys": keys},
+    )
 
 
 def get_pynetbox(nfclient):
@@ -656,6 +664,7 @@ class TestGetInterfaces:
     def test_get_interfaces(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
+        clear_nb_cache("get_interfaces*", nfclient)
         ret = nfclient.run_job(
             "netbox",
             "get_interfaces",
@@ -703,6 +712,7 @@ class TestGetInterfaces:
     def test_get_interfaces_with_instance(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
+        clear_nb_cache("get_interfaces*", nfclient)
         ret = nfclient.run_job(
             "netbox",
             "get_interfaces",
@@ -765,6 +775,7 @@ class TestGetInterfaces:
             }, f"{worker} did not return correct query string"
 
     def test_get_interfaces_add_ip(self, nfclient):
+        clear_nb_cache("get_interfaces*", nfclient)
         ret = nfclient.run_job(
             "netbox",
             "get_interfaces",
@@ -794,6 +805,7 @@ class TestGetInterfaces:
                         ), f"{worker}:{device}:{intf_name} not all IP data returned"
 
     def test_get_interfaces_add_inventory_items(self, nfclient):
+        clear_nb_cache("get_interfaces*", nfclient)
         ret = nfclient.run_job(
             "netbox",
             "get_interfaces",
@@ -829,6 +841,7 @@ class TestGetInterfaces:
                         ), f"{worker}:{device}:{intf_name} not all inventory item data returned"
 
     def test_get_interfaces_with_interface_regex(self, nfclient):
+        clear_nb_cache("get_interfaces*", nfclient)
         ret = nfclient.run_job(
             "netbox",
             "get_interfaces",
@@ -853,6 +866,7 @@ class TestGetInterfaces:
                     ), f"{worker}:{device}:{intf_name} interface name does not match regex pattern"
 
     def test_get_interfaces_with_interface_list(self, nfclient):
+        clear_nb_cache("get_interfaces*", nfclient)
         ret = nfclient.run_job(
             "netbox",
             "get_interfaces",
@@ -880,6 +894,53 @@ class TestGetInterfaces:
                     len(interfaces) == 2
                 ), f"{worker}:{device} was expecting only 2 interfaces"
 
+    @pytest.mark.parametrize("cache", cache_options)
+    def test_get_interfaces_cache(self, nfclient, cache):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+        ret = nfclient.run_job(
+            "netbox",
+            "get_interfaces",
+            workers="any",
+            kwargs={"devices": ["ceos1", "fceos4"], "cache": cache},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert "ceos1" in res["result"], f"{worker} returned no results for ceos1"
+            assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
+            for device, interfaces in res["result"].items():
+                assert isinstance(
+                    interfaces, dict
+                ), f"{worker}:{device} did not return interfaces dictionary"
+                for intf_name, intf_data in interfaces.items():
+                    assert all(
+                        k in intf_data
+                        for k in [
+                            "enabled",
+                            "description",
+                            "mtu",
+                            "parent",
+                            "mode",
+                            "untagged_vlan",
+                            "vrf",
+                            "tagged_vlans",
+                            "tags",
+                            "custom_fields",
+                            "last_updated",
+                            "bridge",
+                            "child_interfaces",
+                            "bridge_interfaces",
+                            "member_interfaces",
+                            "wwn",
+                            "duplex",
+                            "speed",
+                        ]
+                    ), f"{worker}:{device}:{intf_name} not all data returned"
+                    if self.nb_version >= (4, 2, 0):
+                        assert "mac_addresses" in intf_data
+                    else:
+                        assert "mac_address" in intf_data
 
 class TestGetDevices:
     nb_version = None

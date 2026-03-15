@@ -12,6 +12,10 @@ from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
 
+# -----------------------------------------------------------------------
+# PYDANTIC OUTPUT MODELS
+# -----------------------------------------------------------------------
+
 
 class GetDevicesSite(BaseModel):
     name: str
@@ -47,6 +51,11 @@ class GetDevicesResult(BaseModel):
 
 class GetDevicesOutput(Result):
     result: Dict[str, GetDevicesResult]
+
+
+# -----------------------------------------------------------------------
+# MAIN CLASS WITH TASKS
+# -----------------------------------------------------------------------
 
 
 class NetboxDevicesTasks:
@@ -96,9 +105,16 @@ class NetboxDevicesTasks:
             ret.result["get_devices_dry_run"] = {"filters": filters}
             return ret
 
+        job.event(
+            f"retrieving device data for {len(devices)} device(s) from instance '{instance}'"
+            if devices
+            else f"retrieving device data from instance '{instance}' using {len(filters)} filter(s)"
+        )
+
         filters_to_fetch = list(filters)
 
         if cache == True or cache == "force":
+            job.event("checking cache for up-to-date device data")
             # retrieve last_updated data from Netbox for all filters using REST
             last_updated_data = {}
             for filter_item in filters:
@@ -122,9 +138,11 @@ class NetboxDevicesTasks:
                     or cache == "force"
                 ):
                     ret.result[device_name] = self.cache[device_cache_key]
+                    job.event(f"serving '{device_name}' from cache")
                 # cache old or no cache, fetch device data
                 else:
                     devices_to_fetch.append(device_name)
+                    job.event(f"'{device_name}' cache miss or stale, fetching fresh data")
 
             # only fetch devices missing from or stale in cache
             filters_to_fetch = [{"name": devices_to_fetch}] if devices_to_fetch else []
@@ -134,12 +152,15 @@ class NetboxDevicesTasks:
 
         # fetch full device data from Netbox
         if filters_to_fetch:
+            job.event(f"fetching device data from NetBox instance '{instance}'")
             nb = self._get_pynetbox(instance)
             all_devices_raw = {}
 
             for filter_item in filters_to_fetch:
                 for device in nb.dcim.devices.filter(**filter_item):
                     all_devices_raw.setdefault(device.name, device)
+
+            job.event(f"retrieved {len(all_devices_raw)} device(s) from NetBox")
 
             # process devices data
             for device_name, device in all_devices_raw.items():
@@ -189,9 +210,13 @@ class NetboxDevicesTasks:
                     if cache != False:
                         cache_key = f"get_devices::{device_name}"
                         self.cache.set(cache_key, device_data, expire=self.cache_ttl)
+                        log.info(f"{self.name} - Cached device data for '{device_name}'")
+                        job.event(f"cached device data for '{device_name}'")
                     # add device data to return result
                     ret.result[device_name] = device_data
 
+        log.info(f"{self.name} - get_devices returning {len(ret.result)} device(s)")
+        job.event(f"fetched {len(ret.result)} device(s)")
         return ret
 
     @Task(
@@ -254,8 +279,10 @@ class NetboxDevicesTasks:
             if kwargs:
                 devices.extend(self.get_nornir_hosts(kwargs, timeout))
                 devices = list(set(devices))
-                job.event(f"Syncing {len(devices)} devices")
+                job.event(f"syncing {len(devices)} devices")
+                log.info(f"{self.name} - sync_device_facts starting for {len(devices)} device(s): {', '.join(devices)}")
             # fetch devices data from Netbox
+            job.event(f"fetching current device data from NetBox instance '{instance}'")
             nb_devices = self.get_devices(
                 job=job,
                 instance=instance,
@@ -268,6 +295,7 @@ class NetboxDevicesTasks:
                     msg = f"'{d}' device does not exist in Netbox"
                     ret.errors.append(msg)
                     log.error(msg)
+                    job.event(msg, severity="ERROR")
                     devices.remove(d)
             # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
@@ -290,12 +318,14 @@ class NetboxDevicesTasks:
                         msg = f"{worker} get_facts failed, errors: {'; '.join(results['errors'])}"
                         ret.errors.append(msg)
                         log.error(msg)
+                        job.event(msg, severity="ERROR")
                         continue
                     for host, host_data in results["result"].items():
                         if host_data["napalm_get"]["failed"]:
                             msg = f"{host} facts update failed: '{host_data['napalm_get']['exception']}'"
                             ret.errors.append(msg)
                             log.error(msg)
+                            job.event(msg, severity="ERROR")
                             continue
 
                         nb_device = nb_devices[host]
@@ -318,6 +348,7 @@ class NetboxDevicesTasks:
                             updates["id"] = int(nb_device["id"])
                             devices_to_update.append(updates)
                             ret.diff[host] = diff
+                            log.debug(f"{self.name} - '{host}' facts differ: {diff}")
 
                         ret.result[host] = {
                             (
@@ -333,8 +364,16 @@ class NetboxDevicesTasks:
                 if devices_to_update and not dry_run:
                     try:
                         nb.dcim.devices.update(devices_to_update)
+                        job.event(f"bulk updated facts for {len(devices_to_update)} device(s)")
+                        log.info(f"{self.name} - Bulk updated facts for {len(devices_to_update)} device(s)")
                     except Exception as e:
-                        ret.errors.append(f"Bulk update failed: {e}")
+                        msg = f"Bulk update failed: {e}"
+                        ret.errors.append(msg)
+                        log.error(f"{self.name} - {msg}")
+                elif devices_to_update and dry_run:
+                    job.event(f"dry-run, would update facts for {len(devices_to_update)} device(s)")
+                else:
+                    job.event("all device facts are already in sync, no updates needed")
         else:
             raise UnsupportedServiceError(
                 f"'{datasource}' datasource service not supported"
