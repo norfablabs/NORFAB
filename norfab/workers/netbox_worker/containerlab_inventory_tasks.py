@@ -118,13 +118,7 @@ class NetboxContainerlabInventoryTasks:
         if tenant:
             filters = filters or [{}]
             for filter in filters:
-                if self.nb_version[instance] >= (4, 4, 0):
-                    filter["tenant"] = f'{{name: {{exact: "{tenant}"}}}}'
-                else:
-                    raise UnsupportedNetboxVersion(
-                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
-                        f"minimum required version is {self.compatible_ge_v4}"
-                    )
+                filter["tenant__name"] = tenant
 
         # construct inventory
         inventory = {
@@ -174,7 +168,7 @@ class NetboxContainerlabInventoryTasks:
             # populate node parameters
             if not node.get("kind"):
                 if device["platform"]:
-                    node["kind"] = device["platform"]["name"]
+                    node["kind"] = device["platform"]
                 else:
                     msg = (
                         f"{device_name} - has no 'kind' of 'platform' defined, skipping"

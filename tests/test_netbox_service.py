@@ -1431,33 +1431,18 @@ class TestGetNornirInventory:
                 ), f"{worker}:{device} not all data returned"
 
     def test_with_filters(self, nfclient):
-        if self.nb_version is None:
-            self.nb_version = get_nb_version(nfclient)
 
-        if self.nb_version[0] == 4:
-            ret = nfclient.run_job(
-                "netbox",
-                "get_nornir_inventory",
-                workers="any",
-                kwargs={
-                    "filters": [
-                        {"name": '{in_list: ["ceos1"]}'},
-                        {"name": '{contains: "fceos"}'},
-                    ]
-                },
-            )
-        elif self.nb_version[0] == 3:
-            ret = nfclient.run_job(
-                "netbox",
-                "get_nornir_inventory",
-                workers="any",
-                kwargs={
-                    "filters": [
-                        {"name": ["ceos1"]},
-                        {"name__ic": "fceos"},
-                    ]
-                },
-            )
+        ret = nfclient.run_job(
+            "netbox",
+            "get_nornir_inventory",
+            workers="any",
+            kwargs={
+                "filters": [
+                    {"name": ["ceos1"]},
+                    {"name__ic": "fceos"},
+                ]
+            },
+        )
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert (
@@ -4266,7 +4251,7 @@ class TestGetContainerlabInventory:
                 workers="any",
                 kwargs={
                     "filters": [
-                        '{name: {i_contains: "ceos-spine"}, status: {exact: STATUS_ACTIVE}}'
+                        {"name__ic": "ceos-spine", "status": "active"}
                     ],
                     "lab_name": "foobar",
                 },

@@ -582,8 +582,8 @@ class TestDeployNetboxTask:
                 "lab_name": "foobar",
                 "filters": [
                     {
-                        "tenant": '{name: {exact: "NORFAB"}}',
-                        "name": '{i_contains: "spine"}',
+                        "tenant__name": "NORFAB",
+                        "name__ic": "spine",
                     }
                 ],
             },
