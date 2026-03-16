@@ -452,7 +452,9 @@ class NetboxDesignTasks:
         branch: str = None,
     ) -> Result:
         instance = instance or self.default_instance
-        log.info(f"{self.name} - Create design: Processing design data for '{instance}'")
+        log.info(
+            f"{self.name} - Create design: Processing design data for '{instance}'"
+        )
         ret = Result(task=f"{self.name}:design_create", result={})
         nb = self._get_pynetbox(instance, branch=branch)
 

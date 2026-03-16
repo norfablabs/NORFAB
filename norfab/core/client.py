@@ -760,7 +760,9 @@ def handle_response(client: object, juuid: str, status: str, payload: dict):
             append_errors=[error_msg],
             completed_ts=time.ctime(),
         )
-        log.error(f"{client.name} - Job {juuid} failed with status {status}: {error_msg}")
+        log.error(
+            f"{client.name} - Job {juuid} failed with status {status}: {error_msg}"
+        )
         return
 
 

@@ -38,7 +38,9 @@ class NetboxBgpPeeringsTasks:
         """
         instance = instance or self.default_instance
         devices = devices or []
-        log.info(f"{self.name} - Get BGP peerings: Fetching BGP peerings for {len(devices)} device(s) from '{instance}' Netbox")
+        log.info(
+            f"{self.name} - Get BGP peerings: Fetching BGP peerings for {len(devices)} device(s) from '{instance}' Netbox"
+        )
         cache = self.cache_use if cache is None else cache
         ret = Result(
             task=f"{self.name}:get_bgp_peerings",

@@ -102,6 +102,8 @@ class GetInterfacesResult(BaseModel):
 
 
 class GetInterfacesDryRunResult(BaseModel):
+    model_config = {"extra": "forbid"}
+
     filter_params: Dict = None
 
 
@@ -343,7 +345,9 @@ class NetboxInterfacesTasks:
         nb = self._get_pynetbox(instance, branch=branch)
         devices = devices or []
         cache = self.cache_use if cache is None else cache
-        log.info(f"{self.name} - Get interfaces: Fetching interfaces for {len(devices)} device(s) from '{instance}'")
+        log.info(
+            f"{self.name} - Get interfaces: Fetching interfaces for {len(devices)} device(s) from '{instance}'"
+        )
         ret = Result(
             task=f"{self.name}:get_interfaces_pynetbox",
             result={d: {} for d in devices},
@@ -409,10 +413,14 @@ class NetboxInterfacesTasks:
                         ret.result[device_name][intf_name] = self.cache[
                             device_cache_key
                         ][intf_name]
-                    job.event(f"serving '{device_name}' interfaces from cache ({len(intf_last_updated)} interface(s))")
+                    job.event(
+                        f"serving '{device_name}' interfaces from cache ({len(intf_last_updated)} interface(s))"
+                    )
                 else:
                     devices_to_fetch.append(device_name)
-                    job.event(f"'{device_name}' cache miss or stale, fetching fresh data")
+                    job.event(
+                        f"'{device_name}' cache miss or stale, fetching fresh data"
+                    )
         elif cache == False or cache == "refresh":
             pass  # fetch all devices fresh
 
@@ -424,7 +432,9 @@ class NetboxInterfacesTasks:
 
         # fetch all matching interfaces in one call
         if devices_to_fetch:
-            job.event(f"fetching interfaces from NetBox for {len(devices_to_fetch)} device(s)")
+            job.event(
+                f"fetching interfaces from NetBox for {len(devices_to_fetch)} device(s)"
+            )
             all_interfaces = list(nb.dcim.interfaces.filter(**fetch_filter_params))
             job.event(f"retrieved {len(all_interfaces)} interface(s) from NetBox")
 
@@ -567,7 +577,9 @@ class NetboxInterfacesTasks:
             resources=[instance],
         )
         nb = self._get_pynetbox(instance, branch=branch)
-        log.info(f"{self.name} - Create device interfaces: Creating interfaces for {len(devices)} device(s) in '{instance}'")
+        log.info(
+            f"{self.name} - Create device interfaces: Creating interfaces for {len(devices)} device(s) in '{instance}'"
+        )
 
         # Normalize interface_name to a list
         if isinstance(interface_name, str):
@@ -610,7 +622,9 @@ class NetboxInterfacesTasks:
                 for intf_name in all_interface_names:
                     if intf_name in existing_interface_names:
                         result[device_name]["skipped"].append(intf_name)
-                        job.event(f"skipping '{intf_name}' on '{device_name}' - already exists")
+                        job.event(
+                            f"skipping '{intf_name}' on '{device_name}' - already exists"
+                        )
                         continue
 
                     # Build interface data
@@ -715,7 +729,9 @@ class NetboxInterfacesTasks:
             resources=[instance],
         )
         nb = self._get_pynetbox(instance, branch=branch)
-        log.info(f"{self.name} - Update interfaces description: Updating descriptions for {len(devices)} device(s) in '{instance}'")
+        log.info(
+            f"{self.name} - Update interfaces description: Updating descriptions for {len(devices)} device(s) in '{instance}'"
+        )
 
         job.event(f"updating interface descriptions for {len(devices)} device(s)")
 
@@ -733,7 +749,9 @@ class NetboxInterfacesTasks:
             while nb_connections.result:
                 device, device_connections = nb_connections.result.popitem()
                 ret.result.setdefault(device, {})
-                job.event(f"processing {len(device_connections)} interface(s) for '{device}'")
+                job.event(
+                    f"processing {len(device_connections)} interface(s) for '{device}'"
+                )
                 for interface, connection in device_connections.items():
                     job.event(f"{device}:{interface} updating description")
                     if connection["termination_type"] == "consoleport":
@@ -774,7 +792,9 @@ class NetboxInterfacesTasks:
                     if dry_run is False:
                         nb_interface.save()
         if descriptions:
-            job.event(f"applying {len(descriptions)} description(s) to {len(devices)} device(s)")
+            job.event(
+                f"applying {len(descriptions)} description(s) to {len(devices)} device(s)"
+            )
             for device in devices:
                 ret.result.setdefault(device, {})
                 for interface, description in descriptions.items():
@@ -852,7 +872,9 @@ class NetboxInterfacesTasks:
             diff={},
         )
         nb = self._get_pynetbox(instance, branch=branch)
-        log.info(f"{self.name} - Sync device interfaces: Syncing interfaces for {len(devices)} device(s) in '{instance}'")
+        log.info(
+            f"{self.name} - Sync device interfaces: Syncing interfaces for {len(devices)} device(s) in '{instance}'"
+        )
         kwargs["add_details"] = True
 
         if datasource == "nornir":

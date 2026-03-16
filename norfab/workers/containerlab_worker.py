@@ -440,7 +440,9 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:inspect")
-        log.info(f"{self.name} - Inspect: Inspecting {'all labs' if lab_name is None else lab_name + ' lab'}")
+        log.info(
+            f"{self.name} - Inspect: Inspecting {'all labs' if lab_name is None else lab_name + ' lab'}"
+        )
         if lab_name:
             job.event(f"inspecting lab '{lab_name}'")
         else:
@@ -625,7 +627,9 @@ class ContainerlabWorker(NFPWorker):
         timeout = timeout or 600
         groups = groups or []
         ret = Result(task=f"{self.name}:get_nornir_inventory", result={"hosts": {}})
-        log.info(f"{self.name} - Get Nornir inventory: Building inventory for '{lab_name or 'all'}' lab(s)")
+        log.info(
+            f"{self.name} - Get Nornir inventory: Building inventory for '{lab_name or 'all'}' lab(s)"
+        )
         job.event(f"building nornir inventory for '{lab_name or 'all'}' lab(s)")
 
         # get lab details
@@ -780,7 +784,9 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:deploy_netbox")
-        log.info(f"{self.name} - Deploy Netbox: Preparing topology for lab '{lab_name or tenant or 'auto'}'")
+        log.info(
+            f"{self.name} - Deploy Netbox: Preparing topology for lab '{lab_name or tenant or 'auto'}'"
+        )
         subnets_in_use = set()
         ports_in_use = {}
 

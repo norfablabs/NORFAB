@@ -1,3 +1,32 @@
+# 0.16.3
+
+## BUGS
+
+1. Enhancing error handling for worker results compress to not fail silently if task returns data that is not JSON serializable
+2. Fixing get_interfaces and get_devies output models validation handling
+3. Fixing fakenos models to not interfer with nfcli imports - no fakenos required to be installed for nfcli to load, moved fakenos tasks models to dedicated file
+4. Enhancing nfcli output to skip workers that had no results returned in nested output
+
+## CHANGES
+
+1. Dependencies upgrades:
+
+  - tornado 6.5.4 → 6.5.5
+  - orjson 3.11.5 → 3.11.7
+  - rich 14.3.2 → 14.3.3
+  - tabulate 0.9.0 → 0.10.0
+  - ntc-templates 8.1.0 → 9.0.0
+  - scrapli 2025.01.30 → 2026.2.20
+  - xmltodict 1.0.2 → 1.0.4
+  - robotframework 7.4.1 → 7.4.2
+  - langchain 1.2.10 → 1.2.12
+  - datamodel-code-generator 0.54.0 → 0.55.0
+  - fastapi 0.129.0 → 0.135.1
+  - uvicorn 0.40.0 → 0.42.0
+  - fakenos 1.0.0 → 1.0.1
+
+---
+
 # 0.16.2
 
 ## BUGS

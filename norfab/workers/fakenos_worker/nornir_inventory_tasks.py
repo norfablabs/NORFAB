@@ -1,26 +1,11 @@
 import logging
 from typing import List, Union
 
-from pydantic import (
-    BaseModel,
-    Field,
-    StrictStr,
-)
-
+from .fakenos_models import GetNornirInventoryInput
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 log = logging.getLogger(__name__)
-
-
-class GetNornirInventoryInput(BaseModel):
-    network: StrictStr = Field(
-        None, description="FakeNOS network name to get Nornir inventory for"
-    )
-    groups: Union[StrictStr, List[StrictStr]] = Field(
-        None,
-        description="List of groups to include in host's inventory",
-    )
 
 
 class FakeNOSNornirInventoryTasks:

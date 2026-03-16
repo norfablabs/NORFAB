@@ -8,7 +8,7 @@ from pydantic import (
     StrictBool,
 )
 
-from norfab.workers.fakenos_worker.fakenos_worker import (
+from norfab.workers.fakenos_worker.fakenos_models import (
     FakeNOSListNetworksInput,
     FakeNOSRestartInput,
     FakeNOSStartInput,

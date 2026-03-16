@@ -177,8 +177,10 @@ def log_error_or_result(
             ret[w_name] = w_res
         elif verbose_on_fail and w_res["failed"] is True:
             ret[w_name] = w_res
-        else:
+        elif w_res["result"]:
             ret[w_name] = w_res["result"]
+        else:  # skip workers with no results
+            pass
 
     return ret
 

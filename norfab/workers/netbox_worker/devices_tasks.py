@@ -2,7 +2,7 @@ import copy
 import logging
 from typing import Any, Dict, List, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, StrictStr
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
@@ -18,46 +18,41 @@ log = logging.getLogger(__name__)
 
 
 class GetDevicesSite(BaseModel):
-    name: str
-    slug: str
-    tags: List[str] = []
+    name: StrictStr
+    slug: StrictStr
+    tags: List[StrictStr]
 
 
 class GetDevicesIP(BaseModel):
-    address: str
+    address: StrictStr
 
 
 class GetDevicesResult(BaseModel):
-    id: str
-    last_updated: str
-    device_type: str
-    role: str
-    custom_field_data: Dict[str, Any] = {}
-    tags: List[str] = []
-    config_context: Dict[str, Any] = {}
-    tenant: Union[str, None] = None
-    platform: Union[str, None] = None
-    serial: Union[str, None] = None
-    asset_tag: Union[str, None] = None
-    site: Union[GetDevicesSite, None] = None
-    location: Union[str, None] = None
-    rack: Union[str, None] = None
-    status: str = None
+    id: int = None
+    last_updated: StrictStr = None
+    device_type: StrictStr = None
+    role: StrictStr = None
+    custom_field_data: Dict[StrictStr, Any] = None
+    tags: List[StrictStr] = None
+    config_context: Dict[StrictStr, Any] = None
+    tenant: Union[StrictStr, None] = None
+    platform: Union[StrictStr, None] = None
+    serial: Union[StrictStr, None] = None
+    asset_tag: Union[StrictStr, None] = None
+    site: GetDevicesSite = None
+    location: Union[StrictStr, None] = None
+    rack: Union[StrictStr, None] = None
+    status: StrictStr = None
     primary_ip4: Union[GetDevicesIP, None] = None
     primary_ip6: Union[GetDevicesIP, None] = None
-    airflow: Union[str, None] = None
-    position: Union[str, None] = None
-
-
-class GetDevicesDryRunResult(BaseModel):
-    filter_params: Dict = None
+    airflow: Union[StrictStr, None] = None
+    position: Union[StrictStr, None] = None
+    filters: List = None  # for dry-run results
 
 
 class GetDevicesOutput(Result):
-    result: Union[
-        Dict[str, GetDevicesResult], 
-        GetDevicesDryRunResult
-    ]
+    result: Dict[str, GetDevicesResult]
+
 
 # -----------------------------------------------------------------------
 # MAIN CLASS WITH TASKS
@@ -148,7 +143,9 @@ class NetboxDevicesTasks:
                 # cache old or no cache, fetch device data
                 else:
                     devices_to_fetch.append(device_name)
-                    job.event(f"'{device_name}' cache miss or stale, fetching fresh data")
+                    job.event(
+                        f"'{device_name}' cache miss or stale, fetching fresh data"
+                    )
 
             # only fetch devices missing from or stale in cache
             filters_to_fetch = [{"name": devices_to_fetch}] if devices_to_fetch else []
@@ -189,7 +186,11 @@ class NetboxDevicesTasks:
                         "site": {
                             "name": device.site.name,
                             "slug": device.site.slug,
-                            "tags": device.site.tags,
+                            "tags": (
+                                [t.name for t in device.site.tags]
+                                if device.site.tags
+                                else []
+                            ),
                         },
                         "location": device.location.name if device.location else None,
                         "rack": device.rack.name if device.rack else None,
@@ -216,13 +217,16 @@ class NetboxDevicesTasks:
                     if cache != False:
                         cache_key = f"get_devices::{device_name}"
                         self.cache.set(cache_key, device_data, expire=self.cache_ttl)
-                        log.info(f"{self.name} - Cached device data for '{device_name}'")
+                        log.info(
+                            f"{self.name} - Cached device data for '{device_name}'"
+                        )
                         job.event(f"cached device data for '{device_name}'")
                     # add device data to return result
                     ret.result[device_name] = device_data
 
         log.info(f"{self.name} - get_devices returning {len(ret.result)} device(s)")
         job.event(f"fetched {len(ret.result)} device(s)")
+
         return ret
 
     @Task(
@@ -286,7 +290,9 @@ class NetboxDevicesTasks:
                 devices.extend(self.get_nornir_hosts(kwargs, timeout))
                 devices = list(set(devices))
                 job.event(f"syncing {len(devices)} devices")
-                log.info(f"{self.name} - sync_device_facts starting for {len(devices)} device(s): {', '.join(devices)}")
+                log.info(
+                    f"{self.name} - sync_device_facts starting for {len(devices)} device(s): {', '.join(devices)}"
+                )
             # fetch devices data from Netbox
             job.event(f"fetching current device data from NetBox instance '{instance}'")
             nb_devices = self.get_devices(
@@ -370,14 +376,20 @@ class NetboxDevicesTasks:
                 if devices_to_update and not dry_run:
                     try:
                         nb.dcim.devices.update(devices_to_update)
-                        job.event(f"bulk updated facts for {len(devices_to_update)} device(s)")
-                        log.info(f"{self.name} - Bulk updated facts for {len(devices_to_update)} device(s)")
+                        job.event(
+                            f"bulk updated facts for {len(devices_to_update)} device(s)"
+                        )
+                        log.info(
+                            f"{self.name} - Bulk updated facts for {len(devices_to_update)} device(s)"
+                        )
                     except Exception as e:
                         msg = f"Bulk update failed: {e}"
                         ret.errors.append(msg)
                         log.error(f"{self.name} - {msg}")
                 elif devices_to_update and dry_run:
-                    job.event(f"dry-run, would update facts for {len(devices_to_update)} device(s)")
+                    job.event(
+                        f"dry-run, would update facts for {len(devices_to_update)} device(s)"
+                    )
                 else:
                     job.event("all device facts are already in sync, no updates needed")
         else:

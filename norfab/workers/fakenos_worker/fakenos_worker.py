@@ -9,17 +9,17 @@ from typing import Any, List, Union
 import psutil
 import yaml
 from fakenos import FakeNOS
-from pydantic import (
-    BaseModel,
-    Field,
-    StrictBool,
-    StrictStr,
-)
 
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
 from .nornir_inventory_tasks import FakeNOSNornirInventoryTasks
+from .fakenos_models import (
+    FakeNOSStartInput,
+    FakeNOSStopInput,
+    FakeNOSRestartInput,
+    FakeNOSListNetworksInput,
+)
 
 log = logging.getLogger(__name__)
 
@@ -92,45 +92,6 @@ def fakenos_network_process(
         except queue.Empty:
             pass
     net.stop()
-
-
-# -----------------------------------------------------------------------------------------
-# FAKENOS TASKS PYDANTIC MODELS
-# -----------------------------------------------------------------------------------------
-
-
-class FakeNOSStartInput(BaseModel):
-    """Input model for the ``FakeNOSWorker.start`` task."""
-
-    network: StrictStr = Field(..., description="FakeNOS network name to start")
-    inventory: Union[dict, StrictStr, None] = Field(
-        None, description="Inventory content (dict) or path/URL to an inventory file"
-    )
-
-
-class FakeNOSStopInput(BaseModel):
-    """Input model for the ``FakeNOSWorker.stop`` task."""
-
-    network: Union[StrictStr, None] = Field(
-        None, description="FakeNOS network name to stop; stops all networks if omitted"
-    )
-
-
-class FakeNOSRestartInput(BaseModel):
-    """Input model for the ``FakeNOSWorker.restart`` task."""
-
-    network: StrictStr = Field(..., description="FakeNOS network name to restart")
-
-
-class FakeNOSListNetworksInput(BaseModel):
-    """Input model for the ``FakeNOSWorker.inspect_networks`` task."""
-
-    network: Union[StrictStr, None] = Field(
-        None, description="FakeNOS network name to show; shows all networks if omitted"
-    )
-    details: StrictBool = Field(
-        False, description="Return detailed host information per network"
-    )
 
 
 # -----------------------------------------------------------------------------------------

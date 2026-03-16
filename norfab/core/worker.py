@@ -506,10 +506,17 @@ class JobDatabase:
         Returns:
             bytes: zlib-compressed JSON bytes if compression enabled, otherwise raw JSON bytes.
         """
+        try:
+            data_json = orjson.dumps(data)
+        except Exception as e:
+            log.error(
+                f"Failed to dump data into JSON string, error: {e}", exc_info=True
+            )
+            raise e
         if self.jobs_compress:
-            return zlib.compress(orjson.dumps(data), level=6)
+            return zlib.compress(data_json, level=6)
         else:
-            return orjson.dumps(data)
+            return data_json
 
     def _decompress_data(self, data_blob: bytes) -> dict:
         """
@@ -660,15 +667,26 @@ class JobDatabase:
             uuid (str): Job UUID.
             result_data (dict): Result data as dictionary.
         """
-        with self._transaction(write=True) as conn:
-            conn.execute(
-                """
-                UPDATE jobs
-                SET status = 'COMPLETED', completed_timestamp = ?, result_data = ?
-                WHERE uuid = ?
-            """,
-                (time.ctime(), self._compress_data(result_data), uuid),
-            )
+        try:
+            compressed_result_data = self._compress_data(result_data)
+        except Exception as e:
+            for wname, wres in result_data["result"].items():
+                wres["errors"] = [
+                    f"Worker experienced error while compressing job results data: '{e}'"
+                ]
+                wres["failed"] = True
+                wres["result"] = {}
+            self.fail_job(uuid, result_data)
+        else:
+            with self._transaction(write=True) as conn:
+                conn.execute(
+                    """
+                    UPDATE jobs
+                    SET status = 'COMPLETED', completed_timestamp = ?, result_data = ?
+                    WHERE uuid = ?
+                """,
+                    (time.ctime(), compressed_result_data, uuid),
+                )
 
     def fail_job(self, uuid: str, result_data: dict) -> None:
         """

@@ -121,7 +121,9 @@ class NetboxPrefixTasks:
             Result: An object containing the outcome, including status, details of the prefix, and resources used.
         """
         instance = instance or self.default_instance
-        log.info(f"{self.name} - Create prefix: Creating /{prefixlen} prefix within '{parent}' from '{instance}' Netbox")
+        log.info(
+            f"{self.name} - Create prefix: Creating /{prefixlen} prefix within '{parent}' from '{instance}' Netbox"
+        )
         changed = {}
         ret = Result(
             task=f"{self.name}:create_prefix",

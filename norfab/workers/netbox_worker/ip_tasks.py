@@ -98,7 +98,9 @@ class NetboxIpTasks:
         7. If changes were made and not a dry run, saves the IP and device updates to NetBox.
         """
         instance = instance or self.default_instance
-        log.info(f"{self.name} - Create IP: Allocating IP from '{prefix}' for '{device}:{interface}' in '{instance}' Netbox")
+        log.info(
+            f"{self.name} - Create IP: Allocating IP from '{prefix}' for '{device}:{interface}' in '{instance}' Netbox"
+        )
         ret = Result(task=f"{self.name}:create_ip", result={}, resources=[instance])
         tags = tags or []
         has_changes = False
@@ -373,7 +375,9 @@ class NetboxIpTasks:
             - The `prefix` parameter can be a string representing the prefix or a dictionary with additional details.
         """
         instance = instance or self.default_instance
-        log.info(f"{self.name} - Create IP bulk: Assigning IPs for {len(devices or [])} device(s) from '{instance}' Netbox")
+        log.info(
+            f"{self.name} - Create IP bulk: Assigning IPs for {len(devices or [])} device(s) from '{instance}' Netbox"
+        )
         ret = Result(
             task=f"{self.name}:create_ip_bulk", result={}, resources=[instance]
         )
@@ -453,7 +457,9 @@ class NetboxIpTasks:
             task=f"{self.name}:sync_device_ip", result=result, resources=[instance]
         )
         nb = self._get_pynetbox(instance, branch=branch)
-        log.info(f"{self.name} - Sync device IP: Syncing IP addresses for {len(devices)} device(s) from '{instance}' Netbox")
+        log.info(
+            f"{self.name} - Sync device IP: Syncing IP addresses for {len(devices)} device(s) from '{instance}' Netbox"
+        )
 
         if datasource == "nornir":
             # source hosts list from Nornir

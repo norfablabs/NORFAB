@@ -33,29 +33,21 @@ FakeNOS Service supports the following tasks:
 
 ## FakeNOS Service Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     FakeNOS Worker Process                  │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │                   FakeNOSWorker                     │   │
-│  │                                                     │   │
-│  │  networks = {                                       │   │
-│  │    "net-1": { process, stop_event, queues, ... }    │   │
-│  │    "net-2": { process, stop_event, queues, ... }    │   │
-│  │  }                                                  │   │
-│  └────────────────────────┬────────────────────────────┘   │
-│                           │ multiprocessing                 │
-│           ┌───────────────┴───────────────┐                 │
-│           ▼                               ▼                 │
-│  ┌─────────────────┐             ┌─────────────────┐        │
-│  │  FakeNOS Net-1  │             │  FakeNOS Net-2  │        │
-│  │  (child process)│             │  (child process)│        │
-│  │                 │             │                 │        │
-│  │  host-1: SSH    │             │  host-3: SSH    │        │
-│  │  host-2: SSH    │             │  host-4: SSH    │        │
-│  └─────────────────┘             └─────────────────┘        │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+  subgraph worker_process["FakeNOS Worker Process"]
+    direction TB
+
+    subgraph worker["FakeNOSWorker"]
+      worker_state["networks map<br/>net-1: process, stop_event, queues<br/>net-2: process, stop_event, queues"]
+    end
+
+    net1["FakeNOS Net-1<br/>child process<br/>host-1: SSH<br/>host-2: SSH"]
+    net2["FakeNOS Net-2<br/>child process<br/>host-3: SSH<br/>host-4: SSH"]
+
+    worker_state -->|multiprocessing| net1
+    worker_state -->|multiprocessing| net2
+  end
 ```
 
 Each virtual network is isolated in its own OS process. The worker communicates with child processes using multiprocessing queues, allowing it to query host details, check liveness, and collect process metrics without blocking the main worker event loop.
