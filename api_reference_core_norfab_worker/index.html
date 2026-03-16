@@ -7973,14 +7973,7 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">590</span>
 <span class="normal">591</span>
 <span class="normal">592</span>
 <span class="normal">593</span>
@@ -8015,7 +8008,14 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="normal">622</span>
 <span class="normal">623</span>
 <span class="normal">624</span>
-<span class="normal">625</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_job</span><span class="p">(</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_job</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">client_address</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -8103,14 +8103,7 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">627</span>
-<span class="normal">628</span>
-<span class="normal">629</span>
-<span class="normal">630</span>
-<span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">634</span>
 <span class="normal">635</span>
 <span class="normal">636</span>
 <span class="normal">637</span>
@@ -8129,7 +8122,14 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="normal">650</span>
 <span class="normal">651</span>
 <span class="normal">652</span>
-<span class="normal">653</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_next_pending_job</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_next_pending_job</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the next pending job and mark it as STARTED.</span>
 
@@ -8225,14 +8225,7 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">655</span>
-<span class="normal">656</span>
-<span class="normal">657</span>
-<span class="normal">658</span>
-<span class="normal">659</span>
-<span class="normal">660</span>
-<span class="normal">661</span>
-<span class="normal">662</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">662</span>
 <span class="normal">663</span>
 <span class="normal">664</span>
 <span class="normal">665</span>
@@ -8241,7 +8234,25 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="normal">668</span>
 <span class="normal">669</span>
 <span class="normal">670</span>
-<span class="normal">671</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mark a job as completed and store its result.</span>
 
@@ -8249,15 +8260,26 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="sd">        uuid (str): Job UUID.</span>
 <span class="sd">        result_data (dict): Result data as dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-        <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            UPDATE jobs</span>
-<span class="sd">            SET status = &#39;COMPLETED&#39;, completed_timestamp = ?, result_data = ?</span>
-<span class="sd">            WHERE uuid = ?</span>
-<span class="sd">        &quot;&quot;&quot;</span><span class="p">,</span>
-            <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_data</span><span class="p">(</span><span class="n">result_data</span><span class="p">),</span> <span class="n">uuid</span><span class="p">),</span>
-        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">compressed_result_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compress_data</span><span class="p">(</span><span class="n">result_data</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">wname</span><span class="p">,</span> <span class="n">wres</span> <span class="ow">in</span> <span class="n">result_data</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">wres</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;Worker experienced error while compressing job results data: &#39;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">]</span>
+            <span class="n">wres</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">wres</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fail_job</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="n">result_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                UPDATE jobs</span>
+<span class="sd">                SET status = &#39;COMPLETED&#39;, completed_timestamp = ?, result_data = ?</span>
+<span class="sd">                WHERE uuid = ?</span>
+<span class="sd">            &quot;&quot;&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(),</span> <span class="n">compressed_result_data</span><span class="p">,</span> <span class="n">uuid</span><span class="p">),</span>
+            <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8327,23 +8349,23 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">673</span>
-<span class="normal">674</span>
-<span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span>
-<span class="normal">678</span>
-<span class="normal">679</span>
-<span class="normal">680</span>
-<span class="normal">681</span>
-<span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span>
-<span class="normal">689</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fail_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fail_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mark a job as failed and store its result.</span>
 
@@ -8510,25 +8532,7 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
-<span class="normal">701</span>
-<span class="normal">702</span>
-<span class="normal">703</span>
-<span class="normal">704</span>
-<span class="normal">705</span>
-<span class="normal">706</span>
-<span class="normal">707</span>
-<span class="normal">708</span>
-<span class="normal">709</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">709</span>
 <span class="normal">710</span>
 <span class="normal">711</span>
 <span class="normal">712</span>
@@ -8590,7 +8594,25 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="normal">768</span>
 <span class="normal">769</span>
 <span class="normal">770</span>
-<span class="normal">771</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_job_info</span><span class="p">(</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_job_info</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">include_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -8788,25 +8810,7 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">773</span>
-<span class="normal">774</span>
-<span class="normal">775</span>
-<span class="normal">776</span>
-<span class="normal">777</span>
-<span class="normal">778</span>
-<span class="normal">779</span>
-<span class="normal">780</span>
-<span class="normal">781</span>
-<span class="normal">782</span>
-<span class="normal">783</span>
-<span class="normal">784</span>
-<span class="normal">785</span>
-<span class="normal">786</span>
-<span class="normal">787</span>
-<span class="normal">788</span>
-<span class="normal">789</span>
-<span class="normal">790</span>
-<span class="normal">791</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">791</span>
 <span class="normal">792</span>
 <span class="normal">793</span>
 <span class="normal">794</span>
@@ -8814,7 +8818,25 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="normal">796</span>
 <span class="normal">797</span>
 <span class="normal">798</span>
-<span class="normal">799</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_event</span><span class="p">(</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span>
+<span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_event</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">job_uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">severity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">event_data</span><span class="p">:</span> <span class="nb">dict</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8917,25 +8939,7 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span>
-<span class="normal">806</span>
-<span class="normal">807</span>
-<span class="normal">808</span>
-<span class="normal">809</span>
-<span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">819</span>
 <span class="normal">820</span>
 <span class="normal">821</span>
 <span class="normal">822</span>
@@ -8945,7 +8949,25 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="normal">826</span>
 <span class="normal">827</span>
 <span class="normal">828</span>
-<span class="normal">829</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_job_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_job_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all events for a job.</span>
 
@@ -9130,25 +9152,7 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">831</span>
-<span class="normal">832</span>
-<span class="normal">833</span>
-<span class="normal">834</span>
-<span class="normal">835</span>
-<span class="normal">836</span>
-<span class="normal">837</span>
-<span class="normal">838</span>
-<span class="normal">839</span>
-<span class="normal">840</span>
-<span class="normal">841</span>
-<span class="normal">842</span>
-<span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">849</span>
 <span class="normal">850</span>
 <span class="normal">851</span>
 <span class="normal">852</span>
@@ -9189,7 +9193,25 @@ connection-level locking and WAL mode for concurrent reads.</p>
 <span class="normal">887</span>
 <span class="normal">888</span>
 <span class="normal">889</span>
-<span class="normal">890</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">list_jobs</span><span class="p">(</span>
+<span class="normal">890</span>
+<span class="normal">891</span>
+<span class="normal">892</span>
+<span class="normal">893</span>
+<span class="normal">894</span>
+<span class="normal">895</span>
+<span class="normal">896</span>
+<span class="normal">897</span>
+<span class="normal">898</span>
+<span class="normal">899</span>
+<span class="normal">900</span>
+<span class="normal">901</span>
+<span class="normal">902</span>
+<span class="normal">903</span>
+<span class="normal">904</span>
+<span class="normal">905</span>
+<span class="normal">906</span>
+<span class="normal">907</span>
+<span class="normal">908</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">list_jobs</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">pending</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">completed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -9271,11 +9293,11 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">892</span>
-<span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">910</span>
+<span class="normal">911</span>
+<span class="normal">912</span>
+<span class="normal">913</span>
+<span class="normal">914</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Close all database connections.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_local</span><span class="p">,</span> <span class="s2">&quot;conn&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_local</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -9480,23 +9502,23 @@ connection-level locking and WAL mode for concurrent reads.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>norfab\core\worker.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">926</span>
-<span class="normal">927</span>
-<span class="normal">928</span>
-<span class="normal">929</span>
-<span class="normal">930</span>
-<span class="normal">931</span>
-<span class="normal">932</span>
-<span class="normal">933</span>
-<span class="normal">934</span>
-<span class="normal">935</span>
-<span class="normal">936</span>
-<span class="normal">937</span>
-<span class="normal">938</span>
-<span class="normal">939</span>
-<span class="normal">940</span>
-<span class="normal">941</span>
-<span class="normal">942</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">worker</span> <span class="o">=</span> <span class="n">worker</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">worker_process</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
@@ -9575,25 +9597,7 @@ based on the <code>memory_threshold_action</code> attribute. The possible action
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">944</span>
-<span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span>
-<span class="normal">948</span>
-<span class="normal">949</span>
-<span class="normal">950</span>
-<span class="normal">951</span>
-<span class="normal">952</span>
-<span class="normal">953</span>
-<span class="normal">954</span>
-<span class="normal">955</span>
-<span class="normal">956</span>
-<span class="normal">957</span>
-<span class="normal">958</span>
-<span class="normal">959</span>
-<span class="normal">960</span>
-<span class="normal">961</span>
-<span class="normal">962</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">962</span>
 <span class="normal">963</span>
 <span class="normal">964</span>
 <span class="normal">965</span>
@@ -9602,7 +9606,25 @@ based on the <code>memory_threshold_action</code> attribute. The possible action
 <span class="normal">968</span>
 <span class="normal">969</span>
 <span class="normal">970</span>
-<span class="normal">971</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_ram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">971</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span>
+<span class="normal">975</span>
+<span class="normal">976</span>
+<span class="normal">977</span>
+<span class="normal">978</span>
+<span class="normal">979</span>
+<span class="normal">980</span>
+<span class="normal">981</span>
+<span class="normal">982</span>
+<span class="normal">983</span>
+<span class="normal">984</span>
+<span class="normal">985</span>
+<span class="normal">986</span>
+<span class="normal">987</span>
+<span class="normal">988</span>
+<span class="normal">989</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_ram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks the current RAM usage and performs an action if it exceeds the threshold.</span>
 
@@ -9675,14 +9697,14 @@ based on the <code>memory_threshold_action</code> attribute. The possible action
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">973</span>
-<span class="normal">974</span>
-<span class="normal">975</span>
-<span class="normal">976</span>
-<span class="normal">977</span>
-<span class="normal">978</span>
-<span class="normal">979</span>
-<span class="normal">980</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ram_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">991</span>
+<span class="normal">992</span>
+<span class="normal">993</span>
+<span class="normal">994</span>
+<span class="normal">995</span>
+<span class="normal">996</span>
+<span class="normal">997</span>
+<span class="normal">998</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ram_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the RAM usage of the worker process.</span>
 
@@ -9745,25 +9767,7 @@ The method performs the following steps in a loop until the worker's exit event 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 982</span>
-<span class="normal"> 983</span>
-<span class="normal"> 984</span>
-<span class="normal"> 985</span>
-<span class="normal"> 986</span>
-<span class="normal"> 987</span>
-<span class="normal"> 988</span>
-<span class="normal"> 989</span>
-<span class="normal"> 990</span>
-<span class="normal"> 991</span>
-<span class="normal"> 992</span>
-<span class="normal"> 993</span>
-<span class="normal"> 994</span>
-<span class="normal"> 995</span>
-<span class="normal"> 996</span>
-<span class="normal"> 997</span>
-<span class="normal"> 998</span>
-<span class="normal"> 999</span>
-<span class="normal">1000</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1000</span>
 <span class="normal">1001</span>
 <span class="normal">1002</span>
 <span class="normal">1003</span>
@@ -9777,7 +9781,25 @@ The method performs the following steps in a loop until the worker's exit event 
 <span class="normal">1011</span>
 <span class="normal">1012</span>
 <span class="normal">1013</span>
-<span class="normal">1014</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1014</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span>
+<span class="normal">1023</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span>
+<span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Executes the worker&#39;s watchdog main loop, periodically running tasks and checking conditions.</span>
 <span class="sd">    The method performs the following steps in a loop until the worker&#39;s exit event is set:</span>
@@ -10011,25 +10033,7 @@ and manages job queues and events.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>norfab\core\worker.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1307</span>
-<span class="normal">1308</span>
-<span class="normal">1309</span>
-<span class="normal">1310</span>
-<span class="normal">1311</span>
-<span class="normal">1312</span>
-<span class="normal">1313</span>
-<span class="normal">1314</span>
-<span class="normal">1315</span>
-<span class="normal">1316</span>
-<span class="normal">1317</span>
-<span class="normal">1318</span>
-<span class="normal">1319</span>
-<span class="normal">1320</span>
-<span class="normal">1321</span>
-<span class="normal">1322</span>
-<span class="normal">1323</span>
-<span class="normal">1324</span>
-<span class="normal">1325</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1325</span>
 <span class="normal">1326</span>
 <span class="normal">1327</span>
 <span class="normal">1328</span>
@@ -10095,7 +10099,25 @@ and manages job queues and events.</p>
 <span class="normal">1388</span>
 <span class="normal">1389</span>
 <span class="normal">1390</span>
-<span class="normal">1391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">1391</span>
+<span class="normal">1392</span>
+<span class="normal">1393</span>
+<span class="normal">1394</span>
+<span class="normal">1395</span>
+<span class="normal">1396</span>
+<span class="normal">1397</span>
+<span class="normal">1398</span>
+<span class="normal">1399</span>
+<span class="normal">1400</span>
+<span class="normal">1401</span>
+<span class="normal">1402</span>
+<span class="normal">1403</span>
+<span class="normal">1404</span>
+<span class="normal">1405</span>
+<span class="normal">1406</span>
+<span class="normal">1407</span>
+<span class="normal">1408</span>
+<span class="normal">1409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">inventory</span><span class="p">:</span> <span class="n">NorFabInventory</span><span class="p">,</span>
     <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -10262,22 +10284,22 @@ and then applies the configuration using <code>logging.config.dictConfig</code>.
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1393</span>
-<span class="normal">1394</span>
-<span class="normal">1395</span>
-<span class="normal">1396</span>
-<span class="normal">1397</span>
-<span class="normal">1398</span>
-<span class="normal">1399</span>
-<span class="normal">1400</span>
-<span class="normal">1401</span>
-<span class="normal">1402</span>
-<span class="normal">1403</span>
-<span class="normal">1404</span>
-<span class="normal">1405</span>
-<span class="normal">1406</span>
-<span class="normal">1407</span>
-<span class="normal">1408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_queue</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1411</span>
+<span class="normal">1412</span>
+<span class="normal">1413</span>
+<span class="normal">1414</span>
+<span class="normal">1415</span>
+<span class="normal">1416</span>
+<span class="normal">1417</span>
+<span class="normal">1418</span>
+<span class="normal">1419</span>
+<span class="normal">1420</span>
+<span class="normal">1421</span>
+<span class="normal">1422</span>
+<span class="normal">1423</span>
+<span class="normal">1424</span>
+<span class="normal">1425</span>
+<span class="normal">1426</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setup_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_queue</span><span class="p">,</span> <span class="n">log_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Configures logging for the worker.</span>
 
@@ -10330,25 +10352,7 @@ It performs the following steps:</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1410</span>
-<span class="normal">1411</span>
-<span class="normal">1412</span>
-<span class="normal">1413</span>
-<span class="normal">1414</span>
-<span class="normal">1415</span>
-<span class="normal">1416</span>
-<span class="normal">1417</span>
-<span class="normal">1418</span>
-<span class="normal">1419</span>
-<span class="normal">1420</span>
-<span class="normal">1421</span>
-<span class="normal">1422</span>
-<span class="normal">1423</span>
-<span class="normal">1424</span>
-<span class="normal">1425</span>
-<span class="normal">1426</span>
-<span class="normal">1427</span>
-<span class="normal">1428</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1428</span>
 <span class="normal">1429</span>
 <span class="normal">1430</span>
 <span class="normal">1431</span>
@@ -10402,7 +10406,25 @@ It performs the following steps:</p>
 <span class="normal">1479</span>
 <span class="normal">1480</span>
 <span class="normal">1481</span>
-<span class="normal">1482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reconnect_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1482</span>
+<span class="normal">1483</span>
+<span class="normal">1484</span>
+<span class="normal">1485</span>
+<span class="normal">1486</span>
+<span class="normal">1487</span>
+<span class="normal">1488</span>
+<span class="normal">1489</span>
+<span class="normal">1490</span>
+<span class="normal">1491</span>
+<span class="normal">1492</span>
+<span class="normal">1493</span>
+<span class="normal">1494</span>
+<span class="normal">1495</span>
+<span class="normal">1496</span>
+<span class="normal">1497</span>
+<span class="normal">1498</span>
+<span class="normal">1499</span>
+<span class="normal">1500</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reconnect_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect or reconnect to the broker.</span>
 
@@ -10555,25 +10577,7 @@ Logs a debug message with the message being sent.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1484</span>
-<span class="normal">1485</span>
-<span class="normal">1486</span>
-<span class="normal">1487</span>
-<span class="normal">1488</span>
-<span class="normal">1489</span>
-<span class="normal">1490</span>
-<span class="normal">1491</span>
-<span class="normal">1492</span>
-<span class="normal">1493</span>
-<span class="normal">1494</span>
-<span class="normal">1495</span>
-<span class="normal">1496</span>
-<span class="normal">1497</span>
-<span class="normal">1498</span>
-<span class="normal">1499</span>
-<span class="normal">1500</span>
-<span class="normal">1501</span>
-<span class="normal">1502</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1502</span>
 <span class="normal">1503</span>
 <span class="normal">1504</span>
 <span class="normal">1505</span>
@@ -10589,7 +10593,25 @@ Logs a debug message with the message being sent.</p>
 <span class="normal">1515</span>
 <span class="normal">1516</span>
 <span class="normal">1517</span>
-<span class="normal">1518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">send_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="normal">1518</span>
+<span class="normal">1519</span>
+<span class="normal">1520</span>
+<span class="normal">1521</span>
+<span class="normal">1522</span>
+<span class="normal">1523</span>
+<span class="normal">1524</span>
+<span class="normal">1525</span>
+<span class="normal">1526</span>
+<span class="normal">1527</span>
+<span class="normal">1528</span>
+<span class="normal">1529</span>
+<span class="normal">1530</span>
+<span class="normal">1531</span>
+<span class="normal">1532</span>
+<span class="normal">1533</span>
+<span class="normal">1534</span>
+<span class="normal">1535</span>
+<span class="normal">1536</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">send_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Send a message to the broker.</span>
 
@@ -10671,26 +10693,26 @@ It logs the received inventory data and returns the results if available.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1520</span>
-<span class="normal">1521</span>
-<span class="normal">1522</span>
-<span class="normal">1523</span>
-<span class="normal">1524</span>
-<span class="normal">1525</span>
-<span class="normal">1526</span>
-<span class="normal">1527</span>
-<span class="normal">1528</span>
-<span class="normal">1529</span>
-<span class="normal">1530</span>
-<span class="normal">1531</span>
-<span class="normal">1532</span>
-<span class="normal">1533</span>
-<span class="normal">1534</span>
-<span class="normal">1535</span>
-<span class="normal">1536</span>
-<span class="normal">1537</span>
-<span class="normal">1538</span>
-<span class="normal">1539</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1538</span>
+<span class="normal">1539</span>
+<span class="normal">1540</span>
+<span class="normal">1541</span>
+<span class="normal">1542</span>
+<span class="normal">1543</span>
+<span class="normal">1544</span>
+<span class="normal">1545</span>
+<span class="normal">1546</span>
+<span class="normal">1547</span>
+<span class="normal">1548</span>
+<span class="normal">1549</span>
+<span class="normal">1550</span>
+<span class="normal">1551</span>
+<span class="normal">1552</span>
+<span class="normal">1553</span>
+<span class="normal">1554</span>
+<span class="normal">1555</span>
+<span class="normal">1556</span>
+<span class="normal">1557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load inventory data from the broker for this worker.</span>
 
@@ -10734,14 +10756,14 @@ tasks that need to be performed when the worker is exiting.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1541</span>
-<span class="normal">1542</span>
-<span class="normal">1543</span>
-<span class="normal">1544</span>
-<span class="normal">1545</span>
-<span class="normal">1546</span>
-<span class="normal">1547</span>
-<span class="normal">1548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1559</span>
+<span class="normal">1560</span>
+<span class="normal">1561</span>
+<span class="normal">1562</span>
+<span class="normal">1563</span>
+<span class="normal">1564</span>
+<span class="normal">1565</span>
+<span class="normal">1566</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">worker_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Method to override in child classes with a set of actions to perform on exit call.</span>
 
@@ -10819,21 +10841,21 @@ implementation for retrieving the inventory of a worker.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1550</span>
-<span class="normal">1551</span>
-<span class="normal">1552</span>
-<span class="normal">1553</span>
-<span class="normal">1554</span>
-<span class="normal">1555</span>
-<span class="normal">1556</span>
-<span class="normal">1557</span>
-<span class="normal">1558</span>
-<span class="normal">1559</span>
-<span class="normal">1560</span>
-<span class="normal">1561</span>
-<span class="normal">1562</span>
-<span class="normal">1563</span>
-<span class="normal">1564</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1568</span>
+<span class="normal">1569</span>
+<span class="normal">1570</span>
+<span class="normal">1571</span>
+<span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span>
+<span class="normal">1576</span>
+<span class="normal">1577</span>
+<span class="normal">1578</span>
+<span class="normal">1579</span>
+<span class="normal">1580</span>
+<span class="normal">1581</span>
+<span class="normal">1582</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_inventory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the worker&#39;s inventory.</span>
@@ -10918,21 +10940,21 @@ version report of the worker.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1566</span>
-<span class="normal">1567</span>
-<span class="normal">1568</span>
-<span class="normal">1569</span>
-<span class="normal">1570</span>
-<span class="normal">1571</span>
-<span class="normal">1572</span>
-<span class="normal">1573</span>
-<span class="normal">1574</span>
-<span class="normal">1575</span>
-<span class="normal">1576</span>
-<span class="normal">1577</span>
-<span class="normal">1578</span>
-<span class="normal">1579</span>
-<span class="normal">1580</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1584</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
+<span class="normal">1587</span>
+<span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
+<span class="normal">1591</span>
+<span class="normal">1592</span>
+<span class="normal">1593</span>
+<span class="normal">1594</span>
+<span class="normal">1595</span>
+<span class="normal">1596</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve the version report of the worker.</span>
@@ -11010,25 +11032,7 @@ version report of the worker.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1582</span>
-<span class="normal">1583</span>
-<span class="normal">1584</span>
-<span class="normal">1585</span>
-<span class="normal">1586</span>
-<span class="normal">1587</span>
-<span class="normal">1588</span>
-<span class="normal">1589</span>
-<span class="normal">1590</span>
-<span class="normal">1591</span>
-<span class="normal">1592</span>
-<span class="normal">1593</span>
-<span class="normal">1594</span>
-<span class="normal">1595</span>
-<span class="normal">1596</span>
-<span class="normal">1597</span>
-<span class="normal">1598</span>
-<span class="normal">1599</span>
-<span class="normal">1600</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1600</span>
 <span class="normal">1601</span>
 <span class="normal">1602</span>
 <span class="normal">1603</span>
@@ -11048,7 +11052,25 @@ version report of the worker.</p>
 <span class="normal">1617</span>
 <span class="normal">1618</span>
 <span class="normal">1619</span>
-<span class="normal">1620</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cleanly shuts down the worker by performing the following steps:</span>
 
@@ -11163,17 +11185,17 @@ version report of the worker.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1622</span>
-<span class="normal">1623</span>
-<span class="normal">1624</span>
-<span class="normal">1625</span>
-<span class="normal">1626</span>
-<span class="normal">1627</span>
-<span class="normal">1628</span>
-<span class="normal">1629</span>
-<span class="normal">1630</span>
-<span class="normal">1631</span>
-<span class="normal">1632</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if the given string is a URL supported by NorFab File Service.</span>
 
@@ -11315,25 +11337,7 @@ version report of the worker.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1634</span>
-<span class="normal">1635</span>
-<span class="normal">1636</span>
-<span class="normal">1637</span>
-<span class="normal">1638</span>
-<span class="normal">1639</span>
-<span class="normal">1640</span>
-<span class="normal">1641</span>
-<span class="normal">1642</span>
-<span class="normal">1643</span>
-<span class="normal">1644</span>
-<span class="normal">1645</span>
-<span class="normal">1646</span>
-<span class="normal">1647</span>
-<span class="normal">1648</span>
-<span class="normal">1649</span>
-<span class="normal">1650</span>
-<span class="normal">1651</span>
-<span class="normal">1652</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1652</span>
 <span class="normal">1653</span>
 <span class="normal">1654</span>
 <span class="normal">1655</span>
@@ -11346,7 +11350,25 @@ version report of the worker.</p>
 <span class="normal">1662</span>
 <span class="normal">1663</span>
 <span class="normal">1664</span>
-<span class="normal">1665</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
+<span class="normal">1665</span>
+<span class="normal">1666</span>
+<span class="normal">1667</span>
+<span class="normal">1668</span>
+<span class="normal">1669</span>
+<span class="normal">1670</span>
+<span class="normal">1671</span>
+<span class="normal">1672</span>
+<span class="normal">1673</span>
+<span class="normal">1674</span>
+<span class="normal">1675</span>
+<span class="normal">1676</span>
+<span class="normal">1677</span>
+<span class="normal">1678</span>
+<span class="normal">1679</span>
+<span class="normal">1680</span>
+<span class="normal">1681</span>
+<span class="normal">1682</span>
+<span class="normal">1683</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">read</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -11486,25 +11508,7 @@ version report of the worker.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1667</span>
-<span class="normal">1668</span>
-<span class="normal">1669</span>
-<span class="normal">1670</span>
-<span class="normal">1671</span>
-<span class="normal">1672</span>
-<span class="normal">1673</span>
-<span class="normal">1674</span>
-<span class="normal">1675</span>
-<span class="normal">1676</span>
-<span class="normal">1677</span>
-<span class="normal">1678</span>
-<span class="normal">1679</span>
-<span class="normal">1680</span>
-<span class="normal">1681</span>
-<span class="normal">1682</span>
-<span class="normal">1683</span>
-<span class="normal">1684</span>
-<span class="normal">1685</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1685</span>
 <span class="normal">1686</span>
 <span class="normal">1687</span>
 <span class="normal">1688</span>
@@ -11520,7 +11524,25 @@ version report of the worker.</p>
 <span class="normal">1698</span>
 <span class="normal">1699</span>
 <span class="normal">1700</span>
-<span class="normal">1701</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_render_templates</span><span class="p">(</span>
+<span class="normal">1701</span>
+<span class="normal">1702</span>
+<span class="normal">1703</span>
+<span class="normal">1704</span>
+<span class="normal">1705</span>
+<span class="normal">1706</span>
+<span class="normal">1707</span>
+<span class="normal">1708</span>
+<span class="normal">1709</span>
+<span class="normal">1710</span>
+<span class="normal">1711</span>
+<span class="normal">1712</span>
+<span class="normal">1713</span>
+<span class="normal">1714</span>
+<span class="normal">1715</span>
+<span class="normal">1716</span>
+<span class="normal">1717</span>
+<span class="normal">1718</span>
+<span class="normal">1719</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_render_templates</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -11665,25 +11687,7 @@ other templates referenced using "include" statements.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1703</span>
-<span class="normal">1704</span>
-<span class="normal">1705</span>
-<span class="normal">1706</span>
-<span class="normal">1707</span>
-<span class="normal">1708</span>
-<span class="normal">1709</span>
-<span class="normal">1710</span>
-<span class="normal">1711</span>
-<span class="normal">1712</span>
-<span class="normal">1713</span>
-<span class="normal">1714</span>
-<span class="normal">1715</span>
-<span class="normal">1716</span>
-<span class="normal">1717</span>
-<span class="normal">1718</span>
-<span class="normal">1719</span>
-<span class="normal">1720</span>
-<span class="normal">1721</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1721</span>
 <span class="normal">1722</span>
 <span class="normal">1723</span>
 <span class="normal">1724</span>
@@ -11700,7 +11704,25 @@ other templates referenced using "include" statements.</p>
 <span class="normal">1735</span>
 <span class="normal">1736</span>
 <span class="normal">1737</span>
-<span class="normal">1738</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_fetch_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1738</span>
+<span class="normal">1739</span>
+<span class="normal">1740</span>
+<span class="normal">1741</span>
+<span class="normal">1742</span>
+<span class="normal">1743</span>
+<span class="normal">1744</span>
+<span class="normal">1745</span>
+<span class="normal">1746</span>
+<span class="normal">1747</span>
+<span class="normal">1748</span>
+<span class="normal">1749</span>
+<span class="normal">1750</span>
+<span class="normal">1751</span>
+<span class="normal">1752</span>
+<span class="normal">1753</span>
+<span class="normal">1754</span>
+<span class="normal">1755</span>
+<span class="normal">1756</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_fetch_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to recursively download a Jinja2 template along with</span>
 <span class="sd">    other templates referenced using &quot;include&quot; statements.</span>
@@ -11860,25 +11882,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1740</span>
-<span class="normal">1741</span>
-<span class="normal">1742</span>
-<span class="normal">1743</span>
-<span class="normal">1744</span>
-<span class="normal">1745</span>
-<span class="normal">1746</span>
-<span class="normal">1747</span>
-<span class="normal">1748</span>
-<span class="normal">1749</span>
-<span class="normal">1750</span>
-<span class="normal">1751</span>
-<span class="normal">1752</span>
-<span class="normal">1753</span>
-<span class="normal">1754</span>
-<span class="normal">1755</span>
-<span class="normal">1756</span>
-<span class="normal">1757</span>
-<span class="normal">1758</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1758</span>
 <span class="normal">1759</span>
 <span class="normal">1760</span>
 <span class="normal">1761</span>
@@ -11926,7 +11930,25 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">1803</span>
 <span class="normal">1804</span>
 <span class="normal">1805</span>
-<span class="normal">1806</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">event</span><span class="p">(</span>
+<span class="normal">1806</span>
+<span class="normal">1807</span>
+<span class="normal">1808</span>
+<span class="normal">1809</span>
+<span class="normal">1810</span>
+<span class="normal">1811</span>
+<span class="normal">1812</span>
+<span class="normal">1813</span>
+<span class="normal">1814</span>
+<span class="normal">1815</span>
+<span class="normal">1816</span>
+<span class="normal">1817</span>
+<span class="normal">1818</span>
+<span class="normal">1819</span>
+<span class="normal">1820</span>
+<span class="normal">1821</span>
+<span class="normal">1822</span>
+<span class="normal">1823</span>
+<span class="normal">1824</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">event</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">juuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -12101,25 +12123,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1808</span>
-<span class="normal">1809</span>
-<span class="normal">1810</span>
-<span class="normal">1811</span>
-<span class="normal">1812</span>
-<span class="normal">1813</span>
-<span class="normal">1814</span>
-<span class="normal">1815</span>
-<span class="normal">1816</span>
-<span class="normal">1817</span>
-<span class="normal">1818</span>
-<span class="normal">1819</span>
-<span class="normal">1820</span>
-<span class="normal">1821</span>
-<span class="normal">1822</span>
-<span class="normal">1823</span>
-<span class="normal">1824</span>
-<span class="normal">1825</span>
-<span class="normal">1826</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1826</span>
 <span class="normal">1827</span>
 <span class="normal">1828</span>
 <span class="normal">1829</span>
@@ -12129,7 +12133,25 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">1833</span>
 <span class="normal">1834</span>
 <span class="normal">1835</span>
-<span class="normal">1836</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+<span class="normal">1836</span>
+<span class="normal">1837</span>
+<span class="normal">1838</span>
+<span class="normal">1839</span>
+<span class="normal">1840</span>
+<span class="normal">1841</span>
+<span class="normal">1842</span>
+<span class="normal">1843</span>
+<span class="normal">1844</span>
+<span class="normal">1845</span>
+<span class="normal">1846</span>
+<span class="normal">1847</span>
+<span class="normal">1848</span>
+<span class="normal">1849</span>
+<span class="normal">1850</span>
+<span class="normal">1851</span>
+<span class="normal">1852</span>
+<span class="normal">1853</span>
+<span class="normal">1854</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">job_details</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -12314,25 +12336,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1838</span>
-<span class="normal">1839</span>
-<span class="normal">1840</span>
-<span class="normal">1841</span>
-<span class="normal">1842</span>
-<span class="normal">1843</span>
-<span class="normal">1844</span>
-<span class="normal">1845</span>
-<span class="normal">1846</span>
-<span class="normal">1847</span>
-<span class="normal">1848</span>
-<span class="normal">1849</span>
-<span class="normal">1850</span>
-<span class="normal">1851</span>
-<span class="normal">1852</span>
-<span class="normal">1853</span>
-<span class="normal">1854</span>
-<span class="normal">1855</span>
-<span class="normal">1856</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1856</span>
 <span class="normal">1857</span>
 <span class="normal">1858</span>
 <span class="normal">1859</span>
@@ -12361,7 +12365,25 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">1882</span>
 <span class="normal">1883</span>
 <span class="normal">1884</span>
-<span class="normal">1885</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+<span class="normal">1885</span>
+<span class="normal">1886</span>
+<span class="normal">1887</span>
+<span class="normal">1888</span>
+<span class="normal">1889</span>
+<span class="normal">1890</span>
+<span class="normal">1891</span>
+<span class="normal">1892</span>
+<span class="normal">1893</span>
+<span class="normal">1894</span>
+<span class="normal">1895</span>
+<span class="normal">1896</span>
+<span class="normal">1897</span>
+<span class="normal">1898</span>
+<span class="normal">1899</span>
+<span class="normal">1900</span>
+<span class="normal">1901</span>
+<span class="normal">1902</span>
+<span class="normal">1903</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">job_list</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">pending</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -12572,25 +12594,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1887</span>
-<span class="normal">1888</span>
-<span class="normal">1889</span>
-<span class="normal">1890</span>
-<span class="normal">1891</span>
-<span class="normal">1892</span>
-<span class="normal">1893</span>
-<span class="normal">1894</span>
-<span class="normal">1895</span>
-<span class="normal">1896</span>
-<span class="normal">1897</span>
-<span class="normal">1898</span>
-<span class="normal">1899</span>
-<span class="normal">1900</span>
-<span class="normal">1901</span>
-<span class="normal">1902</span>
-<span class="normal">1903</span>
-<span class="normal">1904</span>
-<span class="normal">1905</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1905</span>
 <span class="normal">1906</span>
 <span class="normal">1907</span>
 <span class="normal">1908</span>
@@ -12614,7 +12618,25 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">1926</span>
 <span class="normal">1927</span>
 <span class="normal">1928</span>
-<span class="normal">1929</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1929</span>
+<span class="normal">1930</span>
+<span class="normal">1931</span>
+<span class="normal">1932</span>
+<span class="normal">1933</span>
+<span class="normal">1934</span>
+<span class="normal">1935</span>
+<span class="normal">1936</span>
+<span class="normal">1937</span>
+<span class="normal">1938</span>
+<span class="normal">1939</span>
+<span class="normal">1940</span>
+<span class="normal">1941</span>
+<span class="normal">1942</span>
+<span class="normal">1943</span>
+<span class="normal">1944</span>
+<span class="normal">1945</span>
+<span class="normal">1946</span>
+<span class="normal">1947</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">WorkerEchoIn</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">WorkerEchoOut</span><span class="p">,</span>
@@ -12777,25 +12799,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1931</span>
-<span class="normal">1932</span>
-<span class="normal">1933</span>
-<span class="normal">1934</span>
-<span class="normal">1935</span>
-<span class="normal">1936</span>
-<span class="normal">1937</span>
-<span class="normal">1938</span>
-<span class="normal">1939</span>
-<span class="normal">1940</span>
-<span class="normal">1941</span>
-<span class="normal">1942</span>
-<span class="normal">1943</span>
-<span class="normal">1944</span>
-<span class="normal">1945</span>
-<span class="normal">1946</span>
-<span class="normal">1947</span>
-<span class="normal">1948</span>
-<span class="normal">1949</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1949</span>
 <span class="normal">1950</span>
 <span class="normal">1951</span>
 <span class="normal">1952</span>
@@ -12805,7 +12809,25 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">1956</span>
 <span class="normal">1957</span>
 <span class="normal">1958</span>
-<span class="normal">1959</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+<span class="normal">1959</span>
+<span class="normal">1960</span>
+<span class="normal">1961</span>
+<span class="normal">1962</span>
+<span class="normal">1963</span>
+<span class="normal">1964</span>
+<span class="normal">1965</span>
+<span class="normal">1966</span>
+<span class="normal">1967</span>
+<span class="normal">1968</span>
+<span class="normal">1969</span>
+<span class="normal">1970</span>
+<span class="normal">1971</span>
+<span class="normal">1972</span>
+<span class="normal">1973</span>
+<span class="normal">1974</span>
+<span class="normal">1975</span>
+<span class="normal">1976</span>
+<span class="normal">1977</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">list_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">brief</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Lists tasks supported by worker.</span>
@@ -12891,25 +12913,7 @@ including queues and events as required.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1969</span>
-<span class="normal">1970</span>
-<span class="normal">1971</span>
-<span class="normal">1972</span>
-<span class="normal">1973</span>
-<span class="normal">1974</span>
-<span class="normal">1975</span>
-<span class="normal">1976</span>
-<span class="normal">1977</span>
-<span class="normal">1978</span>
-<span class="normal">1979</span>
-<span class="normal">1980</span>
-<span class="normal">1981</span>
-<span class="normal">1982</span>
-<span class="normal">1983</span>
-<span class="normal">1984</span>
-<span class="normal">1985</span>
-<span class="normal">1986</span>
-<span class="normal">1987</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1987</span>
 <span class="normal">1988</span>
 <span class="normal">1989</span>
 <span class="normal">1990</span>
@@ -12954,7 +12958,25 @@ including queues and events as required.</p>
 <span class="normal">2029</span>
 <span class="normal">2030</span>
 <span class="normal">2031</span>
-<span class="normal">2032</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2032</span>
+<span class="normal">2033</span>
+<span class="normal">2034</span>
+<span class="normal">2035</span>
+<span class="normal">2036</span>
+<span class="normal">2037</span>
+<span class="normal">2038</span>
+<span class="normal">2039</span>
+<span class="normal">2040</span>
+<span class="normal">2041</span>
+<span class="normal">2042</span>
+<span class="normal">2043</span>
+<span class="normal">2044</span>
+<span class="normal">2045</span>
+<span class="normal">2046</span>
+<span class="normal">2047</span>
+<span class="normal">2048</span>
+<span class="normal">2049</span>
+<span class="normal">2050</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Starts multiple daemon threads required for the worker&#39;s operation.</span>
 
@@ -13103,25 +13125,7 @@ including queues and events as required.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2034</span>
-<span class="normal">2035</span>
-<span class="normal">2036</span>
-<span class="normal">2037</span>
-<span class="normal">2038</span>
-<span class="normal">2039</span>
-<span class="normal">2040</span>
-<span class="normal">2041</span>
-<span class="normal">2042</span>
-<span class="normal">2043</span>
-<span class="normal">2044</span>
-<span class="normal">2045</span>
-<span class="normal">2046</span>
-<span class="normal">2047</span>
-<span class="normal">2048</span>
-<span class="normal">2049</span>
-<span class="normal">2050</span>
-<span class="normal">2051</span>
-<span class="normal">2052</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2052</span>
 <span class="normal">2053</span>
 <span class="normal">2054</span>
 <span class="normal">2055</span>
@@ -13215,7 +13219,25 @@ including queues and events as required.</p>
 <span class="normal">2143</span>
 <span class="normal">2144</span>
 <span class="normal">2145</span>
-<span class="normal">2146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_next_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">2146</span>
+<span class="normal">2147</span>
+<span class="normal">2148</span>
+<span class="normal">2149</span>
+<span class="normal">2150</span>
+<span class="normal">2151</span>
+<span class="normal">2152</span>
+<span class="normal">2153</span>
+<span class="normal">2154</span>
+<span class="normal">2155</span>
+<span class="normal">2156</span>
+<span class="normal">2157</span>
+<span class="normal">2158</span>
+<span class="normal">2159</span>
+<span class="normal">2160</span>
+<span class="normal">2161</span>
+<span class="normal">2162</span>
+<span class="normal">2163</span>
+<span class="normal">2164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_next_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processes the next job from the database.</span>
 
@@ -13359,25 +13381,7 @@ including queues and events as required.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2148</span>
-<span class="normal">2149</span>
-<span class="normal">2150</span>
-<span class="normal">2151</span>
-<span class="normal">2152</span>
-<span class="normal">2153</span>
-<span class="normal">2154</span>
-<span class="normal">2155</span>
-<span class="normal">2156</span>
-<span class="normal">2157</span>
-<span class="normal">2158</span>
-<span class="normal">2159</span>
-<span class="normal">2160</span>
-<span class="normal">2161</span>
-<span class="normal">2162</span>
-<span class="normal">2163</span>
-<span class="normal">2164</span>
-<span class="normal">2165</span>
-<span class="normal">2166</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2166</span>
 <span class="normal">2167</span>
 <span class="normal">2168</span>
 <span class="normal">2169</span>
@@ -13400,7 +13404,25 @@ including queues and events as required.</p>
 <span class="normal">2186</span>
 <span class="normal">2187</span>
 <span class="normal">2188</span>
-<span class="normal">2189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">work</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">2189</span>
+<span class="normal">2190</span>
+<span class="normal">2191</span>
+<span class="normal">2192</span>
+<span class="normal">2193</span>
+<span class="normal">2194</span>
+<span class="normal">2195</span>
+<span class="normal">2196</span>
+<span class="normal">2197</span>
+<span class="normal">2198</span>
+<span class="normal">2199</span>
+<span class="normal">2200</span>
+<span class="normal">2201</span>
+<span class="normal">2202</span>
+<span class="normal">2203</span>
+<span class="normal">2204</span>
+<span class="normal">2205</span>
+<span class="normal">2206</span>
+<span class="normal">2207</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">work</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Executes the main worker loop, managing job execution using a thread pool.</span>
 
@@ -13536,25 +13558,7 @@ alive, it logs a warning and attempts to reconnect to the broker.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1228</span>
-<span class="normal">1229</span>
-<span class="normal">1230</span>
-<span class="normal">1231</span>
-<span class="normal">1232</span>
-<span class="normal">1233</span>
-<span class="normal">1234</span>
-<span class="normal">1235</span>
-<span class="normal">1236</span>
-<span class="normal">1237</span>
-<span class="normal">1238</span>
-<span class="normal">1239</span>
-<span class="normal">1240</span>
-<span class="normal">1241</span>
-<span class="normal">1242</span>
-<span class="normal">1243</span>
-<span class="normal">1244</span>
-<span class="normal">1245</span>
-<span class="normal">1246</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1246</span>
 <span class="normal">1247</span>
 <span class="normal">1248</span>
 <span class="normal">1249</span>
@@ -13590,7 +13594,25 @@ alive, it logs a warning and attempts to reconnect to the broker.</p>
 <span class="normal">1279</span>
 <span class="normal">1280</span>
 <span class="normal">1281</span>
-<span class="normal">1282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">recv</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">destroy_event</span><span class="p">):</span>
+<span class="normal">1282</span>
+<span class="normal">1283</span>
+<span class="normal">1284</span>
+<span class="normal">1285</span>
+<span class="normal">1286</span>
+<span class="normal">1287</span>
+<span class="normal">1288</span>
+<span class="normal">1289</span>
+<span class="normal">1290</span>
+<span class="normal">1291</span>
+<span class="normal">1292</span>
+<span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span>
+<span class="normal">1296</span>
+<span class="normal">1297</span>
+<span class="normal">1298</span>
+<span class="normal">1299</span>
+<span class="normal">1300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">recv</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">destroy_event</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Thread to process receive messages from broker.</span>
 

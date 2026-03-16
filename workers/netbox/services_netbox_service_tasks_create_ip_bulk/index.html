@@ -5585,9 +5585,7 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">345</span>
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
@@ -5646,7 +5644,11 @@ nf#
 <span class="normal">401</span>
 <span class="normal">402</span>
 <span class="normal">403</span>
-<span class="normal">404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_ip_bulk</span><span class="p">(</span>
@@ -5679,7 +5681,9 @@ nf#
 <span class="sd">        - The `prefix` parameter can be a string representing the prefix or a dictionary with additional details.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP bulk: Assigning IPs for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p">[])</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP bulk: Assigning IPs for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p">[])</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span>
+    <span class="p">)</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip_bulk&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span>
     <span class="p">)</span>

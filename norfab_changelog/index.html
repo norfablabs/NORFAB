@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#0162" class="md-skip">
+        <a href="#0163" class="md-skip">
           Skip to content
         </a>
       
@@ -4059,17 +4059,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FEATURES
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -5328,17 +5317,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FEATURES
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -5359,13 +5337,43 @@
   
 
 
-<h1 id="0162">0.16.2<a class="headerlink" href="#0162" title="Permanent link">¤</a></h1>
+<h1 id="0163">0.16.3<a class="headerlink" href="#0163" title="Permanent link">¤</a></h1>
 <h2 id="bugs">BUGS<a class="headerlink" href="#bugs" title="Permanent link">¤</a></h2>
+<ol>
+<li>Enhancing error handling for worker results compress to not fail silently if task returns data that is not JSON serializable</li>
+<li>Fixing get_interfaces and get_devies output models validation handling</li>
+<li>Fixing fakenos models to not interfer with nfcli imports - no fakenos required to be installed for nfcli to load, moved fakenos tasks models to dedicated file</li>
+<li>Enhancing nfcli output to skip workers that had no results returned in nested output</li>
+</ol>
+<h2 id="changes">CHANGES<a class="headerlink" href="#changes" title="Permanent link">¤</a></h2>
+<ol>
+<li>
+<p>Dependencies upgrades:</p>
+</li>
+<li>
+<p>tornado 6.5.4 → 6.5.5</p>
+</li>
+<li>orjson 3.11.5 → 3.11.7</li>
+<li>rich 14.3.2 → 14.3.3</li>
+<li>tabulate 0.9.0 → 0.10.0</li>
+<li>ntc-templates 8.1.0 → 9.0.0</li>
+<li>scrapli 2025.01.30 → 2026.2.20</li>
+<li>xmltodict 1.0.2 → 1.0.4</li>
+<li>robotframework 7.4.1 → 7.4.2</li>
+<li>langchain 1.2.10 → 1.2.12</li>
+<li>datamodel-code-generator 0.54.0 → 0.55.0</li>
+<li>fastapi 0.129.0 → 0.135.1</li>
+<li>uvicorn 0.40.0 → 0.42.0</li>
+<li>fakenos 1.0.0 → 1.0.1</li>
+</ol>
+<hr />
+<h1 id="0162">0.16.2<a class="headerlink" href="#0162" title="Permanent link">¤</a></h1>
+<h2 id="bugs_1">BUGS<a class="headerlink" href="#bugs_1" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixing markdown tests report to calculate success rate correctly</li>
 <li>Fixing Nornir cli input model to allow either commands or run_ttp to be provided</li>
 </ol>
-<h2 id="changes">CHANGES<a class="headerlink" href="#changes" title="Permanent link">¤</a></h2>
+<h2 id="changes_1">CHANGES<a class="headerlink" href="#changes_1" title="Permanent link">¤</a></h2>
 <ol>
 <li>
 <p>Dependencies upgrades:</p>
@@ -5385,7 +5393,7 @@
 </ol>
 <hr />
 <h1 id="0161">0.16.1<a class="headerlink" href="#0161" title="Permanent link">¤</a></h1>
-<h2 id="bugs_1">BUGS<a class="headerlink" href="#bugs_1" title="Permanent link">¤</a></h2>
+<h2 id="bugs_2">BUGS<a class="headerlink" href="#bugs_2" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixing Netbox dependency for data-model-generator library</li>
 <li>Fixing Netbox get_interface queries performance</li>
@@ -5401,7 +5409,7 @@
 <li>Netbox get_interfaces task uses REST API now and return interfaces extra information, such as connected endpoints</li>
 <li>NFCLI - adding new <code>show jobs statistics</code> and <code>show jobs database-statistics</code> commands to view local jobs database statistics</li>
 </ol>
-<h2 id="changes_1">CHANGES<a class="headerlink" href="#changes_1" title="Permanent link">¤</a></h2>
+<h2 id="changes_2">CHANGES<a class="headerlink" href="#changes_2" title="Permanent link">¤</a></h2>
 <ol>
 <li>
 <p>Dependencies updates:</p>
@@ -5439,7 +5447,7 @@
 <p>Refactoring broker to use <code>orjson</code> instead of <code>json</code> library</p>
 </li>
 </ol>
-<h2 id="bugs_2">BUGS<a class="headerlink" href="#bugs_2" title="Permanent link">¤</a></h2>
+<h2 id="bugs_3">BUGS<a class="headerlink" href="#bugs_3" title="Permanent link">¤</a></h2>
 <ol>
 <li>NFCLI netbox get functions - adding missing pipe models</li>
 <li>Client - fixing race condition when calling destroy and dispatcher threads still using zmq socket</li>
@@ -5448,7 +5456,7 @@
 </ol>
 <hr />
 <h2 id="0154">0.15.4<a class="headerlink" href="#0154" title="Permanent link">¤</a></h2>
-<h3 id="bugs_3">BUGS<a class="headerlink" href="#bugs_3" title="Permanent link">¤</a></h3>
+<h3 id="bugs_4">BUGS<a class="headerlink" href="#bugs_4" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing FastMCP service tool calling results validation and adding additional tool calling tests</li>
 </ol>
@@ -5457,7 +5465,7 @@
 <li>Agent service - adding support to build agents using YAML definition</li>
 <li>Agent service - adding support for grok LLM provider</li>
 </ol>
-<h3 id="changes_2">CHANGES<a class="headerlink" href="#changes_2" title="Permanent link">¤</a></h3>
+<h3 id="changes_3">CHANGES<a class="headerlink" href="#changes_3" title="Permanent link">¤</a></h3>
 <ol>
 <li>
 <p>Dependencies updates:</p>
@@ -5503,21 +5511,21 @@
 <li>Netbox service - <code>create_ip_bulk</code> task added <code>interface_list</code> argument to filter interfaces by a list of names</li>
 <li>Netbox worker - support added for 4.5 Netbox version</li>
 </ol>
-<h3 id="changes_3">CHANGES<a class="headerlink" href="#changes_3" title="Permanent link">¤</a></h3>
+<h3 id="changes_4">CHANGES<a class="headerlink" href="#changes_4" title="Permanent link">¤</a></h3>
 <ol>
 <li>Nornir - Removed complete output from tests markdown report</li>
 </ol>
-<h3 id="bugs_4">BUGS<a class="headerlink" href="#bugs_4" title="Permanent link">¤</a></h3>
+<h3 id="bugs_5">BUGS<a class="headerlink" href="#bugs_5" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox - <code>get_connections</code> fixing parent endpoint handling for virtual interfaces</li>
 </ol>
 <hr />
 <h2 id="0152">0.15.2<a class="headerlink" href="#0152" title="Permanent link">¤</a></h2>
-<h3 id="bugs_5">BUGS<a class="headerlink" href="#bugs_5" title="Permanent link">¤</a></h3>
+<h3 id="bugs_6">BUGS<a class="headerlink" href="#bugs_6" title="Permanent link">¤</a></h3>
 <ol>
 <li>NorFab nfcli - Fixing show jobs call</li>
 </ol>
-<h3 id="changes_4">CHANGES<a class="headerlink" href="#changes_4" title="Permanent link">¤</a></h3>
+<h3 id="changes_5">CHANGES<a class="headerlink" href="#changes_5" title="Permanent link">¤</a></h3>
 <ol>
 <li>NorfabNfcli - enhancing jobs commands on the client to query local database</li>
 <li>NorFab client - refactored <code>mmi</code> calls, removed <code>get</code>, <code>post</code> and <code>recv_from_broker</code> methods as not needed anymore</li>
@@ -5530,7 +5538,7 @@
 </ol>
 <hr />
 <h2 id="0151">0.15.1<a class="headerlink" href="#0151" title="Permanent link">¤</a></h2>
-<h3 id="bugs_6">BUGS<a class="headerlink" href="#bugs_6" title="Permanent link">¤</a></h3>
+<h3 id="bugs_7">BUGS<a class="headerlink" href="#bugs_7" title="Permanent link">¤</a></h3>
 <ol>
 <li>Nornir service watchdog - fixing <code>connection_idle_timeout</code> handling</li>
 <li>Netbox service - fixing <code>ssl_verify</code> handling to suppress <code>InsecureRequestWarning</code></li>
@@ -5538,7 +5546,7 @@
 </ol>
 <hr />
 <h2 id="0150">0.15.0<a class="headerlink" href="#0150" title="Permanent link">¤</a></h2>
-<h3 id="changes_5">CHANGES<a class="headerlink" href="#changes_5" title="Permanent link">¤</a></h3>
+<h3 id="changes_6">CHANGES<a class="headerlink" href="#changes_6" title="Permanent link">¤</a></h3>
 <ol>
 <li>Introduce sqlite3 DB into client for jobs state persistence</li>
 <li>Updated NFP semantics for better performance and readability</li>
@@ -5554,7 +5562,7 @@
 </ol>
 <hr />
 <h2 id="0140">0.14.0<a class="headerlink" href="#0140" title="Permanent link">¤</a></h2>
-<h3 id="changes_6">CHANGES<a class="headerlink" href="#changes_6" title="Permanent link">¤</a></h3>
+<h3 id="changes_7">CHANGES<a class="headerlink" href="#changes_7" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox sync_device_interfaces - refactored to use bulk update and bulk create operations</li>
 <li>Netbox service - deprecated support for Netbox below 4.4.0 version</li>
@@ -5574,7 +5582,7 @@
 <li>Netbox service - added integration with Netbox BGP Plugin in a form of <code>get_bgp_peerings</code> task to fetch BGP sessions data for devices, added nfcli shell command to call <code>get_bgp_peerings</code> task.</li>
 <li>Netbox service - <code>get_nornir_inventory</code> task added support for <code>bgp_sessions</code> argument. if True, fetched devices' BGP peerings from netbox and stores them under <code>bgp_sessions</code> key in host's data.</li>
 </ol>
-<h3 id="bugs_7">BUGS<a class="headerlink" href="#bugs_7" title="Permanent link">¤</a></h3>
+<h3 id="bugs_8">BUGS<a class="headerlink" href="#bugs_8" title="Permanent link">¤</a></h3>
 <ol>
 <li>Nornir tests markdown - fixed detailed output handling to not collect suite into summary table</li>
 <li>Nfcli - fixed show client command function calling</li>
@@ -5585,7 +5593,7 @@
 <ol>
 <li>Fixing event severity handling in worker.</li>
 </ol>
-<h3 id="changes_7">CHANGES<a class="headerlink" href="#changes_7" title="Permanent link">¤</a></h3>
+<h3 id="changes_8">CHANGES<a class="headerlink" href="#changes_8" title="Permanent link">¤</a></h3>
 <ol>
 <li>Changed worker to use sqlite database for job persistent storage instead of json files</li>
 <li>Netbox sync device facts - enhanced sync logic to use bulk device updates</li>
@@ -5604,7 +5612,7 @@
 <li>NFAPI logging - added support for <code>logging-&gt;log_events</code> parameter to emit events as syslog messages</li>
 <li>Added context manager support for NFAPI to simplify invocation from python scripts</li>
 </ol>
-<h3 id="changes_8">CHANGES<a class="headerlink" href="#changes_8" title="Permanent link">¤</a></h3>
+<h3 id="changes_9">CHANGES<a class="headerlink" href="#changes_9" title="Permanent link">¤</a></h3>
 <ol>
 <li>NFAPI changed start method arguments from <code>start_broker</code> to <code>run_broker</code> and <code>workers</code> to <code>run_workers</code></li>
 <li>Nornir task - enhanced task import logic</li>
@@ -5613,19 +5621,19 @@
 </ol>
 <hr />
 <h2 id="0126">0.12.6<a class="headerlink" href="#0126" title="Permanent link">¤</a></h2>
-<h3 id="bugs_8">BUGS<a class="headerlink" href="#bugs_8" title="Permanent link">¤</a></h3>
+<h3 id="bugs_9">BUGS<a class="headerlink" href="#bugs_9" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox service - fixed get_circuits handling bug, was not returning circuits data due to recent code refactoring, updated test to catch this kind of an issue.</li>
 </ol>
 <hr />
 <h2 id="0125">0.12.5<a class="headerlink" href="#0125" title="Permanent link">¤</a></h2>
-<h3 id="bugs_9">BUGS<a class="headerlink" href="#bugs_9" title="Permanent link">¤</a></h3>
+<h3 id="bugs_10">BUGS<a class="headerlink" href="#bugs_10" title="Permanent link">¤</a></h3>
 <ol>
 <li>Containerlab - fixing error handling when result is None</li>
 <li>Workflow - fixed emitting event progress for cli shell</li>
 <li>Netbox - bulk ip create updated to sort interfaces names to make ip allocation order deterministic</li>
 </ol>
-<h3 id="changes_9">CHANGES<a class="headerlink" href="#changes_9" title="Permanent link">¤</a></h3>
+<h3 id="changes_10">CHANGES<a class="headerlink" href="#changes_10" title="Permanent link">¤</a></h3>
 <ol>
 <li>Updated dependencies:</li>
 <li>TTP 0.9.5 -&gt; 0.10.0</li>
@@ -5645,7 +5653,7 @@
 </ol>
 <hr />
 <h2 id="0124">0.12.4<a class="headerlink" href="#0124" title="Permanent link">¤</a></h2>
-<h3 id="bugs_10">BUGS<a class="headerlink" href="#bugs_10" title="Permanent link">¤</a></h3>
+<h3 id="bugs_11">BUGS<a class="headerlink" href="#bugs_11" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox worker - fixing handling of Netbox instance for child subnet creation</li>
 </ol>
@@ -5655,17 +5663,17 @@
 </ol>
 <hr />
 <h2 id="0123">0.12.3<a class="headerlink" href="#0123" title="Permanent link">¤</a></h2>
-<h3 id="bugs_11">BUGS<a class="headerlink" href="#bugs_11" title="Permanent link">¤</a></h3>
+<h3 id="bugs_12">BUGS<a class="headerlink" href="#bugs_12" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing handling of entry points for sourcing norfab workers plugins for Py3.10+</li>
 </ol>
-<h3 id="changes_10">CHANGES<a class="headerlink" href="#changes_10" title="Permanent link">¤</a></h3>
+<h3 id="changes_11">CHANGES<a class="headerlink" href="#changes_11" title="Permanent link">¤</a></h3>
 <ol>
 <li>Docker images updated to use Py3.11</li>
 </ol>
 <hr />
 <h2 id="0122">0.12.2<a class="headerlink" href="#0122" title="Permanent link">¤</a></h2>
-<h3 id="changes_11">CHANGES<a class="headerlink" href="#changes_11" title="Permanent link">¤</a></h3>
+<h3 id="changes_12">CHANGES<a class="headerlink" href="#changes_12" title="Permanent link">¤</a></h3>
 <ol>
 <li>Updated Python version dependencies</li>
 <li>Adding FastMCP worker</li>
@@ -5674,7 +5682,7 @@
 </ol>
 <hr />
 <h2 id="0121">0.12.1<a class="headerlink" href="#0121" title="Permanent link">¤</a></h2>
-<h3 id="bugs_12">BUGS<a class="headerlink" href="#bugs_12" title="Permanent link">¤</a></h3>
+<h3 id="bugs_13">BUGS<a class="headerlink" href="#bugs_13" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox service - restored Netbox v4.2.0 support</li>
 <li>Fixing Picle shell netbox get interfaces to have <code>interface_regex</code> argument</li>
@@ -5682,7 +5690,7 @@
 </ol>
 <hr />
 <h2 id="0120">0.12.0<a class="headerlink" href="#0120" title="Permanent link">¤</a></h2>
-<h3 id="bugs_13">BUGS<a class="headerlink" href="#bugs_13" title="Permanent link">¤</a></h3>
+<h3 id="bugs_14">BUGS<a class="headerlink" href="#bugs_14" title="Permanent link">¤</a></h3>
 <ol>
 <li>FastAPI Service - fixing JSON references for OpenAPI schema, which previously broken led to error in swagger and redoc UIs rendering.</li>
 </ol>
@@ -5698,18 +5706,18 @@
 </ol>
 <hr />
 <h2 id="0112">0.11.2<a class="headerlink" href="#0112" title="Permanent link">¤</a></h2>
-<h3 id="changes_12">CHANGES<a class="headerlink" href="#changes_12" title="Permanent link">¤</a></h3>
+<h3 id="changes_13">CHANGES<a class="headerlink" href="#changes_13" title="Permanent link">¤</a></h3>
 <ol>
 <li>Moving to Python 3.10 as primary supported version instead of 3.9 due to addition of FastMCP service which only supports Py3.10 and up.</li>
 <li>Updated build dockerfiles to use <code>python:3.10-slim-trixie</code> as a base image</li>
 </ol>
-<h3 id="bugs_14">BUGS<a class="headerlink" href="#bugs_14" title="Permanent link">¤</a></h3>
+<h3 id="bugs_15">BUGS<a class="headerlink" href="#bugs_15" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing FastAPI worker argument handling by setting it to <code>all</code> by default</li>
 </ol>
 <hr />
 <h2 id="0111">0.11.1<a class="headerlink" href="#0111" title="Permanent link">¤</a></h2>
-<h3 id="bugs_15">BUGS<a class="headerlink" href="#bugs_15" title="Permanent link">¤</a></h3>
+<h3 id="bugs_16">BUGS<a class="headerlink" href="#bugs_16" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed containerlab show lab outputting</li>
 <li>Enhanced nfcli logic to be able to start broker and workers only without a client</li>
@@ -5729,13 +5737,13 @@
 <li>Netbox Service - added support for branching plugin, made create and update tasks be branch aware, updated nfcli shells to support <code>branch</code> argument</li>
 <li>Netbox Service - added <code>delete_branch</code> task</li>
 </ol>
-<h3 id="bugs_16">BUGS<a class="headerlink" href="#bugs_16" title="Permanent link">¤</a></h3>
+<h3 id="bugs_17">BUGS<a class="headerlink" href="#bugs_17" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing nornir test picle shell test task handling for verbose-result and dry-run</li>
 <li>Fixing nornir test handling for when suite renders to empty tests for a host</li>
 <li>Fixed Netbox service <code>instance</code> variable options sourcing for CLI shells</li>
 </ol>
-<h3 id="changes_13">CHANGES<a class="headerlink" href="#changes_13" title="Permanent link">¤</a></h3>
+<h3 id="changes_14">CHANGES<a class="headerlink" href="#changes_14" title="Permanent link">¤</a></h3>
 <ol>
 <li>Upgrading NAPALM library dependency from 5.0.0 to 5.1.0</li>
 <li>Upgrading PICLE library dependency from 0.9.0 to 0.9.1</li>
@@ -5755,7 +5763,7 @@
 </ol>
 <hr />
 <h2 id="091">0.9.1<a class="headerlink" href="#091" title="Permanent link">¤</a></h2>
-<h3 id="bugs_17">BUGS<a class="headerlink" href="#bugs_17" title="Permanent link">¤</a></h3>
+<h3 id="bugs_18">BUGS<a class="headerlink" href="#bugs_18" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing list and dict annotations to also allow None values for workers tasks.</li>
 </ol>
@@ -5770,7 +5778,7 @@
 <li>Adding workers <code>list_tasks</code> method to return information about tasks in MCP compatible format.</li>
 <li>Added picle shell <code>man.tasks</code> command to retrieve information about NorFab services tasks</li>
 </ol>
-<h3 id="changes_14">CHANGES<a class="headerlink" href="#changes_14" title="Permanent link">¤</a></h3>
+<h3 id="changes_15">CHANGES<a class="headerlink" href="#changes_15" title="Permanent link">¤</a></h3>
 <ol>
 <li>Improved Netbox device update nfcli to include Fx hosts filtering for nornir datasource</li>
 <li>Result object added <code>task_started</code> and <code>task_completed</code> timestamp and <code>service</code> parameters</li>
@@ -5783,13 +5791,13 @@
 </ol>
 <hr />
 <h2 id="082">0.8.2<a class="headerlink" href="#082" title="Permanent link">¤</a></h2>
-<h3 id="bugs_18">BUGS<a class="headerlink" href="#bugs_18" title="Permanent link">¤</a></h3>
+<h3 id="bugs_19">BUGS<a class="headerlink" href="#bugs_19" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed nornir inventory load from containerlab handling</li>
 </ol>
 <hr />
 <h2 id="081">0.8.1<a class="headerlink" href="#081" title="Permanent link">¤</a></h2>
-<h3 id="bugs_19">BUGS<a class="headerlink" href="#bugs_19" title="Permanent link">¤</a></h3>
+<h3 id="bugs_20">BUGS<a class="headerlink" href="#bugs_20" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed <code>show containerlab inventory</code> command</li>
 <li>Fixed Nornir Worker inventory load handling</li>
@@ -5800,14 +5808,14 @@
 <li>Netbox service added <code>get_containerlab_inventory</code> task </li>
 <li>Containerlab service added <code>deploy_netbox</code> task</li>
 </ol>
-<h3 id="changes_15">CHANGES<a class="headerlink" href="#changes_15" title="Permanent link">¤</a></h3>
+<h3 id="changes_16">CHANGES<a class="headerlink" href="#changes_16" title="Permanent link">¤</a></h3>
 <ol>
 <li>Improved client post job retry logic</li>
 <li><code>FN</code> filter argument for Nornir add presence handling for nfcli</li>
 </ol>
 <hr />
 <h2 id="080">0.8.0<a class="headerlink" href="#080" title="Permanent link">¤</a></h2>
-<h3 id="changes_16">CHANGES<a class="headerlink" href="#changes_16" title="Permanent link">¤</a></h3>
+<h3 id="changes_17">CHANGES<a class="headerlink" href="#changes_17" title="Permanent link">¤</a></h3>
 <ol>
 <li>Restructuring pydantic models structures for better following DRY principles:</li>
 <li>Moved FastAPI models under norfab.models.fastapi<ol>
@@ -5820,7 +5828,7 @@
 <li>Updated CLI shells to support PICLE 0.9.0</li>
 <li>Enhanced Netbox service to support working with instances of Netbox of different major and minor releases</li>
 </ol>
-<h3 id="bugs_20">BUGS<a class="headerlink" href="#bugs_20" title="Permanent link">¤</a></h3>
+<h3 id="bugs_21">BUGS<a class="headerlink" href="#bugs_21" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed broker to allow workers reconnect on restart.</li>
 </ol>
@@ -5837,7 +5845,7 @@
 <ol>
 <li>Added new <code>workflow</code> service to run simple workflows constructed using YAML DSL</li>
 </ol>
-<h3 id="changes_17">CHANGES<a class="headerlink" href="#changes_17" title="Permanent link">¤</a></h3>
+<h3 id="changes_18">CHANGES<a class="headerlink" href="#changes_18" title="Permanent link">¤</a></h3>
 <ol>
 <li>NFCLI shells - updated to use nested outputter where appropriate</li>
 <li>Nornir worker - updated to set failed flag for its tasks according to test results</li>
@@ -5853,7 +5861,7 @@
 <li>Added support for worker plugins</li>
 <li>Added support for nfcli custom shells</li>
 </ol>
-<h3 id="changes_18">CHANGES<a class="headerlink" href="#changes_18" title="Permanent link">¤</a></h3>
+<h3 id="changes_19">CHANGES<a class="headerlink" href="#changes_19" title="Permanent link">¤</a></h3>
 <ol>
 <li>All workers loaded into NorFab using entrypoints implementing lazy loading - workers classes only imported when they being used, in some cases allowing to save on startup time.</li>
 </ol>
@@ -5866,7 +5874,7 @@
 </ol>
 <hr />
 <h2 id="040">0.4.0<a class="headerlink" href="#040" title="Permanent link">¤</a></h2>
-<h3 id="changes_19">CHANGES<a class="headerlink" href="#changes_19" title="Permanent link">¤</a></h3>
+<h3 id="changes_20">CHANGES<a class="headerlink" href="#changes_20" title="Permanent link">¤</a></h3>
 <ol>
 <li>Improved netbox get_circuits logic.</li>
 <li>Standardised worker <code>get_version</code> and <code>get_inventory</code> methods</li>
@@ -5878,7 +5886,7 @@
 </ol>
 <hr />
 <h2 id="031">0.3.1<a class="headerlink" href="#031" title="Permanent link">¤</a></h2>
-<h3 id="changes_20">CHANGES<a class="headerlink" href="#changes_20" title="Permanent link">¤</a></h3>
+<h3 id="changes_21">CHANGES<a class="headerlink" href="#changes_21" title="Permanent link">¤</a></h3>
 <ol>
 <li>Improved logging handling for NFAPI if it failing to start a worker</li>
 <li>Update client <code>get</code> method to return result as a dictionary for broker MMI, file and inventory services</li>
@@ -5905,7 +5913,7 @@
 </ol>
 <hr />
 <h2 id="024">0.2.4<a class="headerlink" href="#024" title="Permanent link">¤</a></h2>
-<h3 id="bugs_21">BUGS<a class="headerlink" href="#bugs_21" title="Permanent link">¤</a></h3>
+<h3 id="bugs_22">BUGS<a class="headerlink" href="#bugs_22" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed nfcli <code>--workers-list</code> handling</li>
 <li>Fixed <code>job_data</code> url handling for nornir cli/cfg/test tasks</li>
@@ -5921,13 +5929,13 @@
 <ol>
 <li>Added nfcli <code>--workers-list</code> option to specify a list of workers to start</li>
 </ol>
-<h3 id="changes_21">CHANGES<a class="headerlink" href="#changes_21" title="Permanent link">¤</a></h3>
+<h3 id="changes_22">CHANGES<a class="headerlink" href="#changes_22" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed handling of jinja2 import for the worker to make it optional </li>
 </ol>
 <hr />
 <h2 id="021">0.2.1<a class="headerlink" href="#021" title="Permanent link">¤</a></h2>
-<h3 id="changes_22">CHANGES<a class="headerlink" href="#changes_22" title="Permanent link">¤</a></h3>
+<h3 id="changes_23">CHANGES<a class="headerlink" href="#changes_23" title="Permanent link">¤</a></h3>
 <ol>
 <li>Improved libs imports handling to account for distributed deployment</li>
 <li>Improved logging handling</li>
@@ -5941,12 +5949,12 @@
 </ol>
 <hr />
 <h2 id="020">0.2.0<a class="headerlink" href="#020" title="Permanent link">¤</a></h2>
-<h3 id="changes_23">CHANGES<a class="headerlink" href="#changes_23" title="Permanent link">¤</a></h3>
+<h3 id="changes_24">CHANGES<a class="headerlink" href="#changes_24" title="Permanent link">¤</a></h3>
 <ol>
 <li>refactored <code>get_circuits</code> to use <code>ThreadPoolExecutor</code> to fetch circuits path from netbox</li>
 <li>adding <code>job_data</code> json load to nornir cli, cfg and test tasks</li>
 </ol>
-<h3 id="bugs_22">BUGS<a class="headerlink" href="#bugs_22" title="Permanent link">¤</a></h3>
+<h3 id="bugs_23">BUGS<a class="headerlink" href="#bugs_23" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing netbox <code>get_devices</code> dry run test</li>
 <li>Fixed netbox <code>get_circuits</code> devices site retrieval handling</li>
@@ -5958,11 +5966,11 @@
 </ol>
 <hr />
 <h2 id="011">0.1.1<a class="headerlink" href="#011" title="Permanent link">¤</a></h2>
-<h3 id="bugs_23">BUGS<a class="headerlink" href="#bugs_23" title="Permanent link">¤</a></h3>
+<h3 id="bugs_24">BUGS<a class="headerlink" href="#bugs_24" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed Netbox CLI Shell handling of NFCLIENT</li>
 </ol>
-<h3 id="changes_24">CHANGES<a class="headerlink" href="#changes_24" title="Permanent link">¤</a></h3>
+<h3 id="changes_25">CHANGES<a class="headerlink" href="#changes_25" title="Permanent link">¤</a></h3>
 <ol>
 <li>Updated and tested dependencies for Netmiko 4.5.0</li>
 <li>Updated and tested dependencies for Nornir 3.5.0</li>
@@ -5970,7 +5978,7 @@
 </ol>
 <hr />
 <h2 id="010">0.1.0<a class="headerlink" href="#010" title="Permanent link">¤</a></h2>
-<h3 id="changes_25">Changes<a class="headerlink" href="#changes_25" title="Permanent link">¤</a></h3>
+<h3 id="changes_26">Changes<a class="headerlink" href="#changes_26" title="Permanent link">¤</a></h3>
 <ol>
 <li>Changes to Nornir service module files structure</li>
 <li>PICLE dependency updated: 0.7.<em> -&gt; 0.8.</em></li>
@@ -5987,7 +5995,7 @@
 <li>Added <code>show jobs summary</code> and <code>show jobs details</code> commands to NorFab shell and to Nornir shell</li>
 <li>Added <code>--create-env</code> argument to nfcli utility to create NorFab folders and files to make it easier to get started using norfab</li>
 </ol>
-<h3 id="bugs_24">BUGS<a class="headerlink" href="#bugs_24" title="Permanent link">¤</a></h3>
+<h3 id="bugs_25">BUGS<a class="headerlink" href="#bugs_25" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed Nornir Service Watchdog to clean up dead connections from hosts data</li>
 </ol>

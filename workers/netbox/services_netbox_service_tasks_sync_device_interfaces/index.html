@@ -5761,27 +5761,7 @@ automatically creates branch if it does not exist in Netbox.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 792</span>
-<span class="normal"> 793</span>
-<span class="normal"> 794</span>
-<span class="normal"> 795</span>
-<span class="normal"> 796</span>
-<span class="normal"> 797</span>
-<span class="normal"> 798</span>
-<span class="normal"> 799</span>
-<span class="normal"> 800</span>
-<span class="normal"> 801</span>
-<span class="normal"> 802</span>
-<span class="normal"> 803</span>
-<span class="normal"> 804</span>
-<span class="normal"> 805</span>
-<span class="normal"> 806</span>
-<span class="normal"> 807</span>
-<span class="normal"> 808</span>
-<span class="normal"> 809</span>
-<span class="normal"> 810</span>
-<span class="normal"> 811</span>
-<span class="normal"> 812</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 812</span>
 <span class="normal"> 813</span>
 <span class="normal"> 814</span>
 <span class="normal"> 815</span>
@@ -6052,7 +6032,29 @@ automatically creates branch if it does not exist in Netbox.</p>
 <span class="normal">1080</span>
 <span class="normal">1081</span>
 <span class="normal">1082</span>
-<span class="normal">1083</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span>
+<span class="normal">1086</span>
+<span class="normal">1087</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span>
+<span class="normal">1091</span>
+<span class="normal">1092</span>
+<span class="normal">1093</span>
+<span class="normal">1094</span>
+<span class="normal">1095</span>
+<span class="normal">1096</span>
+<span class="normal">1097</span>
+<span class="normal">1098</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
+<span class="normal">1103</span>
+<span class="normal">1104</span>
+<span class="normal">1105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">sync_device_interfaces</span><span class="p">(</span>
@@ -6115,7 +6117,9 @@ automatically creates branch if it does not exist in Netbox.</p>
         <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device interfaces: Syncing interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device interfaces: Syncing interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="p">)</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;add_details&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">datasource</span> <span class="o">==</span> <span class="s2">&quot;nornir&quot;</span><span class="p">:</span>

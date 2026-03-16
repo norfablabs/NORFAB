@@ -5676,9 +5676,7 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
@@ -5973,7 +5971,17 @@ nf#
 <span class="normal">517</span>
 <span class="normal">518</span>
 <span class="normal">519</span>
-<span class="normal">520</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInterfacesOutput</span><span class="p">,</span>
 <span class="p">)</span>
@@ -6096,7 +6104,9 @@ nf#
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cache</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get interfaces: Fetching interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get interfaces: Fetching interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="p">)</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_interfaces_pynetbox&quot;</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
@@ -6162,10 +6172,14 @@ nf#
                     <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">intf_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span>
                         <span class="n">device_cache_key</span>
                     <span class="p">][</span><span class="n">intf_name</span><span class="p">]</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;serving &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; interfaces from cache (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">intf_last_updated</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s))&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;serving &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; interfaces from cache (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">intf_last_updated</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s))&quot;</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">devices_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; cache miss or stale, fetching fresh data&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; cache miss or stale, fetching fresh data&quot;</span>
+                <span class="p">)</span>
     <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span><span class="p">:</span>
         <span class="k">pass</span>  <span class="c1"># fetch all devices fresh</span>
 
@@ -6177,7 +6191,9 @@ nf#
 
     <span class="c1"># fetch all matching interfaces in one call</span>
     <span class="k">if</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching interfaces from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;fetching interfaces from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
+        <span class="p">)</span>
         <span class="n">all_interfaces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">fetch_filter_params</span><span class="p">))</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) from NetBox&quot;</span><span class="p">)</span>
 

@@ -5831,7 +5831,9 @@ the inspection output. Defaults to False.</p>
 <span class="normal">464</span>
 <span class="normal">465</span>
 <span class="normal">466</span>
-<span class="normal">467</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">inspect</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -5858,7 +5860,9 @@ the inspection output. Defaults to False.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:inspect&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Inspect: Inspecting </span><span class="si">{</span><span class="s1">&#39;all labs&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; lab&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Inspect: Inspecting </span><span class="si">{</span><span class="s1">&#39;all labs&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; lab&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="n">lab_name</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inspecting lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

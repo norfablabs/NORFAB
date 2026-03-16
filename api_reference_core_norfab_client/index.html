@@ -6895,9 +6895,7 @@ It handles sending and receiving messages, managing connections, and performing 
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>norfab\core\client.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1015</span>
-<span class="normal">1016</span>
-<span class="normal">1017</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1017</span>
 <span class="normal">1018</span>
 <span class="normal">1019</span>
 <span class="normal">1020</span>
@@ -6968,7 +6966,9 @@ It handles sending and receiving messages, managing connections, and performing 
 <span class="normal">1085</span>
 <span class="normal">1086</span>
 <span class="normal">1087</span>
-<span class="normal">1088</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">inventory</span><span class="p">:</span> <span class="n">NorFabInventory</span><span class="p">,</span>
     <span class="n">broker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -7074,9 +7074,7 @@ It handles sending and receiving messages, managing connections, and performing 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1090</span>
-<span class="normal">1091</span>
-<span class="normal">1092</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1092</span>
 <span class="normal">1093</span>
 <span class="normal">1094</span>
 <span class="normal">1095</span>
@@ -7085,7 +7083,9 @@ It handles sending and receiving messages, managing connections, and performing 
 <span class="normal">1098</span>
 <span class="normal">1099</span>
 <span class="normal">1100</span>
-<span class="normal">1101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ensure_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
+<span class="normal">1103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ensure_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to convert value to bytes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -7131,9 +7131,7 @@ It handles sending and receiving messages, managing connections, and performing 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1103</span>
-<span class="normal">1104</span>
-<span class="normal">1105</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1105</span>
 <span class="normal">1106</span>
 <span class="normal">1107</span>
 <span class="normal">1108</span>
@@ -7178,7 +7176,9 @@ It handles sending and receiving messages, managing connections, and performing 
 <span class="normal">1147</span>
 <span class="normal">1148</span>
 <span class="normal">1149</span>
-<span class="normal">1150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reconnect_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1150</span>
+<span class="normal">1151</span>
+<span class="normal">1152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reconnect_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect or reconnect to the broker.</span>
 
@@ -7343,9 +7343,7 @@ It handles sending and receiving messages, managing connections, and performing 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1152</span>
-<span class="normal">1153</span>
-<span class="normal">1154</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1154</span>
 <span class="normal">1155</span>
 <span class="normal">1156</span>
 <span class="normal">1157</span>
@@ -7398,7 +7396,9 @@ It handles sending and receiving messages, managing connections, and performing 
 <span class="normal">1204</span>
 <span class="normal">1205</span>
 <span class="normal">1206</span>
-<span class="normal">1207</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">send_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="n">workers</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+<span class="normal">1207</span>
+<span class="normal">1208</span>
+<span class="normal">1209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">send_to_broker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="n">workers</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sends a command to the broker.</span>
 
@@ -7634,9 +7634,7 @@ queries) that return a single aggregated response payload.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1209</span>
-<span class="normal">1210</span>
-<span class="normal">1211</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1211</span>
 <span class="normal">1212</span>
 <span class="normal">1213</span>
 <span class="normal">1214</span>
@@ -7744,7 +7742,9 @@ queries) that return a single aggregated response payload.</p>
 <span class="normal">1316</span>
 <span class="normal">1317</span>
 <span class="normal">1318</span>
-<span class="normal">1319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mmi</span><span class="p">(</span>
+<span class="normal">1319</span>
+<span class="normal">1320</span>
+<span class="normal">1321</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mmi</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">task</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7931,9 +7931,7 @@ queries) that return a single aggregated response payload.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1321</span>
-<span class="normal">1322</span>
-<span class="normal">1323</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1323</span>
 <span class="normal">1324</span>
 <span class="normal">1325</span>
 <span class="normal">1326</span>
@@ -7969,7 +7967,9 @@ queries) that return a single aggregated response payload.</p>
 <span class="normal">1356</span>
 <span class="normal">1357</span>
 <span class="normal">1358</span>
-<span class="normal">1359</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_fetched_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="normal">1359</span>
+<span class="normal">1360</span>
+<span class="normal">1361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_fetched_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Delete files and folders matching the filepath glob pattern.</span>
 
@@ -8171,9 +8171,7 @@ queries) that return a single aggregated response payload.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1361</span>
-<span class="normal">1362</span>
-<span class="normal">1363</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1363</span>
 <span class="normal">1364</span>
 <span class="normal">1365</span>
 <span class="normal">1366</span>
@@ -8306,7 +8304,9 @@ queries) that return a single aggregated response payload.</p>
 <span class="normal">1493</span>
 <span class="normal">1494</span>
 <span class="normal">1495</span>
-<span class="normal">1496</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
+<span class="normal">1496</span>
+<span class="normal">1497</span>
+<span class="normal">1498</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256000</span><span class="p">,</span>
@@ -8649,9 +8649,7 @@ NEW -&gt; SUBMITTING -&gt; DISPATCHED -&gt; STARTED -&gt; COMPLETED (or FAILED/S
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1498</span>
-<span class="normal">1499</span>
-<span class="normal">1500</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1500</span>
 <span class="normal">1501</span>
 <span class="normal">1502</span>
 <span class="normal">1503</span>
@@ -8724,7 +8722,9 @@ NEW -&gt; SUBMITTING -&gt; DISPATCHED -&gt; STARTED -&gt; COMPLETED (or FAILED/S
 <span class="normal">1570</span>
 <span class="normal">1571</span>
 <span class="normal">1572</span>
-<span class="normal">1573</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_job</span><span class="p">(</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_job</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">service</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -8825,9 +8825,7 @@ ensure a clean shutdown.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1575</span>
-<span class="normal">1576</span>
-<span class="normal">1577</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1577</span>
 <span class="normal">1578</span>
 <span class="normal">1579</span>
 <span class="normal">1580</span>
@@ -8847,7 +8845,9 @@ ensure a clean shutdown.</p>
 <span class="normal">1594</span>
 <span class="normal">1595</span>
 <span class="normal">1596</span>
-<span class="normal">1597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gracefully shuts down the client.</span>
 
@@ -9352,7 +9352,9 @@ contention issues. All job state changes are persisted to the database.</p>
 <span class="normal">761</span>
 <span class="normal">762</span>
 <span class="normal">763</span>
-<span class="normal">764</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">handle_response</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">juuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">handle_response</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">juuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Handle RESPONSE messages and update job database accordingly.</span>
 
@@ -9450,7 +9452,9 @@ contention issues. All job state changes are persisted to the database.</p>
             <span class="n">append_errors</span><span class="o">=</span><span class="p">[</span><span class="n">error_msg</span><span class="p">],</span>
             <span class="n">completed_ts</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Job </span><span class="si">{</span><span class="n">juuid</span><span class="si">}</span><span class="s2"> failed with status </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error_msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Job </span><span class="si">{</span><span class="n">juuid</span><span class="si">}</span><span class="s2"> failed with status </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error_msg</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9475,9 +9479,7 @@ Non-blocking: sends request and updates status to SUBMITTING.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">827</span>
-<span class="normal">828</span>
-<span class="normal">829</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">829</span>
 <span class="normal">830</span>
 <span class="normal">831</span>
 <span class="normal">832</span>
@@ -9516,7 +9518,9 @@ Non-blocking: sends request and updates status to SUBMITTING.</p>
 <span class="normal">865</span>
 <span class="normal">866</span>
 <span class="normal">867</span>
-<span class="normal">868</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dispatch_new_jobs</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="normal">868</span>
+<span class="normal">869</span>
+<span class="normal">870</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dispatch_new_jobs</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find NEW jobs and send POST requests to broker.</span>
 <span class="sd">    Non-blocking: sends request and updates status to SUBMITTING.</span>
@@ -9581,9 +9585,7 @@ Non-blocking: sends request with 5-second throttling via last_poll_timestamp.</p
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">871</span>
-<span class="normal">872</span>
-<span class="normal">873</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">873</span>
 <span class="normal">874</span>
 <span class="normal">875</span>
 <span class="normal">876</span>
@@ -9632,7 +9634,9 @@ Non-blocking: sends request with 5-second throttling via last_poll_timestamp.</p
 <span class="normal">919</span>
 <span class="normal">920</span>
 <span class="normal">921</span>
-<span class="normal">922</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">poll_active_jobs</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="normal">922</span>
+<span class="normal">923</span>
+<span class="normal">924</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">poll_active_jobs</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find active jobs and send GET requests to poll for results.</span>
 <span class="sd">    Non-blocking: sends request with 5-second throttling via last_poll_timestamp.</span>
@@ -9742,9 +9746,7 @@ messages and updates the database.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\client.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">926</span>
-<span class="normal">927</span>
-<span class="normal">928</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">928</span>
 <span class="normal">929</span>
 <span class="normal">930</span>
 <span class="normal">931</span>
@@ -9762,7 +9764,9 @@ messages and updates the database.</p>
 <span class="normal">943</span>
 <span class="normal">944</span>
 <span class="normal">945</span>
-<span class="normal">946</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dispatcher</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dispatcher</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dispatcher thread: sends POST and GET requests asynchronously.</span>
 

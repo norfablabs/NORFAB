@@ -5582,9 +5582,7 @@ using the provided topology file.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\containerlab_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">519</span>
-<span class="normal">520</span>
-<span class="normal">521</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">521</span>
 <span class="normal">522</span>
 <span class="normal">523</span>
 <span class="normal">524</span>
@@ -5642,7 +5640,9 @@ using the provided topology file.</p>
 <span class="normal">576</span>
 <span class="normal">577</span>
 <span class="normal">578</span>
-<span class="normal">579</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">restart_lab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Restart a specified Containerlab lab.</span>

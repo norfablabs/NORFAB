@@ -5565,7 +5565,12 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 69</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
 <span class="normal"> 70</span>
 <span class="normal"> 71</span>
 <span class="normal"> 72</span>
@@ -5722,7 +5727,11 @@ nf#
 <span class="normal">223</span>
 <span class="normal">224</span>
 <span class="normal">225</span>
-<span class="normal">226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetDevicesOutput</span><span class="p">,</span>
 <span class="p">)</span>
@@ -5804,7 +5813,9 @@ nf#
             <span class="c1"># cache old or no cache, fetch device data</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">devices_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; cache miss or stale, fetching fresh data&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; cache miss or stale, fetching fresh data&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># only fetch devices missing from or stale in cache</span>
         <span class="n">filters_to_fetch</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">devices_to_fetch</span><span class="p">}]</span> <span class="k">if</span> <span class="n">devices_to_fetch</span> <span class="k">else</span> <span class="p">[]</span>
@@ -5845,7 +5856,11 @@ nf#
                     <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                         <span class="s2">&quot;slug&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span>
-                        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
+                        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">(</span>
+                            <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">tags</span>
+                            <span class="k">else</span> <span class="p">[]</span>
+                        <span class="p">),</span>
                     <span class="p">},</span>
                     <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">location</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="s2">&quot;rack&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">rack</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
@@ -5872,13 +5887,16 @@ nf#
                 <span class="k">if</span> <span class="n">cache</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_devices::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">device_data</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span><span class="p">)</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Cached device data for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Cached device data for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="p">)</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cached device data for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
                 <span class="c1"># add device data to return result</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_data</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - get_devices returning </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

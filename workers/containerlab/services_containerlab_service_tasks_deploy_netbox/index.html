@@ -6032,11 +6032,7 @@ inventory without deploying.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\containerlab_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">719</span>
-<span class="normal">720</span>
-<span class="normal">721</span>
-<span class="normal">722</span>
-<span class="normal">723</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">723</span>
 <span class="normal">724</span>
 <span class="normal">725</span>
 <span class="normal">726</span>
@@ -6225,7 +6221,13 @@ inventory without deploying.</p>
 <span class="normal">909</span>
 <span class="normal">910</span>
 <span class="normal">911</span>
-<span class="normal">912</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+<span class="normal">912</span>
+<span class="normal">913</span>
+<span class="normal">914</span>
+<span class="normal">915</span>
+<span class="normal">916</span>
+<span class="normal">917</span>
+<span class="normal">918</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">deploy_netbox</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -6289,7 +6291,9 @@ inventory without deploying.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:deploy_netbox&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy Netbox: Preparing topology for lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">tenant</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;auto&#39;</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Deploy Netbox: Preparing topology for lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">tenant</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;auto&#39;</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="p">)</span>
     <span class="n">subnets_in_use</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">ports_in_use</span> <span class="o">=</span> <span class="p">{}</span>
 

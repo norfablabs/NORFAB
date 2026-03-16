@@ -5675,9 +5675,7 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\containerlab_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">583</span>
 <span class="normal">584</span>
 <span class="normal">585</span>
 <span class="normal">586</span>
@@ -5811,7 +5809,11 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
 <span class="normal">714</span>
 <span class="normal">715</span>
 <span class="normal">716</span>
-<span class="normal">717</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_nornir_inventory</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -5858,7 +5860,9 @@ to Netmiko SSH platform types and extracts relevant connection details.</p>
     <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="ow">or</span> <span class="mi">600</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_nornir_inventory&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="p">{}})</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get Nornir inventory: Building inventory for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;all&#39;</span><span class="si">}</span><span class="s2">&#39; lab(s)&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get Nornir inventory: Building inventory for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;all&#39;</span><span class="si">}</span><span class="s2">&#39; lab(s)&quot;</span>
+    <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;building nornir inventory for &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;all&#39;</span><span class="si">}</span><span class="s2">&#39; lab(s)&quot;</span><span class="p">)</span>
 
     <span class="c1"># get lab details</span>

@@ -6054,7 +6054,9 @@ remote device interface connected to requested device and interface</p>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_ip</span><span class="p">(</span>
@@ -6138,7 +6140,9 @@ remote device interface connected to requested device and interface</p>
 <span class="sd">    7. If changes were made and not a dry run, saves the IP and device updates to NetBox.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP: Allocating IP from &#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP: Allocating IP from &#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span>
+    <span class="p">)</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">])</span>
     <span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">False</span>
