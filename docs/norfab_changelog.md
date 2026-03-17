@@ -1,3 +1,14 @@
+# 0.16.4
+
+## BREAKING CHANGES
+
+Below changes are to simplify NorFab codebase and reduce maintenance burden.
+
+1. Netbox `get_interfaces` now return complete REST API interfaces data without trying to flatten or normalize it
+2. Netbox `get_devices` now return complete REST API devices data without trying to flatten or normalize it
+
+---
+
 # 0.16.3
 
 ## BUGS

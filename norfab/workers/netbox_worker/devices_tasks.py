@@ -12,47 +12,6 @@ from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
 
-# -----------------------------------------------------------------------
-# PYDANTIC OUTPUT MODELS
-# -----------------------------------------------------------------------
-
-
-class GetDevicesSite(BaseModel):
-    name: StrictStr
-    slug: StrictStr
-    tags: List[StrictStr]
-
-
-class GetDevicesIP(BaseModel):
-    address: StrictStr
-
-
-class GetDevicesResult(BaseModel):
-    id: int = None
-    last_updated: StrictStr = None
-    device_type: StrictStr = None
-    role: StrictStr = None
-    custom_field_data: Dict[StrictStr, Any] = None
-    tags: List[StrictStr] = None
-    config_context: Dict[StrictStr, Any] = None
-    tenant: Union[StrictStr, None] = None
-    platform: Union[StrictStr, None] = None
-    serial: Union[StrictStr, None] = None
-    asset_tag: Union[StrictStr, None] = None
-    site: GetDevicesSite = None
-    location: Union[StrictStr, None] = None
-    rack: Union[StrictStr, None] = None
-    status: StrictStr = None
-    primary_ip4: Union[GetDevicesIP, None] = None
-    primary_ip6: Union[GetDevicesIP, None] = None
-    airflow: Union[StrictStr, None] = None
-    position: Union[StrictStr, None] = None
-    filters: List = None  # for dry-run results
-
-
-class GetDevicesOutput(Result):
-    result: Dict[str, GetDevicesResult]
-
 
 # -----------------------------------------------------------------------
 # MAIN CLASS WITH TASKS
@@ -61,10 +20,7 @@ class GetDevicesOutput(Result):
 
 class NetboxDevicesTasks:
 
-    @Task(
-        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
-        output=GetDevicesOutput,
-    )
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_devices(
         self,
         job: Job,
@@ -168,51 +124,8 @@ class NetboxDevicesTasks:
             # process devices data
             for device_name, device in all_devices_raw.items():
                 if device_name not in ret.result:
-                    device_data = {
-                        "last_updated": str(device.last_updated),
-                        "custom_field_data": (
-                            dict(device.custom_fields) if device.custom_fields else {}
-                        ),
-                        "tags": [t.name for t in device.tags] if device.tags else [],
-                        "device_type": device.device_type.model,
-                        "role": device.role.name,
-                        "config_context": (
-                            dict(device.config_context) if device.config_context else {}
-                        ),
-                        "tenant": device.tenant.name,
-                        "platform": device.platform.name if device.platform else None,
-                        "serial": device.serial,
-                        "asset_tag": device.asset_tag,
-                        "site": {
-                            "name": device.site.name,
-                            "slug": device.site.slug,
-                            "tags": (
-                                [t.name for t in device.site.tags]
-                                if device.site.tags
-                                else []
-                            ),
-                        },
-                        "location": device.location.name if device.location else None,
-                        "rack": device.rack.name if device.rack else None,
-                        "status": device.status.value,
-                        "primary_ip4": (
-                            {"address": device.primary_ip4.address}
-                            if device.primary_ip4
-                            else None
-                        ),
-                        "primary_ip6": (
-                            {"address": device.primary_ip6.address}
-                            if device.primary_ip6
-                            else None
-                        ),
-                        "airflow": device.airflow.value if device.airflow else None,
-                        "position": (
-                            str(device.position)
-                            if device.position is not None
-                            else None
-                        ),
-                        "id": str(device.id),
-                    }
+                    device_data = dict(device)
+                    device_data["site"] = dict(nb.dcim.sites.get(id=device.site.id))
                     # cache device data
                     if cache != False:
                         cache_key = f"get_devices::{device_name}"

@@ -13,219 +13,9 @@ from .netbox_models import NetboxFastApiArgs
 log = logging.getLogger(__name__)
 
 
-# -----------------------------------------------------------------------
-# PYDANTIC OUTPUT MODELS
-# -----------------------------------------------------------------------
-
-
-class GetInterfacesIPAddress(BaseModel):
-    address: str
-    family: Union[int, None] = None
-
-
-class GetInterfacesInventoryItem(BaseModel):
-    name: str
-    role: Union[str, None] = None
-    manufacturer: Union[str, None] = None
-    serial: str = ""
-    custom_fields: Dict[str, Any] = {}
-
-
-class GetInterfacesChildInterface(BaseModel):
-    name: str
-    vrf: Union[str, None] = None
-    ip_addresses: List[GetInterfacesIPAddress] = []
-
-
-class GetInterfacesEndpoint(BaseModel):
-    device: Union[str, None] = None
-    interface: Union[str, None] = None
-
-
-class GetInterfacesResult(BaseModel):
-    id: int
-    label: Union[str, None] = None
-    type: Union[str, None] = None
-    enabled: bool = True
-    parent: Union[str, None] = None
-    lag: Union[str, None] = None
-    mtu: Union[int, None] = None
-    duplex: Union[str, None] = None
-    mac_address: Union[str, None] = None
-    mac_addresses: List[str] = []
-    primary_mac_address: Union[str, None] = None
-    speed: Union[int, None] = None
-    wwn: Union[str, None] = None
-    mgmt_only: bool = False
-    description: str = ""
-    mode: Union[str, None] = None
-    rf_role: Union[str, None] = None
-    rf_channel: Union[str, None] = None
-    rf_channel_frequency: Union[float, None] = None
-    rf_channel_width: Union[float, None] = None
-    tx_power: Union[int, None] = None
-    untagged_vlan: Union[Dict, None] = None
-    qinq_svlan: Union[Dict, None] = None
-    vrf: Union[str, None] = None
-    l2vpn_termination: Union[str, None] = None
-    vlan_translation_policy: Union[Dict, None] = None
-    wireless_link: Union[str, None] = None
-    mark_connected: bool = False
-    cable: Union[int, str, None] = None
-    cable_end: Union[str, None] = None
-    wireless_lans: List[Any] = []
-    poe_mode: Union[str, None] = None
-    poe_type: Union[str, None] = None
-    bridge: Union[str, None] = None
-    module: Union[str, None] = None
-    owner: Union[str, None] = None
-    link_peers_type: Union[str, None] = None
-    connected_endpoints_type: Union[str, None] = None
-    connected_endpoints_reachable: Union[bool, None] = None
-    count_ipaddresses: int = 0
-    count_fhrp_groups: int = 0
-    occupied: Union[bool, None] = None
-    tags: List[str] = []
-    custom_fields: Dict[str, Any] = {}
-    created: Union[str, None] = None
-    last_updated: Union[str, None] = None
-    bridge_interfaces: List[Any] = []
-    tagged_vlans: Union[List[Dict], None] = None
-    vdcs: List[Any] = []
-    link_peers: List[GetInterfacesEndpoint] = []
-    connected_endpoints: List[GetInterfacesEndpoint] = []
-    # extra fields populated by get_interfaces
-    child_interfaces: List[GetInterfacesChildInterface] = []
-    member_interfaces: List[str] = []
-    ip_addresses: List[GetInterfacesIPAddress] = []
-    inventory_items: List[GetInterfacesInventoryItem] = []
-
-
-class GetInterfacesDryRunResult(BaseModel):
-    model_config = {"extra": "forbid"}
-
-    filter_params: Dict = None
-
-
-class GetInterfacesOutput(Result):
-    result: Union[Dict[str, Dict[str, GetInterfacesResult]], GetInterfacesDryRunResult]
-
-
-# -----------------------------------------------------------------------
-# HELPER FUNCTIONS
-# -----------------------------------------------------------------------
-
-
-def flatten_tags(tags: list) -> list:
-    tags = tags or []
-    return [t["name"] for t in tags]
-
-
-def flatten_ip_data(ip: dict) -> dict:
-    try:
-        ip = {"address": ip["address"], "family": (ip.get("family") or {}).get("value")}
-    except Exception as e:
-        log.error(f"Failed to flatten IP address data: {e}", exc_info=True)
-
-    return ip
-
-
-def flatten_vlan_data(vlan: dict) -> dict:
-    try:
-        vlan = {
-            "description": vlan["description"],
-            "name": vlan["name"],
-            "vid": vlan["vid"],
-        }
-    except Exception as e:
-        log.error(f"Failed to flatten VLAN data: {e}", exc_info=True)
-
-    return vlan
-
-
-def flatten_inventory_item(iidata: dict) -> dict:
-    try:
-        iidata = {
-            "name": iidata["name"],
-            "role": (iidata.get("role") or {}).get("name"),
-            "manufacturer": (iidata.get("manufacturer") or {}).get("name"),
-            "serial": iidata["serial"],
-            "custom_fields": iidata["custom_fields"],
-        }
-    except Exception as e:
-        log.error(f"Failed to flatten Inventory Item address data: {e}", exc_info=True)
-
-    return iidata
-
-
-def flatten_interface_data(intf: dict) -> dict:
-    try:
-        intf_name = intf.pop("name", None)
-        intf.pop("display", None)
-        intf.pop("display_url", None)
-        intf.pop("device", None)
-        intf.pop("url", None)
-        intf["occupied"] = intf.pop("_occupied", None)
-        intf["mode"] = (intf.get("mode") or {}).get("value")
-        intf["duplex"] = (intf.get("duplex") or {}).get("value")
-        intf["type"] = (intf.get("type") or {}).get("value")
-        intf["vrf"] = (intf.get("vrf") or {}).get("name")
-        intf["parent"] = (intf.get("parent") or {}).get("name")
-        intf["lag"] = (intf.get("lag") or {}).get("name")
-        intf["tags"] = flatten_tags(intf["tags"])
-        # flatten cable
-        if intf["cable"]:
-            intf["cable"] = intf["cable"].get("label") or intf["cable"].get("id")
-        # flatten endpoints
-        endpoints = []
-        for endpoint in intf.pop("connected_endpoints") or []:
-            if intf["connected_endpoints_type"] == "circuits.providernetwork":
-                endpoints.append(
-                    {
-                        "providernetwork": endpoint["name"],
-                    }
-                )
-            else:
-                endpoints.append(
-                    {
-                        "device": endpoint["device"]["name"],
-                        "interface": endpoint["name"],
-                    }
-                )
-        intf["connected_endpoints"] = endpoints
-        # flatten link peers
-        link_peers = []
-        for peer in intf.get("link_peers") or []:
-            if intf["link_peers_type"] == "circuits.circuittermination":
-                link_peers.append({"circuit": peer["circuit"]["cid"]})
-            else:
-                link_peers.append(
-                    {
-                        "device": peer["device"]["name"],
-                        "interface": peer["name"],
-                    }
-                )
-        intf["link_peers"] = link_peers
-        # flatten mac_addresses
-        if intf.get("mac_addresses"):
-            intf["mac_addresses"] = [m["mac_address"] for m in intf["mac_addresses"]]
-        # flatten vlans
-        if intf["untagged_vlan"]:
-            intf["untagged_vlan"] = flatten_vlan_data(intf["untagged_vlan"])
-        if intf["tagged_vlans"]:
-            intf["tagged_vlans"] = [flatten_vlan_data(v) for v in intf["tagged_vlans"]]
-    except Exception as e:
-        log.error(f"Failed to flatten Interface address data: {e}", exc_info=True)
-
-    return intf
-
-
 class NetboxInterfacesTasks:
 
-    @Task(
-        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
-        output=GetInterfacesOutput,
-    )
+    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_interfaces(
         self,
         job: Job,
@@ -257,89 +47,21 @@ class NetboxInterfacesTasks:
         Returns:
             dict: Dictionary keyed by device name with interface details.
 
-        Example of return data for single interface:
+        This task performs no filtering of data returned by `pynetbox.dcim.interfaces.filter`,
+        as a result use netbox REST API explorer to understand resulting data structure, REST
+        API browser available at `http://<netbox url>/api/dcim/interfaces/`. In addition
+        use nfcli to explore interfaces data:
 
-            ```
-            "eth9": {
-                "bridge": null,
-                "bridge_interfaces": [],
-                "cable": 216,
-                "cable_end": "A",
-                "child_interfaces": [
-                    {
-                        "ip_addresses": [
-                            {
-                                "address": "1.0.10.9/32",
-                                "family": 4
-                            }
-                        ],
-                        "name": "eth9.19",
-                        "vrf": "Voice"
-                    }
-                ],
-                "connected_endpoints": [
-                    {
-                        "device": "fceos5",
-                        "interface": "eth3"
-                    }
-                ],
-                "connected_endpoints_reachable": true,
-                "connected_endpoints_type": "dcim.interface",
-                "count_fhrp_groups": 0,
-                "count_ipaddresses": 0,
-                "created": "2026-02-09T10:40:15.684115Z",
-                "custom_fields": {},
-                "description": "Interface 9 description",
-                "device": "fceos4",
-                "duplex": null,
-                "enabled": true,
-                "id": 1014,
-                "inventory_items": [],
-                "ip_addresses": [],
-                "l2vpn_termination": null,
-                "label": "",
-                "lag": null,
-                "last_updated": "2026-02-09T10:40:43.179809Z",
-                "link_peers": [
-                    {
-                        "device": "fceos5",
-                        "interface": "eth3"
-                    }
-                ],
-                "link_peers_type": "dcim.interface",
-                "mac_address": null,
-                "mac_addresses": [],
-                "mark_connected": false,
-                "member_interfaces": [],
-                "mgmt_only": false,
-                "mode": "tagged",
-                "module": null,
-                "mtu": 1500,
-                "occupied": true,
-                "owner": null,
-                "parent": null,
-                "poe_mode": null,
-                "poe_type": null,
-                "primary_mac_address": null,
-                "qinq_svlan": null,
-                "rf_channel": null,
-                "rf_channel_frequency": null,
-                "rf_channel_width": null,
-                "rf_role": null,
-                "speed": null,
-                "tagged_vlans": [],
-                "tags": [],
-                "tx_power": null,
-                "type": "1000base-t",
-                "untagged_vlan": null,
-                "vdcs": [],
-                "vlan_translation_policy": null,
-                "vrf": null,
-                "wireless_lans": [],
-                "wireless_link": null,
-                "wwn": null
-            },
-            ```
+        ```
+        nf#netbox get interfaces devices fceos4 interface-list eth201 | kv
+
+        netbox-worker-1.1.fceos4.eth201.display: eth201
+        netbox-worker-1.1.fceos4.eth201.device.name: fceos4
+        ...
+        ```
+
+        Can also pipe results through `json`, `yaml`, `nested` or `pprint`  formatters to output
+        results in  certain format.
         """
         instance = instance or self.default_instance
         nb = self._get_pynetbox(instance, branch=branch)
@@ -459,60 +181,36 @@ class NetboxInterfacesTasks:
                     ip.assigned_object_id
                     and ip.assigned_object_type == "dcim.interface"
                 ):
-                    ip_by_intf_id.setdefault(ip.assigned_object_id, []).append(
-                        flatten_ip_data(dict(ip))
-                    )
+                    ip_by_intf_id.setdefault(ip.assigned_object_id, []).append(dict(ip))
 
         # fetch inventory items if requested (one bulk call keyed by component_id)
         if inventory_items and devices_to_fetch:
             job.event(f"fetching inventory items for {len(devices_to_fetch)} device(s)")
             for item in nb.dcim.inventory_items.filter(device=devices_to_fetch):
                 if item.component_id and item.component_type == "dcim.interface":
-                    inv_by_intf_id.setdefault(item.component_id, []).append(
-                        flatten_inventory_item(dict(item))
-                    )
+                    inv_by_intf_id.setdefault(item.component_id, []).append(dict(item))
 
         # transform pynetbox records into result dict keyed by device / interface name
         for intf in all_interfaces:
-            device_name = intf.device.name if intf.device else None
+            device_name = intf.device.name
             if device_name not in ret.result:  # Netbox issue #16299
                 continue
 
-            children = children_by_parent_id.get(intf.id, [])
-
-            if ip_addresses:
-                child_interfaces = [
-                    {
-                        "name": c.name,
-                        "vrf": c.vrf.name if c.vrf else None,
-                        "ip_addresses": ip_by_intf_id.get(c.id, []),
-                    }
-                    for c in children
-                ]
-                intf_ip_addresses = ip_by_intf_id.get(intf.id, [])
-            else:
-                child_interfaces = [
-                    {
-                        "name": c.name,
-                        "vrf": c.vrf.name if c.vrf else None,
-                    }
-                    for c in children
-                ]
-                intf_ip_addresses = []
-
-            intf_data = flatten_interface_data(dict(intf))
+            intf_data = dict(intf)
             # add extra fields
-            intf_data["child_interfaces"] = child_interfaces
+            intf_data["child_interfaces"] = [
+                {
+                    "name": c.name,
+                    "vrf": c.vrf.name if c.vrf else None,
+                    "ip_addresses": ip_by_intf_id.get(c.id, []),
+                }
+                for c in children_by_parent_id.get(intf.id, [])
+            ]
             intf_data["member_interfaces"] = [
                 m.name for m in member_intf_by_lag_id.get(intf.id, [])
             ]
-            intf_data["ip_addresses"] = []
-            if ip_addresses:
-                intf_data["ip_addresses"] = intf_ip_addresses
-            intf_data["inventory_items"] = []
-            if inventory_items:
-                intf_data["inventory_items"] = inv_by_intf_id.get(intf.id, [])
-
+            intf_data["ip_addresses"] = ip_by_intf_id.get(intf.id, [])
+            intf_data["inventory_items"] = inv_by_intf_id.get(intf.id, [])
             ret.result[device_name][intf.name] = intf_data
 
         # cache freshly fetched interfaces per device
@@ -1016,7 +714,7 @@ class NetboxInterfacesTasks:
                                 if mac_address and mac_address not in ["none", ""]:
                                     # Check if MAC already exists
                                     for nb_mac in nb_intf.get("mac_addresses") or []:
-                                        if nb_mac.lower() == mac_address:
+                                        if nb_mac["mac_address"].lower() == mac_address:
                                             break
                                     else:
                                         # Prepare MAC address for creation

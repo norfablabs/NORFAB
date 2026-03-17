@@ -944,6 +944,25 @@ class TestGetInterfaces:
 
 class TestGetDevices:
     nb_version = None
+    device_data_keys = [   
+        "last_updated",
+        "custom_fields",
+        "tags",
+        "device_type",
+        "config_context",
+        "tenant",
+        "platform",
+        "serial",
+        "asset_tag",
+        "site",
+        "location",
+        "rack",
+        "status",
+        "primary_ip4",
+        "primary_ip6",
+        "airflow",
+        "position",
+    ]
 
     def test_with_devices_list(self, nfclient):
         ret = nfclient.run_job(
@@ -958,33 +977,16 @@ class TestGetDevices:
             assert "ceos1" in res["result"], f"{worker} returned no results for ceos1"
             assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
             for device, device_data in res["result"].items():
+                print(list(device_data.keys()))
                 assert isinstance(
                     device_data, dict
                 ), f"{worker}:{device} did not return device data as dictionary"
                 assert all(
                     k in device_data
-                    for k in [
-                        "last_updated",
-                        "custom_field_data",
-                        "tags",
-                        "device_type",
-                        "config_context",
-                        "tenant",
-                        "platform",
-                        "serial",
-                        "asset_tag",
-                        "site",
-                        "location",
-                        "rack",
-                        "status",
-                        "primary_ip4",
-                        "primary_ip6",
-                        "airflow",
-                        "position",
-                    ]
+                    for k in self.device_data_keys
                 ), f"{worker}:{device} not all data returned"
                 assert (
-                    "role" in device_data or "devcie_role" in device_data
+                    "role" in device_data
                 ), f"{worker}:{device} nodevice role info returned"
 
     def test_with_filters(self, nfclient):
@@ -1014,25 +1016,7 @@ class TestGetDevices:
                 ), f"{worker}:{device} did not return device data as dictionary"
                 assert all(
                     k in device_data
-                    for k in [
-                        "last_updated",
-                        "custom_field_data",
-                        "tags",
-                        "device_type",
-                        "config_context",
-                        "tenant",
-                        "platform",
-                        "serial",
-                        "asset_tag",
-                        "site",
-                        "location",
-                        "rack",
-                        "status",
-                        "primary_ip4",
-                        "primary_ip6",
-                        "airflow",
-                        "position",
-                    ]
+                    for k in self.device_data_keys
                 ), f"{worker}:{device} not all data returned"
                 assert (
                     "role" in device_data or "devcie_role" in device_data
@@ -1114,25 +1098,7 @@ class TestGetDevices:
                 ), f"{worker}:{device} did not return device data as dictionary"
                 assert all(
                     k in device_data
-                    for k in [
-                        "last_updated",
-                        "custom_field_data",
-                        "tags",
-                        "device_type",
-                        "config_context",
-                        "tenant",
-                        "platform",
-                        "serial",
-                        "asset_tag",
-                        "site",
-                        "location",
-                        "rack",
-                        "status",
-                        "primary_ip4",
-                        "primary_ip6",
-                        "airflow",
-                        "position",
-                    ]
+                    for k in self.device_data_keys
                 ), f"{worker}:{device} not all data returned"
                 assert (
                     "role" in device_data or "devcie_role" in device_data
@@ -1155,22 +1121,22 @@ class TestGetDevices:
             assert isinstance(d["tags"], list), f"{worker}:fceos4 tags should be a list"
             if d["tags"]:
                 assert all(
-                    isinstance(t, str) for t in d["tags"]
-                ), f"{worker}:fceos4 each tag should be a string"
+                    isinstance(t, dict) for t in d["tags"]
+                ), f"{worker}:fceos4 each tag should be a dict"
             # device_type - flat string (model name)
-            assert isinstance(d["device_type"], str), (
-                f"{worker}:fceos4 device_type should be a string"
+            assert isinstance(d["device_type"], dict), (
+                f"{worker}:fceos4 device_type should be a dict"
             )
             # role - flat string
-            assert isinstance(d["role"], str), f"{worker}:fceos4 role should be a string"
+            assert isinstance(d["role"], dict), f"{worker}:fceos4 role should be a dict"
             # site - dict with name, slug, tags
             assert isinstance(d["site"], dict), f"{worker}:fceos4 site should be a dict"
             assert all(
                 k in d["site"] for k in ["name", "slug", "tags"]
             ), f"{worker}:fceos4 site missing expected keys"
             # status - string value
-            assert isinstance(d["status"], str), (
-                f"{worker}:fceos4 status should be a string"
+            assert isinstance(d["status"], dict), (
+                f"{worker}:fceos4 status should be a dict"
             )
             # primary_ip4 when present - dict with address
             if d["primary_ip4"] is not None:
@@ -1181,7 +1147,7 @@ class TestGetDevices:
                     f"{worker}:fceos4 primary_ip4 missing 'address' key"
                 )
             # id - string
-            assert isinstance(d["id"], str), f"{worker}:fceos4 id should be a string"
+            assert isinstance(d["id"], int), f"{worker}:fceos4 id should be an int"
 
     def test_with_devices_and_filters_combined(self, nfclient):
         """Devices list and filters are merged; results contain union of matches."""
@@ -1408,7 +1374,26 @@ class TestGetConnections:
 
 class TestGetNornirInventory:
     nb_version = None
-
+    device_data_keys = [   
+        "last_updated",
+        "custom_fields",
+        "tags",
+        "device_type",
+        "config_context",
+        "tenant",
+        "platform",
+        "serial",
+        "asset_tag",
+        "site",
+        "location",
+        "rack",
+        "status",
+        "primary_ip4",
+        "primary_ip6",
+        "airflow",
+        "position",
+    ]
+    
     def test_with_devices(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
@@ -1496,26 +1481,7 @@ class TestGetNornirInventory:
                 ), f"{worker}:{device} not all device data returned"
                 assert all(
                     k in data["data"]
-                    for k in [
-                        "airflow",
-                        "asset_tag",
-                        "config_context",
-                        "custom_field_data",
-                        "device_type",
-                        "last_updated",
-                        "location",
-                        "platform",
-                        "position",
-                        "primary_ip4",
-                        "primary_ip6",
-                        "rack",
-                        "role",
-                        "serial",
-                        "site",
-                        "status",
-                        "tags",
-                        "tenant",
-                    ]
+                    for k in self.device_data_keys
                 ), f"{worker}:{device} not all nbdata returned"
 
     def test_with_devices_add_interfaces(self, nfclient):

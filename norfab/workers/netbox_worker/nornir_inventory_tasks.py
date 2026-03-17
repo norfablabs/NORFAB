@@ -78,7 +78,7 @@ class NetboxNornirInventoryTasks:
             # add platform if not provided in device config context
             if not host.get("platform"):
                 if device["platform"]:
-                    host["platform"] = device["platform"]
+                    host["platform"] = device["platform"]["name"]
                 else:
                     log.warning(f"{self.name} - No platform found for '{name}' device")
             # add hostname if not provided in config context
