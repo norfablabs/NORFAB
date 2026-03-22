@@ -163,6 +163,16 @@ class WorkerInventoryEntry(BaseModel):
     max_concurrent_jobs: StrictInt = Field(
         None, description="Maximum number of threads to run jobs"
     )
+    autostart_watchdog: StrictBool = Field(
+        None, description="Start watch dog on worker startup"
+    )
+    watchdog_interval: StrictInt = Field(
+        30, description="Intervals between watchdog thread runs"
+    )
+    memory_threshold_mbyte: StrictInt = Field(1000, description="RAM usage threshold")
+    memory_threshold_action: StrictStr = Field(
+        "log", description="RAM threshold exceed action"
+    )
 
 
 # ------------------------------------------------------

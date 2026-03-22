@@ -7,6 +7,8 @@ import time
 from threading import Lock
 from typing import Any, Dict, Tuple, Union
 
+from norfab.utils.text import format_duration
+
 import yaml
 from nornir import InitNornir
 from nornir_salt.plugins.functions import (
@@ -73,7 +75,6 @@ class WatchDog(WorkerWatchDog):
             "connections_idle_timeout", None
         )
         self.connections_data = {}  # store connections use timestamps
-        self.started_at = time.time()
 
         # stats attributes
         self.idle_connections_cleaned = 0
@@ -100,9 +101,10 @@ class WatchDog(WorkerWatchDog):
                 - worker_ram_usage_mbyte (float): The current RAM usage of the worker in megabytes.
         """
         return {
-            "runs": self.runs,
+            "watchdog_runs": self.runs,
             "timestamp": time.ctime(),
-            "alive": int(time.time() - self.started_at),
+            "uptime": format_duration(int(time.time() - self.started_at)),
+            "uptime_seconds": int(time.time() - self.started_at),
             "dead_connections_cleaned": self.dead_connections_cleaned,
             "idle_connections_cleaned": self.idle_connections_cleaned,
             "worker_ram_usage_mbyte": self.get_ram_usage(),
@@ -310,6 +312,7 @@ class NornirWorker(
 
     nr = None
     nornir_inventory = {}
+    autostart_watchdog = False
 
     def __init__(
         self,
@@ -1052,26 +1055,6 @@ class NornirWorker(
                 pass
 
         return Result(result=libs)
-
-    @Task(fastapi={"methods": ["GET"]})
-    def get_watchdog_stats(self) -> Result:
-        """
-        Retrieve the statistics from the watchdog.
-
-        Returns:
-            Result: An object containing the statistics from the watchdog.
-        """
-        return Result(result=self.watchdog.stats())
-
-    @Task(fastapi={"methods": ["GET"]})
-    def get_watchdog_configuration(self) -> Result:
-        """
-        Retrieves the current configuration of the watchdog.
-
-        Returns:
-            Result: An object containing the watchdog configuration.
-        """
-        return Result(result=self.watchdog.configuration())
 
     @Task(fastapi={"methods": ["GET"]})
     def get_watchdog_connections(self) -> Result:

@@ -14,6 +14,8 @@ import zlib
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from norfab.utils.text import format_duration
+
 import orjson
 import psutil
 import zmq
@@ -945,6 +947,7 @@ class WorkerWatchDog(threading.Thread):
         super().__init__()
         self.worker = worker
         self.worker_process = psutil.Process(os.getpid())
+        self.started_at = time.time()
 
         # extract inventory attributes
         self.watchdog_interval = worker.inventory.get("watchdog_interval", 30)
@@ -958,6 +961,26 @@ class WorkerWatchDog(threading.Thread):
         # initiate variables
         self.runs = 0
         self.watchdog_tasks = []
+
+    def stats(self) -> Dict:
+        """
+        Collects and returns statistics about the worker.
+
+        Returns:
+            dict: A dictionary containing the following keys:
+
+                - runs (int): The number of runs executed by the worker.
+                - timestamp (str): The current time in a human-readable format.
+                - alive (int): The time in seconds since the worker started.
+                - worker_ram_usage_mbyte (float): The current RAM usage of the worker in megabytes.
+        """
+        return {
+            "watchdog_runs": self.runs,
+            "timestamp": time.ctime(),
+            "uptime": format_duration(int(time.time() - self.started_at)),
+            "uptime_seconds": int(time.time() - self.started_at),
+            "worker_ram_usage_mbyte": self.get_ram_usage(),
+        }
 
     def check_ram(self):
         """
@@ -1338,6 +1361,7 @@ class NFPWorker:
         self.inventory = inventory
         self.max_concurrent_jobs = max(1, inventory.get("max_concurrent_jobs", 5))
         self.jobs_compress = inventory.get("jobs_compress", True)
+        self.autostart_watchdog = inventory.get("autostart_watchdog", True)
         self.broker = broker
         self.service = service.encode("utf-8") if isinstance(service, str) else service
         self.name = name
@@ -1407,6 +1431,11 @@ class NFPWorker:
         )
 
         self.tasks = NORFAB_WORKER_TASKS
+
+        # initiate watchdog
+        if self.autostart_watchdog:
+            self.watchdog = WorkerWatchDog(self)
+            self.watchdog.start()
 
     def setup_logging(self, log_queue, log_level: str) -> None:
         """
@@ -1981,8 +2010,24 @@ class NFPWorker:
         return Result(result=self.client.delete_fetched_files(filepath))
 
     @Task(fastapi={"methods": ["GET"]})
-    def get_worker_stats(self) -> Result:
-        pass
+    def get_watchdog_stats(self) -> Result:
+        """
+        Retrieve worker statistics from the watchdog.
+
+        Returns:
+            Result: An object containing the statistics from the watchdog.
+        """
+        return Result(result=self.watchdog.stats())
+
+    @Task(fastapi={"methods": ["GET"]})
+    def get_watchdog_configuration(self) -> Result:
+        """
+        Retrieves the current configuration of the watchdog.
+
+        Returns:
+            Result: An object containing the watchdog configuration.
+        """
+        return Result(result=self.watchdog.configuration())
 
     def start_threads(self) -> None:
         """

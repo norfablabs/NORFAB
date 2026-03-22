@@ -453,25 +453,16 @@ class NetboxInterfacesTasks:
                 for interface, connection in device_connections.items():
                     job.event(f"{device}:{interface} updating description")
                     if connection["termination_type"] == "consoleport":
-                        nb_interface = nb.dcim.console_ports.get(
-                            device=device, name=interface
-                        )
+                        api_endpoint = nb.dcim.console_ports
                     elif connection["termination_type"] == "consoleserverport":
-                        nb_interface = nb.dcim.console_server_ports.get(
-                            device=device, name=interface
-                        )
+                        api_endpoint = nb.dcim.console_server_ports
                     elif connection["termination_type"] == "powerport":
-                        nb_interface = nb.dcim.power_ports.get(
-                            device=device, name=interface
-                        )
+                        api_endpoint = nb.dcim.power_ports
                     elif connection["termination_type"] == "poweroutlet":
-                        nb_interface = nb.dcim.power_outlets.get(
-                            device=device, name=interface
-                        )
+                        api_endpoint = nb.dcim.power_outlets
                     else:
-                        nb_interface = nb.dcim.interfaces.get(
-                            device=device, name=interface
-                        )
+                        api_endpoint = nb.dcim.interfaces
+                    nb_interface = api_endpoint.get(device=device, name=interface)
                     nb_device = nb.dcim.devices.get(name=device)
                     rendered_description = self.jinja2_render_templates(
                         templates=[description_template],
@@ -606,7 +597,7 @@ class NetboxInterfacesTasks:
                 )
                 data = self.client.run_job(
                     "nornir",
-                    "parse",
+                    "parse_napalm",
                     kwargs=kwargs,
                     workers="all",
                     timeout=timeout,

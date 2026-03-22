@@ -36,7 +36,7 @@ def listen_events_thread(uuid, stop, NFCLIENT):
     start_time = time.time()
     time_fmt = "%d-%b-%Y %H:%M:%S.%f"
     richconsole.print(
-        "-" * 45 + " Job Events " + "-" * 47 + "\n"
+        "-" * 45 + " Job Events " + "-" * 47 + "\n\n"
         f"{datetime.now().strftime(time_fmt)[:-3]} {uuid} job started"
     )
     while not (stop.is_set() or NFCLIENT.exit_event.is_set()):
@@ -54,7 +54,7 @@ def listen_events_thread(uuid, stop, NFCLIENT):
             status,
             data,
         ) = event
-        if job_uuid != uuid.encode("utf-8"):
+        if not job_uuid.decode("utf-8").startswith(uuid):
             NFCLIENT.event_queue.put(event)
             continue
 

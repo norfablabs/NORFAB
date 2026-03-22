@@ -112,6 +112,7 @@ def delete_ips(prefix, nfclient):
         # print("delete ip address:")
         # pprint.pprint(delete_ip)'
 
+
 def clear_nb_cache(keys, nfclient):
     return nfclient.run_job(
         "netbox",
@@ -942,9 +943,10 @@ class TestGetInterfaces:
                     else:
                         assert "mac_address" in intf_data
 
+
 class TestGetDevices:
     nb_version = None
-    device_data_keys = [   
+    device_data_keys = [
         "last_updated",
         "custom_fields",
         "tags",
@@ -982,8 +984,7 @@ class TestGetDevices:
                     device_data, dict
                 ), f"{worker}:{device} did not return device data as dictionary"
                 assert all(
-                    k in device_data
-                    for k in self.device_data_keys
+                    k in device_data for k in self.device_data_keys
                 ), f"{worker}:{device} not all data returned"
                 assert (
                     "role" in device_data
@@ -1015,8 +1016,7 @@ class TestGetDevices:
                     device_data, dict
                 ), f"{worker}:{device} did not return device data as dictionary"
                 assert all(
-                    k in device_data
-                    for k in self.device_data_keys
+                    k in device_data for k in self.device_data_keys
                 ), f"{worker}:{device} not all data returned"
                 assert (
                     "role" in device_data or "devcie_role" in device_data
@@ -1039,16 +1039,16 @@ class TestGetDevices:
 
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
-            assert "get_devices_dry_run" in res["result"], (
-                f"{worker} - dry run key missing from result"
-            )
+            assert (
+                "get_devices_dry_run" in res["result"]
+            ), f"{worker} - dry run key missing from result"
             dry_run_data = res["result"]["get_devices_dry_run"]
-            assert "filters" in dry_run_data, (
-                f"{worker} - 'filters' key missing from dry run result"
-            )
-            assert isinstance(dry_run_data["filters"], list), (
-                f"{worker} - dry run filters should be a list"
-            )
+            assert (
+                "filters" in dry_run_data
+            ), f"{worker} - 'filters' key missing from dry run result"
+            assert isinstance(
+                dry_run_data["filters"], list
+            ), f"{worker} - dry run filters should be a list"
 
     def test_dry_run_with_devices_only(self, nfclient):
         ret = nfclient.run_job(
@@ -1062,9 +1062,9 @@ class TestGetDevices:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             dry_run_data = res["result"]["get_devices_dry_run"]
-            assert "filters" in dry_run_data, (
-                f"{worker} - 'filters' key missing from dry run result"
-            )
+            assert (
+                "filters" in dry_run_data
+            ), f"{worker} - 'filters' key missing from dry run result"
             # devices should be merged into filters as {"name": devices}
             filters = dry_run_data["filters"]
             assert any(
@@ -1097,8 +1097,7 @@ class TestGetDevices:
                     device_data, dict
                 ), f"{worker}:{device} did not return device data as dictionary"
                 assert all(
-                    k in device_data
-                    for k in self.device_data_keys
+                    k in device_data for k in self.device_data_keys
                 ), f"{worker}:{device} not all data returned"
                 assert (
                     "role" in device_data or "devcie_role" in device_data
@@ -1124,9 +1123,9 @@ class TestGetDevices:
                     isinstance(t, dict) for t in d["tags"]
                 ), f"{worker}:fceos4 each tag should be a dict"
             # device_type - flat string (model name)
-            assert isinstance(d["device_type"], dict), (
-                f"{worker}:fceos4 device_type should be a dict"
-            )
+            assert isinstance(
+                d["device_type"], dict
+            ), f"{worker}:fceos4 device_type should be a dict"
             # role - flat string
             assert isinstance(d["role"], dict), f"{worker}:fceos4 role should be a dict"
             # site - dict with name, slug, tags
@@ -1135,17 +1134,17 @@ class TestGetDevices:
                 k in d["site"] for k in ["name", "slug", "tags"]
             ), f"{worker}:fceos4 site missing expected keys"
             # status - string value
-            assert isinstance(d["status"], dict), (
-                f"{worker}:fceos4 status should be a dict"
-            )
+            assert isinstance(
+                d["status"], dict
+            ), f"{worker}:fceos4 status should be a dict"
             # primary_ip4 when present - dict with address
             if d["primary_ip4"] is not None:
-                assert isinstance(d["primary_ip4"], dict), (
-                    f"{worker}:fceos4 primary_ip4 should be a dict"
-                )
-                assert "address" in d["primary_ip4"], (
-                    f"{worker}:fceos4 primary_ip4 missing 'address' key"
-                )
+                assert isinstance(
+                    d["primary_ip4"], dict
+                ), f"{worker}:fceos4 primary_ip4 should be a dict"
+                assert (
+                    "address" in d["primary_ip4"]
+                ), f"{worker}:fceos4 primary_ip4 missing 'address' key"
             # id - string
             assert isinstance(d["id"], int), f"{worker}:fceos4 id should be an int"
 
@@ -1165,7 +1164,9 @@ class TestGetDevices:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             assert "ceos1" in res["result"], f"{worker} ceos1 missing from result"
-            assert "fceos3_390" in res["result"], f"{worker} fceos3_390 missing from result"
+            assert (
+                "fceos3_390" in res["result"]
+            ), f"{worker} fceos3_390 missing from result"
 
     def test_with_nonexistent_device(self, nfclient):
         """Querying a device that does not exist returns an empty result."""
@@ -1179,9 +1180,9 @@ class TestGetDevices:
 
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
-            assert res["result"] == {}, (
-                f"{worker} - expected empty result for nonexistent device"
-            )
+            assert (
+                res["result"] == {}
+            ), f"{worker} - expected empty result for nonexistent device"
 
 
 class TestGetConnections:
@@ -1374,7 +1375,7 @@ class TestGetConnections:
 
 class TestGetNornirInventory:
     nb_version = None
-    device_data_keys = [   
+    device_data_keys = [
         "last_updated",
         "custom_fields",
         "tags",
@@ -1393,7 +1394,7 @@ class TestGetNornirInventory:
         "airflow",
         "position",
     ]
-    
+
     def test_with_devices(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
@@ -1480,8 +1481,7 @@ class TestGetNornirInventory:
                     k in data for k in ["data", "hostname", "platform"]
                 ), f"{worker}:{device} not all device data returned"
                 assert all(
-                    k in data["data"]
-                    for k in self.device_data_keys
+                    k in data["data"] for k in self.device_data_keys
                 ), f"{worker}:{device} not all nbdata returned"
 
     def test_with_devices_add_interfaces(self, nfclient):
@@ -4216,9 +4216,7 @@ class TestGetContainerlabInventory:
                 "get_containerlab_inventory",
                 workers="any",
                 kwargs={
-                    "filters": [
-                        {"name__ic": "ceos-spine", "status": "active"}
-                    ],
+                    "filters": [{"name__ic": "ceos-spine", "status": "active"}],
                     "lab_name": "foobar",
                 },
             )

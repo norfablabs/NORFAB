@@ -471,7 +471,7 @@ class NetboxIpTasks:
                 kwargs["getters"] = "get_interfaces_ip"
                 data = self.client.run_job(
                     "nornir",
-                    "parse",
+                    "parse_napalm",
                     kwargs=kwargs,
                     workers="all",
                     timeout=timeout,

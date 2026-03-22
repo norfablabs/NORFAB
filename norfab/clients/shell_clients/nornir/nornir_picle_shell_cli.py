@@ -247,13 +247,13 @@ class NrCliPluginNapalm(BaseModel):
 
 class NrCliPlugins(BaseModel):
     netmiko: NrCliPluginNetmiko = Field(
-        None, description="Use Netmiko plugin to configure devices"
+        None, description="Use Netmiko plugin to collect output from devices"
     )
     scrapli: NrCliPluginScrapli = Field(
-        None, description="Use Scrapli plugin to configure devices"
+        None, description="Use Scrapli plugin to collect output from devices"
     )
     napalm: NrCliPluginNapalm = Field(
-        None, description="Use NAPALM plugin to configure devices"
+        None, description="Use NAPALM plugin to collect output from devices"
     )
 
 

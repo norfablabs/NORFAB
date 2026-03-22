@@ -229,7 +229,7 @@ class NetboxDevicesTasks:
                 job.event(f"retrieving facts for devices {', '.join(kwargs['FL'])}")
                 data = self.client.run_job(
                     "nornir",
-                    "parse",
+                    "parse_napalm",
                     kwargs=kwargs,
                     workers="all",
                     timeout=timeout,

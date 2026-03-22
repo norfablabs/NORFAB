@@ -1,3 +1,25 @@
+# 0.16.5
+
+## BUGS
+
+1. Fixing Nornir N2G diagram calling UUID handling
+
+## CHANGES
+
+1. Splitting Nornir parse task into 3 tasks `parse_ttp`, `parse_napalm`, `parse_textfsm`
+2. Enhancing nfcli shell `nornir parse` commands
+3. Watchdog thread now starts automatically for every worker, so far implemented RAM usage monitoring
+
+## FEATURES
+
+1. Nornir service nfcli added `nornir parse textfsm` command
+2. Nfcli - adding these commands:
+
+  - `show workers statistics`
+  - `show workers brief`
+
+---
+
 # 0.16.4
 
 ## BREAKING CHANGES

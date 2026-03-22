@@ -2,6 +2,7 @@
 ! device: ceos-spine-2 (cEOSLab, EOS-4.30.0F-31408673.4300F (engineering build))
 !
 no aaa root
+aaa authorization exec default local
 !
 security pki key generate rsa 2048 self-signed.key
 !

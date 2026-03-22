@@ -3,50 +3,47 @@ tags:
   - nornir
 ---
 
-# Nornir Service Parse Task
+# Nornir Service Parse Tasks
 
-> task api name: `parse`
+> task api names: `parse_napalm`, `parse_ttp`, `parse_textfsm`
 
-The Nornir Service Parse Task is an integral part of NorFab's Nornir service, designed to facilitate the parsing and extraction of valuable information from network device outputs. This task provides network automation and developer engineers with powerful tools to transform raw command outputs into structured data, enabling more efficient network management and automation workflows.
+Three tasks for parsing network device CLI output into structured data:
 
-Key features of the Nornir Service Parse Task include:
+- **`parse_napalm`** — retrieves structured data via [NAPALM](https://napalm.readthedocs.io) getters (e.g. `get_facts`, `get_interfaces`). No template required.
+- **`parse_ttp`** — collects CLI output and parses it with a [TTP](https://ttp.readthedocs.io) template. Supports inline templates, `ttp://` paths from [ttp_templates](https://ttp-templates.readthedocs.io), `nf://` file paths, and HTTP URLs. Template input definitions drive which commands are collected automatically.
+- **`parse_textfsm`** — collects CLI output and parses it with a [TextFSM](https://github.com/google/textfsm) template. When no template is provided, [NTC-Templates](https://github.com/networktocode/ntc-templates) auto-detection is used based on device platform and command.
 
-- **TextFSM Parsing**: This task allows you to use TextFSM templates to parse command outputs into structured data. TextFSM is a powerful text processing tool that uses templates to define how to extract data from unstructured text. By leveraging TextFSM, you can convert complex command outputs into easily readable and processable data formats, which can then be used for further analysis or automation tasks.
+## NORFAB Shell Reference
 
-- **TTP Parsing**: The Template Text Parser (TTP) is a robust parsing tool supported by the Nornir Service Parse Task. TTP allows you to define templates for parsing text data, similar to TextFSM, but with additional flexibility and features. Using TTP, you can extract specific information from command outputs and transform it into structured data, making it easier to integrate with other systems and processes.
-
-- **NAPALM Getters**: The Nornir Service Parse Task leverages NAPALM getters to retrieve and parse structured data directly from network devices. NAPALM getters are pre-defined methods that extract specific pieces of information from devices, such as interface details, routing tables, ARP tables, and more.
-
-The Nornir Service Parse Task is essential for network automation and developer engineers who need to process and analyze large volumes of network data. By transforming raw command outputs into structured data, you can automate complex workflows, generate insightful reports, and ensure that your network devices are configured and operating correctly.
-
-This document also includes a reference for the NorFab shell commands related to the Nornir `parse` task, detailing the available options and parameters. These commands provide granular control over the parsing tasks.
-
-## NORFAB Nornir Parse Shell Reference
-
-NorFab shell supports these command options for Nornir `parse` task:
+NorFab shell commands for Nornir parse tasks:
 
 ```
 nf#man tree nornir.parse
+
+R - required field, M - supports multiline input, D - dynamic key
+
 root
 └── nornir:    Nornir service
     └── parse:    Parse network devices output
         ├── napalm:    Parse devices output using NAPALM getters
         │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default 'all'
-        │   ├── add_details:    Add task details to results
-        │   ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        │   ├── run_num_connectors:    RetryRunner number of threads for device connections
-        │   ├── run_connect_retry:    RetryRunner number of connection attempts
-        │   ├── run_task_retry:    RetryRunner number of attempts to run task
-        │   ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        │   ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        │   ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        │   ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        │   ├── workers:    Filter workers to target, default 'all'
+        │   ├── verbose-result:    Control output details, default 'False'
+        │   ├── progress:    Display progress events, default 'True'
+        │   ├── nowait:    Do not wait for job to complete, default 'False'
+        │   ├── add-details:    Add task details to results, default 'False'
+        │   ├── num-workers:    RetryRunner number of threads for tasks execution
+        │   ├── num-connectors:    RetryRunner number of threads for device connections
+        │   ├── connect-retry:    RetryRunner number of connection attempts
+        │   ├── task-retry:    RetryRunner number of attempts to run task
+        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         │   ├── tf:    File group name to save task results to on worker file system
-        │   ├── tf_skip_failed:    Save results to file for failed tasks
+        │   ├── tf-skip-failed:    Save results to file for failed tasks
         │   ├── diff:    File group name to run the diff for
-        │   ├── diff_last:    File version number to diff, default is 1 (last)
-        │   ├── progress:    Emit execution progress
+        │   ├── diff-last:    File version number to diff, default is 1 (last)
         │   ├── FO:    Filter hosts using Filter Object
         │   ├── FB:    Filter hosts by name using Glob Patterns
         │   ├── FH:    Filter hosts by hostname
@@ -58,24 +55,101 @@ root
         │   ├── FM:    Filter hosts by platform
         │   ├── FX:    Filter hosts excluding them by name
         │   ├── FN:    Negate the match
-        │   ├── hosts:    Filter hosts to target
-        │   └── *getters:    Select NAPALM getters, default 'PydanticUndefined'
-        └── ttp:    Parse devices output using TTP templates
+        │   └── getters (R):    Select NAPALM getters
+        ├── ttp:    Parse devices output using TTP templates
+        │   ├── timeout:    Job timeout
+        │   ├── workers:    Filter workers to target, default 'all'
+        │   ├── verbose-result:    Control output details, default 'False'
+        │   ├── progress:    Display progress events, default 'True'
+        │   ├── nowait:    Do not wait for job to complete, default 'False'
+        │   ├── add-details:    Add task details to results, default 'False'
+        │   ├── num-workers:    RetryRunner number of threads for tasks execution
+        │   ├── num-connectors:    RetryRunner number of threads for device connections
+        │   ├── connect-retry:    RetryRunner number of connection attempts
+        │   ├── task-retry:    RetryRunner number of attempts to run task
+        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
+        │   ├── tf:    File group name to save task results to on worker file system
+        │   ├── tf-skip-failed:    Save results to file for failed tasks
+        │   ├── diff:    File group name to run the diff for
+        │   ├── diff-last:    File version number to diff, default is 1 (last)
+        │   ├── FO:    Filter hosts using Filter Object
+        │   ├── FB:    Filter hosts by name using Glob Patterns
+        │   ├── FH:    Filter hosts by hostname
+        │   ├── FC:    Filter hosts containment of pattern in name
+        │   ├── FR:    Filter hosts by name using Regular Expressions
+        │   ├── FG:    Filter hosts by group
+        │   ├── FP:    Filter hosts by hostname using IP Prefix
+        │   ├── FL:    Filter hosts by names list
+        │   ├── FM:    Filter hosts by platform
+        │   ├── FX:    Filter hosts excluding them by name
+        │   ├── FN:    Negate the match
+        │   ├── template:    TTP Template to parse commands output, supports ttp:// path
+        │   ├── get:    Getter TTP Template name to use
+        │   ├── commands (M):    List of commands to collect form devices
+        │   ├── plugin:    CLI connection plugin parameters
+        │   │   ├── netmiko:    Use Netmiko plugin to collect output from devices
+        │   │   │   ├── enable:    Attempt to enter enable-mode
+        │   │   │   ├── use-timing:    switch to send command timing method
+        │   │   │   ├── expect-string:    Regular expression pattern to use for determining end of output
+        │   │   │   ├── read-timeout:    Maximum time to wait looking for pattern
+        │   │   │   ├── auto-find-prompt:    Use find_prompt() to override base prompt
+        │   │   │   ├── strip-prompt:    Remove the trailing router prompt from the output
+        │   │   │   ├── strip-command:    Remove the echo of the command from the output
+        │   │   │   ├── normalize:    Ensure the proper enter is sent at end of command
+        │   │   │   ├── use-textfsm:    Process command output through TextFSM template
+        │   │   │   ├── textfsm-template:    Name of template to parse output with
+        │   │   │   ├── use-ttp:    Process command output through TTP template
+        │   │   │   ├── ttp-template:    Name of template to parse output with
+        │   │   │   ├── use-genie:    Process command output through PyATS/Genie parser
+        │   │   │   ├── cmd-verify:    Verify command echo before proceeding
+        │   │   │   ├── interval:    Interval between sending commands
+        │   │   │   ├── use-ps:    Use send command promptless method
+        │   │   │   ├── use-ps-timeout:    Promptless mode absolute timeout
+        │   │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        │   │   │   ├── repeat:    Number of times to repeat the commands
+        │   │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   │   └── return-last:    Returns requested last number of commands outputs
+        │   │   ├── scrapli:    Use Scrapli plugin to collect output from devices
+        │   │   │   ├── strip-prompt:    Strip prompt from returned output
+        │   │   │   ├── failed-when-contains:    String or list of strings indicating failure if found in response
+        │   │   │   ├── timeout-ops:    Timeout ops value for this operation
+        │   │   │   ├── interval:    Interval between sending commands
+        │   │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        │   │   │   ├── repeat:    Number of times to repeat the commands
+        │   │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   │   └── return-last:    Returns requested last number of commands outputs
+        │   │   └── napalm:    Use NAPALM plugin to collect output from devices
+        │   │       ├── interval:    Interval between sending commands
+        │   │       ├── split-lines:    Split multiline string to individual commands
+        │   │       └── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        │   ├── enable:    Enter exec mode
+        │   └── structure:    TTP Results structure
+        └── textfsm:    Parse devices output using TextFSM templates
             ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default 'all'
-            ├── add_details:    Add task details to results
-            ├── run_num_workers:    RetryRunner number of threads for tasks execution
-            ├── run_num_connectors:    RetryRunner number of threads for device connections
-            ├── run_connect_retry:    RetryRunner number of connection attempts
-            ├── run_task_retry:    RetryRunner number of attempts to run task
-            ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-            ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-            ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+            ├── workers:    Filter workers to target, default 'all'
+            ├── verbose-result:    Control output details, default 'False'
+            ├── progress:    Display progress events, default 'True'
+            ├── nowait:    Do not wait for job to complete, default 'False'
+            ├── add-details:    Add task details to results, default 'False'
+            ├── num-workers:    RetryRunner number of threads for tasks execution
+            ├── num-connectors:    RetryRunner number of threads for device connections
+            ├── connect-retry:    RetryRunner number of connection attempts
+            ├── task-retry:    RetryRunner number of attempts to run task
+            ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+            ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+            ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+            ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
             ├── tf:    File group name to save task results to on worker file system
-            ├── tf_skip_failed:    Save results to file for failed tasks
+            ├── tf-skip-failed:    Save results to file for failed tasks
             ├── diff:    File group name to run the diff for
-            ├── diff_last:    File version number to diff, default is 1 (last)
-            ├── progress:    Emit execution progress
+            ├── diff-last:    File version number to diff, default is 1 (last)
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
             ├── FH:    Filter hosts by hostname
@@ -87,14 +161,13 @@ root
             ├── FM:    Filter hosts by platform
             ├── FX:    Filter hosts excluding them by name
             ├── FN:    Negate the match
-            ├── hosts:    Filter hosts to target
-            ├── *template:    TTP Template to parse commands output, default 'PydanticUndefined'
-            └── commands:    Commands to collect form devices
+            ├── template:    Path to a TextFSM template file
+            └── commands (M):    List of commands to parse form devices
 nf#
 ```
 
-``*`` - mandatory/required command argument
-
 ## Python API Reference
 
-::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse
+::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse_napalm
+::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse_ttp
+::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse_textfsm

@@ -27,14 +27,9 @@ class WorkerStatus(str, Enum):
     any_ = "any"
 
 
-class ShowWorkersModel(BaseModel):
+class ShowWorkersStatusBrief(BaseModel):
     service: StrictStr = Field("all", description="Service name")
     status: WorkerStatus = Field("any", description="Worker status")
-
-    class PicleConfig:
-        pipe = PipeFunctionsModel
-        outputter = Outputters.outputter_rich_table
-        outputter_kwargs = {"sortby": "name"}
 
     @staticmethod
     def run(*args, **kwargs):
@@ -46,6 +41,103 @@ class ShowWorkersModel(BaseModel):
             return "\n".join(reply["errors"])
         else:
             return reply["results"]
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_rich_table
+        outputter_kwargs = {"sortby": "name"}
+
+
+class ShowWorkersStatistics(ClientRunJobArgs):
+
+    @staticmethod
+    def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+
+        result = NFCLIENT.run_job(
+            "all",
+            "get_watchdog_stats",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+            nowait=nowait,
+        )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+    @staticmethod
+    def source_workers():
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
+
+
+class ShowWorkersVersion(ClientRunJobArgs):
+
+    @staticmethod
+    def run(*args, **kwargs):
+        NFCLIENT = builtins.NFCLIENT
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+
+        result = NFCLIENT.run_job(
+            "all",
+            "get_version",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+            nowait=nowait,
+        )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+    @staticmethod
+    def source_workers():
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
+
+
+class ShowWorkersModel(BaseModel):
+    brief: ShowWorkersStatusBrief = Field(None, description="Show workers brief info")
+    statistics: ShowWorkersStatistics = Field(
+        None, description="Show workers statistics"
+    )
+    version: ShowWorkersVersion = Field(None, description="Show workers version info")
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
 
 
 # ---------------------------------------------------------------------------------------------
