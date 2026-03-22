@@ -18,6 +18,8 @@
   - `show workers statistics`
   - `show workers brief`
 
+3. Adding experimental Textual TUI monitoring dashboard
+
 ---
 
 # 0.16.4

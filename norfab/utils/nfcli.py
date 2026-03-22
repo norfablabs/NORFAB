@@ -13,6 +13,12 @@ try:
 except ImportError as e:
     log.warning(f"Failed to import NorFab Shell, needed libs not found - '{e}'")
 
+try:
+    from norfab.clients.textual.app import NorFabApp
+except ImportError as e:
+    log.warning(f"Failed to import NorFab Textual TUI, needed libs not found - '{e}'")
+    NorFabApp = None
+
 
 norfab_base_inventory = """
 # broker settings
@@ -149,6 +155,13 @@ def nfcli():
         default=False,
         help="Start WEB UI Client",
     )
+    run_options.add_argument(
+        "--tui",
+        action="store_true",
+        dest="TUI",
+        default=False,
+        help="Start Textual TUI client",
+    )
 
     # extract argparser arguments:
     args = argparser.parse_args()
@@ -162,6 +175,7 @@ def nfcli():
     CREATE_ENV = args.CREATE_ENV
     SHOW_BROKER_SHARED_KEY = args.SHOW_BROKER_SHARED_KEY
     WEB_UI = args.WEB_UI
+    TUI = args.TUI
 
     if WORKERS_LIST is not None:
         WORKERS_LIST = [i.strip() for i in WORKERS_LIST.split(",") if i.strip()]
@@ -216,8 +230,22 @@ def nfcli():
             else (f"\nDone, 'cd {CREATE_ENV}' and run 'nfcli' to start NorFab\n")
         )
 
+    # start Textual TUI
+    if TUI:
+        if NorFabApp is None:
+            print("Textual TUI not available — install norfab[tui] to enable it.")
+            return
+        with NorFab(
+            inventory=INVENTORY,
+            log_level=LOGLEVEL,
+            run_broker=BROKER,
+            run_workers=(WORKERS or WORKERS_LIST),
+        ) as nf:
+            client = nf.client
+            app = NorFabApp(nfclient=client)
+            app.run()
     # start broker and workers
-    if BROKER and (WORKERS or WORKERS_LIST):
+    elif BROKER and (WORKERS or WORKERS_LIST):
         nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
         nf.start(run_broker=True, run_workers=WORKERS_LIST if WORKERS_LIST else True)
         nf.run()
