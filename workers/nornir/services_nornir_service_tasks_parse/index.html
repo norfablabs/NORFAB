@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#nornir-service-parse-task" class="md-skip">
+        <a href="#nornir-service-parse-tasks" class="md-skip">
           Skip to content
         </a>
       
@@ -1749,10 +1749,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#norfab-nornir-parse-shell-reference" class="md-nav__link">
+  <a href="#norfab-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Nornir Parse Shell Reference
+        NORFAB Shell Reference
       
     </span>
   </a>
@@ -5300,10 +5300,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#norfab-nornir-parse-shell-reference" class="md-nav__link">
+  <a href="#norfab-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Nornir Parse Shell Reference
+        NORFAB Shell Reference
       
     </span>
   </a>
@@ -5352,48 +5352,44 @@
   
 
 
-<h1 id="nornir-service-parse-task">Nornir Service Parse Task<a class="headerlink" href="#nornir-service-parse-task" title="Permanent link">¤</a></h1>
+<h1 id="nornir-service-parse-tasks">Nornir Service Parse Tasks<a class="headerlink" href="#nornir-service-parse-tasks" title="Permanent link">¤</a></h1>
 <blockquote>
-<p>task api name: <code>parse</code></p>
+<p>task api names: <code>parse_napalm</code>, <code>parse_ttp</code>, <code>parse_textfsm</code></p>
 </blockquote>
-<p>The Nornir Service Parse Task is an integral part of NorFab's Nornir service, designed to facilitate the parsing and extraction of valuable information from network device outputs. This task provides network automation and developer engineers with powerful tools to transform raw command outputs into structured data, enabling more efficient network management and automation workflows.</p>
-<p>Key features of the Nornir Service Parse Task include:</p>
+<p>Three tasks for parsing network device CLI output into structured data:</p>
 <ul>
-<li>
-<p><strong>TextFSM Parsing</strong>: This task allows you to use TextFSM templates to parse command outputs into structured data. TextFSM is a powerful text processing tool that uses templates to define how to extract data from unstructured text. By leveraging TextFSM, you can convert complex command outputs into easily readable and processable data formats, which can then be used for further analysis or automation tasks.</p>
-</li>
-<li>
-<p><strong>TTP Parsing</strong>: The Template Text Parser (TTP) is a robust parsing tool supported by the Nornir Service Parse Task. TTP allows you to define templates for parsing text data, similar to TextFSM, but with additional flexibility and features. Using TTP, you can extract specific information from command outputs and transform it into structured data, making it easier to integrate with other systems and processes.</p>
-</li>
-<li>
-<p><strong>NAPALM Getters</strong>: The Nornir Service Parse Task leverages NAPALM getters to retrieve and parse structured data directly from network devices. NAPALM getters are pre-defined methods that extract specific pieces of information from devices, such as interface details, routing tables, ARP tables, and more.</p>
-</li>
+<li><strong><code>parse_napalm</code></strong> — retrieves structured data via <a href="https://napalm.readthedocs.io">NAPALM</a> getters (e.g. <code>get_facts</code>, <code>get_interfaces</code>). No template required.</li>
+<li><strong><code>parse_ttp</code></strong> — collects CLI output and parses it with a <a href="https://ttp.readthedocs.io">TTP</a> template. Supports inline templates, <code>ttp://</code> paths from <a href="https://ttp-templates.readthedocs.io">ttp_templates</a>, <code>nf://</code> file paths, and HTTP URLs. Template input definitions drive which commands are collected automatically.</li>
+<li><strong><code>parse_textfsm</code></strong> — collects CLI output and parses it with a <a href="https://github.com/google/textfsm">TextFSM</a> template. When no template is provided, <a href="https://github.com/networktocode/ntc-templates">NTC-Templates</a> auto-detection is used based on device platform and command.</li>
 </ul>
-<p>The Nornir Service Parse Task is essential for network automation and developer engineers who need to process and analyze large volumes of network data. By transforming raw command outputs into structured data, you can automate complex workflows, generate insightful reports, and ensure that your network devices are configured and operating correctly.</p>
-<p>This document also includes a reference for the NorFab shell commands related to the Nornir <code>parse</code> task, detailing the available options and parameters. These commands provide granular control over the parsing tasks.</p>
-<h2 id="norfab-nornir-parse-shell-reference">NORFAB Nornir Parse Shell Reference<a class="headerlink" href="#norfab-nornir-parse-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Nornir <code>parse</code> task:</p>
+<h2 id="norfab-shell-reference">NORFAB Shell Reference<a class="headerlink" href="#norfab-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell commands for Nornir parse tasks:</p>
 <div class="highlight"><pre><span></span><code>nf#man tree nornir.parse
+
+R - required field, M - supports multiline input, D - dynamic key
+
 root
 └── nornir:    Nornir service
     └── parse:    Parse network devices output
         ├── napalm:    Parse devices output using NAPALM getters
         │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── add_details:    Add task details to results
-        │   ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        │   ├── run_num_connectors:    RetryRunner number of threads for device connections
-        │   ├── run_connect_retry:    RetryRunner number of connection attempts
-        │   ├── run_task_retry:    RetryRunner number of attempts to run task
-        │   ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        │   ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        │   ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        │   ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+        │   ├── workers:    Filter workers to target, default &#39;all&#39;
+        │   ├── verbose-result:    Control output details, default &#39;False&#39;
+        │   ├── progress:    Display progress events, default &#39;True&#39;
+        │   ├── nowait:    Do not wait for job to complete, default &#39;False&#39;
+        │   ├── add-details:    Add task details to results, default &#39;False&#39;
+        │   ├── num-workers:    RetryRunner number of threads for tasks execution
+        │   ├── num-connectors:    RetryRunner number of threads for device connections
+        │   ├── connect-retry:    RetryRunner number of connection attempts
+        │   ├── task-retry:    RetryRunner number of attempts to run task
+        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
         │   ├── tf:    File group name to save task results to on worker file system
-        │   ├── tf_skip_failed:    Save results to file for failed tasks
+        │   ├── tf-skip-failed:    Save results to file for failed tasks
         │   ├── diff:    File group name to run the diff for
-        │   ├── diff_last:    File version number to diff, default is 1 (last)
-        │   ├── progress:    Emit execution progress
+        │   ├── diff-last:    File version number to diff, default is 1 (last)
         │   ├── FO:    Filter hosts using Filter Object
         │   ├── FB:    Filter hosts by name using Glob Patterns
         │   ├── FH:    Filter hosts by hostname
@@ -5405,24 +5401,101 @@ root
         │   ├── FM:    Filter hosts by platform
         │   ├── FX:    Filter hosts excluding them by name
         │   ├── FN:    Negate the match
-        │   ├── hosts:    Filter hosts to target
-        │   └── *getters:    Select NAPALM getters, default &#39;PydanticUndefined&#39;
-        └── ttp:    Parse devices output using TTP templates
+        │   └── getters (R):    Select NAPALM getters
+        ├── ttp:    Parse devices output using TTP templates
+        │   ├── timeout:    Job timeout
+        │   ├── workers:    Filter workers to target, default &#39;all&#39;
+        │   ├── verbose-result:    Control output details, default &#39;False&#39;
+        │   ├── progress:    Display progress events, default &#39;True&#39;
+        │   ├── nowait:    Do not wait for job to complete, default &#39;False&#39;
+        │   ├── add-details:    Add task details to results, default &#39;False&#39;
+        │   ├── num-workers:    RetryRunner number of threads for tasks execution
+        │   ├── num-connectors:    RetryRunner number of threads for device connections
+        │   ├── connect-retry:    RetryRunner number of connection attempts
+        │   ├── task-retry:    RetryRunner number of attempts to run task
+        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
+        │   ├── tf:    File group name to save task results to on worker file system
+        │   ├── tf-skip-failed:    Save results to file for failed tasks
+        │   ├── diff:    File group name to run the diff for
+        │   ├── diff-last:    File version number to diff, default is 1 (last)
+        │   ├── FO:    Filter hosts using Filter Object
+        │   ├── FB:    Filter hosts by name using Glob Patterns
+        │   ├── FH:    Filter hosts by hostname
+        │   ├── FC:    Filter hosts containment of pattern in name
+        │   ├── FR:    Filter hosts by name using Regular Expressions
+        │   ├── FG:    Filter hosts by group
+        │   ├── FP:    Filter hosts by hostname using IP Prefix
+        │   ├── FL:    Filter hosts by names list
+        │   ├── FM:    Filter hosts by platform
+        │   ├── FX:    Filter hosts excluding them by name
+        │   ├── FN:    Negate the match
+        │   ├── template:    TTP Template to parse commands output, supports ttp:// path
+        │   ├── get:    Getter TTP Template name to use
+        │   ├── commands (M):    List of commands to collect form devices
+        │   ├── plugin:    CLI connection plugin parameters
+        │   │   ├── netmiko:    Use Netmiko plugin to collect output from devices
+        │   │   │   ├── enable:    Attempt to enter enable-mode
+        │   │   │   ├── use-timing:    switch to send command timing method
+        │   │   │   ├── expect-string:    Regular expression pattern to use for determining end of output
+        │   │   │   ├── read-timeout:    Maximum time to wait looking for pattern
+        │   │   │   ├── auto-find-prompt:    Use find_prompt() to override base prompt
+        │   │   │   ├── strip-prompt:    Remove the trailing router prompt from the output
+        │   │   │   ├── strip-command:    Remove the echo of the command from the output
+        │   │   │   ├── normalize:    Ensure the proper enter is sent at end of command
+        │   │   │   ├── use-textfsm:    Process command output through TextFSM template
+        │   │   │   ├── textfsm-template:    Name of template to parse output with
+        │   │   │   ├── use-ttp:    Process command output through TTP template
+        │   │   │   ├── ttp-template:    Name of template to parse output with
+        │   │   │   ├── use-genie:    Process command output through PyATS/Genie parser
+        │   │   │   ├── cmd-verify:    Verify command echo before proceeding
+        │   │   │   ├── interval:    Interval between sending commands
+        │   │   │   ├── use-ps:    Use send command promptless method
+        │   │   │   ├── use-ps-timeout:    Promptless mode absolute timeout
+        │   │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        │   │   │   ├── repeat:    Number of times to repeat the commands
+        │   │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   │   └── return-last:    Returns requested last number of commands outputs
+        │   │   ├── scrapli:    Use Scrapli plugin to collect output from devices
+        │   │   │   ├── strip-prompt:    Strip prompt from returned output
+        │   │   │   ├── failed-when-contains:    String or list of strings indicating failure if found in response
+        │   │   │   ├── timeout-ops:    Timeout ops value for this operation
+        │   │   │   ├── interval:    Interval between sending commands
+        │   │   │   ├── split-lines:    Split multiline string to individual commands
+        │   │   │   ├── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        │   │   │   ├── repeat:    Number of times to repeat the commands
+        │   │   │   ├── stop-pattern:    Stop commands repeat if output matches provided glob pattern
+        │   │   │   ├── repeat-interval:    Time in seconds to wait between repeating commands
+        │   │   │   └── return-last:    Returns requested last number of commands outputs
+        │   │   └── napalm:    Use NAPALM plugin to collect output from devices
+        │   │       ├── interval:    Interval between sending commands
+        │   │       ├── split-lines:    Split multiline string to individual commands
+        │   │       └── new-line-char:    Character to replace with new line before sending to device, default is _br_
+        │   ├── enable:    Enter exec mode
+        │   └── structure:    TTP Results structure
+        └── textfsm:    Parse devices output using TextFSM templates
             ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;all&#39;
-            ├── add_details:    Add task details to results
-            ├── run_num_workers:    RetryRunner number of threads for tasks execution
-            ├── run_num_connectors:    RetryRunner number of threads for device connections
-            ├── run_connect_retry:    RetryRunner number of connection attempts
-            ├── run_task_retry:    RetryRunner number of attempts to run task
-            ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-            ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-            ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
+            ├── workers:    Filter workers to target, default &#39;all&#39;
+            ├── verbose-result:    Control output details, default &#39;False&#39;
+            ├── progress:    Display progress events, default &#39;True&#39;
+            ├── nowait:    Do not wait for job to complete, default &#39;False&#39;
+            ├── add-details:    Add task details to results, default &#39;False&#39;
+            ├── num-workers:    RetryRunner number of threads for tasks execution
+            ├── num-connectors:    RetryRunner number of threads for device connections
+            ├── connect-retry:    RetryRunner number of connection attempts
+            ├── task-retry:    RetryRunner number of attempts to run task
+            ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
+            ├── connect-check:    RetryRunner test TCP connection before opening actual connection
+            ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
+            ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
             ├── tf:    File group name to save task results to on worker file system
-            ├── tf_skip_failed:    Save results to file for failed tasks
+            ├── tf-skip-failed:    Save results to file for failed tasks
             ├── diff:    File group name to run the diff for
-            ├── diff_last:    File version number to diff, default is 1 (last)
-            ├── progress:    Emit execution progress
+            ├── diff-last:    File version number to diff, default is 1 (last)
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
             ├── FH:    Filter hosts by hostname
@@ -5434,12 +5507,10 @@ root
             ├── FM:    Filter hosts by platform
             ├── FX:    Filter hosts excluding them by name
             ├── FN:    Negate the match
-            ├── hosts:    Filter hosts to target
-            ├── *template:    TTP Template to parse commands output, default &#39;PydanticUndefined&#39;
-            └── commands:    Commands to collect form devices
+            ├── template:    Path to a TextFSM template file
+            └── commands (M):    List of commands to parse form devices
 nf#
 </code></pre></div>
-<p><code>*</code> - mandatory/required command argument</p>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 
@@ -5450,7 +5521,7 @@ nf#
 
     <div class="doc doc-contents first">
 
-        <p>Parse network device output using specified plugin and options.</p>
+        <p>Parse network device output using NAPALM getters.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5473,7 +5544,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>NorFab Job object containing relevant metadata</p>
+                <p>NorFab Job object containing relevant metadata.</p>
               </div>
             </td>
             <td>
@@ -5482,71 +5553,18 @@ nf#
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>plugin</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The plugin to use for parsing. Options are:</p>
-<ul>
-<li>napalm - parse devices output using NAPALM getters</li>
-<li>ttp - use TTP Templates to parse devices output</li>
-<li>textfsm - use TextFSM templates to parse devices output</li>
-</ul>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;napalm&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                 <code>getters</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="list">list</span>[<span title="str">str</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The getters to use with the "napalm" plugin.</p>
+                <p>NAPALM getter name(s) to call, e.g. <code>get_facts</code>.</p>
               </div>
             </td>
             <td>
                   <code>&#39;get_facts&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>template</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The template to use with the "ttp" or "textfsm" plugin.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>commands</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The list of commands to run with the "ttp" or "textfsm" plugin.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5558,7 +5576,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to convert the result to a dictionary.</p>
+                <p>If True, return results as a dictionary keyed by hostname.</p>
               </div>
             </td>
             <td>
@@ -5574,7 +5592,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Whether to add details to the result.</p>
+                <p>If True, include extra task details in the result.</p>
               </div>
             </td>
             <td>
@@ -5590,7 +5608,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Additional keyword arguments to pass to the plugin.</p>
+                <p>Additional arguments forwarded to Nornir host filtering.</p>
               </div>
             </td>
             <td>
@@ -5605,18 +5623,271 @@ nf#
     <table>
       <thead>
         <tr>
-<th>Name</th>          <th>Type</th>
+          <th>Type</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>Result</code></td>            <td>
+            <td>
                   <code><span title="norfab.models.Result">Result</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A Result object containing the parsed data.</p>
+                <p>Result containing parsed NAPALM getter data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>norfab\workers\nornir_worker\parse_task.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_napalm</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
+    <span class="n">getters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;get_facts&quot;</span><span class="p">,</span>
+    <span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">add_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse network device output using NAPALM getters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        job: NorFab Job object containing relevant metadata.</span>
+<span class="sd">        getters: NAPALM getter name(s) to call, e.g. ``get_facts``.</span>
+<span class="sd">        to_dict: If True, return results as a dictionary keyed by hostname.</span>
+<span class="sd">        add_details: If True, include extra task details in the result.</span>
+<span class="sd">        **kwargs: Additional arguments forwarded to Nornir host filtering.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result containing parsed NAPALM getter data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_napalm&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
+
+    <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="n">nr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_processors</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>  <span class="c1"># add processors</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">napalm_get</span><span class="p">,</span> <span class="n">getters</span><span class="o">=</span><span class="n">getters</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ResultSerializer</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span> <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">)</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span>  <span class="c1"># failed is true if any of the hosts failed</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Parse network device output using a TTP template.</p>
+<p>Fetches CLI output from devices based on the template's input
+definitions, then parses the collected output with TTP.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Job(worker: object = None, juuid: str = None, client_address: str = None, timeout: int = None, args: list = None, kwargs: dict = None, task: str = None, client_input_queue: object = None) (norfab.core.worker.Job)" href="../../../api_reference_core_norfab_worker/#norfab.core.worker.Job">Job</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NorFab Job object containing relevant metadata.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>template</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>TTP template string, URL, or <code>ttp://</code> path.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>strict</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, raise <code>RuntimeError</code> when any host yields no parsed output.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>structure</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>TTP result structure one of <code>flat_list</code>, <code>list</code>, or <code>dictionary</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;flat_list&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>commands</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="list">list</span>[<span title="str">str</span>], None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Fallback commands to collect when the template defines no explicit input commands.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>get</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>TTP getter template name to use.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>plugin</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nornir connection plugin for CLI collection (default <code>netmiko</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;netmiko&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional arguments forwarded to Nornir host filtering and the CLI collection task.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Result containing per-host TTP parsing output.</p>
               </div>
             </td>
           </tr>
@@ -5635,11 +5906,11 @@ nf#
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="UnsupportedPluginError (norfab.core.exceptions.UnsupportedPluginError)" href="../../../api_reference_core_norfab_exceptions/#norfab.core.exceptions.UnsupportedPluginError">UnsupportedPluginError</a></code>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the specified plugin is not supported.</p>
+                <p>If <code>strict=True</code> and a host produces empty results.</p>
               </div>
             </td>
           </tr>
@@ -5649,161 +5920,528 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\nornir_worker\parse_task.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span> <span class="nb">input</span><span class="o">=</span><span class="n">ParseTTPInput</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_ttp</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
-    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;napalm&quot;</span><span class="p">,</span>
-    <span class="n">getters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;get_facts&quot;</span><span class="p">,</span>
-    <span class="n">template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">commands</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">structure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flat_list&quot;</span><span class="p">,</span>
+    <span class="n">commands</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">get</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse network device output using a TTP template.</span>
+
+<span class="sd">    Fetches CLI output from devices based on the template&#39;s input</span>
+<span class="sd">    definitions, then parses the collected output with TTP.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        job: NorFab Job object containing relevant metadata.</span>
+<span class="sd">        template: TTP template string, URL, or ``ttp://`` path.</span>
+<span class="sd">        strict: If True, raise ``RuntimeError`` when any host yields no parsed output.</span>
+<span class="sd">        structure: TTP result structure one of ``flat_list``, ``list``, or ``dictionary``.</span>
+<span class="sd">        commands: Fallback commands to collect when the template defines no explicit input commands.</span>
+<span class="sd">        get: TTP getter template name to use.</span>
+<span class="sd">        plugin: Nornir connection plugin for CLI collection (default ``netmiko``).</span>
+<span class="sd">        **kwargs: Additional arguments forwarded to Nornir host filtering and the CLI collection task.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result containing per-host TTP parsing output.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RuntimeError: If ``strict=True`` and a host produces empty results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;to_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;add_details&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_ttp&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="c1"># check has hosts to run for</span>
+    <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c1"># download TTP template</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">template</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">template</span> <span class="ow">and</span> <span class="n">template</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ttp://&quot;</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">template</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">get</span><span class="p">:</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="n">get</span><span class="p">)</span>
+
+    <span class="c1"># go over template&#39;s inputs and collect commands to fetch from devices</span>
+    <span class="n">cli_runs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ttp</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">template_name</span><span class="p">,</span> <span class="n">inputs</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_input_load</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span> <span class="ow">or</span> <span class="p">{</span><span class="s2">&quot;Default_Input&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+        <span class="k">for</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_params</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">cli_runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="n">input_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;commands&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">commands</span><span class="p">,</span>
+                    <span class="s2">&quot;input_name&quot;</span><span class="p">:</span> <span class="n">input_name</span><span class="p">,</span>
+                    <span class="s2">&quot;template_name&quot;</span><span class="p">:</span> <span class="n">template_name</span><span class="p">,</span>
+                    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">input_params</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;collecting output from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cli_runs</span><span class="p">)</span><span class="si">}</span><span class="s2"> TTP template input(s)&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># collect commands output from devices</span>
+    <span class="k">for</span> <span class="n">cli_run</span> <span class="ow">in</span> <span class="n">cli_runs</span><span class="p">:</span>
+        <span class="n">cli_run_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FFun_functions</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;platform&quot;</span><span class="p">):</span>
+            <span class="n">cli_run_kwargs</span><span class="p">[</span><span class="s2">&quot;FM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">][</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">commands</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;commands&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">cli_run_kwargs</span><span class="p">,</span> <span class="n">plugin</span><span class="o">=</span><span class="n">plugin</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed collecting commands output, errors: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed collecting commands output&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">messages</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="c1"># parse commands output for each host</span>
+        <span class="k">for</span> <span class="n">hname</span><span class="p">,</span> <span class="n">hres</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">input_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">cmdname</span><span class="p">,</span> <span class="n">cmdres</span> <span class="ow">in</span> <span class="n">hres</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">cmdres</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Failed collecting command &#39;</span><span class="si">{</span><span class="n">cmdname</span><span class="si">}</span><span class="s2">&#39; output from &#39;</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2">&#39;, error: </span><span class="si">{</span><span class="n">cmdres</span><span class="p">[</span><span class="s1">&#39;exception&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">input_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmdres</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">])</span>
+            <span class="c1"># parse command results</span>
+            <span class="k">if</span> <span class="n">input_data</span><span class="p">:</span>
+                <span class="n">parser</span> <span class="o">=</span> <span class="n">ttp</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">parser</span><span class="o">.</span><span class="n">add_input</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">input_data</span><span class="p">),</span>
+                    <span class="n">input_name</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;input_name&quot;</span><span class="p">],</span>
+                    <span class="n">template_name</span><span class="o">=</span><span class="n">cli_run</span><span class="p">[</span><span class="s2">&quot;template_name&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="c1"># run parsing in single process</span>
+                <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">one</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">hname</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;No input data collected for &#39;</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2">&#39; device&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">hname</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+
+    <span class="c1"># if strict - check hosts parsing results and raise error if empty</span>
+    <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">hname</span><span class="p">,</span> <span class="n">hres</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">hres</span> <span class="ow">or</span> <span class="n">hres</span> <span class="ow">in</span> <span class="p">[[{}],</span> <span class="p">[],</span> <span class="p">{},</span> <span class="p">[[]]]:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hname</span><span class="si">}</span><span class="s2"> host parsing produced no results&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+
+    <div class="doc doc-contents first">
+
+        <p>Parse network device output using TextFSM templates.</p>
+<p>Collects CLI output from devices and parses it using a TextFSM template.
+When no template is provided, NTC-Templates auto-detection is used based
+on the device platform and command.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Job(worker: object = None, juuid: str = None, client_address: str = None, timeout: int = None, args: list = None, kwargs: dict = None, task: str = None, client_input_queue: object = None) (norfab.core.worker.Job)" href="../../../api_reference_core_norfab_worker/#norfab.core.worker.Job">Job</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NorFab Job object containing relevant metadata.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>commands</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="list">list</span>[<span title="str">str</span>], None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Command(s) to collect from devices.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>template</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to a TextFSM template file, or <code>nf://</code> URL to a
+file stored in NorFab file sharing. If omitted, NTC-Templates
+auto-detection is used.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>to_dict</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, return results as a dictionary keyed by hostname.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>add_details</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, include extra task details in the result.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional arguments forwarded to Nornir host filtering
+and the CLI collection task.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Result containing per-host TextFSM parsed output.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>norfab\workers\nornir_worker\parse_task.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_textfsm</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
+    <span class="n">commands</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">add_details</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Parse network device output using specified plugin and options.</span>
+<span class="sd">    Parse network device output using TextFSM templates.</span>
+
+<span class="sd">    Collects CLI output from devices and parses it using a TextFSM template.</span>
+<span class="sd">    When no template is provided, NTC-Templates auto-detection is used based</span>
+<span class="sd">    on the device platform and command.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        job: NorFab Job object containing relevant metadata</span>
-<span class="sd">        plugin (str): The plugin to use for parsing. Options are:</span>
-
-<span class="sd">            - napalm - parse devices output using NAPALM getters</span>
-<span class="sd">            - ttp - use TTP Templates to parse devices output</span>
-<span class="sd">            - textfsm - use TextFSM templates to parse devices output</span>
-
-<span class="sd">        getters (str): The getters to use with the &quot;napalm&quot; plugin.</span>
-<span class="sd">        template (str): The template to use with the &quot;ttp&quot; or &quot;textfsm&quot; plugin.</span>
-<span class="sd">        commands (list): The list of commands to run with the &quot;ttp&quot; or &quot;textfsm&quot; plugin.</span>
-<span class="sd">        to_dict (bool): Whether to convert the result to a dictionary.</span>
-<span class="sd">        add_details (bool): Whether to add details to the result.</span>
-<span class="sd">        **kwargs: Additional keyword arguments to pass to the plugin.</span>
+<span class="sd">        job: NorFab Job object containing relevant metadata.</span>
+<span class="sd">        commands: Command(s) to collect from devices.</span>
+<span class="sd">        template: Path to a TextFSM template file, or ``nf://`` URL to a</span>
+<span class="sd">            file stored in NorFab file sharing. If omitted, NTC-Templates</span>
+<span class="sd">            auto-detection is used.</span>
+<span class="sd">        to_dict: If True, return results as a dictionary keyed by hostname.</span>
+<span class="sd">        add_details: If True, include extra task details in the result.</span>
+<span class="sd">        **kwargs: Additional arguments forwarded to Nornir host filtering</span>
+<span class="sd">            and the CLI collection task.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: A Result object containing the parsed data.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        UnsupportedPluginError: If the specified plugin is not supported.</span>
+<span class="sd">        Result containing per-host TextFSM parsed output.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FFun_functions</span><span class="p">}</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_textfsm&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
 
     <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="k">if</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;napalm&quot;</span><span class="p">:</span>
-        <span class="n">nr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_processors</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>  <span class="c1"># add processors</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">napalm_get</span><span class="p">,</span> <span class="n">getters</span><span class="o">=</span><span class="n">getters</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ResultSerializer</span><span class="p">(</span>
-            <span class="n">result</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span> <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span>
-        <span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span>  <span class="c1"># failed is true if any of the hosts failed</span>
-    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;ttp&quot;</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-            <span class="n">commands</span><span class="o">=</span><span class="n">commands</span> <span class="ow">or</span> <span class="p">[],</span>
-            <span class="n">run_ttp</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">filters</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
-            <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">,</span>
-            <span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span>
-    <span class="k">elif</span> <span class="n">plugin</span> <span class="o">==</span> <span class="s2">&quot;textfsm&quot;</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-            <span class="n">commands</span><span class="o">=</span><span class="n">commands</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">filters</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
-            <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">,</span>
-            <span class="n">use_textfsm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">textfsm_template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
-            <span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">UnsupportedPluginError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plugin &#39;</span><span class="si">{</span><span class="n">plugin</span><span class="si">}</span><span class="s2">&#39; not supported&quot;</span><span class="p">)</span>
+    <span class="c1"># resolve template from URL or local nf:// path</span>
+    <span class="k">if</span> <span class="n">template</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">template</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+        <span class="n">commands</span><span class="o">=</span><span class="n">commands</span><span class="p">,</span>
+        <span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+        <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
+        <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">,</span>
+        <span class="n">use_textfsm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">textfsm_template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">errors</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

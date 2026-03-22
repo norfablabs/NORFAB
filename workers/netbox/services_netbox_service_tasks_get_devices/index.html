@@ -5565,7 +5565,48 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 64</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
 <span class="normal"> 65</span>
 <span class="normal"> 66</span>
 <span class="normal"> 67</span>
@@ -5644,97 +5685,7 @@ nf#
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
-    <span class="n">output</span><span class="o">=</span><span class="n">GetDevicesOutput</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_devices</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -5838,51 +5789,8 @@ nf#
         <span class="c1"># process devices data</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">all_devices_raw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
-                <span class="n">device_data</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">last_updated</span><span class="p">),</span>
-                    <span class="s2">&quot;custom_field_data&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="nb">dict</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">)</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">custom_fields</span> <span class="k">else</span> <span class="p">{}</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">device</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">tags</span> <span class="k">else</span> <span class="p">[],</span>
-                    <span class="s2">&quot;device_type&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
-                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="s2">&quot;config_context&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="nb">dict</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">config_context</span><span class="p">)</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">config_context</span> <span class="k">else</span> <span class="p">{}</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">tenant</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">platform</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span>
-                    <span class="s2">&quot;asset_tag&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">asset_tag</span><span class="p">,</span>
-                    <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="s2">&quot;slug&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span>
-                        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">(</span>
-                            <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">tags</span>
-                            <span class="k">else</span> <span class="p">[]</span>
-                        <span class="p">),</span>
-                    <span class="p">},</span>
-                    <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">location</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;rack&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">rack</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">rack</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                    <span class="s2">&quot;primary_ip4&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">primary_ip4</span><span class="o">.</span><span class="n">address</span><span class="p">}</span>
-                        <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">primary_ip4</span>
-                        <span class="k">else</span> <span class="kc">None</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot;primary_ip6&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">primary_ip6</span><span class="o">.</span><span class="n">address</span><span class="p">}</span>
-                        <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">primary_ip6</span>
-                        <span class="k">else</span> <span class="kc">None</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot;airflow&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">airflow</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">airflow</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="kc">None</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
-                <span class="p">}</span>
+                <span class="n">device_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">device_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">device</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
                 <span class="c1"># cache device data</span>
                 <span class="k">if</span> <span class="n">cache</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_devices::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
