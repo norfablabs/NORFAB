@@ -1,3 +1,11 @@
+# 0.16.6
+
+## BUGS
+
+1. Fixing Nornir parse_ttp task hosts filtering
+
+---
+
 # 0.16.5
 
 ## BUGS
