@@ -2145,7 +2145,7 @@ class TestNornirParseTasks:
         ret = nfclient.run_job(
             "nornir",
             "parse_ttp",
-            workers=["nornir-worker-1"],
+            workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
@@ -2154,11 +2154,9 @@ class TestNornirParseTasks:
         )
         pprint.pprint(ret)
 
-        for worker, results in ret.items():
-            assert results["failed"] is False, f"{worker} failed to run the task"
-            assert results["result"], f"{worker} returned no results"
-            for host in results["result"]:
-                assert "spine" in host, f"{worker} returned unexpected host '{host}'"
+        assert ret["nornir-worker-1"]["result"]["ceos-spine-1"] == [{'source': 'local'}]
+        assert ret["nornir-worker-1"]["result"]["ceos-spine-2"] == [{'source': 'local'}]
+        assert ret["nornir-worker-2"]["result"] == {}, f"{nornir-worker-2} returned unexpected results"
 
     def test_nornir_parse_ttp_no_matching_hosts(self, nfclient):
         ret = nfclient.run_job(

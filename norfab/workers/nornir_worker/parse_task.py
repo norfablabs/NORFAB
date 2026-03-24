@@ -203,6 +203,7 @@ class ParseTask:
         """
         kwargs["to_dict"] = True
         kwargs["add_details"] = True
+        filters = {k: kwargs[k] for k in kwargs.keys() if k in FFun_functions}
         ret = Result(task=f"{self.name}:parse_ttp", result={})
 
         # check has hosts to run for
@@ -239,13 +240,15 @@ class ParseTask:
 
         # collect commands output from devices
         for cli_run in cli_runs:
+            cli_run_filters = {
+                k: cli_run["params"][k]
+                for k in cli_run["params"].keys()
+                if k in FFun_functions
+            }
             cli_run_kwargs = {
+                **filters,
                 **kwargs,
-                **{
-                    k: cli_run["params"][k]
-                    for k in cli_run["params"].keys()
-                    if k in FFun_functions
-                },
+                **cli_run_filters,
             }
             if cli_run["params"].get("platform"):
                 cli_run_kwargs["FM"] = cli_run["params"]["platform"]
