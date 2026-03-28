@@ -24,20 +24,20 @@ from rich.console import Console
 from norfab.core.nfapi import NorFab
 from norfab.models.norfab_configuration import NorFabInventory
 
-from .shell_clients.agent import agent_picle_shell
-from .shell_clients.common import ClientRunJobArgs, listen_events, log_error_or_result
-from .shell_clients.containerlab import containerlab_picle_shell
-from .shell_clients.fakenos import fakenos_picle_shell
-from .shell_clients.fastapi import fastapi_picle_shell
-from .shell_clients.fastmcp import fastmcp_picle_shell
-from .shell_clients.netbox import netbox_picle_shell
-from .shell_clients.norfab_jobs_shell import NorFabJobsShellCommands
-from .shell_clients.nornir import nornir_picle_shell
-from .shell_clients.workers.workers_picle_shell import (
+from .agent import agent_picle_shell
+from .common import ClientRunJobArgs, listen_events, log_error_or_result
+from .containerlab import containerlab_picle_shell
+from .fakenos import fakenos_picle_shell
+from .fastapi import fastapi_picle_shell
+from .fastmcp import fastmcp_picle_shell
+from .netbox import netbox_picle_shell
+from .norfab_jobs_shell import NorFabJobsShellCommands
+from .nornir import nornir_picle_shell
+from .workers.workers_picle_shell import (
     NorfabWorkersCommands,
     ShowWorkersModel,
 )
-from .shell_clients.workflow import workflow_picle_shell
+from .workflow import workflow_picle_shell
 
 NFCLIENT = None
 RICHCONSOLE = Console()

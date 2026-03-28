@@ -1574,6 +1574,37 @@ class NFPClient(object):
 
             return markdown_results(job, service, task, kwargs) if markdown else result
 
+    def get_agent(self, profile: str = "default") -> "NFAgent":
+        """
+        Return an NFAgent bound to this client for agentic AI interactions.
+
+        The agent is built lazily on first call to ``invoke`` or ``stream``.
+        Configuration is read from ``inventory.yaml`` under
+        ``client -> agent_profiles -> <profile>``.
+
+        Args:
+            profile (str): Agent profile name defined in inventory.yaml.
+                Defaults to ``"default"``.
+
+        Returns:
+            NFAgent: Configured agent instance ready to call.
+
+        Raises:
+            ImportError: If ``norfab[clientagent]`` dependencies are not installed.
+            ValueError: If the requested profile is not found in the inventory.
+
+        Example::
+
+            agent = client.get_agent(profile="default")
+            answer = agent.invoke("Show me interfaces with errors on all routers")
+        """
+        try:
+            from norfab.core.agent import NFAgent
+        except ImportError as exc:
+            log.error("Agent dependencies not installed. Run: pip install norfab[clientagent]")
+            return None
+        return NFAgent(client=self, profile=profile)
+
     def destroy(self):
         """
         Gracefully shuts down the client.

@@ -3,4 +3,4 @@ tags:
   - nfcli
 ---
 
-::: norfab.clients.picle_shell_client
+::: norfab.clients.nfcli_shell.nfcli_shell_client

@@ -9,7 +9,7 @@ from nornir_salt.plugins.tasks import (
     scrapli_send_commands,
 )
 
-from norfab.clients.shell_clients.nornir.nornir_picle_shell_cli import NorniCliInput
+from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_cli import NorniCliInput
 from norfab.core.exceptions import UnsupportedPluginError
 from norfab.core.worker import Job, Task
 from norfab.models import Result

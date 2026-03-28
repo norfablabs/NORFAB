@@ -1,0 +1,101 @@
+# broker settings
+broker:
+  endpoint: "tcp://192.168.1.24:5555"
+  shared_key: "D>[[2]NH9#dN5?!o5DtibYYvV)ev?oRl}#P[>(q3"
+  zmq_auth: True 
+  
+# uses https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema
+logging:
+  log_events: True
+  handlers:
+    terminal:
+      level: '{{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}'
+    file: 
+      level: '{{ env.get("FILE_LOGGING_LEVEL", "INFO") }}'
+      
+# workers inventory section
+workers:
+  nornir-*:
+    - nornir/common.yaml  
+  nornir-worker-1*:
+    - nornir/nornir-worker-1.yaml
+  nornir-worker-2:
+    - nornir/nornir-worker-2.yaml
+    - nornir/nornir-worker-2-extra.yaml
+  nornir-worker-3:
+    - nornir/nornir-worker-3-non-existing-data.yaml
+  nornir-worker-4:
+    - nornir/nornir-worker-4.yaml
+  nornir-worker-5:
+    - nornir/nornir-worker-5.yaml
+  nornir-worker-6:
+    - nornir/nornir-worker-6.yaml
+  netbox-worker-1.*:
+    - netbox/common.yaml  
+  pyats-*:
+    - pyats/common.yaml
+  pyats-worker-1*:
+    - pyats/pyats-worker-1.yaml
+  agent-worker-1:
+    - agents/common.yaml
+  fastapi-worker-*:
+    - fastapi/common.yaml
+  dummy-worker-1:
+    - plugins/dummy_worker_inventory.yaml
+  workflow-worker-1:
+    - workflow/common.yaml
+  fastmcp-worker-1:
+    - fastmcp/common.yaml
+  fakenos-worker-1:
+    - fakenos/common.yaml
+  
+# list what entities we want to start on this node
+topology:
+  broker: True
+  workers:
+    - netbox-worker-1.1
+    - netbox-worker-1.2
+    - nornir-worker-1 # ContainerLab devices
+    - nornir-worker-2 # ContainerLab devices
+    - nornir-worker-3 # Worker with no Nornir Hosts Inventory
+    - nornir-worker-4 # FakeNOS devices
+    - nornir-worker-5: # Worker to test Netbox Inventory
+        depends_on: 
+          - netbox-worker-1.1
+          - netbox-worker-1.2
+    - nornir-worker-6 # Hosts Juniper vMX
+    - agent-worker-1
+    - fastapi-worker-1
+    - dummy-worker-1
+    - workflow-worker-1
+    - fastmcp-worker-1
+    - fakenos-worker-1
+    
+hooks:
+  startup:
+    - function: "hooks.startup:do_on_startup"
+      args: []
+      kwargs: {}
+      description: "Function to run on startup"
+  exit:
+    - function: "hooks.startup:do_on_exit"
+      args: []
+      kwargs: {}
+      description: "Function to run on startup"
+  nornir-startup:
+    - function: "hooks.startup:nornir_do_on_startup"
+      args: []
+      kwargs: {}
+      description: "Function to run on startup"
+  nornir-exit:
+    - function: "hooks.startup:nornir_do_on_exit"
+      args: []
+      kwargs: {}
+      description: "Function to run on startup"
+
+plugins:
+  DummyService: 
+    worker: "plugins.dummy_service:DummyServiceWorker"
+    nfcli: 
+      mount_path: "dummy"
+      shell_model: "plugins.dummy_service:DummyServiceNfcliShell"

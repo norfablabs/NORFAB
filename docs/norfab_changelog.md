@@ -4,6 +4,19 @@
 
 1. Fixing Nornir parse_ttp task hosts filtering
 
+## FEATURES
+
+1. Adding agentic AI capabilities to the NorFab client via `NFPClient.get_agent()` method:
+
+   - New `norfab/core/agent.py` module with `NFPAgent` class — single-file, zero overhead when unused
+   - LangGraph ReAct agent with auto-discovered NorFab service tools
+   - Multi-provider LLM support: openai, anthropic, ollama, groq, mistral, openrouter, google, bedrock
+   - Optional MCP server integration via `langchain-mcp-adapters` (stdio, sse, streamable-http)
+   - Optional RAG knowledge base via Chroma or FAISS
+   - Optional multi-turn conversation memory (in-process buffer or SQLite)
+   - Configuration via `client -> agent_profiles` section in `inventory.yaml`
+   - New `norfab[clientagent]` optional dependency group
+
 ---
 
 # 0.16.5

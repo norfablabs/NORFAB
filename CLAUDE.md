@@ -54,7 +54,7 @@ norfab/
 │   ├── containerlab_worker.py  # ContainerLab integration
 │   └── filesharing_worker/ # File sharing service
 ├── clients/
-│   ├── picle_shell_client.py  # Interactive CLI (nfcli)
+│   ├── nfcli_shell/nfcli_shell_client.py  # Interactive CLI (nfcli)
 │   ├── robot_client.py        # Robot Framework library
 │   ├── textual_client.py      # TUI client (Textual)
 │   └── streamlit_client.py    # Web UI client (Streamlit)
@@ -76,7 +76,7 @@ tests/
 ├── test_fastmcp_service.py
 ├── test_fakenos_service.py
 ├── test_containerlab_service.py
-├── test_picle_shell_client.py
+├── test_nfcli_shell_client.py
 └── test_dummy_service_plugin.py
 docs/                  # MkDocs documentation source (Material theme)
 docker/                # Docker deployment configs

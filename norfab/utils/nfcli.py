@@ -9,7 +9,7 @@ from norfab.core.nfapi import NorFab
 log = logging.getLogger(__name__)
 
 try:
-    from norfab.clients.picle_shell_client import start_picle_shell
+    from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell
 except ImportError as e:
     log.warning(f"Failed to import NorFab Shell, needed libs not found - '{e}'")
 

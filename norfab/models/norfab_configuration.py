@@ -1,12 +1,140 @@
 from typing import Any, Dict, List, Union
 
 from picle.models import ConfigModel
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 
 from norfab.models.norfab_configuration_logging import (
     LoggingConfig,
 )
 from norfab.workers.netbox_worker.netbox_models import NetboxConfigModel
+
+# ------------------------------------------------------
+# Agent profile configuration models
+# ------------------------------------------------------
+
+
+class AgentLLMConfig(BaseModel):
+    """LLM provider configuration for an agent profile."""
+
+    provider: StrictStr = Field(
+        ...,
+        description="LLM provider name: openai, anthropic, ollama, groq, mistral, openrouter, google, bedrock",
+    )
+    model: StrictStr = Field(
+        None,
+        description="Model name, e.g. 'gpt-4o' or 'anthropic/claude-3.5-sonnet'",
+    )
+    api_key: StrictStr = Field(
+        None,
+        description="API key; supports Jinja2 env var syntax e.g. '${MY_API_KEY}'",
+    )
+    base_url: StrictStr = Field(
+        None,
+        description="Custom base URL, required for openrouter or self-hosted models",
+    )
+    temperature: StrictFloat = Field(
+        None,
+        description="Sampling temperature (0.0 = deterministic)",
+    )
+
+
+class AgentMCPServerConfig(BaseModel):
+    """Single MCP server connection configuration."""
+
+    name: StrictStr = Field(..., description="Unique MCP server name")
+    transport: StrictStr = Field(
+        "stdio",
+        description="Transport type: stdio, sse, streamable-http",
+    )
+    command: StrictStr = Field(
+        None,
+        description="Executable command for stdio transport",
+    )
+    args: List[Any] = Field(
+        None,
+        description="Arguments list for the stdio command",
+    )
+    url: StrictStr = Field(
+        None,
+        description="Server URL for sse or streamable-http transport",
+    )
+
+
+class AgentMCPConfig(BaseModel):
+    """MCP server tools configuration for an agent profile."""
+
+    enabled: StrictBool = Field(False, description="Enable MCP server tools")
+    servers: List[AgentMCPServerConfig] = Field(
+        None,
+        description="List of MCP server definitions",
+    )
+
+
+class AgentRAGConfig(BaseModel):
+    """RAG knowledge base configuration for an agent profile."""
+
+    enabled: StrictBool = Field(False, description="Enable RAG knowledge base tool")
+    embed_model: StrictStr = Field(
+        "sentence-transformers/all-MiniLM-L6-v2",
+        description="fastembed-compatible embeddings model name",
+    )
+    collection: StrictStr = Field("norfab", description="Vector collection name")
+    persist_dir: StrictStr = Field(
+        None,
+        description="Directory to persist the vector store; supports '{profile}' placeholder",
+    )
+    top_k: StrictInt = Field(4, description="Number of documents to retrieve")
+    sources: List[StrictStr] = Field(
+        None,
+        description="List of file paths or directories to index into the knowledge base",
+    )
+
+
+class AgentMemoryConfig(BaseModel):
+    """Conversation memory configuration for an agent profile."""
+
+    enabled: StrictBool = Field(False, description="Enable conversation memory")
+    backend: StrictStr = Field(
+        "buffer",
+        description="Memory backend: buffer (in-process), sqlite (persistent)",
+    )
+
+
+class AgentProfile(BaseModel):
+    """Single named agent profile configuration."""
+
+    llm: AgentLLMConfig = Field(..., description="LLM provider configuration")
+    tools: Dict[StrictStr, Any] = Field(
+        None,
+        description="Tools configuration, e.g. {norfab_services: true}",
+    )
+    mcp: AgentMCPConfig = Field(
+        None,
+        description="External MCP server tools configuration",
+    )
+    rag: AgentRAGConfig = Field(
+        None,
+        description="RAG knowledge base configuration",
+    )
+    memory: AgentMemoryConfig = Field(
+        None,
+        description="Conversation memory configuration",
+    )
+    system_prompt: StrictStr = Field(
+        None,
+        description="System prompt for the agent",
+    )
+
+
+class ClientConfig(BaseModel):
+    """NorFab client-side configuration."""
+
+    agent_profiles: Dict[StrictStr, AgentProfile] = Field(
+        None,
+        description="Named agent profiles for NFPClient.get_agent()",
+        json_schema_extra={"pkey": "profile_name", "pkey_description": "Profile name"},
+    )
+
 
 # ------------------------------------------------------
 # Broker configuration models
@@ -213,4 +341,8 @@ class NorFabInventory(ConfigModel):
         None,
         description="Worker inventory sources keyed by worker name or glob pattern",
         json_schema_extra={"pkey": "worker_name", "pkey_description": "Worker name"},
+    )
+    client: ClientConfig = Field(
+        None,
+        description="Client-side configuration including agent profiles",
     )

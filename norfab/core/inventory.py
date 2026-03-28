@@ -435,6 +435,7 @@ class WorkersInventory:
 class NorFabInventory:
     __slots__ = (
         "broker",
+        "client",
         "workers",
         "topology",
         "logging",
@@ -458,6 +459,7 @@ class NorFabInventory:
             RuntimeError: If neither path nor data is provided.
         """
         self.broker = {}
+        self.client = {}
         self.workers = {}
         self.topology = {}
         self.logging = {}
@@ -488,6 +490,7 @@ class NorFabInventory:
             None
         """
         self.broker = data.pop("broker", {})
+        self.client = data.pop("client", {})
         self.workers = WorkersInventory(self.base_dir, data.pop("workers", {}))
         self.topology = data.pop("topology", {})
         self.logging = make_logging_config(self.base_dir, data.pop("logging", {}))
