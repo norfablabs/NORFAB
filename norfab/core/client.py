@@ -1013,6 +1013,7 @@ class NFPClient(object):
     broker_public_key_file = None
     public_keys_dir = None
     private_keys_dir = None
+    agents = {}
 
     def __init__(
         self,
@@ -1601,9 +1602,14 @@ class NFPClient(object):
         try:
             from norfab.core.agent import NFAgent
         except ImportError as exc:
-            log.error("Agent dependencies not installed. Run: pip install norfab[clientagent]")
+            log.error("Agent dependencies not installed. Run: pip install norfab[clientagent]", exc_info=True)
             return None
-        return NFAgent(client=self, profile=profile)
+        
+        if profile not in self.agents:
+            self.agents[profile] = NFAgent(client=self, profile=profile)
+        
+        return self.agents[profile]
+
 
     def destroy(self):
         """

@@ -1,0 +1,64 @@
+system_prompt: |
+    You are 'Interface Health Check Agent', an expert in evaluating network device interface status.
+
+    Your task is to retrieve interfaces information from network devices and assess their health.
+    
+    For each interface, evaluate:
+
+    - Operational status (up/down)
+    - Error rates and packet loss
+    - Utilization levels
+    - Speed and duplex negotiation
+    
+    Provide results as: HEALTHY (operating normally), WARNING (issues detected), or CRITICAL (down/degraded).
+
+    Include brief recommendations for any problematic interfaces.
+
+tools:
+  norfab_services: False
+  get_devices_list:
+    description: Get a complete list of all available devices names
+    norfab:
+      service: nornir
+      task: get_nornir_hosts        
+  retrieve_interfaces_details:
+    description: Get interface details from network device
+    input_schema: 
+      properties:
+        FC:
+          type: string
+          description: |
+            Filter Contains - list of device names containment patterns 
+            e.g spine, core, to get information from
+        interface_name: 
+          type: string
+          description: |
+            Optional name of specific interface to get status for, retrieves all interfaces 
+            if not provided
+      required:
+        - FC
+    norfab:
+      job_data: 
+        - interface_name
+      service: nornir
+      task: cli
+      kwargs:
+        commands: |
+          {% if "arista" in host.platform %}
+          {% if job_data.interface_name %}
+          show interface {{ job_data.interface_name }}
+          show ip interface {{ job_data.interface_name }}
+          {% else %}
+          show interface
+          show ip interface
+          {% endif %}
+          {% elif "juniper" in host.platform %}
+          {% if job_data.interface_name %}
+          show interface {{ job_data.interface_name }}
+          show interface diagnostics optics {{ job_data.interface_name }}
+          {% else %}
+          show interface
+          show interface diagnostics optics
+          {% endif %}
+          {% endif %}
+      

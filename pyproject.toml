@@ -86,6 +86,7 @@ langchain-mcp-adapters = { version = ">=0.1", optional = true }
 langgraph = { version = ">=0.2", optional = true }
 ollama = { version = "0.6.1", optional = true }
 datamodel-code-generator = { version = "0.55.0", optional = true }
+langgraph-checkpoint-sqlite = { version = "3.0.3", optional = true }
 
 # Netbox Service Dependencies
 diskcache = { version = "5.6.3", optional = true }
@@ -199,6 +200,7 @@ clientagent = [
     "langchain-mcp-adapters",
     "fastembed",
     "qdrant-client",
+    "langgraph-checkpoint-sqlite"
 ]
 fastmcpservice = [
     "mcp"

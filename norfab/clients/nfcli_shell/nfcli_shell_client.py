@@ -25,6 +25,7 @@ from norfab.core.nfapi import NorFab
 from norfab.models.norfab_configuration import NorFabInventory
 
 from .agent import agent_picle_shell
+from .client_agent import client_agent_picle_shell
 from .common import ClientRunJobArgs, listen_events, log_error_or_result
 from .containerlab import containerlab_picle_shell
 from .fakenos import fakenos_picle_shell
@@ -384,6 +385,9 @@ class NorFabShell(BaseModel):
     )
     agent: agent_picle_shell.AgentServiceCommands = Field(
         None, description="AI Agent service"
+    )
+    client_agent: client_agent_picle_shell.ClientAgentCommands = Field(
+        None, description="Invoke client agent", alias="client-agent"
     )
     fastapi: fastapi_picle_shell.FastAPIServiceCommands = Field(
         None, description="FastAPI service"

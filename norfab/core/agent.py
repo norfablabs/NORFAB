@@ -4,16 +4,22 @@ import importlib
 import logging
 import os
 import uuid
-from typing import Any, Iterator
+import copy
+import yaml
+from typing import Any, Iterator, Callable, List
 
 from fastembed import TextEmbedding
 from langchain_core.tools import StructuredTool
+from langchain.tools import tool as langchain_tool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.prebuilt import create_react_agent
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
+from norfab.core.inventory import merge_recursively
+from datamodel_code_generator import Formatter, GenerateConfig, generate_dynamic_models
+from langchain_core.runnables import RunnableLambda
 
 log = logging.getLogger(__name__)
 
@@ -164,6 +170,83 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
                     )
 
     return tools
+
+
+# ------------------------------------------------------------------------------------------
+# Agent Inline Definition Tools
+# ------------------------------------------------------------------------------------------
+
+def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
+    def run_norfab_task(kwargs: dict) -> dict:
+        """
+        Args:
+            kwargs (dict): arguments passed on by LLM
+        """
+        log.debug(f"'{tool_name}' agent calling tool with kwargs: {kwargs}")
+
+        # get service name
+        tool_defined_service = tool["norfab"].get("service")
+        llm_requested_service = kwargs.pop("service", None)
+        service = tool_defined_service or llm_requested_service
+        if not service:
+            raise RuntimeError(
+                f"No service name provided for '{tool_name}' tool call"
+            )
+
+        # extract job data from LLM kwargs
+        job_data = tool["norfab"].get("kwargs", {}).pop("job_data", {})
+        if tool["norfab"].get("job_data"):
+            for key in tool["norfab"]["job_data"]:
+                if key in kwargs:
+                    job_data[key] = kwargs.pop(key)
+
+        # merge arguments for NorFab task call
+        all_kwargs = {**kwargs, **tool["norfab"].get("kwargs", {})}
+        if job_data:
+            all_kwargs["job_data"] = job_data
+
+        # run norfab task
+        ret = client.run_job(
+            service=service,
+            task=tool["norfab"]["task"],
+            kwargs=all_kwargs,
+        )
+
+        return ret
+
+    return RunnableLambda(run_norfab_task).with_types(
+        input_type=tool.get("input_schema", {})
+    )
+
+def make_pydantic_model(schema, model_name):
+    schema.setdefault("type", "object")
+    config = GenerateConfig(
+        formatters=[Formatter.RUFF_FORMAT, Formatter.RUFF_CHECK]
+    )
+    models = generate_dynamic_models(schema, config=config)
+
+    return models["Model"]
+
+def make_agent_inline_tools(client: object, tools: dict) -> List[langchain_tool]:
+    ret = []
+
+    for tool_name, tool in tools.items():
+        if isinstance(tool.get("input_schema"), dict):
+            tool["input_schema"] = make_pydantic_model(
+                tool["input_schema"], tool_name
+            )
+        ret.append(
+            langchain_tool(
+                tool_name,
+                make_runnable(client, tool, tool_name),
+                infer_schema=False,
+                parse_docstring=False,
+                description=tool["description"],
+                args_schema=tool.get("input_schema", {}),
+            )
+        )
+
+    return ret
 
 
 # ------------------------------------------------------------------------------------------
@@ -369,6 +452,21 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
 
 
 # ------------------------------------------------------------------------------------------
+# AGENT CONFIG LOADING FUNCTIONS
+# ------------------------------------------------------------------------------------------
+
+def load_agent_cfg_from_yaml_file(filename: str) -> dict:
+    if os.path.isfile(filename):
+        try:
+            with open(filename, encoding="utf-8") as fh:
+                return yaml.safe_load(fh.read())
+        except Exception as e:
+            log.error(
+                f"NFAgent - failed to load configuration from YAML file: {filename}", exc_info=True
+            )
+    return {}
+
+# ------------------------------------------------------------------------------------------
 # NFAgent
 # ------------------------------------------------------------------------------------------
 
@@ -450,18 +548,27 @@ class NFAgent:
     def __init__(self, client: object, profile: str = "default") -> None:
         self.client = client
         self.profile = profile
-        self._graph = None
+        self._agent = None
         self._thread_id = str(uuid.uuid4())  # unique thread per instance for continuous chat
-
         client_cfg = getattr(client.inventory, "client", {}) or {}
-        profiles = client_cfg.get("agent_profiles", {})
-        cfg = profiles.get(profile)
-        if cfg is None:
+        self.profiles = client_cfg.get("agent_profiles", {})
+        default_cfg = self.profiles.get("default", {})
+        if profile not in self.profiles:
             raise ValueError(
                 f"Agent profile '{profile}' not found in inventory. "
                 f"Define it under client->agent_profiles->{profile} in inventory.yaml"
             )
-        self._cfg = cfg
+        cfg = self.profiles[profile]
+        if "from_yaml_file" in cfg:
+            cfg = load_agent_cfg_from_yaml_file(cfg.pop("from_yaml_file"))
+        
+        if profile != "default" and default_cfg:
+            self._cfg = copy.deepcopy(default_cfg)
+            merge_recursively(self._cfg, cfg)
+        else:
+            self._cfg = cfg      
+
+        self._build()
 
     def _build(self) -> None:
         """Build the LangGraph ReAct agent graph (runs once on first use)."""
@@ -479,7 +586,7 @@ class NFAgent:
         tools = []
 
         # Auto-generate LangChain tools from discovered NorFab services
-        if tools_cfg.get("norfab_services", True):
+        if tools_cfg.pop("norfab_services", True):
             log.info(
                 "NFAgent - discovering NorFab service tools for profile '%s'",
                 self.profile,
@@ -487,6 +594,12 @@ class NFAgent:
             norfab_tools = _make_norfab_tools(self.client)
             tools.extend(norfab_tools)
             log.info("NFAgent - discovered %d NorFab service tools", len(norfab_tools))
+        if tools_cfg:
+            log.info(
+                "NFAgent - building tools from profile '%s'",
+                self.profile,
+            )
+            tools.extend(make_agent_inline_tools(self.client, tools_cfg))
 
         # Load tools from external MCP servers
         if mcp_cfg.get("enabled") and mcp_cfg.get("servers"):
@@ -522,7 +635,7 @@ class NFAgent:
         else:
             checkpointer = MemorySaver()
 
-        self._graph = create_react_agent(
+        self._agent = create_react_agent(
             llm,
             tools=tools,
             prompt=system_prompt,
@@ -540,6 +653,10 @@ class NFAgent:
         """
         return {"configurable": {"thread_id": thread_id or self._thread_id}}
 
+    def list_tools(self, match: str = "*") -> List[str]:
+        print(self._agent.tools)
+        return []
+
     def reset(self) -> None:
         """
         Start a fresh conversation by rotating the instance thread ID.
@@ -549,34 +666,6 @@ class NFAgent:
         """
         self._thread_id = str(uuid.uuid4())
         log.debug("NFAgent - conversation reset, new thread_id: %s", self._thread_id)
-
-    def chat(self, thread_id: str = None) -> None:
-        """
-        Start an interactive multi-turn chat session in the terminal.
-
-        Reads user input from stdin and prints agent responses until the user
-        types ``exit``, ``quit``, or sends EOF (Ctrl-D / Ctrl-Z).
-
-        Args:
-            thread_id (str, optional): Thread ID for this chat session.
-                Defaults to the instance thread ID so history is preserved
-                across programmatic calls made before entering the chat loop.
-        """
-        print("NFAgent chat — type 'exit' or 'quit' to stop.")
-        while True:
-            try:
-                user_input = input("You: ").strip()
-            except (EOFError, KeyboardInterrupt):
-                print()
-                break
-            if not user_input:
-                continue
-            if user_input.lower() in ("exit", "quit"):
-                break
-            print("Agent: ", end="", flush=True)
-            for token in self.stream(user_input, thread_id=thread_id):
-                print(token, end="", flush=True)
-            print()
 
     def invoke(self, message: str, thread_id: str = None) -> str:
         """
@@ -589,14 +678,12 @@ class NFAgent:
 
         Returns:
             str: Agent's final response text.
-        """
-        if self._graph is None:
-            self._build()
-
-        result = self._graph.invoke(
+        """         
+        result = self._agent.invoke(
             {"messages": [{"role": "user", "content": message}]},
             config=self._run_config(thread_id),
         )
+        
         return result["messages"][-1].content
 
     def stream(self, message: str, thread_id: str = None) -> Iterator[str]:
@@ -610,10 +697,7 @@ class NFAgent:
         Yields:
             str: Text token chunks from the agent's response.
         """
-        if self._graph is None:
-            self._build()
-
-        for chunk in self._graph.stream(
+        for chunk in self._agent.stream(
             {"messages": [{"role": "user", "content": message}]},
             config=self._run_config(thread_id),
             stream_mode="messages",
