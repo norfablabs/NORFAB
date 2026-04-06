@@ -188,6 +188,7 @@ class Task:
         description: Optional[str] = None,
         fastapi: Optional[dict] = None,
         mcp: Optional[dict] = None,
+        agent: Optional[dict] = None,
     ) -> None:
         self.input = input
         self.output = output or Result
@@ -200,6 +201,10 @@ class Task:
             self.mcp = False
         else:
             self.mcp = mcp or {}
+        if agent is False:
+            self.agent = False
+        else:
+            self.agent = agent or {}
 
     def __call__(self, function: Callable) -> Callable:
         """
@@ -341,6 +346,7 @@ class Task:
                     "outputSchema": output_json_schema,
                     "fastapi": self.fastapi,
                     "mcp": self.mcp,
+                    "agent": self.agent,
                 },
             }
         }
@@ -1852,7 +1858,7 @@ class NFPWorker:
         except Exception as e:
             log.error(f"Failed to save event to database: {e}")
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def job_details(
         self,
         uuid: str = None,
@@ -1882,7 +1888,7 @@ class NFPWorker:
         else:
             raise RuntimeError(f"{self.name} - job with UUID '{uuid}' not found")
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def job_list(
         self,
         pending: bool = True,
@@ -1975,7 +1981,7 @@ class NFPWorker:
             }
         )
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def list_tasks(self, name: Union[None, str] = None, brief: bool = False) -> Result:
         """
         Lists tasks supported by worker.
@@ -2005,11 +2011,11 @@ class NFPWorker:
             ret.result = [t["schema"] for t in NORFAB_WORKER_TASKS.values()]
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def delete_fetched_files(self, filepath) -> Result:
         return Result(result=self.client.delete_fetched_files(filepath))
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def get_watchdog_stats(self) -> Result:
         """
         Retrieve worker statistics from the watchdog.
@@ -2019,7 +2025,7 @@ class NFPWorker:
         """
         return Result(result=self.watchdog.stats())
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def get_watchdog_configuration(self) -> Result:
         """
         Retrieves the current configuration of the watchdog.

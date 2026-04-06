@@ -1,8 +1,10 @@
-# 0.16.6
+# 0.17.0
 
-## BUGS
+## CHANGES
 
-1. Fixing Nornir parse_ttp task hosts filtering
+1. Updating Netbox get_devices task to use pynetbox for fetching brief device info, fixing bug with pagination
+2. Enhancing Netbox get_devices to cache sites data to reduce amount of API calls
+3. Updating Netbox get_interfaces to use pynetbox for fetching brief interfaces info, fixing bug with pagination
 
 ## FEATURES
 
@@ -16,6 +18,18 @@
    - Optional multi-turn conversation memory (in-process buffer or SQLite)
    - Configuration via `client -> agent_profiles` section in `inventory.yaml`
    - New `norfab[clientagent]` optional dependency group
+
+## BUGS
+
+1. Nornir parse ttp enhancing return result to be for parsed template only to avoid extra data from other templates
+
+---
+
+# 0.16.6
+
+## BUGS
+
+1. Fixing Nornir parse_ttp task hosts filtering
 
 ---
 

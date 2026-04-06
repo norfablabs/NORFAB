@@ -585,6 +585,7 @@ class NorFabInventory:
             "workers": self.workers.data,
             "topology": self.topology,
             "logging": self.logging,
+            "client": self.client,
             "hooks": {},
             "plugins": {},
         }

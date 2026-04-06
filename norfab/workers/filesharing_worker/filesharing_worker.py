@@ -72,7 +72,7 @@ class FileSharingWorker(NFPWorker):
             raise ValueError(f"'{url}' - invalid URL path")
         return candidate
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def get_version(self) -> Result:
         libs = {
             "python": sys.version.split(" ")[0],
@@ -87,15 +87,15 @@ class FileSharingWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def get_inventory(self) -> Result:
         return Result(result=self.filesharing_inventory)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def get_status(self) -> Result:
         return Result(result="OK")
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def list_files(self, url: str) -> Result:
         """
         List files in a directory.
@@ -121,7 +121,7 @@ class FileSharingWorker(NFPWorker):
             ret.failed = True
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def file_details(self, url: str) -> Result:
         """
         Get file details including md5 hash, size, and existence.
@@ -163,7 +163,7 @@ class FileSharingWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def walk(self, url: str) -> Result:
         """
         Recursively list all files from all subdirectories.
@@ -205,7 +205,7 @@ class FileSharingWorker(NFPWorker):
             ret.errors = ["Directory Not Found"]
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def fetch_file(
         self,
         job: Job,

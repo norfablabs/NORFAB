@@ -52,7 +52,10 @@ class NetboxDevicesTasks:
         cache = self.cache_use if cache is None else cache
         filters = list(filters) if filters else []
         devices = devices or []
-
+        devices_to_fetch = []
+        sites_data = {}
+        nb = self._get_pynetbox(instance)
+        
         # merge named devices into filters as a name filter
         if devices:
             filters.append({"name": devices})
@@ -69,39 +72,33 @@ class NetboxDevicesTasks:
         )
 
         filters_to_fetch = list(filters)
-
+        
         if cache == True or cache == "force":
             job.event("checking cache for up-to-date device data")
-            # retrieve last_updated data from Netbox for all filters using REST
-            last_updated_data = {}
-            for filter_item in filters:
-                result = self.rest(
-                    job=job,
-                    instance=instance,
-                    api="dcim/devices",
-                    params={**filter_item, "fields": "name,last_updated"},
-                )
-                for device in result.result.get("results", []):
-                    last_updated_data[device["name"]] = device["last_updated"]
-
-            # try to retrieve device data from cache
             self.cache.expire()  # remove expired items from cache
-            devices_to_fetch = []
-            for device_name, last_updated in last_updated_data.items():
-                device_cache_key = f"get_devices::{device_name}"
-                # check if cache is up to date and use it if so
-                if device_cache_key in self.cache and (
-                    self.cache[device_cache_key].get("last_updated") == last_updated
-                    or cache == "force"
-                ):
-                    ret.result[device_name] = self.cache[device_cache_key]
-                    job.event(f"serving '{device_name}' from cache")
-                # cache old or no cache, fetch device data
-                else:
-                    devices_to_fetch.append(device_name)
-                    job.event(
-                        f"'{device_name}' cache miss or stale, fetching fresh data"
-                    )
+            # retrieve last_updated data from Netbox for all filters using REST
+            for filter_item in filters:
+                result = nb.dcim.devices.filter(
+                    **filter_item, fields="name,last_updated",
+                )
+                for device in result:
+                    device_name = device.name
+                    last_updated = device.last_updated
+                    # try to retrieve device data from cache
+                    device_cache_key = f"get_devices::{device_name}"
+                    # check if cache is up to date and use it if so
+                    if device_cache_key in self.cache and (
+                        self.cache[device_cache_key].get("last_updated") == last_updated
+                        or cache == "force"
+                    ):
+                        ret.result[device_name] = self.cache[device_cache_key]
+                        job.event(f"serving '{device_name}' from cache")
+                    # cache old or no cache, fetch device data
+                    else:
+                        devices_to_fetch.append(device_name)
+                        job.event(
+                            f"'{device_name}' cache miss or stale, fetching fresh data"
+                        )
 
             # only fetch devices missing from or stale in cache
             filters_to_fetch = [{"name": devices_to_fetch}] if devices_to_fetch else []
@@ -125,7 +122,9 @@ class NetboxDevicesTasks:
             for device_name, device in all_devices_raw.items():
                 if device_name not in ret.result:
                     device_data = dict(device)
-                    device_data["site"] = dict(nb.dcim.sites.get(id=device.site.id))
+                    if device.site.name not in sites_data:
+                        sites_data[device.site.name] = dict(nb.dcim.sites.get(id=device.site.id))
+                    device_data["site"] = sites_data[device.site.name]
                     # cache device data
                     if cache != False:
                         cache_key = f"get_devices::{device_name}"
@@ -141,6 +140,7 @@ class NetboxDevicesTasks:
         job.event(f"fetched {len(ret.result)} device(s)")
 
         return ret
+
 
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}

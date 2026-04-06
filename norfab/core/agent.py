@@ -6,6 +6,8 @@ import os
 import uuid
 import copy
 import yaml
+from fnmatch import fnmatch
+
 from typing import Any, Iterator, Callable, List
 
 from fastembed import TextEmbedding
@@ -14,7 +16,7 @@ from langchain.tools import tool as langchain_tool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite import SqliteSaver
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 from norfab.core.inventory import merge_recursively
@@ -102,9 +104,25 @@ def _make_service_tool(client, service: str, task_name: str, description: str):
     """
     def run(**kwargs: Any) -> Any:
         workers = kwargs.pop("workers", "all")
-        return client.run_job(
-            service=service, task=task_name, kwargs=kwargs, workers=workers
+        log.info(
+            f"NFAgent - tool call started: service='{service}', task='{task_name}', workers='{workers}'"
         )
+        try:
+            ret = client.run_job(
+                service=service, task=task_name, kwargs=kwargs, workers=workers
+            )
+        except Exception as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', error='{exc}'",
+                exc_info=True,
+            )
+            raise
+
+        log.info(
+            f"NFAgent - tool call completed: service='{service}', task='{task_name}'"
+        )
+
+        return ret
 
     tool_name = f"service_{service}__task_{task_name}".replace("-", "_")
     return StructuredTool.from_function(
@@ -133,13 +151,11 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
     # Discover available services from the broker
     svc_result = client.mmi("mmi.service.broker", "show_workers", timeout=timeout)
     if svc_result.get("status") != "200" or svc_result.get("errors"):
-        log.warning(
-            "NFAgent - NorFab service discovery failed: %s", svc_result.get("errors")
-        )
+        log.warning(f"NFAgent - NorFab service discovery failed: {svc_result.get('errors')}")
         return tools
 
     services = list({s["service"] for s in svc_result.get("results", [])})
-    log.debug("NFAgent - discovered services for tool generation: %s", services)
+    log.debug(f"NFAgent - discovered services for tool generation: {services}")
 
     for service in services:
         tasks_result = client.run_job(
@@ -152,22 +168,36 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
             continue
         for wres in tasks_result.values():
             for task in wres.get("result", []):
-                # respect task's mcp=false opt-out flag
-                if task.get("mcp") is False:
+                if task.get("agent", {}).get("enabled") is False:
                     continue
-                task_name = task["name"]
-                description = task.get("description") or f"NorFab {service}/{task_name}"
-                try:
-                    tools.append(
-                        _make_service_tool(client, service, task_name, description)
+                task_name = f"service_{service}__task_{task['name']}".replace("-", "_")
+                description = task.get("agent", {}).get("description") or task.get("description") or f"NorFab {service}/{task_name}"
+                task["norfab"] = {"service": service, "task": task['name']}
+                if isinstance(task.get("input_schema"), dict):
+                    task["input_schema"] = make_pydantic_model(
+                        task["input_schema"], task_name
                     )
-                except Exception as exc:
-                    log.warning(
-                        "NFAgent - could not create tool for %s/%s: %s",
-                        service,
+                tools.append(
+                    langchain_tool(
                         task_name,
-                        exc,
+                        make_runnable(client, task, task_name),
+                        infer_schema=False,
+                        parse_docstring=False,
+                        description=description,
+                        args_schema=task.get("input_schema", {}),
                     )
+                )
+
+                # task_name = task["name"]
+                # description = task.get("description") or f"NorFab {service}/{task_name}"
+                # try:
+                #     tools.append(
+                #         _make_service_tool(client, service, task_name, description)
+                #     )
+                # except Exception as exc:
+                #     log.warning(
+                #         f"NFAgent - could not create tool for {service}/{task_name}: {exc}"
+                #     )
 
     return tools
 
@@ -205,12 +235,23 @@ def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
         if job_data:
             all_kwargs["job_data"] = job_data
 
+        log.info(f"Agent running '{service}' service, task '{tool['norfab']['task']}'")
+
         # run norfab task
-        ret = client.run_job(
-            service=service,
-            task=tool["norfab"]["task"],
-            kwargs=all_kwargs,
-        )
+        try:
+            ret = client.run_job(
+                service=service,
+                task=tool["norfab"]["task"],
+                kwargs=all_kwargs,
+            )
+        except Exception as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{tool['norfab']['task']}', error='{exc}'",
+                exc_info=True,
+            )
+            raise
+
+        log.info(f"Agent '{service}' service, task '{tool['norfab']['task']}' completed")
 
         return ret
 
@@ -278,9 +319,7 @@ async def _make_mcp_tools_async(mcp_servers: list) -> list:
             servers[name] = {"transport": transport, "url": s["url"]}
         else:
             log.warning(
-                "NFAgent - unknown MCP transport '%s' for server '%s', skipping",
-                transport,
-                name,
+                f"NFAgent - unknown MCP transport '{transport}' for server '{name}', skipping"
             )
 
     if not servers:
@@ -394,7 +433,7 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
                             chunks.extend((fpath, c) for c in _split_text(text))
                         except Exception as exc:  # noqa: BLE001
                             log.warning(
-                                "NFAgent - could not read RAG source %s: %s", fpath, exc
+                                f"NFAgent - could not read RAG source {fpath}: {exc}"
                             )
             elif os.path.isfile(src):
                 try:
@@ -402,11 +441,9 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
                         text = fh.read()
                     chunks.extend((src, c) for c in _split_text(text))
                 except Exception as exc:  # noqa: BLE001
-                    log.warning(
-                        "NFAgent - could not read RAG source %s: %s", src, exc
-                    )
+                    log.warning(f"NFAgent - could not read RAG source {src}: {exc}")
             else:
-                log.warning("NFAgent - RAG source not found: %s", src)
+                log.warning(f"NFAgent - RAG source not found: {src}")
 
         if chunks:
             texts = [c[1] for c in chunks]
@@ -420,7 +457,9 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
                 for i in range(len(chunks))
             ]
             qdrant.upsert(collection_name=collection, points=points)
-            log.info("NFAgent - indexed %d chunks into Qdrant collection '%s'", len(chunks), collection)
+            log.info(
+                f"NFAgent - indexed {len(chunks)} chunks into Qdrant collection '{collection}'"
+            )
 
     def search_knowledge_base(query: str) -> str:
         """Search the NorFab knowledge base for information relevant to the query.
@@ -431,24 +470,280 @@ def _make_rag_tool(rag_cfg: dict, base_dir: str):
         Returns:
             str: Formatted search results from the Qdrant knowledge base.
         """
-        query_vec = list(embedder.embed([query]))[0].tolist()
-        results = qdrant.query_points(
-            collection_name=collection,
-            query=query_vec,
-            limit=top_k,
+        service = "rag"
+        task_name = "search_knowledge_base"
+        log.info(
+            f"NFAgent - tool call started: service='{service}', task='{task_name}'"
         )
-        if not results.points:
-            return "No relevant information found."
-        return "\n\n---\n\n".join(
-            f"[Source: {p.payload.get('source', 'unknown')}]\n{p.payload.get('text', '')}"
-            for p in results.points
-        )
+        try:
+            query_vec = list(embedder.embed([query]))[0].tolist()
+            results = qdrant.query_points(
+                collection_name=collection,
+                query=query_vec,
+                limit=top_k,
+            )
+            hit_count = len(results.points or [])
+            log.info(
+                f"NFAgent - tool call completed: service='{service}', task='{task_name}', hits={hit_count}"
+            )
+            if not results.points:
+                return "No relevant information found."
+            return "\n\n---\n\n".join(
+                f"[Source: {p.payload.get('source', 'unknown')}]\n{p.payload.get('text', '')}"
+                for p in results.points
+            )
+        except Exception as exc:  # noqa: BLE001
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', error='{exc}'",
+                exc_info=True,
+            )
+            return f"Error searching knowledge base: {exc}"
 
     return StructuredTool.from_function(
         func=search_knowledge_base,
         name="norfab_knowledge_base",
         description="Search NorFab documentation and knowledge base for relevant information.",
     )
+
+
+# ------------------------------------------------------------------------------------------
+# Filesystem Tools
+# ------------------------------------------------------------------------------------------
+
+
+def _make_filesystem_tools() -> list:
+    """
+    Build built-in filesystem tools: read, write, edit, and list-directory.
+
+    All paths are resolved relative to the current working directory and access
+    outside that directory is denied.
+
+    Returns:
+        list[StructuredTool]: Four LangChain StructuredTool objects.
+    """
+
+    base_dir = os.path.abspath(os.getcwd())
+
+    def _safe_path(path: str) -> str:
+        """Resolve *path* and verify it stays within the current working directory."""
+        resolved = os.path.abspath(path)
+        root = base_dir
+        if not resolved.startswith(root + os.sep) and resolved != root:
+            raise PermissionError(
+                f"Access denied: '{path}' is outside the allowed base directory '{root}'"
+            )
+        return resolved
+
+    def fs_read_file(path: str) -> str:
+        """Read and return the text contents of a file.
+
+        Args:
+            path (str): Path to the file to read.
+
+        Returns:
+            str: File contents as text, or an error message.
+        """
+        service = "filesystem"
+        task_name = "read_file"
+        log.info(
+            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+        )
+        try:
+            safe = _safe_path(path)
+        except PermissionError as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error: {exc}"
+        if not os.path.isfile(safe):
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='file not found'"
+            )
+            return f"Error: file not found: {path}"
+        try:
+            with open(safe, encoding="utf-8", errors="replace") as fh:
+                ret = fh.read()
+        except Exception as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error reading '{path}': {exc}"
+
+        log.info(
+            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+        )
+        return ret
+
+    def fs_write_file(path: str, content: str) -> str:
+        """Create a new file or overwrite an existing file with the provided content.
+
+        Missing parent directories are created automatically.
+
+        Args:
+            path (str): Destination file path.
+            content (str): Text content to write.
+
+        Returns:
+            str: Success or error message.
+        """
+        service = "filesystem"
+        task_name = "write_file"
+        log.info(
+            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+        )
+        try:
+            safe = _safe_path(path)
+        except PermissionError as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error: {exc}"
+        try:
+            parent = os.path.dirname(safe)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+            with open(safe, "w", encoding="utf-8") as fh:
+                fh.write(content)
+            ret = f"File written successfully: {path}"
+        except Exception as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error writing '{path}': {exc}"
+
+        log.info(
+            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+        )
+        return ret
+
+    def fs_edit_file(path: str, old_text: str, new_text: str) -> str:
+        """Edit an existing file by replacing the first occurrence of *old_text* with *new_text*.
+
+        Use this for targeted in-place edits rather than rewriting the entire file.
+
+        Args:
+            path (str): Path to the file to edit.
+            old_text (str): Exact text to find and replace.
+            new_text (str): Replacement text.
+
+        Returns:
+            str: Success or error message.
+        """
+        service = "filesystem"
+        task_name = "edit_file"
+        log.info(
+            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+        )
+        try:
+            safe = _safe_path(path)
+        except PermissionError as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error: {exc}"
+        if not os.path.isfile(safe):
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='file not found'"
+            )
+            return f"Error: file not found: {path}"
+        try:
+            with open(safe, encoding="utf-8", errors="replace") as fh:
+                original = fh.read()
+            if old_text not in original:
+                log.error(
+                    f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='old_text not found'"
+                )
+                return f"Error: old_text not found in '{path}'"
+            updated = original.replace(old_text, new_text, 1)
+            with open(safe, "w", encoding="utf-8") as fh:
+                fh.write(updated)
+            ret = f"File edited successfully: {path}"
+        except Exception as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error editing '{path}': {exc}"
+
+        log.info(
+            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+        )
+        return ret
+
+    def fs_list_dir(path: str = ".") -> str:
+        """List files and sub-directories at the given path.
+
+        Directories are shown with a trailing ``/``.  Entries are sorted
+        alphabetically.
+
+        Args:
+            path (str): Directory path to list. Defaults to the current directory.
+
+        Returns:
+            str: Newline-separated list of directory entries, or an error message.
+        """
+        service = "filesystem"
+        task_name = "list_dir"
+        log.info(
+            f"NFAgent - tool call started: service='{service}', task='{task_name}', path='{path}'"
+        )
+        try:
+            safe = _safe_path(path)
+        except PermissionError as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error: {exc}"
+        if not os.path.isdir(safe):
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='directory not found'"
+            )
+            return f"Error: directory not found: {path}"
+        try:
+            entries = sorted(os.listdir(safe))
+            lines = []
+            for entry in entries:
+                suffix = "/" if os.path.isdir(os.path.join(safe, entry)) else ""
+                lines.append(f"{entry}{suffix}")
+            ret = "\n".join(lines) if lines else "(empty)"
+        except Exception as exc:
+            log.error(
+                f"NFAgent - tool call failed: service='{service}', task='{task_name}', path='{path}', error='{exc}'"
+            )
+            return f"Error listing '{path}': {exc}"
+
+        log.info(
+            f"NFAgent - tool call completed: service='{service}', task='{task_name}', path='{path}'"
+        )
+        return ret
+
+    return [
+        StructuredTool.from_function(
+            func=fs_read_file,
+            name="fs_read_file",
+            description="Read and return the text contents of a file.",
+        ),
+        StructuredTool.from_function(
+            func=fs_write_file,
+            name="fs_write_file",
+            description=(
+                "Create a new file or overwrite an existing file with the provided content. "
+                "Parent directories are created automatically."
+            ),
+        ),
+        StructuredTool.from_function(
+            func=fs_edit_file,
+            name="fs_edit_file",
+            description=(
+                "Edit an existing file by replacing the first occurrence of old_text with "
+                "new_text. Use for targeted in-place edits rather than full rewrites."
+            ),
+        ),
+        StructuredTool.from_function(
+            func=fs_list_dir,
+            name="fs_list_dir",
+            description="List files and sub-directories at the given path.",
+        ),
+    ]
 
 
 # ------------------------------------------------------------------------------------------
@@ -465,6 +760,48 @@ def load_agent_cfg_from_yaml_file(filename: str) -> dict:
                 f"NFAgent - failed to load configuration from YAML file: {filename}", exc_info=True
             )
     return {}
+
+# ------------------------------------------------------------------------------------------
+# Default System Prompt
+# ------------------------------------------------------------------------------------------
+
+SYSTEM_PROMPT = """
+You are a Network Automation Fabric (NorFab) Agent — an expert AI assistant for
+provisioning, configuring, testing, and documenting network infrastructure.
+
+Your primary responsibilities:
+
+1. NETWORK PROVISIONING
+   Use nornir service tasks to push configuration changes to network devices:
+   - `nornir_cfg` — deploy structured configuration (Jinja2 templates or raw config).
+   - `nornir_cli` — run show or exec commands on one or many devices.
+   - `nornir_task` — execute arbitrary Nornir task plugins for advanced automation.
+   Always confirm the target scope (device, group, or all workers) before applying
+   changes. Prefer dry-run or diff mode when available.
+
+2. NETWORK TESTING & VALIDATION
+   Use the nornir `test` task to verify network state after changes:
+   - Run test suites to check interface status, routing, reachability, and protocols.
+   - Report pass/fail results clearly and suggest remediation for failures.
+   Treat testing as a mandatory post-change step unless the user explicitly skips it.
+
+3. DEVICE INVENTORY & DATA RETRIEVAL
+   Use the NetBox `get_devices` task to look up authoritative device information:
+   - Resolve hostnames, management IPs, roles, sites, platforms, and tags.
+   - Use NetBox data to scope automation targets and validate change requests.
+   Never assume device details — always query NetBox when Netbox service is available.   
+
+GENERAL GUIDELINES
+- Always choose the most specific tool available. 
+- Prefer targeted, narrowly scoped calls over broad ones to minimise risk and execution time.
+- Think step-by-step. Break complex requests into ordered sub-tasks.
+- When device scope is ambiguous, ask the user to clarify before executing.
+- Summarise what you did and what changed after every action.
+- Surface errors immediately with the raw error text and a proposed fix.
+- Never fabricate command output or device state — use tools to retrieve real data.
+- Keep responses concise; show full output only when explicitly requested.
+"""
+
 
 # ------------------------------------------------------------------------------------------
 # NFAgent
@@ -503,6 +840,7 @@ class NFAgent:
                 temperature: 0.0
               tools:
                 norfab_services: true
+                filesystem: true
               mcp:
                 enabled: false
                 servers:
@@ -548,6 +886,7 @@ class NFAgent:
     def __init__(self, client: object, profile: str = "default") -> None:
         self.client = client
         self.profile = profile
+        self.tools = []
         self._agent = None
         self._thread_id = str(uuid.uuid4())  # unique thread per instance for continuous chat
         client_cfg = getattr(client.inventory, "client", {}) or {}
@@ -578,44 +917,43 @@ class NFAgent:
         mcp_cfg = cfg.get("mcp", {})
         rag_cfg = cfg.get("rag", {})
         memory_cfg = cfg.get("memory", {})
-        system_prompt = cfg.get(
-            "system_prompt",
-            "You are a network automation assistant with access to NorFab services.",
-        )
-
-        tools = []
+        system_prompt = cfg.get("system_prompt", SYSTEM_PROMPT)
 
         # Auto-generate LangChain tools from discovered NorFab services
         if tools_cfg.pop("norfab_services", True):
             log.info(
-                "NFAgent - discovering NorFab service tools for profile '%s'",
-                self.profile,
+                f"NFAgent - discovering NorFab service tools for profile '{self.profile}'"
             )
             norfab_tools = _make_norfab_tools(self.client)
-            tools.extend(norfab_tools)
-            log.info("NFAgent - discovered %d NorFab service tools", len(norfab_tools))
+            self.tools.extend(norfab_tools)
+            log.info(f"NFAgent - discovered {len(norfab_tools)} NorFab service tools")
+
+        # Add built-in filesystem tools
+        fs_cfg = tools_cfg.pop("filesystem", True)
+        if fs_cfg is True or (isinstance(fs_cfg, dict) and fs_cfg.get("enabled", True)):
+            fs_tools = _make_filesystem_tools()
+            self.tools.extend(fs_tools)
+            log.info(f"NFAgent - added {len(fs_tools)} built-in filesystem tools")
+
         if tools_cfg:
-            log.info(
-                "NFAgent - building tools from profile '%s'",
-                self.profile,
-            )
-            tools.extend(make_agent_inline_tools(self.client, tools_cfg))
+            log.info(f"NFAgent - building tools from profile '{self.profile}'")
+            self.tools.extend(make_agent_inline_tools(self.client, tools_cfg))
 
         # Load tools from external MCP servers
         if mcp_cfg.get("enabled") and mcp_cfg.get("servers"):
-            log.info("NFAgent - loading MCP tools for profile '%s'", self.profile)
+            log.info(f"NFAgent - loading MCP tools for profile '{self.profile}'")
             mcp_tools = _make_mcp_tools(mcp_cfg["servers"])
-            tools.extend(mcp_tools)
-            log.info("NFAgent - loaded %d MCP tools", len(mcp_tools))
+            self.tools.extend(mcp_tools)
+            log.info(f"NFAgent - loaded {len(mcp_tools)} MCP tools")
 
         # Add RAG retriever tool
         if rag_cfg.get("enabled"):
             log.info(
-                "NFAgent - setting up RAG retriever for profile '%s'", self.profile
+                f"NFAgent - setting up RAG retriever for profile '{self.profile}'"
             )
             rag_cfg["_profile"] = self.profile
             rag_tool = _make_rag_tool(rag_cfg, self.client.inventory.base_dir)
-            tools.append(rag_tool)
+            self.tools.append(rag_tool)
             log.info("NFAgent - RAG retriever tool ready")
 
         llm = _make_llm(llm_cfg)
@@ -635,10 +973,10 @@ class NFAgent:
         else:
             checkpointer = MemorySaver()
 
-        self._agent = create_react_agent(
-            llm,
-            tools=tools,
-            prompt=system_prompt,
+        self._agent = create_agent(
+            model=llm,
+            tools=self.tools,
+            system_prompt=system_prompt,
             checkpointer=checkpointer,
         )
 
@@ -653,10 +991,6 @@ class NFAgent:
         """
         return {"configurable": {"thread_id": thread_id or self._thread_id}}
 
-    def list_tools(self, match: str = "*") -> List[str]:
-        print(self._agent.tools)
-        return []
-
     def reset(self) -> None:
         """
         Start a fresh conversation by rotating the instance thread ID.
@@ -665,7 +999,7 @@ class NFAgent:
         a new conversation with no memory of previous exchanges.
         """
         self._thread_id = str(uuid.uuid4())
-        log.debug("NFAgent - conversation reset, new thread_id: %s", self._thread_id)
+        log.debug(f"NFAgent - conversation reset, new thread_id: {self._thread_id}")
 
     def invoke(self, message: str, thread_id: str = None) -> str:
         """
@@ -704,3 +1038,11 @@ class NFAgent:
         ):
             if chunk and hasattr(chunk[0], "content") and chunk[0].content:
                 yield chunk[0].content
+
+    def list_tools(self, name: str = "*") -> list:
+        return [
+            {t.name: t.description}
+            for t in self.tools
+            if fnmatch(t.name, name)
+        ]
+

@@ -11,19 +11,28 @@ from pydantic import (
 )
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from contextvars import ContextVar
+
 
 log = logging.getLogger(__name__)
 
-shell_agent = None
+current_agent = ContextVar("current_agent", default=None)
 
-class ChatShellCommands(BaseModel):
-    list_tools: Any = Field(None, description="List agent tools", alias="list-tools", json_schema_extra={"function": "call_list_tools"})
+class ListToolsCommand(BaseModel):
+    name: StrictStr = Field(None, descritpion="Tools glob pattern filter")
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
 
     @staticmethod
-    def call_list_tools():
-        global shell_agent
-        log.critical("!!!!!!!!!")
-        return shell_agent.list_tools()
+    def run(*args, **kwargs):
+        agent = current_agent.get()
+        if agent:
+            return agent.list_tools(**kwargs)
+        return "Agent is not running"
+
+class ChatShellCommands(BaseModel):
+    list_tools: ListToolsCommand = Field(None, description="List agent tools", alias="list-tools")
 
 class AgentChat(BaseModel):
     thread_id: StrictStr = Field(None, description="Chat identifier", alias="thread-id")
@@ -31,10 +40,9 @@ class AgentChat(BaseModel):
 
     @staticmethod
     def run(message, **kwargs):
-        global shell_agent
         NFCLIENT = builtins.NFCLIENT
         agent = NFCLIENT.get_agent(profile=kwargs.get("agent_name", "default"))
-        shell_agent = agent
+        current_agent.set(agent)
         return agent.invoke(message, thread_id=kwargs.get("thread_id"))
 
     class PicleConfig:

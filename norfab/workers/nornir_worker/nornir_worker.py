@@ -1022,6 +1022,7 @@ class NornirWorker(
             "nornir": "",
             "ncclient": "",
             "nornir-netmiko": "",
+            "netmiko": "",
             "nornir-napalm": "",
             "nornir-scrapli": "",
             "nornir-utils": "",

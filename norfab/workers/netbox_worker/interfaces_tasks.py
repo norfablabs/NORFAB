@@ -82,6 +82,7 @@ class NetboxInterfacesTasks:
         ip_by_intf_id = {}
         inv_by_intf_id = {}
         all_interfaces = []
+        last_updated_by_device = {}
 
         # build REST filter params
         if devices:
@@ -102,19 +103,12 @@ class NetboxInterfacesTasks:
         if cache == True or cache == "force":
             job.event(f"checking cache for {len(devices)} device(s)")
             # quick REST call to get current last_updated for all matching interfaces
-            result = self.rest(
-                job=job,
-                instance=instance,
-                api="dcim/interfaces",
-                params={**filter_params, "fields": "name,last_updated,device"},
-            )
+            result = nb.dcim.interfaces.filter(**filter_params, fields="name,last_updated,device")
             # build per-device last_updated map
-            last_updated_by_device = {}
-            for intf in result.result.get("results", []):
-                dev_name = intf["device"]["name"]
-                last_updated_by_device.setdefault(dev_name, {})[intf["name"]] = intf[
-                    "last_updated"
-                ]
+            for intf in result:
+                last_updated_by_device.setdefault(
+                    intf.device.name, {}
+                )[intf.name] = intf.last_updated
 
             self.cache.expire()  # remove expired items from cache
             devices_to_fetch = []

@@ -1,0 +1,45 @@
+ip routing
+!
+interface Loopback0
+   description Router ID
+   ip address 10.10.10.2/32
+!
+interface Ethernet2
+   description P2P to ceos-leaf-1 Ethernet2
+   no switchport
+   ip address 10.0.0.2/31
+!
+interface Ethernet3
+   description P2P to ceos-leaf-2 Ethernet2
+   no switchport
+   ip address 10.0.0.6/31
+!
+interface Ethernet4
+   description P2P to ceos-leaf-3 Ethernet2
+   no switchport
+   ip address 10.0.0.10/31
+!
+router bgp 65002
+   router-id 10.10.10.2
+   network 10.10.10.2/32
+   neighbor EVPN-OVERLAY peer group
+   neighbor EVPN-OVERLAY update-source Loopback0
+   neighbor EVPN-OVERLAY ebgp-multihop 3
+   neighbor EVPN-OVERLAY send-community standard extended
+   neighbor 10.0.0.3 remote-as 65101
+   neighbor 10.0.0.3 description ceos-leaf-1 Ethernet2
+   neighbor 10.0.0.7 remote-as 65102
+   neighbor 10.0.0.7 description ceos-leaf-2 Ethernet2
+   neighbor 10.0.0.11 remote-as 65103
+   neighbor 10.0.0.11 description ceos-leaf-3 Ethernet2
+   neighbor 10.10.10.11 peer group EVPN-OVERLAY
+   neighbor 10.10.10.11 remote-as 65101
+   neighbor 10.10.10.11 description ceos-leaf-1 Loopback0 EVPN
+   neighbor 10.10.10.12 peer group EVPN-OVERLAY
+   neighbor 10.10.10.12 remote-as 65102
+   neighbor 10.10.10.12 description ceos-leaf-2 Loopback0 EVPN
+   neighbor 10.10.10.13 peer group EVPN-OVERLAY
+   neighbor 10.10.10.13 remote-as 65103
+   neighbor 10.10.10.13 description ceos-leaf-3 Loopback0 EVPN
+   address-family evpn
+      neighbor EVPN-OVERLAY activate

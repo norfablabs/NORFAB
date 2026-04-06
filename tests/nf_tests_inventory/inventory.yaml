@@ -7,7 +7,7 @@ client:
   agent_profiles:
     default:
       llm:
-        api_key: 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
+        api_key: '{{ env.get("OPENROUTER_API_KEY") }}'
         model: stepfun/step-3.5-flash:free
         profile_name: testAgent1
         provider: openrouter
@@ -52,16 +52,16 @@ topology:
   broker: true
   workers:
   - netbox-worker-1.1
-  # - netbox-worker-1.2
+  - netbox-worker-1.2
   - nornir-worker-1
-  # - nornir-worker-2
+  - nornir-worker-2
   # - nornir-worker-3
   # - nornir-worker-4
   # - nornir-worker-5:
   #     depends_on:
   #     - netbox-worker-1.1
   #     - netbox-worker-1.2
-  # - nornir-worker-6
+  - nornir-worker-6
   # - agent-worker-1
   # - fastapi-worker-1
   # - dummy-worker-1

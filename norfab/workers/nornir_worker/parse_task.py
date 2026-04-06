@@ -283,7 +283,7 @@ class ParseTask:
                     )
                     # run parsing in single process
                     parser.parse(one=True)
-                    ret.result[hname] = parser.result(structure=structure)
+                    ret.result[hname] = parser.result(structure=structure, templates=cli_run["template_name"])
                 else:
                     msg = f"No input data collected for '{hname}' device"
                     log.error(msg)
