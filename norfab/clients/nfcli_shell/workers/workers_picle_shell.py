@@ -182,6 +182,7 @@ class WorkersPingCommand(ClientRunJobArgs):
         service = kwargs.pop("service", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
+        nowait = kwargs.pop("nowait", False)
         kwargs["ping"] = "pong"
 
         result = NFCLIENT.run_job(
@@ -191,7 +192,11 @@ class WorkersPingCommand(ClientRunJobArgs):
             workers=workers,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True

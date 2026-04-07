@@ -151,7 +151,7 @@ class FakeNOSStartCommand(ClientRunJobArgs, FakeNOSStartInput):
             uuid=uuid,
         )
         if nowait:
-            return result
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -273,6 +273,9 @@ class GetFakeNOSNornirInventoryCommand(ClientRunJobArgs, GetNornirInventoryInput
             nowait=nowait,
             uuid=uuid,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True

@@ -1,7 +1,15 @@
 from typing import Any, Dict, List, Union
 
 from picle.models import ConfigModel
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
 
 from norfab.models.norfab_configuration_logging import (
     LoggingConfig,

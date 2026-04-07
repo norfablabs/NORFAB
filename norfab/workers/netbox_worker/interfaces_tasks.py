@@ -103,12 +103,14 @@ class NetboxInterfacesTasks:
         if cache == True or cache == "force":
             job.event(f"checking cache for {len(devices)} device(s)")
             # quick REST call to get current last_updated for all matching interfaces
-            result = nb.dcim.interfaces.filter(**filter_params, fields="name,last_updated,device")
+            result = nb.dcim.interfaces.filter(
+                **filter_params, fields="name,last_updated,device"
+            )
             # build per-device last_updated map
             for intf in result:
-                last_updated_by_device.setdefault(
-                    intf.device.name, {}
-                )[intf.name] = intf.last_updated
+                last_updated_by_device.setdefault(intf.device.name, {})[
+                    intf.name
+                ] = intf.last_updated
 
             self.cache.expire()  # remove expired items from cache
             devices_to_fetch = []

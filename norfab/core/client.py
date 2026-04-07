@@ -1599,14 +1599,16 @@ class NFPClient(object):
         try:
             from norfab.core.agent import NFAgent
         except ImportError as exc:
-            log.error("Agent dependencies not installed. Run: pip install norfab[clientagent]", exc_info=True)
+            log.error(
+                "Agent dependencies not installed. Run: pip install norfab[clientagent]",
+                exc_info=True,
+            )
             return None
-        
+
         if profile not in self.agents:
             self.agents[profile] = NFAgent(client=self, profile=profile)
-        
-        return self.agents[profile]
 
+        return self.agents[profile]
 
     def destroy(self):
         """

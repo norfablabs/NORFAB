@@ -32,14 +32,14 @@ log = logging.getLogger(__name__)
 # Maps provider name → (module, class).  OpenRouter reuses ChatOpenAI with a
 # custom base_url, so no extra package is needed beyond langchain-openai.
 _PROVIDER_MAP = {
-    "openai":     ("langchain_openai",            "ChatOpenAI"),
-    "anthropic":  ("langchain_anthropic",         "ChatAnthropic"),
-    "ollama":     ("langchain_ollama",            "ChatOllama"),
-    "groq":       ("langchain_groq",              "ChatGroq"),
-    "mistral":    ("langchain_mistralai",         "ChatMistralAI"),
-    "openrouter": ("langchain_openai",            "ChatOpenAI"),
-    "google":     ("langchain_google_genai",      "ChatGoogleGenerativeAI"),
-    "bedrock":    ("langchain_aws",               "ChatBedrock"),
+    "openai": ("langchain_openai", "ChatOpenAI"),
+    "anthropic": ("langchain_anthropic", "ChatAnthropic"),
+    "ollama": ("langchain_ollama", "ChatOllama"),
+    "groq": ("langchain_groq", "ChatGroq"),
+    "mistral": ("langchain_mistralai", "ChatMistralAI"),
+    "openrouter": ("langchain_openai", "ChatOpenAI"),
+    "google": ("langchain_google_genai", "ChatGoogleGenerativeAI"),
+    "bedrock": ("langchain_aws", "ChatBedrock"),
 }
 
 
@@ -102,6 +102,7 @@ def _make_service_tool(client, service: str, task_name: str, description: str):
     Returns:
         StructuredTool: Configured LangChain tool for the given task.
     """
+
     def run(**kwargs: Any) -> Any:
         workers = kwargs.pop("workers", "all")
         log.info(
@@ -151,7 +152,9 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
     # Discover available services from the broker
     svc_result = client.mmi("mmi.service.broker", "show_workers", timeout=timeout)
     if svc_result.get("status") != "200" or svc_result.get("errors"):
-        log.warning(f"NFAgent - NorFab service discovery failed: {svc_result.get('errors')}")
+        log.warning(
+            f"NFAgent - NorFab service discovery failed: {svc_result.get('errors')}"
+        )
         return tools
 
     services = list({s["service"] for s in svc_result.get("results", [])})
@@ -171,8 +174,12 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
                 if task.get("agent", {}).get("enabled") is False:
                     continue
                 task_name = f"service_{service}__task_{task['name']}".replace("-", "_")
-                description = task.get("agent", {}).get("description") or task.get("description") or f"NorFab {service}/{task_name}"
-                task["norfab"] = {"service": service, "task": task['name']}
+                description = (
+                    task.get("agent", {}).get("description")
+                    or task.get("description")
+                    or f"NorFab {service}/{task_name}"
+                )
+                task["norfab"] = {"service": service, "task": task["name"]}
                 if isinstance(task.get("input_schema"), dict):
                     task["input_schema"] = make_pydantic_model(
                         task["input_schema"], task_name
@@ -206,6 +213,7 @@ def _make_norfab_tools(client, timeout: int = 10) -> list:
 # Agent Inline Definition Tools
 # ------------------------------------------------------------------------------------------
 
+
 def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
     def run_norfab_task(kwargs: dict) -> dict:
         """
@@ -219,9 +227,7 @@ def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
         llm_requested_service = kwargs.pop("service", None)
         service = tool_defined_service or llm_requested_service
         if not service:
-            raise RuntimeError(
-                f"No service name provided for '{tool_name}' tool call"
-            )
+            raise RuntimeError(f"No service name provided for '{tool_name}' tool call")
 
         # extract job data from LLM kwargs
         job_data = tool["norfab"].get("kwargs", {}).pop("job_data", {})
@@ -251,7 +257,9 @@ def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
             )
             raise
 
-        log.info(f"Agent '{service}' service, task '{tool['norfab']['task']}' completed")
+        log.info(
+            f"Agent '{service}' service, task '{tool['norfab']['task']}' completed"
+        )
 
         return ret
 
@@ -259,23 +267,21 @@ def make_runnable(client: object, tool: dict, tool_name: str) -> Callable:
         input_type=tool.get("input_schema", {})
     )
 
+
 def make_pydantic_model(schema, model_name):
     schema.setdefault("type", "object")
-    config = GenerateConfig(
-        formatters=[Formatter.RUFF_FORMAT, Formatter.RUFF_CHECK]
-    )
+    config = GenerateConfig(formatters=[Formatter.RUFF_FORMAT, Formatter.RUFF_CHECK])
     models = generate_dynamic_models(schema, config=config)
 
     return models["Model"]
+
 
 def make_agent_inline_tools(client: object, tools: dict) -> List[langchain_tool]:
     ret = []
 
     for tool_name, tool in tools.items():
         if isinstance(tool.get("input_schema"), dict):
-            tool["input_schema"] = make_pydantic_model(
-                tool["input_schema"], tool_name
-            )
+            tool["input_schema"] = make_pydantic_model(tool["input_schema"], tool_name)
         ret.append(
             langchain_tool(
                 tool_name,
@@ -750,6 +756,7 @@ def _make_filesystem_tools() -> list:
 # AGENT CONFIG LOADING FUNCTIONS
 # ------------------------------------------------------------------------------------------
 
+
 def load_agent_cfg_from_yaml_file(filename: str) -> dict:
     if os.path.isfile(filename):
         try:
@@ -757,9 +764,11 @@ def load_agent_cfg_from_yaml_file(filename: str) -> dict:
                 return yaml.safe_load(fh.read())
         except Exception as e:
             log.error(
-                f"NFAgent - failed to load configuration from YAML file: {filename}", exc_info=True
+                f"NFAgent - failed to load configuration from YAML file: {filename}",
+                exc_info=True,
             )
     return {}
+
 
 # ------------------------------------------------------------------------------------------
 # Default System Prompt
@@ -888,7 +897,9 @@ class NFAgent:
         self.profile = profile
         self.tools = []
         self._agent = None
-        self._thread_id = str(uuid.uuid4())  # unique thread per instance for continuous chat
+        self._thread_id = str(
+            uuid.uuid4()
+        )  # unique thread per instance for continuous chat
         client_cfg = getattr(client.inventory, "client", {}) or {}
         self.profiles = client_cfg.get("agent_profiles", {})
         default_cfg = self.profiles.get("default", {})
@@ -900,12 +911,12 @@ class NFAgent:
         cfg = self.profiles[profile]
         if "from_yaml_file" in cfg:
             cfg = load_agent_cfg_from_yaml_file(cfg.pop("from_yaml_file"))
-        
+
         if profile != "default" and default_cfg:
             self._cfg = copy.deepcopy(default_cfg)
             merge_recursively(self._cfg, cfg)
         else:
-            self._cfg = cfg      
+            self._cfg = cfg
 
         self._build()
 
@@ -948,9 +959,7 @@ class NFAgent:
 
         # Add RAG retriever tool
         if rag_cfg.get("enabled"):
-            log.info(
-                f"NFAgent - setting up RAG retriever for profile '{self.profile}'"
-            )
+            log.info(f"NFAgent - setting up RAG retriever for profile '{self.profile}'")
             rag_cfg["_profile"] = self.profile
             rag_tool = _make_rag_tool(rag_cfg, self.client.inventory.base_dir)
             self.tools.append(rag_tool)
@@ -1012,12 +1021,12 @@ class NFAgent:
 
         Returns:
             str: Agent's final response text.
-        """         
+        """
         result = self._agent.invoke(
             {"messages": [{"role": "user", "content": message}]},
             config=self._run_config(thread_id),
         )
-        
+
         return result["messages"][-1].content
 
     def stream(self, message: str, thread_id: str = None) -> Iterator[str]:
@@ -1040,9 +1049,4 @@ class NFAgent:
                 yield chunk[0].content
 
     def list_tools(self, name: str = "*") -> list:
-        return [
-            {t.name: t.description}
-            for t in self.tools
-            if fnmatch(t.name, name)
-        ]
-
+        return [{t.name: t.description} for t in self.tools if fnmatch(t.name, name)]

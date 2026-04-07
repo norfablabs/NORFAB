@@ -6,7 +6,10 @@ import unittest
 import unittest.mock
 import sys
 from norfab.core.nfapi import NorFab
-from norfab.clients.nfcli_shell.nfcli_shell_client import mount_shell_plugins, NorFabShell
+from norfab.clients.nfcli_shell.nfcli_shell_client import (
+    mount_shell_plugins,
+    NorFabShell,
+)
 from picle import App
 
 

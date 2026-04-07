@@ -116,16 +116,16 @@ nf#
 
 ### bearer_token_store
 
-::: norfab.workers.fastapi_worker.FastAPIWorker.bearer_token_store
+::: norfab.workers.fastapi_worker.fastapi_worker.FastAPIWorker.bearer_token_store
 
 ### bearer_token_delete
 
-::: norfab.workers.fastapi_worker.FastAPIWorker.bearer_token_delete
+::: norfab.workers.fastapi_worker.fastapi_worker.FastAPIWorker.bearer_token_delete
 
 ### bearer_token_list
 
-::: norfab.workers.fastapi_worker.FastAPIWorker.bearer_token_list
+::: norfab.workers.fastapi_worker.fastapi_worker.FastAPIWorker.bearer_token_list
 
 ### bearer_token_check
 
-::: norfab.workers.fastapi_worker.FastAPIWorker.bearer_token_check
+::: norfab.workers.fastapi_worker.fastapi_worker.FastAPIWorker.bearer_token_check

@@ -10,7 +10,6 @@ import pynetbox
 
 from .netbox_data import NB_URL, NB_API_TOKEN
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -42,7 +41,10 @@ def test_manufacturer(nfclient):
     if existing:
         existing.delete()
     mfr = nb.dcim.manufacturers.create(
-        {"name": "NorFab CRUD Test Manufacturer", "slug": "norfab-crud-test-manufacturer"}
+        {
+            "name": "NorFab CRUD Test Manufacturer",
+            "slug": "norfab-crud-test-manufacturer",
+        }
     )
     yield mfr.id
     obj = nb.dcim.manufacturers.get(mfr.id)
@@ -78,7 +80,9 @@ class TestCrudListObjects:
                 assert isinstance(obj_types, dict), f"{worker} - {app} should be a dict"
                 for obj_type, meta in obj_types.items():
                     assert "path" in meta, f"{worker} - {app}.{obj_type} missing 'path'"
-                    assert "methods" in meta, f"{worker} - {app}.{obj_type} missing 'methods'"
+                    assert (
+                        "methods" in meta
+                    ), f"{worker} - {app}.{obj_type} missing 'methods'"
                     assert isinstance(meta["methods"], list)
             assert "devices" in result["dcim"], f"{worker} - 'devices' missing in dcim"
 
@@ -96,8 +100,12 @@ class TestCrudListObjects:
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
             assert "dcim" in result, f"{worker} - 'dcim' should be present"
-            assert "ipam" not in result, f"{worker} - 'ipam' should have been filtered out"
-            assert "extras" not in result, f"{worker} - 'extras' should have been filtered out"
+            assert (
+                "ipam" not in result
+            ), f"{worker} - 'ipam' should have been filtered out"
+            assert (
+                "extras" not in result
+            ), f"{worker} - 'extras' should have been filtered out"
             assert "devices" in result["dcim"], f"{worker} - 'devices' missing in dcim"
 
     def test_app_filter_list(self, nfclient):
@@ -115,7 +123,9 @@ class TestCrudListObjects:
             result = res["result"]
             assert "dcim" in result, f"{worker} - 'dcim' should be present"
             assert "ipam" in result, f"{worker} - 'ipam' should be present"
-            assert "extras" not in result, f"{worker} - 'extras' should have been filtered out"
+            assert (
+                "extras" not in result
+            ), f"{worker} - 'extras' should have been filtered out"
 
     def test_include_metadata_false(self, nfclient):
         """include_metadata=False returns lists of object type name strings."""
@@ -163,9 +173,9 @@ class TestCrudListObjects:
 
         for worker, res in ret2.items():
             assert not res["errors"], f"{worker} - received error on cached call"
-            assert res["result"] == result1, (
-                f"{worker} - cached result differs from original"
-            )
+            assert (
+                res["result"] == result1
+            ), f"{worker} - cached result differs from original"
 
 
 # ---------------------------------------------------------------------------
@@ -290,7 +300,9 @@ class TestCrudSearch:
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
             total_matches = sum(len(v) for v in result.values())
-            assert total_matches == 0, f"{worker} - expected no matches for non-existent term"
+            assert (
+                total_matches == 0
+            ), f"{worker} - expected no matches for non-existent term"
 
     def test_multiple_object_types(self, nfclient):
         """Search across multiple object types returns keys for each."""
@@ -309,7 +321,9 @@ class TestCrudSearch:
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
             assert "dcim.devices" in result, f"{worker} - 'dcim.devices' key missing"
-            assert "dcim.interfaces" in result, f"{worker} - 'dcim.interfaces' key missing"
+            assert (
+                "dcim.interfaces" in result
+            ), f"{worker} - 'dcim.interfaces' key missing"
 
 
 # ---------------------------------------------------------------------------
@@ -363,7 +377,9 @@ class TestCrudRead:
             result = res["result"]
             assert result["count"] == 1, f"{worker} - expected exactly 1 result"
             assert result["results"][0]["id"] == ceos1.id, f"{worker} - wrong device id"
-            assert result["results"][0]["name"] == "ceos1", f"{worker} - wrong device name"
+            assert (
+                result["results"][0]["name"] == "ceos1"
+            ), f"{worker} - wrong device name"
 
     def test_by_id_list(self, nfclient):
         """Read multiple devices by a list of IDs."""
@@ -478,9 +494,9 @@ class TestCrudRead:
         for worker, res in ret_offset.items():
             assert not res["errors"], f"{worker} - received error"
             offset_count = res["result"]["count"]
-            assert offset_count == all_count - 1, (
-                f"{worker} - offset=1 should return 1 fewer result"
-            )
+            assert (
+                offset_count == all_count - 1
+            ), f"{worker} - offset=1 should return 1 fewer result"
 
     def test_ordering_ascending(self, nfclient):
         """ordering='name' returns results sorted alphabetically."""
@@ -500,7 +516,9 @@ class TestCrudRead:
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
             names = [d["name"] for d in result["results"]]
-            assert names == sorted(names, key=str.lower), f"{worker} - results not sorted by name"
+            assert names == sorted(
+                names, key=str.lower
+            ), f"{worker} - results not sorted by name"
 
     def test_no_filters_returns_results(self, nfclient):
         """No filter returns all objects up to limit."""
@@ -675,9 +693,9 @@ class TestCrudUpdate:
             assert result["count"] == 1, f"{worker} - expected count=1"
             changes_entry = result["changes"][0]
             assert changes_entry["id"] == test_manufacturer
-            assert "name" in changes_entry["changes"], (
-                f"{worker} - expected 'name' in changes"
-            )
+            assert (
+                "name" in changes_entry["changes"]
+            ), f"{worker} - expected 'name' in changes"
             assert changes_entry["changes"]["name"]["new"] == new_name
 
         # verify the object was NOT modified
@@ -733,9 +751,9 @@ class TestCrudUpdate:
             result = res["result"]
             assert result.get("dry_run") is True
             changes = result["changes"][0]["changes"]
-            assert "name" not in changes, (
-                f"{worker} - expected no name change when value is unchanged"
-            )
+            assert (
+                "name" not in changes
+            ), f"{worker} - expected no name change when value is unchanged"
 
 
 # ---------------------------------------------------------------------------
@@ -816,9 +834,9 @@ class TestCrudDelete:
 
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
-            assert res["result"]["deleted"] == 0, (
-                f"{worker} - expected deleted=0 for non-existent ID"
-            )
+            assert (
+                res["result"]["deleted"] == 0
+            ), f"{worker} - expected deleted=0 for non-existent ID"
 
     def test_multiple_ids(self, nfclient):
         """Delete a list of IDs in a single call."""
@@ -913,9 +931,9 @@ class TestCrudGetChangelogs:
                 # action may be a string or a dict with "value" key depending on NetBox version
                 if isinstance(action, dict):
                     action = action.get("value")
-                assert action == "create", (
-                    f"{worker} - expected action=create, got {entry.get('action')}"
-                )
+                assert (
+                    action == "create"
+                ), f"{worker} - expected action=create, got {entry.get('action')}"
 
     def test_fields_filter(self, nfclient):
         """fields parameter restricts returned fields."""
@@ -970,9 +988,9 @@ class TestCrudGetChangelogs:
             assert not res["errors"], f"{worker} - received error"
             offset_results = res["result"]["results"]
             if len(all_results) >= 2 and offset_results:
-                assert offset_results[0]["id"] == all_results[1]["id"], (
-                    f"{worker} - offset pagination not working correctly"
-                )
+                assert (
+                    offset_results[0]["id"] == all_results[1]["id"]
+                ), f"{worker} - offset pagination not working correctly"
 
     def test_filter_list(self, nfclient):
         """List of filter dicts runs multiple queries and merges results."""
@@ -998,9 +1016,10 @@ class TestCrudGetChangelogs:
                 action = entry.get("action")
                 if isinstance(action, dict):
                     action = action.get("value")
-                assert action in ("create", "update"), (
-                    f"{worker} - unexpected action '{action}'"
-                )
+                assert action in (
+                    "create",
+                    "update",
+                ), f"{worker} - unexpected action '{action}'"
 
     def test_changelogs_reflect_created_object(self, nfclient):
         """Changelogs show the create action for a recently created object."""
@@ -1030,9 +1049,9 @@ class TestCrudGetChangelogs:
             for worker, res in ret.items():
                 assert not res["errors"], f"{worker} - received error"
                 result = res["result"]
-                assert result["count"] >= 1, (
-                    f"{worker} - expected at least 1 changelog entry for created manufacturer"
-                )
+                assert (
+                    result["count"] >= 1
+                ), f"{worker} - expected at least 1 changelog entry for created manufacturer"
         finally:
             obj = nb.dcim.manufacturers.get(mfr_id)
             if obj:

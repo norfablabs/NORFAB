@@ -1,4 +1,15 @@
 service: fastmcp
 
-fastmcp: {}
+# tools:
+#   policy:
+#     - service: nornir
+#       tasks: ["cli"]
+#       action: allow
+#     - service: netbox
+#       tasks: ["get*"]
+#       action: allow
+#     - service: "*"
+#       tasks: ["*"]
+#       action: reject
+
 uvicorn: {}

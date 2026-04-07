@@ -228,4 +228,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.workflow_worker.WorkflowWorker.run
+::: norfab.workers.workflow_worker.workflow_worker.WorkflowWorker.run

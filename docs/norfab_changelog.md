@@ -5,6 +5,10 @@
 1. Updating Netbox get_devices task to use pynetbox for fetching brief device info, fixing bug with pagination
 2. Enhancing Netbox get_devices to cache sites data to reduce amount of API calls
 3. Updating Netbox get_interfaces to use pynetbox for fetching brief interfaces info, fixing bug with pagination
+4. Refactoring Containerlab worker moving it to dedicated directory.
+5. Refactoring FastAPI worker moving it to dedicated directory.
+6. Refactoring Workflow worker moving it to dedicated directory.
+7. Refactoring FastMCP worker moving it to dedicated directory.
 
 ## FEATURES
 
@@ -29,10 +33,20 @@
    - `crud_delete` — delete one or multiple objects by ID, supports `dry_run` preview
    - `crud_get_changelogs` — retrieve object change history, supports NetBox 4.0+ with automatic fallback to older versions
 
+3. FastMCP service - adding MCP tool exposure policy via inventory `tools.policy`:
+
+  - `tools.policy` is an ordered list of policy entries with `service`, `tasks`, and `action` keys
+  - `service` accepts glob patterns matched against NorFab service names
+  - `tasks` accepts glob patterns matched against service task names
+  - `action` supports `allow` or `reject`
+  - Policies are evaluated top-down, first matching entry wins
+  - If no policy entry matches, tool is allowed by default
+
 ## BUGS
 
 1. Nornir parse ttp enhancing return result to be for parsed template only to avoid extra data from other templates
 2. Netbox `get_connection` fixing handling of remote interface when it has no lag associated with it
+3. Fixing nfcli `nowait` argument handling
 
 ---
 

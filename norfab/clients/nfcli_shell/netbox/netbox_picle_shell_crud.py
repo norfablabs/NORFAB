@@ -76,7 +76,9 @@ class CrudSearchShell(NetboxCommonArgs, NetboxClientRunJobArgs):
         description="Return brief representation",
         json_schema_extra={"presence": True},
     )
-    limit: StrictInt = Field(10, ge=1, le=100, description="Max results per object type")
+    limit: StrictInt = Field(
+        10, ge=1, le=100, description="Max results per object type"
+    )
 
     @staticmethod
     @listen_events

@@ -286,7 +286,7 @@ class NornirDiagramShell(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         _ = kwargs.pop("verbose_result", False)
-        nowait = kwargs.pop("nowait")
+        nowait = kwargs.pop("nowait", False)
         ctime = time.strftime("%Y-%m-%d_%H-%M-%S")
         FM = kwargs.pop("FM", [])
         n2g_data = {}  # to store collected from devices data

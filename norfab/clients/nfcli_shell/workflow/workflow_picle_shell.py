@@ -29,6 +29,7 @@ class WorkflowShowInventoryModel(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "workflow",
@@ -36,7 +37,12 @@ class WorkflowShowInventoryModel(ClientRunJobArgs):
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
@@ -51,6 +57,7 @@ class WorkflowShowVersionModel(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "workflow",
@@ -58,7 +65,12 @@ class WorkflowShowVersionModel(ClientRunJobArgs):
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
         return log_error_or_result(result, verbose_result=verbose_result)
 
 

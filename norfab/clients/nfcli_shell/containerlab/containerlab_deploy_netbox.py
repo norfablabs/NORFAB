@@ -83,6 +83,7 @@ class DeployNetboxCommand(GetContainerlabInventoryCommand):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         if not any(k in kwargs for k in ["devices", "filters", "tenant"]):
             raise ValueError(
@@ -103,7 +104,11 @@ class DeployNetboxCommand(GetContainerlabInventoryCommand):
             kwargs=kwargs,
             args=args,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True

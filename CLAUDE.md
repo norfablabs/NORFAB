@@ -48,9 +48,9 @@ norfab/
 │   ├── nornir_worker/  # Nornir network automation service
 │   ├── netbox_worker/  # NetBox DCIM/IPAM integration service
 │   ├── agent_worker/   # AI/LLM agent service (LangChain/Ollama)
-│   ├── fastapi_worker.py    # REST API service (FastAPI + Uvicorn)
-│   ├── fastmcp_worker.py    # Model Context Protocol (MCP) service
-│   ├── workflow_worker.py   # Workflow orchestration service
+│   ├── fastapi_worker/      # REST API service (FastAPI + Uvicorn)
+│   ├── fastmcp_worker/      # Model Context Protocol (MCP) service
+│   ├── workflow_worker/     # Workflow orchestration service
 │   ├── containerlab_worker/  # ContainerLab integration
 │   └── filesharing_worker/ # File sharing service
 ├── clients/
@@ -214,11 +214,11 @@ Workers are registered via Python entry points in `pyproject.toml`:
 [project.entry-points."norfab.workers"]
 "nornir"      = "norfab.workers.nornir_worker.nornir_worker:NornirWorker"
 "netbox"      = "norfab.workers.netbox_worker.netbox_worker:NetboxWorker"
-"fastapi"     = "norfab.workers.fastapi_worker:FastAPIWorker"
+"fastapi"     = "norfab.workers.fastapi_worker.fastapi_worker:FastAPIWorker"
 "agent"       = "norfab.workers.agent_worker.agent_worker:AgentWorker"
-"workflow"    = "norfab.workers.workflow_worker:WorkflowWorker"
+"workflow"    = "norfab.workers.workflow_worker.workflow_worker:WorkflowWorker"
 "containerlab"= "norfab.workers.containerlab_worker.containerlab_worker:ContainerlabWorker"
-"fastmcp"     = "norfab.workers.fastmcp_worker:FastMCPWorker"
+"fastmcp"     = "norfab.workers.fastmcp_worker.fastmcp_worker:FastMCPWorker"
 "filesharing" = "norfab.workers.filesharing_worker.filesharing_worker:FileSharingWorker"
 "fakenos"     = "norfab.workers.fakenos_worker.fakenos_worker:FakeNOSWorker"
 ```

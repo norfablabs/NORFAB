@@ -13,10 +13,10 @@ from pydantic import (
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from contextvars import ContextVar
 
-
 log = logging.getLogger(__name__)
 
 current_agent = ContextVar("current_agent", default=None)
+
 
 class ListToolsCommand(BaseModel):
     name: StrictStr = Field(None, descritpion="Tools glob pattern filter")
@@ -31,12 +31,18 @@ class ListToolsCommand(BaseModel):
             return agent.list_tools(**kwargs)
         return "Agent is not running"
 
+
 class ChatShellCommands(BaseModel):
-    list_tools: ListToolsCommand = Field(None, description="List agent tools", alias="list-tools")
+    list_tools: ListToolsCommand = Field(
+        None, description="List agent tools", alias="list-tools"
+    )
+
 
 class AgentChat(BaseModel):
     thread_id: StrictStr = Field(None, description="Chat identifier", alias="thread-id")
-    agent_name: StrictStr = Field(None, description="Name of the agent profile", alias="agent-name")
+    agent_name: StrictStr = Field(
+        None, description="Name of the agent profile", alias="agent-name"
+    )
 
     @staticmethod
     def run(message, **kwargs):

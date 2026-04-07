@@ -2154,9 +2154,11 @@ class TestNornirParseTasks:
         )
         pprint.pprint(ret)
 
-        assert ret["nornir-worker-1"]["result"]["ceos-spine-1"] == [{'source': 'local'}]
-        assert ret["nornir-worker-1"]["result"]["ceos-spine-2"] == [{'source': 'local'}]
-        assert ret["nornir-worker-2"]["result"] == {}, f"{nornir-worker-2} returned unexpected results"
+        assert ret["nornir-worker-1"]["result"]["ceos-spine-1"] == [{"source": "local"}]
+        assert ret["nornir-worker-1"]["result"]["ceos-spine-2"] == [{"source": "local"}]
+        assert (
+            ret["nornir-worker-2"]["result"] == {}
+        ), f"{nornir-worker-2} returned unexpected results"
 
     def test_nornir_parse_ttp_no_matching_hosts(self, nfclient):
         ret = nfclient.run_job(

@@ -53,6 +53,7 @@ class DeployCommand(ClientRunJobArgs):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -61,7 +62,11 @@ class DeployCommand(ClientRunJobArgs):
             kwargs=kwargs,
             args=args,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True
@@ -102,6 +107,7 @@ class DestroyCommand(ClientRunJobArgs):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -110,7 +116,11 @@ class DestroyCommand(ClientRunJobArgs):
             kwargs=kwargs,
             args=args,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True
@@ -151,6 +161,7 @@ class RestartCommand(ClientRunJobArgs):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -159,7 +170,11 @@ class RestartCommand(ClientRunJobArgs):
             kwargs=kwargs,
             args=args,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True
@@ -200,6 +215,7 @@ class SaveCommand(ClientRunJobArgs):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -208,7 +224,11 @@ class SaveCommand(ClientRunJobArgs):
             kwargs=kwargs,
             args=args,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True
@@ -253,6 +273,7 @@ class GetNornirInventoryCommand(ClientRunJobArgs):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         # extract groups from kwargs
         groups = kwargs.pop("groups", None)
@@ -268,7 +289,11 @@ class GetNornirInventoryCommand(ClientRunJobArgs):
             kwargs=kwargs,
             args=args,
             uuid=uuid,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True
@@ -308,6 +333,7 @@ class ShowContainers(ClientRunJobArgs):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -315,7 +341,11 @@ class ShowContainers(ClientRunJobArgs):
             workers=workers,
             kwargs=kwargs,
             args=args,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         ret = log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True
@@ -343,6 +373,7 @@ class ShowRunningLabs(ClientRunJobArgs):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
+        nowait = kwargs.pop("nowait", False)
 
         result = NFCLIENT.run_job(
             "containerlab",
@@ -350,7 +381,11 @@ class ShowRunningLabs(ClientRunJobArgs):
             workers=workers,
             kwargs=kwargs,
             args=args,
+            nowait=nowait,
         )
+
+        if nowait:
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=True

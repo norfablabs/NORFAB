@@ -72,6 +72,7 @@ def service_tasks_discovery(
                     tasks.extend(wres["result"])
 
             # create tools for discovered tasks
+            policy = worker.fastmcp_inventory.get("tools", {}).get("policy", [])
             for task in tasks:
                 # skip task tool creation if set to false
                 if task["mcp"] is False:
@@ -92,6 +93,19 @@ def service_tasks_discovery(
                 # skip already discovered tasks
                 if task_tool["name"] in result[task["service"]]:
                     continue
+                # evaluate policy entries; first match wins, default is allow
+                if policy:
+                    action = "allow"  # default if no rule matches
+                    for rule in policy:
+                        if fnmatch(task["service"], rule.get("service", "*")):
+                            if any(
+                                fnmatch(task["name"], p)
+                                for p in rule.get("tasks", ["*"])
+                            ):
+                                action = rule.get("action", "allow")
+                                break
+                    if action == "reject":
+                        continue
                 # save discovered task to return results
                 result[task["service"]][task_tool["name"]] = {
                     "tool": types.Tool(**task_tool),
@@ -302,9 +316,11 @@ class FastMCPWorker(NFPWorker):
         It registers two MCP server endpoints:
 
           - `list_tools`: Asynchronously returns a list of available
-            tools by aggregating all tools from `self.norfab_services_tasks`.
+            tools by aggregating all tools from `self.norfab_services_tasks`,
+            filtered by the inventory ``tools.allow`` glob patterns.
           - `call_tool`: Asynchronously handles tool invocation requests by
-            parsing the tool name, extracting the corresponding service and
+            parsing the tool name, checking it against the ``tools.allow``
+            inventory patterns, extracting the corresponding service and
             task, and running the job using `self.client.run_job`.
 
         The FastMCP server is started in a separate thread using the

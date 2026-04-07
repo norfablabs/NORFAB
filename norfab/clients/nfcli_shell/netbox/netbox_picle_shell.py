@@ -86,7 +86,7 @@ class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
         nowait = kwargs.pop("nowait", False)
         verbose_result = kwargs.pop("verbose_result", False)
 
-        ret = NFCLIENT.run_job(
+        result = NFCLIENT.run_job(
             "netbox",
             "graphql",
             workers=workers,
@@ -96,7 +96,10 @@ class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
             nowait=nowait,
         )
 
-        return log_error_or_result(ret, verbose_result=verbose_result)
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
         subshell = True

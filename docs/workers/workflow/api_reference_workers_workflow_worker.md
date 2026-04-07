@@ -1,1 +1,1 @@
-::: norfab.workers.workflow_worker
+::: norfab.workers.workflow_worker.workflow_worker

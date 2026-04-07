@@ -12,5 +12,5 @@ class TestClientApi:
 
         answer = agent.invoke("Tell me who you are in 5 words")
         print(f"AGENT ANSWER: '{answer}'")
-        
+
         assert answer and isinstance(answer, str), f"Unexpected answer: '{answer}'"

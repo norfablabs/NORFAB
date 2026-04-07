@@ -62,7 +62,7 @@ class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel, ClientRunJobAr
         result = NorniHostsFilters.get_nornir_hosts(**kwargs)
 
         if nowait:
-            return result
+            return result, Outputters.outputter_nested
 
         # form table results
         if table:
@@ -164,9 +164,10 @@ class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
+            nowait=nowait,
         )
         if nowait:
-            return result
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 
@@ -257,7 +258,7 @@ class RefreshNornirModel(ClientRunJobArgs):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
-        nowait = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("external_inventories"), str):
             kwargs["external_inventories"] = [kwargs["external_inventories"]]
@@ -269,9 +270,10 @@ class RefreshNornirModel(ClientRunJobArgs):
             workers=workers,
             timeout=timeout,
             uuid=uuid,
+            nowait=nowait,
         )
         if nowait:
-            return result
+            return result, Outputters.outputter_nested
 
         return log_error_or_result(result, verbose_result=verbose_result)
 

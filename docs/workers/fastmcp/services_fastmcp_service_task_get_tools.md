@@ -82,4 +82,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.fastmcp_worker.FastMCPWorker.get_tools
+::: norfab.workers.fastmcp_worker.fastmcp_worker.FastMCPWorker.get_tools
