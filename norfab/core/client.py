@@ -691,9 +691,6 @@ def handle_response(client: object, juuid: str, status: str, payload: dict):
             workers_dispatched=workers_list,
             started_ts=time.ctime(),
         )
-        log.info(
-            f"{client.name} - Job {juuid} dispatched to {len(workers_list)} worker(s)"
-        )
         log.debug(f"{client.name} - job {juuid} dispatched to workers: {workers_list}")
         return
 

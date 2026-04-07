@@ -98,4 +98,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.containerlab_worker.ContainerlabWorker.destroy_lab
+::: norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.destroy_lab

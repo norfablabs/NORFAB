@@ -360,15 +360,19 @@ class NetboxConnectionsTasks:
                     connection["provider"] = endpoint["name"]
                 # find matching remote virtual interface for LAG subif
                 elif "." in interface_name and parent["type"] == "lag":
-                    subif_id = interface_name.split(".")[1]
-                    for remote_child in endpoint["lag"]["child_interfaces"]:
-                        if remote_child["name"].endswith(f".{subif_id}"):
-                            connection["remote_interface"] = remote_child["name"]
-                            break
-                    # no matching subinterface found, associate child interface with remote interface
+                    if endpoint["lag"]:
+                        subif_id = interface_name.split(".")[1]
+                        for remote_child in endpoint["lag"]["child_interfaces"]:
+                            if remote_child["name"].endswith(f".{subif_id}"):
+                                connection["remote_interface"] = remote_child["name"]
+                                break
+                        # no matching subinterface found, associate child interface with remote interface
+                        else:
+                            connection["remote_interface"] = endpoint["lag"]["name"]
+                            connection["remote_termination_type"] = "lag"
+                    # no remote lag found, associate child interface with remote interface
                     else:
-                        connection["remote_interface"] = endpoint["lag"]["name"]
-                        connection["remote_termination_type"] = "lag"
+                        connection["remote_interface"] = endpoint["name"]
                 # find matching remote virtual interface for physical interface subif
                 elif "." in interface_name:
                     subif_id = interface_name.split(".")[1]

@@ -130,4 +130,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.containerlab_worker.ContainerlabWorker.get_nornir_inventory
+::: norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.get_nornir_inventory

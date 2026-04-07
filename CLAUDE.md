@@ -51,7 +51,7 @@ norfab/
 │   ├── fastapi_worker.py    # REST API service (FastAPI + Uvicorn)
 │   ├── fastmcp_worker.py    # Model Context Protocol (MCP) service
 │   ├── workflow_worker.py   # Workflow orchestration service
-│   ├── containerlab_worker.py  # ContainerLab integration
+│   ├── containerlab_worker/  # ContainerLab integration
 │   └── filesharing_worker/ # File sharing service
 ├── clients/
 │   ├── nfcli_shell/nfcli_shell_client.py  # Interactive CLI (nfcli)
@@ -217,7 +217,7 @@ Workers are registered via Python entry points in `pyproject.toml`:
 "fastapi"     = "norfab.workers.fastapi_worker:FastAPIWorker"
 "agent"       = "norfab.workers.agent_worker.agent_worker:AgentWorker"
 "workflow"    = "norfab.workers.workflow_worker:WorkflowWorker"
-"containerlab"= "norfab.workers.containerlab_worker:ContainerlabWorker"
+"containerlab"= "norfab.workers.containerlab_worker.containerlab_worker:ContainerlabWorker"
 "fastmcp"     = "norfab.workers.fastmcp_worker:FastMCPWorker"
 "filesharing" = "norfab.workers.filesharing_worker.filesharing_worker:FileSharingWorker"
 "fakenos"     = "norfab.workers.fakenos_worker.fakenos_worker:FakeNOSWorker"

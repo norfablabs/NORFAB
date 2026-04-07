@@ -295,4 +295,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.containerlab_worker.ContainerlabWorker.inspect
+::: norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.inspect

@@ -240,4 +240,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.containerlab_worker.ContainerlabWorker.deploy
+::: norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.deploy

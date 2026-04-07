@@ -261,4 +261,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.containerlab_worker.ContainerlabWorker.deploy_netbox
+::: norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.deploy_netbox

@@ -112,4 +112,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.containerlab_worker.ContainerlabWorker.restart_lab
+::: norfab.workers.containerlab_worker.containerlab_worker.ContainerlabWorker.restart_lab

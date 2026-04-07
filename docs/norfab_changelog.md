@@ -19,9 +19,20 @@
    - Configuration via `client -> agent_profiles` section in `inventory.yaml`
    - New `norfab[clientagent]` optional dependency group
 
+2. Adding new Netbox CRUD tasks for generic REST API access to any NetBox object type:
+
+   - `crud_list_objects` — lists all available NetBox object types from the OpenAPI schema, results cached for 24 hours
+   - `crud_search` — free-text search across multiple object types simultaneously using the `q` parameter
+   - `crud_read` — retrieve objects by ID(s) or filter dict(s), supports pagination and field selection
+   - `crud_create` — create one or multiple objects in a single request, supports `dry_run` preview
+   - `crud_update` — partial (PATCH) or full (PUT) update of one or multiple objects by ID, supports `dry_run` diff
+   - `crud_delete` — delete one or multiple objects by ID, supports `dry_run` preview
+   - `crud_get_changelogs` — retrieve object change history, supports NetBox 4.0+ with automatic fallback to older versions
+
 ## BUGS
 
 1. Nornir parse ttp enhancing return result to be for parsed template only to avoid extra data from other templates
+2. Netbox `get_connection` fixing handling of remote interface when it has no lag associated with it
 
 ---
 
