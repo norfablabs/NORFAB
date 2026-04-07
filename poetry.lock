@@ -175,6 +175,23 @@ frozenlist = ">=1.1.0"
 typing-extensions = {version = ">=4.2", markers = "python_version < \"3.13\""}
 
 [[package]]
+name = "aiosqlite"
+version = "0.22.1"
+description = "asyncio bridge to the standard sqlite3 module"
+optional = true
+python-versions = ">=3.9"
+groups = ["main"]
+markers = "extra == \"clientagent\""
+files = [
+    {file = "aiosqlite-0.22.1-py3-none-any.whl", hash = "sha256:21c002eb13823fad740196c5a2e9d8e62f6243bd9e7e4a1f87fb5e44ecb4fceb"},
+    {file = "aiosqlite-0.22.1.tar.gz", hash = "sha256:043e0bd78d32888c0a9ca90fc788b38796843360c855a7262a532813133a0650"},
+]
+
+[package.extras]
+dev = ["attribution (==1.8.0)", "black (==25.11.0)", "build (>=1.2)", "coverage[toml] (==7.10.7)", "flake8 (==7.3.0)", "flake8-bugbear (==24.12.12)", "flit (==3.12.0)", "mypy (==1.19.0)", "ufmt (==2.8.0)", "usort (==1.0.8.post1)"]
+docs = ["sphinx (==8.1.3)", "sphinx-mdinclude (==0.6.2)"]
+
+[[package]]
 name = "annotated-doc"
 version = "0.0.4"
 description = "Document parameters, class attributes, return types, and variables inline, with Annotated."
@@ -2304,6 +2321,24 @@ files = [
 [package.dependencies]
 langchain-core = ">=0.2.38"
 ormsgpack = ">=1.12.0"
+
+[[package]]
+name = "langgraph-checkpoint-sqlite"
+version = "3.0.3"
+description = "Library with a SQLite implementation of LangGraph checkpoint saver."
+optional = true
+python-versions = ">=3.10"
+groups = ["main"]
+markers = "extra == \"clientagent\""
+files = [
+    {file = "langgraph_checkpoint_sqlite-3.0.3-py3-none-any.whl", hash = "sha256:02eb683a79aa6fcda7cd4de43861062a5d160dbbb990ef8a9fd76c979998a952"},
+    {file = "langgraph_checkpoint_sqlite-3.0.3.tar.gz", hash = "sha256:438c234d37dabda979218954c9c6eb1db73bee6492c2f1d3a00552fe23fa34ed"},
+]
+
+[package.dependencies]
+aiosqlite = ">=0.20"
+langgraph-checkpoint = ">=3,<5.0.0"
+sqlite-vec = ">=0.1.6"
 
 [[package]]
 name = "langgraph-prebuilt"
@@ -5822,6 +5857,22 @@ pymysql = ["pymysql"]
 sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
+name = "sqlite-vec"
+version = "0.1.9"
+description = ""
+optional = true
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"clientagent\""
+files = [
+    {file = "sqlite_vec-0.1.9-py3-none-macosx_10_6_x86_64.whl", hash = "sha256:1b62a7f0a060d9475575d4e599bbf94a13d85af896bc1ce86ee80d1b5b48e5fb"},
+    {file = "sqlite_vec-0.1.9-py3-none-macosx_11_0_arm64.whl", hash = "sha256:1d52e30513bae4cc9778ddbf6145610434081be4c3afe57cd877893bad9f6b6c"},
+    {file = "sqlite_vec-0.1.9-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4e921e592f24a5f9a18f590b6ddd530eb637e2d474e3b1972f9bbeb773aa3cb9"},
+    {file = "sqlite_vec-0.1.9-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux1_x86_64.whl", hash = "sha256:1515727990b49e79bcaf75fdee2ffc7d461f8b66905013231251f1c8938e7786"},
+    {file = "sqlite_vec-0.1.9-py3-none-win_amd64.whl", hash = "sha256:4a28dc12fa4b53d7b1dced22da2488fade444e96b5d16fd2d698cd670675cf32"},
+]
+
+[[package]]
 name = "sse-starlette"
 version = "3.3.2"
 description = "SSE plugin for Starlette"
@@ -7129,7 +7180,7 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 
 [extras]
 agentservice = ["datamodel-code-generator", "langchain", "langchain-community", "langchain-ollama", "ollama"]
-clientagent = ["langchain-anthropic", "langchain-mcp-adapters", "langchain-ollama", "langchain-openai", "langgraph"]
+clientagent = ["langchain-anthropic", "langchain-mcp-adapters", "langchain-ollama", "langchain-openai", "langgraph", "langgraph-checkpoint-sqlite"]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-material-extensions", "mkdocstrings", "pygments", "pymdown-extensions"]
 fakenosservice = ["fakenos"]
 fastapiservice = ["diskcache", "fastapi", "python-multipart", "uvicorn"]
@@ -7144,4 +7195,4 @@ tui = ["textual"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<=3.14"
-content-hash = "d18f57465fdf1c0c69022d1bc0b98a583cc78cd339d2239ff9d9acc019d1a1ca"
+content-hash = "dc864cb13d509bc0306b8a5f3e63609d0fe0c12b79aac73c0734ed923a1dee01"
