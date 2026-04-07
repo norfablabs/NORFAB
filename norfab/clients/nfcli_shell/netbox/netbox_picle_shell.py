@@ -27,6 +27,7 @@ from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesS
 from .netbox_picle_shell_create_ip import CreateIp
 from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
 from .netbox_picle_shell_create_prefix import CreatePrefixShell
+from .netbox_picle_shell_crud import CrudCommands
 from .netbox_picle_shell_get_bgp_peerings import GetBGPPeerings
 from .netbox_picle_shell_get_circuits import GetCircuits
 from .netbox_picle_shell_get_connections import GetConnections
@@ -292,6 +293,9 @@ class NetboxServiceCommands(BaseModel):
         None, description="Work with Netbox service cached data"
     )
     create: CreateCommands = Field(None, description="Create objects in Netbox")
+    crud: CrudCommands = Field(
+        None, description="Generic CRUD operations on NetBox objects"
+    )
 
     class PicleConfig:
         subshell = True

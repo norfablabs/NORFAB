@@ -26,6 +26,7 @@ from .design_tasks import NetboxDesignTasks
 from .devices_tasks import NetboxDevicesTasks
 from .interfaces_tasks import NetboxInterfacesTasks
 from .ip_tasks import NetboxIpTasks
+from .netbox_crud import NetboxCrudTasks
 from .netbox_exceptions import UnsupportedNetboxVersion
 from .netbox_models import NetboxFastApiArgs
 from .nornir_inventory_tasks import NetboxNornirInventoryTasks
@@ -94,6 +95,7 @@ class NetboxWorker(
     NetboxContainerlabInventoryTasks,
     NetboxIpTasks,
     NetboxBranchTasks,
+    NetboxCrudTasks,
 ):
     """
     NetboxWorker class for interacting with Netbox API and managing inventory.
