@@ -1,5 +1,11 @@
+import json
 import logging
-from typing import Union
+import concurrent.futures
+from typing import Any, Union
+
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -10,19 +16,299 @@ from .netbox_models import NetboxFastApiArgs
 log = logging.getLogger(__name__)
 
 
+CONNECTIONS_QUERY = """
+query ConnectionsQuery(
+    $devices: [String!]!
+    $interface_regex: String!
+    $offset: Int!
+    $limit: Int!
+) {
+    interface: interface_list(
+        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        pagination: { offset: $offset, limit: $limit }
+    ) {
+        name
+        type
+        device {name, status}
+        member_interfaces {
+            name
+            connected_endpoints {
+                __typename
+                ... on ProviderNetworkType {name}
+                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
+            }
+        }
+        parent {
+            name
+            type
+            member_interfaces {
+                name
+                connected_endpoints {
+                    __typename
+                    ... on ProviderNetworkType {name}
+                    ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
+                }
+            }
+            connected_endpoints {
+                __typename
+                ... on ProviderNetworkType {name}
+                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
+            }
+        }
+        connected_endpoints {
+            __typename
+            ... on ProviderNetworkType {name}
+            ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
+        }
+        link_peers {
+            __typename
+            ... on InterfaceType {name device {name, status}}
+            ... on FrontPortType {name device {name, status}}
+            ... on RearPortType {name device {name, status}}
+        }
+        cable {
+            type
+            status
+            tenant {name}
+            label
+            tags {name}
+            custom_fields
+        }
+    }
+    consoleport: console_port_list(
+        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        pagination: { offset: $offset, limit: $limit }
+    ) {
+        name
+        device {name, status}
+        type
+        connected_endpoints {
+            __typename
+            ... on ConsoleServerPortType {name device {name, status}}
+        }
+        link_peers {
+            __typename
+            ... on ConsoleServerPortType {name device {name, status}}
+            ... on FrontPortType {name device {name, status}}
+            ... on RearPortType {name device {name, status}}
+        }
+        cable {
+            type
+            status
+            tenant {name}
+            label
+            tags {name}
+            length
+            length_unit
+            custom_fields
+        }
+    }
+    consoleserverport: console_server_port_list(
+        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        pagination: { offset: $offset, limit: $limit }
+    ) {
+        name
+        device {name, status}
+        type
+        connected_endpoints {
+            __typename
+            ... on ConsolePortType {name device {name, status}}
+        }
+        link_peers {
+            __typename
+            ... on ConsolePortType {name device {name, status}}
+            ... on FrontPortType {name device {name, status}}
+            ... on RearPortType {name device {name, status}}
+        }
+        cable {
+            type
+            status
+            tenant {name}
+            label
+            tags {name}
+            length
+            length_unit
+            custom_fields
+        }
+    }
+    poweroutlet: power_outlet_list(
+        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        pagination: { offset: $offset, limit: $limit }
+    ) {
+        name
+        device {name, status}
+        type
+        connected_endpoints {
+            __typename
+            ... on PowerPortType {name device {name, status}}
+        }
+        link_peers {
+            __typename
+            ... on PowerPortType {name device {name, status}}
+        }
+        cable {
+            type
+            status
+            tenant {name}
+            label
+            tags {name}
+            length
+            length_unit
+            custom_fields
+        }
+    }
+}
+"""
+
+
 class NetboxConnectionsTasks:
+    def _graphql_fetch_page(
+        self,
+        session: requests.Session,
+        nb_url: str,
+        ssl_verify: bool,
+        query: str,
+        variables: dict,
+    ) -> dict[str, Any]:
+        response = session.post(
+            url=f"{nb_url}/graphql/",
+            json={"query": query, "variables": variables},
+            verify=ssl_verify,
+            timeout=(self.netbox_connect_timeout, self.netbox_read_timeout),
+        )
+        response.raise_for_status()
+        response_payload = response.json()
+        if response_payload.get("errors"):
+            raise RuntimeError(
+                f"{self.name} - GraphQL query returned errors: {response_payload['errors']}"
+            )
+        return response_payload.get("data", {})
+
+    def _netbox_graphql(
+        self,
+        job: Job,
+        instance: str,
+        query: str,
+        variables: Union[None, dict] = None,
+        dry_run: bool = False,
+    ) -> Result:
+        nb_params = self._get_instance_params(instance)
+        ret = Result(task=f"{self.name}:graphql", resources=[instance])
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Token {nb_params['token']}",
+        }
+        payload = {
+            "query": query,
+            "variables": variables or {},
+        }
+
+        base_variables = dict(variables or {})
+        offset = int(base_variables.pop("offset", 0))
+        limit = int(base_variables.pop("limit", 200))
+
+        if dry_run:
+            ret.result = {
+                "url": f"{nb_params['url']}/graphql/",
+                "data": json.dumps(payload),
+                "verify": nb_params.get("ssl_verify", True),
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": f"Token ...{nb_params['token'][-6:]}",
+                },
+            }
+            return ret
+
+        retry = Retry(
+            total=3,
+            connect=3,
+            read=3,
+            backoff_factor=0.5,
+            status_forcelist=(429, 500, 502, 503, 504),
+            allowed_methods=frozenset(["POST"]),
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session = requests.Session()
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+        session.headers.update(headers)
+
+        try:
+            aggregated_data: dict[str, Any] = {}
+
+            # Use a bounded executor pool to fetch multiple pages per iteration.
+            max_workers = min(8, max(2, int(base_variables.pop("parallel_workers", 4))))
+            ssl_verify = nb_params.get("ssl_verify", True)
+            nb_url = nb_params["url"]
+
+            while True:
+                batch_offsets = [offset + (i * limit) for i in range(max_workers)]
+                pages: list[tuple[int, dict[str, Any]]] = []
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+                    futures: dict[concurrent.futures.Future, int] = {}
+                    for page_offset in batch_offsets:
+                        future = pool.submit(
+                            self._graphql_fetch_page,
+                            session,
+                            nb_url,
+                            ssl_verify,
+                            query,
+                            {
+                                **base_variables,
+                                "offset": page_offset,
+                                "limit": limit,
+                            },
+                        )
+                        futures[future] = page_offset
+
+                    for future in concurrent.futures.as_completed(futures):
+                        page_offset = futures[future]
+                        pages.append((page_offset, future.result()))
+
+                any_data_returned = False
+                has_full_page = False
+
+                for _, data in sorted(pages, key=lambda item: item[0]):
+                    page_sizes: list[int] = []
+                    for key, value in data.items():
+                        if isinstance(value, list):
+                            if value:
+                                any_data_returned = True
+                            aggregated_data.setdefault(key, [])
+                            aggregated_data[key].extend(value)
+                            page_sizes.append(len(value))
+                        else:
+                            aggregated_data[key] = value
+
+                    if page_sizes and any(size == limit for size in page_sizes):
+                        has_full_page = True
+
+                if not any_data_returned:
+                    break
+
+                if not has_full_page:
+                    break
+
+                offset += max_workers * limit
+
+            ret.result = aggregated_data
+        finally:
+            session.close()
+
+        return ret
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_connections(
         self,
         job: Job,
         devices: list[str],
+        interface_regex: Union[None, str] = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
-        cables: bool = False,
         cache: Union[None, bool, str] = None,
-        include_virtual: bool = True,
-        interface_regex: Union[None, str] = None,
     ) -> Result:
         """
         Retrieve interface connection details for specified devices from Netbox.
@@ -41,8 +327,6 @@ class NetboxConnectionsTasks:
             devices (list): List of device names to retrieve connections for.
             instance (str, optional): Netbox instance name for the GraphQL query.
             dry_run (bool, optional): If True, perform a dry run without making actual changes.
-            cables (bool, optional): if True includes interfaces' directly attached cables and peers details
-            include_virtual (bool, optional): if True include connections for virtual and LAG interfaces
             interface_regex (str, optional): Regex pattern to match interfaces, console ports and
                 console server ports by name, case insensitive.
 
@@ -88,170 +372,33 @@ class NetboxConnectionsTasks:
             resources=[instance],
         )
 
-        # form lists of fields to request from netbox
-        cable_fields = """
-            cable {
-                type
-                status
-                tenant {name}
-                label
-                tags {name}
-                length
-                length_unit
-                custom_fields
-            }
-        """
-        interfaces_fields = [
-            "name",
-            "type",
-            "device {name, status}",
-            """
-            member_interfaces {
-              name
-              connected_endpoints {
-                __typename
-                ... on ProviderNetworkType {name}
-                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
-              }
-            }
-            """,
-            """
-            parent {
-              name
-              type
-              member_interfaces {
-                name
-                connected_endpoints {
-                  __typename
-                  ... on ProviderNetworkType {name}
-                  ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
-                }
-              }
-              connected_endpoints {
-                __typename
-                ... on ProviderNetworkType {name}
-                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
-              }
-            }
-            """,
-            """
-            connected_endpoints {
-                __typename 
-                ... on ProviderNetworkType {name}
-                ... on InterfaceType {name, device {name, status}, child_interfaces {name}, lag {name child_interfaces {name}}}
-            }
-            """,
-            """
-            link_peers {
-                __typename
-                ... on InterfaceType {name device {name, status}}
-                ... on FrontPortType {name device {name, status}}
-                ... on RearPortType {name device {name, status}}
-            }
-            """,
-        ]
-        console_ports_fields = [
-            "name",
-            "device {name, status}",
-            "type",
-            """connected_endpoints {
-              __typename 
-              ... on ConsoleServerPortType {name device {name, status}}
-            }""",
-            """link_peers {
-              __typename
-              ... on ConsoleServerPortType {name device {name, status}}
-              ... on FrontPortType {name device {name, status}}
-              ... on RearPortType {name device {name, status}}
-            }""",
-        ]
-        console_server_ports_fields = [
-            "name",
-            "device {name, status}",
-            "type",
-            """connected_endpoints {
-              __typename 
-              ... on ConsolePortType {name device {name, status}}
-            }""",
-            """link_peers {
-              __typename
-              ... on ConsolePortType {name device {name, status}}
-              ... on FrontPortType {name device {name, status}}
-              ... on RearPortType {name device {name, status}}
-            }""",
-        ]
-        power_outlet_fields = [
-            "name",
-            "device {name, status}",
-            "type",
-            """connected_endpoints {
-              __typename 
-              ... on PowerPortType {name device {name, status}}
-            }""",
-            """link_peers {
-              __typename
-              ... on PowerPortType {name device {name, status}}
-            }""",
-        ]
-
-        # check if need to include cables info
-        if cables is True:
-            interfaces_fields.append(cable_fields)
-            console_ports_fields.append(cable_fields)
-            console_server_ports_fields.append(cable_fields)
-            power_outlet_fields.append(cable_fields)
-
-        # form query dictionary with aliases to get data from Netbox
-        dlist = str(devices).replace("'", '"')  # swap quotes
-        if self.nb_version[instance] >= (4, 4, 0):
-            if interface_regex:
-                filters = (
-                    "{device: {name: {in_list: "
-                    + dlist
-                    + "}}, "
-                    + "name: {i_regex: "
-                    + f'"{interface_regex}"'
-                    + "}}"
-                )
-            else:
-                filters = "{device: {name: {in_list: " + dlist + "}}}"
-        else:
+        # query uses inline filters with variables for devices and interface regex
+        if not self.nb_version[instance] >= (4, 4, 0):
             raise UnsupportedNetboxVersion(
                 f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
                 f"minimum required version is {self.compatible_ge_v4}"
             )
 
-        queries = {
-            "interface": {
-                "obj": "interface_list",
-                "filters": filters,
-                "fields": interfaces_fields,
-            },
-            "consoleport": {
-                "obj": "console_port_list",
-                "filters": filters,
-                "fields": console_ports_fields,
-            },
-            "consoleserverport": {
-                "obj": "console_server_port_list",
-                "filters": filters,
-                "fields": console_server_ports_fields,
-            },
-            "poweroutlet": {
-                "obj": "power_outlet_list",
-                "filters": filters,
-                "fields": power_outlet_fields,
-            },
+        variables = {
+            "devices": devices,
+            "interface_regex": interface_regex or ".*",
+            "offset": 0,
+            "limit": 50,
         }
 
-        # retrieve full list of devices interface with all cables
-        query_result = self.graphql(
-            job=job, queries=queries, instance=instance, dry_run=dry_run
+        # retrieve full list of ports and process client-side to map connections
+        query_result = self._netbox_graphql(
+            job=job,
+            query=CONNECTIONS_QUERY,
+            variables=variables,
+            instance=instance,
+            dry_run=dry_run,
         )
 
         # return dry run result
         if dry_run:
-            return query_result
+            ret.result = query_result
+            return ret
 
         all_ports = query_result.result
         if not all_ports:
@@ -300,7 +447,7 @@ class NetboxConnectionsTasks:
                     ]
 
                 # add cable and its peer details
-                if cables:
+                if link_peers:
                     peer_termination_type = link_peers[0]["__typename"].lower()
                     peer_termination_type = peer_termination_type.replace("type", "")
                     cable["peer_termination_type"] = peer_termination_type
@@ -308,7 +455,7 @@ class NetboxConnectionsTasks:
                     cable["peer_interface"] = link_peers[0].get("name")
                     if len(link_peers) > 1:  # handle breakout cable
                         cable["peer_interface"] = [i["name"] for i in link_peers]
-                    connection["cable"] = cable
+                connection["cable"] = cable
 
                 # add physical connection to the results
                 ret.result[device_name][port_name] = connection
@@ -318,8 +465,7 @@ class NetboxConnectionsTasks:
             for port in ports:
                 # add child virtual interfaces connections
                 if (
-                    not include_virtual
-                    or port["type"] != "virtual"
+                    port["type"] != "virtual"
                     or not port["parent"]
                 ):
                     continue
@@ -390,7 +536,7 @@ class NetboxConnectionsTasks:
         # extract LAG interfaces connections
         for port_type, ports in all_ports.items():
             for port in ports:
-                if not include_virtual or port["type"] != "lag":
+                if port["type"] != "lag":
                     continue
                 device_name = port["device"]["name"]
                 interface_name = port["name"]

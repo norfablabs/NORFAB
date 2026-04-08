@@ -91,6 +91,7 @@ langgraph-checkpoint-sqlite = { version = "3.0.3", optional = true }
 # Netbox Service Dependencies
 diskcache = { version = "5.6.3", optional = true }
 pynetbox = { version = "7.6.1", optional = true }
+httpx = { version = "0.28.1", optional = true }
 
 # FastAPI Service Dependencies
 fastapi = { version = "0.135.1", optional = true, extras = ["standard"] }
@@ -173,6 +174,7 @@ netboxservice = [
     "requests",
     "pynetbox",
     "diskcache",
+    "httpx",
     "datamodel-code-generator"
 ]
 fastapiservice = [
@@ -244,6 +246,7 @@ full = [
     "requests",
     "pynetbox",
     "diskcache",
+    "httpx",
     "robotframework",
     "langchain",
     "langchain-community",

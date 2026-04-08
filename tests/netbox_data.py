@@ -408,6 +408,15 @@ ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
 
 vlans = [{"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)]
 
+# generated lab topology for scale testing
+bulk_connection_device_names = [f"bulk-conn-{i:02d}" for i in range(1, 11)]
+bulk_connection_pair_link_count = 40
+bulk_connection_pairs = [
+    (left, right)
+    for left in bulk_connection_device_names[:5]
+    for right in bulk_connection_device_names[5:]
+]
+
 interfaces = [
     {"name": "loopback0", "device": {"name": "fceos4"}, "type": "virtual"},
     {"name": "loopback0", "device": {"name": "fceos5"}, "type": "virtual"},
@@ -587,6 +596,23 @@ interfaces.extend(
             "description": f"Sub-Interface {i} description",
         }
         for i in range(1, 11)
+    ]
+)
+
+# append 1000base-t interfaces for generated 10-device, 1000-connection topology
+interfaces.extend(
+    [
+        {
+            "name": f"eth{pair_index * bulk_connection_pair_link_count + link_index:04d}",
+            "device": {"name": endpoint_device},
+            "type": "1000base-t",
+            "mtu": 1500,
+        }
+        for pair_index, (left_device, right_device) in enumerate(
+            bulk_connection_pairs, start=1
+        )
+        for link_index in range(1, bulk_connection_pair_link_count + 1)
+        for endpoint_device in (left_device, right_device)
     ]
 )
 
@@ -1257,6 +1283,35 @@ connections = [
     },
 ]
 
+# append 1000 simple point-to-point connections (single port A to single port B)
+connections.extend(
+    [
+        {
+            "type": "cat6a",
+            "a_terminations": [
+                {
+                    "device": left_device,
+                    "interface": f"eth{pair_index * bulk_connection_pair_link_count + link_index:04d}",
+                    "termination_type": "dcim.interface",
+                }
+            ],
+            "b_terminations": [
+                {
+                    "device": right_device,
+                    "interface": f"eth{pair_index * bulk_connection_pair_link_count + link_index:04d}",
+                    "termination_type": "dcim.interface",
+                }
+            ],
+            "status": "connected",
+            "tenant": {"slug": "saltnornir"},
+        }
+        for pair_index, (left_device, right_device) in enumerate(
+            bulk_connection_pairs, start=1
+        )
+        for link_index in range(1, bulk_connection_pair_link_count + 1)
+    ]
+)
+
 devices = [
     {
         "name": "fceos4",
@@ -1573,6 +1628,24 @@ for i in range(10):
         }
     )
 
+# append 10 extra devices used by generated 1000-connection payload
+devices.extend(
+    [
+        {
+            "name": device_name,
+            "device_type": {"slug": slugify("Arista cEOS")},
+            "device_role": {"name": "VirtualRouter"},
+            "tenant": {"name": "SALTNORNIR"},
+            "site": {"name": "SALTNORNIR-LAB"},
+            "rack": {"name": "R301"},
+            "face": "front",
+            "platform": {"name": "arista_eos"},
+            "tags": [{"name": "nrp3"}],
+        }
+        for device_name in bulk_connection_device_names
+    ]
+)
+
 
 netbox_secrets_roles = [
     {"name": "SaltNornirCreds"},
@@ -1816,74 +1889,111 @@ def _netbox_secrets_get_session_key():
         )
 
 
+def _chunked(items, size=100):
+    for i in range(0, len(items), size):
+        yield items[i : i + size]
+
+
+def _create_in_batches(endpoint, items, item_name, batch_size=100):
+    """Create NetBox objects in batches and fail fast on first error."""
+    total_items = len(items)
+    total_batches = 0
+    for batch in _chunked(items, size=batch_size):
+        total_batches += 1
+        try:
+            endpoint.create(batch)
+        except Exception as e:
+            log.error(
+                f"Creating {item_name} batch failed '{e}', stopping execution",
+                exc_info=True,
+            )
+            raise SystemExit(1)
+    log.info(
+        f"Created {total_items} {item_name} items in {total_batches} batches (batch-size {batch_size})"
+    )
+
+
 def create_regions():
     log.info("creating regions")
-    for region in regions:
-        region.setdefault("slug", slugify(region["name"]))
-        try:
-            nb.dcim.regions.create(**region)
-        except Exception as e:
-            log.error(f"creating region '{region}' error '{e}'")
+    payloads = [dict(region, slug=region.get("slug", slugify(region["name"]))) for region in regions]
+    _create_in_batches(
+        endpoint=nb.dcim.regions,
+        items=payloads,
+        item_name="region",
+        batch_size=100,
+    )
 
 
 def ceate_tenants():
     log.info("creating tenants")
-    for tenant in tenants:
-        tenant.setdefault("slug", slugify(tenant["name"]))
-        try:
-            nb.tenancy.tenants.create(**tenant)
-        except Exception as e:
-            log.error(f"creating tenant '{tenant}' error '{e}'")
+    payloads = [dict(tenant, slug=tenant.get("slug", slugify(tenant["name"]))) for tenant in tenants]
+    _create_in_batches(
+        endpoint=nb.tenancy.tenants,
+        items=payloads,
+        item_name="tenant",
+        batch_size=100,
+    )
 
 
 def create_sites():
     log.info("creating sites")
-    for site in sites:
-        site.setdefault("slug", slugify(site["name"]))
-        try:
-            nb.dcim.sites.create(**site)
-        except Exception as e:
-            log.error(f"creating site '{site}' error '{e}'")
+    payloads = [dict(site, slug=site.get("slug", slugify(site["name"]))) for site in sites]
+    _create_in_batches(
+        endpoint=nb.dcim.sites,
+        items=payloads,
+        item_name="site",
+        batch_size=100,
+    )
 
 
 def create_racks():
     log.info("creating racks")
-    for rack in racks:
-        rack.setdefault("slug", slugify(rack["name"]))
-        try:
-            nb.dcim.racks.create(**rack)
-        except Exception as e:
-            log.error(f"creating rack '{rack}' error '{e}'")
+    payloads = [dict(rack, slug=rack.get("slug", slugify(rack["name"]))) for rack in racks]
+    _create_in_batches(
+        endpoint=nb.dcim.racks,
+        items=payloads,
+        item_name="rack",
+        batch_size=100,
+    )
 
 
 def create_manufacturers():
     log.info("creating manufacturers")
-    for manufacturer in manufacturers:
-        manufacturer.setdefault("slug", slugify(manufacturer["name"]))
-        try:
-            nb.dcim.manufacturers.create(**manufacturer)
-        except Exception as e:
-            log.error(f"creating manufacturer '{manufacturer}' error '{e}'")
+    payloads = [
+        dict(manufacturer, slug=manufacturer.get("slug", slugify(manufacturer["name"])))
+        for manufacturer in manufacturers
+    ]
+    _create_in_batches(
+        endpoint=nb.dcim.manufacturers,
+        items=payloads,
+        item_name="manufacturer",
+        batch_size=100,
+    )
 
 
 def create_tags():
     log.info("creating tags")
-    for tag in tags:
-        tag.setdefault("slug", slugify(tag["name"]))
-        try:
-            nb.extras.tags.create(**tag)
-        except Exception as e:
-            log.error(f"creating tag '{tag}' error '{e}'")
+    payloads = [dict(tag, slug=tag.get("slug", slugify(tag["name"]))) for tag in tags]
+    _create_in_batches(
+        endpoint=nb.extras.tags,
+        items=payloads,
+        item_name="tag",
+        batch_size=100,
+    )
 
 
 def create_platforms():
     log.info("creating platforms")
-    for platform in platforms:
-        platform.setdefault("slug", slugify(platform["name"]))
-        try:
-            nb.dcim.platforms.create(**platform)
-        except Exception as e:
-            log.error(f"creating platform '{platform}' error '{e}'")
+    payloads = [
+        dict(platform, slug=platform.get("slug", slugify(platform["name"])))
+        for platform in platforms
+    ]
+    _create_in_batches(
+        endpoint=nb.dcim.platforms,
+        items=payloads,
+        item_name="platform",
+        batch_size=100,
+    )
 
 
 def create_device_types():
@@ -1920,131 +2030,181 @@ def create_device_types():
 
 def create_device_roles():
     log.info("creating device roles")
-    for device_role in device_roles:
-        device_role.setdefault("slug", slugify(device_role["name"]))
-        try:
-            nb.dcim.device_roles.create(**device_role)
-        except Exception as e:
-            log.error(f"creating device role '{device_role}' error '{e}'")
+    payloads = [
+        dict(device_role, slug=device_role.get("slug", slugify(device_role["name"])))
+        for device_role in device_roles
+    ]
+    _create_in_batches(
+        endpoint=nb.dcim.device_roles,
+        items=payloads,
+        item_name="device role",
+        batch_size=100,
+    )
 
 
 def create_prefixes():
     log.info("creating prefixes")
-    for prefix in prefixes:
-        try:
-            nb.ipam.prefixes.create(**prefix)
-        except Exception as e:
-            log.error(f"creating prefix '{prefix}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.ipam.prefixes,
+        items=prefixes,
+        item_name="prefix",
+        batch_size=100,
+    )
 
 
 def create_ip_addresses():
     log.info("creating ip addresses")
-    for ip_address in ip_addresses:
-        try:
-            nb.ipam.ip_addresses.create(**ip_address)
-        except Exception as e:
-            log.error(f"creating ip address '{ip_address}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.ipam.ip_addresses,
+        items=ip_addresses,
+        item_name="ip address",
+        batch_size=100,
+    )
 
 
 def create_vrfs():
     log.info("creating vrfs")
-    for vrf in vrfs:
-        try:
-            nb.ipam.vrfs.create(**vrf)
-        except Exception as e:
-            log.error(f"creating vrf '{vrf}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.ipam.vrfs,
+        items=vrfs,
+        item_name="vrf",
+        batch_size=100,
+    )
 
 
 def create_rir():
     log.info("creating RIRs")
-    for rir in rirs:
-        try:
-            nb.ipam.rirs.create(**rir)
-        except Exception as e:
-            log.error(f"creating RIR '{rir}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.ipam.rirs,
+        items=rirs,
+        item_name="RIR",
+        batch_size=100,
+    )
 
 
 def create_prefix_roles():
     log.info("creating prefix roles")
-    for role in prefix_roles:
-        try:
-            nb.ipam.roles.create(**role)
-        except Exception as e:
-            log.error(f"creating prefix role '{role}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.ipam.roles,
+        items=prefix_roles,
+        item_name="prefix role",
+        batch_size=100,
+    )
 
 
 def create_vlans():
     log.info("creating vlans")
-    for vlan in vlans:
-        try:
-            nb.ipam.vlans.create(**vlan)
-        except Exception as e:
-            log.error(f"creating vlan '{vlan}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.ipam.vlans,
+        items=vlans,
+        item_name="vlan",
+        batch_size=100,
+    )
 
 
 def create_interfaces():
     log.info("creating interfaces")
-    # create parent interfaces
+    lag_interfaces = []
+    non_lag_parent_interfaces = []
+    child_interfaces = []
+
+    # prepare payloads first to allow batched creates
     for interface in interfaces:
-        # skip child interfaces
-        if "parent" in interface:
+        payload = dict(interface)
+        if "parent" in payload:
+            child_interfaces.append(payload)
             continue
         try:
-            if "tagged_vlans" in interface:
-                for index, vid in enumerate(interface["tagged_vlans"]):
-                    nb_vlan = nb.ipam.vlans.get(vid=str(vid))
-                    interface["tagged_vlans"][index] = nb_vlan.id
-            if "untagged_vlan" in interface:
-                nb_vlan = nb.ipam.vlans.get(vid=str(interface["untagged_vlan"]))
-                interface["untagged_vlan"] = nb_vlan.id
-            nb.dcim.interfaces.create(**interface)
+            if "tagged_vlans" in payload:
+                payload["tagged_vlans"] = [
+                    nb.ipam.vlans.get(vid=str(vid)).id for vid in payload["tagged_vlans"]
+                ]
+            if "untagged_vlan" in payload:
+                payload["untagged_vlan"] = nb.ipam.vlans.get(
+                    vid=str(payload["untagged_vlan"])
+                ).id
+
+            if payload.get("type") == "lag":
+                lag_interfaces.append(payload)
+            else:
+                non_lag_parent_interfaces.append(payload)
         except Exception as e:
             log.error(f"creating interface '{interface}' error '{e}'")
+
+    log.info("creating LAG interfaces")
+    _create_in_batches(
+        endpoint=nb.dcim.interfaces,
+        items=lag_interfaces,
+        item_name="LAG interface",
+        batch_size=100,
+    )
+
+    log.info("creating non-LAG parent interfaces")
+    _create_in_batches(
+        endpoint=nb.dcim.interfaces,
+        items=non_lag_parent_interfaces,
+        item_name="interface",
+        batch_size=100,
+    )
+
     # create child interfaces
     log.info("creating child interfaces")
-    for interface in interfaces:
-        # skip non child interfaces
-        if "parent" not in interface:
-            continue
+    child_payloads = []
+    for interface in child_interfaces:
         try:
             nb_parent_intf = nb.dcim.interfaces.get(
                 name=interface["parent"]["name"], device=interface["device"]["name"]
             )
             interface["parent"] = nb_parent_intf.id
-            nb.dcim.interfaces.create(**interface)
+            child_payloads.append(interface)
         except Exception as e:
             log.error(f"creating interface '{interface}' error '{e}'")
+
+    _create_in_batches(
+        endpoint=nb.dcim.interfaces,
+        items=child_payloads,
+        item_name="interface",
+        batch_size=100,
+    )
 
 
 def create_console_server_ports():
     log.info("creating console server ports")
-    for port in console_server_ports:
-        try:
-            nb.dcim.console_server_ports.create(**port)
-        except Exception as e:
-            log.error(f"creating console server port '{port}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.dcim.console_server_ports,
+        items=console_server_ports,
+        item_name="console server port",
+        batch_size=100,
+    )
 
 
 def create_console_ports():
     log.info("creating console ports")
-    for port in console_ports:
-        try:
-            nb.dcim.console_ports.create(**port)
-        except Exception as e:
-            log.error(f"creating console port '{port}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.dcim.console_ports,
+        items=console_ports,
+        item_name="console port",
+        batch_size=100,
+    )
 
 
 def create_devices():
     log.info("creating devices")
+    payloads = []
     for device in devices:
-        device.setdefault("slug", slugify(device["name"]))
+        payload = dict(device)
+        payload.setdefault("slug", slugify(payload["name"]))
         #  'device_role' field on the Device model has been renamed to 'role' starting Netbox 3.6
         if NB_VERSION >= 3.6:
-            device["role"] = device.pop("device_role")
-        try:
-            nb.dcim.devices.create(**device)
-        except Exception as e:
-            log.error(f"creating device '{device}' error '{e}'")
+            payload["role"] = payload.pop("device_role")
+        payloads.append(payload)
+
+    _create_in_batches(
+        endpoint=nb.dcim.devices,
+        items=payloads,
+        item_name="device",
+        batch_size=100,
+    )
 
 
 def associate_ip_adress_to_devices():
@@ -2076,74 +2236,79 @@ def associate_ip_adress_to_devices():
 # }
 def create_connections():
     log.info("creatig connections")
+    endpoint_by_termination_type = {
+        "dcim.interface": nb.dcim.interfaces,
+        "dcim.consoleport": nb.dcim.console_ports,
+        "dcim.consoleserverport": nb.dcim.console_server_ports,
+        "dcim.frontport": nb.dcim.front_ports,
+        "dcim.rearport": nb.dcim.rear_ports,
+        "dcim.powerport": nb.dcim.power_ports,
+        "dcim.poweroutlet": nb.dcim.power_outlets,
+    }
+    termination_id_cache = {
+        termination_type: {}
+        for termination_type in endpoint_by_termination_type
+    }
+
+    def _get_termination_id(termination_type, device, interface_name):
+        endpoint = endpoint_by_termination_type.get(termination_type)
+        if endpoint is None:
+            raise ValueError(f"Unsupported a_termination_type '{termination_type}'")
+
+        per_type_cache = termination_id_cache[termination_type]
+        if device not in per_type_cache:
+            per_type_cache[device] = {
+                record.name: record.id for record in endpoint.filter(device=device)
+            }
+
+        term_id = per_type_cache[device].get(interface_name)
+        if term_id is None:
+            raise LookupError(
+                f"Termination not found for type '{termination_type}', device '{device}', interface '{interface_name}'"
+            )
+        return term_id
+
+    cable_payloads = []
     for connection in connections:
+        payload = dict(connection)
 
-        a_termination_type = connection["a_terminations"][0]["termination_type"]
-        if a_termination_type == "dcim.interface":
-            query_endpoint = nb.dcim.interfaces
-        elif a_termination_type == "dcim.consoleport":
-            query_endpoint = nb.dcim.console_ports
-        elif a_termination_type == "dcim.consoleserverport":
-            query_endpoint = nb.dcim.console_server_ports
-        elif a_termination_type == "dcim.frontport":
-            query_endpoint = nb.dcim.front_ports
-        elif a_termination_type == "dcim.rearport":
-            query_endpoint = nb.dcim.rear_ports
-        elif a_termination_type == "dcim.powerport":
-            query_endpoint = nb.dcim.power_ports
-        elif a_termination_type == "dcim.poweroutlet":
-            query_endpoint = nb.dcim.power_outlets
-        else:
+        a_termination_type = payload["a_terminations"][0]["termination_type"]
+        b_termination_type = payload["b_terminations"][0]["termination_type"]
+        if a_termination_type not in endpoint_by_termination_type:
             raise ValueError(f"Unsupported a_termination_type '{a_termination_type}'")
-        nb_interfaces_a = [
-            query_endpoint.get(
-                device=tp["device"],
-                name=tp["interface"],
-            )
-            for tp in connection["a_terminations"]
-        ]
-
-        b_termination_type = connection["b_terminations"][0]["termination_type"]
-        if b_termination_type == "dcim.interface":
-            query_endpoint = nb.dcim.interfaces
-        elif b_termination_type == "dcim.consoleport":
-            query_endpoint = nb.dcim.console_ports
-        elif b_termination_type == "dcim.consoleserverport":
-            query_endpoint = nb.dcim.console_server_ports
-        elif b_termination_type == "dcim.frontport":
-            query_endpoint = nb.dcim.front_ports
-        elif b_termination_type == "dcim.rearport":
-            query_endpoint = nb.dcim.rear_ports
-        elif b_termination_type == "dcim.powerport":
-            query_endpoint = nb.dcim.power_ports
-        elif b_termination_type == "dcim.poweroutlet":
-            query_endpoint = nb.dcim.power_outlets
-        else:
+        if b_termination_type not in endpoint_by_termination_type:
             raise ValueError(f"Unsupported a_termination_type '{b_termination_type}'")
-        nb_interfaces_b = [
-            query_endpoint.get(
-                device=tp["device"],
-                name=tp["interface"],
-            )
-            for tp in connection["b_terminations"]
-        ]
 
-        connection["a_terminations"] = [
+        payload["a_terminations"] = [
             {
-                "object_type": connection["a_terminations"][0]["termination_type"],
-                "object_id": nb_interface_a.id,
+                "object_type": a_termination_type,
+                "object_id": _get_termination_id(
+                    a_termination_type,
+                    tp["device"],
+                    tp["interface"],
+                ),
             }
-            for nb_interface_a in nb_interfaces_a
+            for tp in payload["a_terminations"]
         ]
-        connection["b_terminations"] = [
+        payload["b_terminations"] = [
             {
-                "object_type": connection["b_terminations"][0]["termination_type"],
-                "object_id": nb_interface_b.id,
+                "object_type": b_termination_type,
+                "object_id": _get_termination_id(
+                    b_termination_type,
+                    tp["device"],
+                    tp["interface"],
+                ),
             }
-            for nb_interface_b in nb_interfaces_b
+            for tp in payload["b_terminations"]
         ]
+        cable_payloads.append(payload)
 
-        nb.dcim.cables.create(**connection)
+    _create_in_batches(
+        endpoint=nb.dcim.cables,
+        items=cable_payloads,
+        item_name="connection",
+        batch_size=100,
+    )
 
 
 def create_netbox_secrets_roles():
@@ -2366,20 +2531,22 @@ def create_circuits():
 
 def create_power_outlet_ports():
     log.info("creating power outlet ports")
-    for item in power_outlet_ports:
-        try:
-            nb.dcim.power_outlets.create(**item)
-        except Exception as e:
-            log.error(f"creating power outlet port '{item}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.dcim.power_outlets,
+        items=power_outlet_ports,
+        item_name="power outlet port",
+        batch_size=100,
+    )
 
 
 def create_power_ports():
     log.info("creating power ports")
-    for item in power_ports:
-        try:
-            nb.dcim.power_ports.create(**item)
-        except Exception as e:
-            log.error(f"creating power port '{item}' error '{e}'")
+    _create_in_batches(
+        endpoint=nb.dcim.power_ports,
+        items=power_ports,
+        item_name="power port",
+        batch_size=100,
+    )
 
 
 def create_circuit_provider_accounts():
@@ -2987,7 +3154,7 @@ def populate_netbox():
 
 if __name__ == "__main__":
     try:
-        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN, threading=True)
         # request status to verify that Netbox is reachable,
         # raises ConnectionError if Netbox is not reachable
         _ = nb.status()
