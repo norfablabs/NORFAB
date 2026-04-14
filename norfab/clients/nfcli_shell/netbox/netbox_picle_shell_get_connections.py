@@ -29,15 +29,6 @@ class GetConnections(NetboxCommonArgs, NetboxClientRunJobArgs):
         json_schema_extra={"presence": True},
     )
     cache: CacheEnum = Field(True, description="How to use cache")
-    cables: StrictBool = Field(
-        None,
-        description="Add interfaces directly attached cables details",
-    )
-    include_virtual: StrictBool = Field(
-        None,
-        description="Include connections for virtual and LAG interfaces",
-        alias="include-virtual",
-    )
     interface_regex: StrictStr = Field(
         None,
         description="Regex pattern to match interfaces and ports",

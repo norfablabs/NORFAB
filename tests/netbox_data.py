@@ -616,6 +616,40 @@ interfaces.extend(
     ]
 )
 
+# Seed MAC addresses used by get_connections tests.
+mac_addresses = [
+    {
+        "mac_address": "00:11:22:33:44:01",
+        "device": "fceos4",
+        "interface": "eth101",
+    },
+    {
+        "mac_address": "00:11:22:33:44:02",
+        "device": "fceos4",
+        "interface": "Port-Channel1.101",
+    },
+    {
+        "mac_address": "00:11:22:33:44:03",
+        "device": "fceos4",
+        "interface": "Port-Channel1",
+    },
+    {
+        "mac_address": "00:11:22:33:44:04",
+        "device": "fceos5",
+        "interface": "eth103",
+    },
+    {
+        "mac_address": "00:11:22:33:44:05",
+        "device": "fceos5",
+        "interface": "eth103",
+    },
+    {
+        "mac_address": "00:11:22:33:44:06",
+        "device": "fceos4",
+        "interface": "eth11.123",
+    },
+]
+
 power_outlet_ports = [
     {"name": "PowerOutlet-1", "device": {"name": "fceos4"}, "type": "iec-60320-c5"},
     {"name": "PowerOutlet-2", "device": {"name": "fceos4"}, "type": "iec-60320-c5"},
@@ -2168,6 +2202,35 @@ def create_interfaces():
     )
 
 
+def create_mac_addresses():
+    if NB_VERSION < 4.2:
+        log.info("Skipping MAC addresses population for NetBox versions below 4.2")
+        return
+
+    log.info("creating MAC addresses")
+    payloads = []
+    for mac in mac_addresses:
+        interface = nb.dcim.interfaces.get(name=mac["interface"], device=mac["device"])
+        if interface is None:
+            raise RuntimeError(
+                f"Interface '{mac['device']}:{mac['interface']}' not found for MAC '{mac['mac_address']}'"
+            )
+        payloads.append(
+            {
+                "mac_address": mac["mac_address"],
+                "assigned_object_type": "dcim.interface",
+                "assigned_object_id": interface.id,
+            }
+        )
+
+    _create_in_batches(
+        endpoint=nb.dcim.mac_addresses,
+        items=payloads,
+        item_name="mac address",
+        batch_size=100,
+    )
+
+
 def create_console_server_ports():
     log.info("creating console server ports")
     _create_in_batches(
@@ -3130,6 +3193,7 @@ def populate_netbox():
     create_devices()
     create_vlans()
     create_interfaces()
+    create_mac_addresses()
     create_power_outlet_ports()
     create_power_ports()
     create_inventory_items_roles()
@@ -3142,8 +3206,7 @@ def populate_netbox():
     # create_netbox_secrets_secrets()
     create_circuit_providers()
     creat_circuit_provider_networks()
-    if NB_VERSION >= 3.5:
-        create_circuit_provider_accounts()
+    create_circuit_provider_accounts()
     create_circuit_types()
     create_circuits()
     create_config_templates()

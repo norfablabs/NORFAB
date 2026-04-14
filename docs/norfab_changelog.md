@@ -1,3 +1,10 @@
+# 0.17.1
+
+## CHANGES
+
+1. Refactored Netbox get_connections task, remove `include_virtual` arguments, `cables` argument, now these data always retrieved.
+2. Refactoring Netbox graphql fetch function to use variables, pagination and threading to enhance data retrieval performance
+
 # 0.17.0
 
 ## CHANGES
