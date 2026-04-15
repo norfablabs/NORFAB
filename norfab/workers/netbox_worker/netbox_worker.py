@@ -24,10 +24,10 @@ from .connections_tasks import NetboxConnectionsTasks
 from .containerlab_inventory_tasks import NetboxContainerlabInventoryTasks
 from .design_tasks import NetboxDesignTasks
 from .devices_tasks import NetboxDevicesTasks
+from .graphql_tasks import NetboxGraphqlTasks
 from .interfaces_tasks import NetboxInterfacesTasks
 from .ip_tasks import NetboxIpTasks
 from .netbox_crud import NetboxCrudTasks
-from .netbox_exceptions import UnsupportedNetboxVersion
 from .netbox_models import NetboxFastApiArgs
 from .nornir_inventory_tasks import NetboxNornirInventoryTasks
 from .prefix_tasks import NetboxPrefixTasks
@@ -37,53 +37,9 @@ SERVICE = "netbox"
 log = logging.getLogger(__name__)
 
 
-# ----------------------------------------------------------------------
-# HELPER FUNCTIONS
-# ----------------------------------------------------------------------
-
-
-def _form_query_v4(obj, filters, fields, alias=None) -> str:
-    """
-    Helper function to form graphql query for Netbox version 4.
-
-    Args:
-        obj (str): The object to return data for, e.g., 'device', 'interface', 'ip_address'.
-        filters (dict): A dictionary of key-value pairs to filter by.
-        fields (list): A list of data fields to return.
-        alias (str, optional): An alias value for the requested object.
-
-    Returns:
-        str: A formatted GraphQL query string.
-    """
-    filters_list = []
-    fields = " ".join(fields)
-    if isinstance(filters, str):
-        filters = filters.replace("'", '"')  # swap quotes
-        if alias:
-            query = f"{alias}: {obj}(filters: {filters}) {{{fields}}}"
-        else:
-            query = f"{obj}(filters: {filters}) {{{fields}}}"
-    elif isinstance(filters, dict):
-        for k, v in filters.items():
-            if isinstance(v, (list, set, tuple)):
-                items = ", ".join(f'"{i}"' for i in v)
-                filters_list.append(f"{k}: [{items}]")
-            elif "{" in v and "}" in v:
-                filters_list.append(f"{k}: {v}")
-            else:
-                filters_list.append(f'{k}: "{v}"')
-        filters_string = ", ".join(filters_list)
-        filters_string = filters_string.replace("'", '"')  # swap quotes
-        if alias:
-            query = f"{alias}: {obj}(filters: {{{filters_string}}}) {{{fields}}}"
-        else:
-            query = f"{obj}(filters: {{{filters_string}}}) {{{fields}}}"
-
-    return query
-
-
 class NetboxWorker(
     NFPWorker,
+    NetboxGraphqlTasks,
     NetboxDesignTasks,
     NetboxInterfacesTasks,
     NetboxDevicesTasks,
@@ -166,6 +122,7 @@ class NetboxWorker(
         self.branch_create_timeout = self.netbox_inventory.get(
             "branch_create_timeout", 120
         )
+        self.grapqhl_max_workers = self.netbox_inventory.get("grapqhl_max_workers", 4)
 
         # find default instance
         for name, params in self.netbox_inventory["instances"].items():
@@ -651,132 +608,6 @@ class NetboxWorker(
             for cache_key in self.cache:
                 if fnmatchcase(cache_key, keys):
                     ret.result[cache_key] = self.cache[cache_key]
-        return ret
-
-    @Task(
-        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
-    )
-    def graphql(
-        self,
-        job: Job,
-        instance: Union[None, str] = None,
-        dry_run: bool = False,
-        obj: Union[str, dict] = None,
-        filters: Union[None, dict, str] = None,
-        fields: Union[None, list] = None,
-        queries: Union[None, dict] = None,
-        query_string: str = None,
-    ) -> Result:
-        """
-        Function to query Netbox v3 or Netbox v4 GraphQL API.
-
-        Args:
-            job: NorFab Job object containing relevant metadata
-            instance: Netbox instance name
-            dry_run: only return query content, do not run it
-            obj: Object to query
-            filters: Filters to apply to the query
-            fields: Fields to retrieve in the query
-            queries: Dictionary of queries to execute
-            query_string: Raw query string to execute
-
-        Returns:
-            dict: GraphQL request data returned by Netbox
-
-        Raises:
-            RuntimeError: If required arguments are not provided
-            Exception: If GraphQL query fails
-        """
-        nb_params = self._get_instance_params(instance)
-        instance = instance or self.default_instance
-        ret = Result(task=f"{self.name}:graphql", resources=[instance])
-
-        # form graphql query(ies) payload
-        if queries:
-            queries_list = []
-            for alias, query_data in queries.items():
-                query_data["alias"] = alias
-                if self.nb_version[instance] >= (4, 4, 0):
-                    queries_list.append(_form_query_v4(**query_data))
-                else:
-                    raise UnsupportedNetboxVersion(
-                        f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
-                        f"minimum required version is {self.compatible_ge_v4}"
-                    )
-            queries_strings = "    ".join(queries_list)
-            query = f"query {{{queries_strings}}}"
-        elif obj and filters and fields:
-            if self.nb_version[instance] >= (4, 4, 0):
-                query = _form_query_v4(obj, filters, fields)
-            else:
-                raise UnsupportedNetboxVersion(
-                    f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
-                    f"minimum required version is {self.compatible_ge_v4}"
-                )
-            query = f"query {{{query}}}"
-        elif query_string:
-            query = query_string
-        else:
-            raise RuntimeError(
-                f"{self.name} - graphql method expects queries argument or obj, filters, "
-                f"fields arguments or query_string argument provided"
-            )
-        payload = json.dumps({"query": query})
-
-        # form and return dry run response
-        if dry_run:
-            log.info(
-                f"{self.name} - GraphQL dry run, returning query payload without executing"
-            )
-            ret.result = {
-                "url": f"{nb_params['url']}/graphql/",
-                "data": payload,
-                "verify": nb_params.get("ssl_verify", True),
-                "headers": {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Authorization": f"Token ...{nb_params['token'][-6:]}",
-                },
-            }
-            return ret
-
-        # send request to Netbox GraphQL API
-        log.debug(
-            f"{self.name} - sending GraphQL query '{payload}' to URL '{nb_params['url']}/graphql/'"
-        )
-        req = requests.post(
-            url=f"{nb_params['url']}/graphql/",
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": f"Token {nb_params['token']}",
-            },
-            data=payload,
-            verify=nb_params.get("ssl_verify", True),
-            timeout=(self.netbox_connect_timeout, self.netbox_read_timeout),
-        )
-        try:
-            req.raise_for_status()
-        except Exception:
-            raise Exception(
-                f"{self.name} -  Netbox GraphQL query failed, query '{query}', "
-                f"URL '{req.url}', status-code '{req.status_code}', reason '{req.reason}', "
-                f"response content '{req.text}'"
-            )
-
-        # return results
-        reply = req.json()
-        if reply.get("errors"):
-            msg = f"{self.name} - GrapQL query error '{reply['errors']}', query '{payload}'"
-            log.error(msg)
-            ret.errors.append(msg)
-            if reply.get("data"):
-                ret.result = reply["data"]  # at least return some data
-        elif queries or query_string:
-            ret.result = reply["data"]
-        else:
-            ret.result = reply["data"][obj]
-
         return ret
 
     @Task(

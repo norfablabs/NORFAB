@@ -64,8 +64,7 @@ Sample Nornir worker inventory definition
           interfaces:
             ip_addresses: True
             inventory_items: True
-          connections:
-            cables: True
+          connections: True
           nbdata: True
           circuits: True
           primary_ip: "ipv4"
@@ -99,8 +98,7 @@ netbox:
   interfaces:
     ip_addresses: True
     inventory_items: True
-  connections:
-    cables: True
+  connections: True
   nbdata: True
   circuits: True
   primary_ip: "ipv4"
@@ -117,7 +115,7 @@ netbox:
 
 **filters**
 
-List of Netbox GraphQL filters to pull devices data. Up to 10 filters supported.
+List of Netbox REST API filters to pull devices data.
 
 **devices**
 
@@ -138,11 +136,7 @@ Extras:
 
 **connections**
 
-Specifies whether to include connection data in the results. 
-
-Extras:
-
-- **cables**: When set to `True`, includes cable information associated with the interface connections. 
+Specifies whether to include connection data in the inventory.
 
 **nbdata**
 

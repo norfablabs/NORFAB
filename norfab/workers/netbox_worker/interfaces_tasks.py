@@ -436,8 +436,6 @@ class NetboxInterfacesTasks:
                 devices=devices,
                 interface_regex=interface_regex,
                 instance=instance,
-                include_virtual=True,
-                cables=True,
             )
             # produce interfaces description and update it
             while nb_connections.result:

@@ -617,6 +617,7 @@ class JobDatabase:
             timeout (int): Job timeout.
             timestamp (str): Received timestamp.
         """
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
         with self._transaction(write=True) as conn:
             # Serialize args and kwargs to BLOB
             compressed_args = self._compress_data({"args": args})
@@ -625,8 +626,8 @@ class JobDatabase:
             conn.execute(
                 """
                 INSERT INTO jobs (uuid, client_address, task, args, kwargs, timeout,
-                                 status, received_timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?)
+                                 status, received_timestamp, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?)
             """,
                 (
                     uuid,
@@ -636,6 +637,7 @@ class JobDatabase:
                     compressed_kwargs,
                     timeout,
                     timestamp,
+                    now,
                 ),
             )
 

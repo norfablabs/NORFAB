@@ -4,8 +4,7 @@ netbox:
   interfaces:
     ip_addresses: True
     inventory_items: True
-  connections:
-    cables: True
+  connections: True
   nbdata: True
   primary_ip: "ipv4"
   circuits: 

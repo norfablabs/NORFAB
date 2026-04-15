@@ -26,8 +26,7 @@ root
             ├── instance:    Netbox instance name to target
             ├── dry-run:    Only return query content, do not run it
             ├── devices:    Device names to query data for
-            ├── cache:    How to use cache, default 'True'
-            └── add-cables:    Add interfaces directly attached cables details
+            └── cache:    How to use cache, default 'True'
 nf#
 ```
 

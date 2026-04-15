@@ -1949,7 +1949,10 @@ def _create_in_batches(endpoint, items, item_name, batch_size=100):
 
 def create_regions():
     log.info("creating regions")
-    payloads = [dict(region, slug=region.get("slug", slugify(region["name"]))) for region in regions]
+    payloads = [
+        dict(region, slug=region.get("slug", slugify(region["name"])))
+        for region in regions
+    ]
     _create_in_batches(
         endpoint=nb.dcim.regions,
         items=payloads,
@@ -1960,7 +1963,10 @@ def create_regions():
 
 def ceate_tenants():
     log.info("creating tenants")
-    payloads = [dict(tenant, slug=tenant.get("slug", slugify(tenant["name"]))) for tenant in tenants]
+    payloads = [
+        dict(tenant, slug=tenant.get("slug", slugify(tenant["name"])))
+        for tenant in tenants
+    ]
     _create_in_batches(
         endpoint=nb.tenancy.tenants,
         items=payloads,
@@ -1971,7 +1977,9 @@ def ceate_tenants():
 
 def create_sites():
     log.info("creating sites")
-    payloads = [dict(site, slug=site.get("slug", slugify(site["name"]))) for site in sites]
+    payloads = [
+        dict(site, slug=site.get("slug", slugify(site["name"]))) for site in sites
+    ]
     _create_in_batches(
         endpoint=nb.dcim.sites,
         items=payloads,
@@ -1982,7 +1990,9 @@ def create_sites():
 
 def create_racks():
     log.info("creating racks")
-    payloads = [dict(rack, slug=rack.get("slug", slugify(rack["name"]))) for rack in racks]
+    payloads = [
+        dict(rack, slug=rack.get("slug", slugify(rack["name"]))) for rack in racks
+    ]
     _create_in_batches(
         endpoint=nb.dcim.racks,
         items=payloads,
@@ -2151,7 +2161,8 @@ def create_interfaces():
         try:
             if "tagged_vlans" in payload:
                 payload["tagged_vlans"] = [
-                    nb.ipam.vlans.get(vid=str(vid)).id for vid in payload["tagged_vlans"]
+                    nb.ipam.vlans.get(vid=str(vid)).id
+                    for vid in payload["tagged_vlans"]
                 ]
             if "untagged_vlan" in payload:
                 payload["untagged_vlan"] = nb.ipam.vlans.get(
@@ -2309,8 +2320,7 @@ def create_connections():
         "dcim.poweroutlet": nb.dcim.power_outlets,
     }
     termination_id_cache = {
-        termination_type: {}
-        for termination_type in endpoint_by_termination_type
+        termination_type: {} for termination_type in endpoint_by_termination_type
     }
 
     def _get_termination_id(termination_type, device, interface_name):

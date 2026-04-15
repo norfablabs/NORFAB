@@ -3,7 +3,20 @@
 ## CHANGES
 
 1. Refactored Netbox get_connections task, remove `include_virtual` arguments, `cables` argument, now these data always retrieved.
-2. Refactoring Netbox graphql fetch function to use variables, pagination and threading to enhance data retrieval performance
+2. Refactoring Netbox graphql fetch function to use variables, pagination, persistent sessions and threading to enhance data retrieval performance
+
+## FEATURES
+
+1. Netbox get connections added remote interface label extraction for physical interfaces, console port, power ports, front/rear ports
+2. Netbox get connections added remote interface MAC addresses extraction
+3. Nornir tests markdown report added timestamps and duration summary
+
+## BUGS
+
+1. Fixing get connections handling for provider network
+2. Fixing client and worker job db timestamps handling for created_at
+
+---
 
 # 0.17.0
 

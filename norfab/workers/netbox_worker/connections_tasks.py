@@ -1,11 +1,5 @@
-import json
 import logging
-import concurrent.futures
-from typing import Any, Union
-
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+from typing import Union
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -36,7 +30,7 @@ query ConnectionsQuery(
                 __typename
                 ... on ProviderNetworkType {name}
                 ... on InterfaceType {
-                    name, device {name, status}, 
+                    name, label, device {name, status}, 
                     child_interfaces {name mac_addresses {mac_address}}, 
                     lag {name mac_addresses {mac_address} child_interfaces {name mac_addresses {mac_address}}}, 
                     mac_addresses {mac_address}
@@ -52,7 +46,7 @@ query ConnectionsQuery(
                     __typename
                     ... on ProviderNetworkType {name}
                     ... on InterfaceType {
-                        name, device {name, status}, 
+                        name, label, device {name, status}, 
                         child_interfaces {name mac_addresses {mac_address}}, 
                         lag {name child_interfaces {name mac_addresses {mac_address}}}, 
                         mac_addresses {mac_address}
@@ -63,7 +57,7 @@ query ConnectionsQuery(
                 __typename
                 ... on ProviderNetworkType {name}
                 ... on InterfaceType {
-                    name, device {name, status}, child_interfaces {name mac_addresses {mac_address}}, 
+                    name, label, device {name, status}, child_interfaces {name mac_addresses {mac_address}}, 
                     lag {name child_interfaces {name mac_addresses {mac_address}}}, 
                     mac_addresses {mac_address}
                 }
@@ -73,7 +67,7 @@ query ConnectionsQuery(
             __typename
             ... on ProviderNetworkType {name}
             ... on InterfaceType {
-                name, device {name, status}, 
+                name, label, device {name, status}, 
                 child_interfaces {name mac_addresses {mac_address}}, 
                 lag {name child_interfaces {name mac_addresses {mac_address}}}, 
                 mac_addresses {mac_address}
@@ -81,9 +75,9 @@ query ConnectionsQuery(
         }
         link_peers {
             __typename
-            ... on InterfaceType {name device {name, status}}
-            ... on FrontPortType {name device {name, status}}
-            ... on RearPortType {name device {name, status}}
+            ... on InterfaceType {name label device {name, status}}
+            ... on FrontPortType {name label device {name, status}}
+            ... on RearPortType {name label device {name, status}}
         }
         cable {
             type
@@ -103,13 +97,13 @@ query ConnectionsQuery(
         type
         connected_endpoints {
             __typename
-            ... on ConsoleServerPortType {name device {name, status}}
+            ... on ConsoleServerPortType {name label device {name, status}}
         }
         link_peers {
             __typename
-            ... on ConsoleServerPortType {name device {name, status}}
-            ... on FrontPortType {name device {name, status}}
-            ... on RearPortType {name device {name, status}}
+            ... on ConsoleServerPortType {name label device {name, status}}
+            ... on FrontPortType {name label device {name, status}}
+            ... on RearPortType {name label device {name, status}}
         }
         cable {
             type
@@ -131,13 +125,13 @@ query ConnectionsQuery(
         type
         connected_endpoints {
             __typename
-            ... on ConsolePortType {name device {name, status}}
+            ... on ConsolePortType {name label device {name, status}}
         }
         link_peers {
             __typename
-            ... on ConsolePortType {name device {name, status}}
-            ... on FrontPortType {name device {name, status}}
-            ... on RearPortType {name device {name, status}}
+            ... on ConsolePortType {name label device {name, status}}
+            ... on FrontPortType {name label device {name, status}}
+            ... on RearPortType {name label device {name, status}}
         }
         cable {
             type
@@ -159,11 +153,11 @@ query ConnectionsQuery(
         type
         connected_endpoints {
             __typename
-            ... on PowerPortType {name device {name, status}}
+            ... on PowerPortType {name label device {name, status}}
         }
         link_peers {
             __typename
-            ... on PowerPortType {name device {name, status}}
+            ... on PowerPortType {name label device {name, status}}
         }
         cable {
             type
@@ -181,183 +175,6 @@ query ConnectionsQuery(
 
 
 class NetboxConnectionsTasks:
-    def graphql_fetch_page(
-        self,
-        session: requests.Session,
-        nb_url: str,
-        ssl_verify: bool,
-        query: str,
-        variables: dict,
-    ) -> dict[str, Any]:
-        """Execute a single paginated GraphQL POST request and return the ``data`` payload.
-
-        Designed to be called concurrently from multiple threads sharing the same session.
-
-        Args:
-            session: Shared :class:`requests.Session` with auth headers pre-configured.
-            nb_url: Base URL of the NetBox instance (e.g. ``https://netbox.example.com``).
-            ssl_verify: Whether to verify TLS certificates.
-            query: GraphQL query string.
-            variables: Variable mapping sent with the query (must include ``offset`` and ``limit``).
-
-        Returns:
-            The ``data`` section of the GraphQL JSON response.
-
-        Raises:
-            requests.HTTPError: If the HTTP response status indicates an error.
-            RuntimeError: If the GraphQL response body contains an ``errors`` field.
-        """
-        response = session.post(
-            url=f"{nb_url}/graphql/",
-            json={"query": query, "variables": variables},
-            verify=ssl_verify,
-            timeout=(self.netbox_connect_timeout, self.netbox_read_timeout),
-        )
-        response.raise_for_status()
-        response_payload = response.json()
-        if response_payload.get("errors"):
-            raise RuntimeError(
-                f"{self.name} - GraphQL query returned errors: {response_payload['errors']}"
-            )
-        return response_payload.get("data", {})
-
-    def netbox_graphql(
-        self,
-        job: Job,
-        instance: str,
-        query: str,
-        variables: Union[None, dict] = None,
-        dry_run: bool = False,
-        offset: int = 0,
-        limit: int = 50,
-        max_workers: int = 8
-    ) -> Result:
-        """
-        Execute a paginated GraphQL query against a NetBox instance, fetching all pages in parallel.
-
-        Pages are fetched in parallel batches of up to ``max_workers`` concurrent requests.
-        Results across all pages are merged into a single ``aggregated_data`` dict where list
-        fields are extended and scalar fields are overwritten.
-
-        Args:
-            job: NorFab job context.
-            instance: Name of the NetBox instance to query.
-            query: GraphQL query string. Must accept ``$offset: Int!`` and ``$limit: Int!``
-                variables to support automatic pagination.
-            variables: Optional extra GraphQL variables forwarded verbatim to the GraphQL query.
-            dry_run: When ``True``, return the request parameters without executing any HTTP calls.
-            offset: Starting pagination offset (number of records to skip before the first page).
-            limit: Number of records per page fetched from NetBox.
-            max_workers: Maximum number of concurrent page-fetch threads per iteration.
-
-        Returns:
-            :class:`Result` whose ``result`` field holds the merged GraphQL ``data`` dict.
-            On failure ``failed`` is ``True`` and ``errors`` lists the exception messages.
-        """
-        nb_params = self._get_instance_params(instance)
-        ret = Result(task=f"{self.name}:graphql", resources=[instance])
-
-        if dry_run:
-            ret.dry_run = True
-            ret.result = {
-                "url": f"{nb_params['url']}/graphql/",
-                "data": json.dumps({"query": query, "variables": variables or {}}),
-                "verify": nb_params.get("ssl_verify", True),
-                "headers": {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Authorization": f"Token ...{nb_params['token'][-6:]}",
-                },
-            }
-            return ret
-
-        # configure session with retry back-off for transient server errors
-        retry = Retry(
-            total=3,
-            connect=3,
-            read=3,
-            backoff_factor=0.5,
-            status_forcelist=(429, 500, 502, 503, 504),
-            allowed_methods={"POST"},
-        )
-        adapter = HTTPAdapter(max_retries=retry)
-        session = requests.Session()
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
-        session.headers.update({
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": f"Token {nb_params['token']}",
-        })
-
-        try:
-            aggregated_data: dict[str, Any] = {}
-            ssl_verify = nb_params.get("ssl_verify", True)
-            nb_url = nb_params["url"]
-
-            # paginate through all results, fetching max_workers pages per iteration
-            while True:
-                batch_offsets = [offset + (i * limit) for i in range(max_workers)]
-                pages: list[tuple[int, dict[str, Any]]] = []
-
-                with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
-                    futures: dict[concurrent.futures.Future, int] = {
-                        pool.submit(
-                            self.graphql_fetch_page,
-                            session,
-                            nb_url,
-                            ssl_verify,
-                            query,
-                            {**variables, "offset": page_offset, "limit": limit},
-                        ): page_offset
-                        for page_offset in batch_offsets
-                    }
-                    for future in concurrent.futures.as_completed(futures):
-                        page_offset = futures[future]
-                        try:
-                            pages.append((page_offset, future.result()))
-                        except Exception as exc:
-                            error_msg = f"Failed to fetch page at offset {page_offset}: {exc}"
-                            log.error(f"{self.name} - {error_msg}")
-                            ret.errors.append(error_msg)
-                            ret.failed = True
-
-                # stop immediately if any page fetch failed — results would be incomplete
-                if ret.failed:
-                    break
-
-                any_data_returned = False
-                has_full_page = False
-
-                # merge pages in offset order to maintain consistent result ordering
-                for _, data in sorted(pages, key=lambda item: item[0]):
-                    page_sizes: list[int] = []
-                    for key, value in data.items():
-                        if isinstance(value, list):
-                            if value:
-                                any_data_returned = True
-                            aggregated_data.setdefault(key, [])
-                            aggregated_data[key].extend(value)
-                            page_sizes.append(len(value))
-                        else:
-                            aggregated_data[key] = value
-                    # a full page means there may be more data to fetch
-                    if page_sizes and any(size == limit for size in page_sizes):
-                        has_full_page = True
-
-                # stop when no data was returned or no page was fully filled
-                if not any_data_returned or not has_full_page:
-                    break
-
-                offset += max_workers * limit
-
-            if not ret.failed:
-                ret.result = aggregated_data
-        finally:
-            session.close()
-
-        return ret
-
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def get_connections(
         self,
@@ -380,7 +197,7 @@ class NetboxConnectionsTasks:
         - Console port and console server ports connections
         - Connections to provider networks for physical, child/virtual and lag interfaces
 
-        This task also fetches MAC addresses for remote interfaces, sub-interfaces, LAG 
+        This task also fetches MAC addresses for remote interfaces, sub-interfaces, LAG
         and LAG sub-interfaces
 
         Args:
@@ -414,8 +231,12 @@ class NetboxConnectionsTasks:
                                 "remote_device": "fceos4",
                                 "remote_device_status": "active",
                                 "remote_interface": "eth101",
+                                "remote_interface_label": "port101",
                                 "remote_termination_type": "interface",
-                                "termination_type": "interface"
+                                "termination_type": "interface",
+                                "remote_mac_addresses": [
+                                    "00:11:22:33:44:01"
+                                ]
                             }
                         }
                     }
@@ -508,12 +329,16 @@ class NetboxConnectionsTasks:
                     connection["remote_device"] = None
                     connection["remote_device_status"] = None
                     connection["remote_interface"] = None
+                    connection["remote_interface_label"] = None
                     connection["provider"] = endpoints[0]["name"]
                 else:
                     remote_interface = endpoints[0]["name"]
+                    remote_label = endpoints[0]["label"]
                     if len(endpoints) > 1:
-                        remote_interface = list(sorted([i["name"] for i in endpoints]))
+                        remote_interface = [i["name"] for i in endpoints]
+                        remote_label = [i["label"] for i in endpoints]
                     connection["remote_interface"] = remote_interface
+                    connection["remote_interface_label"] = remote_label
                     connection["remote_device"] = endpoints[0]["device"]["name"]
                     connection["remote_device_status"] = endpoints[0]["device"][
                         "status"
@@ -537,10 +362,7 @@ class NetboxConnectionsTasks:
         for port_type, ports in all_ports.items():
             for port in ports:
                 # add child virtual interfaces connections
-                if (
-                    port["type"] != "virtual"
-                    or not port["parent"]
-                ):
+                if port["type"] != "virtual" or not port["parent"]:
                     continue
                 device_name = port["device"]["name"]
                 interface_name = port["name"]
@@ -571,15 +393,16 @@ class NetboxConnectionsTasks:
                         f"{device_name}:{interface_name} Parent has no connected endpoints"
                     )
                     continue
-                connection["remote_device"] = endpoint["device"]["name"]
-                connection["remote_device_status"] = endpoint["device"]["status"]
                 remote_termination_type = endpoint["__typename"].lower()
                 remote_termination_type = remote_termination_type.replace("type", "")
                 # collect virtual interfaces facing provider
                 if remote_termination_type == "providernetwork":
                     connection["provider"] = endpoint["name"]
+                    connection["remote_termination_type"] = remote_termination_type
                 # find matching remote virtual interface for LAG subif
                 elif "." in interface_name and parent["type"] == "lag":
+                    connection["remote_device"] = endpoint["device"]["name"]
+                    connection["remote_device_status"] = endpoint["device"]["status"]
                     if endpoint["lag"]:
                         subif_id = interface_name.split(".")[1]
                         for remote_child in endpoint["lag"]["child_interfaces"]:
@@ -588,7 +411,8 @@ class NetboxConnectionsTasks:
                                 connection["remote_mac_addresses"] = sorted(
                                     {
                                         mac.get("mac_address")
-                                        for mac in remote_child.get("mac_addresses") or []
+                                        for mac in remote_child.get("mac_addresses")
+                                        or []
                                         if mac.get("mac_address")
                                     }
                                 )
@@ -600,8 +424,11 @@ class NetboxConnectionsTasks:
                     # no remote lag found, associate child interface with remote interface
                     else:
                         connection["remote_interface"] = endpoint["name"]
+                        connection["remote_interface_label"] = endpoint["label"]
                 # find matching remote virtual interface for physical interface subif
                 elif "." in interface_name:
+                    connection["remote_device"] = endpoint["device"]["name"]
+                    connection["remote_device_status"] = endpoint["device"]["status"]
                     subif_id = interface_name.split(".")[1]
                     for remote_child in endpoint["child_interfaces"]:
                         if remote_child["name"].endswith(f".{subif_id}"):
@@ -617,6 +444,7 @@ class NetboxConnectionsTasks:
                     # no matching subinterface found, associate child interface with remote interface
                     else:
                         connection["remote_interface"] = endpoint["name"]
+                        connection["remote_interface_label"] = endpoint["label"]
                         connection["remote_termination_type"] = remote_termination_type
                 # add virtual interface connection to results
                 ret.result[device_name][interface_name] = connection
@@ -660,12 +488,16 @@ class NetboxConnectionsTasks:
                 # if no remote lag, collect remote end interfaces
                 else:
                     connection["remote_interface"] = []
+                    connection["remote_interface_label"] = []
                     connection["termination_type"] = "interface"
                     connection["remote_device"] = endpoint["device"]["name"]
                     connection["remote_device_status"] = endpoint["device"]["status"]
                     for member in port["member_interfaces"]:
                         for endpoint in member["connected_endpoints"]:
                             connection["remote_interface"].append(endpoint["name"])
+                            connection["remote_interface_label"].append(
+                                endpoint["label"]
+                            )
                 # add lag interface connection to results
                 ret.result[device_name][interface_name] = connection
 

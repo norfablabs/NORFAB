@@ -158,7 +158,6 @@ class NetboxIpTasks:
                     devices=[device],
                     interface_regex=interface,
                     instance=instance,
-                    include_virtual=True,
                 )
                 if interface in connection.result[device]:
                     peer = connection.result[device][interface]

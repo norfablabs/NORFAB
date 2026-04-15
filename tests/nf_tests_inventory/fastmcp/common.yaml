@@ -12,4 +12,5 @@ service: fastmcp
 #       tasks: ["*"]
 #       action: reject
 
+fastmcp: {}
 uvicorn: {}

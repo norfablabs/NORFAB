@@ -157,12 +157,13 @@ class ClientJobDatabase:
         deadline: float,
     ) -> None:
 
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
         with self._transaction(write=True) as conn:
             conn.execute(
                 """
                 INSERT INTO jobs (uuid, service, task, args, kwargs, timeout, deadline,
-                                  status, workers_requested, received_timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'NEW', ?, ?)
+                                  status, workers_requested, received_timestamp, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'NEW', ?, ?, ?)
                 """,
                 (
                     uuid,
@@ -173,7 +174,8 @@ class ClientJobDatabase:
                     timeout,
                     deadline,
                     orjson.dumps(workers).decode("utf-8"),
-                    time.ctime(),
+                    now,
+                    now,
                 ),
             )
 

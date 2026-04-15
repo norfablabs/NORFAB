@@ -15,4 +15,10 @@ NorFab shell supports these command options for Netbox `graphql` task:
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.graphql
+### graphql
+
+::: norfab.workers.netbox_worker.graphql_tasks.NetboxGraphqlTasks.graphql
+
+### netbox_graphql
+
+::: norfab.workers.netbox_worker.graphql_tasks.NetboxGraphqlTasks.netbox_graphql

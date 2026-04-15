@@ -1,4 +1,6 @@
+import calendar
 import json
+import time
 
 from mdutils import MdUtils
 
@@ -143,6 +145,10 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     total_rows = 1  # Counter for total table rows (includes header)
     table_rows = []  # List to collect and sort table rows
     total_failed = 0  # number of tests failed
+    created_at = data.get("created_at")  # when tests job was created
+    completed_timestamp = data.get(
+        "completed_timestamp"
+    )  # when tests job was completed
 
     # HTML output buffers
     tests_details_html = ""  # HTML for hierarchical tests details section
@@ -320,6 +326,26 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
 
     # Tests Summary section
     md.new_header(level=2, title="Summary")
+    # calculate tests timestamps and duration
+    if created_at and completed_timestamp:
+        try:
+            start = calendar.timegm(time.strptime(created_at, "%Y-%m-%d %H:%M:%S"))
+            end_ts = time.strptime(completed_timestamp)
+            end = calendar.timegm(end_ts)
+            duration_secs = end - start
+            h, rem = divmod(abs(duration_secs), 3600)
+            m, s = divmod(rem, 60)
+            duration_str = f"{h}h {m}m {s}s" if h else (f"{m}m {s}s" if m else f"{s}s")
+            completed_normalized = time.strftime("%Y-%m-%d %H:%M:%S", end_ts)
+        except (ValueError, OverflowError):
+            duration_str = "N/A"
+            completed_normalized = completed_timestamp
+        md.new_paragraph(
+            f"Started - {created_at}, "
+            f"completed - {completed_normalized}, "
+            f"duration - {duration_str}\n\n"
+        )
+    # calculate tests stats
     if total_rows > 1:
         md.new_paragraph(
             f"Tests total - {total_rows - 1}, "

@@ -1202,15 +1202,17 @@ class TestGetConnections:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
-            assert "eth101" in res["result"]["fceos5"], f"{worker}:fceos5 missing eth101"
+            assert (
+                "eth101" in res["result"]["fceos5"]
+            ), f"{worker}:fceos5 missing eth101"
 
             intf_data = res["result"]["fceos5"]["eth101"]
             assert intf_data["remote_device"] == "fceos4"
             assert intf_data["remote_interface"] == "eth101"
             assert isinstance(intf_data["remote_mac_addresses"], list)
-            assert intf_data["remote_mac_addresses"] == ["00:11:22:33:44:01"], (
-                f"{worker}:fceos5:eth101 expected populated remote_mac_addresses"
-            )
+            assert intf_data["remote_mac_addresses"] == [
+                "00:11:22:33:44:01"
+            ], f"{worker}:fceos5:eth101 expected populated remote_mac_addresses"
 
     def test_get_connections_port_channel_subif_remote_mac_addresses(self, nfclient):
         ret = nfclient.run_job(
@@ -1227,16 +1229,18 @@ class TestGetConnections:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
-            assert "ae5.101" in res["result"]["fceos5"], f"{worker}:fceos5 missing ae5.101"
+            assert (
+                "ae5.101" in res["result"]["fceos5"]
+            ), f"{worker}:fceos5 missing ae5.101"
 
             intf_data = res["result"]["fceos5"]["ae5.101"]
             assert intf_data["remote_device"] == "fceos4"
             assert intf_data["remote_interface"] == "Port-Channel1.101"
             assert "remote_mac_addresses" in intf_data
             assert isinstance(intf_data["remote_mac_addresses"], list)
-            assert intf_data["remote_mac_addresses"] == ["00:11:22:33:44:02"], (
-                f"{worker}:fceos5:ae5.101 expected populated remote_mac_addresses"
-            )
+            assert intf_data["remote_mac_addresses"] == [
+                "00:11:22:33:44:02"
+            ], f"{worker}:fceos5:ae5.101 expected populated remote_mac_addresses"
 
     def test_get_connections_port_channel_remote_mac_addresses(self, nfclient):
         ret = nfclient.run_job(
@@ -1260,9 +1264,9 @@ class TestGetConnections:
             assert intf_data["remote_interface"] == "Port-Channel1"
             assert "remote_mac_addresses" in intf_data
             assert isinstance(intf_data["remote_mac_addresses"], list)
-            assert intf_data["remote_mac_addresses"] == ["00:11:22:33:44:03"], (
-                f"{worker}:fceos5:ae5 expected populated remote_mac_addresses"
-            )
+            assert intf_data["remote_mac_addresses"] == [
+                "00:11:22:33:44:03"
+            ], f"{worker}:fceos5:ae5 expected populated remote_mac_addresses"
 
     def test_get_connections_two_remote_mac_addresses(self, nfclient):
         ret = nfclient.run_job(
@@ -1279,16 +1283,19 @@ class TestGetConnections:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
-            assert "eth103" in res["result"]["fceos4"], f"{worker}:fceos4 missing eth103"
+            assert (
+                "eth103" in res["result"]["fceos4"]
+            ), f"{worker}:fceos4 missing eth103"
 
             intf_data = res["result"]["fceos4"]["eth103"]
             assert intf_data["remote_device"] == "fceos5"
             assert intf_data["remote_interface"] == "eth103"
             assert "remote_mac_addresses" in intf_data
             assert isinstance(intf_data["remote_mac_addresses"], list)
-            assert intf_data["remote_mac_addresses"] == ['00:11:22:33:44:04', '00:11:22:33:44:05'], (
-                f"{worker}:fceos4:eth103 expected exactly two remote_mac_addresses"
-            )
+            assert intf_data["remote_mac_addresses"] == [
+                "00:11:22:33:44:04",
+                "00:11:22:33:44:05",
+            ], f"{worker}:fceos4:eth103 expected exactly two remote_mac_addresses"
 
     def test_get_connections_eth11_123_remote_mac_addresses(self, nfclient):
         ret = nfclient.run_job(
@@ -1305,16 +1312,18 @@ class TestGetConnections:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
-            assert "eth11.123" in res["result"]["fceos5"], f"{worker}:fceos5 missing eth3.13"
+            assert (
+                "eth11.123" in res["result"]["fceos5"]
+            ), f"{worker}:fceos5 missing eth3.13"
 
             intf_data = res["result"]["fceos5"]["eth11.123"]
             assert intf_data["remote_device"] == "fceos4"
             assert intf_data["remote_interface"] == "eth11.123"
             assert "remote_mac_addresses" in intf_data
             assert isinstance(intf_data["remote_mac_addresses"], list)
-            assert intf_data["remote_mac_addresses"] == ["00:11:22:33:44:06"], (
-                f"{worker}:fceos5:eth11.123 expected populated remote_mac_addresses"
-            )
+            assert intf_data["remote_mac_addresses"] == [
+                "00:11:22:33:44:06"
+            ], f"{worker}:fceos5:eth11.123 expected populated remote_mac_addresses"
 
     def test_get_connections(self, nfclient):
         ret = nfclient.run_job(
@@ -1367,6 +1376,7 @@ class TestGetConnections:
                         assert intf_data["remote_termination_type"] == "providernetwork"
                         assert intf_data["remote_device"] == None
                         assert intf_data["remote_interface"] == None
+                        assert intf_data["remote_interface_label"] == None
                     # verify breakout handling
                     if device == "fceos5" and intf_name == "eth1":
                         assert (
@@ -1385,11 +1395,13 @@ class TestGetConnections:
                         assert intf_data["remote_device"] == "fceos5"
                         assert intf_data["remote_interface"] == "ae5"
                         assert intf_data["termination_type"] == "lag"
+                        assert "remote_interface_label" not in intf_data
                     # verify lag virtual interfaces handling
                     if device == "fceos4" and intf_name == "Port-Channel1.101":
                         assert intf_data["remote_device"] == "fceos5"
                         assert intf_data["remote_interface"] == "ae5.101"
                         assert intf_data["termination_type"] == "virtual"
+                        assert "remote_interface_label" not in intf_data
                     if device == "fceos5" and intf_name == "ae6.0":
                         assert intf_data["remote_device"] == "fceos4"
                         assert intf_data["remote_interface"] == "Port-Channel2"
@@ -1400,6 +1412,15 @@ class TestGetConnections:
                         assert intf_data["remote_interface"] == "eth103"
                         assert intf_data["termination_type"] == "virtual"
                         assert intf_data["remote_termination_type"] == "interface"
+                        assert intf_data["remote_interface_label"] == ""
+                    if device == "fceos4" and intf_name == "ConsolePort2":
+                        assert intf_data["remote_device"] == "fceos5"
+                        assert intf_data["remote_interface"] == "ConsoleServerPort2"
+                        assert intf_data["termination_type"] == "consoleport"
+                        assert (
+                            intf_data["remote_termination_type"] == "consoleserverport"
+                        )
+                        assert intf_data["remote_interface_label"] == ""
 
     def test_get_connections_physical_interface_regex(self, nfclient):
         ret = nfclient.run_job(
@@ -1513,19 +1534,21 @@ class TestGetConnections:
         elapsed_seconds = perf_counter() - started_at
         pprint.pprint(ret)
 
-        assert elapsed_seconds < 15, (
-            f"get_connections took {elapsed_seconds:.2f}s, expected under 15s"
-        )
+        assert (
+            elapsed_seconds < 15
+        ), f"get_connections took {elapsed_seconds:.2f}s, expected under 15s"
 
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             for device in devices:
-                assert device in res["result"], f"{worker} returned no results for {device}"
+                assert (
+                    device in res["result"]
+                ), f"{worker} returned no results for {device}"
 
             total_connections = sum(len(res["result"][device]) for device in devices)
-            assert total_connections == 600, (
-                f"{worker} returned {total_connections} connections, expected 600"
-            )
+            assert (
+                total_connections == 600
+            ), f"{worker} returned {total_connections} connections, expected 600"
 
 
 class TestGetNornirInventory:
