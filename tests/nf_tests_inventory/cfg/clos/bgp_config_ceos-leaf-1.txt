@@ -1,18 +1,40 @@
+vrf instance CONTROL_PLANE
+!
 ip routing
+ip routing vrf CONTROL_PLANE
 !
 interface Loopback0
    description Router ID
    ip address 10.10.10.11/32
+!
+interface Loopback101
+   description Control Plane Router ID
+   vrf CONTROL_PLANE
+   ip address 10.101.1.11/32
 !
 interface Ethernet1
    description P2P to ceos-spine-1 Ethernet2
    no switchport
    ip address 10.0.0.1/31
 !
+interface Ethernet1.101
+   description Control Plane P2P to ceos-spine-1 Ethernet2.101
+   encapsulation dot1q vlan 101
+   vrf CONTROL_PLANE
+   ip address 10.101.0.1/31
+!
 interface Ethernet2
    description P2P to ceos-spine-2 Ethernet2
    no switchport
    ip address 10.0.0.3/31
+!
+interface Ethernet2.101
+   description Control Plane P2P to ceos-spine-2 Ethernet2.101
+   encapsulation dot1q vlan 101
+   vrf CONTROL_PLANE
+   ip address 10.101.0.3/31
+!
+ip prefix-list ALLOW-ALL seq 10 permit 0.0.0.0/0 le 32
 !
 router bgp 65101
    router-id 10.10.10.11
@@ -33,3 +55,15 @@ router bgp 65101
    neighbor 10.10.10.2 description ceos-spine-2 Loopback0 EVPN
    address-family evpn
       neighbor EVPN-OVERLAY activate
+   address-family ipv4
+      neighbor 10.0.0.2 prefix-list ALLOW-ALL in
+      neighbor 10.0.0.2 prefix-list ALLOW-ALL out
+      neighbor 10.0.0.0 prefix-list ALLOW-ALL in
+      neighbor 10.0.0.0 prefix-list ALLOW-ALL out
+   vrf CONTROL_PLANE
+      router-id 10.101.1.11
+      redistribute connected
+      neighbor 10.101.0.0 remote-as 65001
+      neighbor 10.101.0.0 description ceos-spine-1 Ethernet2.101
+      neighbor 10.101.0.2 remote-as 65002
+      neighbor 10.101.0.2 description ceos-spine-2 Ethernet2.101

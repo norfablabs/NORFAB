@@ -1,4 +1,7 @@
+vrf instance CONTROL_PLANE
+!
 ip routing
+ip routing vrf CONTROL_PLANE
 !
 interface Loopback0
    description Router ID
@@ -9,15 +12,35 @@ interface Ethernet2
    no switchport
    ip address 10.0.0.2/31
 !
+interface Ethernet2.101
+   description Control Plane P2P to ceos-leaf-1 Ethernet2.101
+   encapsulation dot1q vlan 101
+   vrf CONTROL_PLANE
+   ip address 10.101.0.2/31
+!
 interface Ethernet3
    description P2P to ceos-leaf-2 Ethernet2
    no switchport
    ip address 10.0.0.6/31
 !
+interface Ethernet3.101
+   description Control Plane P2P to ceos-leaf-2 Ethernet2.101
+   encapsulation dot1q vlan 101
+   vrf CONTROL_PLANE
+   ip address 10.101.0.6/31
+!
 interface Ethernet4
    description P2P to ceos-leaf-3 Ethernet2
    no switchport
    ip address 10.0.0.10/31
+!
+interface Ethernet4.101
+   description Control Plane P2P to ceos-leaf-3 Ethernet2.101
+   encapsulation dot1q vlan 101
+   vrf CONTROL_PLANE
+   ip address 10.101.0.10/31
+!
+route-map ALLOW-ALL permit 10
 !
 router bgp 65002
    router-id 10.10.10.2
@@ -28,10 +51,16 @@ router bgp 65002
    neighbor EVPN-OVERLAY send-community standard extended
    neighbor 10.0.0.3 remote-as 65101
    neighbor 10.0.0.3 description ceos-leaf-1 Ethernet2
+   neighbor 10.0.0.3 route-map ALLOW-ALL in
+   neighbor 10.0.0.3 route-map ALLOW-ALL out
    neighbor 10.0.0.7 remote-as 65102
    neighbor 10.0.0.7 description ceos-leaf-2 Ethernet2
+   neighbor 10.0.0.7 route-map ALLOW-ALL in
+   neighbor 10.0.0.7 route-map ALLOW-ALL out
    neighbor 10.0.0.11 remote-as 65103
    neighbor 10.0.0.11 description ceos-leaf-3 Ethernet2
+   neighbor 10.0.0.11 route-map ALLOW-ALL in
+   neighbor 10.0.0.11 route-map ALLOW-ALL out
    neighbor 10.10.10.11 peer group EVPN-OVERLAY
    neighbor 10.10.10.11 remote-as 65101
    neighbor 10.10.10.11 description ceos-leaf-1 Loopback0 EVPN
@@ -43,3 +72,10 @@ router bgp 65002
    neighbor 10.10.10.13 description ceos-leaf-3 Loopback0 EVPN
    address-family evpn
       neighbor EVPN-OVERLAY activate
+   vrf CONTROL_PLANE
+      neighbor 10.101.0.3 remote-as 65101
+      neighbor 10.101.0.3 description ceos-leaf-1 Ethernet2.101
+      neighbor 10.101.0.7 remote-as 65102
+      neighbor 10.101.0.7 description ceos-leaf-2 Ethernet2.101
+      neighbor 10.101.0.11 remote-as 65103
+      neighbor 10.101.0.11 description ceos-leaf-3 Ethernet2.101

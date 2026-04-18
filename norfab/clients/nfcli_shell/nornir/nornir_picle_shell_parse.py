@@ -58,7 +58,7 @@ class NapalmGettersEnum(str, Enum):
 
 
 class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
-    getters: Union[NapalmGettersEnum, List[NapalmGettersEnum]] = Field(
+    getters: NapalmGettersEnum = Field(
         ..., description="Select NAPALM getters"
     )
 
