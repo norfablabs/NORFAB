@@ -15,7 +15,7 @@ interface Loopback101
 interface Ethernet1
    description P2P to ceos-spine-1 Ethernet2
    no switchport
-   ip address 10.0.0.1/31
+   ip address 10.10.0.1/31
 !
 interface Ethernet1.101
    description Control Plane P2P to ceos-spine-1 Ethernet2.101
@@ -26,7 +26,7 @@ interface Ethernet1.101
 interface Ethernet2
    description P2P to ceos-spine-2 Ethernet2
    no switchport
-   ip address 10.0.0.3/31
+   ip address 10.10.0.3/31
 !
 interface Ethernet2.101
    description Control Plane P2P to ceos-spine-2 Ethernet2.101
@@ -43,10 +43,10 @@ router bgp 65101
    neighbor EVPN-OVERLAY update-source Loopback0
    neighbor EVPN-OVERLAY ebgp-multihop 3
    neighbor EVPN-OVERLAY send-community standard extended
-   neighbor 10.0.0.0 remote-as 65001
-   neighbor 10.0.0.0 description ceos-spine-1 Ethernet2
-   neighbor 10.0.0.2 remote-as 65002
-   neighbor 10.0.0.2 description ceos-spine-2 Ethernet2
+   neighbor 10.10.0.0 remote-as 65001
+   neighbor 10.10.0.0 description ceos-spine-1 Ethernet2
+   neighbor 10.10.0.2 remote-as 65002
+   neighbor 10.10.0.2 description ceos-spine-2 Ethernet2
    neighbor 10.10.10.1 peer group EVPN-OVERLAY
    neighbor 10.10.10.1 remote-as 65001
    neighbor 10.10.10.1 description ceos-spine-1 Loopback0 EVPN
@@ -56,10 +56,10 @@ router bgp 65101
    address-family evpn
       neighbor EVPN-OVERLAY activate
    address-family ipv4
-      neighbor 10.0.0.2 prefix-list ALLOW-ALL in
-      neighbor 10.0.0.2 prefix-list ALLOW-ALL out
-      neighbor 10.0.0.0 prefix-list ALLOW-ALL in
-      neighbor 10.0.0.0 prefix-list ALLOW-ALL out
+      neighbor 10.10.0.2 prefix-list ALLOW-ALL in
+      neighbor 10.10.0.2 prefix-list ALLOW-ALL out
+      neighbor 10.10.0.0 prefix-list ALLOW-ALL in
+      neighbor 10.10.0.0 prefix-list ALLOW-ALL out
    vrf CONTROL_PLANE
       router-id 10.101.1.11
       redistribute connected

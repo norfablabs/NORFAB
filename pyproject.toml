@@ -92,6 +92,7 @@ langgraph-checkpoint-sqlite = { version = "3.0.3", optional = true }
 diskcache = { version = "5.6.3", optional = true }
 pynetbox = { version = "7.6.1", optional = true }
 httpx = { version = "0.28.1", optional = true }
+deepdiff = { version = "9.0.0", optional = true }
 
 # FastAPI Service Dependencies
 fastapi = { version = "0.135.1", optional = true, extras = ["standard"] }

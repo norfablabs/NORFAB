@@ -10,7 +10,7 @@ interface Loopback0
 interface Ethernet2
    description P2P to ceos-leaf-1 Ethernet1
    no switchport
-   ip address 10.0.0.0/31
+   ip address 10.10.0.0/31
 !
 interface Ethernet2.101
    description Control Plane P2P to ceos-leaf-1 Ethernet1.101
@@ -21,7 +21,7 @@ interface Ethernet2.101
 interface Ethernet3
    description P2P to ceos-leaf-2 Ethernet1
    no switchport
-   ip address 10.0.0.4/31
+   ip address 10.10.0.4/31
 !
 interface Ethernet3.101
    description Control Plane P2P to ceos-leaf-2 Ethernet1.101
@@ -32,7 +32,7 @@ interface Ethernet3.101
 interface Ethernet4
    description P2P to ceos-leaf-3 Ethernet1
    no switchport
-   ip address 10.0.0.8/31
+   ip address 10.10.0.8/31
 !
 interface Ethernet4.101
    description Control Plane P2P to ceos-leaf-3 Ethernet1.101
@@ -49,18 +49,18 @@ router bgp 65001
    neighbor EVPN-OVERLAY update-source Loopback0
    neighbor EVPN-OVERLAY ebgp-multihop 3
    neighbor EVPN-OVERLAY send-community standard extended
-   neighbor 10.0.0.1 remote-as 65101
-   neighbor 10.0.0.1 description ceos-leaf-1 Ethernet1
-   neighbor 10.0.0.1 route-map ALLOW-ALL in
-   neighbor 10.0.0.1 route-map ALLOW-ALL out
-   neighbor 10.0.0.5 remote-as 65102
-   neighbor 10.0.0.5 description ceos-leaf-2 Ethernet1
-   neighbor 10.0.0.5 route-map ALLOW-ALL in
-   neighbor 10.0.0.5 route-map ALLOW-ALL out
-   neighbor 10.0.0.9 remote-as 65103
-   neighbor 10.0.0.9 description ceos-leaf-3 Ethernet1
-   neighbor 10.0.0.9 route-map ALLOW-ALL in
-   neighbor 10.0.0.9 route-map ALLOW-ALL out
+   neighbor 10.10.0.1 remote-as 65101
+   neighbor 10.10.0.1 description ceos-leaf-1 Ethernet1
+   neighbor 10.10.0.1 route-map ALLOW-ALL in
+   neighbor 10.10.0.1 route-map ALLOW-ALL out
+   neighbor 10.10.0.5 remote-as 65102
+   neighbor 10.10.0.5 description ceos-leaf-2 Ethernet1
+   neighbor 10.10.0.5 route-map ALLOW-ALL in
+   neighbor 10.10.0.5 route-map ALLOW-ALL out
+   neighbor 10.10.0.9 remote-as 65103
+   neighbor 10.10.0.9 description ceos-leaf-3 Ethernet1
+   neighbor 10.10.0.9 route-map ALLOW-ALL in
+   neighbor 10.10.0.9 route-map ALLOW-ALL out
    neighbor 10.10.10.11 peer group EVPN-OVERLAY
    neighbor 10.10.10.11 remote-as 65101
    neighbor 10.10.10.11 description ceos-leaf-1 Loopback0 EVPN

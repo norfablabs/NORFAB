@@ -5342,3 +5342,418 @@ class TestCreateDesign:
         )
         print("created design:")
         pprint.pprint(res, width=200)
+
+
+# ---------------------------------------------------------------------------
+# BGP PEERINGS TESTS
+# ---------------------------------------------------------------------------
+
+DEVICES = ["ceos-spine-1", "ceos-spine-2", "ceos-leaf-1", "ceos-leaf-2", "ceos-leaf-3"]
+
+
+def delete_bgp_sessions(devices=DEVICES):
+    """Delete all BGP sessions in NetBox for the given devices."""
+    nb = get_pynetbox(None)
+    for device in devices:
+        sessions = list(nb.plugins.bgp.session.filter(device=device))
+        for session in sessions:
+            session.delete()
+    print(f"Deleted BGP sessions for devices: {devices}")
+
+
+class TestCreateBgpPeerings:
+
+    def setup_method(self):
+        delete_bgp_sessions()
+
+    def teardown_method(self):
+        delete_bgp_sessions()
+
+    def test_create_bgp_peerings_basic(self, nfclient):
+        """Run task, verify created list is non-empty, sessions exist in NetBox."""
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": DEVICES, "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        nb = get_pynetbox(nfclient)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            for device in DEVICES:
+                if device in res["result"]:
+                    assert len(res["result"][device]["created"]) > 0, (
+                        f"{worker}: expected created sessions for '{device}'"
+                    )
+                    for sname in res["result"][device]["created"]:
+                        assert nb.plugins.bgp.session.get(name=sname), (
+                            f"session '{sname}' not found in NetBox after creation"
+                        )
+
+    def test_create_bgp_peerings_idempotent(self, nfclient):
+        """Run twice; second run returns empty created/updated and non-empty in_sync."""
+        kwargs = {"devices": DEVICES, "rir": "lab"}
+        nfclient.run_job("netbox", "create_bgp_peerings", workers="any", kwargs=kwargs)
+
+        ret = nfclient.run_job(
+            "netbox", "create_bgp_peerings", workers="any", kwargs=kwargs
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            for device in DEVICES:
+                if device in res["result"]:
+                    assert res["result"][device]["created"] == [], (
+                        f"{worker}: expected no new sessions on 2nd run for '{device}'"
+                    )
+                    assert res["result"][device]["updated"] == [], (
+                        f"{worker}: expected no updates on 2nd run for '{device}'"
+                    )
+
+    def test_create_bgp_peerings_dry_run_no_sessions(self, nfclient):
+        """NetBox empty; dry_run=True; every device has non-empty missing_in_netbox."""
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": DEVICES, "dry_run": True, "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            for device in DEVICES:
+                if device in res["result"]:
+                    assert len(res["result"][device]["missing_in_netbox"]) > 0, (
+                        f"{worker}: expected missing_in_netbox for '{device}'"
+                    )
+                    assert res["result"][device]["missing_on_device"] == [], (
+                        f"{worker}: expected empty missing_on_device for '{device}'"
+                    )
+                    assert res["result"][device]["needs_update"] == {}, (
+                        f"{worker}: expected empty needs_update for '{device}'"
+                    )
+                    assert res["result"][device]["in_sync"] == [], (
+                        f"{worker}: expected empty in_sync for '{device}'"
+                    )
+
+    def test_create_bgp_peerings_dry_run_in_sync(self, nfclient):
+        """Pre-create sessions; dry_run=True; all sessions in in_sync."""
+        nfclient.run_job(
+            "netbox", "create_bgp_peerings", workers="any", kwargs={"devices": DEVICES, "rir": "lab"}
+        )
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": DEVICES, "dry_run": True, "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            for device in DEVICES:
+                if device in res["result"]:
+                    assert res["result"][device]["missing_in_netbox"] == [], (
+                        f"{worker}: expected no missing_in_netbox after creation for '{device}'"
+                    )
+                    assert len(res["result"][device]["in_sync"]) > 0, (
+                        f"{worker}: expected in_sync sessions for '{device}'"
+                    )
+
+    def test_create_bgp_peerings_dry_run_needs_update(self, nfclient):
+        """Pre-create sessions; manually change description; dry_run=True shows needs_update."""
+        nfclient.run_job(
+            "netbox", "create_bgp_peerings", workers="any", kwargs={"devices": DEVICES, "rir": "lab"}
+        )
+        nb = get_pynetbox(nfclient)
+        # Find any created session and alter its description
+        target_device = DEVICES[0]
+        sessions = list(nb.plugins.bgp.session.filter(device=target_device))
+        assert sessions, f"No sessions found for '{target_device}' after creation"
+        target_session = sessions[0]
+        original_description = target_session.description
+        target_session.description = "CHANGED_FOR_TEST"
+        target_session.save()
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "dry_run": True, "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                assert target_session.name in res["result"][target_device]["needs_update"], (
+                    f"{worker}: expected '{target_session.name}' in needs_update"
+                )
+
+    def test_create_bgp_peerings_dry_run_missing_on_device(self, nfclient):
+        """Manually create a stale session; dry_run=True shows it in missing_on_device."""
+        nb = get_pynetbox(nfclient)
+        target_device = DEVICES[0]
+
+        # First create real sessions so we have device/IP/ASN resolved
+        nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+
+        # Now create a stale session that won't match any parsed session
+        nb_device = nb.dcim.devices.get(name=target_device)
+        # Reuse IPs/ASNs from an existing session to avoid FK issues
+        existing = list(nb.plugins.bgp.session.filter(device=target_device))
+        assert existing, f"No sessions for '{target_device}'"
+        ref = existing[0]
+        stale_name = f"{target_device}_STALE_TEST_SESSION_XYZ"
+        nb.plugins.bgp.session.create(
+            name=stale_name,
+            device=nb_device.id,
+            local_address=ref.local_address.id,
+            remote_address=ref.remote_address.id,
+            local_as=ref.local_as.id,
+            remote_as=ref.remote_as.id,
+            status="planned",
+        )
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "dry_run": True, "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                assert stale_name in res["result"][target_device]["missing_on_device"], (
+                    f"{worker}: expected '{stale_name}' in missing_on_device"
+                )
+
+    def test_create_bgp_peerings_dry_run_no_writes(self, nfclient):
+        """Confirm NetBox session count is identical before and after dry_run."""
+        nb = get_pynetbox(nfclient)
+        before = len(list(nb.plugins.bgp.session.filter(device=DEVICES)))
+
+        nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": DEVICES, "dry_run": True, "rir": "lab"},
+        )
+
+        after = len(list(nb.plugins.bgp.session.filter(device=DEVICES)))
+        assert before == after, f"Session count changed during dry_run: {before} -> {after}"
+
+    def test_create_bgp_peerings_update_description(self, nfclient):
+        """Pre-create sessions; change description on one; re-run; verify updated."""
+        nfclient.run_job(
+            "netbox", "create_bgp_peerings", workers="any", kwargs={"devices": DEVICES, "rir": "lab"}
+        )
+        nb = get_pynetbox(nfclient)
+        target_device = DEVICES[0]
+        sessions = list(nb.plugins.bgp.session.filter(device=target_device))
+        assert sessions
+        target = sessions[0]
+        target.description = "UPDATED_DESCRIPTION"
+        target.save()
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                assert target.name in res["result"][target_device]["updated"], (
+                    f"{worker}: expected '{target.name}' in updated"
+                )
+
+    def test_create_bgp_peerings_update_status(self, nfclient):
+        """Pre-create sessions; change status on one; re-run; verify updated."""
+        nfclient.run_job(
+            "netbox", "create_bgp_peerings", workers="any", kwargs={"devices": DEVICES, "rir": "lab"}
+        )
+        nb = get_pynetbox(nfclient)
+        target_device = DEVICES[0]
+        sessions = list(nb.plugins.bgp.session.filter(device=target_device))
+        assert sessions
+        target = sessions[0]
+        # Set a different status than what parse_ttp would return
+        target.status = "planned"
+        target.save()
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                assert target.name in res["result"][target_device]["updated"], (
+                    f"{worker}: expected '{target.name}' in updated after status change"
+                )
+
+    def test_create_bgp_peerings_process_deletions(self, nfclient):
+        """Pre-seed a stale session; run with process_deletions=True; verify deleted."""
+        nb = get_pynetbox(nfclient)
+        target_device = DEVICES[0]
+
+        nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+
+        existing = list(nb.plugins.bgp.session.filter(device=target_device))
+        assert existing
+        ref = existing[0]
+        nb_device = nb.dcim.devices.get(name=target_device)
+        stale_name = f"{target_device}_STALE_DELETION_TEST"
+        nb.plugins.bgp.session.create(
+            name=stale_name,
+            device=nb_device.id,
+            local_address=ref.local_address.id,
+            remote_address=ref.remote_address.id,
+            local_as=ref.local_as.id,
+            remote_as=ref.remote_as.id,
+            status="planned",
+        )
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "process_deletions": True, "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                assert stale_name in res["result"][target_device]["deleted"], (
+                    f"{worker}: expected '{stale_name}' in deleted"
+                )
+        assert not nb.plugins.bgp.session.get(name=stale_name), (
+            f"Stale session '{stale_name}' still exists in NetBox after deletion"
+        )
+
+    def test_create_bgp_peerings_process_deletions_default_off(self, nfclient):
+        """Stale session pre-seeded; run without process_deletions; verify not deleted."""
+        nb = get_pynetbox(nfclient)
+        target_device = DEVICES[0]
+
+        nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+
+        existing = list(nb.plugins.bgp.session.filter(device=target_device))
+        assert existing
+        ref = existing[0]
+        nb_device = nb.dcim.devices.get(name=target_device)
+        stale_name = f"{target_device}_STALE_NO_DELETE_TEST"
+        nb.plugins.bgp.session.create(
+            name=stale_name,
+            device=nb_device.id,
+            local_address=ref.local_address.id,
+            remote_address=ref.remote_address.id,
+            local_as=ref.local_as.id,
+            remote_as=ref.remote_as.id,
+            status="planned",
+        )
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                assert res["result"][target_device]["deleted"] == [], (
+                    f"{worker}: expected empty deleted list when process_deletions=False"
+                )
+        assert nb.plugins.bgp.session.get(name=stale_name), (
+            f"Stale session '{stale_name}' was incorrectly deleted"
+        )
+
+    def test_create_bgp_peerings_with_instance(self, nfclient):
+        """Pass explicit instance='prod'; task should not fail."""
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": DEVICES, "instance": "prod", "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed with instance='prod': {res['errors']}"
+
+    def test_create_bgp_peerings_with_branch(self, nfclient):
+        """Pass branch name; verify sessions created in branch; delete branch after."""
+        branch = "test-create-bgp-peerings-branch"
+        try:
+            ret = nfclient.run_job(
+                "netbox",
+                "create_bgp_peerings",
+                workers="any",
+                kwargs={"devices": DEVICES, "branch": branch, "rir": "lab"},
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+                for device in DEVICES:
+                    if device in res["result"]:
+                        assert len(res["result"][device]["created"]) > 0, (
+                            f"{worker}: expected sessions created in branch for '{device}'"
+                        )
+        finally:
+            delete_branch(branch, nfclient)
+
+    def test_create_bgp_peerings_nonexistent_device(self, nfclient):
+        """Nonexistent device; verify ret.errors populated, no crash."""
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"devices": ["nonexistent-device-xyz"], "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert len(res["errors"]) > 0, (
+                f"{worker}: expected errors for nonexistent device"
+            )
+
+    def test_create_bgp_peerings_with_nornir_filter(self, nfclient):
+        """Devices sourced from Nornir filter FC='spine'; verify spine sessions created."""
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peerings",
+            workers="any",
+            kwargs={"FC": "spine", "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        nb = get_pynetbox(nfclient)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            for device_name, device_res in res["result"].items():
+                assert "spine" in device_name, (
+                    f"{worker}: unexpected device '{device_name}' for FC='spine' filter"
+                )
+                assert len(device_res["created"]) > 0, (
+                    f"{worker}: expected created sessions for '{device_name}'"
+                )

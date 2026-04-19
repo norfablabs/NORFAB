@@ -15,7 +15,7 @@ interface Loopback101
 interface Ethernet1
    description P2P to ceos-spine-1 Ethernet4
    no switchport
-   ip address 10.0.0.9/31
+   ip address 10.10.0.9/31
 !
 interface Ethernet1.101
    description Control Plane P2P to ceos-spine-1 Ethernet4.101
@@ -26,7 +26,7 @@ interface Ethernet1.101
 interface Ethernet2
    description P2P to ceos-spine-2 Ethernet4
    no switchport
-   ip address 10.0.0.11/31
+   ip address 10.10.0.11/31
 !
 interface Ethernet2.101
    description Control Plane P2P to ceos-spine-2 Ethernet4.101
@@ -41,10 +41,10 @@ router bgp 65103
    neighbor EVPN-OVERLAY update-source Loopback0
    neighbor EVPN-OVERLAY ebgp-multihop 3
    neighbor EVPN-OVERLAY send-community standard extended
-   neighbor 10.0.0.8 remote-as 65001
-   neighbor 10.0.0.8 description ceos-spine-1 Ethernet4
-   neighbor 10.0.0.10 remote-as 65002
-   neighbor 10.0.0.10 description ceos-spine-2 Ethernet4
+   neighbor 10.10.0.8 remote-as 65001
+   neighbor 10.10.0.8 description ceos-spine-1 Ethernet4
+   neighbor 10.10.0.10 remote-as 65002
+   neighbor 10.10.0.10 description ceos-spine-2 Ethernet4
    neighbor 10.10.10.1 peer group EVPN-OVERLAY
    neighbor 10.10.10.1 remote-as 65001
    neighbor 10.10.10.1 description ceos-spine-1 Loopback0 EVPN

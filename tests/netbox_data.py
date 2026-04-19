@@ -1626,6 +1626,33 @@ devices = [
             },
         },
     },
+    {
+        "name": "ceos-leaf-1",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-1"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+    },
+    {
+        "name": "ceos-leaf-2",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-1"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+    },
+    {
+        "name": "ceos-leaf-3",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-1"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+    }
 ]
 # add fceos3_390-fceos3_399 devices to test multi-threading retrieval
 for i in range(10):
