@@ -23,7 +23,7 @@ from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 from ..common import log_error_or_result
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
-from .netbox_picle_shell_create_bgp_peerings import CreateBgpPeeringsShell
+from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
 from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
 from .netbox_picle_shell_create_ip import CreateIp
 from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
@@ -244,11 +244,6 @@ class CreateCommands(BaseModel):
         description="Allocate next available IP address from prefix for multiple devices and interfaces",
         alias="ip-bulk",
     )
-    bgp_peerings: CreateBgpPeeringsShell = Field(
-        None,
-        description="Create BGP peering sessions",
-        alias="bgp-peerings",
-    )
     device_interfaces: CreateDeviceInterfacesShell = Field(
         None,
         description="Create devices interfaces",
@@ -267,6 +262,11 @@ class CreateCommands(BaseModel):
 
 class SyncCommands(BaseModel):
     device: SyncDeviceCommands = Field(None, description="Sync from device into Netbox")
+    bgp_peerings: SyncBgpPeeringsShell = Field(
+        None,
+        description="Sync BGP peering sessions",
+        alias="bgp-peerings",
+    )
 
     class PicleConfig:
         subshell = True

@@ -4,7 +4,6 @@ from enum import Enum
 from typing import List, Union
 
 import pynetbox
-from deepdiff import DeepDiff
 from pydantic import Field, StrictInt
 
 from norfab.core.worker import Job, Task
@@ -23,7 +22,7 @@ class BgpSessionStatusEnum(str, Enum):
     decommissioned = "decommissioned"
 
 
-class CreateBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
+class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
     devices: Union[None, List] = Field(
         None,
         description="List of device names to create BGP peerings for",
@@ -51,6 +50,16 @@ class CreateBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
     message: Union[None, str] = Field(
         None,
         description="Changelog message to record in NetBox for all create, update, and delete operations",
+    )
+    name_template: str = Field(
+        "{device}_{name}",
+        description=(
+            "Template string for BGP session names in NetBox. "
+            "Available variables: device, name, "
+            "description, local_address, local_as, remote_address, remote_as, "
+            "vrf, state, peer_group, import_policies, export_policies, "
+            "prefix_list_in, prefix_list_out."
+        ),
     )
 
 
@@ -349,69 +358,10 @@ class NetboxBgpPeeringsTasks:
 
         return ret
 
-    def make_diff(
-        self,
-        source_data: dict,
-        target_data: dict,
-    ) -> dict:
-        """
-        Compare two flat dicts of items and categorise them using DeepDiff tree view.
-
-        Args:
-            source_data: dict keyed by item name with item dicts as values (live/device data).
-            target_data: dict keyed by item name with item dicts as values (existing/netbox data).
-
-        Returns:
-            dict keyed by device name, each with keys ``create``, ``delete``,
-            ``update``, and ``in_sync``.
-            ``update`` is keyed by session name with ``{field: {"old_value": t1, "new_value": t2}}``.
-        """
-        result = {}
-        diff = DeepDiff(target_data, source_data, ignore_order=True, view="tree", threshold_to_diff_deeper=0)
-        
-        all_devices = set(source_data.keys()) | set(target_data.keys())
-        for device_name in all_devices:
-            result[device_name] = {"create": [], "delete": [], "update": {}, "in_sync": []}
-
-        for item in diff.get("dictionary_item_added", []):
-            path = item.path(output_format="list")
-            if len(path) == 1:
-                # Entire device is new in source — all its sessions are missing in target
-                device_name = path[0]
-                result[device_name]["create"].extend(source_data[device_name].keys())
-            elif len(path) == 2:
-                # Individual session is new within an existing device
-                device_name, sname = path
-                result[device_name]["create"].append(sname)
-
-        for item in diff.get("dictionary_item_removed", []):
-            path = item.path(output_format="list")
-            if len(path) == 1:
-                # Entire device is absent in source — all its sessions are missing in source
-                device_name = path[0]
-                result[device_name]["delete"].extend(target_data[device_name].keys())
-            elif len(path) == 2:
-                # Individual session removed within an existing device
-                device_name, sname = path
-                result[device_name]["delete"].append(sname)
-
-        for item in diff.get("values_changed", []):
-            path = item.path(output_format="list")
-            if len(path) == 3:
-                device_name, sname, field = path
-                result[device_name]["update"].setdefault(sname, {})[field] = {
-                    "old_value": item.t1,
-                    "new_value": item.t2,
-                }
-
-        for device_name in all_devices:
-            result[device_name]["create"] = sorted(result[device_name]["create"])
-            result[device_name]["delete"] = sorted(result[device_name]["delete"])
-
-        return result
-
-    @Task(fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()})
-    def create_bgp_peerings(
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+    )
+    def sync_bgp_peerings(
         self,
         job: Job,
         instance: Union[None, str] = None,
@@ -424,10 +374,11 @@ class NetboxBgpPeeringsTasks:
         branch: str = None,
         rir: str = None,
         message: str = None,
+        name_template: str = "{device}_{name}",
         **kwargs,
     ) -> Result:
         """
-        Synchronise BGP sessions between live devices and NetBox.
+        Synchronize BGP sessions between live devices and NetBox.
 
         Collects BGP session data from devices via Nornir ``parse_ttp`` with
         ``get="bgp_neighbors"``, compares against existing NetBox BGP sessions and
@@ -445,6 +396,21 @@ class NetboxBgpPeeringsTasks:
             branch (str, optional): NetBox branching plugin branch name.
             rir (str, optional): RIR name to use when creating new ASNs in NetBox (e.g. ``RFC 1918``, ``ARIN``).
             message (str, optional): Changelog message recorded in NetBox for all create, update, and delete operations.
+            name_template (str): Template string for BGP session names written to NetBox. Formatted with the
+                following keyword arguments from parsing results:
+
+                - ``device`` — device name (e.g. ``ceos-leaf-1``)
+                - ``name`` — parsed session name - ``{vrf}_{remote_address}`` by default
+                - ``description`` — session description
+                - ``local_address`` — local IP address string (e.g. ``10.0.0.1``)
+                - ``local_as`` — local AS number string (e.g. ``65100``)
+                - ``remote_address`` — remote IP address string
+                - ``remote_as`` — remote AS number string
+                - ``vrf`` — VRF name or ``None``
+                - ``state`` — device-reported state (e.g. ``established``)
+                - ``peer_group`` — peer group name or ``None``
+
+                Default: ``"{device}_{name}"``.
             **kwargs: Nornir host filters (e.g. ``FC``, ``FL``, ``FB``).
 
         Returns:
@@ -463,9 +429,9 @@ class NetboxBgpPeeringsTasks:
 
                 {
                     "<device>": {
-                        "missing_in_netbox": ["<session_name>", ...],
-                        "missing_on_device": ["<session_name>", ...],
-                        "update": {"<session_name>": <deepdiff_delta>, ...},
+                        "create": ["<session_name>", ...],
+                        "delete": ["<session_name>", ...],
+                        "update": {"<session_name>": {"<field>": {"old_value": ..., "new_value": ...}, ...}, ...},
                         "in_sync": ["<session_name>", ...],
                     }
                 }
@@ -473,14 +439,18 @@ class NetboxBgpPeeringsTasks:
         instance = instance or self.default_instance
         devices = devices or []
         ret = Result(
-            task=f"{self.name}:create_bgp_peerings",
+            task=f"{self.name}:sync_bgp_peerings",
             result={},
             resources=[instance],
         )
 
         # Normalised session dicts keyed by device name -> session name -> session field values
-        normalised_nb = {}    # NetBox data: device name -> session name -> normalised field values
-        normalised_live = {}  # Live data:   device name -> session name -> normalised field values
+        normalised_nb = (
+            {}
+        )  # NetBox data: device name -> session name -> normalised field values
+        normalised_live = (
+            {}
+        )  # Live data:   device name -> session name -> normalised field values
         # Diff results keyed by device name: device name -> diff result (create/source, update, in_sync)
         full_diff = {}
         # pynetbox API client, initialised after the dry-run guard
@@ -494,7 +464,9 @@ class NetboxBgpPeeringsTasks:
 
         # Validate BGP plugin
         if not self.has_plugin("netbox_bgp", instance, strict=True):
-            ret.errors.append(f"'{instance}' NetBox instance has no BGP plugin installed")
+            ret.errors.append(
+                f"'{instance}' NetBox instance has no BGP plugin installed"
+            )
             ret.failed = True
             return ret
 
@@ -511,7 +483,7 @@ class NetboxBgpPeeringsTasks:
             return ret
 
         log.info(
-            f"{self.name} - Create BGP peerings: processing {len(devices)} device(s) in '{instance}'"
+            f"{self.name} - Sync BGP peerings: processing {len(devices)} device(s) in '{instance}'"
         )
 
         # Fetch existing NetBox BGP sessions
@@ -525,7 +497,9 @@ class NetboxBgpPeeringsTasks:
             return ret
 
         # Fetch live BGP data from devices via Nornir parse_ttp
-        job.event(f"fetching BGP session data from {len(devices)} device(s) via Nornir parse_ttp")
+        job.event(
+            f"fetching BGP session data from {len(devices)} device(s) via Nornir parse_ttp"
+        )
         parse_data = self.client.run_job(
             "nornir",
             "parse_ttp",
@@ -538,25 +512,57 @@ class NetboxBgpPeeringsTasks:
         for device_name in devices:
             # Normalise NetBox sessions for this device
             normalised_nb[device_name] = {}
-            for sname, nb_session in nb_sessions_result.result.get(device_name, {}).items():
+            for sname, nb_session in nb_sessions_result.result.get(
+                device_name, {}
+            ).items():
                 try:
                     normalised_nb[device_name][sname] = {
-                        "name":            nb_session["name"],
-                        "description":     nb_session.get("description") or "",
-                        "local_address":   nb_session["local_address"]["address"].split("/")[0],
-                        "local_as":        str(nb_session["local_as"]["asn"]),
-                        "remote_address":  nb_session["remote_address"]["address"].split("/")[0],
-                        "remote_as":       str(nb_session["remote_as"]["asn"]),
-                        "vrf":             nb_session["vrf"]["name"] if nb_session.get("vrf") else None,
-                        "status":          nb_session["status"]["value"],
-                        "peer_group":      nb_session["peer_group"]["name"] if nb_session.get("peer_group") else None,
-                        "import_policies": "|".join(sorted(p["name"] for p in nb_session.get("import_policies") or [])),
-                        "export_policies": "|".join(sorted(p["name"] for p in nb_session.get("export_policies") or [])),
-                        "prefix_list_in":  nb_session["prefix_list_in"]["name"] if nb_session.get("prefix_list_in") else None,
-                        "prefix_list_out": nb_session["prefix_list_out"]["name"] if nb_session.get("prefix_list_out") else None,
+                        "name": nb_session["name"],
+                        "description": nb_session.get("description") or "",
+                        "local_address": nb_session["local_address"]["address"].split(
+                            "/"
+                        )[0],
+                        "local_as": str(nb_session["local_as"]["asn"]),
+                        "remote_address": nb_session["remote_address"]["address"].split(
+                            "/"
+                        )[0],
+                        "remote_as": str(nb_session["remote_as"]["asn"]),
+                        "vrf": (
+                            nb_session["vrf"]["name"] if nb_session.get("vrf") else None
+                        ),
+                        "status": nb_session["status"]["value"],
+                        "peer_group": (
+                            nb_session["peer_group"]["name"]
+                            if nb_session.get("peer_group")
+                            else None
+                        ),
+                        "import_policies": "|".join(
+                            sorted(
+                                p["name"]
+                                for p in nb_session.get("import_policies") or []
+                            )
+                        ),
+                        "export_policies": "|".join(
+                            sorted(
+                                p["name"]
+                                for p in nb_session.get("export_policies") or []
+                            )
+                        ),
+                        "prefix_list_in": (
+                            nb_session["prefix_list_in"]["name"]
+                            if nb_session.get("prefix_list_in")
+                            else None
+                        ),
+                        "prefix_list_out": (
+                            nb_session["prefix_list_out"]["name"]
+                            if nb_session.get("prefix_list_out")
+                            else None
+                        ),
                     }
                 except Exception as e:
-                    log.warning(f"{self.name} - failed to normalise NetBox session '{sname}' for '{device_name}': {e}")
+                    log.warning(
+                        f"{self.name} - failed to normalise NetBox session '{sname}' for '{device_name}': {e}"
+                    )
 
         # Normalize live parse data per device
         for wname, wdata in parse_data.items():
@@ -566,32 +572,37 @@ class NetboxBgpPeeringsTasks:
             for device_name, host_sessions in wdata.get("result", {}).items():
                 normalised_live.setdefault(device_name, {})
                 for s in host_sessions:
-                    session_name = f"{device_name}_{s['name']}"
+                    try:
+                        session_name = name_template.format(device=device_name, **s)
+                    except (KeyError, IndexError) as e:
+                        log.warning(
+                            f"{self.name} - name_template '{name_template}' failed for session '{s.get('name')}' on '{device_name}': {e}, falling back to default"
+                        )
+                        session_name = f"{device_name}_{s['name']}"
                     normalised_live[device_name][session_name] = {
-                        "name":            session_name,
-                        "description":     s.get("description") or "",
-                        "local_address":   s.get("local_address"),
-                        "local_as":        str(s.get("local_as", "")),
-                        "remote_address":  s.get("remote_address"),
-                        "remote_as":       str(s.get("remote_as", "")),
-                        "vrf":             s.get("vrf"),
-                        "status":          "active" if s.get("state") == "established" else status,
-                        "peer_group":      s.get("peer_group"),
-                        "import_policies": "|".join(sorted(s.get("import_policies") or [])),
-                        "export_policies": "|".join(sorted(s.get("export_policies") or [])),
-                        "prefix_list_in":  s.get("prefix_list_in"),
+                        "name": session_name,
+                        "description": s.get("description") or "",
+                        "local_address": s.get("local_address"),
+                        "local_as": str(s.get("local_as", "")),
+                        "remote_address": s.get("remote_address"),
+                        "remote_as": str(s.get("remote_as", "")),
+                        "vrf": s.get("vrf"),
+                        "status": (
+                            "active" if s.get("state") == "established" else status
+                        ),
+                        "peer_group": s.get("peer_group"),
+                        "import_policies": "|".join(
+                            sorted(s.get("import_policies") or [])
+                        ),
+                        "export_policies": "|".join(
+                            sorted(s.get("export_policies") or [])
+                        ),
+                        "prefix_list_in": s.get("prefix_list_in"),
                         "prefix_list_out": s.get("prefix_list_out"),
                     }
 
         # Single diff on the full normalised datasets
         full_diff = self.make_diff(normalised_live, normalised_nb)
-
-        # calculate in sync sessions
-        for device_name in set(normalised_live.keys()) | set(normalised_nb.keys()):
-            src_sessions = set(normalised_live.get(device_name, {}).keys())
-            tgt_sessions = set(normalised_nb.get(device_name, {}).keys())
-            common = src_sessions & tgt_sessions
-            full_diff[device_name]["in_sync"] = sorted(name for name in common if name not in full_diff[device_name]["update"])
 
         # Return dry-run results per device
         if dry_run:
@@ -617,7 +628,9 @@ class NetboxBgpPeeringsTasks:
             if rir_obj:
                 rir_id = rir_obj.id
             else:
-                msg = f"RIR '{rir}' not found in NetBox, ASN creation will fail if needed"
+                msg = (
+                    f"RIR '{rir}' not found in NetBox, ASN creation will fail if needed"
+                )
                 job.event(msg, severity="WARNING")
                 log.warning(f"{self.name} - {msg}")
 
@@ -716,7 +729,15 @@ class NetboxBgpPeeringsTasks:
                 return "ipv4"
 
         # Per-device result tracking
-        device_results = {device_name: {"created": [], "updated": [], "deleted": [], "in_sync": actions["in_sync"]} for device_name, actions in full_diff.items()}
+        device_results = {
+            device_name: {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": actions["in_sync"],
+            }
+            for device_name, actions in full_diff.items()
+        }
 
         for device_name, actions in full_diff.items():
 
@@ -726,11 +747,14 @@ class NetboxBgpPeeringsTasks:
                 job.event(msg, severity="WARNING")
                 ret.errors.append(msg)
                 continue
-            device_id = device_info["id"] 
+            device_id = device_info["id"]
 
             # --- Create ---
             payloads = []
             for sname in actions["create"]:
+                job.event(
+                    f"preparing to create BGP session '{sname}' for '{device_name}'"
+                )
                 s = normalised_live[device_name][sname]
                 local_ip_id = _resolve_ip(s["local_address"])
                 remote_ip_id = _resolve_ip(s["remote_address"])
@@ -754,15 +778,15 @@ class NetboxBgpPeeringsTasks:
                     continue
 
                 payload = {
-                    "name":           sname,
-                    "description":    s["description"],
-                    "device":         device_id,
-                    "local_address":  local_ip_id,
-                    "local_as":       local_as_id,
+                    "name": sname,
+                    "description": s["description"],
+                    "device": device_id,
+                    "local_address": local_ip_id,
+                    "local_as": local_as_id,
                     "remote_address": remote_ip_id,
-                    "remote_as":      remote_as_id,
-                    "status":         s["status"],
-                    "site":           device_info["site_id"],
+                    "remote_as": remote_as_id,
+                    "status": s["status"],
+                    "site": device_info["site_id"],
                 }
 
                 if s.get("vrf"):
@@ -771,7 +795,11 @@ class NetboxBgpPeeringsTasks:
                         payload["vrf"] = vrf.id
 
                 if s.get("peer_group"):
-                    pg_id = _resolve_or_create(nb.plugins.bgp.peer_group, s["peer_group"], obj_type="peer group")
+                    pg_id = _resolve_or_create(
+                        nb.plugins.bgp.peer_group,
+                        s["peer_group"],
+                        obj_type="peer group",
+                    )
                     if pg_id:
                         payload["peer_group"] = pg_id
 
@@ -779,21 +807,47 @@ class NetboxBgpPeeringsTasks:
 
                 if s.get("import_policies"):
                     names = [p for p in s["import_policies"].split("|") if p]
-                    ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, obj_type="routing policy", family=addr_family) for p in names]
+                    ids = [
+                        _resolve_or_create(
+                            nb.plugins.bgp.routing_policy,
+                            p,
+                            obj_type="routing policy",
+                            family=addr_family,
+                        )
+                        for p in names
+                    ]
                     payload["import_policies"] = [i for i in ids if i]
 
                 if s.get("export_policies"):
                     names = [p for p in s["export_policies"].split("|") if p]
-                    ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, obj_type="routing policy", family=addr_family) for p in names]
+                    ids = [
+                        _resolve_or_create(
+                            nb.plugins.bgp.routing_policy,
+                            p,
+                            obj_type="routing policy",
+                            family=addr_family,
+                        )
+                        for p in names
+                    ]
                     payload["export_policies"] = [i for i in ids if i]
 
                 if s.get("prefix_list_in"):
-                    pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, s["prefix_list_in"], obj_type="prefix list", family=addr_family)
+                    pl_id = _resolve_or_create(
+                        nb.plugins.bgp.prefix_list,
+                        s["prefix_list_in"],
+                        obj_type="prefix list",
+                        family=addr_family,
+                    )
                     if pl_id:
                         payload["prefix_list_in"] = pl_id
 
                 if s.get("prefix_list_out"):
-                    pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, s["prefix_list_out"], obj_type="prefix list", family=addr_family)
+                    pl_id = _resolve_or_create(
+                        nb.plugins.bgp.prefix_list,
+                        s["prefix_list_out"],
+                        obj_type="prefix list",
+                        family=addr_family,
+                    )
                     if pl_id:
                         payload["prefix_list_out"] = pl_id
 
@@ -805,7 +859,9 @@ class NetboxBgpPeeringsTasks:
                     msg = f"created {len(payloads)} BGP session(s) for '{device_name}'"
                     log.info(f"{self.name} - {msg}")
                     job.event(msg)
-                    device_results[device_name]["created"].extend(p["name"] for p in payloads)
+                    device_results[device_name]["created"].extend(
+                        p["name"] for p in payloads
+                    )
                 except Exception as e:
                     msg = f"failed to create BGP sessions for '{device_name}': {e}"
                     ret.errors.append(msg)
@@ -822,7 +878,9 @@ class NetboxBgpPeeringsTasks:
                         ret.errors.append(msg)
                         continue
 
-                    addr_family = _get_addr_family(session.local_address.address.split("/")[0])
+                    addr_family = _get_addr_family(
+                        session.local_address.address.split("/")[0]
+                    )
                     changed_payload = {}
 
                     for field, change in field_changes.items():
@@ -844,13 +902,42 @@ class NetboxBgpPeeringsTasks:
                             else:
                                 changed_payload["vrf"] = None
                         elif field == "peer_group":
-                            changed_payload["peer_group"] = _resolve_or_create(nb.plugins.bgp.peer_group, new_value, obj_type="peer group") if new_value else None
+                            changed_payload["peer_group"] = (
+                                _resolve_or_create(
+                                    nb.plugins.bgp.peer_group,
+                                    new_value,
+                                    obj_type="peer group",
+                                )
+                                if new_value
+                                else None
+                            )
                         elif field in ("import_policies", "export_policies"):
-                            names = [p for p in new_value.split("|") if p] if new_value else []
-                            ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, obj_type="routing policy", family=addr_family) for p in names]
+                            names = (
+                                [p for p in new_value.split("|") if p]
+                                if new_value
+                                else []
+                            )
+                            ids = [
+                                _resolve_or_create(
+                                    nb.plugins.bgp.routing_policy,
+                                    p,
+                                    obj_type="routing policy",
+                                    family=addr_family,
+                                )
+                                for p in names
+                            ]
                             changed_payload[field] = [i for i in ids if i]
                         elif field in ("prefix_list_in", "prefix_list_out"):
-                            changed_payload[field] = _resolve_or_create(nb.plugins.bgp.prefix_list, new_value, obj_type="prefix list", family=addr_family) if new_value else None
+                            changed_payload[field] = (
+                                _resolve_or_create(
+                                    nb.plugins.bgp.prefix_list,
+                                    new_value,
+                                    obj_type="prefix list",
+                                    family=addr_family,
+                                )
+                                if new_value
+                                else None
+                            )
 
                     if changed_payload:
                         session.update(changed_payload)
@@ -882,4 +969,3 @@ class NetboxBgpPeeringsTasks:
         ret.result = device_results
 
         return ret
-

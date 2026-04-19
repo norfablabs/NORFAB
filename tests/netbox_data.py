@@ -1652,7 +1652,7 @@ devices = [
         "site": {"name": "NORFAB-LAB"},
         "tags": [{"name": "nornir-worker-1"}, {"name": "NORFAB"}],
         "platform": {"name": "arista_eos"},
-    }
+    },
 ]
 # add fceos3_390-fceos3_399 devices to test multi-threading retrieval
 for i in range(10):
@@ -2723,7 +2723,7 @@ def create_bgp_asn():
             log.error(traceback.format_exc())
 
 
-def create_bgp_peerings():
+def sync_bgp_peerings():
     """Create BGP peerings using netbox_bgp plugin API"""
     log.info("creating BGP peerings")
     for peering in bgp_peerings:
@@ -3249,7 +3249,7 @@ def populate_netbox():
     create_config_templates()
     create_bgp_asn()
     create_bgp_peer_groups()
-    create_bgp_peerings()
+    sync_bgp_peerings()
 
 
 if __name__ == "__main__":

@@ -154,6 +154,7 @@ nav:
       - Sync Device Facts: workers/netbox/services_netbox_service_tasks_sync_device_facts.md
       - Sync Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
       - Sync Device IP: workers/netbox/services_netbox_service_tasks_sync_device_ip.md
+      - Sync BGP Peerings: workers\netbox\services_netbox_service_tasks_sync_bgp_peerings.md
       - CRUD: workers/netbox/services_netbox_service_tasks_crud.md
   - Agent:
     - Overview: workers/agent/services_agent_service.md

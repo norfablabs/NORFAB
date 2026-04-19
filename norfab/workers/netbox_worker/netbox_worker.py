@@ -11,6 +11,7 @@ from typing import Any, List, Union
 
 import pynetbox
 import requests
+from deepdiff import DeepDiff
 from diskcache import FanoutCache
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
@@ -485,6 +486,125 @@ class NetboxWorker(
             timeout=1,  # 1 second
             size_limit=1073741824,  #  GigaByte
         )
+
+    def make_diff(
+        self,
+        source_data: dict,
+        target_data: dict,
+    ) -> dict:
+        """
+        Compute an actionable diff between two nested dictionaries and classify
+        each entity as ``create``, ``delete``, ``update``, or ``in_sync``.
+
+        Both arguments share the same two-level structure: the outer key typically is a
+        device name and the inner key is a unique entity identifier (name, slug, or any
+        hashable value). The inner value is a flat dict of comparable fields:
+
+        ```
+        {
+            "<device_name>": {
+                "<entity_id>": {<field>: <value>, ...},
+            }
+        }
+        ```
+
+        ``source_data`` represents the *desired* or *discovered* state (e.g. live
+        device data), while ``target_data`` represents the *current* state stored
+        in the target system (e.g. NetBox). Entities present in ``source_data``
+        but absent from ``target_data`` are classified as ``create``; entities
+        present in ``target_data`` but absent from ``source_data`` are classified
+        as ``delete``; entities present in both with differing field values are
+        classified as ``update``; identical entities are ``in_sync``.
+
+        Args:
+            source_data: Nested dict representing the discovered/live state.
+                Outer key is the device name; inner key is the entity identifier;
+                value is a flat dict of entity fields.
+            target_data: Nested dict representing the desired/managed state.
+                Same structure as ``source_data``.
+
+        Returns:
+            dict: Keyed by group name, each value contains:
+
+            - ``create`` (list[str]): Entity identifiers to be created.
+            - ``delete`` (list[str]): Entity identifiers to be deleted.
+            - ``update`` (dict): Entities with field-level changes, keyed by
+              entity identifier. Each entry maps changed field names to a dict
+              with ``old_value`` (current) and ``new_value`` (desired):
+
+                ```
+                {
+                    "<entity_id>": {
+                        "<field>": {"old_value": <current>, "new_value": <desired>}
+                    }
+                }
+                ```
+
+            - ``in_sync`` (list[str]): Entity identifiers that are identical in
+              both datasets.
+        """
+        result = {}
+        diff = DeepDiff(
+            target_data,
+            source_data,
+            ignore_order=True,
+            view="tree",
+            threshold_to_diff_deeper=0,
+        )
+
+        all_devices = set(source_data.keys()) | set(target_data.keys())
+        for device_name in all_devices:
+            result[device_name] = {
+                "create": [],
+                "delete": [],
+                "update": {},
+                "in_sync": [],
+            }
+
+        for item in diff.get("dictionary_item_added", []):
+            path = item.path(output_format="list")
+            if len(path) == 1:
+                # Entire device is new in source — all its sessions are missing in target
+                device_name = path[0]
+                result[device_name]["create"].extend(source_data[device_name].keys())
+            elif len(path) == 2:
+                # Individual session is new within an existing device
+                device_name, sname = path
+                result[device_name]["create"].append(sname)
+
+        for item in diff.get("dictionary_item_removed", []):
+            path = item.path(output_format="list")
+            if len(path) == 1:
+                # Entire device is absent in source — all its sessions are missing in source
+                device_name = path[0]
+                result[device_name]["delete"].extend(target_data[device_name].keys())
+            elif len(path) == 2:
+                # Individual session removed within an existing device
+                device_name, sname = path
+                result[device_name]["delete"].append(sname)
+
+        for item in diff.get("values_changed", []):
+            path = item.path(output_format="list")
+            if len(path) == 3:
+                device_name, sname, field = path
+                result[device_name]["update"].setdefault(sname, {})[field] = {
+                    "old_value": item.t1,
+                    "new_value": item.t2,
+                }
+
+        for device_name in all_devices:
+            result[device_name]["create"] = sorted(result[device_name]["create"])
+            result[device_name]["delete"] = sorted(result[device_name]["delete"])
+
+            # calculate in sync entities
+            src_entities_keys = set(source_data.get(device_name, {}).keys())
+            tgt_entities_keys = set(target_data.get(device_name, {}).keys())
+            common = src_entities_keys & tgt_entities_keys
+            result[device_name]["in_sync"] = sorted(
+                i for i in common if i not in result[device_name]["update"]
+            )
+
+        return result
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def cache_list(self, keys: str = "*", details: bool = False) -> Result:

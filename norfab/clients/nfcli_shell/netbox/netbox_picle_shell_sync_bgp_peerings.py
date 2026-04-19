@@ -2,8 +2,8 @@ import builtins
 import logging
 
 from picle.models import Outputters
-
-from norfab.workers.netbox_worker.bgp_peerings_tasks import CreateBgpPeeringsInput
+from pydantic import Field
+from norfab.workers.netbox_worker.bgp_peerings_tasks import SyncBgpPeeringsInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -12,7 +12,16 @@ from ..nornir.nornir_picle_shell_common import NorniHostsFilters
 log = logging.getLogger(__name__)
 
 
-class CreateBgpPeeringsShell(NetboxClientRunJobArgs, CreateBgpPeeringsInput, NorniHostsFilters):
+class SyncBgpPeeringsShell(
+    NetboxClientRunJobArgs, SyncBgpPeeringsInput, NorniHostsFilters
+):
+    process_deletions: bool = Field(
+        False,
+        description="Delete BGP sessions present in NetBox but not found on the device",
+        alias="process-deletions",
+        json_schema_extra={"presence": True},
+    )
+
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
@@ -27,7 +36,7 @@ class CreateBgpPeeringsShell(NetboxClientRunJobArgs, CreateBgpPeeringsInput, Nor
 
         result = NFCLIENT.run_job(
             "netbox",
-            "create_bgp_peerings",
+            "sync_bgp_peerings",
             workers=workers,
             args=args,
             kwargs=kwargs,
@@ -38,7 +47,7 @@ class CreateBgpPeeringsShell(NetboxClientRunJobArgs, CreateBgpPeeringsInput, Nor
 
         if nowait:
             return result
-            
+
         return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:
