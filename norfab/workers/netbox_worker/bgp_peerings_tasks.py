@@ -48,6 +48,10 @@ class CreateBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
         None,
         description="RIR name to use when creating new ASNs in NetBox (e.g. 'RFC 1918', 'ARIN')",
     )
+    message: Union[None, str] = Field(
+        None,
+        description="Changelog message to record in NetBox for all create, update, and delete operations",
+    )
 
 
 class NetboxBgpPeeringsTasks:
@@ -345,7 +349,7 @@ class NetboxBgpPeeringsTasks:
 
         return ret
 
-    def _build_dataset_diff(
+    def make_diff(
         self,
         source_data: dict,
         target_data: dict,
@@ -358,44 +362,53 @@ class NetboxBgpPeeringsTasks:
             target_data: dict keyed by item name with item dicts as values (existing/netbox data).
 
         Returns:
-            dict with keys ``missing_in_target``, ``missing_in_source``, ``needs_update``, ``in_sync``.
-            ``needs_update`` is keyed by item name with ``{field: {"old_value": t1, "new_value": t2}}``.
+            dict keyed by device name, each with keys ``create``, ``delete``,
+            ``update``, and ``in_sync``.
+            ``update`` is keyed by session name with ``{field: {"old_value": t1, "new_value": t2}}``.
         """
-        # t1=target (netbox), t2=source (device live data)
+        result = {}
         diff = DeepDiff(target_data, source_data, ignore_order=True, view="tree", threshold_to_diff_deeper=0)
-
-        missing_in_target = []  # in source but absent in target → create
-        missing_in_source = []  # in target but absent in source → delete
-        needs_update = {}
+        
+        all_devices = set(source_data.keys()) | set(target_data.keys())
+        for device_name in all_devices:
+            result[device_name] = {"create": [], "delete": [], "update": {}, "in_sync": []}
 
         for item in diff.get("dictionary_item_added", []):
             path = item.path(output_format="list")
             if len(path) == 1:
-                missing_in_target.append(path[0])
+                # Entire device is new in source — all its sessions are missing in target
+                device_name = path[0]
+                result[device_name]["create"].extend(source_data[device_name].keys())
+            elif len(path) == 2:
+                # Individual session is new within an existing device
+                device_name, sname = path
+                result[device_name]["create"].append(sname)
 
         for item in diff.get("dictionary_item_removed", []):
             path = item.path(output_format="list")
             if len(path) == 1:
-                missing_in_source.append(path[0])
+                # Entire device is absent in source — all its sessions are missing in source
+                device_name = path[0]
+                result[device_name]["delete"].extend(target_data[device_name].keys())
+            elif len(path) == 2:
+                # Individual session removed within an existing device
+                device_name, sname = path
+                result[device_name]["delete"].append(sname)
 
         for item in diff.get("values_changed", []):
             path = item.path(output_format="list")
-            if len(path) == 2:
-                sname, field = path
-                needs_update.setdefault(sname, {})[field] = {
+            if len(path) == 3:
+                device_name, sname, field = path
+                result[device_name]["update"].setdefault(sname, {})[field] = {
                     "old_value": item.t1,
                     "new_value": item.t2,
                 }
 
-        common = set(source_data.keys()) & set(target_data.keys())
-        in_sync = sorted(name for name in common if name not in needs_update)
+        for device_name in all_devices:
+            result[device_name]["create"] = sorted(result[device_name]["create"])
+            result[device_name]["delete"] = sorted(result[device_name]["delete"])
 
-        return {
-            "missing_in_target": sorted(missing_in_target),
-            "missing_in_source": sorted(missing_in_source),
-            "needs_update": needs_update,
-            "in_sync": in_sync,
-        }
+        return result
 
     @Task(fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()})
     def create_bgp_peerings(
@@ -410,6 +423,7 @@ class NetboxBgpPeeringsTasks:
         batch_size: int = 10,
         branch: str = None,
         rir: str = None,
+        message: str = None,
         **kwargs,
     ) -> Result:
         """
@@ -430,6 +444,7 @@ class NetboxBgpPeeringsTasks:
             batch_size (int): Devices per Nornir batch (reserved for future use).
             branch (str, optional): NetBox branching plugin branch name.
             rir (str, optional): RIR name to use when creating new ASNs in NetBox (e.g. ``RFC 1918``, ``ARIN``).
+            message (str, optional): Changelog message recorded in NetBox for all create, update, and delete operations.
             **kwargs: Nornir host filters (e.g. ``FC``, ``FL``, ``FB``).
 
         Returns:
@@ -440,7 +455,7 @@ class NetboxBgpPeeringsTasks:
                         "created": ["<session_name>", ...],
                         "updated": ["<session_name>", ...],
                         "deleted": ["<session_name>", ...],
-                        "skipped": ["<session_name>", ...],
+                        "in_sync": ["<session_name>", ...],
                     }
                 }
 
@@ -450,7 +465,7 @@ class NetboxBgpPeeringsTasks:
                     "<device>": {
                         "missing_in_netbox": ["<session_name>", ...],
                         "missing_on_device": ["<session_name>", ...],
-                        "needs_update": {"<session_name>": <deepdiff_delta>, ...},
+                        "update": {"<session_name>": <deepdiff_delta>, ...},
                         "in_sync": ["<session_name>", ...],
                     }
                 }
@@ -462,6 +477,20 @@ class NetboxBgpPeeringsTasks:
             result={},
             resources=[instance],
         )
+
+        # Normalised session dicts keyed by device name -> session name -> session field values
+        normalised_nb = {}    # NetBox data: device name -> session name -> normalised field values
+        normalised_live = {}  # Live data:   device name -> session name -> normalised field values
+        # Diff results keyed by device name: device name -> diff result (create/source, update, in_sync)
+        full_diff = {}
+        # pynetbox API client, initialised after the dry-run guard
+        nb = None
+        # Device detail lookup: device name -> {"id": ..., "site_id": ...}
+        devices_info = {}
+        # RIR ID used when creating new ASNs in NetBox (resolved from rir param if provided)
+        rir_id = None
+        # Per-device result tracking: created/updated/deleted/in_sync session names
+        device_results = {}
 
         # Validate BGP plugin
         if not self.has_plugin("netbox_bgp", instance, strict=True):
@@ -486,6 +515,7 @@ class NetboxBgpPeeringsTasks:
         )
 
         # Fetch existing NetBox BGP sessions
+        job.event(f"fetching BGP session data from Netbox for {len(devices)} device(s)")
         nb_sessions_result = self.get_bgp_peerings(
             job=job, instance=instance, devices=devices, cache=True
         )
@@ -504,15 +534,13 @@ class NetboxBgpPeeringsTasks:
             timeout=timeout,
         )
 
-        # Build per-device diff
-        diff_results = {}
+        # Build normalised dicts per device
         for device_name in devices:
-            # Normalise NetBox sessions
-            nb_raw = nb_sessions_result.result.get(device_name, {})
-            normalised_nb = {}
-            for sname, nb_session in nb_raw.items():
+            # Normalise NetBox sessions for this device
+            normalised_nb[device_name] = {}
+            for sname, nb_session in nb_sessions_result.result.get(device_name, {}).items():
                 try:
-                    normalised_nb[sname] = {
+                    normalised_nb[device_name][sname] = {
                         "name":            nb_session["name"],
                         "description":     nb_session.get("description") or "",
                         "local_address":   nb_session["local_address"]["address"].split("/")[0],
@@ -530,18 +558,16 @@ class NetboxBgpPeeringsTasks:
                 except Exception as e:
                     log.warning(f"{self.name} - failed to normalise NetBox session '{sname}' for '{device_name}': {e}")
 
-            # Normalise live parse data
-            normalised_live = {}
-            for worker_name, worker_data in parse_data.items():
-                if worker_data.get("failed"):
-                    continue
-                host_data = worker_data.get("result", {})
-                if device_name not in host_data:
-                    continue
-                host_sessions = host_data[device_name]
+        # Normalize live parse data per device
+        for wname, wdata in parse_data.items():
+            if wdata.get("failed"):
+                log.warning(f"{wname} - failed to parse devices")
+                continue
+            for device_name, host_sessions in wdata.get("result", {}).items():
+                normalised_live.setdefault(device_name, {})
                 for s in host_sessions:
                     session_name = f"{device_name}_{s['name']}"
-                    normalised_live[session_name] = {
+                    normalised_live[device_name][session_name] = {
                         "name":            session_name,
                         "description":     s.get("description") or "",
                         "local_address":   s.get("local_address"),
@@ -557,35 +583,35 @@ class NetboxBgpPeeringsTasks:
                         "prefix_list_out": s.get("prefix_list_out"),
                     }
 
-            # Compute diff: source=live, target=netbox
-            raw_diff = self._build_dataset_diff(normalised_live, normalised_nb)
-            diff_results[device_name] = {
-                "missing_in_netbox": raw_diff["missing_in_target"],
-                "missing_on_device": raw_diff["missing_in_source"],
-                "needs_update":      raw_diff["needs_update"],
-                "in_sync":           raw_diff["in_sync"],
-                "_normalised_live":  normalised_live,
-            }
+        # Single diff on the full normalised datasets
+        full_diff = self.make_diff(normalised_live, normalised_nb)
 
-        # return dry run results
+        # calculate in sync sessions
+        for device_name in set(normalised_live.keys()) | set(normalised_nb.keys()):
+            src_sessions = set(normalised_live.get(device_name, {}).keys())
+            tgt_sessions = set(normalised_nb.get(device_name, {}).keys())
+            common = src_sessions & tgt_sessions
+            full_diff[device_name]["in_sync"] = sorted(name for name in common if name not in full_diff[device_name]["update"])
+
+        # Return dry-run results per device
         if dry_run:
-            for device_name, diff in diff_results.items():
-                ret.result[device_name] = {
-                    "missing_in_netbox": diff["missing_in_netbox"],
-                    "missing_on_device": diff["missing_on_device"],
-                    "needs_update":      diff["needs_update"],
-                    "in_sync":           diff["in_sync"],
-                }
+            ret.result = full_diff
             return ret
 
-        # proceed with sessions updates
+        # Proceed with sessions updates
         nb = self._get_pynetbox(instance, branch=branch)
 
-        # Pre-fetch device IDs once
-        devices_result = {d.name: d.id for d in nb.dcim.devices.filter(name=devices, fields="name,id")}
+        # Set changelog message header for all NetBox write operations
+        if message:
+            nb.http_session.headers["X-Changelog-Message"] = message
+
+        # Pre-fetch device IDs and site IDs once
+        devices_info = {
+            d.name: {"id": d.id, "site_id": d.site.id if d.site else None}
+            for d in nb.dcim.devices.filter(name=devices, fields="name,id,site")
+        }
 
         # Resolve RIR ID once if rir name provided
-        rir_id = None
         if rir:
             rir_obj = nb.ipam.rirs.get(name=rir)
             if rir_obj:
@@ -595,123 +621,117 @@ class NetboxBgpPeeringsTasks:
                 job.event(msg, severity="WARNING")
                 log.warning(f"{self.name} - {msg}")
 
-        for device_name in devices:
-            created = []
-            updated = []
-            deleted = []
-            skipped = []
+        def _resolve_ip(address):
+            """Resolve or create an IP address in IPAM, return its ID or None."""
+            if not address:
+                return None
+            existing = list(nb.ipam.ip_addresses.filter(q=f"{address}/"))
+            if existing:
+                return existing[0].id
+            # Try to find a containing prefix for mask length
+            mask = None
+            prefixes = list(nb.ipam.prefixes.filter(contains=address))
+            if prefixes:
+                mask = prefixes[0].prefix.split("/")[1]
+            if not mask:
+                try:
+                    net = ipaddress.ip_network(address, strict=False)
+                    mask = "128" if net.version == 6 else "32"
+                except Exception:
+                    mask = "32"
+            try:
+                new_ip = nb.ipam.ip_addresses.create(address=f"{address}/{mask}")
+                msg = f"created IP address '{address}/{mask}' in NetBox IPAM"
+                job.event(msg)
+                log.info(f"{self.name} - {msg}")
+                return new_ip.id
+            except Exception as e:
+                msg = f"failed to create IP address '{address}/{mask}': {e}"
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
+                return None
 
-            diff = diff_results[device_name]
-            normalised_live = diff["_normalised_live"]
+        def _resolve_asn(asn_str):
+            """Resolve or create an ASN, return its ID or None."""
+            if not asn_str:
+                return None
+            try:
+                asn_int = int(asn_str)
+            except (ValueError, TypeError):
+                return None
+            existing = list(nb.ipam.asns.filter(asn=asn_int))
+            if existing:
+                return existing[0].id
+            if not rir_id:
+                msg = f"cannot create ASN '{asn_str}': no RIR provided, use 'rir' parameter"
+                job.event(msg, severity="WARNING")
+                log.warning(f"{self.name} - {msg}")
+                ret.errors.append(msg)
+                return None
+            try:
+                new_asn = nb.ipam.asns.create(asn=asn_int, rir=rir_id)
+                msg = f"created ASN '{asn_str}' in NetBox IPAM"
+                job.event(msg)
+                log.info(f"{self.name} - {msg}")
+                return new_asn.id
+            except Exception as e:
+                msg = f"failed to create ASN '{asn_str}': {e}"
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
+                return None
 
-            if device_name not in devices_result:
+        def _resolve_or_create(endpoint, name, obj_type="object", family=None):
+            """Resolve or create a named object (peer_group / routing_policy / prefix_list)."""
+            if not name:
+                return None
+            if family:
+                existing = endpoint.get(name=name, family=family)
+            else:
+                existing = endpoint.get(name=name)
+            if existing:
+                return existing.id
+            create_kwargs = {"name": name}
+            if family is not None:
+                create_kwargs["family"] = family
+            try:
+                new_obj = endpoint.create(**create_kwargs)
+                msg = f"created {obj_type} '{name}' in NetBox"
+                job.event(msg)
+                log.info(f"{self.name} - {msg}")
+                return new_obj.id
+            except Exception as e:
+                msg = f"failed to create {obj_type} '{name}' in NetBox: {e}"
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
+                return None
+
+        def _get_addr_family(address):
+            """Return 'ipv4' or 'ipv6' based on the IP address version."""
+            try:
+                return "ipv6" if ipaddress.ip_address(address).version == 6 else "ipv4"
+            except Exception:
+                return "ipv4"
+
+        # Per-device result tracking
+        device_results = {device_name: {"created": [], "updated": [], "deleted": [], "in_sync": actions["in_sync"]} for device_name, actions in full_diff.items()}
+
+        for device_name, actions in full_diff.items():
+
+            device_info = devices_info.get(device_name)
+            if not device_info:
                 msg = f"device '{device_name}' not found in NetBox, skipping"
                 job.event(msg, severity="WARNING")
                 ret.errors.append(msg)
                 continue
-
-            device_id = devices_result[device_name]
-
-            def _resolve_ip(address):
-                """Resolve or create an IP address in IPAM, return its ID or None."""
-                if not address:
-                    return None
-                existing = list(nb.ipam.ip_addresses.filter(q=f"{address}/"))
-                if existing:
-                    return existing[0].id
-                # Try to find a containing prefix for mask length
-                mask = None
-                prefixes = list(nb.ipam.prefixes.filter(contains=address))
-                if prefixes:
-                    mask = prefixes[0].prefix.split("/")[1]
-                if not mask:
-                    try:
-                        net = ipaddress.ip_network(address, strict=False)
-                        mask = "128" if net.version == 6 else "32"
-                    except Exception:
-                        mask = "32"
-                try:
-                    new_ip = nb.ipam.ip_addresses.create(address=f"{address}/{mask}")
-                    msg = f"created IP address '{address}/{mask}' in NetBox IPAM"
-                    job.event(msg)
-                    log.info(f"{self.name} - {msg}")
-                    return new_ip.id
-                except Exception as e:
-                    msg = f"failed to create IP address '{address}/{mask}': {e}"
-                    job.event(msg, severity="ERROR")
-                    log.error(f"{self.name} - {msg}")
-                    ret.errors.append(msg)
-                    return None
-
-            def _resolve_asn(asn_str):
-                """Resolve or create an ASN, return its ID or None."""
-                if not asn_str:
-                    return None
-                try:
-                    asn_int = int(asn_str)
-                except (ValueError, TypeError):
-                    return None
-                existing = list(nb.ipam.asns.filter(asn=asn_int))
-                if existing:
-                    return existing[0].id
-                if not rir_id:
-                    msg = f"cannot create ASN '{asn_str}': no RIR provided, use 'rir' parameter"
-                    job.event(msg, severity="WARNING")
-                    log.warning(f"{self.name} - {msg}")
-                    ret.errors.append(msg)
-                    return None
-                try:
-                    new_asn = nb.ipam.asns.create(asn=asn_int, rir=rir_id)
-                    msg = f"created ASN '{asn_str}' in NetBox IPAM"
-                    job.event(msg)
-                    log.info(f"{self.name} - {msg}")
-                    return new_asn.id
-                except Exception as e:
-                    msg = f"failed to create ASN '{asn_str}': {e}"
-                    job.event(msg, severity="ERROR")
-                    log.error(f"{self.name} - {msg}")
-                    ret.errors.append(msg)
-                    return None
-
-
-            def _resolve_or_create(endpoint, name, family=None):
-                """Resolve or create a named object (peer_group / routing_policy / prefix_list)."""
-                if not name:
-                    return None
-                if family:
-                    existing = endpoint.get(name=name, family=family)
-                else:
-                    existing = endpoint.get(name=name)
-                if existing:
-                    return existing.id
-                create_kwargs = {"name": name}
-                if family is not None:
-                    create_kwargs["family"] = family
-                try:
-                    new_obj = endpoint.create(**create_kwargs)
-                    msg = f"created object '{name}' via {endpoint}"
-                    job.event(msg)
-                    log.info(f"{self.name} - {msg}")
-                    return new_obj.id
-                except Exception as e:
-                    msg = f"failed to create object '{name}' via {endpoint}: {e}"
-                    job.event(msg, severity="ERROR")
-                    log.error(f"{self.name} - {msg}")
-                    ret.errors.append(msg)
-                    return None
-
-            def _get_addr_family(address):
-                """Return 'ipv4' or 'ipv6' based on the IP address version."""
-                try:
-                    return "ipv6" if ipaddress.ip_address(address).version == 6 else "ipv4"
-                except Exception:
-                    return "ipv4"
+            device_id = device_info["id"] 
 
             # --- Create ---
-            create_payloads = []
-            for sname in diff["missing_in_netbox"]:
-                s = normalised_live[sname]
-
+            payloads = []
+            for sname in actions["create"]:
+                s = normalised_live[device_name][sname]
                 local_ip_id = _resolve_ip(s["local_address"])
                 remote_ip_id = _resolve_ip(s["remote_address"])
                 local_as_id = _resolve_asn(s["local_as"])
@@ -731,18 +751,18 @@ class NetboxBgpPeeringsTasks:
                     job.event(msg, severity="WARNING")
                     log.warning(f"{self.name} - {msg}")
                     ret.errors.append(msg)
-                    skipped.append(sname)
                     continue
 
                 payload = {
-                    "name":          sname,
-                    "description":   s["description"],
-                    "device":        device_id,
-                    "local_address": local_ip_id,
-                    "local_as":      local_as_id,
+                    "name":           sname,
+                    "description":    s["description"],
+                    "device":         device_id,
+                    "local_address":  local_ip_id,
+                    "local_as":       local_as_id,
                     "remote_address": remote_ip_id,
-                    "remote_as":     remote_as_id,
-                    "status":        s["status"],
+                    "remote_as":      remote_as_id,
+                    "status":         s["status"],
+                    "site":           device_info["site_id"],
                 }
 
                 if s.get("vrf"):
@@ -751,7 +771,7 @@ class NetboxBgpPeeringsTasks:
                         payload["vrf"] = vrf.id
 
                 if s.get("peer_group"):
-                    pg_id = _resolve_or_create(nb.plugins.bgp.peer_group, s["peer_group"])
+                    pg_id = _resolve_or_create(nb.plugins.bgp.peer_group, s["peer_group"], obj_type="peer group")
                     if pg_id:
                         payload["peer_group"] = pg_id
 
@@ -759,43 +779,40 @@ class NetboxBgpPeeringsTasks:
 
                 if s.get("import_policies"):
                     names = [p for p in s["import_policies"].split("|") if p]
-                    ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, family=addr_family) for p in names]
+                    ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, obj_type="routing policy", family=addr_family) for p in names]
                     payload["import_policies"] = [i for i in ids if i]
 
                 if s.get("export_policies"):
                     names = [p for p in s["export_policies"].split("|") if p]
-                    ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, family=addr_family) for p in names]
+                    ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, obj_type="routing policy", family=addr_family) for p in names]
                     payload["export_policies"] = [i for i in ids if i]
 
                 if s.get("prefix_list_in"):
-                    pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, s["prefix_list_in"], family=addr_family)
+                    pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, s["prefix_list_in"], obj_type="prefix list", family=addr_family)
                     if pl_id:
                         payload["prefix_list_in"] = pl_id
 
                 if s.get("prefix_list_out"):
-                    pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, s["prefix_list_out"], family=addr_family)
+                    pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, s["prefix_list_out"], obj_type="prefix list", family=addr_family)
                     if pl_id:
                         payload["prefix_list_out"] = pl_id
 
-                create_payloads.append(payload)
-                created.append(sname)
+                payloads.append(payload)
 
-            if create_payloads:
+            if payloads:
                 try:
-                    nb.plugins.bgp.session.create(create_payloads)
-                    msg = f"created {len(create_payloads)} BGP session(s) for '{device_name}'"
-                    log.info(msg)
+                    nb.plugins.bgp.session.create(payloads)
+                    msg = f"created {len(payloads)} BGP session(s) for '{device_name}'"
+                    log.info(f"{self.name} - {msg}")
                     job.event(msg)
+                    device_results[device_name]["created"].extend(p["name"] for p in payloads)
                 except Exception as e:
                     msg = f"failed to create BGP sessions for '{device_name}': {e}"
                     ret.errors.append(msg)
                     log.error(f"{self.name} - {msg}")
-                    # Move failed names from created to skipped
-                    skipped.extend(created)
-                    created = []
 
             # --- Update ---
-            for sname, field_changes in diff["needs_update"].items():
+            for sname, field_changes in actions["update"].items():
                 try:
                     session = nb.plugins.bgp.session.get(name=sname)
                     if not session:
@@ -803,31 +820,21 @@ class NetboxBgpPeeringsTasks:
                         job.event(msg, severity="WARNING")
                         log.warning(f"{self.name} - {msg}")
                         ret.errors.append(msg)
-                        skipped.append(sname)
                         continue
 
-                    
                     addr_family = _get_addr_family(session.local_address.address.split("/")[0])
-
                     changed_payload = {}
+
                     for field, change in field_changes.items():
                         new_value = change["new_value"]
-                        if field == "local_address":
+                        if field in ("local_address", "remote_address"):
                             ip_id = _resolve_ip(new_value)
                             if ip_id:
-                                changed_payload["local_address"] = ip_id
-                        elif field == "remote_address":
-                            ip_id = _resolve_ip(new_value)
-                            if ip_id:
-                                changed_payload["remote_address"] = ip_id
-                        elif field == "local_as":
+                                changed_payload[field] = ip_id
+                        elif field in ("local_as", "remote_as"):
                             asn_id = _resolve_asn(new_value)
                             if asn_id:
-                                changed_payload["local_as"] = asn_id
-                        elif field == "remote_as":
-                            asn_id = _resolve_asn(new_value)
-                            if asn_id:
-                                changed_payload["remote_as"] = asn_id
+                                changed_payload[field] = asn_id
                         elif field in ("description", "status"):
                             changed_payload[field] = new_value
                         elif field == "vrf":
@@ -837,31 +844,17 @@ class NetboxBgpPeeringsTasks:
                             else:
                                 changed_payload["vrf"] = None
                         elif field == "peer_group":
-                            if new_value:
-                                pg_id = _resolve_or_create(nb.plugins.bgp.peer_group, new_value)
-                                changed_payload["peer_group"] = pg_id
-                            else:
-                                changed_payload["peer_group"] = None
+                            changed_payload["peer_group"] = _resolve_or_create(nb.plugins.bgp.peer_group, new_value, obj_type="peer group") if new_value else None
                         elif field in ("import_policies", "export_policies"):
                             names = [p for p in new_value.split("|") if p] if new_value else []
-                            ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, family=addr_family) for p in names]
+                            ids = [_resolve_or_create(nb.plugins.bgp.routing_policy, p, obj_type="routing policy", family=addr_family) for p in names]
                             changed_payload[field] = [i for i in ids if i]
-                        elif field == "prefix_list_in":
-                            if new_value:
-                                pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, new_value, family=addr_family)
-                                changed_payload["prefix_list_in"] = pl_id
-                            else:
-                                changed_payload["prefix_list_in"] = None
-                        elif field == "prefix_list_out":
-                            if new_value:
-                                pl_id = _resolve_or_create(nb.plugins.bgp.prefix_list, new_value, family=addr_family)
-                                changed_payload["prefix_list_out"] = pl_id
-                            else:
-                                changed_payload["prefix_list_out"] = None
+                        elif field in ("prefix_list_in", "prefix_list_out"):
+                            changed_payload[field] = _resolve_or_create(nb.plugins.bgp.prefix_list, new_value, obj_type="prefix list", family=addr_family) if new_value else None
 
                     if changed_payload:
                         session.update(changed_payload)
-                        updated.append(sname)
+                        device_results[device_name]["updated"].append(sname)
                         msg = f"updated BGP session '{sname}' for '{device_name}'"
                         job.event(msg)
                         log.info(f"{self.name} - {msg}")
@@ -869,16 +862,15 @@ class NetboxBgpPeeringsTasks:
                     msg = f"failed to update BGP session '{sname}' for '{device_name}': {e}"
                     ret.errors.append(msg)
                     log.error(f"{self.name} - {msg}")
-                    skipped.append(sname)
 
             # --- Delete ---
             if process_deletions:
-                for sname in diff["missing_on_device"]:
+                for sname in actions["delete"]:
                     try:
                         session = nb.plugins.bgp.session.get(name=sname)
                         if session:
                             session.delete()
-                            deleted.append(sname)
+                            device_results[device_name]["deleted"].append(sname)
                             msg = f"deleted BGP session '{sname}' for '{device_name}'"
                             job.event(msg)
                             log.info(f"{self.name} - {msg}")
@@ -886,14 +878,8 @@ class NetboxBgpPeeringsTasks:
                         msg = f"failed to delete BGP session '{sname}' for '{device_name}': {e}"
                         ret.errors.append(msg)
                         log.error(f"{self.name} - {msg}")
-                        skipped.append(sname)
 
-            ret.result[device_name] = {
-                "created": created,
-                "updated": updated,
-                "deleted": deleted,
-                "skipped": skipped,
-            }
+        ret.result = device_results
 
         return ret
 

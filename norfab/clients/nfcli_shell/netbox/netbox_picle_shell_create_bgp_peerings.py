@@ -7,11 +7,12 @@ from norfab.workers.netbox_worker.bgp_peerings_tasks import CreateBgpPeeringsInp
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
+from ..nornir.nornir_picle_shell_common import NorniHostsFilters
 
 log = logging.getLogger(__name__)
 
 
-class CreateBgpPeeringsShell(NetboxClientRunJobArgs, CreateBgpPeeringsInput):
+class CreateBgpPeeringsShell(NetboxClientRunJobArgs, CreateBgpPeeringsInput, NorniHostsFilters):
     @staticmethod
     @listen_events
     def run(uuid, *args, **kwargs):
@@ -36,8 +37,8 @@ class CreateBgpPeeringsShell(NetboxClientRunJobArgs, CreateBgpPeeringsInput):
         )
 
         if nowait:
-            return result, Outputters.outputter_nested
-
+            return result
+            
         return log_error_or_result(result, verbose_result=verbose_result)
 
     class PicleConfig:

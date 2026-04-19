@@ -21,24 +21,6 @@ The same gather-and-compare phase is used for both `dry_run=True` (returns diff 
 - **NetBox BGP plugin** (`netbox-bgp`) must be installed and enabled in the target NetBox instance.
 - **Nornir service** must be running with a TTP getter that handles `get="bgp_neighbors"` and returns session data in the expected format.
 
----
-
-## Arguments
-
-| Argument | Type | Default | Description |
-|---|---|---|---|
-| `instance` | `str \| None` | `None` | NetBox instance name. Uses the default instance if omitted. |
-| `devices` | `list \| None` | `None` | List of device names to process. |
-| `status` | `str` | `"active"` | Status to assign to created/updated sessions when the device state is not `established`. |
-| `dry_run` | `bool` | `False` | If `True`, return the diff report without writing to NetBox. |
-| `process_deletions` | `bool` | `False` | If `True`, delete sessions present in NetBox but not found on the device. |
-| `timeout` | `int` | `60` | Timeout in seconds for the Nornir `parse_ttp` job. |
-| `batch_size` | `int` | `10` | Number of devices per Nornir batch (reserved for future use). |
-| `branch` | `str \| None` | `None` | NetBox branching plugin branch name. |
-| `**kwargs` | | | Nornir host filters (e.g. `FC`, `FL`, `FB`). |
-
----
-
 ## Behaviour and Idempotency
 
 Sessions are matched by name. The naming convention is `{device_name}_{parsed_session_name}`.
@@ -163,7 +145,7 @@ nf# netbox create bgp-peerings devices ceos-spine-1 ceos-spine-2
 # Dry run to see what would change
 nf# netbox create bgp-peerings devices ceos-spine-1 dry-run
 
-# Enable deletion of stale sessions
+# Enable deletion of stale sessions - present in Netbox but not on device
 nf# netbox create bgp-peerings devices ceos-spine-1 process-deletions
 ```
 
