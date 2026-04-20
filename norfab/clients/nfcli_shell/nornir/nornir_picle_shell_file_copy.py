@@ -55,7 +55,7 @@ class NrFileCopyPluginNetmiko(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "netmiko"
         return NornirFileCopyShell.run(*args, **kwargs)
 
@@ -84,12 +84,12 @@ class NornirFileCopyShell(
     )
 
     @staticmethod
-    def source_source_file():
+    def source_source_file() -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

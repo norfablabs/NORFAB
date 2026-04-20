@@ -51,7 +51,7 @@ class NorFabJobsShellCommands(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         details = kwargs.pop("details", None)
         uuid = kwargs.pop("uuid", None)
@@ -85,13 +85,13 @@ class NorFabJobsShellCommands(BaseModel):
             )
 
     @staticmethod
-    def source_workers_completed():
+    def source_workers_completed() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
         return [i["name"] for i in reply["results"]]
 
     @staticmethod
-    def source_service():
+    def source_service() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
         return [i["service"] for i in reply["results"]]
@@ -100,9 +100,11 @@ class NorFabJobsShellCommands(BaseModel):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def jobs_statistics(*args, **kwargs):
+    def jobs_statistics(*args: object, **kwargs: object):
+        NFCLIENT = builtins.NFCLIENT
         return NFCLIENT.job_db.jobs_stats(), Outputters.outputter_nested
 
     @staticmethod
-    def jobs_database_statistics(*args, **kwargs):
+    def jobs_database_statistics(*args: object, **kwargs: object):
+        NFCLIENT = builtins.NFCLIENT
         return NFCLIENT.job_db.jobs_db_stats(), Outputters.outputter_kv

@@ -1,13 +1,9 @@
-from ttp import ttp
-from ttp_templates import get_template
+import logging
+from enum import Enum
+from typing import Any, List, Union
+
 from nornir_napalm.plugins.tasks import napalm_get
 from nornir_salt.plugins.functions import FFun_functions, ResultSerializer
-import logging
-from norfab.core.worker import Job, Task
-from norfab.models import Result
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-
 from pydantic import (
     BaseModel,
     Field,
@@ -15,6 +11,11 @@ from pydantic import (
     StrictStr,
     model_validator,
 )
+from ttp import ttp
+from ttp_templates import get_template
+
+from norfab.core.worker import Job, Task
+from norfab.models import Result
 
 log = logging.getLogger(__name__)
 

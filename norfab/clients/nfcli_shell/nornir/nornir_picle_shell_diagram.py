@@ -7,7 +7,7 @@ from enum import Enum
 from fnmatch import fnmatchcase
 from typing import List, Union
 
-from picle.models import Outputters, PipeFunctionsModel
+from picle.models import PipeFunctionsModel
 from pydantic import (
     Field,
     StrictBool,
@@ -94,7 +94,7 @@ class N2GLayer3Diagram(NorniHostsFilters, NornirCommonArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["data_plugin"] = "layer3"
         n2g_kwargs = {}
         kwargs["n2g_kwargs"] = n2g_kwargs
@@ -157,7 +157,7 @@ class N2GLayer2Diagram(NorniHostsFilters, NornirCommonArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["data_plugin"] = "layer2"
         n2g_kwargs = {}
         kwargs["n2g_kwargs"] = n2g_kwargs
@@ -202,7 +202,7 @@ class N2GISISDiagram(NorniHostsFilters, NornirCommonArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["data_plugin"] = "isis"
         n2g_kwargs = {}
         kwargs["n2g_kwargs"] = n2g_kwargs
@@ -243,7 +243,7 @@ class N2GOSPFDiagram(NorniHostsFilters, NornirCommonArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["data_plugin"] = "ospf"
         n2g_kwargs = {}
         kwargs["n2g_kwargs"] = n2g_kwargs
@@ -279,14 +279,14 @@ class NornirDiagramShell(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object) -> str | None:
         if not (HAS_N2G and HAS_TTP):
             return "Failed importing N2G and TTP modules, are they installed?"
 
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         _ = kwargs.pop("verbose_result", False)
-        nowait = kwargs.pop("nowait", False)
+        kwargs.pop("nowait", False)
         ctime = time.strftime("%Y-%m-%d_%H-%M-%S")
         FM = kwargs.pop("FM", [])
         n2g_data = {}  # to store collected from devices data

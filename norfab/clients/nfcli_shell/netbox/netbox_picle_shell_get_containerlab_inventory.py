@@ -56,7 +56,7 @@ class NetboxDeviceFilters(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         filters = {
             k: kwargs.pop(k)
             for k in [
@@ -119,7 +119,7 @@ class GetContainerlabInventoryCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")

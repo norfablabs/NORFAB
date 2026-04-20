@@ -9,7 +9,10 @@ import threading
 import time
 import zlib
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+
+if TYPE_CHECKING:
+    from norfab.core.agent import NFAgent
 from uuid import uuid4  # random uuid
 
 import orjson
@@ -42,7 +45,7 @@ class JobStatus:
 class ClientJobDatabase:
     """Lightweight client-side job and events store."""
 
-    def __init__(self, db_path: str, jobs_compress: bool = True):
+    def __init__(self, db_path: str, jobs_compress: bool = True) -> None:
         self.db_path = db_path
         self.jobs_compress = jobs_compress
         self._local = threading.local()
@@ -197,7 +200,7 @@ class ClientJobDatabase:
         fields = []
         values: List[Any] = []
 
-        def _store_set(label: str, value: Set[str] | List[str] | None):
+        def _store_set(label: str, value: Set[str] | List[str] | None) -> None:
             if value is None:
                 return
             if isinstance(value, set):
@@ -568,7 +571,7 @@ class ClientJobDatabase:
         return stats
 
 
-def recv(client):
+def recv(client) -> None:
     """
     Receiver thread: processes all incoming messages from the broker and updates the database.
 
@@ -643,7 +646,7 @@ def recv(client):
             client.mmi_queue.put(msg)
 
 
-def handle_event(client: object, juuid: str, payload: dict, msg: list):
+def handle_event(client: object, juuid: str, payload: dict, msg: list) -> None:
     """
     Handle EVENT messages and update job database accordingly.
 
@@ -664,7 +667,7 @@ def handle_event(client: object, juuid: str, payload: dict, msg: list):
     )
 
 
-def handle_response(client: object, juuid: str, status: str, payload: dict):
+def handle_response(client: object, juuid: str, status: str, payload: dict) -> None:
     """
     Handle RESPONSE messages and update job database accordingly.
 
@@ -765,7 +768,7 @@ def handle_response(client: object, juuid: str, status: str, payload: dict):
         return
 
 
-def handle_stream(client, juuid: str, status: str, payload: bytes):
+def handle_stream(client, juuid: str, status: str, payload: bytes) -> None:
     job = client.job_db.get_job(juuid)
     file_transfer = client.file_transfers.get(juuid)
 
@@ -825,7 +828,7 @@ def handle_stream(client, juuid: str, status: str, payload: bytes):
         file_transfer["chunk_requests_remaining"] -= 1
 
 
-def dispatch_new_jobs(client):
+def dispatch_new_jobs(client) -> None:
     """
     Find NEW jobs and send POST requests to broker.
     Non-blocking: sends request and updates status to SUBMITTING.
@@ -869,7 +872,7 @@ def dispatch_new_jobs(client):
             )
 
 
-def poll_active_jobs(client):
+def poll_active_jobs(client) -> None:
     """
     Find active jobs and send GET requests to poll for results.
     Non-blocking: sends request with 5-second throttling via last_poll_timestamp.
@@ -924,7 +927,7 @@ def poll_active_jobs(client):
             # Don't fail the job on poll error, just log and retry next cycle
 
 
-def dispatcher(client):
+def dispatcher(client) -> None:
     """
     Dispatcher thread: sends POST and GET requests asynchronously.
 
@@ -1021,7 +1024,7 @@ class NFPClient(object):
         name: str,
         exit_event: Optional[threading.Event] = None,
         event_queue: Optional[queue.Queue] = None,
-    ):
+    ) -> None:
         self.inventory = inventory
         self.name = name
         self.zmq_name = f"{self.name}-{uuid4().hex}"
@@ -1102,7 +1105,7 @@ class NFPClient(object):
         else:
             return orjson.dumps(value)
 
-    def reconnect_to_broker(self):
+    def reconnect_to_broker(self) -> None:
         """
         Connect or reconnect to the broker.
 
@@ -1151,7 +1154,7 @@ class NFPClient(object):
         log.debug(f"{self.name} - client connected to broker at '{self.broker}'")
         self.stats_reconnect_to_broker += 1
 
-    def send_to_broker(self, command, service, workers, uuid, request):
+    def send_to_broker(self, command: str, service, workers, uuid: str, request) -> None:
         """
         Sends a command to the broker.
 
@@ -1386,7 +1389,7 @@ class NFPClient(object):
         """
 
         # round up digit e.g. if 2.0 -> 2 if 2.1 -> 3 if 0.01 -> 1
-        def round_up(num):
+        def round_up(num: float) -> int:
             return max(1, (int(num) + (not num.is_integer())))
 
         uuid = uuid4().hex
@@ -1600,7 +1603,7 @@ class NFPClient(object):
         """
         try:
             from norfab.core.agent import NFAgent
-        except ImportError as exc:
+        except ImportError:
             log.error(
                 "Agent dependencies not installed. Run: pip install norfab[clientagent]",
                 exc_info=True,
@@ -1612,7 +1615,7 @@ class NFPClient(object):
 
         return self.agents[profile]
 
-    def destroy(self):
+    def destroy(self) -> None:
         """
         Gracefully shuts down the client.
 

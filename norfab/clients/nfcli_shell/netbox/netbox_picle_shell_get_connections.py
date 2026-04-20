@@ -11,7 +11,7 @@ from pydantic import (
 
 from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_cache import CacheEnum
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
@@ -37,7 +37,7 @@ class GetConnections(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)

@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class CreateDeviceInterfacesShell(NetboxClientRunJobArgs, CreateDeviceInterfacesInput):
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)

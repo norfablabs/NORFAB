@@ -10,12 +10,12 @@ st.set_page_config(
 st.set_option("client.toolbarMode", "viewer")
 
 
-def about():
+def about() -> None:
     st.title("About Page")
     st.write("This is the about page.")
 
 
-def run_streamlit_app():
+def run_streamlit_app() -> None:
 
     nf = NorFab(inventory="inventory.yaml")
     NFCLIENT = nf.make_client()  # noqa

@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 
 class DeployNetboxDeviceFilters(NetboxDeviceFilters):
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         filters = {
             k: kwargs.pop(k)
             for k in [
@@ -69,7 +69,7 @@ class DeployNetboxCommand(GetContainerlabInventoryCommand):
     )
 
     @staticmethod
-    def source_lab_name():
+    def source_lab_name() -> list:
         NFCLIENT = builtins.NFCLIENT
         ret = []
         result = NFCLIENT.run_job("containerlab", "get_running_labs")
@@ -79,7 +79,7 @@ class DeployNetboxCommand(GetContainerlabInventoryCommand):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")

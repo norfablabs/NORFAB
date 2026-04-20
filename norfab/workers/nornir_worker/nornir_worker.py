@@ -7,8 +7,6 @@ import time
 from threading import Lock
 from typing import Any, Dict, Tuple, Union
 
-from norfab.utils.text import format_duration
-
 import yaml
 from nornir import InitNornir
 from nornir_salt.plugins.functions import (
@@ -30,6 +28,7 @@ from nornir_salt.plugins.tasks import (
 from norfab.core.inventory import merge_recursively
 from norfab.core.worker import Job, NFPWorker, Task, WorkerWatchDog
 from norfab.models import Result
+from norfab.utils.text import format_duration
 
 from .cfg_task import CfgTask
 from .cli_task import CliTask
@@ -68,7 +67,7 @@ class WatchDog(WorkerWatchDog):
         watchdog_tasks (list): List of tasks for the watchdog to run in a given order.
     """
 
-    def __init__(self, worker):
+    def __init__(self, worker) -> None:
         super().__init__(worker)
         self.worker = worker
         self.connections_idle_timeout = worker.nornir_worker_inventory.get(
@@ -157,7 +156,7 @@ class WatchDog(WorkerWatchDog):
             f"{self.worker.name} - updated connections use timestamps for '{plugin}'"
         )
 
-    def connections_clean(self):
+    def connections_clean(self) -> None:
         """
         Cleans up idle connections based on the configured idle timeout.
 
@@ -223,7 +222,7 @@ class WatchDog(WorkerWatchDog):
         finally:
             self.worker.connections_lock.release()
 
-    def connections_keepalive(self):
+    def connections_keepalive(self) -> None:
         """
         Keepalive connections and clean up dead connections if any.
 
@@ -323,7 +322,7 @@ class NornirWorker(
         init_done_event=None,
         log_level: str = None,
         log_queue: object = None,
-    ):
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -349,7 +348,7 @@ class NornirWorker(
 
         log.info(f"{self.name} - Started")
 
-    def worker_exit(self):
+    def worker_exit(self) -> None:
         """
         Executes all functions registered under the "nornir-exit" hook in the inventory.
 
@@ -831,7 +830,7 @@ class NornirWorker(
         return ret
 
     def jinja2_nb_create_ip(
-        self, prefix: str, device: str = None, interface: str = None, **kwargs
+        self, prefix: str, device: str = None, interface: str = None, **kwargs: object
     ) -> str:
         """
         Jinja2 filter to get or create next available IP address from
@@ -854,7 +853,7 @@ class NornirWorker(
         return res["result"]["address"]
 
     def jinja2_nb_create_prefix(
-        self, parent: str, description: str, prefixlen: int = 30, **kwargs
+        self, parent: str, description: str, prefixlen: int = 30, **kwargs: object
     ) -> str:
         """
         Jinja2 filter to get or create next available prefix from
@@ -882,7 +881,7 @@ class NornirWorker(
         Returns a callable function to execute arbitrary NetBox service task.
         """
 
-        def call_netbox(*args, **kwargs) -> dict:
+        def call_netbox(*args: object, **kwargs: object) -> dict:
             reply = self.client.run_job(
                 "netbox",
                 netbox_task,
@@ -1022,7 +1021,6 @@ class NornirWorker(
             "nornir": "",
             "ncclient": "",
             "nornir-netmiko": "",
-            "netmiko": "",
             "nornir-napalm": "",
             "nornir-scrapli": "",
             "nornir-utils": "",

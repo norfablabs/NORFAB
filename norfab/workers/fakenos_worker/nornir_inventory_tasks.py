@@ -1,9 +1,10 @@
 import logging
-from typing import List, Union
+from typing import Union
 
-from .fakenos_models import GetNornirInventoryInput
 from norfab.core.worker import Job, Task
 from norfab.models import Result
+
+from .fakenos_models import GetNornirInventoryInput
 
 log = logging.getLogger(__name__)
 

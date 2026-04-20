@@ -1,10 +1,11 @@
+from typing import List, Union
+
 from pydantic import (
     BaseModel,
     Field,
-    StrictStr,
     StrictBool,
+    StrictStr,
 )
-from typing import List, Union
 
 # -----------------------------------------------------------------------------------------
 # FAKENOS TASKS PYDANTIC MODELS

@@ -1,17 +1,15 @@
 import builtins
 import logging
-from typing import Any, Optional
+from contextvars import ContextVar
 
-from picle.models import Outputters, PipeFunctionsModel
+from picle.models import Outputters
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
     StrictStr,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
-from contextvars import ContextVar
+from ..common import ClientRunJobArgs
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +23,7 @@ class ListToolsCommand(BaseModel):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         agent = current_agent.get()
         if agent:
             return agent.list_tools(**kwargs)
@@ -45,7 +43,7 @@ class AgentChat(BaseModel):
     )
 
     @staticmethod
-    def run(message, **kwargs):
+    def run(message: str, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         agent = NFCLIENT.get_agent(profile=kwargs.get("agent_name", "default"))
         current_agent.set(agent)

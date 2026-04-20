@@ -1,7 +1,4 @@
 import pprint
-import json
-import time
-from uuid import uuid4
 
 
 class TestNfApi:

@@ -28,12 +28,12 @@ class WorkflowRunShell(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def source_workflow():
+    def source_workflow() -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)

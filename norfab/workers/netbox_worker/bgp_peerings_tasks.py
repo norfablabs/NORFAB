@@ -3,7 +3,6 @@ import logging
 from enum import Enum
 from typing import List, Union
 
-import pynetbox
 from pydantic import Field, StrictInt
 
 from norfab.core.worker import Job, Task
@@ -375,7 +374,7 @@ class NetboxBgpPeeringsTasks:
         rir: str = None,
         message: str = None,
         name_template: str = "{device}_{name}",
-        **kwargs,
+        **kwargs: object,
     ) -> Result:
         """
         Synchronize BGP sessions between live devices and NetBox.
@@ -721,7 +720,7 @@ class NetboxBgpPeeringsTasks:
                 ret.errors.append(msg)
                 return None
 
-        def _get_addr_family(address):
+        def _get_addr_family(address) -> str | None:
             """Return 'ipv4' or 'ipv6' based on the IP address version."""
             try:
                 return "ipv6" if ipaddress.ip_address(address).version == 6 else "ipv4"

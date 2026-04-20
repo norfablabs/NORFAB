@@ -1,14 +1,16 @@
+import importlib.metadata
 import logging
 import sys
-import importlib.metadata
-from norfab.core.worker import NFPWorker, Task, Job
-from norfab.models import Result
+from typing import Any, Dict
+
+from picle.models import Outputters
 from pydantic import (
     BaseModel,
     Field,
 )
-from typing import Dict, Callable, Any
-from picle.models import Outputters
+
+from norfab.core.worker import NFPWorker, Task
+from norfab.models import Result
 
 SERVICE = "DummyService"
 

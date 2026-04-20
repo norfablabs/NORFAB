@@ -1,5 +1,4 @@
 import pprint
-import pytest
 
 NET1_INVENTORY = "nf://fakenos/net1.yaml"
 NET2_INVENTORY = "nf://fakenos/net2.yaml"

@@ -11,7 +11,7 @@ import threading
 import time
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 from uuid import uuid4  # random uuid
 
 from pydantic import (
@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-def listen_events_thread(uuid, stop, NFCLIENT):
+def listen_events_thread(uuid: str, stop, NFCLIENT) -> None:
     """Helper function to pretty print events to command line"""
     richconsole = Console()
     start_time = time.time()
@@ -94,11 +94,11 @@ def listen_events_thread(uuid, stop, NFCLIENT):
     )
 
 
-def listen_events(fun):
+def listen_events(fun: Callable) -> Callable:
     """Decorator to listen for events and print them to console"""
 
     @functools.wraps(fun)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: object, **kwargs: object) -> object:
         NFCLIENT = builtins.NFCLIENT
         events_thread_stop = threading.Event()
         uuid = uuid4().hex

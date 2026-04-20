@@ -66,7 +66,7 @@ class NornirNetworkPing(
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         kwargs["fun"] = "ping"
         workers = kwargs.pop("workers", "all")
@@ -154,7 +154,7 @@ class NornirNetworkDns(
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         kwargs["fun"] = "resolve_dns"
         workers = kwargs.pop("workers", "all")

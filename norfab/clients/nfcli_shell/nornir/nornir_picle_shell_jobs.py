@@ -40,11 +40,11 @@ class ListJobsModel(ClientRunJobArgs):
     task: NornirTaskEnum = Field(None, description="Task name to return jobs for")
 
     @staticmethod
-    def source_client():
+    def source_client() -> list:
         return ["self"]
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
@@ -54,7 +54,7 @@ class ListJobsModel(ClientRunJobArgs):
         return ["all", "any"] + workers
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -102,7 +102,7 @@ class JobDetailsModel(ClientRunJobArgs):
     )
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
@@ -112,7 +112,7 @@ class JobDetailsModel(ClientRunJobArgs):
         return ["all", "any"] + workers
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

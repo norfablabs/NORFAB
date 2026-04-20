@@ -33,7 +33,7 @@ class FastAPIShowOpenAPISchema(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
@@ -61,7 +61,7 @@ class FastAPIShowInventoryModel(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -105,7 +105,7 @@ class FastAPIShowCommandsModel(BaseModel):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def get_version(**kwargs):
+    def get_version(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("fastapi", "get_version", workers=workers)

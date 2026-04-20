@@ -149,7 +149,7 @@ class NrCliPluginNetmiko(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "netmiko"
         return NornirCliShell.run(*args, **kwargs)
 
@@ -210,7 +210,7 @@ class NrCliPluginScrapli(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "scrapli"
         return NornirCliShell.run(*args, **kwargs)
 
@@ -237,7 +237,7 @@ class NrCliPluginNapalm(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "napalm"
         return NornirCliShell.run(*args, **kwargs)
 
@@ -292,22 +292,22 @@ class NornirCliShell(
         return values
 
     @staticmethod
-    def source_commands():
+    def source_commands() -> list:
         completions = ClientRunJobArgs.walk_norfab_files()
         completions.append("load-terminal")
         return completions
 
     @staticmethod
-    def source_run_ttp():
+    def source_run_ttp() -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    def source_job_data():
+    def source_job_data() -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

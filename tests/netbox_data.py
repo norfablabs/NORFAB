@@ -1,8 +1,9 @@
-import pynetbox
-import re
 import logging
-import requests
+import re
 import traceback
+
+import pynetbox
+import requests
 
 logging.basicConfig(
     level=logging.INFO,
@@ -952,24 +953,24 @@ connections = [
         "a_terminations": [
             {
                 "device": "fceos4",
-                "interface": f"eth1",
+                "interface": "eth1",
                 "termination_type": "dcim.interface",
             },
             {
                 "device": "fceos4",
-                "interface": f"eth10",
+                "interface": "eth10",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "fceos5",
-                "interface": f"eth1",
+                "interface": "eth1",
                 "termination_type": "dcim.interface",
             },
             {
                 "device": "fceos5",
-                "interface": f"eth10",
+                "interface": "eth10",
                 "termination_type": "dcim.interface",
             },
         ],
@@ -981,19 +982,19 @@ connections = [
         "a_terminations": [
             {
                 "device": "fceos4",
-                "interface": f"eth2",
+                "interface": "eth2",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "fceos5",
-                "interface": f"eth9",
+                "interface": "eth9",
                 "termination_type": "dcim.interface",
             },
             {
                 "device": "fceos5",
-                "interface": f"eth2",
+                "interface": "eth2",
                 "termination_type": "dcim.interface",
             },
         ],
@@ -1005,24 +1006,24 @@ connections = [
         "a_terminations": [
             {
                 "device": "fceos4",
-                "interface": f"eth8",
+                "interface": "eth8",
                 "termination_type": "dcim.interface",
             },
             {
                 "device": "fceos4",
-                "interface": f"eth9",
+                "interface": "eth9",
                 "termination_type": "dcim.interface",
             },
             {
                 "device": "fceos4",
-                "interface": f"eth3",
+                "interface": "eth3",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "fceos5",
-                "interface": f"eth3",
+                "interface": "eth3",
                 "termination_type": "dcim.interface",
             }
         ],
@@ -1035,14 +1036,14 @@ connections = [
         "a_terminations": [
             {
                 "device": "fceos4",
-                "interface": f"eth4",
+                "interface": "eth4",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "fceos5",
-                "interface": f"eth4",
+                "interface": "eth4",
                 "termination_type": "dcim.interface",
             }
         ],
@@ -1054,14 +1055,14 @@ connections = [
         "a_terminations": [
             {
                 "device": "fceos4",
-                "interface": f"eth6",
+                "interface": "eth6",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "fceos5",
-                "interface": f"eth6",
+                "interface": "eth6",
                 "termination_type": "dcim.interface",
             }
         ],
@@ -1073,14 +1074,14 @@ connections = [
         "a_terminations": [
             {
                 "device": "ceos-spine-1",
-                "interface": f"Ethernet1",
+                "interface": "Ethernet1",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "ceos-spine-2",
-                "interface": f"Ethernet1",
+                "interface": "Ethernet1",
                 "termination_type": "dcim.interface",
             }
         ],
@@ -1092,14 +1093,14 @@ connections = [
         "a_terminations": [
             {
                 "device": "fceos4",
-                "interface": f"eth102",
+                "interface": "eth102",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "fceos5",
-                "interface": f"eth102",
+                "interface": "eth102",
                 "termination_type": "dcim.interface",
             }
         ],
@@ -1110,14 +1111,14 @@ connections = [
         "a_terminations": [
             {
                 "device": "fceos4",
-                "interface": f"eth103",
+                "interface": "eth103",
                 "termination_type": "dcim.interface",
             },
         ],
         "b_terminations": [
             {
                 "device": "fceos5",
-                "interface": f"eth103",
+                "interface": "eth103",
                 "termination_type": "dcim.interface",
             }
         ],

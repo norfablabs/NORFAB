@@ -27,7 +27,7 @@ class TaskTask:
         CONNECTION_NAME = "netmiko"
 
         # create task function
-        def task(nornir_task_object, **kwargs):
+        def task(nornir_task_object, **kwargs: object):
             pass
         ```
 

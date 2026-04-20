@@ -1,11 +1,9 @@
-import pprint
-import pytest
-import random
-import requests
-import json
-import time
 import asyncio
+import json
+import pprint
 import time
+
+import pytest
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 

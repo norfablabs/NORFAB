@@ -14,8 +14,6 @@ import zlib
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from norfab.utils.text import format_duration
-
 import orjson
 import psutil
 import zmq
@@ -26,6 +24,7 @@ from pydantic import BaseModel, create_model
 from norfab import models
 from norfab.core.inventory import NorFabInventory
 from norfab.models import NorFabEvent, Result
+from norfab.utils.text import format_duration
 
 from . import NFP
 from .client import NFPClient
@@ -67,7 +66,7 @@ class Job:
         kwargs: dict = None,
         task: str = None,
         client_input_queue: object = None,
-    ):
+    ) -> None:
         self.worker = worker
         self.juuid = juuid
         self.client_address = client_address
@@ -77,10 +76,10 @@ class Job:
         self.task = task
         self.client_input_queue = client_input_queue
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.juuid
 
-    def event(self, message: str, **kwargs: Any):
+    def event(self, message: str, **kwargs: Any) -> None:
         """
         Handles an event by forwarding it to the worker.
 
@@ -229,7 +228,7 @@ class Task:
             self.make_input_model()
 
         @functools.wraps(self.function)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: object, **kwargs: object):
             # remove `job` argument if function does not expect it
             if self.is_need_argument(function, "job") is False:
                 _ = kwargs.pop("job", None)
@@ -256,7 +255,7 @@ class Task:
 
         return wrapper
 
-    def make_input_model(self):
+    def make_input_model(self) -> None:
         """
         Dynamically creates a Pydantic input model for the worker's function by inspecting its signature.
 
@@ -432,7 +431,7 @@ class JobDatabase:
         _lock (threading.Lock): Lock for write operations to ensure thread safety.
     """
 
-    def __init__(self, db_path: str, jobs_compress: bool = True):
+    def __init__(self, db_path: str, jobs_compress: bool = True) -> None:
         """
         Initialize the job database.
 
@@ -541,7 +540,7 @@ class JobDatabase:
         else:
             return orjson.loads(data_blob)
 
-    def _initialize_database(self):
+    def _initialize_database(self) -> None:
         """Initialize the database schema."""
         with self._transaction(write=True) as conn:
             # Jobs table - args, kwargs, result_data stored as BLOBs
@@ -917,7 +916,7 @@ class JobDatabase:
             cursor = conn.execute(query, params)
             return [dict(row) for row in cursor.fetchall()]
 
-    def close(self):
+    def close(self) -> None:
         """Close all database connections."""
         if hasattr(self._local, "conn"):
             self._local.conn.close()
@@ -951,7 +950,7 @@ class WorkerWatchDog(threading.Thread):
         worker (object): The worker object containing inventory attributes.
     """
 
-    def __init__(self, worker):
+    def __init__(self, worker) -> None:
         super().__init__()
         self.worker = worker
         self.worker_process = psutil.Process(os.getpid())
@@ -990,7 +989,7 @@ class WorkerWatchDog(threading.Thread):
             "worker_ram_usage_mbyte": self.get_ram_usage(),
         }
 
-    def check_ram(self):
+    def check_ram(self) -> None:
         """
         Checks the current RAM usage and performs an action if it exceeds the threshold.
 
@@ -1028,7 +1027,7 @@ class WorkerWatchDog(threading.Thread):
         """
         return self.worker_process.memory_info().rss / 1024000
 
-    def run(self):
+    def run(self) -> None:
         """
         Executes the worker's watchdog main loop, periodically running tasks and checking conditions.
         The method performs the following steps in a loop until the worker's exit event is set:
@@ -1068,7 +1067,7 @@ class WorkerWatchDog(threading.Thread):
 # --------------------------------------------------------------------------------------------
 
 
-def _put(worker, put_queue, destroy_event):
+def _put(worker, put_queue, destroy_event) -> None:
     """
     Continuously processes items from the `put_queue` and updates the input queue
     of running jobs in the `worker` until the `destroy_event` is set.
@@ -1106,7 +1105,7 @@ def _put(worker, put_queue, destroy_event):
         put_queue.task_done()
 
 
-def _post(worker, post_queue, destroy_event):
+def _post(worker, post_queue, destroy_event) -> None:
     """
     Thread to receive POST requests and save them to database.
 
@@ -1180,7 +1179,7 @@ def _post(worker, post_queue, destroy_event):
         post_queue.task_done()
 
 
-def _get(worker, get_queue, destroy_event):
+def _get(worker, get_queue, destroy_event) -> None:
     """
     Thread to receive GET requests and retrieve job status/results from the database.
 
@@ -1238,7 +1237,7 @@ def _get(worker, get_queue, destroy_event):
         get_queue.task_done()
 
 
-def _event(worker, event_queue, destroy_event):
+def _event(worker, event_queue, destroy_event) -> None:
     """
     Thread function to emit events to Clients.
 
@@ -1274,7 +1273,7 @@ def _event(worker, event_queue, destroy_event):
         event_queue.task_done()
 
 
-def recv(worker, destroy_event):
+def recv(worker, destroy_event) -> None:
     """
     Thread to process receive messages from broker.
 
@@ -1364,7 +1363,7 @@ class NFPWorker:
         log_queue: object = None,
         multiplier: int = 6,
         keepalive: int = 2500,
-    ):
+    ) -> None:
         self.setup_logging(log_queue, log_level)
         self.inventory = inventory
         self.max_concurrent_jobs = max(1, inventory.get("max_concurrent_jobs", 5))
@@ -1462,7 +1461,7 @@ class NFPWorker:
             logging_config_producer["root"]["level"] = log_level
         logging.config.dictConfig(logging_config_producer)
 
-    def reconnect_to_broker(self):
+    def reconnect_to_broker(self) -> None:
         """
         Connect or reconnect to the broker.
 
@@ -1536,7 +1535,7 @@ class NFPWorker:
             f"service '{self.service.decode('utf-8')}'"
         )
 
-    def send_to_broker(self, command, msg: list = None):
+    def send_to_broker(self, command: str, msg: list = None) -> None:
         """
         Send a message to the broker.
 
@@ -1634,7 +1633,7 @@ class NFPWorker:
         """
         raise NotImplementedError
 
-    def destroy(self, message=None):
+    def destroy(self, message: str=None) -> None:
         """
         Cleanly shuts down the worker by performing the following steps:
 
@@ -2102,7 +2101,7 @@ class NFPWorker:
         )
         self.recv_thread.start()
 
-    def run_next_job(self, uuid: str):
+    def run_next_job(self, uuid: str) -> None:
         """
         Processes the next job from the database.
 
@@ -2216,7 +2215,7 @@ class NFPWorker:
         # inform client that job completed
         job.event(message="completed", status="completed")
 
-    def work(self):
+    def work(self) -> None:
         """
         Executes the main worker loop, managing job execution using a thread pool.
 

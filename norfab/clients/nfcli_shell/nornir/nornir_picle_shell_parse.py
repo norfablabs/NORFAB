@@ -1,28 +1,29 @@
 ﻿import builtins
 from enum import Enum
-from typing import List, Union, Any
+from typing import List, Union
 
 try:
-    from ttp_templates import list_templates_refs, list_templates
+    from ttp_templates import list_templates, list_templates_refs
 
     HAS_TTP_TEMPLATES = True
-except Exception as e:
+except Exception:
     HAS_TTP_TEMPLATES = False
 
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import BaseModel, Field, StrictStr, StrictBool, model_validator
+from pydantic import BaseModel, Field, StrictBool, StrictStr
+
+from norfab.workers.nornir_worker.parse_task import ParseTTPInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from .nornir_picle_shell_cli import (
+    NrCliPluginNapalm,
+    NrCliPluginNetmiko,
+    NrCliPluginScrapli,
+)
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     NornirCommonArgs,
 )
-from .nornir_picle_shell_cli import (
-    NrCliPluginNetmiko,
-    NrCliPluginScrapli,
-    NrCliPluginNapalm,
-)
-from norfab.workers.nornir_worker.parse_task import ParseTTPInput
 
 
 class NapalmGettersEnum(str, Enum):
@@ -62,7 +63,7 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -97,21 +98,21 @@ class TTPStructureOptions(str, Enum):
 
 class TTPParseNrCliPluginNetmiko(NrCliPluginNetmiko):
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "netmiko"
         return TTPParseModel.run(*args, **kwargs)
 
 
 class TTPParseNrCliPluginScrapli(NrCliPluginScrapli):
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "scrapli"
         return TTPParseModel.run(*args, **kwargs)
 
 
 class TTPParseNrCliPluginNapalm(NrCliPluginNapalm):
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "napalm"
         return TTPParseModel.run(*args, **kwargs)
 
@@ -149,7 +150,7 @@ class TTPParseModel(
     )
 
     @staticmethod
-    def source_template(choice):
+    def source_template(choice) -> list:
         if choice and choice.startswith("nf://"):
             return ClientRunJobArgs.walk_norfab_files()
         elif choice and choice.startswith("ttp://") and HAS_TTP_TEMPLATES:
@@ -158,14 +159,14 @@ class TTPParseModel(
             return ["nf://", "ttp://"]
 
     @staticmethod
-    def source_get():
+    def source_get() -> list:
         if HAS_TTP_TEMPLATES:
             return [t.replace(".txt", "") for t in list_templates()["get"]]
         return []
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -201,12 +202,12 @@ class TextFSMParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     )
 
     @staticmethod
-    def source_template(choice):
+    def source_template(choice) -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

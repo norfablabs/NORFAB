@@ -1,27 +1,27 @@
 import asyncio
 import concurrent.futures
+import copy
 import importlib
 import logging
 import os
 import uuid
-import copy
-import yaml
 from fnmatch import fnmatch
+from typing import Any, Callable, Iterator, List
 
-from typing import Any, Iterator, Callable, List
-
+import yaml
+from datamodel_code_generator import Formatter, GenerateConfig, generate_dynamic_models
 from fastembed import TextEmbedding
-from langchain_core.tools import StructuredTool
+from langchain.agents import create_agent
 from langchain.tools import tool as langchain_tool
+from langchain_core.runnables import RunnableLambda
+from langchain_core.tools import StructuredTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite import SqliteSaver
-from langchain.agents import create_agent
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
+
 from norfab.core.inventory import merge_recursively
-from datamodel_code_generator import Formatter, GenerateConfig, generate_dynamic_models
-from langchain_core.runnables import RunnableLambda
 
 log = logging.getLogger(__name__)
 
@@ -762,7 +762,7 @@ def load_agent_cfg_from_yaml_file(filename: str) -> dict:
         try:
             with open(filename, encoding="utf-8") as fh:
                 return yaml.safe_load(fh.read())
-        except Exception as e:
+        except Exception:
             log.error(
                 f"NFAgent - failed to load configuration from YAML file: {filename}",
                 exc_info=True,

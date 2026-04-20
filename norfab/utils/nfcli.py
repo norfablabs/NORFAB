@@ -61,7 +61,7 @@ hosts:
 """
 
 
-def nfcli():
+def nfcli() -> str | None:
     # form argparser menu:
     description_text = """
     """

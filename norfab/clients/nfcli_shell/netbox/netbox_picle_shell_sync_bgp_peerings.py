@@ -3,11 +3,12 @@ import logging
 
 from picle.models import Outputters
 from pydantic import Field
+
 from norfab.workers.netbox_worker.bgp_peerings_tasks import SyncBgpPeeringsInput
 
 from ..common import listen_events, log_error_or_result
-from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters
+from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class SyncBgpPeeringsShell(
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 60)

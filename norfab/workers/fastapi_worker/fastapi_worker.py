@@ -261,7 +261,7 @@ class FastAPIWorker(NFPWorker):
         init_done_event=None,
         log_level: str = None,
         log_queue: object = None,
-    ):
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -314,7 +314,7 @@ class FastAPIWorker(NFPWorker):
             size_limit=1073741824,  #  1 GigaByte
         )
 
-    def fastapi_start(self):
+    def fastapi_start(self) -> None:
         """
         Starts the FastAPI server.
 
@@ -358,7 +358,7 @@ class FastAPIWorker(NFPWorker):
             f"http://{self.uvicorn_inventory['host']}:{self.uvicorn_inventory['port']}"
         )
 
-    def worker_exit(self):
+    def worker_exit(self) -> None:
         """
         Terminates the current process by sending a SIGTERM signal to itself.
 

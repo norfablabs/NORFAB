@@ -65,16 +65,16 @@ class NornirTestShell(
     )
 
     @staticmethod
-    def source_suite():
+    def source_suite() -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    def source_job_data():
+    def source_job_data() -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

@@ -32,7 +32,7 @@ class ShowWorkersStatusBrief(BaseModel):
     status: WorkerStatus = Field("any", description="Worker status")
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", args=args, kwargs=kwargs
@@ -51,7 +51,7 @@ class ShowWorkersStatusBrief(BaseModel):
 class ShowWorkersStatistics(ClientRunJobArgs):
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -74,7 +74,7 @@ class ShowWorkersStatistics(ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "all"}
@@ -91,7 +91,7 @@ class ShowWorkersStatistics(ClientRunJobArgs):
 class ShowWorkersVersion(ClientRunJobArgs):
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -114,7 +114,7 @@ class ShowWorkersVersion(ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "all"}
@@ -165,7 +165,7 @@ class WorkersPingCommand(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "all"}
@@ -176,7 +176,7 @@ class WorkersPingCommand(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, **kwargs):
+    def run(uuid: str, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         service = kwargs.pop("service", "all")

@@ -23,7 +23,7 @@ class CreateAuthToken(ClientRunJobArgs):
     expire: StrictInt = Field(None, description="Seconds before token expire")
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -55,7 +55,7 @@ class ListAuthToken(ClientRunJobArgs):
     username: StrictStr = Field(None, description="Name of the user to list tokens for")
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -94,7 +94,7 @@ class DeleteAuthToken(ClientRunJobArgs):
     token: StrictStr = Field(None, description="Token string to delete")
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -123,7 +123,7 @@ class CheckAuthToken(ClientRunJobArgs):
     token: StrictStr = Field(..., description="Token string to check")
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

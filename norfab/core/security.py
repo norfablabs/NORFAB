@@ -30,10 +30,10 @@ class NorFabClientAuthProvider:
     authorized by user using 'nfcli --keys' command
     """
 
-    def __init__(self, broker):
+    def __init__(self, broker) -> None:
         self.broker = broker
 
-    def callback(self, domain, key):
+    def callback(self, domain, key) -> bool:
         log.debug(f"Broker received client key, domain: {domain}, key: {key}")
 
         return True

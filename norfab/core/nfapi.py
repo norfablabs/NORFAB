@@ -19,10 +19,10 @@ def start_broker_process(
     endpoint,
     exit_event=None,
     inventory=None,
-    log_level=None,
+    log_level: str=None,
     log_queue=None,
     init_done_event=None,
-):
+) -> None:
     """
     Thread target function too start a broker process with the given parameters.
 
@@ -54,7 +54,7 @@ def start_worker_process(
     log_level=None,
     log_queue=None,
     init_done_event=None,
-):
+) -> None:
     """
     Thread target function to start a worker process using the provided worker plugin.
 
@@ -185,13 +185,13 @@ class NorFab:
         # find all workers plugins
         self.register_plugins()
 
-    def __enter__(self):
+    def __enter__(self) -> "NorFab":
         self.start()
         self.make_client()
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
         self.destroy()
 
     def register_plugins(self) -> None:
@@ -524,7 +524,7 @@ class NorFab:
         for f in self.inventory.hooks.get("startup", []):
             f["function"](self, *f.get("args", []), **f.get("kwargs", {}))
 
-    def run(self):
+    def run(self) -> None:
         """
         Runs the main loop until a termination signal (CTRL+C) is received.
         This method checks if there are any broker or worker processes running.

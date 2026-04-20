@@ -44,7 +44,7 @@ class WorkflowWorker(NFPWorker):
         init_done_event=None,
         log_level: str = "WARNING",
         log_queue: object = None,
-    ):
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -56,7 +56,7 @@ class WorkflowWorker(NFPWorker):
         self.init_done_event.set()
         log.info(f"{self.name} - Started")
 
-    def worker_exit(self):
+    def worker_exit(self) -> None:
         pass
 
     @Task(fastapi={"methods": ["GET"]})

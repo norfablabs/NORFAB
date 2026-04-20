@@ -1,10 +1,11 @@
 import pprint
-import pytest
 import random
-import pynetbox
 from time import perf_counter
 
-from .netbox_data import NB_URL, NB_API_TOKEN
+import pynetbox
+import pytest
+
+from .netbox_data import NB_API_TOKEN, NB_URL
 
 cache_options = [True, False, "refresh", "force"]
 
@@ -1462,11 +1463,11 @@ class TestGetConnections:
             assert (
                 res["result"]["fceos4"]["Port-Channel1.101"]["remote_interface"]
                 == "ae5.101"
-            ), f"Unexpected interface name"
+            ), "Unexpected interface name"
             assert (
                 res["result"]["fceos5"]["ae5.101"]["remote_interface"]
                 == "Port-Channel1.101"
-            ), f"Unexpected interface name"
+            ), "Unexpected interface name"
 
     def test_get_connections_dry_run(self, nfclient):
         ret = nfclient.run_job(
@@ -2477,7 +2478,7 @@ class TestSyncDeviceFacts:
                 assert "branch" in device_data, f"{worker}:{device} no branch info"
                 assert (
                     device_data["branch"] == "sync_facts_test_branch"
-                ), f"Wrong branch name"
+                ), "Wrong branch name"
 
         # Cleanup
         delete_branch("sync_facts_test_branch", nfclient)
@@ -2718,7 +2719,7 @@ class TestSyncDeviceInterfaces:
                 ], f"{worker}:{device} Loopback123 not updated"
             assert (
                 res["diff"]["ceos-spine-2"]["Loopback123"]["description"]["-"] == "foo"
-            ), f"Interface description diff not populated"
+            ), "Interface description diff not populated"
 
     @pytest.mark.skip(reason="TBD")
     def test_sync_device_interfaces_non_existing_device(self, nfclient):
@@ -3200,10 +3201,10 @@ class TestCreateIP:
             worker, res2 = tuple(create_2.items())[0]
             assert (
                 res1["result"]["address"] == res2["result"]["address"]
-            ), f"Should have been same IP address"
+            ), "Should have been same IP address"
             assert (
                 res1["result"]["description"] == res2["result"]["description"]
-            ), f"Should have been same IP description"
+            ), "Should have been same IP description"
 
     def test_create_ip_by_prefix_description(self, nfclient):
         if self.nb_version is None:
@@ -3243,10 +3244,10 @@ class TestCreateIP:
             worker, res2 = tuple(create_2.items())[0]
             assert (
                 res1["result"]["address"] == res2["result"]["address"]
-            ), f"Should have been same IP address"
+            ), "Should have been same IP address"
             assert (
                 res1["result"]["description"] == res2["result"]["description"]
-            ), f"Should have been same IP description"
+            ), "Should have been same IP description"
 
     def test_create_ip_by_prefix_multiple(self, nfclient):
         if self.nb_version is None:
@@ -3423,7 +3424,7 @@ class TestCreateIP:
             worker, res1 = tuple(create_1.items())[0]
 
             assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["result"]["address"], "No ip allocated"
 
     def test_create_ip_non_existing_device(self, nfclient):
         if self.nb_version is None:
@@ -3496,7 +3497,7 @@ class TestCreateIP:
             worker, res1 = tuple(create_1.items())[0]
 
             assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["result"]["address"], "No ip allocated"
 
     def test_create_ip_dry_run_new_ip(self, nfclient):
         if self.nb_version is None:
@@ -3532,12 +3533,12 @@ class TestCreateIP:
             worker, res2 = tuple(create_2.items())[0]
 
             assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["result"]["address"], "No ip allocated"
             assert res1["dry_run"] is True, "No dry run flag set to true"
             assert res1["status"] == "unchanged", "Unexpected status"
 
             assert res2["failed"] == False, "Allocation failed"
-            assert res2["result"]["address"], f"No ip allocated"
+            assert res2["result"]["address"], "No ip allocated"
             assert res2["dry_run"] is True, "No dry run flag set to true"
             assert res2["status"] == "unchanged", "Unexpected status"
 
@@ -3577,12 +3578,12 @@ class TestCreateIP:
             worker, res2 = tuple(create_2.items())[0]
 
             assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["result"]["address"], "No ip allocated"
             assert res1["dry_run"] is False, "No dry run flag set to true"
             assert res1["status"] == "created", "Unexpected status"
 
             assert res2["failed"] == False, "Allocation failed"
-            assert res2["result"]["address"], f"No ip allocated"
+            assert res2["result"]["address"], "No ip allocated"
             assert res2["dry_run"] is True, "No dry run flag set to true"
             assert res2["status"] == "unchanged", "Unexpected status"
 
@@ -3609,7 +3610,7 @@ class TestCreateIP:
             worker, res1 = tuple(create_1.items())[0]
 
             assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["result"]["address"], "No ip allocated"
             assert res1["dry_run"] is False, "No dry run flag set to true"
             assert res1["status"] == "created", "Unexpected status"
             assert "dev" in res1["resources"]
@@ -3645,7 +3646,7 @@ class TestCreateIP:
             worker, res1 = tuple(create_1.items())[0]
 
             assert res1["failed"] == False, "Allocation failed"
-            assert res1["result"]["address"], f"No ip allocated"
+            assert res1["result"]["address"], "No ip allocated"
             assert (
                 res1["result"]["branch"] == "create_ip_1"
             ), "No branch info in results"
@@ -3667,7 +3668,7 @@ class TestCreateIP:
         print("create_1")
         pprint.pprint(create_1, width=200)
         worker, res1 = tuple(create_1.items())[0]
-        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert res1["result"]["address"] == "10.0.0.0/31", "Wrong ip allocated"
 
     def test_create_ip_with_mask_len_dry_run(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3688,7 +3689,7 @@ class TestCreateIP:
         pprint.pprint(create_1, width=200)
         worker, res1 = tuple(create_1.items())[0]
         # dry run will allocate first ip within /24 as opposed to /31
-        assert res1["result"]["address"] == "10.0.0.1/24", f"Wrong ip allocated"
+        assert res1["result"]["address"] == "10.0.0.1/24", "Wrong ip allocated"
 
     def test_create_ip_check_create_peer_ip(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3709,16 +3710,16 @@ class TestCreateIP:
 
         worker, res1 = tuple(create_1.items())[0]
 
-        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert res1["result"]["address"] == "10.0.0.0/31", "Wrong ip allocated"
         assert (
             res1["result"]["peer"]["address"] == "10.0.0.1/31"
-        ), f"Wrong ip allocated for peer"
+        ), "Wrong ip allocated for peer"
         assert (
             res1["result"]["peer"]["device"] == "fceos5"
-        ), f"Wrong ip allocated for peer"
+        ), "Wrong ip allocated for peer"
         assert (
             res1["result"]["peer"]["interface"] == "ae5.101"
-        ), f"Wrong ip allocated for peer"
+        ), "Wrong ip allocated for peer"
 
     def test_create_ip_check_create_peer_ip_with_branch(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3741,17 +3742,17 @@ class TestCreateIP:
 
         worker, res1 = tuple(create_1.items())[0]
 
-        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
-        assert res1["result"]["branch"] == "create_ip_with_peer", f"Wrong branch"
+        assert res1["result"]["address"] == "10.0.0.0/31", "Wrong ip allocated"
+        assert res1["result"]["branch"] == "create_ip_with_peer", "Wrong branch"
         assert (
             res1["result"]["peer"]["address"] == "10.0.0.1/31"
-        ), f"Wrong ip allocated for peer"
+        ), "Wrong ip allocated for peer"
         assert (
             res1["result"]["peer"]["device"] == "fceos5"
-        ), f"Wrong ip allocated for peer"
+        ), "Wrong ip allocated for peer"
         assert (
             res1["result"]["peer"]["interface"] == "ae5.101"
-        ), f"Wrong ip allocated for peer"
+        ), "Wrong ip allocated for peer"
 
     def test_create_ip_check_skip_create_peer_ip(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3773,10 +3774,10 @@ class TestCreateIP:
 
         worker, res1 = tuple(create_1.items())[0]
 
-        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
+        assert res1["result"]["address"] == "10.0.0.0/31", "Wrong ip allocated"
         assert (
             "peer" not in res1["result"]
-        ), f"SHould have been skipping peer ip creation"
+        ), "SHould have been skipping peer ip creation"
 
     def test_create_ip_use_peer_ip(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3811,8 +3812,8 @@ class TestCreateIP:
         worker, res1 = tuple(create_1.items())[0]
         worker, res2 = tuple(create_2.items())[0]
 
-        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
-        assert res2["result"]["address"] == "10.0.0.1/31", f"Wrong ip allocated"
+        assert res1["result"]["address"] == "10.0.0.0/31", "Wrong ip allocated"
+        assert res2["result"]["address"] == "10.0.0.1/31", "Wrong ip allocated"
 
     def test_create_ip_with_link_peer_dry_run(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3847,8 +3848,8 @@ class TestCreateIP:
         worker, res1 = tuple(create_1.items())[0]
         worker, res2 = tuple(create_2.items())[0]
 
-        assert res1["result"]["address"] == "10.0.0.0/31", f"Wrong ip allocated"
-        assert res2["result"]["address"] == "10.0.0.1/31", f"Wrong ip allocated"
+        assert res1["result"]["address"] == "10.0.0.0/31", "Wrong ip allocated"
+        assert res2["result"]["address"] == "10.0.0.1/31", "Wrong ip allocated"
 
     def test_create_ip_with_link_peer_within_parent(self, nfclient):
         delete_prefixes_within("10.0.0.0/24", nfclient)
@@ -3881,8 +3882,8 @@ class TestCreateIP:
         worker, res1 = tuple(create_1.items())[0]
         worker, res2 = tuple(create_2.items())[0]
 
-        assert res1["result"]["address"] == "10.0.0.1/24", f"Wrong ip allocated"
-        assert res2["result"]["address"] == "10.0.0.2/24", f"Wrong ip allocated"
+        assert res1["result"]["address"] == "10.0.0.1/24", "Wrong ip allocated"
+        assert res2["result"]["address"] == "10.0.0.2/24", "Wrong ip allocated"
 
 
 class TestNetboxCache:
@@ -4632,10 +4633,10 @@ class TestCreatePrefix:
             worker, res2 = tuple(create_2.items())[0]
             assert (
                 res1["result"]["prefix"] == res2["result"]["prefix"]
-            ), f"Should have been same prefix"
+            ), "Should have been same prefix"
             assert (
                 res1["result"]["description"] == res2["result"]["description"]
-            ), f"Should have been same prefix description"
+            ), "Should have been same prefix description"
 
     def test_create_prefix_multiple(self, nfclient):
         if self.nb_version is None:
@@ -4678,7 +4679,7 @@ class TestCreatePrefix:
             worker, res2 = tuple(create_2.items())[0]
             assert (
                 res1["result"]["prefix"] != res2["result"]["prefix"]
-            ), f"Should have been different prefix"
+            ), "Should have been different prefix"
 
     def test_create_prefix_non_exist_parent(self, nfclient):
         if self.nb_version is None:
@@ -4702,7 +4703,7 @@ class TestCreatePrefix:
                 assert res1["failed"] == True, "Allocation not failed"
                 assert (
                     "Unable to source parent prefix from Netbox" in res1["messages"][0]
-                ), f"Result has no errors"
+                ), "Result has no errors"
 
     def test_create_prefix_with_vrf(self, nfclient):
         """Should create single prefix and handle deduplication within vrf"""
@@ -4764,10 +4765,10 @@ class TestCreatePrefix:
             worker, res3 = tuple(create_3.items())[0]
             assert (
                 res1["result"]["prefix"] == res2["result"]["prefix"]
-            ), f"Should have been same prefix"
+            ), "Should have been same prefix"
             assert (
                 res1["result"]["prefix"] != res3["result"]["prefix"]
-            ), f"Should have been different prefix"
+            ), "Should have been different prefix"
 
     def test_create_prefix_with_parent_vrf_mismatch(self, nfclient):
         if self.nb_version is None:
@@ -4837,10 +4838,10 @@ class TestCreatePrefix:
             worker, res2 = tuple(create_2.items())[0]
             assert (
                 res1["result"]["prefix"] == res2["result"]["prefix"]
-            ), f"Should have been same prefix"
+            ), "Should have been same prefix"
             assert (
                 res1["result"]["description"] == res2["result"]["description"]
-            ), f"Should have been same prefix description"
+            ), "Should have been same prefix description"
 
     def test_create_prefix_within_vrf_by_parent_prefix_name(self, nfclient):
         if self.nb_version is None:
@@ -4902,13 +4903,13 @@ class TestCreatePrefix:
 
             assert (
                 res1["result"]["prefix"] == res2["result"]["prefix"]
-            ), f"Should have been same prefix"
+            ), "Should have been same prefix"
             assert (
                 res1["result"]["description"] == res2["result"]["description"]
-            ), f"Should have been same prefix description"
+            ), "Should have been same prefix description"
             assert (
                 res1["result"]["prefix"] != res3["result"]["prefix"]
-            ), f"Should have been different prefix"
+            ), "Should have been different prefix"
 
     def test_create_prefix_dry_run_empty_parent(self, nfclient):
         if self.nb_version is None:

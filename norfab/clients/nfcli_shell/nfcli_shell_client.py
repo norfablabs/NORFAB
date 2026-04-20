@@ -65,7 +65,7 @@ class ShowBrokerModel(BaseModel):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         if kwargs.get("version"):
             reply = NFCLIENT.mmi("mmi.service.broker", "show_broker_version")
         elif kwargs.get("inventory"):
@@ -197,7 +197,7 @@ class ListFilesModel(BaseModel):
     url: StrictStr = Field("nf://", description="Directory to list content for")
 
     @staticmethod
-    def source_url():
+    def source_url() -> list:
         NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.run_job(
             "filesharing",
@@ -210,7 +210,7 @@ class ListFilesModel(BaseModel):
             return wres["result"]
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         reply = NFCLIENT.run_job(
             "filesharing",
             "list_files",
@@ -234,7 +234,7 @@ class CopyFileModel(BaseModel):
     read: Optional[StrictBool] = Field(False, description="Print file content")
 
     @staticmethod
-    def source_url():
+    def source_url() -> list:
         NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.run_job(
             "filesharing",
@@ -246,7 +246,7 @@ class CopyFileModel(BaseModel):
             return wres["result"]
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         return NFCLIENT.fetch_file(**kwargs)
 
     class PicleConfig:
@@ -257,7 +257,7 @@ class ListFileDetails(BaseModel):
     url: StrictStr = Field("nf://", description="File location")
 
     @staticmethod
-    def source_url():
+    def source_url() -> list:
         NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.run_job(
             "filesharing",
@@ -269,7 +269,7 @@ class ListFileDetails(BaseModel):
             return wres["result"]
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         reply = NFCLIENT.run_job(
             "filesharing",
             "file_details",
@@ -290,7 +290,7 @@ class DeleteFetchedFiles(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -314,7 +314,7 @@ class DeleteFetchedFiles(ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
     @staticmethod
-    def source_filepath():
+    def source_filepath() -> list:
         NFCLIENT = builtins.NFCLIENT
         broker_files = NFCLIENT.run_job(
             "filesharing", "any", "walk", kwargs={"url": "nf://"}
@@ -323,7 +323,7 @@ class DeleteFetchedFiles(ClientRunJobArgs):
             return wres["result"]
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
         workers = [i["name"] for i in reply["results"]]
@@ -417,7 +417,7 @@ class NorFabShell(BaseModel):
         history_file = "./__norfab__/nfcli_history.txt"
 
     @classmethod
-    def cmd_preloop_override(self):
+    def cmd_preloop_override(self) -> None:
         """This method called before CMD loop starts"""
         pass
 
@@ -440,7 +440,7 @@ class ManTasks(BaseModel):
 
     @staticmethod
     @listen_events
-    def run(uuid, **kwargs):
+    def run(uuid: str, **kwargs: object):
         service = kwargs.pop("service", "all")
 
         result = NFCLIENT.run_job(
@@ -501,8 +501,8 @@ def start_picle_shell(
     inventory="./inventory.yaml",
     run_workers=None,
     run_broker=None,
-    log_level="WARNING",
-):
+    log_level: str="WARNING",
+) -> None:
     global NFCLIENT
     # initiate NorFab
     with NorFab(

@@ -1,9 +1,8 @@
-import pprint
-import pytest
-import random
-import requests
 import json
+import pprint
 import time
+
+import requests
 
 
 def get_token(nfclient):
@@ -276,7 +275,7 @@ class TestFastAPIServer:
         assert res["errors"] == [], f"Having errors: '{res['errors']}'"
         assert res["status"] == "200", f"Unexpected status: '{res['status']}'"
         assert res["uuid"], f"Unexpected uuid value '{res['uuid']}'"
-        assert len(res["workers"]) > 0, f"No workers targeted"
+        assert len(res["workers"]) > 0, "No workers targeted"
 
     def test_job_post_noargs_nokwargs(self, nfclient):
         token = get_token(nfclient)
@@ -292,7 +291,7 @@ class TestFastAPIServer:
         assert res["errors"] == [], f"Having errors: '{res['errors']}'"
         assert res["status"] == "200", f"Unexpected status: '{res['status']}'"
         assert res["uuid"], f"Unexpected uuid value '{res['uuid']}'"
-        assert len(res["workers"]) > 0, f"No workers targeted"
+        assert len(res["workers"]) > 0, "No workers targeted"
 
     def test_job_get(self, nfclient):
         # post the job first

@@ -1,6 +1,4 @@
 import pprint
-import pytest
-import random
 
 
 class TestDummyPluginLocal:

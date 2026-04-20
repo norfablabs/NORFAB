@@ -108,7 +108,7 @@ class NrCfgPluginNetmiko(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "netmiko"
 
         # handle commit command for netmiko
@@ -170,7 +170,7 @@ class NrCfgPluginScrapli(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "scrapli"
         return NornirCfgShell.run(*args, **kwargs)
 
@@ -197,7 +197,7 @@ class NrCfgPluginNapalm(BaseModel):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "napalm"
         return NornirCfgShell.run(*args, **kwargs)
 
@@ -239,18 +239,18 @@ class NornirCfgShell(
     )
 
     @staticmethod
-    def source_config():
+    def source_config() -> list:
         completions = ClientRunJobArgs.walk_norfab_files()
         completions.append("load-terminal")
         return completions
 
     @staticmethod
-    def source_job_data():
+    def source_job_data() -> list:
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

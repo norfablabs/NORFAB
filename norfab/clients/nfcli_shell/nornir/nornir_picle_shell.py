@@ -49,7 +49,7 @@ class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel, ClientRunJobAr
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         # extract Tabulate arguments
         table = kwargs.pop("table", {})  # tabulate
         headers = kwargs.pop("headers", "keys")  # tabulate
@@ -113,7 +113,7 @@ class ShowWatchDogModel(NorniHostsFilters):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def get_watchdog_stats(**kwargs):
+    def get_watchdog_stats(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
@@ -123,7 +123,7 @@ class ShowWatchDogModel(NorniHostsFilters):
         return log_error_or_result(result)
 
     @staticmethod
-    def get_watchdog_configuration(**kwargs):
+    def get_watchdog_configuration(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
@@ -135,7 +135,7 @@ class ShowWatchDogModel(NorniHostsFilters):
         return log_error_or_result(result)
 
     @staticmethod
-    def get_watchdog_connections(**kwargs):
+    def get_watchdog_connections(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
@@ -151,7 +151,7 @@ class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -201,7 +201,7 @@ class NornirShowCommandsModel(BaseModel):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def get_version(**kwargs):
+    def get_version(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
@@ -242,7 +242,7 @@ class RefreshNornirModel(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
@@ -253,7 +253,7 @@ class RefreshNornirModel(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, **kwargs):
+    def run(uuid: str, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

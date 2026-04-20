@@ -46,7 +46,7 @@ class ContainerlabWorker(NFPWorker):
         init_done_event=None,
         log_level: str = None,
         log_queue: object = None,
-    ):
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -64,7 +64,7 @@ class ContainerlabWorker(NFPWorker):
 
         self.init_done_event.set()
 
-    def get_clab_version(self):
+    def get_clab_version(self) -> list[int]:
         clab_version = None
         clab_version = subprocess.run(
             ["containerlab", "version"], capture_output=True, text=True
@@ -87,7 +87,7 @@ class ContainerlabWorker(NFPWorker):
 
         return clab_version
 
-    def worker_exit(self):
+    def worker_exit(self) -> None:
         """
         Terminates the current process by sending a SIGTERM signal to itself.
 

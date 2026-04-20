@@ -49,7 +49,7 @@ class AgentShowCommandsModel(BaseModel):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def get_inventory(**kwargs):
+    def get_inventory(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("agent", "get_inventory", workers=workers)
@@ -57,7 +57,7 @@ class AgentShowCommandsModel(BaseModel):
         return result
 
     @staticmethod
-    def get_version(**kwargs):
+    def get_version(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         result = NFCLIENT.run_job("agent", "get_version", workers=workers)
@@ -65,7 +65,7 @@ class AgentShowCommandsModel(BaseModel):
         return result
 
     @staticmethod
-    def get_status(**kwargs):
+    def get_status(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         result = NFCLIENT.run_job("agent", "get_status", workers=workers, kwargs=kwargs)
@@ -92,12 +92,12 @@ class AgentInvoke(ClientRunJobArgs):
         outputter = Outputters.outputter_rich_markdown
 
     @staticmethod
-    def source_name():
+    def source_name() -> list:
         return ["NorFab"] + ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "any")

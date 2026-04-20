@@ -40,7 +40,7 @@ class UpdateInterfacesDescription(NetboxCommonArgs, NetboxClientRunJobArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)

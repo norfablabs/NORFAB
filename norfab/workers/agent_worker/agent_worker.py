@@ -60,7 +60,7 @@ class AgentWorker(NFPWorker):
         init_done_event: object = None,
         log_level: str = "WARNING",
         log_queue: object = None,
-    ):
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -73,10 +73,10 @@ class AgentWorker(NFPWorker):
         self.init_done_event.set()
         log.info(f"{self.name} - Started")
 
-    def worker_exit(self):
+    def worker_exit(self) -> None:
         pass
 
-    def get_llm(self, model: str, provider: str = None, **kwargs) -> object:
+    def get_llm(self, model: str, provider: str = None, **kwargs: object) -> object:
         """
         Retrieve or create an LLM instance.
 

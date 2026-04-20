@@ -64,7 +64,7 @@ class NetboxCommonArgs(BaseModel):
     )
 
     @staticmethod
-    def source_instance():
+    def source_instance() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.run_job("netbox", "get_inventory", workers="any")
         for worker_name, inventory in reply.items():

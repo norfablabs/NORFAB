@@ -1,8 +1,7 @@
 import pprint
-import json
 import time
-import pytest
 from uuid import uuid4
+
 from norfab.core.client import JobStatus
 
 
@@ -413,7 +412,7 @@ class TestFetchJobs:
             nfclient.job_db.add_job(
                 uuid=job_uuid,
                 service="nornir",
-                task=f"echo",
+                task="echo",
                 workers=["nornir-worker-1"],
                 args=[],
                 kwargs={},

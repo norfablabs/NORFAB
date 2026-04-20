@@ -13,13 +13,13 @@ from fakenos import FakeNOS
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
-from .nornir_inventory_tasks import FakeNOSNornirInventoryTasks
 from .fakenos_models import (
+    FakeNOSListNetworksInput,
+    FakeNOSRestartInput,
     FakeNOSStartInput,
     FakeNOSStopInput,
-    FakeNOSRestartInput,
-    FakeNOSListNetworksInput,
 )
+from .nornir_inventory_tasks import FakeNOSNornirInventoryTasks
 
 log = logging.getLogger(__name__)
 

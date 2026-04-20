@@ -1,6 +1,6 @@
 import ipaddress
 import logging
-from typing import Union, Any
+from typing import Any, Union
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
@@ -352,7 +352,7 @@ class NetboxIpTasks:
         interface_list: list[str] = None,
         interface_regex: str = None,
         instance: Union[None, str] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> Result:
         """
         Bulk assigns IP addresses to interfaces of specified devices.

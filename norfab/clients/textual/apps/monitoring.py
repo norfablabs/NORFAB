@@ -54,7 +54,7 @@ class BasePanel(Widget):
     """
 
     def __init__(
-        self, title: str = "", nfclient: Any = None, refresh_interval: int = 5, **kwargs
+        self, title: str = "", nfclient: Any = None, refresh_interval: int = 5, **kwargs: object
     ) -> None:
         super().__init__(**kwargs)
         self.title = title
@@ -128,7 +128,7 @@ class WorkerStatsPanel(BasePanel):
         refresh_interval: int = 5,
         workers: str = "all",
         warn_ram_mb: float = 512.0,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         super().__init__(
             title="Worker Stats",
@@ -225,7 +225,7 @@ class ClientDBPanel(BasePanel):
     }
     """
 
-    def __init__(self, nfclient: object, refresh_interval: int = 5, **kwargs) -> None:
+    def __init__(self, nfclient: object, refresh_interval: int = 5, **kwargs: object) -> None:
         super().__init__(
             title="Client DB Stats",
             nfclient=nfclient,
@@ -303,7 +303,7 @@ class BrokerPanel(BasePanel):
     """
 
     def __init__(
-        self, nfclient: Any = None, refresh_interval: int = 5, **kwargs
+        self, nfclient: Any = None, refresh_interval: int = 5, **kwargs: object
     ) -> None:
         super().__init__(
             title="Broker",
@@ -429,7 +429,7 @@ class MonitoringScreen(Widget):
 
     DEFAULT_CSS = MONITORING_CSS
 
-    def __init__(self, nfclient: Any = None, **kwargs) -> None:
+    def __init__(self, nfclient: Any = None, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self.nfclient = nfclient
         self._current_interval: int = 5

@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 class SyncDeviceFactsDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["datasource"] = "nornir"
         return SyncDeviceFactsCommand.run(*args, **kwargs)
 
@@ -59,7 +59,7 @@ class SyncDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, **kwargs):
+    def run(uuid: str, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
@@ -93,7 +93,7 @@ class SyncDeviceFactsCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
 class SyncDeviceInterfacesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["datasource"] = "nornir"
         return SyncDeviceInterfacesCommand.run(*args, **kwargs)
 
@@ -130,7 +130,7 @@ class SyncDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, **kwargs):
+    def run(uuid: str, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
@@ -164,7 +164,7 @@ class SyncDeviceInterfacesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
 class SyncDeviceIPAddressesDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["datasource"] = "nornir"
         return SyncDeviceIPAddressesCommand.run(*args, **kwargs)
 
@@ -201,7 +201,7 @@ class SyncDeviceIPAddressesCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, **kwargs):
+    def run(uuid: str, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)

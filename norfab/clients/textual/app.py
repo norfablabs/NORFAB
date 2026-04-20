@@ -133,7 +133,7 @@ class NorFabApp(App):
         Binding("ctrl+r", "refresh", "Refresh", show=True),
     ]
 
-    def __init__(self, nfclient=None, **kwargs) -> None:
+    def __init__(self, nfclient=None, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self.nfclient = nfclient
         # Trigger app registration (safe to call multiple times — nf_screen deduplicates)

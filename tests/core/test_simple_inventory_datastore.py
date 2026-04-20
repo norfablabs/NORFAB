@@ -1,8 +1,6 @@
-import pytest
-import pprint
-import json
 import os
-import yaml
+
+import pytest
 
 from norfab.core.inventory import NorFabInventory
 from norfab.core.worker import NFPWorker

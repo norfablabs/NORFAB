@@ -25,7 +25,7 @@ class FileSharingWorker(NFPWorker):
         init_done_event: Any = None,
         log_level: str = "WARNING",
         log_queue: object = None,
-    ):
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -38,7 +38,7 @@ class FileSharingWorker(NFPWorker):
         self.init_done_event.set()
         log.debug(f"{self.name} - Started, {self.filesharing_inventory}")
 
-    def worker_exit(self):
+    def worker_exit(self) -> None:
         pass
 
     def _safe_path(self, url: str) -> str:

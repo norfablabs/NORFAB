@@ -5,10 +5,11 @@ and a live NetBox at NB_URL with NB_API_TOKEN credentials.
 """
 
 import pprint
-import pytest
-import pynetbox
 
-from .netbox_data import NB_URL, NB_API_TOKEN
+import pynetbox
+import pytest
+
+from .netbox_data import NB_API_TOKEN, NB_URL
 
 # ---------------------------------------------------------------------------
 # Helpers

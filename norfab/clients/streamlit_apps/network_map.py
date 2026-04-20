@@ -77,7 +77,7 @@ def _render_graph(
     camera_z=200,
     color_field="group",
     linkDirectionalParticles=0,
-):
+) -> None:
     graph_json = json.dumps(graph)
     html_content = _HTML_TEMPLATE.format(
         graph_json=graph_json,
@@ -92,7 +92,7 @@ def _render_graph(
     html(html_content, height=800, scrolling=True)
 
 
-def network_visualizer_page():
+def network_visualizer_page() -> None:
     col1, col2 = st.columns([1, 4])
 
     with col1:

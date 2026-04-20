@@ -23,7 +23,6 @@ from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 from ..common import log_error_or_result
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
-from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
 from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
 from .netbox_picle_shell_create_ip import CreateIp
 from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
@@ -37,6 +36,7 @@ from .netbox_picle_shell_get_containerlab_inventory import (
 )
 from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_get_interfaces import GetInterfaces
+from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
 from .netbox_picle_shell_sync_device import SyncDeviceCommands
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
 
@@ -80,7 +80,7 @@ class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
@@ -147,7 +147,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def get_inventory(**kwargs):
+    def get_inventory(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "all")
@@ -159,7 +159,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
         return result
 
     @staticmethod
-    def get_version(**kwargs):
+    def get_version(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "all")
@@ -171,7 +171,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
         return result
 
     @staticmethod
-    def get_netbox_status(**kwargs):
+    def get_netbox_status(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "any")
@@ -183,7 +183,7 @@ class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
         return result
 
     @staticmethod
-    def get_compatibility(**kwargs):
+    def get_compatibility(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "any")

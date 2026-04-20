@@ -4,7 +4,7 @@ from norfab.models import Result
 
 class NetworkTask:
     @Task(fastapi={"methods": ["POST"]})
-    def network(self, job: Job, fun: str, **kwargs) -> Result:
+    def network(self, job: Job, fun: str, **kwargs: object) -> Result:
         """
         Task to call various network-related utility functions.
 

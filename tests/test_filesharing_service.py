@@ -1,7 +1,8 @@
-import pprint
-import pytest
 import hashlib
 import os
+import pprint
+
+import pytest
 
 # ----------------------------------------------------------------------------
 # FILESHARING WORKER TESTS
@@ -436,9 +437,9 @@ class TestFetchFile:
         )
         pprint.pprint(ret)
 
-        assert ret["status"] == "200", f"failed to fetch file"
-        assert ret["content"], f"no file path returned"
-        assert os.path.exists(ret["content"]), f"file does not exist"
+        assert ret["status"] == "200", "failed to fetch file"
+        assert ret["content"], "no file path returned"
+        assert os.path.exists(ret["content"]), "file does not exist"
 
     def test_fetch_file_read(self, nfclient):
         """Test fetching a small file in one chunk"""
@@ -446,11 +447,11 @@ class TestFetchFile:
         ret = nfclient.fetch_file(url="nf://filesharing/test_file_1.txt", read=True)
         pprint.pprint(ret)
 
-        assert ret["status"] == "200", f"failed to fetch file"
+        assert ret["status"] == "200", "failed to fetch file"
         assert (
             ret["content"]
             == "This is test file 1 content.\nLine 2 of test file 1.\nLine 3 of test file 1.\n"
-        ), f"file content is workng"
+        ), "file content is workng"
 
     def test_fetch_file_with_pipeline(self, nfclient):
         """Test fetching a small file in one chunk"""
@@ -462,27 +463,27 @@ class TestFetchFile:
         )
         pprint.pprint(ret)
 
-        assert ret["status"] == "200", f"failed to fetch file"
-        assert ret["content"], f"no file path returned"
-        assert os.path.exists(ret["content"]), f"file does not exist"
+        assert ret["status"] == "200", "failed to fetch file"
+        assert ret["content"], "no file path returned"
+        assert os.path.exists(ret["content"]), "file does not exist"
 
     def test_fetch_file_non_existent(self, nfclient):
         """Test fetching a non-existent file"""
         ret = nfclient.fetch_file(url="nf://filesharing/non_existent_file.txt")
         pprint.pprint(ret)
 
-        assert ret["status"] == "404", f"file fetch status is wrong"
-        assert ret["content"] == None, f"content should be empty"
-        assert ret["error"], f"expected error"
+        assert ret["status"] == "404", "file fetch status is wrong"
+        assert ret["content"] == None, "content should be empty"
+        assert ret["error"], "expected error"
 
     def test_fetch_file_invalid_url_format(self, nfclient):
         """Test fetch_file with invalid URL format"""
         ret = nfclient.fetch_file(url="http://invalid")
         pprint.pprint(ret)
 
-        assert ret["status"] == "500", f"file fetch status is wrong"
-        assert ret["content"] == None, f"content should be empty"
-        assert ret["error"], f"expected error"
+        assert ret["status"] == "500", "file fetch status is wrong"
+        assert ret["content"] == None, "content should be empty"
+        assert ret["error"], "expected error"
 
     def test_fetch_file_nested_file(self, nfclient):
         """Test fetching a file from a subdirectory"""
@@ -490,9 +491,9 @@ class TestFetchFile:
         ret = nfclient.fetch_file(url="nf://filesharing/subdir1/nested_file.txt")
         pprint.pprint(ret)
 
-        assert ret["status"] == "200", f"failed to fetch file"
-        assert ret["content"], f"no file path returned"
-        assert os.path.exists(ret["content"]), f"file does not exist"
+        assert ret["status"] == "200", "failed to fetch file"
+        assert ret["content"], "no file path returned"
+        assert os.path.exists(ret["content"]), "file does not exist"
 
     def test_fetch_file_large_file_with_small_chunks(self, nfclient):
         """Test fetching a large file with small 25-byte chunks"""
@@ -500,9 +501,9 @@ class TestFetchFile:
         ret = nfclient.fetch_file(url="nf://filesharing/large_file.txt", chunk_size=25)
         pprint.pprint(ret)
 
-        assert ret["status"] == "200", f"failed to fetch file"
-        assert ret["content"], f"no file path returned"
-        assert os.path.exists(ret["content"]), f"file does not exist"
+        assert ret["status"] == "200", "failed to fetch file"
+        assert ret["content"], "no file path returned"
+        assert os.path.exists(ret["content"]), "file does not exist"
 
     @pytest.mark.parametrize(
         "url",

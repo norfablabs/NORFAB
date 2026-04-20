@@ -48,7 +48,7 @@ class CreateHostModel(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
@@ -128,7 +128,7 @@ class UpdateHostModel(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
@@ -173,7 +173,7 @@ class DeleteHostModel(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
@@ -218,7 +218,7 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
@@ -290,7 +290,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
@@ -300,7 +300,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
         return ["all", "any"] + workers
 
     @staticmethod
-    def source_lab_name():
+    def source_lab_name() -> list:
         NFCLIENT = builtins.NFCLIENT
         ret = []
         result = NFCLIENT.run_job("containerlab", "get_running_labs")
@@ -309,7 +309,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
         return ret
 
     @staticmethod
-    def source_clab_workers():
+    def source_clab_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "containerlab"}
@@ -320,7 +320,7 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
 
     @staticmethod
     @listen_events
-    def run(uuid, **kwargs):
+    def run(uuid: str, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)

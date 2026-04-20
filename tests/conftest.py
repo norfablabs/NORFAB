@@ -1,16 +1,17 @@
-import pytest
-import time
-import yaml
 import builtins
+import sys
+import time
 import unittest
 import unittest.mock
-import sys
-from norfab.core.nfapi import NorFab
-from norfab.clients.nfcli_shell.nfcli_shell_client import (
-    mount_shell_plugins,
-    NorFabShell,
-)
+
+import pytest
 from picle import App
+
+from norfab.clients.nfcli_shell.nfcli_shell_client import (
+    NorFabShell,
+    mount_shell_plugins,
+)
+from norfab.core.nfapi import NorFab
 
 
 @pytest.fixture(scope="module")

@@ -117,7 +117,7 @@ class TabulateTableModel(BaseModel):
         json_schema_extra={"presence": True},
     )
 
-    def source_table():
+    def source_table() -> list[str]:
         return ["brief", "terse", "extend", "True"]
 
 
@@ -172,7 +172,7 @@ class NorniHostsFilters(BaseModel):
     )
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "nornir"}
@@ -181,7 +181,7 @@ class NorniHostsFilters(BaseModel):
         return ["all", "any"] + [w["name"] for w in reply]
 
     @staticmethod
-    def source_hosts():
+    def source_hosts() -> list:
         NFCLIENT = builtins.NFCLIENT
         ret = set()
         result = NFCLIENT.run_job("nornir", "get_nornir_hosts")
@@ -193,11 +193,11 @@ class NorniHostsFilters(BaseModel):
         return list(ret)
 
     @staticmethod
-    def source_FL():
+    def source_FL() -> list:
         return NorniHostsFilters.source_hosts()
 
     @staticmethod
-    def get_nornir_hosts(**kwargs):
+    def get_nornir_hosts(**kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

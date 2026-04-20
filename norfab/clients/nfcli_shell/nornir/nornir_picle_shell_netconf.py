@@ -28,7 +28,7 @@ class EnumConfigSource(str, Enum):
 class NrNetconfPluginNcclient(BaseModel):
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "netmiko"
         return NornirNetconfShell.run(*args, **kwargs)
 
@@ -39,7 +39,7 @@ class NrNetconfPluginNcclient(BaseModel):
 class NrNetconfPluginScrapli(BaseModel):
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "scrapli"
         return NornirNetconfShell.run(*args, **kwargs)
 
@@ -68,7 +68,7 @@ class CallGetConfig(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["call"] = "get_config"
         return NornirNetconfShell.run(*args, **kwargs)
 
@@ -85,7 +85,7 @@ class CallCapabilities(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
     )
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         kwargs["call"] = "server_capabilities"
         return NornirNetconfShell.run(*args, **kwargs)
 
@@ -105,7 +105,7 @@ class NornirNetconfShell(BaseModel):
 
     @staticmethod
     @listen_events
-    def run(uuid, *args, **kwargs):
+    def run(uuid: str, *args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)

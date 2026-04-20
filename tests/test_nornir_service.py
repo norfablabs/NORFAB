@@ -1,6 +1,7 @@
 import pprint
-import pytest
 import random
+
+import pytest
 
 # ----------------------------------------------------------------------------
 # NORNIR WORKER TESTS
@@ -662,17 +663,17 @@ class TestNornirCfg:
 
         assert (
             len(ret["nornir-worker-1"]["result"]) == 1
-        ), f"nornir-worker-1 produced more then 1 host result"
+        ), "nornir-worker-1 produced more then 1 host result"
         assert (
             len(ret["nornir-worker-2"]["result"]) == 1
-        ), f"nornir-worker-2 produced more then 1 host result"
+        ), "nornir-worker-2 produced more then 1 host result"
 
         assert (
             "ceos-spine-1" in ret["nornir-worker-1"]["result"]
-        ), f"nornir-worker-1 no output for ceos-spine-1"
+        ), "nornir-worker-1 no output for ceos-spine-1"
         assert (
             "ceos-leaf-1" in ret["nornir-worker-2"]["result"]
-        ), f"nornir-worker-2 no output for ceos-leaf-1"
+        ), "nornir-worker-2 no output for ceos-leaf-1"
 
     def test_config_with_worker_target(self, nfclient):
         ret = nfclient.run_job(
@@ -686,8 +687,8 @@ class TestNornirCfg:
         )
         pprint.pprint(ret)
 
-        assert len(ret) == 1, f"CFG produced more then 1 worker result"
-        assert "nornir-worker-1" in ret, f"No output for nornir-worker-1"
+        assert len(ret) == 1, "CFG produced more then 1 worker result"
+        assert "nornir-worker-1" in ret, "No output for nornir-worker-1"
 
     def test_config_add_details(self, nfclient):
         ret = nfclient.run_job(
@@ -2578,15 +2579,15 @@ class TestNornirRunTimeInventory:
         assert all(
             h in ret_hosts["nornir-worker-1"]["result"]
             for h in ["ceos-spine-1", "ceos-spine-2", "r1", "r2", "r3"]
-        ), f"nornir-worker-1 did not load three-routers-lab devices"
+        ), "nornir-worker-1 did not load three-routers-lab devices"
         assert all(
             h in ret_run_command["nornir-worker-1"]["result"]
             for h in ["r1", "r2", "r3"]
-        ), f"nornir-worker-1 did not return command output"
+        ), "nornir-worker-1 did not return command output"
         assert all(
             h not in ret_hosts_after_refresh["nornir-worker-1"]["result"]
             for h in ["r1", "r2", "r3"]
-        ), f"nornir-worker-1 inventory not refreshed"
+        ), "nornir-worker-1 inventory not refreshed"
 
 
 # ----------------------------------------------------------------------------

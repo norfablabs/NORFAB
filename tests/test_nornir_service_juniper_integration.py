@@ -1,7 +1,7 @@
 import pprint
-import pytest
-import random
 import socket
+
+import pytest
 
 # check if has access to juniper device
 vmx_1_ip = "192.168.1.130"

@@ -1,6 +1,6 @@
+import concurrent.futures
 import json
 import logging
-import concurrent.futures
 from typing import Any, Union
 
 import requests

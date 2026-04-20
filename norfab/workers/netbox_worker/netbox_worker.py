@@ -1,5 +1,4 @@
 import importlib.metadata
-import json
 import logging
 import os
 import re
@@ -92,9 +91,9 @@ class NetboxWorker(
         worker_name,
         exit_event=None,
         init_done_event=None,
-        log_level=None,
+        log_level: str=None,
         log_queue: object = None,
-    ):
+    ) -> None:
         super().__init__(
             inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
         )
@@ -282,7 +281,7 @@ class NetboxWorker(
 
         return ret
 
-    def _verify_compatibility(self):
+    def _verify_compatibility(self) -> None:
         """
         Verifies the compatibility of Netbox instances.
 

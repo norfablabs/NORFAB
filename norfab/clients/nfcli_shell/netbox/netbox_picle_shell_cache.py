@@ -38,7 +38,7 @@ class CacheList(NetboxClientRunJobArgs):
     )
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
@@ -47,7 +47,7 @@ class CacheList(NetboxClientRunJobArgs):
         return ["all", "any"] + [w["name"] for w in reply]
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
@@ -105,7 +105,7 @@ class CacheClear(NetboxClientRunJobArgs):
     )
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
@@ -114,7 +114,7 @@ class CacheClear(NetboxClientRunJobArgs):
         return ["all", "any"] + [w["name"] for w in reply]
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
@@ -150,7 +150,7 @@ class CacheGet(NetboxClientRunJobArgs):
     )
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi(
             "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
@@ -159,7 +159,7 @@ class CacheGet(NetboxClientRunJobArgs):
         return ["all", "any"] + [w["name"] for w in reply]
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)

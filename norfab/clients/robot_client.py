@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 DATA = {}
 
 
-def clean_global_data():
+def clean_global_data() -> None:
     global DATA
     DATA.clear()
 
@@ -28,8 +28,8 @@ class NorFabRobot:
     def __init__(
         self,
         inventory="./inventory.yaml",
-        log_level="WARNING",
-    ):
+        log_level: str="WARNING",
+    ) -> None:
         self.ROBOT_LIBRARY_LISTENER = self
 
         # initiate NorFab
@@ -37,15 +37,15 @@ class NorFabRobot:
         self.nf.start()
         self.client = self.nf.make_client()
 
-    def start_suite(self, data, result):
+    def start_suite(self, data, result) -> None:
         pass
 
-    def end_suite(self, data, result):
+    def end_suite(self, data, result) -> None:
         print("NorFab ROBOT - Exiting")
         self.nf.destroy()
 
     @keyword("Workers")
-    def workers(self, *args, **kwargs):
+    def workers(self, *args: object, **kwargs: object) -> None:
         """Collect workers to target"""
         if args:
             DATA["workers"] = args
@@ -53,7 +53,7 @@ class NorFabRobot:
             DATA["workers"] = kwargs.pop("workers", "all")
 
     @keyword("Hosts")
-    def hosts(self, *args, **kwargs):
+    def hosts(self, *args: object, **kwargs: object) -> None:
         """Collect hosts to target"""
         if args:
             DATA["hosts"] = {"FB": ", ".join(args), **kwargs}
@@ -61,7 +61,7 @@ class NorFabRobot:
             DATA["hosts"] = kwargs
 
     @keyword("nr.test")
-    def nr_test(self, *args, **kwargs):
+    def nr_test(self, *args: object, **kwargs: object):
         """Run nr.test  task"""
         tests_pass = 0
         tests_fail = 0
@@ -220,7 +220,7 @@ class NorFabRobot:
         return ret
 
     @keyword("nr.cli")
-    def nr_cli(self, *args, **kwargs):
+    def nr_cli(self, *args: object, **kwargs: object):
         """Run Nornir service cli task"""
         log.info(
             f"Running nr.cli with args '{args}', kwargs '{kwargs}', global DATA '{DATA}'"
@@ -284,7 +284,7 @@ class NorFabRobot:
         return ret
 
     @keyword("nr.cfg")
-    def nr_cfg(self, *args, **kwargs):
+    def nr_cfg(self, *args: object, **kwargs: object):
         """Run Nornir service cfg task"""
         log.info(
             f"Running nr.cfg with args '{args}', kwargs '{kwargs}', global DATA '{DATA}'"

@@ -1,8 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, List, Union
-
-from pydantic import BaseModel, StrictStr
+from typing import Any, Union
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task

@@ -62,7 +62,7 @@ class KeepAliver:
         whoami: str,  # NFP.BROKER or NFP.WORKER
         name: str,
         socket_lock,
-    ):
+    ) -> None:
         self.address = address
         self.socket = socket
         self.exit_event = exit_event or threading.Event()
@@ -91,7 +91,7 @@ class KeepAliver:
             target=self.run, name=f"{self.name}_keepalives_thread", daemon=True
         )
 
-    def start(self):
+    def start(self) -> bool:
         """
         Start the keepalives thread and record the start time.
 
@@ -105,7 +105,7 @@ class KeepAliver:
         self.started_at = time.time()
         return True
 
-    def stop(self):
+    def stop(self) -> bool:
         """
         Stops the keepalive thread by setting the destroy event and joining the thread.
 
@@ -121,7 +121,7 @@ class KeepAliver:
         self.keepalive_thread.join()
         return True
 
-    def run(self):
+    def run(self) -> None:
         """
         Continuously send heartbeat messages at the specified keepalive interval.
 
@@ -160,7 +160,7 @@ class KeepAliver:
                 log.debug(f"{self.name} - send keepalive '{msg}'")
             time.sleep(0.1)
 
-    def received_heartbeat(self, msg):
+    def received_heartbeat(self, msg) -> None:
         """
         Handles the reception of a heartbeat message from another party.
 
@@ -173,7 +173,7 @@ class KeepAliver:
         self.keepalives_received += 1
         self.holdtime = time.time() + 0.001 * self.multiplier * self.keepalive
 
-    def restart(self, socket):
+    def restart(self, socket) -> None:
         """
         Restart keepalives with a new socket.
 
@@ -196,7 +196,7 @@ class KeepAliver:
             time.time() + 0.001 * self.keepalive
         )  # when to send keepalive
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         """
         Check if the other party is still alive based on the hold time.
 
@@ -205,7 +205,7 @@ class KeepAliver:
         """
         return self.holdtime > time.time()
 
-    def show_holdtime(self):
+    def show_holdtime(self) -> float:
         """
         Calculate and return the remaining hold time.
 
@@ -217,7 +217,7 @@ class KeepAliver:
         """
         return round(self.holdtime - time.time(), 1)
 
-    def show_alive_for(self):
+    def show_alive_for(self) -> int:
         """
         Calculate the duration for which the instance has been alive.
 

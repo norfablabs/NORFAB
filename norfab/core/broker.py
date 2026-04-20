@@ -6,7 +6,7 @@ import signal
 import sys
 import threading
 from multiprocessing import Event
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 import orjson
 import zmq
@@ -35,7 +35,7 @@ class NFPService(object):
 
     __slots__ = ("name", "workers")
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name  # Service name
         self.workers = []  # list of known workers
 
@@ -76,7 +76,7 @@ class NFPWorker(object):
         multiplier: int,  # e.g. 6 times
         keepalive: int,  # e.g. 5000 ms
         service: Optional[NFPService] = None,
-    ):
+    ) -> None:
         self.address = address  # Address to route to
         self.service = service
         self.ready = False
@@ -217,7 +217,7 @@ class NFPBroker:
         multiplier: int = 6,
         keepalive: int = 2500,
         init_done_event: Event = None,
-    ):
+    ) -> None:
         self.setup_logging(log_queue, log_level)
         self.keepalive = keepalive
         self.multiplier = multiplier
@@ -304,7 +304,7 @@ class NFPBroker:
             logging_config_producer["root"]["level"] = log_level
         logging.config.dictConfig(logging_config_producer)
 
-    def mediate(self):
+    def mediate(self) -> None:
         """
         Main broker work happens here.
 
@@ -351,7 +351,7 @@ class NFPBroker:
                 self.destroy()
                 break
 
-    def destroy(self):
+    def destroy(self) -> None:
         """
         Disconnect all workers and destroy the context.
 
@@ -493,7 +493,7 @@ class NFPBroker:
             )
             self.socket.send_multipart(msg)
 
-    def process_worker(self, sender: str, msg: list):
+    def process_worker(self, sender: str, msg: list) -> None:
         """
         Process message received from worker.
 
@@ -776,7 +776,7 @@ class NFPBroker:
         for worker in workers:
             self.send_to_worker(worker, command, sender, uuid, data)
 
-    def mmi_service(self, sender, command, target, uuid, data):
+    def mmi_service(self, sender, command: str, target, uuid: str, data) -> None:
         """
         Handle internal broker Management Interface (MMI) service tasks.
 
@@ -881,7 +881,7 @@ class NFPBroker:
             sender, NFP.MMI, b"mmi.service.broker", [uuid, b"200", reply]
         )
 
-    def inventory_service(self, sender, command, target, uuid, data):
+    def inventory_service(self, sender, command: str, target, uuid: str, data) -> None:
         log.debug(
             f"sid.service.broker - processing request: sender '{sender}', "
             f"command '{command}', target '{target}'"

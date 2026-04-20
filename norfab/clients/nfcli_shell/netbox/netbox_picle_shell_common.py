@@ -15,7 +15,7 @@ class NetboxClientRunJobArgs(ClientRunJobArgs):
     )
 
     @staticmethod
-    def source_workers():
+    def source_workers() -> list:
         NFCLIENT = builtins.NFCLIENT
         reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
         reply = reply["results"]

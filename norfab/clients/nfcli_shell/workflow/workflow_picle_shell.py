@@ -24,7 +24,7 @@ class WorkflowShowInventoryModel(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -52,7 +52,7 @@ class WorkflowShowVersionModel(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args, **kwargs):
+    def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
