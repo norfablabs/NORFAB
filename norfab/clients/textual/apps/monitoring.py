@@ -54,7 +54,11 @@ class BasePanel(Widget):
     """
 
     def __init__(
-        self, title: str = "", nfclient: Any = None, refresh_interval: int = 5, **kwargs: object
+        self,
+        title: str = "",
+        nfclient: Any = None,
+        refresh_interval: int = 5,
+        **kwargs: object,
     ) -> None:
         super().__init__(**kwargs)
         self.title = title
@@ -225,7 +229,9 @@ class ClientDBPanel(BasePanel):
     }
     """
 
-    def __init__(self, nfclient: object, refresh_interval: int = 5, **kwargs: object) -> None:
+    def __init__(
+        self, nfclient: object, refresh_interval: int = 5, **kwargs: object
+    ) -> None:
         super().__init__(
             title="Client DB Stats",
             nfclient=nfclient,

@@ -1154,7 +1154,9 @@ class NFPClient(object):
         log.debug(f"{self.name} - client connected to broker at '{self.broker}'")
         self.stats_reconnect_to_broker += 1
 
-    def send_to_broker(self, command: str, service, workers, uuid: str, request) -> None:
+    def send_to_broker(
+        self, command: str, service, workers, uuid: str, request
+    ) -> None:
         """
         Sends a command to the broker.
 

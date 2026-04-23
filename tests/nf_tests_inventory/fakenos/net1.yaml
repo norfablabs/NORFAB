@@ -2,6 +2,12 @@ hosts:
   arista-eos-router:
     username: admin
     password: admin
-    platform: cisco_ios
-    port: [6000, 6004]
-    replicas: 5
+    platform: arista_eos
+    port: [6000, 6001]
+    replicas: 2
+  cisco_ios_xr:
+    username: admin
+    password: admin
+    platform: cisco_xr
+    port: [6002, 6003]
+    replicas: 2

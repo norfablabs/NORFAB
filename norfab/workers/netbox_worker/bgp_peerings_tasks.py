@@ -53,11 +53,10 @@ class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
     name_template: str = Field(
         "{device}_{name}",
         description=(
-            "Template string for BGP session names in NetBox. "
+            "Template f-string for BGP session names in NetBox. "
             "Available variables: device, name, "
             "description, local_address, local_as, remote_address, remote_as, "
-            "vrf, state, peer_group, import_policies, export_policies, "
-            "prefix_list_in, prefix_list_out."
+            "vrf, state, peer_group."
         ),
     )
 

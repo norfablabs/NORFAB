@@ -139,7 +139,7 @@ class Result(BaseModel, use_enum_values=True):
         False, description="True if dry run, False otherwise"
     )
 
-    def raise_for_status(self, message: str="") -> None:
+    def raise_for_status(self, message: str = "") -> None:
         """
         Raises a NorfabJobFailedError if the job has failed.
 

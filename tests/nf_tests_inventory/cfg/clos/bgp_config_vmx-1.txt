@@ -1,0 +1,39 @@
+set routing-options autonomous-system 65104
+
+set interfaces ge-0/0/0 unit 0 family inet address 10.10.0.15/31
+set interfaces lo0 unit 0 family inet address 10.10.10.14/32
+set interfaces ge-0/0/0 flexible-vlan-tagging
+set interfaces ge-0/0/0 native-vlan-id 1
+set interfaces ge-0/0/0 unit 0 vlan-id 1
+
+set routing-instances CONTROL_PLANE instance-type vrf
+set routing-instances CONTROL_PLANE interface ge-0/0/0.101
+set routing-instances CONTROL_PLANE interface lo0.101
+set routing-instances CONTROL_PLANE route-distinguisher 65104:101
+set routing-instances CONTROL_PLANE vrf-target target:65104:101
+set interfaces ge-0/0/0 unit 101 family inet address 10.101.0.15/31
+set interfaces ge-0/0/0 unit 101 vlan-id 101
+set interfaces lo0 unit 101 family inet address 10.101.1.14/32
+set interfaces lo0 unit 101 family inet address 10.101.1.14/32
+
+set policy-options policy-statement ALLOW-10_8 term 1 from route-filter 10.0.0.0/8 orlonger
+set policy-options policy-statement ALLOW-10_8 term 1 then accept
+set policy-options policy-statement ALLOW-ALL term 1 then accept
+
+set protocols bgp group CLOS type external
+set protocols bgp group CLOS peer-as 65002
+set protocols bgp group CLOS neighbor 10.10.0.14 peer-as 65002
+set protocols bgp group CLOS neighbor 10.10.0.14 description "ceos-spine-2 Ethernet5"
+set protocols bgp group CLOS neighbor 10.10.0.14 import [ ALLOW-10_8 ALLOW-ALL ]
+set protocols bgp group CLOS neighbor 10.10.0.14 export [ ALLOW-10_8 ALLOW-ALL ]
+set protocols bgp group CLOS local-address 10.10.0.15
+set protocols bgp group CLOS family inet unicast
+
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC type external
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC peer-as 65002
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC neighbor 10.101.0.14 peer-as 65002
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC neighbor 10.101.0.14 description "ceos-spine-2 Ethernet5.101"
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC neighbor 10.101.0.14 import ALLOW-ALL
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC local-address 10.101.0.15
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC family inet unicast
+set routing-instances CONTROL_PLANE protocols bgp group CLOS-FABRIC local-as 65105  

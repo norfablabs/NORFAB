@@ -501,7 +501,7 @@ def start_picle_shell(
     inventory="./inventory.yaml",
     run_workers=None,
     run_broker=None,
-    log_level: str="WARNING",
+    log_level: str = "WARNING",
 ) -> None:
     global NFCLIENT
     # initiate NorFab

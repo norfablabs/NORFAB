@@ -28,7 +28,7 @@ class NorFabRobot:
     def __init__(
         self,
         inventory="./inventory.yaml",
-        log_level: str="WARNING",
+        log_level: str = "WARNING",
     ) -> None:
         self.ROBOT_LIBRARY_LISTENER = self
 

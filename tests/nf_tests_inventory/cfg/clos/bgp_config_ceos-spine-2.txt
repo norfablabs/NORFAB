@@ -40,6 +40,17 @@ interface Ethernet4.101
    vrf CONTROL_PLANE
    ip address 10.101.0.10/31
 !
+interface Ethernet5
+   description P2P to vmx-1 eth1
+   no switchport
+   ip address 10.10.0.14/31
+!
+interface Ethernet5.101
+   description Control Plane P2P to vmx-1 eth1.101
+   encapsulation dot1q vlan 101
+   vrf CONTROL_PLANE
+   ip address 10.101.0.14/31
+!
 route-map ALLOW-ALL permit 10
 !
 router bgp 65002
@@ -70,6 +81,10 @@ router bgp 65002
    neighbor 10.10.10.13 peer group EVPN-OVERLAY
    neighbor 10.10.10.13 remote-as 65103
    neighbor 10.10.10.13 description ceos-leaf-3 Loopback0 EVPN
+   neighbor 10.10.0.15 remote-as 65104
+   neighbor 10.10.0.15 description vmx-1 eth1
+   neighbor 10.10.0.15 route-map ALLOW-ALL in
+   neighbor 10.10.0.15 route-map ALLOW-ALL out
    address-family evpn
       neighbor EVPN-OVERLAY activate
    vrf CONTROL_PLANE
@@ -79,3 +94,5 @@ router bgp 65002
       neighbor 10.101.0.7 description ceos-leaf-2 Ethernet2.101
       neighbor 10.101.0.11 remote-as 65103
       neighbor 10.101.0.11 description ceos-leaf-3 Ethernet2.101
+      neighbor 10.101.0.15 remote-as 65105
+      neighbor 10.101.0.15 description vmx-1 eth1.101

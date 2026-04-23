@@ -1633,7 +1633,7 @@ class NFPWorker:
         """
         raise NotImplementedError
 
-    def destroy(self, message: str=None) -> None:
+    def destroy(self, message: str = None) -> None:
         """
         Cleanly shuts down the worker by performing the following steps:
 

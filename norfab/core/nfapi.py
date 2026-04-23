@@ -19,7 +19,7 @@ def start_broker_process(
     endpoint,
     exit_event=None,
     inventory=None,
-    log_level: str=None,
+    log_level: str = None,
     log_queue=None,
     init_done_event=None,
 ) -> None:

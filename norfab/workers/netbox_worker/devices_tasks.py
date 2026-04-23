@@ -311,3 +311,5 @@ class NetboxDevicesTasks:
             )
 
         return ret
+
+

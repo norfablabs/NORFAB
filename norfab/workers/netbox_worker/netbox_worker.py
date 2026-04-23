@@ -91,7 +91,7 @@ class NetboxWorker(
         worker_name,
         exit_event=None,
         init_done_event=None,
-        log_level: str=None,
+        log_level: str = None,
         log_queue: object = None,
     ) -> None:
         super().__init__(
