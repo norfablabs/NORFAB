@@ -5848,3 +5848,765 @@ class TestSyncBgpPeerings:
                 assert (
                     custom_sessions
                 ), f"{worker}: no sessions with '_BGP_' found in NetBox for '{target_device}'"
+
+
+# ---------------------------------------------------------------------------
+# CREATE BGP PEERING TESTS
+# ---------------------------------------------------------------------------
+
+# Helper IP addresses used exclusively by create/update tests
+_TEST_LOCAL_IP = "198.51.100.1"
+_TEST_REMOTE_IP = "198.51.100.2"
+# /31 P2P pair
+_TEST_P2P_LOCAL = "198.51.100.4"
+_TEST_P2P_REMOTE = "198.51.100.5"
+_TEST_LOCAL_AS = "64999"
+_TEST_REMOTE_AS = "64998"
+
+
+def _cleanup_test_ips(nb):
+    """Remove any test IPs created during create/update tests."""
+    for addr in [
+        _TEST_LOCAL_IP,
+        _TEST_REMOTE_IP,
+        _TEST_P2P_LOCAL,
+        _TEST_P2P_REMOTE,
+        "198.51.100.10",
+        "198.51.100.11",
+        "198.51.100.20",
+        "198.51.100.21",
+        "198.51.100.22",
+    ]:
+        for ip in list(nb.ipam.ip_addresses.filter(q=f"{addr}/")):
+            ip.delete()
+
+
+def _cleanup_test_asns(nb):
+    """Remove test ASNs created during create/update tests."""
+    for asn in [int(_TEST_LOCAL_AS), int(_TEST_REMOTE_AS), 64997, 64996]:
+        for obj in list(nb.ipam.asns.filter(asn=asn)):
+            obj.delete()
+
+
+class TestCreateBgpPeering:
+
+    def setup_method(self):
+        delete_bgp_sessions()
+        nb = get_pynetbox(None)
+        _cleanup_test_ips(nb)
+        _cleanup_test_asns(nb)
+
+    def teardown_method(self):
+        delete_bgp_sessions()
+        nb = get_pynetbox(None)
+        _cleanup_test_ips(nb)
+        _cleanup_test_asns(nb)
+
+    def test_create_bgp_peering_single(self, nfclient):
+        """Single-session mode — session appears in created list and in NetBox."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sname = f"{device}_test_create_single"
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["created"], f"{worker}: expected session in created"
+        assert nb.plugins.bgp.session.get(name=sname), f"session '{sname}' not found in NetBox"
+
+    def test_create_bgp_peering_single_idempotent(self, nfclient):
+        """Session already exists — reported in exists, no duplicate created."""
+        device = DEVICES[0]
+        sname = f"{device}_test_idempotent"
+        kwargs = {
+            "name": sname,
+            "device": device,
+            "local_address": _TEST_LOCAL_IP,
+            "remote_address": _TEST_REMOTE_IP,
+            "local_as": _TEST_LOCAL_AS,
+            "remote_as": _TEST_REMOTE_AS,
+            "rir": "lab",
+        }
+        nfclient.run_job("netbox", "create_bgp_peering", workers="any", kwargs=kwargs)
+
+        ret = nfclient.run_job("netbox", "create_bgp_peering", workers="any", kwargs=kwargs)
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["exists"], f"{worker}: expected session in exists"
+            assert sname not in res["result"].get("created", []), f"{worker}: duplicate created"
+
+    def test_create_bgp_peering_single_dry_run(self, nfclient):
+        """dry_run=True — name in create list, no session written to NetBox."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sname = f"{device}_test_dry_run"
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["create"], f"{worker}: expected session in create"
+        assert not nb.plugins.bgp.session.get(name=sname), f"session was written despite dry_run=True"
+
+    def test_create_bgp_peering_single_dry_run_exists(self, nfclient):
+        """dry_run=True when session already exists — in exists, not in create."""
+        device = DEVICES[0]
+        sname = f"{device}_test_dry_run_exists"
+        kwargs = {
+            "name": sname,
+            "device": device,
+            "local_address": _TEST_LOCAL_IP,
+            "remote_address": _TEST_REMOTE_IP,
+            "local_as": _TEST_LOCAL_AS,
+            "remote_as": _TEST_REMOTE_AS,
+            "rir": "lab",
+        }
+        nfclient.run_job("netbox", "create_bgp_peering", workers="any", kwargs=kwargs)
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={**kwargs, "dry_run": True},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["exists"], f"{worker}: expected session in exists"
+            assert sname not in res["result"].get("create", []), f"{worker}: should not be in create"
+
+    def test_create_bgp_peering_bulk(self, nfclient):
+        """bulk_create — all sessions appear in created and in NetBox."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sessions = [
+            {
+                "name": f"{device}_bulk_1",
+                "device": device,
+                "local_address": "198.51.100.20",
+                "remote_address": "198.51.100.21",
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+            },
+            {
+                "name": f"{device}_bulk_2",
+                "device": device,
+                "local_address": "198.51.100.21",
+                "remote_address": "198.51.100.22",
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+            },
+        ]
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={"bulk_create": sessions, "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            for s in sessions:
+                assert s["name"] in res["result"]["created"], f"{worker}: '{s['name']}' not in created"
+                assert nb.plugins.bgp.session.get(name=s["name"]), f"session '{s['name']}' not in NetBox"
+
+    def test_create_bgp_peering_bulk_partial_idempotent(self, nfclient):
+        """Some sessions exist — correct split between created and exists."""
+        device = DEVICES[0]
+        existing_name = f"{device}_bulk_exist"
+        new_name = f"{device}_bulk_new"
+        existing_kwargs = {
+            "name": existing_name,
+            "device": device,
+            "local_address": "198.51.100.10",
+            "remote_address": "198.51.100.11",
+            "local_as": _TEST_LOCAL_AS,
+            "remote_as": _TEST_REMOTE_AS,
+            "rir": "lab",
+        }
+        nfclient.run_job("netbox", "create_bgp_peering", workers="any", kwargs=existing_kwargs)
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "bulk_create": [
+                    {
+                        "name": existing_name,
+                        "device": device,
+                        "local_address": "198.51.100.10",
+                        "remote_address": "198.51.100.11",
+                        "local_as": _TEST_LOCAL_AS,
+                        "remote_as": _TEST_REMOTE_AS,
+                    },
+                    {
+                        "name": new_name,
+                        "device": device,
+                        "local_address": "198.51.100.20",
+                        "remote_address": "198.51.100.21",
+                        "local_as": _TEST_LOCAL_AS,
+                        "remote_as": _TEST_REMOTE_AS,
+                    },
+                ],
+                "rir": "lab",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert existing_name in res["result"]["exists"], f"{worker}: existing session not in exists"
+            assert new_name in res["result"]["created"], f"{worker}: new session not in created"
+
+    def test_create_bgp_peering_bulk_dry_run(self, nfclient):
+        """dry_run=True + bulk — names in create list, no writes."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sessions = [
+            {
+                "name": f"{device}_bulk_dry_1",
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+            },
+        ]
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={"bulk_create": sessions, "rir": "lab", "dry_run": True},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sessions[0]["name"] in res["result"]["create"], f"{worker}: expected name in create"
+        assert not nb.plugins.bgp.session.get(
+            name=sessions[0]["name"]
+        ), "session written despite dry_run=True"
+
+    def test_create_bgp_peering_reverse_disabled(self, nfclient):
+        """create_reverse=False — only local session created."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sname = f"{device}_no_reverse"
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+                "create_reverse": False,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["created"], f"{worker}: expected session in created"
+        assert nb.plugins.bgp.session.get(name=sname), f"session '{sname}' not found in NetBox"
+
+    def test_create_bgp_peering_missing_required(self, nfclient):
+        """Single mode with missing device — failed=True."""
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": "test_missing_required",
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == True, f"{worker}: expected failed=True"
+
+    def test_create_bgp_peering_nonexistent_device(self, nfclient):
+        """Unknown device name — error appended, no crash, failed=False."""
+        sname = "nonexistent_device_bgp_session"
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": "device-that-does-not-exist-xyz",
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker}: unexpected failed=True"
+            assert res["errors"], f"{worker}: expected errors list to be non-empty"
+            assert sname not in res["result"].get("created", []), f"{worker}: should not be created"
+
+    def test_create_bgp_peering_with_branch(self, nfclient):
+        """branch=... — session created inside the branch."""
+        branch = "create_bgp_test_branch"
+        device = DEVICES[0]
+        sname = f"{device}_branch_test"
+        try:
+            nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={"method": "post", "api": "/extras/branches/", "data": {"name": branch}},
+            )
+            ret = nfclient.run_job(
+                "netbox",
+                "create_bgp_peering",
+                workers="any",
+                kwargs={
+                    "name": sname,
+                    "device": device,
+                    "local_address": _TEST_LOCAL_IP,
+                    "remote_address": _TEST_REMOTE_IP,
+                    "local_as": _TEST_LOCAL_AS,
+                    "remote_as": _TEST_REMOTE_AS,
+                    "rir": "lab",
+                    "branch": branch,
+                },
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+                assert sname in res["result"]["created"], f"{worker}: session not in created"
+        finally:
+            delete_branch(branch, nfclient)
+
+    def test_create_bgp_peering_asn_auto_create(self, nfclient):
+        """ASN not in NetBox — auto-created when rir provided."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sname = f"{device}_auto_asn"
+        new_asn = "64997"
+        # Make sure ASN doesn't exist
+        for obj in list(nb.ipam.asns.filter(asn=int(new_asn))):
+            obj.delete()
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": new_asn,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["created"], f"{worker}: session not in created"
+        assert nb.ipam.asns.get(asn=int(new_asn)), f"ASN {new_asn} not created in NetBox"
+
+    def test_create_bgp_peering_ip_auto_create(self, nfclient):
+        """IP not in NetBox — auto-created in IPAM."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sname = f"{device}_auto_ip"
+        new_ip = "198.51.100.100"
+        # Ensure IP doesn't exist
+        for ip in list(nb.ipam.ip_addresses.filter(q=f"{new_ip}/")):
+            ip.delete()
+
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": device,
+                "local_address": new_ip,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["created"], f"{worker}: session not in created"
+        assert list(nb.ipam.ip_addresses.filter(q=f"{new_ip}/")), f"IP {new_ip} not created in NetBox"
+        # cleanup: delete the BGP session first (IP is referenced by it), then the IP
+        session_obj = nb.plugins.bgp.session.get(name=sname)
+        if session_obj:
+            session_obj.delete()
+        for ip in list(nb.ipam.ip_addresses.filter(q=f"{new_ip}/")):
+            ip.delete()
+
+    def test_create_bgp_peering_with_peer_group_policies_prefix_lists(self, nfclient):
+        """Optional fields — peer_group / import_policies / prefix_list_in resolved/created."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        sname = f"{device}_optional_fields"
+        ret = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+                "peer_group": "TEST_PG_CREATE",
+                "import_policies": ["TEST_IMPORT_POLICY"],
+                "export_policies": ["TEST_EXPORT_POLICY"],
+                "prefix_list_in": "TEST_PREFIX_IN",
+                "prefix_list_out": "TEST_PREFIX_OUT",
+                "description": "test optional fields",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["created"], f"{worker}: session not in created"
+        session = nb.plugins.bgp.session.get(name=sname)
+        assert session, f"session '{sname}' not found in NetBox"
+        assert session.description == "test optional fields", "description not saved"
+
+
+# ---------------------------------------------------------------------------
+# UPDATE BGP PEERING TESTS
+# ---------------------------------------------------------------------------
+
+
+class TestUpdateBgpPeering:
+
+    def setup_method(self):
+        delete_bgp_sessions()
+        nb = get_pynetbox(None)
+        _cleanup_test_ips(nb)
+        _cleanup_test_asns(nb)
+
+    def teardown_method(self):
+        delete_bgp_sessions()
+        nb = get_pynetbox(None)
+        _cleanup_test_ips(nb)
+        _cleanup_test_asns(nb)
+
+    def _create_test_session(self, nfclient, name=None, device=None):
+        """Helper: create a single BGP session and return its name."""
+        device = device or DEVICES[0]
+        sname = name or f"{device}_update_test"
+        nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+                "create_reverse": False,
+            },
+        )
+        return sname
+
+    def test_update_bgp_peering_single(self, nfclient):
+        """Single-session mode — field updated, session in updated list."""
+        sname = self._create_test_session(nfclient)
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "description": "updated by test",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["updated"], f"{worker}: expected session in updated"
+        nb = get_pynetbox(nfclient)
+        session = nb.plugins.bgp.session.get(name=sname)
+        assert session.description == "updated by test", "description not updated"
+
+    def test_update_bgp_peering_single_dry_run(self, nfclient):
+        """dry_run=True — diff returned, no write."""
+        sname = self._create_test_session(nfclient)
+        nb = get_pynetbox(nfclient)
+        session_before = nb.plugins.bgp.session.get(name=sname)
+        old_desc = session_before.description or ""
+
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "description": "dry run description",
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname not in res["result"].get("in_sync", []), f"{worker}: session should not be in_sync"
+            update_entries = res["result"].get("update", [])
+            names = [e["name"] for e in update_entries]
+            assert sname in names, f"{worker}: expected '{sname}' in update diff list"
+        # Verify no write happened
+        session_after = nb.plugins.bgp.session.get(name=sname)
+        assert (session_after.description or "") == old_desc, "description changed despite dry_run=True"
+
+    def test_update_bgp_peering_single_dry_run_in_sync(self, nfclient):
+        """dry_run=True when values already match — session in in_sync, empty update."""
+        sname = self._create_test_session(nfclient)
+        nb = get_pynetbox(nfclient)
+        session = nb.plugins.bgp.session.get(name=sname)
+        current_desc = session.description or ""
+
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "description": current_desc,
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"].get("in_sync", []), f"{worker}: expected session in in_sync"
+
+    def test_update_bgp_peering_bulk(self, nfclient):
+        """bulk_update — all changed sessions appear in updated."""
+        nb = get_pynetbox(nfclient)
+        device = DEVICES[0]
+        names = [f"{device}_upd_bulk_1", f"{device}_upd_bulk_2"]
+        # use distinct IP pairs per session to avoid unique-constraint rejection
+        ip_pairs = [
+            (_TEST_LOCAL_IP, _TEST_REMOTE_IP),
+            (_TEST_P2P_LOCAL, _TEST_P2P_REMOTE),
+        ]
+        for sname, (local_ip, remote_ip) in zip(names, ip_pairs):
+            nfclient.run_job(
+                "netbox",
+                "create_bgp_peering",
+                workers="any",
+                kwargs={
+                    "name": sname,
+                    "device": device,
+                    "local_address": local_ip,
+                    "remote_address": remote_ip,
+                    "local_as": _TEST_LOCAL_AS,
+                    "remote_as": _TEST_REMOTE_AS,
+                    "rir": "lab",
+                    "create_reverse": False,
+                },
+            )
+        bulk = [
+            {"name": names[0], "description": "bulk updated 1"},
+            {"name": names[1], "description": "bulk updated 2"},
+        ]
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={"bulk_update": bulk},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            for sname in names:
+                assert sname in res["result"]["updated"], f"{worker}: '{sname}' not in updated"
+        for sname, desc in zip(names, ["bulk updated 1", "bulk updated 2"]):
+            assert nb.plugins.bgp.session.get(name=sname).description == desc
+
+    def test_update_bgp_peering_bulk_dry_run(self, nfclient):
+        """dry_run=True + bulk — diffs in update list, no writes."""
+        device = DEVICES[0]
+        sname = f"{device}_bulk_dry_upd"
+        self._create_test_session(nfclient, name=sname)
+        bulk = [{"name": sname, "description": "should not be written"}]
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={"bulk_update": bulk, "dry_run": True},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            update_names = [e["name"] for e in res["result"].get("update", [])]
+            assert sname in update_names, f"{worker}: expected '{sname}' in dry-run update list"
+        nb = get_pynetbox(nfclient)
+        session = nb.plugins.bgp.session.get(name=sname)
+        assert session.description != "should not be written", "description written despite dry_run"
+
+    def test_update_bgp_peering_nonexistent_session(self, nfclient):
+        """Session not in NetBox — error appended, not in updated."""
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": "session_that_does_not_exist_xyz",
+                "description": "should error",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker}: unexpected failed=True"
+            assert res["errors"], f"{worker}: expected error list non-empty"
+            assert "session_that_does_not_exist_xyz" not in res["result"].get("updated", [])
+
+    def test_update_bgp_peering_no_changes(self, nfclient):
+        """All values already match — session in in_sync, no write."""
+        sname = self._create_test_session(nfclient)
+        nb = get_pynetbox(nfclient)
+        session = nb.plugins.bgp.session.get(name=sname)
+        current_desc = session.description or ""
+
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={"name": sname, "description": current_desc},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"].get("in_sync", []), f"{worker}: expected session in in_sync"
+            assert sname not in res["result"].get("updated", []), f"{worker}: no write expected"
+
+    def test_update_bgp_peering_status(self, nfclient):
+        """status field updated correctly."""
+        sname = self._create_test_session(nfclient)
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={"name": sname, "status": "planned"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["updated"], f"{worker}: expected session in updated"
+        nb = get_pynetbox(nfclient)
+        session = nb.plugins.bgp.session.get(name=sname)
+        assert session.status.value == "planned", f"status not updated, got {session.status}"
+
+    def test_update_bgp_peering_description(self, nfclient):
+        """description field updated correctly."""
+        sname = self._create_test_session(nfclient)
+        new_desc = "updated description"
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={"name": sname, "description": new_desc},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["updated"], f"{worker}: expected session in updated"
+        nb = get_pynetbox(nfclient)
+        assert nb.plugins.bgp.session.get(name=sname).description == new_desc
+
+    def test_update_bgp_peering_routing_policies(self, nfclient):
+        """import_policies / export_policies updated."""
+        sname = self._create_test_session(nfclient)
+        ret = nfclient.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": sname,
+                "import_policies": ["TEST_IMPORT_UPD"],
+                "export_policies": ["TEST_EXPORT_UPD"],
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert sname in res["result"]["updated"], f"{worker}: expected session in updated"
+        nb = get_pynetbox(nfclient)
+        session = nb.plugins.bgp.session.get(name=sname)
+        import_names = [p.name for p in (session.import_policies or [])]
+        export_names = [p.name for p in (session.export_policies or [])]
+        assert "TEST_IMPORT_UPD" in import_names, "import policy not updated"
+        assert "TEST_EXPORT_UPD" in export_names, "export policy not updated"
+
+    def test_update_bgp_peering_with_branch(self, nfclient):
+        """branch=... — update applied to branch."""
+        branch = "update_bgp_test_branch"
+        sname = self._create_test_session(nfclient)
+        try:
+            nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={"method": "post", "api": "/extras/branches/", "data": {"name": branch}},
+            )
+            ret = nfclient.run_job(
+                "netbox",
+                "update_bgp_peering",
+                workers="any",
+                kwargs={
+                    "name": sname,
+                    "description": "branch update test",
+                    "branch": branch,
+                },
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+                assert sname in res["result"]["updated"], f"{worker}: session not in updated"
+        finally:
+            delete_branch(branch, nfclient)

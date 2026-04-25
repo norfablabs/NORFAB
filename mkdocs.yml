@@ -154,7 +154,9 @@ nav:
       - Sync Device Facts: workers/netbox/services_netbox_service_tasks_sync_device_facts.md
       - Sync Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
       - Sync Device IP: workers/netbox/services_netbox_service_tasks_sync_device_ip.md
-      - Sync BGP Peerings: workers\netbox\services_netbox_service_tasks_sync_bgp_peerings.md
+      - Sync BGP Peerings: workers/netbox/services_netbox_service_tasks_sync_bgp_peerings.md
+      - Create BGP Peering: workers/netbox/services_netbox_service_tasks_create_bgp_peering.md
+      - Update BGP Peering: workers/netbox/services_netbox_service_tasks_update_bgp_peering.md
       - CRUD: workers/netbox/services_netbox_service_tasks_crud.md
   - Agent:
     - Overview: workers/agent/services_agent_service.md
@@ -233,6 +235,8 @@ nav:
 - Development:
   - Documentation Style Guide: development/documentation_style_guide.md
   - File Streaming (fetch_file): development/file_streaming_fetch_file.md
+  - Architecture Design Records:
+    - Netbox BGP Create/Update Tasks Plan: development/adr_netbox_bgp_create_update_tasks_plan.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
     - Netbox Service Tests: testing/netbox_service_tests.md

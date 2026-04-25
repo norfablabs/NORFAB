@@ -784,4 +784,3 @@ class NetboxInterfacesTasks:
             )
 
         return ret
-

@@ -36,8 +36,10 @@ from .netbox_picle_shell_get_containerlab_inventory import (
 )
 from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_get_interfaces import GetInterfaces
+from .netbox_picle_shell_create_bgp_peering import CreateBgpPeeringShell
 from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
 from .netbox_picle_shell_sync_device import SyncDeviceCommands
+from .netbox_picle_shell_update_bgp_peering import UpdateBgpPeeringShell
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
 
 RICHCONSOLE = Console()
@@ -249,6 +251,11 @@ class CreateCommands(BaseModel):
         description="Create devices interfaces",
         alias="device-interfaces",
     )
+    bgp_peering: CreateBgpPeeringShell = Field(
+        None,
+        description="Create BGP peering session(s)",
+        alias="bgp-peering",
+    )
 
     class PicleConfig:
         subshell = True
@@ -281,6 +288,11 @@ class SyncCommands(BaseModel):
 class UpdateCommands(BaseModel):
     interfaces: UpdateInterfaces = Field(
         None, description="Update Netbox interfaces attributes"
+    )
+    bgp_peering: UpdateBgpPeeringShell = Field(
+        None,
+        description="Update BGP peering session(s)",
+        alias="bgp-peering",
     )
 
     class PicleConfig:

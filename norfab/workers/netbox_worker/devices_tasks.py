@@ -311,5 +311,3 @@ class NetboxDevicesTasks:
             )
 
         return ret
-
-
