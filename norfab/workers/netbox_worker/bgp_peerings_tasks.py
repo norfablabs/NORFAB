@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, StrictInt, StrictStr, model_validator, St
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
-from norfab.utils.text import expand_interface_range
+from norfab.utils.text import expand_alphanumeric_range
 
 from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
 
@@ -1162,7 +1162,7 @@ class NetboxBgpPeeringsTasks:
 
             if bgp_session_local_interface:
                 # Expand bracket-range pattern e.g. "Ethernet[1-4]/1.101"
-                intf_names = expand_interface_range(bgp_session_local_interface)
+                intf_names = expand_alphanumeric_range(bgp_session_local_interface)
 
                 # Batch fetch interfaces and their IPs in two calls instead of 2N
                 intf_by_name = {

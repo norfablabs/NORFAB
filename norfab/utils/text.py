@@ -25,7 +25,7 @@ def expand_bracket(group: str) -> list:
     return results
 
 
-def expand_interface_range(pattern: str) -> list:
+def expand_alphanumeric_range(pattern: str) -> list:
     """
     Expand a bracket-notation pattern into a list of concrete strings.
 

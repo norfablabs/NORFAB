@@ -6,6 +6,8 @@ from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
+from norfab.utils.text import expand_alphanumeric_range
+
 from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
@@ -282,7 +284,7 @@ class NetboxInterfacesTasks:
         # Expand all interface name patterns
         all_interface_names = []
         for name_pattern in interface_names:
-            all_interface_names.extend(self.expand_alphanumeric_range(name_pattern))
+            all_interface_names.extend(expand_alphanumeric_range(name_pattern))
 
         job.event(
             f"expanded interface names to {len(all_interface_names)} interface(s)"

@@ -144,7 +144,6 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
     ]  # Header row for summary table
     total_rows = 1  # Counter for total table rows (includes header)
     table_rows = []  # List to collect and sort table rows
-    total_failed = 0  # number of tests failed
     created_at = data.get("created_at")  # when tests job was created
     completed_timestamp = data.get(
         "completed_timestamp"
@@ -218,7 +217,6 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
                 row.insert(0, index)
                 table_text.extend(row)
                 index += 1
-                total_failed += 1
         # Append successful tests
         for row in table_rows:
             if "PASS" in row[2]:
@@ -310,6 +308,68 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         if hosts_test_suites_html:
             hosts_test_suites_html += "\n</details>\n"
 
+    # Build per-device summary stats table data
+    device_summary_table_text = [
+        "#",
+        "Device",
+        "Tests Count",
+        "Failed",
+        "Success",
+        "Success Rate",
+        "Commands Collected",
+    ]
+    device_summary_rows = 1  # starts with header row
+    overall_device_tests = 0
+    overall_device_failed = 0
+    overall_device_commands = 0
+    device_rows = []
+    for host in sorted(hosts_tests_results.keys()):
+        host_results = hosts_tests_results[host]["results"]
+        host_commands = hosts_tests_results[host]["commands"]
+        tests_count = len(host_results)
+        failed_count = sum(1 for t in host_results if t.get("result") == "FAIL")
+        success_count = tests_count - failed_count
+        rate = f"{int((success_count / tests_count) * 100)}%" if tests_count else "N/A"
+        commands_failed = any(c.get("failed") for c in host_commands)
+        commands_cell = (
+            "❌ Error collecting commands"
+            if commands_failed
+            else str(len(host_commands))
+        )
+        commands_count = 0 if commands_failed else len(host_commands)
+        device_rows.append(
+            [
+                host,
+                str(tests_count),
+                str(failed_count),
+                str(success_count),
+                rate,
+                commands_cell,
+            ]
+        )
+        overall_device_tests += tests_count
+        overall_device_failed += failed_count
+        overall_device_commands += commands_count
+    overall_device_success = overall_device_tests - overall_device_failed
+    overall_rate = (
+        f"{int((overall_device_success / overall_device_tests) * 100)}%"
+        if overall_device_tests
+        else "N/A"
+    )
+    device_summary_table_text += [
+        "0",
+        "**Overall**",
+        str(overall_device_tests),
+        str(overall_device_failed),
+        str(overall_device_success),
+        overall_rate,
+        str(overall_device_commands),
+    ]
+    device_summary_rows += 1
+    for index, row in enumerate(device_rows, start=1):
+        device_summary_table_text += [str(index)] + row
+        device_summary_rows += 1
+
     # Prepare Debug section HTML
     kwargs["suite"] = kwargs["suite"][:100]  # limit suite content
     debug_html = (
@@ -345,13 +405,18 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
             f"completed - {completed_normalized}, "
             f"duration - {duration_str}\n\n"
         )
-    # calculate tests stats
-    if total_rows > 1:
-        md.new_paragraph(
-            f"Tests total - {total_rows - 1}, "
-            f"failed - {total_failed}, "
-            f"success rate - {100 - int((total_failed / (total_rows - 1)) * 100)}%\n\n"
+    # Per-device summary table
+    if hosts_tests_results:
+        md.new_table(
+            columns=7,
+            rows=device_summary_rows,
+            text=device_summary_table_text,
+            text_align="left",
         )
+
+    # Tests results section
+    md.new_header(level=2, title="Tests Results")
+    if total_rows > 1:
         md.new_table(columns=5, rows=total_rows, text=table_text, text_align="left")
     else:
         md.new_paragraph("❌ Failed to produce summary results.\n\n")

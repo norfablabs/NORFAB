@@ -1640,7 +1640,7 @@ class TestNornirTest:
             in ret
         )
 
-    def test_nornir_test_markdown_with_comments(self, nfclient):
+    def test_nornir_test_markdown_tests_have_comments(self, nfclient):
         ret = nfclient.run_job(
             "nornir",
             "test",

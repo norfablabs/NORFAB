@@ -253,9 +253,10 @@ class TestGetNornirInventory:
                 assert (
                     host_data["password"] == "admin"
                 ), f"{worker_name}/{host_name} unexpected password"
-                assert (
-                    host_data["platform"] in ["cisco_xr", "arista_eos"]
-                ), f"{worker_name}/{host_name} unexpected platform"
+                assert host_data["platform"] in [
+                    "cisco_xr",
+                    "arista_eos",
+                ], f"{worker_name}/{host_name} unexpected platform"
                 assert isinstance(
                     host_data["groups"], list
                 ), f"{worker_name}/{host_name} groups is not a list"
