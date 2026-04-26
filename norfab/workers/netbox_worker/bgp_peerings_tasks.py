@@ -1,10 +1,10 @@
+import fnmatch
 import ipaddress
 import logging
-from deepdiff import DeepDiff
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr, model_validator
+from pydantic import BaseModel, Field, StrictInt, StrictStr, model_validator, StrictBool
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -105,9 +105,10 @@ def resolve_prefix_list(
     if not name:
         return None
     if family:
-        existing = nb.plugins.bgp.prefix_list.get(name=name, family=family)
+        results = list(nb.plugins.bgp.prefix_list.filter(name=name, family=family))
     else:
-        existing = nb.plugins.bgp.prefix_list.get(name=name)
+        results = list(nb.plugins.bgp.prefix_list.filter(name=name))
+    existing = results[0] if results else None
     if existing:
         return existing.id
     create_kwargs = {"name": name}
@@ -133,7 +134,8 @@ def resolve_route_policy(
     """Resolve or create a routing policy."""
     if not name:
         return None
-    existing = nb.plugins.bgp.routing_policy.get(name=name)
+    results = list(nb.plugins.bgp.routing_policy.filter(name=name))
+    existing = results[0] if results else None
     if existing:
         return existing.id
     try:
@@ -150,13 +152,37 @@ def resolve_route_policy(
         return None
 
 
+def resolve_vrf(
+    name: Union[None, str], nb: Any, job: Job, ret: Result, worker_name: str
+) -> Union[int, None]:
+    """Resolve or create a VRF, return its NetBox ID or None."""
+    if not name:
+        return None
+    vrf_obj = nb.ipam.vrfs.get(name=name)
+    if vrf_obj:
+        return vrf_obj.id
+    try:
+        new_vrf = nb.ipam.vrfs.create(name=name)
+        msg = f"created VRF '{name}' in NetBox"
+        job.event(msg)
+        log.info(f"{worker_name} - {msg}")
+        return new_vrf.id
+    except Exception as e:
+        msg = f"failed to create VRF '{name}' in NetBox: {e}"
+        job.event(msg, severity="ERROR")
+        log.error(f"{worker_name} - {msg}")
+        ret.errors.append(msg)
+        return None
+
+
 def resolve_peer_group(
     name: Union[None, str], nb: Any, job: Job, ret: Result, worker_name: str
 ) -> Union[int, None]:
     """Resolve or create a peer group."""
     if not name:
         return None
-    existing = nb.plugins.bgp.peer_group.get(name=name)
+    results = list(nb.plugins.bgp.peer_group.filter(name=name))
+    existing = results[0] if results else None
     if existing:
         return existing.id
     try:
@@ -210,7 +236,7 @@ def resolve_asn_from_source(
     - dict — kwargs passed to nb.ipam.asn.get(**asn_source); uses asn_obj.asn
     """
     if isinstance(asn_source, dict):
-        asn_obj = nb.ipam.asn.get(**asn_source)
+        asn_obj = nb.ipam.asns.get(**asn_source)
         if asn_obj is not None:
             return str(asn_obj.asn)
     else:
@@ -232,32 +258,47 @@ def resolve_asn_from_source(
     return None
 
 
-def normalise_nb_bgp_session(nb_session: dict) -> dict:
+def normalise_nb_bgp_session(nb_session: dict, vrf_custom_field: str = "vrf") -> dict:
     """Normalise a NetBox BGP session plain dict into a flat comparable dict.
 
     Accepts either a raw ``dict(pynetbox_obj)`` or a session dict returned by
     ``get_bgp_peerings``.  All nested objects are flattened to scalars so the
     result can be compared directly with ``make_diff``.
+
+    Args:
+        nb_session: Raw NetBox BGP session dict.
+        vrf_custom_field: Name of the BGP session custom field that holds the
+            VRF object reference (e.g. ``"vrf"`` or ``"tenant_vrf"``).  The
+            field must be of type **Object** in NetBox pointing to the VRF
+            content-type.  The value is always read from
+            ``custom_fields[vrf_custom_field]``.
     """
-    return {
+    ret = {
         "id": nb_session["id"],
         "name": nb_session["name"],
         "description": nb_session.get("description") or "",
-        "local_address": nb_session["local_address"]["address"].split("/")[0],
-        "local_as": nb_session["local_as"]["asn"],
-        "remote_address": nb_session["remote_address"]["address"].split("/")[0],
-        "remote_as": nb_session["remote_as"]["asn"],
-        "vrf": nb_session["vrf"]["name"] if nb_session.get("vrf") else None,
+        "local_address": (
+            nb_session["local_address"]["address"].split("/")[0]
+            if nb_session.get("local_address")
+            else None
+        ),
+        "local_as": (
+            nb_session["local_as"]["asn"] if nb_session.get("local_as") else None
+        ),
+        "remote_address": (
+            nb_session["remote_address"]["address"].split("/")[0]
+            if nb_session.get("remote_address")
+            else None
+        ),
+        "remote_as": (
+            nb_session["remote_as"]["asn"] if nb_session.get("remote_as") else None
+        ),
         "status": nb_session["status"]["value"],
         "peer_group": (
             nb_session["peer_group"]["name"] if nb_session.get("peer_group") else None
         ),
-        "import_policies": "|".join(
-            sorted(p["name"] for p in nb_session.get("import_policies") or [])
-        ),
-        "export_policies": "|".join(
-            sorted(p["name"] for p in nb_session.get("export_policies") or [])
-        ),
+        "import_policies": [p["name"] for p in nb_session.get("import_policies") or []],
+        "export_policies": [p["name"] for p in nb_session.get("export_policies") or []],
         "prefix_list_in": (
             nb_session["prefix_list_in"]["name"]
             if nb_session.get("prefix_list_in")
@@ -270,6 +311,13 @@ def normalise_nb_bgp_session(nb_session: dict) -> dict:
         ),
     }
 
+    if vrf_custom_field:
+        ret["vrf"] = (
+            (nb_session.get("custom_fields") or {}).get(vrf_custom_field) or {}
+        ).get("name")
+
+    return ret
+
 
 def resolve_bgp_session_payload_fields(
     fields: dict,
@@ -279,6 +327,8 @@ def resolve_bgp_session_payload_fields(
     ret: Result,
     worker_name: str,
     addr_family: str,
+    _lookup_cache: Union[None, dict] = None,
+    vrf_custom_field: str = "vrf",
 ) -> dict:
     """Resolve BGP session field name/value pairs to a partial NetBox API payload dict.
 
@@ -288,7 +338,13 @@ def resolve_bgp_session_payload_fields(
 
     ``import_policies`` / ``export_policies`` values may be either a list of policy
     names or a pipe-separated string; both forms are handled.
+
+    ``_lookup_cache`` is an optional dict shared across multiple calls within the same
+    task invocation to avoid redundant NetBox lookups for VRF / peer group / routing
+    policy / prefix list objects.
     """
+    if _lookup_cache is None:
+        _lookup_cache = {}
     payload = {}
     for field, value in fields.items():
         if field in ("local_address", "remote_address"):
@@ -302,32 +358,96 @@ def resolve_bgp_session_payload_fields(
         elif field in ("description", "status"):
             payload[field] = value
         elif field == "vrf":
-            if value:
-                vrf_obj = nb.ipam.vrfs.get(name=value)
-                payload["vrf"] = vrf_obj.id if vrf_obj else None
+            if not vrf_custom_field:
+                pass
+            elif value:
+                cache_key = ("vrf", value)
+                if cache_key not in _lookup_cache:
+                    _lookup_cache[cache_key] = resolve_vrf(
+                        value, nb, job, ret, worker_name
+                    )
+                vrf_id = _lookup_cache[cache_key]
+                payload.setdefault("custom_fields", {})[vrf_custom_field] = vrf_id
             else:
-                payload["vrf"] = None
+                payload.setdefault("custom_fields", {})[vrf_custom_field] = None
         elif field == "peer_group":
-            payload["peer_group"] = (
-                resolve_peer_group(value, nb, job, ret, worker_name) if value else None
-            )
+            if value:
+                cache_key = ("peer_group", value)
+                if cache_key not in _lookup_cache:
+                    _lookup_cache[cache_key] = resolve_peer_group(
+                        value, nb, job, ret, worker_name
+                    )
+                payload["peer_group"] = _lookup_cache[cache_key]
+            else:
+                payload["peer_group"] = None
         elif field in ("import_policies", "export_policies"):
             policies = (
                 value
                 if isinstance(value, list)
                 else [p for p in value.split("|") if p] if value else []
             )
-            ids = [resolve_route_policy(p, nb, job, ret, worker_name) for p in policies]
-            payload[field] = [i for i in ids if i]
+            ids = []
+            for p_name in policies:
+                cache_key = ("route_policy", p_name)
+                if cache_key not in _lookup_cache:
+                    _lookup_cache[cache_key] = resolve_route_policy(
+                        p_name, nb, job, ret, worker_name
+                    )
+                if _lookup_cache[cache_key]:
+                    ids.append(_lookup_cache[cache_key])
+            payload[field] = ids
         elif field in ("prefix_list_in", "prefix_list_out"):
-            payload[field] = (
-                resolve_prefix_list(
-                    value, nb, job, ret, worker_name, family=addr_family
-                )
-                if value
-                else None
-            )
+            if value:
+                cache_key = ("prefix_list", value, addr_family)
+                if cache_key not in _lookup_cache:
+                    _lookup_cache[cache_key] = resolve_prefix_list(
+                        value, nb, job, ret, worker_name, family=addr_family
+                    )
+                payload[field] = _lookup_cache[cache_key]
+            else:
+                payload[field] = None
     return payload
+
+
+def _resolve_rir_id(
+    rir: Union[None, str], nb: Any, job: Job, worker_name: str
+) -> Union[None, int]:
+    """Resolve RIR name to its NetBox ID; log a warning when not found."""
+    if not rir:
+        return None
+    rir_obj = nb.ipam.rirs.get(name=rir)
+    if rir_obj:
+        return rir_obj.id
+    msg = f"RIR '{rir}' not found in NetBox, ASN creation will fail if needed"
+    job.event(msg, severity="WARNING")
+    log.warning(f"{worker_name} - {msg}")
+    return None
+
+
+def _resolve_vrf_custom_field(
+    vrf_custom_field: str, nb: Any, job: Job, worker_name: str
+) -> Union[str, bool]:
+    """Check that vrf_custom_field exists as a custom field in NetBox.
+
+    Queries the NetBox extras API.  Returns the field name unchanged when found,
+    or ``False`` when the custom field does not exist so callers can skip VRF
+    handling entirely.
+    """
+    if not vrf_custom_field:
+        return False
+    try:
+        cf = nb.extras.custom_fields.get(name=vrf_custom_field)
+    except Exception as exc:
+        msg = f"failed to verify custom field '{vrf_custom_field}' in NetBox: {exc}"
+        job.event(msg, severity="WARNING")
+        log.warning(f"{worker_name} - {msg}")
+        return False
+    if cf is None:
+        msg = f"BGP session custom field '{vrf_custom_field}' not found in NetBox, VRF handling disabled"
+        job.event(msg, severity="WARNING")
+        log.warning(f"{worker_name} - {msg}")
+        return False
+    return vrf_custom_field
 
 
 class BgpSessionStatusEnum(str, Enum):
@@ -355,10 +475,6 @@ class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
         60,
         description="Timeout in seconds for Nornir parse_ttp job",
     )
-    batch_size: StrictInt = Field(
-        10,
-        description="Number of devices to process per Nornir batch",
-    )
     rir: Union[None, str] = Field(
         None,
         description="RIR name to use when creating new ASNs in NetBox (e.g. 'RFC 1918', 'ARIN')",
@@ -369,12 +485,33 @@ class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
     )
     name_template: str = Field(
         "{device}_{name}",
-        description=(
-            "Template f-string for BGP session names in NetBox. "
+        description=("Template f-string for BGP session names in NetBox. "),
+        examples=[
             "Available variables: device, name, "
             "description, local_address, local_as, remote_address, remote_as, "
             "vrf, state, peer_group."
-        ),
+        ],
+    )
+    filter_by_remote_as: Union[None, List[int]] = Field(
+        None,
+        description="Only sync sessions whose remote AS number matches one of the provided integer values",
+    )
+    filter_by_peer_group: Union[None, List[str]] = Field(
+        None,
+        description="Only sync sessions whose peer group name matches one of the provided values",
+    )
+    filter_by_description: Union[None, str] = Field(
+        None,
+        description="Only sync sessions whose description matches this glob pattern (e.g. '*uplink*')",
+    )
+    vrf_custom_field: Union[StrictBool, StrictStr] = Field(
+        "vrf",
+        description="BGP session Object-type custom field name used to store VRF reference.",
+        examples=[
+            "Object-type custom field in NetBox pointing to the VRF content-type. "
+            "The value is always a single VRF object reference read from and written to "
+            "custom_fields[vrf_custom_field]. Default 'vrf' means custom_fields['vrf']."
+        ],
     )
 
 
@@ -383,11 +520,15 @@ class BgpSessionCommonFields(BaseModel):
 
     name: StrictStr = Field(..., description="BGP session name")
     description: Union[None, StrictStr] = Field(None, description="Session description")
-    status: Union[None, BgpSessionStatusEnum] = Field(None, description="Session status")
+    status: Union[None, BgpSessionStatusEnum] = Field(
+        None, description="Session status"
+    )
     local_address: Union[None, StrictStr] = Field(None, description="Local IP address")
-    remote_address: Union[None, StrictStr] = Field(None, description="Remote IP address")
-    local_as: Union[None, StrictStr] = Field(None, description="Local ASN")
-    remote_as: Union[None, StrictStr] = Field(None, description="Remote ASN")
+    remote_address: Union[None, StrictStr] = Field(
+        None, description="Remote IP address"
+    )
+    local_as: Union[None, StrictInt] = Field(None, description="Local ASN")
+    remote_as: Union[None, StrictInt] = Field(None, description="Remote ASN")
     vrf: Union[None, StrictStr] = Field(None, description="VRF name")
     peer_group: Union[None, StrictStr] = Field(None, description="Peer group name")
     import_policies: Union[None, List[StrictStr]] = Field(
@@ -426,15 +567,14 @@ class BgpSessionBulkCreateFields(BgpSessionCommonFields):
 class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
     """Input model for create_bgp_peering task."""
 
-    # --- Single-session mode ---
     name: Union[None, StrictStr] = Field(None, description="Session name")
     device: Union[None, StrictStr] = Field(None, description="Local device name")
     local_address: Union[None, StrictStr] = Field(None, description="Local IP address")
     remote_address: Union[None, StrictStr] = Field(
         None, description="Remote IP address"
     )
-    local_as: Union[None, StrictStr] = Field(None, description="Local ASN")
-    remote_as: Union[None, StrictStr] = Field(None, description="Remote ASN")
+    local_as: Union[None, StrictInt] = Field(None, description="Local ASN")
+    remote_as: Union[None, StrictInt] = Field(None, description="Remote ASN")
     status: BgpSessionStatusEnum = Field("active", description="Session status")
     description: Union[None, StrictStr] = Field(None, description="Session description")
     vrf: Union[None, StrictStr] = Field(None, description="VRF name")
@@ -451,8 +591,6 @@ class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
     prefix_list_out: Union[None, StrictStr] = Field(
         None, description="Outbound prefix list"
     )
-
-    # --- Interface-driven resolution ---
     local_interface: Union[None, StrictStr] = Field(
         None,
         description="Local interface name or bracket-range pattern to resolve local_address from IPAM.",
@@ -465,14 +603,12 @@ class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
     )
     name_template: Union[None, StrictStr] = Field(
         None,
-        description=(
-            "Template string for BGP session names. "
+        description=("Template string for BGP session names."),
+        examples=[
             "Available variables: device, local_address, remote_address. "
             "Default: '{device}_{vrf}_{remote_address}'."
-        ),
+        ],
     )
-
-    # --- Mirror session ---
     create_reverse: bool = Field(
         True,
         description=(
@@ -480,14 +616,10 @@ class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
             "with local and remote IPs/ASNs swapped."
         ),
     )
-
-    # --- Bulk mode ---
     bulk_create: Union[None, List[BgpSessionBulkCreateFields]] = Field(
         None,
         description="List of BGP session objects to create in bulk.",
     )
-
-    # --- Shared resolution options ---
     rir: Union[None, StrictStr] = Field(
         None,
         description="RIR name used when auto-creating ASNs in NetBox (e.g. 'RFC 1918', 'ARIN').",
@@ -495,6 +627,15 @@ class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
     message: Union[None, StrictStr] = Field(
         None,
         description="Changelog message recorded on every NetBox write.",
+    )
+    vrf_custom_field: Union[StrictBool, StrictStr] = Field(
+        "vrf",
+        description="BGP session Object-type custom field name used to store VRF reference.",
+        examples=[
+            "Object-type custom field in NetBox pointing to the VRF content-type. "
+            "The value is always a single VRF object reference read from and written to "
+            "custom_fields[vrf_custom_field]. Default 'vrf' means custom_fields['vrf']."
+        ],
     )
 
     @model_validator(mode="before")
@@ -509,10 +650,6 @@ class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
                     "Single-session mode requires either 'local_address' or 'local_interface'."
                 )
         return values
-
-    @model_validator(mode="after")
-    def validate_single_or_bulk(self) -> "CreateBgpPeeringInput":
-        return self
 
 
 class UpdateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
@@ -529,8 +666,8 @@ class UpdateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
     remote_address: Union[None, StrictStr] = Field(
         None, description="Remote IP address"
     )
-    local_as: Union[None, StrictStr] = Field(None, description="Local ASN")
-    remote_as: Union[None, StrictStr] = Field(None, description="Remote ASN")
+    local_as: Union[None, StrictInt] = Field(None, description="Local ASN")
+    remote_as: Union[None, StrictInt] = Field(None, description="Remote ASN")
     vrf: Union[None, StrictStr] = Field(None, description="VRF name")
     peer_group: Union[None, StrictStr] = Field(None, description="Peer group name")
     import_policies: Union[None, List[StrictStr]] = Field(
@@ -558,6 +695,15 @@ class UpdateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
     )
     message: Union[None, StrictStr] = Field(
         None, description="Changelog message recorded on every NetBox write"
+    )
+    vrf_custom_field: Union[StrictBool, StrictStr] = Field(
+        "vrf",
+        description="BGP session Object-type custom field name used to store VRF reference.",
+        examples=[
+            "Object-type custom field in NetBox pointing to the VRF content-type. "
+            "The value is always a single VRF object reference read from and written to "
+            "custom_fields[vrf_custom_field]. Default 'vrf' means custom_fields['vrf']."
+        ],
     )
 
     @model_validator(mode="after")
@@ -878,11 +1024,11 @@ class NetboxBgpPeeringsTasks:
         device: Union[None, str] = None,
         local_address: Union[None, str] = None,
         remote_address: Union[None, str] = None,
-        local_as: Union[None, str] = None,
-        remote_as: Union[None, str] = None,
+        local_as: Union[None, int] = None,
+        remote_as: Union[None, int] = None,
         status: str = "active",
         description: Union[None, str] = None,
-        vrf: Union[None, str] = "default",
+        vrf: Union[None, str] = None,
         peer_group: Union[None, str] = None,
         import_policies: Union[None, list] = None,
         export_policies: Union[None, list] = None,
@@ -901,6 +1047,7 @@ class NetboxBgpPeeringsTasks:
         message: Union[None, str] = None,
         branch: Union[None, str] = None,
         dry_run: bool = False,
+        vrf_custom_field: str = "vrf",
     ) -> Result:
         """
         Create one or many BGP sessions in NetBox.
@@ -918,8 +1065,8 @@ class NetboxBgpPeeringsTasks:
             device (str, optional): Local device name. Required in single-session mode.
             local_address (str, optional): Local IP address string. Derived from ``local_interface`` when omitted.
             remote_address (str, optional): Remote IP address string. Derived from P2P peer when ``local_interface`` is used.
-            local_as (str, optional): Local AS number string. Derived from ``asn_source`` when omitted.
-            remote_as (str, optional): Remote AS number string. Derived from ``asn_source`` on remote device when omitted.
+            local_as (int, optional): Local AS number string. Derived from ``asn_source`` when omitted.
+            remote_as (int, optional): Remote AS number string. Derived from ``asn_source`` on remote device when omitted.
             status (str): Session status. Default ``'active'``.
             description (str, optional): Session description.
             vrf (str, optional): VRF name.
@@ -940,6 +1087,11 @@ class NetboxBgpPeeringsTasks:
             message (str, optional): Changelog message recorded on every NetBox write.
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): When ``True`` return session names without writing.
+            vrf_custom_field (str): Name of the BGP session custom field that stores
+                the VRF object reference.  The custom field must be of type Object in
+                NetBox pointing to the VRF content-type.  The value is always a single
+                VRF object reference written into ``custom_fields[vrf_custom_field]``.
+                Default ``'vrf'`` means ``custom_fields['vrf']``.
 
         Returns:
             Normal run::
@@ -970,18 +1122,11 @@ class NetboxBgpPeeringsTasks:
         if message:
             nb.http_session.headers["X-Changelog-Message"] = message
 
-        # Resolve RIR ID once
-        rir_id = None
-        if rir:
-            rir_obj = nb.ipam.rirs.get(name=rir)
-            if rir_obj:
-                rir_id = rir_obj.id
-            else:
-                msg = (
-                    f"RIR '{rir}' not found in NetBox, ASN creation will fail if needed"
-                )
-                job.event(msg, severity="WARNING")
-                log.warning(f"{self.name} - {msg}")
+        # Validate VRF custom field and RIR
+        vrf_custom_field = _resolve_vrf_custom_field(
+            vrf_custom_field, nb, job, self.name
+        )
+        rir_id = _resolve_rir_id(rir, nb, job, self.name)
 
         # Build initial bgp_sessions list
         bgp_sessions = bulk_create or [
@@ -1018,22 +1163,35 @@ class NetboxBgpPeeringsTasks:
             if bgp_session_local_interface:
                 # Expand bracket-range pattern e.g. "Ethernet[1-4]/1.101"
                 intf_names = expand_interface_range(bgp_session_local_interface)
-                for intf_name in intf_names:
-                    intf_list = list(
-                        nb.dcim.interfaces.filter(
-                            device=bgp_session_device, name=intf_name
-                        )
+
+                # Batch fetch interfaces and their IPs in two calls instead of 2N
+                intf_by_name = {
+                    i.name: i
+                    for i in nb.dcim.interfaces.filter(
+                        device=bgp_session_device, name=intf_names, fields="id,name"
                     )
-                    if not intf_list:
+                }
+                found_intf_ids = [i.id for i in intf_by_name.values()]
+                ips_by_intf_id: Dict[int, list] = {}
+                if found_intf_ids:
+                    for _ip in nb.ipam.ip_addresses.filter(
+                        interface_id=found_intf_ids,
+                        fields="id,address,assigned_object_id",
+                    ):
+                        ips_by_intf_id.setdefault(_ip.assigned_object_id, []).append(
+                            _ip
+                        )
+
+                for intf_name in intf_names:
+                    intf = intf_by_name.get(intf_name)
+                    if not intf:
                         msg = f"interface '{intf_name}' not found on device '{bgp_session_device}'"
                         job.event(msg, severity="WARNING")
                         log.warning(f"{self.name} - {msg}")
                         ret.errors.append(msg)
                         continue
 
-                    ip_list = list(
-                        nb.ipam.ip_addresses.filter(interface_id=intf_list[0].id)
-                    )
+                    ip_list = ips_by_intf_id.get(intf.id, [])
                     if not ip_list:
                         msg = f"no IP address assigned to interface '{intf_name}' on '{bgp_session_device}'"
                         job.event(msg, severity="WARNING")
@@ -1153,6 +1311,7 @@ class NetboxBgpPeeringsTasks:
         else:
             result = {"created": [], "exists": []}
 
+        _lookup_cache: dict = {}
         payloads = []
 
         for bgp_session in resolved_bgp_sessions:
@@ -1305,6 +1464,8 @@ class NetboxBgpPeeringsTasks:
                     ret,
                     self.name,
                     addr_family,
+                    _lookup_cache=_lookup_cache,
+                    vrf_custom_field=vrf_custom_field,
                 )
             )
 
@@ -1339,8 +1500,8 @@ class NetboxBgpPeeringsTasks:
         status: Union[None, str] = None,
         local_address: Union[None, str] = None,
         remote_address: Union[None, str] = None,
-        local_as: Union[None, str] = None,
-        remote_as: Union[None, str] = None,
+        local_as: Union[None, int] = None,
+        remote_as: Union[None, int] = None,
         vrf: Union[None, str] = None,
         peer_group: Union[None, str] = None,
         import_policies: Union[None, list] = None,
@@ -1355,6 +1516,7 @@ class NetboxBgpPeeringsTasks:
         branch: Union[None, str] = None,
         dry_run: bool = False,
         instance: Union[None, str] = None,
+        vrf_custom_field: str = "vrf",
     ) -> Result:
         """
         Update one or many existing BGP sessions in NetBox.
@@ -1385,6 +1547,12 @@ class NetboxBgpPeeringsTasks:
             message (str, optional): Changelog message recorded on every NetBox write.
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): When ``True`` return diff without writing.
+            vrf_custom_field (str): Name of the BGP session custom field that stores
+                the VRF object reference.  The custom field must be of type Object in
+                NetBox pointing to the VRF content-type.  The value is always a single
+                VRF object reference read from and written into
+                ``custom_fields[vrf_custom_field]``.  Default ``'vrf'`` means
+                ``custom_fields['vrf']``.
 
         Returns:
             Normal run::
@@ -1418,48 +1586,35 @@ class NetboxBgpPeeringsTasks:
         if message:
             nb.http_session.headers["X-Changelog-Message"] = message
 
-        # Resolve RIR ID once
-        rir_id = None
-        if rir:
-            rir_obj = nb.ipam.rirs.get(name=rir)
-            if rir_obj:
-                rir_id = rir_obj.id
-            else:
-                msg = (
-                    f"RIR '{rir}' not found in NetBox, ASN creation will fail if needed"
-                )
-                job.event(msg, severity="WARNING")
-                log.warning(f"{self.name} - {msg}")
+        # Validate VRF custom field and RIR
+        vrf_custom_field = _resolve_vrf_custom_field(
+            vrf_custom_field, nb, job, self.name
+        )
+        rir_id = _resolve_rir_id(rir, nb, job, self.name)
 
         # Build list of sessions to update
         if bulk_update is not None:
             bgp_sessions = bulk_update
         else:
-            bgp_session = {}
-            if description is not None:
-                bgp_session["description"] = description
-            if status is not None:
-                bgp_session["status"] = status
-            if local_address is not None:
-                bgp_session["local_address"] = local_address
-            if remote_address is not None:
-                bgp_session["remote_address"] = remote_address
-            if local_as is not None:
-                bgp_session["local_as"] = local_as
-            if remote_as is not None:
-                bgp_session["remote_as"] = remote_as
-            if vrf is not None:
-                bgp_session["vrf"] = vrf
-            if peer_group is not None:
-                bgp_session["peer_group"] = peer_group
-            if import_policies is not None:
-                bgp_session["import_policies"] = import_policies
-            if export_policies is not None:
-                bgp_session["export_policies"] = export_policies
-            if prefix_list_in is not None:
-                bgp_session["prefix_list_in"] = prefix_list_in
-            if prefix_list_out is not None:
-                bgp_session["prefix_list_out"] = prefix_list_out
+            _single_fields = (
+                "description",
+                "status",
+                "local_address",
+                "remote_address",
+                "local_as",
+                "remote_as",
+                "vrf",
+                "peer_group",
+                "import_policies",
+                "export_policies",
+                "prefix_list_in",
+                "prefix_list_out",
+            )
+            bgp_session = {
+                k: v
+                for k, v in locals().items()
+                if k in _single_fields and v is not None
+            }
             bgp_sessions = [{"name": name, **bgp_session}]
 
         result = {"updated": [], "in_sync": []}
@@ -1471,11 +1626,12 @@ class NetboxBgpPeeringsTasks:
         nb_sessions_raw = list(
             nb.plugins.bgp.session.filter(
                 name=session_names,
-                fields="id,name,description,status,local_address,remote_address,local_as,remote_as,vrf,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
+                fields="id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
             )
         )
         normalised_nb = {
-            s.name: normalise_nb_bgp_session(dict(s)) for s in nb_sessions_raw
+            s.name: normalise_nb_bgp_session(dict(s), vrf_custom_field=vrf_custom_field)
+            for s in nb_sessions_raw
         }
 
         # Build updates dictionary by session name
@@ -1496,12 +1652,8 @@ class NetboxBgpPeeringsTasks:
                     bgp_session["export_policies"] = [bgp_session["export_policies"]]
                 normalised_updates[sname] = {
                     **bgp_session,
-                    "import_policies": "|".join(
-                        sorted(bgp_session.get("import_policies", []))
-                    ),
-                    "export_policies": "|".join(
-                        sorted(bgp_session.get("export_policies", []))
-                    ),
+                    "import_policies": sorted(bgp_session.get("import_policies") or []),
+                    "export_policies": sorted(bgp_session.get("export_policies") or []),
                 }
 
         # Compare complete dictionaries using make_diff; classify in_sync vs changed
@@ -1522,6 +1674,7 @@ class NetboxBgpPeeringsTasks:
             return ret
 
         # Build update payloads — iterate over diff to get only changed fields per session
+        _lookup_cache: dict = {}
         update_payloads = []
         for sname, field_changes in sessions_diff["update"].items():
             nb_session = normalised_nb[sname]
@@ -1536,6 +1689,8 @@ class NetboxBgpPeeringsTasks:
                     ret,
                     self.name,
                     addr_family,
+                    _lookup_cache=_lookup_cache,
+                    vrf_custom_field=vrf_custom_field,
                 )
             )
             update_payloads.append(payload)
@@ -1569,11 +1724,14 @@ class NetboxBgpPeeringsTasks:
         dry_run: bool = False,
         process_deletions: bool = False,
         timeout: int = 60,
-        batch_size: int = 10,
         branch: str = None,
         rir: str = None,
         message: str = None,
         name_template: str = "{device}_{name}",
+        filter_by_remote_as: Union[None, List[int]] = None,
+        filter_by_peer_group: Union[None, list] = None,
+        filter_by_description: Union[None, str] = None,
+        vrf_custom_field: str = "vrf",
         **kwargs: object,
     ) -> Result:
         """
@@ -1591,7 +1749,6 @@ class NetboxBgpPeeringsTasks:
             dry_run (bool): If True, return diff report without writing to NetBox.
             process_deletions (bool): If True, delete NetBox sessions not found on device.
             timeout (int): Timeout in seconds for Nornir ``parse_ttp`` job.
-            batch_size (int): Devices per Nornir batch (reserved for future use).
             branch (str, optional): NetBox branching plugin branch name.
             rir (str, optional): RIR name to use when creating new ASNs in NetBox (e.g. ``RFC 1918``, ``ARIN``).
             message (str, optional): Changelog message recorded in NetBox for all create, update, and delete operations.
@@ -1610,6 +1767,18 @@ class NetboxBgpPeeringsTasks:
                 - ``peer_group`` — peer group name or ``None``
 
                 Default: ``"{device}_{name}"``.
+            filter_by_remote_as (list of int, optional): Only include sessions whose remote AS number
+                matches one of the provided integer values. Applied to both NetBox and live device sessions.
+            filter_by_peer_group (list, optional): Only include sessions whose peer group name matches
+                one of the provided values. Applied to both NetBox and live device sessions.
+            filter_by_description (str, optional): Only include sessions whose description matches
+                this glob pattern (e.g. ``'*uplink*'``). Applied to both NetBox and live device sessions.
+            vrf_custom_field (str): Name of the BGP session custom field that stores
+                the VRF object reference.  The custom field must be of type Object in
+                NetBox pointing to the VRF content-type.  The value is always a single
+                VRF object reference read from and written into
+                ``custom_fields[vrf_custom_field]``.  Default ``'vrf'`` means
+                ``custom_fields['vrf']``.
             **kwargs: Nornir host filters (e.g. ``FC``, ``FL``, ``FB``).
 
         Returns:
@@ -1650,10 +1819,6 @@ class NetboxBgpPeeringsTasks:
         normalised_live = (
             {}
         )  # Live data:   device name -> session name -> normalised field values
-        # Diff results keyed by device name: device name -> diff result (create/source, update, in_sync)
-        full_diff = {}
-        # Per-device result tracking: created/updated/deleted/in_sync session names
-        device_results = {}
 
         # Validate BGP plugin
         if not self.has_plugin("netbox_bgp", instance, strict=True):
@@ -1662,6 +1827,12 @@ class NetboxBgpPeeringsTasks:
             )
             ret.failed = True
             return ret
+
+        # Validate VRF custom field
+        _nb_check = self._get_pynetbox(instance)
+        vrf_custom_field = _resolve_vrf_custom_field(
+            vrf_custom_field, _nb_check, job, self.name
+        )
 
         # Source additional devices from Nornir filters
         if kwargs:
@@ -1701,7 +1872,7 @@ class NetboxBgpPeeringsTasks:
             timeout=timeout,
         )
 
-        # Build normalised dicts per device
+        # Build Netbox BGP sessions normalised dicts per device
         for device_name in devices:
             # Normalise NetBox sessions for this device
             normalised_nb[device_name] = {}
@@ -1709,13 +1880,27 @@ class NetboxBgpPeeringsTasks:
                 device_name, {}
             ).items():
                 try:
-                    normalised_nb[device_name][sname] = normalise_nb_bgp_session(
-                        nb_session
+                    normalised = normalise_nb_bgp_session(
+                        nb_session, vrf_custom_field=vrf_custom_field
                     )
                 except Exception as e:
                     log.warning(
                         f"{self.name} - failed to normalise NetBox session '{sname}' for '{device_name}': {e}"
                     )
+                    continue
+                if filter_by_remote_as:
+                    if (normalised.get("remote_as") or 0) not in filter_by_remote_as:
+                        continue
+                if (
+                    filter_by_peer_group
+                    and normalised.get("peer_group") not in filter_by_peer_group
+                ):
+                    continue
+                if filter_by_description and not fnmatch.fnmatch(
+                    normalised.get("description") or "", filter_by_description
+                ):
+                    continue
+                normalised_nb[device_name][sname] = normalised
 
         # Normalize live parse data per device
         for wname, wdata in parse_data.items():
@@ -1735,24 +1920,35 @@ class NetboxBgpPeeringsTasks:
                         ret.errors.append(msg)
                         log.error(f"{self.name} - {msg}")
                         continue
+                    remote_as_val = s.get("remote_as")
+                    peer_group_val = s.get("peer_group")
+                    description_val = s.get("description") or ""
+                    if filter_by_remote_as:
+                        if (remote_as_val or 0) not in filter_by_remote_as:
+                            continue
+                    if (
+                        filter_by_peer_group
+                        and peer_group_val not in filter_by_peer_group
+                    ):
+                        continue
+                    if filter_by_description and not fnmatch.fnmatch(
+                        description_val, filter_by_description
+                    ):
+                        continue
                     normalised_live[device_name][session_name] = {
                         "name": session_name,
-                        "description": s.get("description") or "",
+                        "description": description_val,
                         "local_address": s.get("local_address"),
-                        "local_as": s.get("local_as", ""),
+                        "local_as": s.get("local_as"),
                         "remote_address": s.get("remote_address"),
-                        "remote_as": s.get("remote_as", ""),
+                        "remote_as": remote_as_val,
                         "vrf": s.get("vrf"),
                         "status": (
                             "active" if s.get("state") == "established" else status
                         ),
-                        "peer_group": s.get("peer_group"),
-                        "import_policies": "|".join(
-                            sorted(s.get("import_policies") or [])
-                        ),
-                        "export_policies": "|".join(
-                            sorted(s.get("export_policies") or [])
-                        ),
+                        "peer_group": peer_group_val,
+                        "import_policies": s.get("import_policies"),
+                        "export_policies": s.get("export_policies"),
                         "prefix_list_in": s.get("prefix_list_in"),
                         "prefix_list_out": s.get("prefix_list_out"),
                     }
@@ -1781,8 +1977,6 @@ class NetboxBgpPeeringsTasks:
         for device_name, actions in full_diff.items():
             for sname in actions["create"]:
                 session_data = normalised_live[device_name][sname]
-                import_policies = session_data.get("import_policies")
-                export_policies = session_data.get("export_policies")
                 bulk_create.append(
                     {
                         "name": sname,
@@ -1795,22 +1989,14 @@ class NetboxBgpPeeringsTasks:
                         "vrf": session_data.get("vrf"),
                         "status": session_data.get("status", "active"),
                         "peer_group": session_data.get("peer_group"),
-                        "import_policies": (
-                            [p for p in import_policies.split("|") if p]
-                            if import_policies
-                            else None
-                        ),
-                        "export_policies": (
-                            [p for p in export_policies.split("|") if p]
-                            if export_policies
-                            else None
-                        ),
+                        "import_policies": session_data.get("import_policies"),
+                        "export_policies": session_data.get("export_policies"),
                         "prefix_list_in": session_data.get("prefix_list_in"),
                         "prefix_list_out": session_data.get("prefix_list_out"),
                     }
                 )
 
-        # Build bulk_update list from full_diff — split pipe-separated policies to lists
+        # Build bulk_update list from full_diff
         bulk_update = []
         for device_name, actions in full_diff.items():
             for sname, field_changes in actions["update"].items():
@@ -1818,9 +2004,7 @@ class NetboxBgpPeeringsTasks:
                 for field, change in field_changes.items():
                     new_value = change["new_value"]
                     if field in ("import_policies", "export_policies"):
-                        entry[field] = (
-                            [p for p in new_value.split("|") if p] if new_value else []
-                        )
+                        entry[field] = new_value if new_value is not None else []
                     elif field in ("prefix_list_in", "prefix_list_out"):
                         entry[field] = new_value if new_value else None
                     else:
@@ -1837,6 +2021,7 @@ class NetboxBgpPeeringsTasks:
                 message=message,
                 branch=branch,
                 create_reverse=False,
+                vrf_custom_field=vrf_custom_field,
             )
             ret.errors.extend(create_result.errors)
             created_names = set(create_result.result.get("created", []))
@@ -1853,6 +2038,7 @@ class NetboxBgpPeeringsTasks:
                 rir=rir,
                 message=message,
                 branch=branch,
+                vrf_custom_field=vrf_custom_field,
             )
             ret.errors.extend(update_result.errors)
             updated_names = set(update_result.result.get("updated", []))
@@ -1861,23 +2047,32 @@ class NetboxBgpPeeringsTasks:
                     if sname in updated_names:
                         device_results[device_name]["updated"].append(sname)
 
-        # Deletion loop stays inline (not shared with other tasks)
+        # Deletion — batch-fetch all candidate sessions then delete individually
         if process_deletions:
             nb = self._get_pynetbox(instance, branch=branch)
             if message:
                 nb.http_session.headers["X-Changelog-Message"] = message
+            # Map session name → device name for all sessions to delete across devices
+            all_deletions: Dict[str, str] = {}
             for device_name, actions in full_diff.items():
                 for sname in actions["delete"]:
+                    all_deletions[sname] = device_name
+            if all_deletions:
+                sessions_to_delete = list(
+                    nb.plugins.bgp.session.filter(name=list(all_deletions))
+                )
+                for session in sessions_to_delete:
+                    device_name = all_deletions[session.name]
                     try:
-                        session = nb.plugins.bgp.session.get(name=sname)
-                        if session:
-                            session.delete()
-                            device_results[device_name]["deleted"].append(sname)
-                            msg = f"deleted BGP session '{sname}' for '{device_name}'"
-                            job.event(msg)
-                            log.info(f"{self.name} - {msg}")
+                        session.delete()
+                        device_results[device_name]["deleted"].append(session.name)
+                        msg = (
+                            f"deleted BGP session '{session.name}' for '{device_name}'"
+                        )
+                        job.event(msg)
+                        log.info(f"{self.name} - {msg}")
                     except Exception as e:
-                        msg = f"failed to delete BGP session '{sname}' for '{device_name}': {e}"
+                        msg = f"failed to delete BGP session '{session.name}' for '{device_name}': {e}"
                         ret.errors.append(msg)
                         log.error(f"{self.name} - {msg}")
 

@@ -72,6 +72,37 @@ Set `create_reverse=False` to suppress mirror session creation.
 !!! note
     `sync_bgp_peerings` passes `create_reverse=False` when delegating to `create_bgp_peering` because it manages both sides of a session independently via the diff.
 
+## VRF Custom Field
+
+The VRF reference is **always** stored in a BGP session custom field that must be
+configured as type **Object** in NetBox pointing to the VRF content-type.  This means
+NetBox stores a reference to a single VRF object, not a plain string.
+
+By default `vrf_custom_field="vrf"` means the VRF object reference is written into
+`custom_fields["vrf"]`.  Pass a different name to target a different custom field:
+
+```python
+result = client.run_job(
+    "netbox",
+    "create_bgp_peering",
+    workers="any",
+    kwargs={
+        "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+        "device": "ceos-spine-1",
+        "local_address": "10.0.0.1",
+        "remote_address": "10.0.0.2",
+        "local_as": 65001,
+        "remote_as": 65002,
+        "rir": "lab",
+        "vrf": "PROD_VRF",
+        "vrf_custom_field": "tenant_vrf",  # Object-type custom field -> VRF
+    },
+)
+```
+
+The `vrf` parameter accepts a VRF name which is resolved to a NetBox VRF object ID before
+being stored as an object reference in the custom field.
+
 ## Examples
 
 === "CLI"
@@ -252,10 +283,9 @@ root
             ├── create-reverse:    Also create mirror session on remote device, default 'True'
             ├── bulk-create:    JSON list of session dicts for bulk creation
             ├── rir:    RIR name for ASN creation
+            ├── vrf-custom-field:    BGP session field for VRF reference, default 'vrf'
             └── message:    Changelog message for NetBox write operations
 nf#
 ```
-
-## Python API Reference
 
 ::: norfab.workers.netbox_worker.bgp_peerings_tasks.NetboxBgpPeeringsTasks.create_bgp_peering

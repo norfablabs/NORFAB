@@ -2,7 +2,7 @@ import builtins
 import json
 import logging
 
-from picle.models import Outputters
+from picle.models import Outputters, PipeFunctionsModel
 
 from norfab.workers.netbox_worker.bgp_peerings_tasks import UpdateBgpPeeringInput
 
@@ -57,3 +57,4 @@ class UpdateBgpPeeringShell(NetboxClientRunJobArgs, UpdateBgpPeeringInput):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel

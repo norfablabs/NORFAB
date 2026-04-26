@@ -1,7 +1,8 @@
 import builtins
 import logging
+from typing import List, Union
 
-from picle.models import Outputters
+from picle.models import Outputters, PipeFunctionsModel
 from pydantic import Field
 
 from norfab.workers.netbox_worker.bgp_peerings_tasks import SyncBgpPeeringsInput
@@ -21,6 +22,21 @@ class SyncBgpPeeringsShell(
         description="Delete BGP sessions present in NetBox but not found on the device",
         alias="process-deletions",
         json_schema_extra={"presence": True},
+    )
+    filter_by_remote_as: Union[None, List[int]] = Field(
+        None,
+        description="Only sync sessions with matching remote AS number(s)",
+        alias="filter-by-remote-as",
+    )
+    filter_by_peer_group: Union[None, List[str]] = Field(
+        None,
+        description="Only sync sessions with matching peer group name(s)",
+        alias="filter-by-peer-group",
+    )
+    filter_by_description: Union[None, str] = Field(
+        None,
+        description="Only sync sessions whose description matches this glob pattern",
+        alias="filter-by-description",
     )
 
     @staticmethod
@@ -53,3 +69,4 @@ class SyncBgpPeeringsShell(
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel

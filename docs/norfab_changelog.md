@@ -3,6 +3,8 @@
 ## FEATURES
 
 1. Adding new Netbox `sync_bgp_peerings` task to synchronize BGP sessions between live devices and NetBox
+2. Adding new Netbox `create_bgp_peerings` task to create BGP peerings
+3. Adding new Netbox `update_bgp_peerings` task to update BGP peerings
 
 ---
 

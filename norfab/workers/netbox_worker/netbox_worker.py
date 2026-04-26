@@ -591,6 +591,27 @@ class NetboxWorker(
                     "new_value": item.t2,
                 }
 
+        for item in diff.get("type_changes", []):
+            path = item.path(output_format="list")
+            if len(path) == 3:
+                device_name, sname, field = path
+                result[device_name]["update"].setdefault(sname, {})[field] = {
+                    "old_value": item.t1,
+                    "new_value": item.t2,
+                }
+
+        for item in diff.get("iterable_item_added", []):
+            path = item.path(output_format="list")
+            if len(path) == 4:
+                # Item added to a list field within an existing entity
+                device_name, sname, field, _ = path
+                entity_updates = result[device_name]["update"].setdefault(sname, {})
+                if field not in entity_updates:
+                    entity_updates[field] = {
+                        "old_value": target_data[device_name][sname][field],
+                        "new_value": source_data[device_name][sname][field],
+                    }
+
         for device_name in all_devices:
             result[device_name]["create"] = sorted(result[device_name]["create"])
             result[device_name]["delete"] = sorted(result[device_name]["delete"])

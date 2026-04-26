@@ -2,7 +2,7 @@ import builtins
 import json
 import logging
 
-from picle.models import Outputters
+from picle.models import Outputters, PipeFunctionsModel
 
 from norfab.workers.netbox_worker.bgp_peerings_tasks import (
     CreateBgpPeeringInput,
@@ -42,10 +42,6 @@ class CreateBgpPeeringShell(NetboxClientRunJobArgs, CreateBgpPeeringInput):
             kwargs["export_policies"] = [
                 p.strip() for p in kwargs["export_policies"].split(",") if p.strip()
             ]
-        if isinstance(kwargs.get("prefix_list_in"), str):
-            kwargs["prefix_list_in"] = [kwargs["prefix_list_in"]]
-        if isinstance(kwargs.get("prefix_list_out"), str):
-            kwargs["prefix_list_out"] = [kwargs["prefix_list_out"]]
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -65,3 +61,4 @@ class CreateBgpPeeringShell(NetboxClientRunJobArgs, CreateBgpPeeringInput):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel

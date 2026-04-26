@@ -45,6 +45,26 @@ Updates one or many existing BGP sessions in NetBox. Supports single-session mod
 
 Sessions with no effective changes appear in `in_sync` regardless of dry-run mode.
 
+## VRF Custom Field
+
+The VRF reference is **always** stored in a BGP session custom field that must be
+configured as type **Object** in NetBox pointing to the VRF content-type.  By default
+`vrf_custom_field="vrf"` means the VRF object reference is read from and written to
+`custom_fields["vrf"]`.  This must match the value used when the session was created.
+
+```python
+result = client.run_job(
+    "netbox",
+    "update_bgp_peering",
+    workers="any",
+    kwargs={
+        "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+        "vrf": "NEW_VRF",
+        "vrf_custom_field": "tenant_vrf",  # Object-type custom field -> VRF
+    },
+)
+```
+
 ## Examples
 
 === "CLI"
@@ -174,6 +194,7 @@ root
             ├── prefix-list-out:    New outbound prefix list name
             ├── bulk-update:    JSON list of session update dicts for bulk mode
             ├── rir:    RIR name for ASN creation
+            ├── vrf-custom-field:    BGP session field for VRF reference, default 'vrf'
             └── message:    Changelog message for NetBox write operations
 nf#
 ```
