@@ -2430,6 +2430,118 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Peerings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_create_bgp_peering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_update_bgp_peering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_crud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5348,7 +5460,7 @@
   <span class="md-ellipsis">
     
   
-    Testing
+    Architecture Design Records
   
 
     
@@ -5361,6 +5473,89 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Design Records
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox BGP Create/Update Tasks Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -5790,7 +5985,7 @@
                     <summary>Source code in <code>norfab\core\broker.py</code></summary>
                     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
 <span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># Service name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">workers</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of known workers</span>
 </code></pre></div></td></tr></table></div>
@@ -6086,7 +6281,7 @@
     <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>  <span class="c1"># e.g. 6 times</span>
     <span class="n">keepalive</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>  <span class="c1"># e.g. 5000 ms</span>
     <span class="n">service</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NFPService</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>  <span class="c1"># Address to route to</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">service</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="kc">False</span>
@@ -6527,7 +6722,7 @@ Method to apply logging configuration.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="mediate() (norfab.core.broker.NFPBroker.mediate)" href="#norfab.core.broker.NFPBroker.mediate">mediate</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="mediate() -> None (norfab.core.broker.NFPBroker.mediate)" href="#norfab.core.broker.NFPBroker.mediate">mediate</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Main broker work happens here.</p>
@@ -6535,7 +6730,7 @@ Method to apply logging configuration.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="destroy() (norfab.core.broker.NFPBroker.destroy)" href="#norfab.core.broker.NFPBroker.destroy">destroy</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="destroy() -> None (norfab.core.broker.NFPBroker.destroy)" href="#norfab.core.broker.NFPBroker.destroy">destroy</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Disconnect all workers, destroy context.</p>
@@ -6577,7 +6772,7 @@ Send message to client.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="process_worker(sender: str, msg: list) (norfab.core.broker.NFPBroker.process_worker)" href="#norfab.core.broker.NFPBroker.process_worker">process_worker</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="process_worker(sender: str, msg: list) -> None (norfab.core.broker.NFPBroker.process_worker)" href="#norfab.core.broker.NFPBroker.process_worker">process_worker</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Process message received from worker.</p>
@@ -6626,7 +6821,7 @@ Helper function to filter workers.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="mmi_service(sender, command, target, uuid, data) (norfab.core.broker.NFPBroker.mmi_service)" href="#norfab.core.broker.NFPBroker.mmi_service">mmi_service</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="mmi_service(sender, command: str, target, uuid: str, data) -> None (norfab.core.broker.NFPBroker.mmi_service)" href="#norfab.core.broker.NFPBroker.mmi_service">mmi_service</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Handle internal service according to 8/MMI specification.</p>
@@ -6881,7 +7076,7 @@ Helper function to filter workers.</p>
     <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
     <span class="n">keepalive</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2500</span><span class="p">,</span>
     <span class="n">init_done_event</span><span class="p">:</span> <span class="n">Event</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">log_queue</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">keepalive</span> <span class="o">=</span> <span class="n">keepalive</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="n">multiplier</span>
@@ -7099,7 +7294,7 @@ and then applies the configuration using <code>logging.config.dictConfig</code>.
 
 
 <h3 id="norfab.core.broker.NFPBroker.mediate" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mediate</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">mediate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 <a href="#norfab.core.broker.NFPBroker.mediate" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -7183,7 +7378,7 @@ exit event to gracefully shut down the broker.</p>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
-<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mediate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mediate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main broker work happens here.</span>
 
@@ -7239,7 +7434,7 @@ exit event to gracefully shut down the broker.</p>
 
 
 <h3 id="norfab.core.broker.NFPBroker.destroy" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">destroy</span><span class="p">()</span></code>
+            <code class="highlight language-python"><span class="n">destroy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 <a href="#norfab.core.broker.NFPBroker.destroy" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -7272,7 +7467,7 @@ exit event to gracefully shut down the broker.</p>
 <span class="normal">367</span>
 <span class="normal">368</span>
 <span class="normal">369</span>
-<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Disconnect all workers and destroy the context.</span>
 
@@ -7890,7 +8085,7 @@ Logs a debug message when sending the message to the worker.</p>
 
 
 <h3 id="norfab.core.broker.NFPBroker.process_worker" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">process_worker</span><span class="p">(</span><span class="n">sender</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">process_worker</span><span class="p">(</span><span class="n">sender</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 <a href="#norfab.core.broker.NFPBroker.process_worker" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -8047,7 +8242,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">548</span>
 <span class="normal">549</span>
 <span class="normal">550</span>
-<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process message received from worker.</span>
 
@@ -9010,7 +9205,7 @@ Logs a debug message when sending the message to the worker.</p>
 
 
 <h3 id="norfab.core.broker.NFPBroker.mmi_service" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mmi_service</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">mmi_service</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 <a href="#norfab.core.broker.NFPBroker.mmi_service" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -9228,7 +9423,7 @@ Logs a debug message when sending the message to the worker.</p>
 <span class="normal">879</span>
 <span class="normal">880</span>
 <span class="normal">881</span>
-<span class="normal">882</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mmi_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="normal">882</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mmi_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Handle internal broker Management Interface (MMI) service tasks.</span>
 
