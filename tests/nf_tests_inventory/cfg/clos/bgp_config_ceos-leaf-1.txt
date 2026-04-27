@@ -53,6 +53,8 @@ router bgp 65101
    neighbor 10.10.10.2 peer group EVPN-OVERLAY
    neighbor 10.10.10.2 remote-as 65002
    neighbor 10.10.10.2 description ceos-spine-2 Loopback0 EVPN
+   neighbor 172.16.1.101 remote-as 65002
+   neighbor 172.16.1.101 description test resolve local ip via remote ip
    address-family evpn
       neighbor EVPN-OVERLAY activate
    address-family ipv4

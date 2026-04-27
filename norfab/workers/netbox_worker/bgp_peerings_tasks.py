@@ -258,6 +258,63 @@ def resolve_asn_from_source(
     return None
 
 
+def resolve_local_ip_via_peer(
+    device_name: str, remote_address: str, nb: Any
+) -> Union[None, str]:
+    """
+    Resolve a local IP address for a device by looking up the subnet of the peer IP.
+
+    Queries NetBox for the ``remote_address`` IP to determine its containing prefix,
+    then searches for IP addresses assigned to interfaces of ``device_name`` that
+    fall within the same prefix.  Returns the host part of that IP if exactly one
+    match is found, ``None`` otherwise.
+
+    Args:
+        device_name: Local device name.
+        remote_address: Remote peer IP address string (without mask).
+        nb: pynetbox API instance.
+
+    Returns:
+        Local IP address string (without mask) or ``None``.
+    """
+    # Find the containing prefix for the remote IP
+    prefixes = list(nb.ipam.prefixes.filter(contains=remote_address))
+    if not prefixes:
+        log.error(
+            f"failed to resolve local ip via peer - no prefix found containing '{remote_address}' in NetBox IPAM"
+        )
+        return None
+
+    # Use the most specific (longest prefix) containing subnet
+    prefix_obj = max(prefixes, key=lambda p: int(p.prefix.split("/")[1]))
+    subnet = ipaddress.ip_network(prefix_obj.prefix, strict=False)
+    # Find all IPs assigned to device_name interfaces within that subnet
+    device_ips = list(
+        nb.ipam.ip_addresses.filter(
+            device=device_name,
+            parent=str(subnet),
+        )
+    )
+
+    if not device_ips:
+        log.error(
+            f"failed to resolve local ip via peer - no IP address found for device '{device_name}' "
+            f"within subnet '{subnet}' (peer '{remote_address}')"
+        )
+        return None
+
+    if len(device_ips) > 1:
+        found = [ip.address for ip in device_ips]
+        log.error(
+            f"failed to resolve local ip via peer - multiple IPs found for device '{device_name}' "
+            f"within subnet '{subnet}' (peer '{remote_address}'): {found}; "
+            "cannot determine local address unambiguously"
+        )
+        return None
+
+    return device_ips[0].address.split("/")[0]
+
+
 def normalise_nb_bgp_session(nb_session: dict, vrf_custom_field: str = "vrf") -> dict:
     """Normalise a NetBox BGP session plain dict into a flat comparable dict.
 
@@ -983,9 +1040,8 @@ class NetboxBgpPeeringsTasks:
             # Remove deleted sessions
             for session_name in sessions_to_remove:
                 ret.result[device_name].pop(session_name, None)
-                job.event(
-                    f"removed deleted session '{session_name}' from cache for '{device_name}'",
-                    resource=instance,
+                log.info(
+                    f"removed deleted session '{session_name}' from cache for '{device_name}'"
                 )
 
             # Fetch updated/new sessions
@@ -1229,7 +1285,6 @@ class NetboxBgpPeeringsTasks:
                     if not new_bgp_session.get("name"):
                         try:
                             new_bgp_session["name"] = name_template.format(
-                                device=bgp_session_device,
                                 **new_bgp_session,
                             )
                         except Exception as exc:
@@ -1257,7 +1312,6 @@ class NetboxBgpPeeringsTasks:
                         mirror_session["name"] = None
                         try:
                             mirror_session["name"] = name_template.format(
-                                device=remote_device_name,
                                 **mirror_session,
                             )
                         except Exception as exc:
@@ -1327,7 +1381,6 @@ class NetboxBgpPeeringsTasks:
             if not sname:
                 try:
                     sname = name_template.format(
-                        device=bgp_session_device,
                         **bgp_session,
                     )
                 except Exception as exc:
@@ -1473,6 +1526,7 @@ class NetboxBgpPeeringsTasks:
 
         # Bulk create (step 7)
         if payloads:
+            job.event(f"creating {len(payloads)} BGP session(s)")
             try:
                 nb.plugins.bgp.session.create(payloads)
                 result["created"].extend(p["name"] for p in payloads)
@@ -1481,6 +1535,7 @@ class NetboxBgpPeeringsTasks:
                 log.info(f"{self.name} - {msg}")
             except Exception as e:
                 msg = f"failed to create BGP sessions: {e}"
+                job.event(msg)
                 ret.errors.append(msg)
                 log.error(f"{self.name} - {msg}")
 
@@ -1829,9 +1884,9 @@ class NetboxBgpPeeringsTasks:
             return ret
 
         # Validate VRF custom field
-        _nb_check = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance)
         vrf_custom_field = _resolve_vrf_custom_field(
-            vrf_custom_field, _nb_check, job, self.name
+            vrf_custom_field, nb, job, self.name
         )
 
         # Source additional devices from Nornir filters
@@ -1935,12 +1990,27 @@ class NetboxBgpPeeringsTasks:
                         description_val, filter_by_description
                     ):
                         continue
+                    # attempt to resolve local ip if empty
+                    local_address = s.get("local_address")
+                    remote_address = s.get("remote_address")
+                    if not local_address and remote_address:
+                        local_address = resolve_local_ip_via_peer(
+                            device_name, remote_address, nb
+                        )
+                        if not local_address:
+                            msg = f"{session_name} - skipping, no local ip in parsed data, failed to resolve using peer ip"
+                            log.error(msg)
+                            job.event(msg, severity="ERROR")
+                            continue
+                        msg = f"{session_name} - resolved local ip '{local_address}' using peer ip"
+                        log.info(msg)
+                        job.event(msg)
                     normalised_live[device_name][session_name] = {
                         "name": session_name,
                         "description": description_val,
-                        "local_address": s.get("local_address"),
+                        "local_address": local_address,
                         "local_as": s.get("local_as"),
-                        "remote_address": s.get("remote_address"),
+                        "remote_address": remote_address,
                         "remote_as": remote_as_val,
                         "vrf": s.get("vrf"),
                         "status": (

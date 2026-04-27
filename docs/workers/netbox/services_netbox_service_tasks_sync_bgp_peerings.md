@@ -292,11 +292,11 @@ Set `process_deletions=True` to delete stale sessions. Only sessions for the exp
 
 ## VRF Custom Field
 
-The VRF reference is **always** stored in a BGP session custom field that must be
-configured as type **Object** in NetBox pointing to the VRF content-type.  By default
-`vrf_custom_field="vrf"` means `custom_fields["vrf"]` is used for all reads and
-writes.  The parameter is forwarded to both `create_bgp_peering` and
-`update_bgp_peering` internally so all normalisation, diff, and write operations
+VRF reference could be stored in a BGP session custom field, for that 
+custom field must be configured as type **Object** in NetBox pointing to the VRF 
+content-type. By default `vrf_custom_field="vrf"` means `custom_fields["vrf"]` is 
+used for all reads and writes.  The parameter is forwarded to both `create_bgp_peering` 
+and `update_bgp_peering` internally so all normalisation, diff, and write operations
 use the same field consistently.
 
 ```python
@@ -307,7 +307,7 @@ result = client.run_job(
     kwargs={
         "devices": ["ceos-leaf-1"],
         "rir": "lab",
-        "vrf_custom_field": "tenant_vrf",  # Object-type custom field -> VRF
+        "vrf_custom_field": "tenant_vrf",  # BGP Sessions custom field -> Object-type VRF
     },
 )
 ```

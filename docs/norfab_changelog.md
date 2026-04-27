@@ -1,3 +1,16 @@
+# 0.17.3
+
+## ENHANCEMENTS
+
+1. Improving logic for local ip sourcing for BGP sessions
+
+## BUGS
+
+1. Fixing BGP sessions name forming for Netbox sync bgp tasks
+2. Fixing deepdiff dependency for Netbox service
+
+----
+
 # 0.17.2
 
 ## FEATURES

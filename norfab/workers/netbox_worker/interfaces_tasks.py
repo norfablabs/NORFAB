@@ -728,19 +728,19 @@ class NetboxInterfacesTasks:
                                 if interface_data.get("speed", 0) > 0:
                                     new_intf["speed"] = interface_data["speed"] * 1000
 
-                                mac_address = (
-                                    interface_data.get("mac_address", "")
-                                    .strip()
-                                    .lower()
-                                )
-                                if mac_address and mac_address not in ["none", ""]:
-                                    mac_addresses_to_create.append(
-                                        {
-                                            "mac_address": mac_address,
-                                            "assigned_object_type": "dcim.interface",
-                                            "assigned_object_id": int(nb_intf["id"]),
-                                        }
-                                    )
+                                # mac_address = (
+                                #     interface_data.get("mac_address", "")
+                                #     .strip()
+                                #     .lower()
+                                # )
+                                # if mac_address and mac_address not in ["none", ""]:
+                                #     mac_addresses_to_create.append(
+                                #         {
+                                #             "mac_address": mac_address,
+                                #             "assigned_object_type": "dcim.interface",
+                                #             "assigned_object_id": int(nb_intf["id"]),
+                                #         }
+                                #     )
 
                                 interfaces_to_create.append(new_intf)
                                 ret.result[host][create_key][intf_name] = new_intf

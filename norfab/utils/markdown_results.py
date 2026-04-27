@@ -415,14 +415,14 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         )
 
     # Tests results section
-    md.new_header(level=2, title="Tests Results")
+    md.new_header(level=2, title="Test Results")
     if total_rows > 1:
         md.new_table(columns=5, rows=total_rows, text=table_text, text_align="left")
     else:
         md.new_paragraph("❌ Failed to produce summary results.\n\n")
 
     # Tests Details section
-    md.new_header(level=2, title="Tests Details")
+    md.new_header(level=2, title="Test Details")
     if tests_details_html:
         md.new_paragraph(
             "Hierarchical expandable sections organized by device, then test name, containing complete test result details."
@@ -434,7 +434,7 @@ def nornir_test_markdown(data: dict, kwargs: dict = None):
         )
 
     # Device Output section
-    md.new_header(level=2, title="Device Outputs")
+    md.new_header(level=2, title="Device Output")
     if devices_commands_output_html:
         md.new_paragraph(
             "Expandable sections containing outputs collected during test execution for each host."

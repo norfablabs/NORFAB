@@ -403,6 +403,8 @@ ip_addresses = [
     {"address": "10.0.2.10/30"},  # eth107 fceos5
     {"address": "10.0.2.8/30"},  # fceos4-fceos5-eth107-vrf
     {"address": "10.0.2.9/30"},  # fceos5-fceos4-eth107-vrf
+    {"address": "172.16.1.101/30"}, # BGP peering reolve localip via peer ip test
+    {"address": "172.16.1.102/30"}, # BGP peering reolve localip via peer ip test
 ]
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
@@ -541,6 +543,7 @@ interfaces = [
     {"name": "eth106", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
     {"name": "eth107", "device": {"name": "fceos4"}, "type": "10gbase-x-sfpp"},
     {"name": "eth107", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
+    {"name": "Loopback1001", "device": {"name": "ceos-leaf-1"}, "type": "virtual", "description": "BGP reolve local ip via peer ip test"},
 ]
 
 # add Containerlab devices interfaces
@@ -797,6 +800,11 @@ ip_adress_to_devices = [
         "interface": "eth107",
         "device": "fceos5",
         "vrf": {"name": "TEST_BGP_VRF"},
+    },
+    {
+        "address": "172.16.1.102/30",
+        "interface": "Loopback1001",
+        "device": "ceos-leaf-1",
     },
 ]
 # associate IP addresses to subinterfaces

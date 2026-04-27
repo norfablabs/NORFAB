@@ -528,19 +528,19 @@ class NetboxWorker(
             - ``create`` (list[str]): Entity identifiers to be created.
             - ``delete`` (list[str]): Entity identifiers to be deleted.
             - ``update`` (dict): Entities with field-level changes, keyed by
-              entity identifier. Each entry maps changed field names to a dict
-              with ``old_value`` (current) and ``new_value`` (desired):
+                entity identifier. Each entry maps changed field names to a dict
+                with ``old_value`` (current) and ``new_value`` (desired):
 
-                ```
-                {
-                    "<entity_id>": {
-                        "<field>": {"old_value": <current>, "new_value": <desired>}
-                    }
-                }
+                  ```
+                  {
+                      "<entity_id>": {
+                          "<field>": {"old_value": <current>, "new_value": <desired>}
+                      }
+                  }
                 ```
 
             - ``in_sync`` (list[str]): Entity identifiers that are identical in
-              both datasets.
+                both datasets.
         """
         result = {}
         diff = DeepDiff(

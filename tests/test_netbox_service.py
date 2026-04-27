@@ -6189,6 +6189,34 @@ class TestSyncBgpPeerings:
             assert res["failed"] == False, f"{worker} failed: {res['errors']}"
             assert not res["errors"], f"{worker}: unexpected errors: {res['errors']}"
 
+    def test_sync_bgp_peerings_resolve_local_ip_via_peer(self, nfclient):
+        """Sync ceos-leaf-1 which has a BGP peer at 172.16.1.101 but no local address
+        in parsed data; verify that resolve_local_ip_via_peer derives the local IP
+        from the subnet and the session ceos-leaf-1_default_172.16.1.101 is created."""
+        target_device = "ceos-leaf-1"
+        expected_session = "ceos-leaf-1_default_172.16.1.101"
+        nb = get_pynetbox(nfclient)
+
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert target_device in res["result"], (
+                f"{worker}: '{target_device}' not in result"
+            )
+            assert expected_session in res["result"][target_device]["created"], (
+                f"{worker}: expected '{expected_session}' in created, "
+                f"got: {res['result'][target_device]['created']}"
+            )
+        assert nb.plugins.bgp.session.get(name=expected_session), (
+            f"session '{expected_session}' not found in NetBox after sync"
+        )
+
 
 # ---------------------------------------------------------------------------
 # CREATE BGP PEERING TESTS
