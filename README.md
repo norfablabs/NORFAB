@@ -4,7 +4,7 @@
 [![GitHub Discussion][github-discussions-badge]][github-discussions-link]
 [![Code style: black][black-badge]][black-link]
 
-![logo](docs/images/logo.png)
+![logo](docs/images/logo.jpg)
 
 # Network Automations Fabric - NORFAB
 
