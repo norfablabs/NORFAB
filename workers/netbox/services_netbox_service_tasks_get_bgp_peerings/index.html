@@ -5969,64 +5969,7 @@ API explorer:</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 720</span>
-<span class="normal"> 721</span>
-<span class="normal"> 722</span>
-<span class="normal"> 723</span>
-<span class="normal"> 724</span>
-<span class="normal"> 725</span>
-<span class="normal"> 726</span>
-<span class="normal"> 727</span>
-<span class="normal"> 728</span>
-<span class="normal"> 729</span>
-<span class="normal"> 730</span>
-<span class="normal"> 731</span>
-<span class="normal"> 732</span>
-<span class="normal"> 733</span>
-<span class="normal"> 734</span>
-<span class="normal"> 735</span>
-<span class="normal"> 736</span>
-<span class="normal"> 737</span>
-<span class="normal"> 738</span>
-<span class="normal"> 739</span>
-<span class="normal"> 740</span>
-<span class="normal"> 741</span>
-<span class="normal"> 742</span>
-<span class="normal"> 743</span>
-<span class="normal"> 744</span>
-<span class="normal"> 745</span>
-<span class="normal"> 746</span>
-<span class="normal"> 747</span>
-<span class="normal"> 748</span>
-<span class="normal"> 749</span>
-<span class="normal"> 750</span>
-<span class="normal"> 751</span>
-<span class="normal"> 752</span>
-<span class="normal"> 753</span>
-<span class="normal"> 754</span>
-<span class="normal"> 755</span>
-<span class="normal"> 756</span>
-<span class="normal"> 757</span>
-<span class="normal"> 758</span>
-<span class="normal"> 759</span>
-<span class="normal"> 760</span>
-<span class="normal"> 761</span>
-<span class="normal"> 762</span>
-<span class="normal"> 763</span>
-<span class="normal"> 764</span>
-<span class="normal"> 765</span>
-<span class="normal"> 766</span>
-<span class="normal"> 767</span>
-<span class="normal"> 768</span>
-<span class="normal"> 769</span>
-<span class="normal"> 770</span>
-<span class="normal"> 771</span>
-<span class="normal"> 772</span>
-<span class="normal"> 773</span>
-<span class="normal"> 774</span>
-<span class="normal"> 775</span>
-<span class="normal"> 776</span>
-<span class="normal"> 777</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 777</span>
 <span class="normal"> 778</span>
 <span class="normal"> 779</span>
 <span class="normal"> 780</span>
@@ -6261,7 +6204,63 @@ API explorer:</p>
 <span class="normal">1009</span>
 <span class="normal">1010</span>
 <span class="normal">1011</span>
-<span class="normal">1012</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
+<span class="normal">1012</span>
+<span class="normal">1013</span>
+<span class="normal">1014</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span>
+<span class="normal">1023</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span>
+<span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span>
+<span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_bgp_peerings</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -6527,9 +6526,8 @@ API explorer:</p>
         <span class="c1"># Remove deleted sessions</span>
         <span class="k">for</span> <span class="n">session_name</span> <span class="ow">in</span> <span class="n">sessions_to_remove</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">session_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;removed deleted session &#39;</span><span class="si">{</span><span class="n">session_name</span><span class="si">}</span><span class="s2">&#39; from cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
-                <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;removed deleted session &#39;</span><span class="si">{</span><span class="n">session_name</span><span class="si">}</span><span class="s2">&#39; from cache for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Fetch updated/new sessions</span>

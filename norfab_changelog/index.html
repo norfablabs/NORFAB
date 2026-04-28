@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#0172" class="md-skip">
+        <a href="#0173" class="md-skip">
           Skip to content
         </a>
       
@@ -4150,10 +4150,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#enhancements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FEATURES
+        ENHANCEMENTS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BUGS
       
     </span>
   </a>
@@ -5480,10 +5491,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#enhancements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FEATURES
+        ENHANCEMENTS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BUGS
       
     </span>
   </a>
@@ -5510,6 +5532,17 @@
   
 
 
+<h1 id="0173">0.17.3<a class="headerlink" href="#0173" title="Permanent link">¤</a></h1>
+<h2 id="enhancements">ENHANCEMENTS<a class="headerlink" href="#enhancements" title="Permanent link">¤</a></h2>
+<ol>
+<li>Improving logic for local ip sourcing for BGP sessions</li>
+</ol>
+<h2 id="bugs">BUGS<a class="headerlink" href="#bugs" title="Permanent link">¤</a></h2>
+<ol>
+<li>Fixing BGP sessions name forming for Netbox sync bgp tasks</li>
+<li>Fixing deepdiff dependency for Netbox service</li>
+</ol>
+<hr />
 <h1 id="0172">0.17.2<a class="headerlink" href="#0172" title="Permanent link">¤</a></h1>
 <h2 id="features">FEATURES<a class="headerlink" href="#features" title="Permanent link">¤</a></h2>
 <ol>
@@ -5531,7 +5564,7 @@
 <li>Netbox get connections added remote interface MAC addresses extraction</li>
 <li>Nornir tests markdown report added timestamps and duration summary</li>
 </ol>
-<h2 id="bugs">BUGS<a class="headerlink" href="#bugs" title="Permanent link">¤</a></h2>
+<h2 id="bugs_1">BUGS<a class="headerlink" href="#bugs_1" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixing get connections handling for provider network</li>
 <li>Fixing client and worker job db timestamps handling for created_at</li>
@@ -5591,7 +5624,7 @@
 <li>Policies are evaluated top-down, first matching entry wins</li>
 <li>If no policy entry matches, tool is allowed by default</li>
 </ol>
-<h2 id="bugs_1">BUGS<a class="headerlink" href="#bugs_1" title="Permanent link">¤</a></h2>
+<h2 id="bugs_2">BUGS<a class="headerlink" href="#bugs_2" title="Permanent link">¤</a></h2>
 <ol>
 <li>Nornir parse ttp enhancing return result to be for parsed template only to avoid extra data from other templates</li>
 <li>Netbox <code>get_connection</code> fixing handling of remote interface when it has no lag associated with it</li>
@@ -5599,13 +5632,13 @@
 </ol>
 <hr />
 <h1 id="0166">0.16.6<a class="headerlink" href="#0166" title="Permanent link">¤</a></h1>
-<h2 id="bugs_2">BUGS<a class="headerlink" href="#bugs_2" title="Permanent link">¤</a></h2>
+<h2 id="bugs_3">BUGS<a class="headerlink" href="#bugs_3" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixing Nornir parse_ttp task hosts filtering</li>
 </ol>
 <hr />
 <h1 id="0165">0.16.5<a class="headerlink" href="#0165" title="Permanent link">¤</a></h1>
-<h2 id="bugs_3">BUGS<a class="headerlink" href="#bugs_3" title="Permanent link">¤</a></h2>
+<h2 id="bugs_4">BUGS<a class="headerlink" href="#bugs_4" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixing Nornir N2G diagram calling UUID handling</li>
 </ol>
@@ -5641,7 +5674,7 @@
 </ol>
 <hr />
 <h1 id="0163">0.16.3<a class="headerlink" href="#0163" title="Permanent link">¤</a></h1>
-<h2 id="bugs_4">BUGS<a class="headerlink" href="#bugs_4" title="Permanent link">¤</a></h2>
+<h2 id="bugs_5">BUGS<a class="headerlink" href="#bugs_5" title="Permanent link">¤</a></h2>
 <ol>
 <li>Enhancing error handling for worker results compress to not fail silently if task returns data that is not JSON serializable</li>
 <li>Fixing get_interfaces and get_devies output models validation handling</li>
@@ -5671,7 +5704,7 @@
 </ol>
 <hr />
 <h1 id="0162">0.16.2<a class="headerlink" href="#0162" title="Permanent link">¤</a></h1>
-<h2 id="bugs_5">BUGS<a class="headerlink" href="#bugs_5" title="Permanent link">¤</a></h2>
+<h2 id="bugs_6">BUGS<a class="headerlink" href="#bugs_6" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixing markdown tests report to calculate success rate correctly</li>
 <li>Fixing Nornir cli input model to allow either commands or run_ttp to be provided</li>
@@ -5696,7 +5729,7 @@
 </ol>
 <hr />
 <h1 id="0161">0.16.1<a class="headerlink" href="#0161" title="Permanent link">¤</a></h1>
-<h2 id="bugs_6">BUGS<a class="headerlink" href="#bugs_6" title="Permanent link">¤</a></h2>
+<h2 id="bugs_7">BUGS<a class="headerlink" href="#bugs_7" title="Permanent link">¤</a></h2>
 <ol>
 <li>Fixing Netbox dependency for data-model-generator library</li>
 <li>Fixing Netbox get_interface queries performance</li>
@@ -5750,7 +5783,7 @@
 <p>Refactoring broker to use <code>orjson</code> instead of <code>json</code> library</p>
 </li>
 </ol>
-<h2 id="bugs_7">BUGS<a class="headerlink" href="#bugs_7" title="Permanent link">¤</a></h2>
+<h2 id="bugs_8">BUGS<a class="headerlink" href="#bugs_8" title="Permanent link">¤</a></h2>
 <ol>
 <li>NFCLI netbox get functions - adding missing pipe models</li>
 <li>Client - fixing race condition when calling destroy and dispatcher threads still using zmq socket</li>
@@ -5759,7 +5792,7 @@
 </ol>
 <hr />
 <h2 id="0154">0.15.4<a class="headerlink" href="#0154" title="Permanent link">¤</a></h2>
-<h3 id="bugs_8">BUGS<a class="headerlink" href="#bugs_8" title="Permanent link">¤</a></h3>
+<h3 id="bugs_9">BUGS<a class="headerlink" href="#bugs_9" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing FastMCP service tool calling results validation and adding additional tool calling tests</li>
 </ol>
@@ -5818,13 +5851,13 @@
 <ol>
 <li>Nornir - Removed complete output from tests markdown report</li>
 </ol>
-<h3 id="bugs_9">BUGS<a class="headerlink" href="#bugs_9" title="Permanent link">¤</a></h3>
+<h3 id="bugs_10">BUGS<a class="headerlink" href="#bugs_10" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox - <code>get_connections</code> fixing parent endpoint handling for virtual interfaces</li>
 </ol>
 <hr />
 <h2 id="0152">0.15.2<a class="headerlink" href="#0152" title="Permanent link">¤</a></h2>
-<h3 id="bugs_10">BUGS<a class="headerlink" href="#bugs_10" title="Permanent link">¤</a></h3>
+<h3 id="bugs_11">BUGS<a class="headerlink" href="#bugs_11" title="Permanent link">¤</a></h3>
 <ol>
 <li>NorFab nfcli - Fixing show jobs call</li>
 </ol>
@@ -5841,7 +5874,7 @@
 </ol>
 <hr />
 <h2 id="0151">0.15.1<a class="headerlink" href="#0151" title="Permanent link">¤</a></h2>
-<h3 id="bugs_11">BUGS<a class="headerlink" href="#bugs_11" title="Permanent link">¤</a></h3>
+<h3 id="bugs_12">BUGS<a class="headerlink" href="#bugs_12" title="Permanent link">¤</a></h3>
 <ol>
 <li>Nornir service watchdog - fixing <code>connection_idle_timeout</code> handling</li>
 <li>Netbox service - fixing <code>ssl_verify</code> handling to suppress <code>InsecureRequestWarning</code></li>
@@ -5885,7 +5918,7 @@
 <li>Netbox service - added integration with Netbox BGP Plugin in a form of <code>get_bgp_peerings</code> task to fetch BGP sessions data for devices, added nfcli shell command to call <code>get_bgp_peerings</code> task.</li>
 <li>Netbox service - <code>get_nornir_inventory</code> task added support for <code>bgp_sessions</code> argument. if True, fetched devices' BGP peerings from netbox and stores them under <code>bgp_sessions</code> key in host's data.</li>
 </ol>
-<h3 id="bugs_12">BUGS<a class="headerlink" href="#bugs_12" title="Permanent link">¤</a></h3>
+<h3 id="bugs_13">BUGS<a class="headerlink" href="#bugs_13" title="Permanent link">¤</a></h3>
 <ol>
 <li>Nornir tests markdown - fixed detailed output handling to not collect suite into summary table</li>
 <li>Nfcli - fixed show client command function calling</li>
@@ -5924,13 +5957,13 @@
 </ol>
 <hr />
 <h2 id="0126">0.12.6<a class="headerlink" href="#0126" title="Permanent link">¤</a></h2>
-<h3 id="bugs_13">BUGS<a class="headerlink" href="#bugs_13" title="Permanent link">¤</a></h3>
+<h3 id="bugs_14">BUGS<a class="headerlink" href="#bugs_14" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox service - fixed get_circuits handling bug, was not returning circuits data due to recent code refactoring, updated test to catch this kind of an issue.</li>
 </ol>
 <hr />
 <h2 id="0125">0.12.5<a class="headerlink" href="#0125" title="Permanent link">¤</a></h2>
-<h3 id="bugs_14">BUGS<a class="headerlink" href="#bugs_14" title="Permanent link">¤</a></h3>
+<h3 id="bugs_15">BUGS<a class="headerlink" href="#bugs_15" title="Permanent link">¤</a></h3>
 <ol>
 <li>Containerlab - fixing error handling when result is None</li>
 <li>Workflow - fixed emitting event progress for cli shell</li>
@@ -5956,7 +5989,7 @@
 </ol>
 <hr />
 <h2 id="0124">0.12.4<a class="headerlink" href="#0124" title="Permanent link">¤</a></h2>
-<h3 id="bugs_15">BUGS<a class="headerlink" href="#bugs_15" title="Permanent link">¤</a></h3>
+<h3 id="bugs_16">BUGS<a class="headerlink" href="#bugs_16" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox worker - fixing handling of Netbox instance for child subnet creation</li>
 </ol>
@@ -5966,7 +5999,7 @@
 </ol>
 <hr />
 <h2 id="0123">0.12.3<a class="headerlink" href="#0123" title="Permanent link">¤</a></h2>
-<h3 id="bugs_16">BUGS<a class="headerlink" href="#bugs_16" title="Permanent link">¤</a></h3>
+<h3 id="bugs_17">BUGS<a class="headerlink" href="#bugs_17" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing handling of entry points for sourcing norfab workers plugins for Py3.10+</li>
 </ol>
@@ -5985,7 +6018,7 @@
 </ol>
 <hr />
 <h2 id="0121">0.12.1<a class="headerlink" href="#0121" title="Permanent link">¤</a></h2>
-<h3 id="bugs_17">BUGS<a class="headerlink" href="#bugs_17" title="Permanent link">¤</a></h3>
+<h3 id="bugs_18">BUGS<a class="headerlink" href="#bugs_18" title="Permanent link">¤</a></h3>
 <ol>
 <li>Netbox service - restored Netbox v4.2.0 support</li>
 <li>Fixing Picle shell netbox get interfaces to have <code>interface_regex</code> argument</li>
@@ -5993,7 +6026,7 @@
 </ol>
 <hr />
 <h2 id="0120">0.12.0<a class="headerlink" href="#0120" title="Permanent link">¤</a></h2>
-<h3 id="bugs_18">BUGS<a class="headerlink" href="#bugs_18" title="Permanent link">¤</a></h3>
+<h3 id="bugs_19">BUGS<a class="headerlink" href="#bugs_19" title="Permanent link">¤</a></h3>
 <ol>
 <li>FastAPI Service - fixing JSON references for OpenAPI schema, which previously broken led to error in swagger and redoc UIs rendering.</li>
 </ol>
@@ -6014,13 +6047,13 @@
 <li>Moving to Python 3.10 as primary supported version instead of 3.9 due to addition of FastMCP service which only supports Py3.10 and up.</li>
 <li>Updated build dockerfiles to use <code>python:3.10-slim-trixie</code> as a base image</li>
 </ol>
-<h3 id="bugs_19">BUGS<a class="headerlink" href="#bugs_19" title="Permanent link">¤</a></h3>
+<h3 id="bugs_20">BUGS<a class="headerlink" href="#bugs_20" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing FastAPI worker argument handling by setting it to <code>all</code> by default</li>
 </ol>
 <hr />
 <h2 id="0111">0.11.1<a class="headerlink" href="#0111" title="Permanent link">¤</a></h2>
-<h3 id="bugs_20">BUGS<a class="headerlink" href="#bugs_20" title="Permanent link">¤</a></h3>
+<h3 id="bugs_21">BUGS<a class="headerlink" href="#bugs_21" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed containerlab show lab outputting</li>
 <li>Enhanced nfcli logic to be able to start broker and workers only without a client</li>
@@ -6040,7 +6073,7 @@
 <li>Netbox Service - added support for branching plugin, made create and update tasks be branch aware, updated nfcli shells to support <code>branch</code> argument</li>
 <li>Netbox Service - added <code>delete_branch</code> task</li>
 </ol>
-<h3 id="bugs_21">BUGS<a class="headerlink" href="#bugs_21" title="Permanent link">¤</a></h3>
+<h3 id="bugs_22">BUGS<a class="headerlink" href="#bugs_22" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing nornir test picle shell test task handling for verbose-result and dry-run</li>
 <li>Fixing nornir test handling for when suite renders to empty tests for a host</li>
@@ -6066,7 +6099,7 @@
 </ol>
 <hr />
 <h2 id="091">0.9.1<a class="headerlink" href="#091" title="Permanent link">¤</a></h2>
-<h3 id="bugs_22">BUGS<a class="headerlink" href="#bugs_22" title="Permanent link">¤</a></h3>
+<h3 id="bugs_23">BUGS<a class="headerlink" href="#bugs_23" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing list and dict annotations to also allow None values for workers tasks.</li>
 </ol>
@@ -6094,13 +6127,13 @@
 </ol>
 <hr />
 <h2 id="082">0.8.2<a class="headerlink" href="#082" title="Permanent link">¤</a></h2>
-<h3 id="bugs_23">BUGS<a class="headerlink" href="#bugs_23" title="Permanent link">¤</a></h3>
+<h3 id="bugs_24">BUGS<a class="headerlink" href="#bugs_24" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed nornir inventory load from containerlab handling</li>
 </ol>
 <hr />
 <h2 id="081">0.8.1<a class="headerlink" href="#081" title="Permanent link">¤</a></h2>
-<h3 id="bugs_24">BUGS<a class="headerlink" href="#bugs_24" title="Permanent link">¤</a></h3>
+<h3 id="bugs_25">BUGS<a class="headerlink" href="#bugs_25" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed <code>show containerlab inventory</code> command</li>
 <li>Fixed Nornir Worker inventory load handling</li>
@@ -6131,7 +6164,7 @@
 <li>Updated CLI shells to support PICLE 0.9.0</li>
 <li>Enhanced Netbox service to support working with instances of Netbox of different major and minor releases</li>
 </ol>
-<h3 id="bugs_25">BUGS<a class="headerlink" href="#bugs_25" title="Permanent link">¤</a></h3>
+<h3 id="bugs_26">BUGS<a class="headerlink" href="#bugs_26" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed broker to allow workers reconnect on restart.</li>
 </ol>
@@ -6216,7 +6249,7 @@
 </ol>
 <hr />
 <h2 id="024">0.2.4<a class="headerlink" href="#024" title="Permanent link">¤</a></h2>
-<h3 id="bugs_26">BUGS<a class="headerlink" href="#bugs_26" title="Permanent link">¤</a></h3>
+<h3 id="bugs_27">BUGS<a class="headerlink" href="#bugs_27" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed nfcli <code>--workers-list</code> handling</li>
 <li>Fixed <code>job_data</code> url handling for nornir cli/cfg/test tasks</li>
@@ -6257,7 +6290,7 @@
 <li>refactored <code>get_circuits</code> to use <code>ThreadPoolExecutor</code> to fetch circuits path from netbox</li>
 <li>adding <code>job_data</code> json load to nornir cli, cfg and test tasks</li>
 </ol>
-<h3 id="bugs_27">BUGS<a class="headerlink" href="#bugs_27" title="Permanent link">¤</a></h3>
+<h3 id="bugs_28">BUGS<a class="headerlink" href="#bugs_28" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixing netbox <code>get_devices</code> dry run test</li>
 <li>Fixed netbox <code>get_circuits</code> devices site retrieval handling</li>
@@ -6269,7 +6302,7 @@
 </ol>
 <hr />
 <h2 id="011">0.1.1<a class="headerlink" href="#011" title="Permanent link">¤</a></h2>
-<h3 id="bugs_28">BUGS<a class="headerlink" href="#bugs_28" title="Permanent link">¤</a></h3>
+<h3 id="bugs_29">BUGS<a class="headerlink" href="#bugs_29" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed Netbox CLI Shell handling of NFCLIENT</li>
 </ol>
@@ -6298,7 +6331,7 @@
 <li>Added <code>show jobs summary</code> and <code>show jobs details</code> commands to NorFab shell and to Nornir shell</li>
 <li>Added <code>--create-env</code> argument to nfcli utility to create NorFab folders and files to make it easier to get started using norfab</li>
 </ol>
-<h3 id="bugs_29">BUGS<a class="headerlink" href="#bugs_29" title="Permanent link">¤</a></h3>
+<h3 id="bugs_30">BUGS<a class="headerlink" href="#bugs_30" title="Permanent link">¤</a></h3>
 <ol>
 <li>Fixed Nornir Service Watchdog to clean up dead connections from hosts data</li>
 </ol>

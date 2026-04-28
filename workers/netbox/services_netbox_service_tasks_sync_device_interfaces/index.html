@@ -6485,19 +6485,19 @@ automatically creates branch if it does not exist in Netbox.</p>
                             <span class="k">if</span> <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;speed&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                 <span class="n">new_intf</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_data</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1000</span>
 
-                            <span class="n">mac_address</span> <span class="o">=</span> <span class="p">(</span>
-                                <span class="n">interface_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mac_address&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-                                <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                                <span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                            <span class="p">)</span>
-                            <span class="k">if</span> <span class="n">mac_address</span> <span class="ow">and</span> <span class="n">mac_address</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]:</span>
-                                <span class="n">mac_addresses_to_create</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                                    <span class="p">{</span>
-                                        <span class="s2">&quot;mac_address&quot;</span><span class="p">:</span> <span class="n">mac_address</span><span class="p">,</span>
-                                        <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
-                                        <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_intf</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span>
-                                    <span class="p">}</span>
-                                <span class="p">)</span>
+                            <span class="c1"># mac_address = (</span>
+                            <span class="c1">#     interface_data.get(&quot;mac_address&quot;, &quot;&quot;)</span>
+                            <span class="c1">#     .strip()</span>
+                            <span class="c1">#     .lower()</span>
+                            <span class="c1"># )</span>
+                            <span class="c1"># if mac_address and mac_address not in [&quot;none&quot;, &quot;&quot;]:</span>
+                            <span class="c1">#     mac_addresses_to_create.append(</span>
+                            <span class="c1">#         {</span>
+                            <span class="c1">#             &quot;mac_address&quot;: mac_address,</span>
+                            <span class="c1">#             &quot;assigned_object_type&quot;: &quot;dcim.interface&quot;,</span>
+                            <span class="c1">#             &quot;assigned_object_id&quot;: int(nb_intf[&quot;id&quot;]),</span>
+                            <span class="c1">#         }</span>
+                            <span class="c1">#     )</span>
 
                             <span class="n">interfaces_to_create</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_intf</span><span class="p">)</span>
                             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">host</span><span class="p">][</span><span class="n">create_key</span><span class="p">][</span><span class="n">intf_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_intf</span>
