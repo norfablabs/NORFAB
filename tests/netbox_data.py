@@ -380,6 +380,7 @@ prefixes = [
     {"prefix": "1.0.1.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.100.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.10.0/24", "description": "Subinterface addresses"},
+    {"prefix": "192.168.100.0/24", "description": "Test IP allocation by role and site", "role": "prefix_role_1", "scope_type": "dcim.site", "scope_name": "NORFAB-LAB"}
 ]
 
 prefix_roles = [

@@ -3163,6 +3163,12 @@ class TestSyncDeviceIP:
 class TestCreateIP:
     nb_version = None
 
+    def setup_method(self):
+        pass
+
+    def teardown_method(self):
+        pass
+
     def test_create_ip_by_prefix(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
@@ -3248,6 +3254,42 @@ class TestCreateIP:
             assert (
                 res1["result"]["description"] == res2["result"]["description"]
             ), "Should have been same IP description"
+
+    def test_create_ip_by_prefix_role_and_site(self, nfclient):
+        delete_ips("192.168.100.0/24", nfclient)
+
+        create_1 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": {"role__name": "PREFIX_ROLE_1".lower(), "site": "NORFAB-LAB".lower()},
+                "description": f"test create ip by prefix role and site 1st",
+            },
+        )
+
+        create_2 = nfclient.run_job(
+            "netbox",
+            "create_ip",
+            workers="any",
+            kwargs={
+                "prefix": {"role": "PREFIX_ROLE_1".lower(), "site": "NORFAB-LAB".lower()},
+                "description": f"test create ip by prefix role and site 2nd",
+            },
+        )
+        print("create_1")
+        pprint.pprint(create_1, width=200)
+        print("create_2")
+        pprint.pprint(create_2, width=200)
+
+        for worker, res1 in create_1.items():
+            assert res1["failed"] == False, "Allocation failed"
+            assert res1["result"]["address"], f"Result has no ip {res1['result']}"
+
+        for worker, res2 in create_2.items():
+            assert res2["failed"] == False, "Allocation failed"
+            assert res2["result"]["address"], f"Result has no ip {res2['result']}"
+
 
     def test_create_ip_by_prefix_multiple(self, nfclient):
         if self.nb_version is None:
@@ -4820,6 +4862,53 @@ class TestCreatePrefix:
                 workers="any",
                 kwargs={
                     "parent": "TEST CREATE PREFIXES",
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            print("create_1")
+            pprint.pprint(create_1, width=200)
+            print("create_2")
+            pprint.pprint(create_2, width=200)
+
+            for worker, res1 in create_1.items():
+                assert res1["failed"] == False, "Allocation failed"
+                assert res1["result"][
+                    "prefix"
+                ], f"Result has no prefix {res1['result']}"
+
+            worker, res2 = tuple(create_2.items())[0]
+            assert (
+                res1["result"]["prefix"] == res2["result"]["prefix"]
+            ), "Should have been same prefix"
+            assert (
+                res1["result"]["description"] == res2["result"]["description"]
+            ), "Should have been same prefix description"
+
+    def test_create_prefix_by_parent_prefix_dictionary(self, nfclient):
+        if self.nb_version is None:
+            self.nb_version = get_nb_version(nfclient)
+
+        delete_prefixes_within("10.1.0.0/24", nfclient)
+
+        rand = random.randint(1, 1000)
+        if self.nb_version[0] == 4:
+            create_1 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": {"description": "TEST CREATE PREFIXES"},
+                    "prefixlen": 30,
+                    "description": f"test create prefix {rand}",
+                },
+            )
+            create_2 = nfclient.run_job(
+                "netbox",
+                "create_prefix",
+                workers="any",
+                kwargs={
+                    "parent": {"description": "TEST CREATE PREFIXES"},
                     "prefixlen": 30,
                     "description": f"test create prefix {rand}",
                 },

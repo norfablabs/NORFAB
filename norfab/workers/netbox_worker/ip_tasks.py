@@ -52,7 +52,8 @@ class NetboxIpTasks:
                 - IPv6 prefix string e.g. 2001::/64
                 - Prefix description string to filter by
                 - Dictionary with prefix filters to feed `pynetbox` get method
-                    e.g. `{"prefix": "10.0.0.0/24", "site__name": "foo"}`
+                    e.g. `{"prefix": "10.0.0.0/24", "site": "foo", "role": "bar"}`, 
+                    site and role referred to by slugs not by their names.
 
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.

@@ -99,7 +99,7 @@ class NetboxPrefixTasks:
                 - IPv6 prefix string e.g. 2001::/64
                 - Prefix description string to filter by
                 - Dictionary with prefix filters for `pynetbox` prefixes.get method
-                    e.g. `{"prefix": "10.0.0.0/24", "site__name": "foo"}`
+                    e.g. `{"prefix": "10.0.0.0/24", "site": "foo"}`
 
             description (str): Description for the new prefix, prefix description used for
                 deduplication to source existing prefixes.
@@ -155,6 +155,8 @@ class NetboxPrefixTasks:
                 parent_filters = {"description": parent, "vrf__name": vrf}
             elif is_network is False:
                 parent_filters = {"description": parent}
+        elif isinstance(parent, dict):
+            parent_filters = parent
         nb_parent_prefix = nb.ipam.prefixes.get(**parent_filters)
         if not nb_parent_prefix:
             raise NetboxAllocationError(

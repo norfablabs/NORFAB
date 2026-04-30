@@ -1,3 +1,11 @@
+# 0.17.4
+
+## BUGS
+
+1. Fixing Netbox prefix allocation with parent filtering by dictionary
+
+---
+
 # 0.17.3
 
 ## ENHANCEMENTS
