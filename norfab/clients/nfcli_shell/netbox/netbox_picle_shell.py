@@ -38,7 +38,9 @@ from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_get_interfaces import GetInterfaces
 from .netbox_picle_shell_create_bgp_peering import CreateBgpPeeringShell
 from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
-from .netbox_picle_shell_sync_device import SyncDeviceCommands
+from .netbox_picle_shell_sync_device import SyncDeviceInventoryShell
+from .netbox_picle_shell_sync_interfaces import SyncInterfacesShell
+from .netbox_picle_shell_sync_ip_addresses import SyncIpAddressesShell
 from .netbox_picle_shell_update_bgp_peering import UpdateBgpPeeringShell
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
 
@@ -268,7 +270,20 @@ class CreateCommands(BaseModel):
 
 
 class SyncCommands(BaseModel):
-    device: SyncDeviceCommands = Field(None, description="Sync from device into Netbox")
+    device_inventory: SyncDeviceInventoryShell = Field(
+        None,
+        description="Sync device inventory facts e.g. serial number",
+        alias="device-inventory",
+    )
+    interfaces: SyncInterfacesShell = Field(
+        None,
+        description="Sync device interfaces with NetBox",
+    )
+    ip_addresses: SyncIpAddressesShell = Field(
+        None,
+        description="Sync device interface IP addresses with NetBox",
+        alias="ip-addresses",
+    )
     bgp_peerings: SyncBgpPeeringsShell = Field(
         None,
         description="Sync BGP peering sessions",

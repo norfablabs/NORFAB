@@ -1908,7 +1908,7 @@ class NetboxBgpPeeringsTasks:
         # Fetch existing NetBox BGP sessions
         job.event(f"fetching BGP session data from Netbox for {len(devices)} device(s)")
         nb_sessions_result = self.get_bgp_peerings(
-            job=job, instance=instance, devices=devices, cache=True
+            job=job, instance=instance, devices=devices, cache="refresh"
         )
         if nb_sessions_result.errors:
             ret.errors.extend(nb_sessions_result.errors)
@@ -2094,7 +2094,7 @@ class NetboxBgpPeeringsTasks:
                 vrf_custom_field=vrf_custom_field,
             )
             ret.errors.extend(create_result.errors)
-            created_names = set(create_result.result.get("created", []))
+            created_names = create_result.result.get("created", [])
             for device_name, actions in full_diff.items():
                 for sname in actions["create"]:
                     if sname in created_names:

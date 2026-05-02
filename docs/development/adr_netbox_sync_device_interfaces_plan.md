@@ -1,4 +1,4 @@
-# NetBox sync_device_interfaces Refactor Plan
+# ADR - NetBox sync_device_interfaces Refactor Plan
 
 ## Overview
 
@@ -16,6 +16,12 @@ Primary data source for live state:
 Primary data source for NetBox state:
 - `self.get_interfaces(...)` with additional data required for interface, MAC,
   and IP reconciliation
+
+Modeling
+- create or update pydantic models for handling tasks input
+
+PICLE SHell
+- Create or update PICLE shell models
 
 ---
 

@@ -7,7 +7,7 @@ tags:
 
 > task api name: `sync_device_interfaces`
 
-The Netbox Sync Device Interfaces Task is a feature of the NorFab Netbox Service that allows you to synchronize and update the interface data of your network devices in Netbox. This task ensures that the interface configurations in Netbox are accurate and up-to-date, reflecting the current state of your network infrastructure.
+The Netbox Sync Device Interfaces Task is a feature of the NorFab Netbox Service that synchronizes device interfaces with NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan for interface, MAC, and IP create/update/delete operations.
 
 Keeping interface data accurate and up-to-date is crucial for effective network management. The Netbox Update Device Interfaces Task automates the process of updating interface information, such as interface names, statuses, mac addresses, and other relevant details.
 
@@ -15,7 +15,13 @@ Keeping interface data accurate and up-to-date is crucial for effective network 
 
 Update device interfaces task is branch aware and can push updates to the branch. [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) need to be installed on Netbox instance.
 
-**How it works** - Netbox worker on a call to update interfaces task fetches live data from network devices using nominated datasource, by default it is Nornir service [parse](../nornir/services_nornir_service_tasks_parse.md) task using NAPALM `get_interfaces` getter. Once data retrieved from network, Netbox worker updates records in Netbox database for device interfaces.
+**How it works** - Netbox worker fetches live data from network devices using Nornir [parse](../nornir/services_nornir_service_tasks_parse.md) tasks, normalizes both live and NetBox interface state to a common schema, computes a DeepDiff, builds deterministic action plans, and applies operations in this order:
+
+1. Interface create
+2. Interface update
+3. MAC reconcile
+4. IP reconcile
+5. Interface delete (only when delete is enabled)
 
 ![Netbox Update Device Interfaces](../../images/Netbox_Service_Sync_Interfaces.jpg)
 
@@ -27,7 +33,7 @@ Update device interfaces task is branch aware and can push updates to the branch
 
 4. Datasource returns devices interfaces data back to Netbox Service worker
 
-5. Netbox worker processes device interfaces data and updates records in Netbox for requested devices
+5. Netbox worker applies planned actions and returns per-device action summaries and diffs
 
 ## Limitations
 
@@ -86,6 +92,8 @@ root
                 │       ├── diff-last:    File version number to diff, default is 1 (last)
                 │       └── progress:    Display progress events, default 'True'
                 ├── batch-size:    Number of devices to process at a time, default '10'
+                ├── create:    Create interfaces present in live data but absent in NetBox, default 'True'
+                ├── delete:    Delete interfaces present in NetBox but absent in live data, default 'False'
                 └── branch:    Branching plugin branch name to use
 nf#
 ```

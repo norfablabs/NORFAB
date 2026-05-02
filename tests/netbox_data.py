@@ -410,7 +410,37 @@ ip_addresses = [
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
 
-vlans = [{"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)]
+vlans = [
+    {"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)
+]
+vlans.extend(
+    [
+        {"name": "TEST_L1_TRUNK_A", "vid": 110},
+        {"name": "TEST_L1_TRUNK_B", "vid": 111},
+        {"name": "TEST_L1_ACCESS",  "vid": 210},
+        {"name": "TEST_L1_SUBIF",   "vid": 310},
+
+        {"name": "TEST_L2_TRUNK_A", "vid": 120},
+        {"name": "TEST_L2_TRUNK_B", "vid": 121},
+        {"name": "TEST_L2_ACCESS",  "vid": 220},
+        {"name": "TEST_L2_SUBIF",   "vid": 320},
+
+        {"name": "TEST_L3_TRUNK_A", "vid": 130},
+        {"name": "TEST_L3_TRUNK_B", "vid": 131},
+        {"name": "TEST_L3_ACCESS",  "vid": 230},
+        {"name": "TEST_L3_SUBIF",   "vid": 330},
+
+        {"name": "TEST_S1_TRUNK_A", "vid": 410},
+        {"name": "TEST_S1_TRUNK_B", "vid": 411},
+        {"name": "TEST_S1_ACCESS",  "vid": 510},
+        {"name": "TEST_S1_SUBIF",   "vid": 610},
+
+        {"name": "TEST_S2_TRUNK_A", "vid": 420},
+        {"name": "TEST_S2_TRUNK_B", "vid": 421},
+        {"name": "TEST_S2_ACCESS",  "vid": 520},
+        {"name": "TEST_S2_SUBIF",   "vid": 620},
+    ]
+)
 
 # generated lab topology for scale testing
 bulk_connection_device_names = [f"bulk-conn-{i:02d}" for i in range(1, 11)]

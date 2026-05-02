@@ -1,0 +1,65 @@
+vlan 410
+   name TEST_S1_TRUNK_A
+vlan 411
+   name TEST_S1_TRUNK_B
+vlan 510
+   name TEST_S1_ACCESS
+vlan 610
+   name TEST_S1_SUBIF
+!
+interface Loopback10
+   description TEST_SYNC_LOOPBACK_IPV4
+   ip address 10.3.4.1/32
+   ipv6 address 2001:beef:10:4::1/128
+!
+interface Loopback250
+   description TEST_SYNC_ANYCAST_IPV4
+   ip address 10.3.250.250/32
+   ipv6 address 2001:beef:250::250/128
+!
+interface Loopback11
+   description TEST_SYNC_LOOPBACK_IPV6
+   ipv6 address 2001:beef:10:4::11/128
+!
+interface Ethernet6
+   description TEST_SYNC_LAG_MEMBER_A
+   channel-group 41 mode active
+   no shutdown
+!
+interface Ethernet7
+   description TEST_SYNC_LAG_MEMBER_B
+   channel-group 41 mode active
+   no shutdown
+!
+interface Port-Channel41
+   description TEST_SYNC_LAG_TRUNK
+   switchport mode trunk
+   switchport trunk native vlan 410
+   switchport trunk allowed vlan 410,411,510
+   no shutdown
+!
+interface Ethernet8
+   description TEST_SYNC_ACCESS_PORT
+   switchport mode access
+   switchport access vlan 510
+   no shutdown
+!
+interface Vlan510
+   description TEST_SYNC_SVI_PRIMARY_SECONDARY
+   ip address 10.3.14.33/29
+   ipv6 address 2001:beef:11:4::32/64
+   no shutdown
+!
+interface Ethernet9
+   description TEST_SYNC_ROUTED_WITH_MAC
+   no switchport
+   mac-address 0200.0011.0009
+   ip address 10.3.15.33/30
+   no shutdown
+!
+interface Ethernet9.610
+   description TEST_SYNC_SUBINTERFACE
+   encapsulation dot1q vlan 610
+   ip address 10.3.16.37/30
+!
+end

@@ -3,7 +3,7 @@ import logging
 
 from picle.models import Outputters
 
-from norfab.workers.netbox_worker.netbox_models import CreateDeviceInterfacesInput
+from norfab.workers.netbox_worker.interfaces_tasks import CreateDeviceInterfacesInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
