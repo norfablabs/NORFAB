@@ -11,6 +11,25 @@ from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
 
+def resolve_ip_role(ip: str, intf_name: str, anycast_ranges: Union[None, str, list]):
+    if anycast_ranges and isinstance(anycast_ranges, str):
+        anycast_ranges = [anycast_ranges]
+
+    # check if IP is part of anycast ranges
+    if anycast_ranges:
+        ip_addr = ipaddress.ip_interface(str(ip)).ip
+        anycast_nets = []
+        for pfx in anycast_ranges:
+            # strict=False allows host/mask entries such as 192.0.2.1/24.
+            anycast_nets.append(ipaddress.ip_network(str(pfx), strict=False))
+        if any(ip_addr in net for net in anycast_nets):
+            return "anycast"
+
+    # check if interface is a loopback
+    if any(intf_name.lower().startswith(k) for k in ["loopback", "lo"]):
+        return "loopback"
+
+    return None
 
 class NetboxIpTasks:
 
@@ -560,5 +579,185 @@ class NetboxIpTasks:
             raise UnsupportedServiceError(
                 f"'{datasource}' datasource service not supported"
             )
+
+        return ret
+
+
+    def sync_ip_new(self):
+        device_results = {
+            device_name: {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": actions["in_sync"],
+                "mac_addresses": {
+                    "created": [],
+                    "updated": [],
+                    "in_sync": [],
+                },
+                "ip_addresses": {
+                    "created": [],
+                    "updated": [],
+                    "in_sync": [],
+                },
+                "prefixes": {
+                    "created": [],
+                    "updated": [],
+                    "in_sync": [],
+                },
+            }
+            for device_name, actions in full_diff.items()
+        }
+
+        # process IP and Prefixes
+        bulk_update_ip = {} # {(device, intf, ip): {ip data}}
+        bulk_create_ip = {} # {(device, intf, ip): {ip data}}
+        bulk_create_prefixes = []
+        bulk_update_prefixes = []
+        # collect all discovered IP addresses and prefixes
+        all_ip_live = [] 
+        all_prefixes_live = []
+        for device_name, interfaces in normalised_live_all.items():
+            nb_device = nb_devices_data[device_name]
+            nb_raw = nb_interfaces_result.result[device_name]
+            for intf_name, intf_data in interfaces.items():
+                for ip in (intf_data.get("ipv4_addresses") or []) + (intf_data.get("ipv6_addresses") or []):
+                    description = f"{device_name} {intf_name}"
+                    vrf = resolve_vrf(intf_data["vrf"], nb, job, ret, self.name)
+                    if vrf:
+                        description += f", VRF {vrf}"
+                    all_ip_live.append(
+                        {
+                            "device": device_name,
+                            "interface": intf_name,
+                            "address": ip,
+                            "vrf": vrf,
+                            "role": resolve_ip_role(ip, intf_name, anycast_ranges),
+                            "assigned_object_type": "dcim.interface",
+                            "assigned_object_id": nb_raw[intf_name]["id"],
+                            # "description": description
+                        }
+                    )
+                    all_prefixes_live.append(
+                        {
+                            "prefix": make_prefix_from_ip(ip),
+                            "vrf": vrf,
+                            "site": nb_device["site_id"],
+                        }
+                    )
+        # fetch existing IP addresses and prefixes from Netbox
+        nb_ips = [
+            {
+                "id": ip.id,
+                "address": ip.address,
+                "vrf": ip.vrf.id if ip.vrf else None,
+                "role": str(ip.role).lower(),
+                "assigned_object_id": ip.assigned_object.id if ip.assigned_object else None,
+                "device": ip.assigned_object.device.name if ip.assigned_object else None,
+                "interface": ip.assigned_object.name if ip.assigned_object else None,
+            }
+            for ip in nb.ipam.ip_addresses.filter(
+                address=[i["address"] for i in all_ip_live], 
+                fields="id,address,vrf,role,assigned_object"
+            )
+        ]
+        nb_prefixes = [
+            {
+                "id": pfx.id,
+                "prefix": pfx.prefix,
+                "vrf": pfx.vrf.id if pfx.vrf else None,
+                "scope_type": pfx.scope_type,
+                "scope_id": pfx.scope_id,
+            }
+            for pfx in nb.ipam.prefixes.filter(
+                prefix=[p["prefix"] for p in all_prefixes_live], 
+                fields="id,prefix,vrf,scope_id,scope_type"
+            )
+        ]
+        # process IP addresses
+        for ip_live in all_ip_live:
+            device_name = ip_live.pop("device")
+            intf_name = ip_live.pop("interface")
+            key = (device_name, intf_name, ip_live["address"])
+            # find existing Netbox IPs of same value
+            matching_nb_ips = [i for i in nb_ips if i["address"] == ip_live["address"]]
+            # no existing IP found, create it
+            if not matching_nb_ips:
+                bulk_create_ip[key] = ip_live
+                continue
+            # check if existing IP already assigned to same interface
+            for nb_ip in matching_nb_ips:
+                if nb_ip["assigned_object_id"]:
+                    # ip already assigned to same interface, update it
+                    if nb_ip["assigned_object_id"] == ip_live["assigned_object_id"]:
+                        # check if vrf or role need an update
+                        if any(nb_ip[k] != ip_live[k] for k in ["role", "vrf"] if ip_live[k]):
+                            ip_live["id"] = nb_ip["id"]
+                            bulk_update_ip[key] = ip_live
+                        break
+            # no IP assigned to same interface
+            else:
+                for nb_ip in matching_nb_ips:
+                    # existing NB IP already assigned to an interface
+                    if nb_ip["assigned_object_id"]:
+                        nb_ip_resolved_role = resolve_ip_role(nb_ip["address"], nb_ip["interface"], anycast_ranges) or nb_ip["role"]
+                        # add existign IP to updates if needed
+                        if nb_ip["role"] != nb_ip_resolved_role:
+                            nb_ip_key = (nb_ip["device"], nb_ip["interface"], nb_ip['address'])
+                            bulk_update_ip[nb_ip_key] = {
+                                "id": nb_ip["id"],
+                                "role": nb_ip_resolved_role
+                            }
+                        # create anycast ip if existing and discovered IPs are anycast
+                        if nb_ip_resolved_role == ip_live["role"] == "anycast":
+                            bulk_create_ip[key] = ip_live
+                            break
+                        # check if existing ip role did not resolve to anycast
+                        if nb_ip_resolved_role != "anycast":
+                            msg = (
+                                f"Duplicate non anycast ip found, {device_name}:{intf_name}->{ip_live['address']}, "
+                                f"overlaps with {nb_ip['device']}:{nb_ip['interface']}->{nb_ip['address']}"
+                            )
+                            log.error(msg)
+                            ret.errors.append(msg)
+                            job.event(msg, severity="ERROR")
+                            break
+
+                    # ip exists but not assigned to an interface - update it
+                    else:
+                        ip_live["id"] = nb_ip["id"]
+                        bulk_update_ip[key] = ip_live
+        # update first, since existing IPs might change role to Anycast
+        if bulk_update_ip:
+            try:
+                nb.ipam.ip_addresses.update(list(bulk_update_ip.values()))
+                job.event(f"updated {len(bulk_update_ip)} IP addresses")
+                for key in bulk_update_ip:
+                    device_name = key[0]
+                    ip_address = key[2]
+                    # updates might contain existing IPs that changed the role
+                    device_results.setdefault(device_name, {"ip_addresses": {"updated": []}})
+                    device_results[device_name]["ip_addresses"]["updated"].append(ip_address)
+            except Exception as e:
+                msg = f"failed to bulk update IP addresses: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+        # create new IPs next
+        if bulk_create_ip:
+            try:
+                nb.ipam.ip_addresses.create(list(bulk_create_ip.values()))
+                job.event(f"created {len(bulk_create_ip)} IP addresses")
+                for key in bulk_create_ip:
+                    device_name = key[0]
+                    ip_address = key[2]
+                    device_results[device_name]["ip_addresses"]["created"].append(ip_address)
+            except Exception as e:
+                msg = f"failed to bulk create IP addresses: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+        
+        # process prefixes
 
         return ret

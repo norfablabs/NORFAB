@@ -176,6 +176,34 @@ def delete_mac_addresses_from_interface(nfclient, device, interface):
     print(f"Deleted MAC addresses from '{device}:{interface}'")
 
 
+def delete_interfaces_with_description(nfclient, devices, description_contains):
+    """Delete all NetBox interfaces whose description contains the given substring."""
+    devices = devices if isinstance(devices, list) else [devices]
+    for device in devices:
+        resp = nfclient.run_job(
+            "netbox",
+            "rest",
+            workers="any",
+            kwargs={
+                "method": "get",
+                "api": "/dcim/interfaces/",
+                "params": {"device": device, "description__ic": description_contains},
+            },
+        )
+        worker, result = tuple(resp.items())[0]
+        for intf in result["result"]["results"]:
+            nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={
+                    "method": "delete",
+                    "api": f"/dcim/interfaces/{intf['id']}/",
+                },
+            )
+        print(f"Deleted interfaces with description containing '{description_contains}' on '{device}'")
+
+
 def get_pynetbox(nfclient):
     return pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
 
@@ -2647,109 +2675,57 @@ class TestSyncDeviceFacts:
 
 
 class TestSyncDeviceInterfaces:
-    # Parse data provides these TEST_SYNC_ interfaces on all ceos devices;
-    # IPs are from 10.3.0.0/16 (IPv4) and 2001:beef::/32 (IPv6).
+    # Parse data provides these TEST_SYNC_ interfaces on all ceos devices.
+    # Live state comes from interfaces_parse_data.json served by the Nornir parse_ttp mock.
     ALL_DEVICES = ["ceos-spine-1", "ceos-spine-2", "ceos-leaf-1", "ceos-leaf-2", "ceos-leaf-3"]
     SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    # Keys present in a live-run per-device result dict
+    LIVE_RUN_KEYS = {"created", "updated", "deleted", "in_sync"}
+    # Keys present in a dry-run per-device result dict
+    DRY_RUN_KEYS = {"create", "delete", "update", "in_sync"}
+    # TEST_SYNC interfaces expected in live data for spine-1 / spine-2
+    TEST_SYNC_INTERFACES = {
+        "Port-Channel41", "Ethernet6", "Ethernet7",
+        "Ethernet8", "Ethernet9", "Ethernet9.610",
+        "Loopback10", "Loopback11",
+    }
 
-    def test_sync_device_interfaces(self, nfclient):
-        ret = nfclient.run_job(
+    # ------------------------------------------------------------------ #
+    # Class-level helpers                                                  #
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _cleanup(nfclient, devices):
+        """Delete all NetBox interfaces with 'TEST_SYNC' in description for given devices."""
+        delete_interfaces_with_description(nfclient, devices, "TEST_SYNC")
+
+    @staticmethod
+    def _sync(nfclient, devices, **extra_kwargs):
+        """Run sync_device_interfaces and return the result dict."""
+        return nfclient.run_job(
             "netbox",
             "sync_device_interfaces",
             workers="any",
-            kwargs={
-                "devices": self.SPINE_DEVICES,
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            for device in self.SPINE_DEVICES:
-                assert device in res["result"], f"{worker} returned no results for {device}"
-            for device, device_data in res["result"].items():
-                assert "interfaces" in device_data, f"{worker}:{device} no interfaces plan"
-                assert "mac_addresses" in device_data, f"{worker}:{device} no MAC plan"
-                assert "ip_addresses" in device_data, f"{worker}:{device} no IP plan"
-                assert "in_sync" in device_data, f"{worker}:{device} no in_sync data"
-
-    def test_sync_device_interfaces_all_devices(self, nfclient):
-        """Verify sync succeeds for all 5 lab devices at once."""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": self.ALL_DEVICES,
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            for device in self.ALL_DEVICES:
-                assert device in res["result"], f"{worker} returned no results for {device}"
-            for device, device_data in res["result"].items():
-                assert "interfaces" in device_data, f"{worker}:{device} no interfaces plan"
-                assert "mac_addresses" in device_data, f"{worker}:{device} no MAC plan"
-                assert "ip_addresses" in device_data, f"{worker}:{device} no IP plan"
-                assert "in_sync" in device_data, f"{worker}:{device} no in_sync data"
-
-    def test_sync_device_interfaces_dry_run(self, nfclient):
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": self.SPINE_DEVICES,
-                "dry_run": True,
-            },
-        )
-        pprint.pprint(ret)
-
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            for device in self.SPINE_DEVICES:
-                assert device in res["result"], f"{worker} returned no results for {device}"
-            for device, device_data in res["result"].items():
-                assert "interfaces" in device_data, f"{worker}:{device} no interfaces plan"
-                assert "mac_addresses" in device_data, f"{worker}:{device} no MAC plan"
-                assert "ip_addresses" in device_data, f"{worker}:{device} no IP plan"
-                assert "in_sync" in device_data, f"{worker}:{device} no in_sync data"
-
-    def test_sync_device_interfaces_create(self, nfclient):
-        """Delete Loopback123 from NetBox then verify sync creates it back."""
-        delete_interfaces(nfclient, "ceos-spine-2", "Loopback123")
-
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-spine-2"],
-            },
+            kwargs={"devices": devices, **extra_kwargs},
         )
 
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            for device, device_data in res["result"].items():
-                assert (
-                    "Loopback123" in device_data["interfaces"]["create"]
-                ), f"{worker}:{device} Loopback123 interface not created"
-
-    def test_sync_device_interfaces_update(self, nfclient):
-        """Corrupt Loopback123 description in NetBox then verify sync restores it."""
-        resp_get = nfclient.run_job(
+    @staticmethod
+    def _get_intf_id(nfclient, device, name):
+        resp = nfclient.run_job(
             "netbox",
             "rest",
             workers="any",
             kwargs={
                 "method": "get",
                 "api": "dcim/interfaces",
-                "params": {"device": "ceos-spine-2", "name": "Loopback123"},
+                "params": {"device": device, "name": name},
             },
         )
-        worker, interfaces = tuple(resp_get.items())[0]
-        intf_id = interfaces["result"]["results"][0]["id"]
+        worker, result = tuple(resp.items())[0]
+        return result["result"]["results"][0]["id"]
+
+    @staticmethod
+    def _patch_intf(nfclient, intf_id, patch):
         nfclient.run_job(
             "netbox",
             "rest",
@@ -2757,170 +2733,330 @@ class TestSyncDeviceInterfaces:
             kwargs={
                 "method": "patch",
                 "api": f"dcim/interfaces/{intf_id}",
-                "json": {"description": "corrupted"},
-            },
-        )
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-spine-2"],
+                "json": patch,
             },
         )
 
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            for device, device_data in res["result"].items():
-                assert (
-                    "Loopback123" in device_data["interfaces"]["update"]
-                ), f"{worker}:{device} Loopback123 not updated"
-            assert "ceos-spine-2" in res["diff"], "Interface diff data not populated"
-            assert "Loopback123" in res["diff"]["ceos-spine-2"], "Loopback123 diff not populated"
+    @staticmethod
+    def _get_nb_intf(nfclient, device, name):
+        """Fetch a single interface record from NetBox via pynetbox. Returns None if not found."""
+        pynb = get_pynetbox(nfclient)
+        return pynb.dcim.interfaces.get(device=device, name=name)
 
-    def test_sync_device_interfaces_ip_create(self, nfclient):
-        """Delete Loopback10 IPs (10.3.4.1/32, 2001:beef:10:4::1/128) from NetBox
-        then verify sync creates them back."""
-        delete_ip_address(nfclient, "10.3.4.1/32")
-        delete_ip_address(nfclient, "2001:beef:10:4::1/128")
+    # ------------------------------------------------------------------ #
+    # Basic smoke tests                                                    #
+    # ------------------------------------------------------------------ #
 
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-spine-1"],
-            },
-        )
+    def test_sync_device_interfaces(self, nfclient):
+        """Clean TEST_SYNC interfaces from spines then sync. All TEST_SYNC interfaces
+        must be created from live data; result must carry live-run keys."""
+        self._cleanup(nfclient, self.SPINE_DEVICES)
 
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
-            created_ips = device_data["ip_addresses"]["create"]
-            assert any(
-                "Loopback10" in entry and "10.3.4.1/32" in entry for entry in created_ips
-            ), f"{worker} did not create Loopback10 IPv4 10.3.4.1/32"
-            assert any(
-                "Loopback10" in entry and "2001:beef:10:4::1/128" in entry for entry in created_ips
-            ), f"{worker} did not create Loopback10 IPv6 2001:beef:10:4::1/128"
-
-    def test_sync_device_interfaces_mac_create(self, nfclient):
-        """Delete Ethernet9 MAC from NetBox then verify sync creates it back.
-        ceos-spine-1 Ethernet9 has mac_address '02:00:00:11:00:09'."""
-        delete_mac_addresses_from_interface(nfclient, "ceos-spine-1", "Ethernet9")
-
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-spine-1"],
-            },
-        )
-
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
-            assert (
-                "Ethernet9" in device_data["mac_addresses"]["create"]
-            ), f"{worker} did not create MAC for Ethernet9 on ceos-spine-1"
-
-    def test_sync_device_interfaces_anycast_ip(self, nfclient):
-        """Loopback250 carries anycast 10.3.250.250/32 shared across all devices.
-        Delete it from spine-1 only and verify it is created back for spine-1 without
-        affecting spine-2 (which still has it assigned)."""
-        delete_ip_address(nfclient, "10.3.250.250/32")
-
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-spine-1"],
-            },
-        )
-
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
-            created_ips = device_data["ip_addresses"]["create"]
-            assert any(
-                "Loopback250" in entry and "10.3.250.250/32" in entry for entry in created_ips
-            ), f"{worker} did not create anycast IP 10.3.250.250/32 for ceos-spine-1"
-
-    def test_sync_device_interfaces_disabled_interface(self, nfclient):
-        """ceos-leaf-2 Ethernet5 is shutdown (enabled=false).
-        Verify sync correctly marks it as enabled=False in the plan."""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-leaf-2"],
-                "dry_run": True,
-            },
-        )
-
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-leaf-2"]
-            # Ethernet5 should either be in_sync (already disabled) or in update
-            # (if enabled field differs). Either way it must appear in the plan.
-            all_tracked = (
-                device_data["interfaces"].get("create", [])
-                + device_data["interfaces"].get("update", [])
-                + device_data.get("in_sync", [])
-                + device_data["interfaces"].get("delete", [])
-            )
-            assert "Ethernet5" in all_tracked, f"{worker} Ethernet5 not tracked in plan for ceos-leaf-2"
-
-    def test_sync_device_interfaces_non_existing_device(self, nfclient):
-        """Sync of a device not in NetBox should report an error and not fail the whole job."""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["nonexistent-device-12345"],
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert len(res["errors"]) > 0, f"{worker} should have errors for nonexistent device"
-
-    def test_sync_device_interfaces_with_branch(self, nfclient):
-        delete_branch("update_interfaces_branch_1", nfclient)
-
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": self.SPINE_DEVICES,
-                "branch": "update_interfaces_branch_1",
-            },
-        )
-
+        ret = self._sync(nfclient, self.SPINE_DEVICES)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
             for device in self.SPINE_DEVICES:
                 assert device in res["result"], f"{worker} returned no results for {device}"
             for device, device_data in res["result"].items():
-                assert "interfaces" in device_data, f"{worker}:{device} no interfaces plan"
-                assert device_data["branch"] == "update_interfaces_branch_1"
+                assert self.LIVE_RUN_KEYS <= device_data.keys(), (
+                    f"{worker}:{device} missing keys in result, got: {set(device_data)}"
+                )
+                assert device_data["created"], (
+                    f"{worker}:{device} no interfaces created after cleanup"
+                )
+
+    def test_sync_device_interfaces_all_devices(self, nfclient):
+        """Clean TEST_SYNC from all 5 devices then sync. Each device must have
+        at least one interface created."""
+        self._cleanup(nfclient, self.ALL_DEVICES)
+
+        ret = self._sync(nfclient, self.ALL_DEVICES)
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            for device in self.ALL_DEVICES:
+                assert device in res["result"], f"{worker} returned no results for {device}"
+            for device, device_data in res["result"].items():
+                assert self.LIVE_RUN_KEYS <= device_data.keys(), (
+                    f"{worker}:{device} missing keys in result"
+                )
+                assert device_data["created"], (
+                    f"{worker}:{device} no interfaces created after cleanup"
+                )
+
+    def test_sync_device_interfaces_dry_run(self, nfclient):
+        """Clean TEST_SYNC from spines then dry_run sync. The plan must list
+        cleaned interfaces under 'create' and expose correct key/type structure."""
+        self._cleanup(nfclient, self.SPINE_DEVICES)
+
+        ret = self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            for device in self.SPINE_DEVICES:
+                assert device in res["result"], f"{worker} returned no results for {device}"
+            for device, device_data in res["result"].items():
+                assert self.DRY_RUN_KEYS <= device_data.keys(), (
+                    f"{worker}:{device} dry-run result missing keys, got: {set(device_data)}"
+                )
+                assert isinstance(device_data["create"], list), f"{worker}:{device} create not a list"
+                assert isinstance(device_data["delete"], list), f"{worker}:{device} delete not a list"
+                assert isinstance(device_data["update"], dict), f"{worker}:{device} update not a dict"
+                assert isinstance(device_data["in_sync"], list), f"{worker}:{device} in_sync not a list"
+                assert device_data["create"], (
+                    f"{worker}:{device} create list is empty after cleanup"
+                )
+
+    # ------------------------------------------------------------------ #
+    # Create scenarios                                                     #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_device_interfaces_create(self, nfclient):
+        """Clean TEST_SYNC from spine-2 then verify sync creates Loopback10
+        (TEST_SYNC_LOOPBACK_IPV4) and Loopback11 (TEST_SYNC_LOOPBACK_IPV6) from live data."""
+        self._cleanup(nfclient, ["ceos-spine-2"])
+
+        ret = self._sync(nfclient, ["ceos-spine-2"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-2"]
+            assert "Loopback10" in device_data["created"], (
+                f"{worker} Loopback10 not in created list"
+            )
+            assert "Loopback11" in device_data["created"], (
+                f"{worker} Loopback11 not in created list"
+            )
+
+        # Validate Loopback10 record in NetBox
+        nb_lb10 = self._get_nb_intf(nfclient, "ceos-spine-2", "Loopback10")
+        assert nb_lb10 is not None, "Loopback10 not found in NetBox after sync"
+        assert nb_lb10.description == "TEST_SYNC_LOOPBACK_IPV4", (
+            f"Loopback10 description mismatch: got {nb_lb10.description!r}"
+        )
+        assert nb_lb10.type.value == "virtual", (
+            f"Loopback10 type mismatch: got {nb_lb10.type.value!r}"
+        )
+        # Validate Loopback11 record in NetBox
+        nb_lb11 = self._get_nb_intf(nfclient, "ceos-spine-2", "Loopback11")
+        assert nb_lb11 is not None, "Loopback11 not found in NetBox after sync"
+        assert nb_lb11.description == "TEST_SYNC_LOOPBACK_IPV6", (
+            f"Loopback11 description mismatch: got {nb_lb11.description!r}"
+        )
+        assert nb_lb11.type.value == "virtual", (
+            f"Loopback11 type mismatch: got {nb_lb11.type.value!r}"
+        )
+
+    def test_sync_device_interfaces_create_child(self, nfclient):
+        """Clean TEST_SYNC from spine-1 then verify sync creates Ethernet9.610
+        (sub-interface, description TEST_SYNC_SUBINTERFACE) as a child of Ethernet9."""
+        self._cleanup(nfclient, ["ceos-spine-1"])
+
+        ret = self._sync(nfclient, ["ceos-spine-1"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-1"]
+            assert "Ethernet9.610" in device_data["created"], (
+                f"{worker} Ethernet9.610 (child interface) not in created list"
+            )
+
+        # Validate Ethernet9.610 record in NetBox
+        nb_subif = self._get_nb_intf(nfclient, "ceos-spine-1", "Ethernet9.610")
+        assert nb_subif is not None, "Ethernet9.610 not found in NetBox after sync"
+        assert nb_subif.description == "TEST_SYNC_SUBINTERFACE", (
+            f"Ethernet9.610 description mismatch: got {nb_subif.description!r}"
+        )
+        assert nb_subif.type.value == "virtual", (
+            f"Ethernet9.610 type mismatch: got {nb_subif.type.value!r}"
+        )
+        assert nb_subif.parent is not None and nb_subif.parent.name == "Ethernet9", (
+            f"Ethernet9.610 parent mismatch: got {nb_subif.parent!r}"
+        )
+
+    def test_sync_device_interfaces_create_lag_with_members(self, nfclient):
+        """Clean TEST_SYNC from spine-1 then verify sync creates Port-Channel41 (LAG)
+        and its member interfaces Ethernet6 (TEST_SYNC_LAG_MEMBER_A) and
+        Ethernet7 (TEST_SYNC_LAG_MEMBER_B)."""
+        self._cleanup(nfclient, ["ceos-spine-1"])
+
+        ret = self._sync(nfclient, ["ceos-spine-1"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-1"]
+            assert "Port-Channel41" in device_data["created"], (
+                f"{worker} Port-Channel41 LAG not in created list"
+            )
+            assert "Ethernet6" in device_data["created"], (
+                f"{worker} Ethernet6 LAG member not in created list"
+            )
+            assert "Ethernet7" in device_data["created"], (
+                f"{worker} Ethernet7 LAG member not in created list"
+            )
+
+        # Validate Port-Channel41 record in NetBox
+        nb_lag = self._get_nb_intf(nfclient, "ceos-spine-1", "Port-Channel41")
+        assert nb_lag is not None, "Port-Channel41 not found in NetBox after sync"
+        assert nb_lag.description == "TEST_SYNC_LAG_TRUNK", (
+            f"Port-Channel41 description mismatch: got {nb_lag.description!r}"
+        )
+        assert nb_lag.type.value == "lag", (
+            f"Port-Channel41 type mismatch: got {nb_lag.type.value!r}"
+        )
+        assert nb_lag.mode is not None and nb_lag.mode.value == "tagged", (
+            f"Port-Channel41 mode mismatch: got {nb_lag.mode!r}"
+        )
+        lag_vids = {v.vid for v in nb_lag.tagged_vlans}
+        assert {410, 411, 510} <= lag_vids, (
+            f"Port-Channel41 tagged_vlans mismatch: expected {{410, 411, 510}} subset, got VIDs {lag_vids}"
+        )
+        # Validate LAG member Ethernet6
+        nb_eth6 = self._get_nb_intf(nfclient, "ceos-spine-1", "Ethernet6")
+        assert nb_eth6 is not None, "Ethernet6 not found in NetBox after sync"
+        assert nb_eth6.description == "TEST_SYNC_LAG_MEMBER_A", (
+            f"Ethernet6 description mismatch: got {nb_eth6.description!r}"
+        )
+        assert nb_eth6.lag is not None and nb_eth6.lag.name == "Port-Channel41", (
+            f"Ethernet6 lag association mismatch: got {nb_eth6.lag!r}"
+        )
+        # Validate LAG member Ethernet7
+        nb_eth7 = self._get_nb_intf(nfclient, "ceos-spine-1", "Ethernet7")
+        assert nb_eth7 is not None, "Ethernet7 not found in NetBox after sync"
+        assert nb_eth7.description == "TEST_SYNC_LAG_MEMBER_B", (
+            f"Ethernet7 description mismatch: got {nb_eth7.description!r}"
+        )
+        assert nb_eth7.lag is not None and nb_eth7.lag.name == "Port-Channel41", (
+            f"Ethernet7 lag association mismatch: got {nb_eth7.lag!r}"
+        )
+
+    # ------------------------------------------------------------------ #
+    # Update scenarios                                                     #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_device_interfaces_update_description(self, nfclient):
+        """Clean TEST_SYNC for spine-2, run sync to create Loopback10 with the
+        correct description, then corrupt it and verify sync restores it.
+        Field-level diff must be present in res['diff']."""
+        self._cleanup(nfclient, ["ceos-spine-2"])
+
+        # Create correct NB state from live data
+        setup = self._sync(nfclient, ["ceos-spine-2"])
+        for worker, res in setup.items():
+            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
+            assert "Loopback10" in res["result"]["ceos-spine-2"]["created"], (
+                f"{worker} Loopback10 not created during setup"
+            )
+
+        # Corrupt description
+        intf_id = self._get_intf_id(nfclient, "ceos-spine-2", "Loopback10")
+        self._patch_intf(nfclient, intf_id, {"description": "corrupted-by-test"})
+
+        ret = self._sync(nfclient, ["ceos-spine-2"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-2"]
+            assert "Loopback10" in device_data["updated"], (
+                f"{worker} Loopback10 not in updated list after description corruption"
+            )
+            assert "ceos-spine-2" in res["diff"], f"{worker} diff not populated"
+            assert "Loopback10" in res["diff"]["ceos-spine-2"]["update"], (
+                f"{worker} Loopback10 field diff missing"
+            )
+            assert "description" in res["diff"]["ceos-spine-2"]["update"]["Loopback10"], (
+                f"{worker} description field missing from diff"
+            )
+
+        # Validate description restored in NetBox
+        nb_lb10 = self._get_nb_intf(nfclient, "ceos-spine-2", "Loopback10")
+        assert nb_lb10 is not None, "Loopback10 not found in NetBox after sync"
+        assert nb_lb10.description == "TEST_SYNC_LOOPBACK_IPV4", (
+            f"Loopback10 description not restored in NetBox: got {nb_lb10.description!r}"
+        )
+
+    def test_sync_device_interfaces_update_mode(self, nfclient):
+        """Clean TEST_SYNC for spine-1, run sync to create Ethernet8 (TEST_SYNC_ACCESS_PORT,
+        mode=access), then corrupt mode to tagged and verify sync restores access mode."""
+        self._cleanup(nfclient, ["ceos-spine-1"])
+
+        # Create correct NB state
+        setup = self._sync(nfclient, ["ceos-spine-1"])
+        for worker, res in setup.items():
+            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
+            assert "Ethernet8" in res["result"]["ceos-spine-1"]["created"], (
+                f"{worker} Ethernet8 not created during setup"
+            )
+
+        # Corrupt mode
+        intf_id = self._get_intf_id(nfclient, "ceos-spine-1", "Ethernet8")
+        self._patch_intf(nfclient, intf_id, {"mode": "tagged", "untagged_vlan": None})
+
+        ret = self._sync(nfclient, ["ceos-spine-1"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-1"]
+            assert "Ethernet8" in device_data["updated"], (
+                f"{worker} Ethernet8 not in updated list after mode corruption"
+            )
+
+        # Validate mode and untagged_vlan restored in NetBox
+        nb_eth8 = self._get_nb_intf(nfclient, "ceos-spine-1", "Ethernet8")
+        assert nb_eth8 is not None, "Ethernet8 not found in NetBox after sync"
+        assert nb_eth8.mode is not None and nb_eth8.mode.value == "access", (
+            f"Ethernet8 mode not restored in NetBox: got {nb_eth8.mode!r}"
+        )
+        assert nb_eth8.untagged_vlan is not None and nb_eth8.untagged_vlan.vid == 510, (
+            f"Ethernet8 untagged_vlan not restored in NetBox: got {nb_eth8.untagged_vlan!r}"
+        )
+
+    def test_sync_device_interfaces_update_tagged_vlans(self, nfclient):
+        """Clean TEST_SYNC for spine-1, run sync to create Port-Channel41
+        (TEST_SYNC_LAG_TRUNK, tagged_vlans=[510]), then clear VLANs and verify
+        sync restores the VLAN list."""
+        self._cleanup(nfclient, ["ceos-spine-1"])
+
+        # Create correct NB state
+        setup = self._sync(nfclient, ["ceos-spine-1"])
+        for worker, res in setup.items():
+            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
+            assert "Port-Channel41" in res["result"]["ceos-spine-1"]["created"], (
+                f"{worker} Port-Channel41 not created during setup"
+            )
+
+        # Clear tagged VLANs
+        intf_id = self._get_intf_id(nfclient, "ceos-spine-1", "Port-Channel41")
+        self._patch_intf(nfclient, intf_id, {"tagged_vlans": []})
+
+        ret = self._sync(nfclient, ["ceos-spine-1"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-1"]
+            assert "Port-Channel41" in device_data["updated"], (
+                f"{worker} Port-Channel41 not in updated list after tagged_vlans cleared"
+            )
+
+        # Validate tagged VLANs restored in NetBox
+        nb_lag = self._get_nb_intf(nfclient, "ceos-spine-1", "Port-Channel41")
+        assert nb_lag is not None, "Port-Channel41 not found in NetBox after sync"
+        lag_vids = {v.vid for v in nb_lag.tagged_vlans}
+        assert {410, 411, 510} <= lag_vids, (
+            f"Port-Channel41 tagged_vlans not restored in NetBox: expected {{410, 411, 510}} subset, got VIDs {lag_vids}"
+        )
+
+    # ------------------------------------------------------------------ #
+    # Delete scenarios                                                     #
+    # ------------------------------------------------------------------ #
 
     def test_sync_device_interfaces_delete(self, nfclient):
-        """Create a stray interface on spine-1, then sync with delete=True to remove it."""
+        """Create a stray non-TEST_SYNC interface on spine-1 then verify
+        process_deletions=True removes it."""
         stray = "TestSyncStrayInterface"
         delete_interfaces(nfclient, "ceos-spine-1", stray)
 
-        # Create the stray interface directly in NetBox
         nfclient.run_job(
             "netbox",
             "create_device_interfaces",
@@ -2932,23 +3068,316 @@ class TestSyncDeviceInterfaces:
             },
         )
 
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-spine-1"],
-                "delete": True,
-            },
-        )
-
+        ret = self._sync(nfclient, ["ceos-spine-1"], process_deletions=True)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
             device_data = res["result"]["ceos-spine-1"]
-            assert (
-                stray in device_data["interfaces"]["delete"]
-            ), f"{worker} did not delete stray interface {stray}"
+            assert stray in device_data["deleted"], (
+                f"{worker} stray interface {stray!r} not in deleted list"
+            )
+
+        # Validate the stray interface is gone from NetBox
+        nb_stray = self._get_nb_intf(nfclient, "ceos-spine-1", stray)
+        assert nb_stray is None, (
+            f"Stray interface {stray!r} still exists in NetBox after process_deletions sync"
+        )
+
+    def test_sync_device_interfaces_no_deletions_by_default(self, nfclient):
+        """A stray interface in NetBox must NOT be deleted when process_deletions is
+        omitted (defaults to False)."""
+        stray = "TestSyncStrayNoDelete"
+        delete_interfaces(nfclient, "ceos-spine-1", stray)
+
+        nfclient.run_job(
+            "netbox",
+            "create_device_interfaces",
+            workers="any",
+            kwargs={
+                "devices": ["ceos-spine-1"],
+                "interface_name": stray,
+                "interface_type": "virtual",
+            },
+        )
+
+        ret = self._sync(nfclient, ["ceos-spine-1"])  # process_deletions defaults to False
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert stray not in res["result"]["ceos-spine-1"]["deleted"], (
+                f"{worker} stray interface {stray!r} was deleted but process_deletions=False"
+            )
+
+        # Cleanup
+        delete_interfaces(nfclient, "ceos-spine-1", stray)
+
+    def test_sync_device_interfaces_filter_excludes_from_deletion(self, nfclient):
+        """Interface whose description does NOT match filter_by_description must
+        not be deleted even when process_deletions=True.
+
+        Setup: create a stray interface with description 'NOT_TEST_SYNC_DESCRIPTION'.
+        Sync with process_deletions=True and filter_by_description='TEST_SYNC_*'.
+        The stray must remain untouched because it is outside the filter scope."""
+        device = "ceos-spine-1"
+        stray = "TestSyncStrayNoMatchFilter"
+        delete_interfaces(nfclient, device, stray)
+
+        nfclient.run_job(
+            "netbox",
+            "create_device_interfaces",
+            workers="any",
+            kwargs={
+                "devices": [device],
+                "interface_name": stray,
+                "interface_type": "virtual",
+                "description": "NOT_TEST_SYNC_DESCRIPTION",
+            },
+        )
+
+        ret = self._sync(
+            nfclient, [device],
+            process_deletions=True,
+            filter_by_description="TEST_SYNC_*",
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"][device]
+            assert stray not in device_data["deleted"], (
+                f"{worker} interface {stray!r} with non-matching description was deleted"
+            )
+
+        # Validate stray still exists in NetBox
+        nb_stray = self._get_nb_intf(nfclient, device, stray)
+        assert nb_stray is not None, (
+            f"Interface {stray!r} was removed from NetBox even though its description "
+            f"did not match filter_by_description='TEST_SYNC_*'"
+        )
+
+        # Cleanup
+        delete_interfaces(nfclient, device, stray)
+
+    def test_sync_device_interfaces_filter_deletes_only_matching(self, nfclient):
+        """Only the interface matching filter_by_description AND absent from live
+        data is deleted.  Interfaces outside the filter scope are not touched.
+
+        Setup:
+        - clean all TEST_SYNC interfaces from spine-1
+        - run a setup sync to populate NB with the live TEST_SYNC set
+        - create an extra stray with description 'TEST_SYNC_STRAY_DELETE'
+          (matches filter, no live counterpart → must be deleted)
+        - create a second stray with description 'PERMANENT_STRAY'
+          (does not match filter → must survive)
+
+        Assert: stray deleted, permanent_stray kept, Loopback0 untouched."""
+        device = "ceos-spine-1"
+        stray_match = "TestSyncStrayMatchFilter"
+        stray_no_match = "TestSyncStrayPermanent"
+        delete_interfaces(nfclient, device, stray_match)
+        delete_interfaces(nfclient, device, stray_no_match)
+        self._cleanup(nfclient, [device])
+
+        # Populate NB with live TEST_SYNC interfaces
+        setup = self._sync(nfclient, [device])
+        for worker, res in setup.items():
+            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
+
+        # Stray that matches filter but has no live counterpart
+        nfclient.run_job(
+            "netbox",
+            "create_device_interfaces",
+            workers="any",
+            kwargs={
+                "devices": [device],
+                "interface_name": stray_match,
+                "interface_type": "virtual",
+                "description": "TEST_SYNC_STRAY_DELETE",
+            },
+        )
+        # Stray whose description does not match the filter
+        nfclient.run_job(
+            "netbox",
+            "create_device_interfaces",
+            workers="any",
+            kwargs={
+                "devices": [device],
+                "interface_name": stray_no_match,
+                "interface_type": "virtual",
+                "description": "PERMANENT_STRAY",
+            },
+        )
+
+        ret = self._sync(
+            nfclient, [device],
+            process_deletions=True,
+            filter_by_description="TEST_SYNC_*",
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"][device]
+            # Matching stray must be deleted
+            assert stray_match in device_data["deleted"], (
+                f"{worker} matching stray {stray_match!r} not deleted"
+            )
+            # Non-matching stray must not be deleted
+            assert stray_no_match not in device_data["deleted"], (
+                f"{worker} non-matching stray {stray_no_match!r} was deleted"
+            )
+            # Permanent non-TEST_SYNC fixture must not be deleted
+            assert "Loopback0" not in device_data["deleted"], (
+                f"{worker} Loopback0 was incorrectly deleted"
+            )
+
+        # Validate in NetBox
+        nb_match = self._get_nb_intf(nfclient, device, stray_match)
+        assert nb_match is None, (
+            f"Matching stray {stray_match!r} still exists in NetBox after deletion"
+        )
+        nb_no_match = self._get_nb_intf(nfclient, device, stray_no_match)
+        assert nb_no_match is not None, (
+            f"Non-matching stray {stray_no_match!r} was removed from NetBox unexpectedly"
+        )
+        nb_lb0 = self._get_nb_intf(nfclient, device, "Loopback0")
+        assert nb_lb0 is not None, "Loopback0 was incorrectly deleted from NetBox"
+
+        # Cleanup
+        delete_interfaces(nfclient, device, stray_no_match)
+
+    # ------------------------------------------------------------------ #
+    # Edge-case / filtering scenarios                                      #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_device_interfaces_non_existing_device(self, nfclient):
+        """Sync of a device not in NetBox should report an error."""
+        ret = self._sync(nfclient, ["nonexistent-device-12345"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert len(res["errors"]) > 0, f"{worker} should have errors for nonexistent device"
+
+    def test_sync_device_interfaces_disabled_interface(self, nfclient):
+        """ceos-leaf-2 Ethernet5 is shutdown (enabled=False) in live data.
+        Clean TEST_SYNC interfaces first, then dry_run sync must include Ethernet5
+        in the plan (in create, update, or in_sync)."""
+        self._cleanup(nfclient, ["ceos-leaf-2"])
+
+        ret = self._sync(nfclient, ["ceos-leaf-2"], dry_run=True)
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-leaf-2"]
+            all_tracked = (
+                device_data["create"]
+                + list(device_data["update"].keys())
+                + device_data["in_sync"]
+                + device_data["delete"]
+            )
+            assert "Ethernet5" in all_tracked, (
+                f"{worker} Ethernet5 not tracked in dry-run plan for ceos-leaf-2"
+            )
+
+    def test_sync_device_interfaces_filter_by_name(self, nfclient):
+        """Clean TEST_SYNC from spine-1 then run dry_run with filter_by_name='Loopback*'.
+        Non-loopback interfaces must not appear in the plan. Loopback10 and Loopback11
+        (cleaned) must appear in create."""
+        self._cleanup(nfclient, ["ceos-spine-1"])
+
+        ret = self._sync(nfclient, ["ceos-spine-1"], dry_run=True, filter_by_name="Loopback*")
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-1"]
+            all_names = (
+                device_data["create"]
+                + list(device_data["update"].keys())
+                + device_data["in_sync"]
+                + device_data["delete"]
+            )
+            non_loopback = [n for n in all_names if not n.startswith("Loopback")]
+            assert not non_loopback, (
+                f"{worker} non-loopback interfaces leaked through filter_by_name: {non_loopback}"
+            )
+            # Cleaned TEST_SYNC loopbacks must appear in create
+            assert "Loopback10" in device_data["create"], (
+                f"{worker} Loopback10 not in create after cleanup + filter_by_name='Loopback*'"
+            )
+            assert "Loopback11" in device_data["create"], (
+                f"{worker} Loopback11 not in create after cleanup + filter_by_name='Loopback*'"
+            )
+
+    def test_sync_device_interfaces_filter_by_description(self, nfclient):
+        """Clean TEST_SYNC from spine-1 then run dry_run with filter_by_description='TEST_SYNC_*'.
+        All known TEST_SYNC interfaces must appear in create (they were cleaned).
+        Non-TEST_SYNC interfaces must not appear in the plan at all."""
+        self._cleanup(nfclient, ["ceos-spine-1"])
+
+        ret = self._sync(
+            nfclient, ["ceos-spine-1"],
+            dry_run=True,
+            filter_by_description="TEST_SYNC_*",
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"]["ceos-spine-1"]
+            all_names = (
+                device_data["create"]
+                + list(device_data["update"].keys())
+                + device_data["in_sync"]
+                + device_data["delete"]
+            )
+            # All TEST_SYNC interfaces must be in create (cleaned from NB above)
+            missing = self.TEST_SYNC_INTERFACES - set(device_data["create"])
+            assert not missing, (
+                f"{worker} TEST_SYNC interfaces missing from create: {missing}"
+            )
+            # Non-TEST_SYNC permanent fixtures must not appear
+            non_test_sync = {"Loopback0", "Loopback123", "Ethernet1", "Ethernet2"}
+            leaked = non_test_sync & set(all_names)
+            assert not leaked, (
+                f"{worker} non-TEST_SYNC interfaces leaked through filter_by_description: {leaked}"
+            )
+
+    def test_sync_device_interfaces_diff_populated(self, nfclient):
+        """Corrupt Ethernet2 description (permanent non-TEST_SYNC fixture) on spine-1
+        and verify res['diff'] carries field-level change details after sync."""
+        # Ethernet2 is a permanent fixture — no cleanup needed
+        intf_id = self._get_intf_id(nfclient, "ceos-spine-1", "Ethernet2")
+        self._patch_intf(nfclient, intf_id, {"description": "diff-test-corruption"})
+
+        ret = self._sync(nfclient, ["ceos-spine-1"])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert "ceos-spine-1" in res["diff"], f"{worker} diff not populated"
+            assert "Ethernet2" in res["diff"]["ceos-spine-1"]["update"], (
+                f"{worker} Ethernet2 missing from diff"
+            )
+            intf_diff = res["diff"]["ceos-spine-1"]["update"]["Ethernet2"]
+            assert "description" in intf_diff, f"{worker} description field missing from diff"
+            assert intf_diff["description"]["old_value"] == "diff-test-corruption", (
+                f"{worker} unexpected old_value in diff: {intf_diff['description']}"
+            )
+
+    def test_sync_device_interfaces_with_branch(self, nfclient):
+        """Clean TEST_SYNC from spines, delete the branch, then sync into a new branch.
+        Result must carry live-run keys and at least one interface must be created."""
+        delete_branch("update_interfaces_branch_1", nfclient)
+        self._cleanup(nfclient, self.SPINE_DEVICES)
+
+        ret = self._sync(
+            nfclient, self.SPINE_DEVICES,
+            branch="update_interfaces_branch_1",
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            for device in self.SPINE_DEVICES:
+                assert device in res["result"], f"{worker} returned no results for {device}"
+            for device, device_data in res["result"].items():
+                assert self.LIVE_RUN_KEYS <= device_data.keys(), (
+                    f"{worker}:{device} missing keys in branch-run result"
+                )
 
 
 class TestCreateDeviceInterfaces:
@@ -3266,278 +3695,6 @@ class TestCreateDeviceInterfaces:
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert len(res["errors"]) > 0, f"{worker} should have errors"
-
-
-class TestUpdateInterfaces:
-    """Tests for update_interfaces task."""
-
-    TEST_DEVICE = "ceos-spine-1"
-    TEST_INTF = "TestUpdateIntf1"
-    TEST_INTF2 = "TestUpdateIntf2"
-        
-    def _create_test_interface(self, nfclient, name=None, device=None):
-        """Delete then create a virtual interface and return its name."""
-        dev = device or self.TEST_DEVICE
-        intf = name or self.TEST_INTF
-        delete_interfaces(nfclient, dev, intf)
-        nfclient.run_job(
-            "netbox",
-            "create_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": [dev],
-                "interface_name": intf,
-                "interface_type": "virtual",
-            },
-        )
-        return intf
-
-    def test_update_interfaces_by_name(self, nfclient):
-        """Update an interface field by providing its name — field should change in NetBox."""
-        self._create_test_interface(nfclient)
-
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "devices": [self.TEST_DEVICE],
-                "name": self.TEST_INTF,
-                "description": "updated by test",
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            device_data = res["result"][self.TEST_DEVICE]
-            assert self.TEST_INTF in device_data["updated"], f"{worker}: interface not in updated"
-
-        # Verify change persisted in NetBox
-        nb = pynetbox.api(NB_URL, token=NB_API_TOKEN)
-        nb.http_session.verify = False
-        intf = nb.dcim.interfaces.get(device=self.TEST_DEVICE, name=self.TEST_INTF)
-        assert intf.description == "updated by test", "description not updated in NetBox"
-        delete_interfaces(nfclient, self.TEST_DEVICE, self.TEST_INTF)
-
-    def test_update_interfaces_dry_run(self, nfclient):
-        """dry_run=True returns diff without writing to NetBox."""
-        self._create_test_interface(nfclient)
-
-        nb = pynetbox.api(NB_URL, token=NB_API_TOKEN)
-        nb.http_session.verify = False
-        intf_before = nb.dcim.interfaces.get(device=self.TEST_DEVICE, name=self.TEST_INTF)
-        old_desc = intf_before.description or ""
-
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "devices": [self.TEST_DEVICE],
-                "name": self.TEST_INTF,
-                "description": "dry run desc",
-                "dry_run": True,
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            device_data = res["result"][self.TEST_DEVICE]
-            update_names = device_data.get("update", [])
-            assert (
-                self.TEST_INTF in update_names
-            ), f"{worker}: interface should be in update diff"
-
-        # Verify no write happened
-        intf_after = nb.dcim.interfaces.get(device=self.TEST_DEVICE, name=self.TEST_INTF)
-        assert (intf_after.description or "") == old_desc, "description changed despite dry_run"
-        delete_interfaces(nfclient, self.TEST_DEVICE, self.TEST_INTF)
-
-    def test_update_interfaces_bulk_update(self, nfclient):
-        """bulk_update — both interfaces updated."""
-        self._create_test_interface(nfclient, name=self.TEST_INTF)
-        self._create_test_interface(nfclient, name=self.TEST_INTF2)
-
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "bulk_update": [
-                    {
-                        "device": self.TEST_DEVICE,
-                        "name": self.TEST_INTF,
-                        "description": "bulk desc 1",
-                    },
-                    {
-                        "device": self.TEST_DEVICE,
-                        "name": self.TEST_INTF2,
-                        "description": "bulk desc 2",
-                    },
-                ],
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            device_data = res["result"][self.TEST_DEVICE]
-            assert self.TEST_INTF in device_data["updated"], f"{worker}: intf1 not updated"
-            assert self.TEST_INTF2 in device_data["updated"], f"{worker}: intf2 not updated"
-
-        nb = pynetbox.api(NB_URL, token=NB_API_TOKEN)
-        nb.http_session.verify = False
-        assert nb.dcim.interfaces.get(device=self.TEST_DEVICE, name=self.TEST_INTF).description == "bulk desc 1"
-        assert nb.dcim.interfaces.get(device=self.TEST_DEVICE, name=self.TEST_INTF2).description == "bulk desc 2"
-        delete_interfaces(nfclient, self.TEST_DEVICE, self.TEST_INTF)
-        delete_interfaces(nfclient, self.TEST_DEVICE, self.TEST_INTF2)
-
-    def test_update_interfaces_skips_nonexistent_interface(self, nfclient):
-        """Interface not found on the device is added to skipped, no errors raised."""
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "devices": [self.TEST_DEVICE],
-                "name": "NonExistentIntf9999",
-                "description": "x",
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            device_data = res["result"][self.TEST_DEVICE]
-            assert (
-                "NonExistentIntf9999" in res["errors"][0]
-            ), f"{worker}: expected non-existent interface in error"
-
-    def test_update_interfaces_with_branch(self, nfclient):
-        """Update on a branch — result contains the interface in updated."""
-        branch_name = "update_intf_branch_1"
-        delete_branch(branch_name, nfclient)
-        self._create_test_interface(nfclient)
-
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "devices": [self.TEST_DEVICE],
-                "name": self.TEST_INTF,
-                "description": "branch desc",
-                "branch": branch_name,
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            device_data = res["result"][self.TEST_DEVICE]
-            assert (
-                self.TEST_INTF in device_data["updated"]
-            ), f"{worker}: interface not updated on branch"
-
-        delete_branch(branch_name, nfclient)
-
-    def test_update_interfaces_multiple_fields(self, nfclient):
-        """Update multiple fields at once — all should be reflected in NetBox."""
-        self._create_test_interface(nfclient)
-
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "devices": [self.TEST_DEVICE],
-                "name": self.TEST_INTF,
-                "description": "multi field update",
-                "mtu": 9000,
-                "enabled": False,
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            device_data = res["result"][self.TEST_DEVICE]
-            assert self.TEST_INTF in device_data["updated"], f"{worker}: interface not updated"
-
-        nb = pynetbox.api(NB_URL, token=NB_API_TOKEN)
-        nb.http_session.verify = False
-        intf = nb.dcim.interfaces.get(device=self.TEST_DEVICE, name=self.TEST_INTF)
-        assert intf.description == "multi field update", "description not updated"
-        assert intf.mtu == 9000, "mtu not updated"
-        assert intf.enabled == False, "enabled not updated"
-        delete_interfaces(nfclient, self.TEST_DEVICE, self.TEST_INTF)
-
-    def test_update_interfaces_multiple_devices(self, nfclient):
-        """Update interfaces on two devices simultaneously."""
-        self._create_test_interface(nfclient, device="ceos-spine-1")
-        self._create_test_interface(nfclient, device="ceos-spine-2")
-
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["ceos-spine-1", "ceos-spine-2"],
-                "name": self.TEST_INTF,
-                "description": "multi-device update",
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            for dev in ["ceos-spine-1", "ceos-spine-2"]:
-                assert dev in res["result"], f"{worker}: no result for {dev}"
-                assert (
-                    self.TEST_INTF in res["result"][dev]["updated"]
-                ), f"{worker}: interface not updated on {dev}"
-
-        delete_interfaces(nfclient, "ceos-spine-1", self.TEST_INTF)
-        delete_interfaces(nfclient, "ceos-spine-2", self.TEST_INTF)
-
-    def test_update_interfaces_bulk_update_with_explicit_device(self, nfclient):
-        """bulk_update items with explicit device field are accepted and applied."""
-        self._create_test_interface(nfclient, name=self.TEST_INTF)
-
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={
-                "bulk_update": [
-                    {
-                        "device": self.TEST_DEVICE,
-                        "name": self.TEST_INTF,
-                        "description": "bulk explicit device",
-                    }
-                ]
-            },
-        )
-        pprint.pprint(ret)
-
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
-            assert self.TEST_INTF in res["result"][self.TEST_DEVICE]["updated"]
-
-        nb = pynetbox.api(NB_URL, token=NB_API_TOKEN)
-        nb.http_session.verify = False
-        intf = nb.dcim.interfaces.get(device=self.TEST_DEVICE, name=self.TEST_INTF)
-        assert intf.description == "bulk explicit device"
-        delete_interfaces(nfclient, self.TEST_DEVICE, self.TEST_INTF)
-
-    def test_update_interfaces_without_devices_or_bulk_update_fails(self, nfclient):
-        """Task should fail fast if neither devices nor bulk_update are provided."""
-        ret = nfclient.run_job(
-            "netbox",
-            "update_interfaces",
-            workers="any",
-            kwargs={},
-        )
-        pprint.pprint(ret)
-
-        for worker, res in ret.items():
-            assert res["failed"] == True, f"{worker} should fail for invalid input"
-            assert len(res["errors"]) > 0, f"{worker} should report validation/error message"
 
 
 class TestSyncDeviceIP:

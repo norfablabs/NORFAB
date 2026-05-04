@@ -53,7 +53,7 @@ interface Vlan510
 interface Ethernet9
    description TEST_SYNC_ROUTED_WITH_MAC
    no switchport
-   mac-address 0200.0011.0009
+   mac-address 0200.bb11.00aa
    ip address 10.3.15.33/30
    no shutdown
 !

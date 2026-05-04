@@ -4,6 +4,10 @@
 
 1. Fixing Netbox prefix allocation with parent filtering by dictionary
 
+## CHANGES
+
+1. Complete refactoring of netbox `sync_device_interfaces` task
+
 ---
 
 # 0.17.3

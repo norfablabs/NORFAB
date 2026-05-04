@@ -11,6 +11,7 @@ from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator
 from norfab.utils.text import expand_alphanumeric_range
 
 from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
+from .netbox_worker_utilities import resolve_vrf, resolve_ip
 
 log = logging.getLogger(__name__)
 
@@ -73,8 +74,8 @@ class BulkUpdateInterfaceItem(NetboxCommonArgs, use_enum_values=True):
         description="Enable or disable the interface",
         json_schema_extra={"presence": True},
     )
-    parent: Union[None, StrictStr] = Field(None, description="Parent interface name")
-    lag: Union[None, StrictStr] = Field(None, description="LAG interface name")
+    parent: Union[None, StrictInt] = Field(None, description="Parent interface ID integer")
+    lag: Union[None, StrictInt] = Field(None, description="LAG interface ID integer")
     mtu: Union[None, StrictInt] = Field(None, description="MTU value")
     mac_address: Union[None, StrictStr] = Field(
         None, description="MAC address", alias="mac-address"
@@ -93,7 +94,7 @@ class BulkUpdateInterfaceItem(NetboxCommonArgs, use_enum_values=True):
     tagged_vlans: Union[None, List[StrictInt]] = Field(
         None, description="List of tagged VLAN VIDs", alias="tagged-vlans"
     )
-    vrf: Union[None, StrictStr] = Field(None, description="VRF name")
+    vrf: Union[None, StrictInt] = Field(None, description="VRF ID integer")
 
 
 class UpdateInterfacesInput(
@@ -119,13 +120,13 @@ class UpdateInterfacesInput(
         description="Enable or disable the interface",
         json_schema_extra={"presence": True},
     )
-    parent: Union[None, StrictStr] = Field(
+    parent: Union[None, StrictInt] = Field(
         None,
-        description="Parent interface name",
+        description="Parent interface ID integer",
     )
-    lag: Union[None, StrictStr] = Field(
+    lag: Union[None, StrictInt] = Field(
         None,
-        description="LAG interface name",
+        description="LAG interface ID integer",
     )
     mtu: Union[None, StrictInt] = Field(
         None,
@@ -162,9 +163,9 @@ class UpdateInterfacesInput(
         description="List of tagged VLAN VIDs",
         alias="tagged-vlans",
     )
-    vrf: Union[None, StrictStr] = Field(
+    vrf: Union[None, StrictInt] = Field(
         None,
-        description="VRF name",
+        description="VRF ID Integer",
     )
     # bulk mode
     bulk_update: Union[None, List[BulkUpdateInterfaceItem]] = Field(
@@ -285,13 +286,12 @@ def _normalize_mac(mac: Union[None, str]) -> Union[None, str]:
     return mac_text
 
 
-def _normalize_cidr(address: Union[None, str]) -> Union[None, str]:
-    if not address:
-        return None
+def make_prefix_from_ip(address: Union[None, str]) -> Union[None, str]:
     try:
-        return str(ipaddress.ip_interface(str(address)).with_prefixlen)
+        return str(ipaddress.ip_interface(str(address)).network)
     except Exception:
-        return str(address).strip()
+        return None
+
 
 def _normalize_mode(value: Any) -> Union[None, str]:
     if value is None:
@@ -302,126 +302,118 @@ def _normalize_mode(value: Any) -> Union[None, str]:
     return text or None
 
 def _build_interface_payload(
+    job: object,
     desired: dict,
+    ret: Result,
+    worker_name: str,
     changed_fields: set,
     name_to_id: dict,
-    device_id: Union[None, int] = None,
+    device: Union[None, dict] = None,
+    intf_name: str = None,
+    nb: object = None,
+    _lookup_cache: Union[None, dict] = None,
 ) -> dict:
-    payload = {}
+    """Build a NetBox interface API payload from desired state and changed fields.
 
-    field_mapping = {
-        "type": "type",
-        "enabled": "enabled",
-        "mtu": "mtu",
-        "mac_address": "mac_address",
-        "speed": "speed",
-        "duplex": "duplex",
-        "description": "description",
-        "mode": "mode",
-        "untagged_vlan": "untagged_vlan",
-        "tagged_vlans": "tagged_vlans",
-        "qinq_svlan": "qinq_svlan",
+    ``_lookup_cache`` is an optional dict shared across multiple calls within the
+    same task invocation to avoid redundant NetBox lookups for VLAN and VRF objects.
+    Keyed by ``("vlan", vid, site_id)``, ``("vlan_global", vid)``, or ``("vrf", name)``.
+    """  # noqa: D205
+    if _lookup_cache is None:
+        _lookup_cache = {}
+
+    payload = {
+        k: desired.get(k)
+        for k in (
+            "type",
+            "enabled",
+            "mtu",
+            "speed",
+            "duplex",
+            "description",
+            "mode",
+        )
+        if k in changed_fields
     }
-    for source_key, target_key in field_mapping.items():
-        if source_key in changed_fields:
-            payload[target_key] = desired.get(source_key)
+    payload["name"] = intf_name
 
     if "parent" in changed_fields:
-        parent_name = desired.get("parent")
+        parent_name = desired["parent"]
         payload["parent"] = name_to_id.get(parent_name) if parent_name else None
 
     if "lag" in changed_fields:
-        lag_name = desired.get("lag")
+        lag_name = desired["lag"]
         payload["lag"] = name_to_id.get(lag_name) if lag_name else None
 
-    if device_id is not None:
-        payload.setdefault("device", device_id)
+    if "untagged_vlan" in changed_fields:
+        vid = desired["untagged_vlan"]
+        site_key = ("vlan", vid, device["site_id"])
+        global_key = ("vlan_global", vid)
+        if site_key not in _lookup_cache:
+            nb_vlan = list(nb.ipam.vlans.filter(vid=vid, site_id=device["site_id"]))
+            _lookup_cache[site_key] = nb_vlan[0].id if nb_vlan else None
+            if _lookup_cache[site_key] is None:
+                nb_vlan = list(nb.ipam.vlans.filter(vid=vid))
+                _lookup_cache[global_key] = nb_vlan[0].id if nb_vlan else None
+        vlan_id = _lookup_cache[site_key] or _lookup_cache.get(global_key)
+        if vlan_id:
+            payload["untagged_vlan"] = vlan_id
+        else:
+            log.warning(
+                f"{device['name']}:{intf_name} untagged vlan "
+                f"'{vid}' does not exist in Netbox"
+            )
+
+    if "qinq_svlan" in changed_fields:
+        vid = desired["qinq_svlan"]
+        site_key = ("vlan", vid, device["site_id"])
+        global_key = ("vlan_global", vid)
+        if site_key not in _lookup_cache:
+            nb_vlan = list(nb.ipam.vlans.filter(vid=vid, site_id=device["site_id"]))
+            _lookup_cache[site_key] = nb_vlan[0].id if nb_vlan else None
+            if _lookup_cache[site_key] is None:
+                nb_vlan = list(nb.ipam.vlans.filter(vid=vid))
+                _lookup_cache[global_key] = nb_vlan[0].id if nb_vlan else None
+        vlan_id = _lookup_cache[site_key] or _lookup_cache.get(global_key)
+        if vlan_id:
+            payload["qinq_svlan"] = vlan_id
+        else:
+            log.warning(
+                f"{device['name']}:{intf_name} qinq svlan "
+                f"'{vid}' does not exist in Netbox"
+            )
+
+    if "tagged_vlans" in changed_fields:
+        payload["tagged_vlans"] = []
+        for vid in desired["tagged_vlans"]:
+            site_key = ("vlan", vid, device["site_id"])
+            global_key = ("vlan_global", vid)
+            if site_key not in _lookup_cache:
+                nb_vlan = list(nb.ipam.vlans.filter(vid=vid, site_id=device["site_id"]))
+                _lookup_cache[site_key] = nb_vlan[0].id if nb_vlan else None
+                if _lookup_cache[site_key] is None:
+                    nb_vlan = list(nb.ipam.vlans.filter(vid=vid))
+                    _lookup_cache[global_key] = nb_vlan[0].id if nb_vlan else None
+            vlan_id = _lookup_cache[site_key] or _lookup_cache.get(global_key)
+            if vlan_id:
+                payload["tagged_vlans"].append(vlan_id)
+            else:
+                log.warning(
+                    f"{device['name']}:{intf_name} tagged vlan "
+                    f"'{vid}' does not exist in Netbox"
+                )
+
+    if "vrf" in changed_fields:
+        vrf_name = desired["vrf"]
+        cache_key = ("vrf", vrf_name)
+        if cache_key not in _lookup_cache:
+            _lookup_cache[cache_key] = resolve_vrf(vrf_name, nb, job, ret, worker_name)
+        payload["vrf"] = _lookup_cache[cache_key]
+
+    payload["device"] = device["id"]
     return payload
 
 
-def _normalize_nb_interfaces_per_device(
-    nb_raw_by_device: dict,
-    filter_by_name: Union[None, str] = None,
-    filter_by_description: Union[None, str] = None,
-) -> dict:
-    """Normalize raw NetBox interface data into a comparable dict.
-
-    Returns a dict keyed by device name -> interface name -> normalised fields.
-    Includes MAC address list, IPv4/IPv6 addresses, and all core interface fields.
-    Used by :func:`sync_device_interfaces` and the bulk path of :func:`update_interfaces`.
-    """
-    normalised: dict = {}
-    for device_name, interfaces in nb_raw_by_device.items():
-        normalised[device_name] = {}
-        for intf_name, data in (interfaces or {}).items():
-            if filter_by_name and not fnmatch.fnmatch(intf_name, filter_by_name):
-                continue
-            if filter_by_description and not fnmatch.fnmatch(
-                str(data.get("description") or ""), filter_by_description
-            ):
-                continue
-            tagged_vlans = sorted(
-                v.get("vid")
-                for v in (data.get("tagged_vlans") or [])
-                if isinstance(v, dict) and v.get("vid") is not None
-            )
-            macs = sorted(
-                mac
-                for mac in (
-                    _normalize_mac((m or {}).get("mac_address"))
-                    for m in (data.get("mac_addresses") or [])
-                )
-                if mac
-            )
-            ipv4_addresses = []
-            ipv6_addresses = []
-            for ip in data.get("ip_addresses") or []:
-                cidr = ip["address"]
-                if ip["family"]["value"] == 4:
-                    ipv4_addresses.append(cidr)
-                else:
-                    ipv6_addresses.append(cidr)
-            parent_name = (
-                data["parent"].get("name") if isinstance(data.get("parent"), dict) else None
-            )
-            lag_id = (
-                data["lag"].get("id") if isinstance(data.get("lag"), dict) else None
-            )
-            vrf_name = (
-                data["vrf"].get("name") if isinstance(data.get("vrf"), dict) else None
-            )
-            normalised[device_name][intf_name] = {
-                "name": intf_name,
-                "type": (
-                    data["type"]["value"]
-                    if isinstance(data.get("type"), dict)
-                    else data.get("type")
-                ),
-                "enabled": bool(data.get("enabled", True)),
-                "parent": parent_name,
-                "lag": lag_id,
-                "mtu": data.get("mtu"),
-                "mac_address": macs,
-                "speed": data.get("speed"),
-                "duplex": data.get("duplex"),
-                "description": str(data.get("description") or ""),
-                "mode": _normalize_mode(data.get("mode")),
-                "untagged_vlan": (
-                    (data.get("untagged_vlan") or {}).get("vid")
-                    if isinstance(data.get("untagged_vlan"), dict)
-                    else data.get("untagged_vlan")
-                ),
-                "tagged_vlans": tagged_vlans,
-                "qinq_svlan": (
-                    (data.get("qinq_svlan") or {}).get("vid")
-                    if isinstance(data.get("qinq_svlan"), dict)
-                    else data.get("qinq_svlan")
-                ),
-                "vrf": vrf_name,
-                "ipv4_addresses": ipv4_addresses,
-                "ipv6_addresses": ipv6_addresses,
-            }
-    return normalised
 
 
 class NetboxInterfacesTasks:
@@ -766,148 +758,6 @@ class NetboxInterfacesTasks:
 
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
-        input=UpdateInterfacesInput,
-    )
-    def update_interfaces(
-        self,
-        job: Job,
-        devices: Union[None, list] = None,
-        # single-interface mode
-        name: Union[None, str] = None,
-        type: Union[None, str] = None,
-        enabled: Union[None, bool] = None,
-        parent: Union[None, str] = None,
-        lag: Union[None, str] = None,
-        mtu: Union[None, int] = None,
-        mac_address: Union[None, str] = None,
-        speed: Union[None, int] = None,
-        duplex: Union[None, str] = None,
-        description: Union[None, str] = None,
-        mode: Union[None, str] = None,
-        untagged_vlan: Union[None, int] = None,
-        tagged_vlans: Union[None, list] = None,
-        vrf: Union[None, str] = None,
-        # bulk mode
-        bulk_update: Union[None, list] = None,
-        # shared
-        instance: Union[None, str] = None,
-        dry_run: bool = False,
-        branch: Union[None, str] = None,
-    ) -> Result:
-        """Update NetBox interfaces for one or more devices.
-
-        Supports selective field updates with idempotency: interfaces with no
-        effective changes are reported in ``in_sync`` and no write is performed.
-
-        Each item in ``bulk_update`` must include ``device`` and ``name`` to
-        identify the interface, plus any subset of the supported update fields.
-        Optional ``id`` can be provided as a NetBox interface ID hint.
-
-        Interface IDs are resolved automatically from NetBox when not supplied.
-        ``vrf`` is accepted as a VRF name and resolved to its NetBox object ID.
-        ``parent`` and ``lag`` are accepted as interface names and resolved to
-        their NetBox interface IDs.
-
-        Args:
-            job: NorFab Job object containing execution metadata.
-            devices: List of device names whose interfaces to update.
-            bulk_update: List of interface update dicts for bulk mode; each must include ``device`` and ``name``.
-            instance: NetBox instance name. Defaults to worker default instance.
-            dry_run: If True, return diff without writing.
-            branch: Optional NetBox branch name.
-
-        Returns:
-            Normal run or dry-run — result keyed by device name::
-
-                {
-                    "<device>": {
-                        "updated": ["intf1", ...],
-                        "in_sync": ["intf2", ...],
-                    }
-                }
-        """
-        instance = instance or self.default_instance
-        devices = devices or []
-        ret = Result(
-            task=f"{self.name}:update_interfaces",
-            result={},
-            resources=[instance],
-        )
-        nb = self._get_pynetbox(instance, branch=branch)
-
-        if bulk_update:
-            intf_updates = bulk_update
-        else:
-            _single_fields = (
-                "type",
-                "enabled",
-                "parent",
-                "lag",
-                "mtu",
-                "mac_address",
-                "speed",
-                "duplex",
-                "description",
-                "mode",
-                "untagged_vlan",
-                "tagged_vlans",
-                "vrf",
-                "name",
-            )
-            single_update = {
-                k: v
-                for k, v in locals().items()
-                if k in _single_fields and v is not None
-            }
-            intf_updates = [{"device": d, **single_update} for d in devices]
-
-        log.info(
-            f"{self.name} - Update interfaces: Processing {len(intf_updates)} update(s)"
-        )
-
-        # resolve interface IDs and construct update payloads
-        update_payloads = {}
-        for intf in intf_updates:
-            name = intf.pop("name")
-            device = intf.pop("device")
-            ret.result.setdefault(device, {"update": [], "in_sync": []})
-            if not intf.get("id"):
-                nb_intf = nb.dcim.interfaces.get(name=name, device=device)
-                if not nb_intf:
-                    msg = f"{device}:{name} - no such interface in '{instance}' Netbox"
-                    log.error(msg)
-                    ret.errors.append(msg)
-                    continue
-                intf["id"] = nb_intf.id                    
-            update_payloads[(device, name)] = intf
-
-        # push the updates
-        if update_payloads:
-            try:
-                if dry_run:
-                    for k in update_payloads.keys():
-                        dev_name, intf_name = k
-                        ret.result[dev_name]["update"].append(intf_name)
-                else:
-                    nb.dcim.interfaces.update(list(update_payloads.values()))
-                    for k in update_payloads.keys():
-                        dev_name, intf_name = k
-                        ret.result[dev_name]["updated"].append(intf_name)
-                job.event(f"updated {len(update_payloads)} interface(s)")
-                log.info(
-                    f"{self.name} - Updated {len(update_payloads)} interface(s) in '{instance}' Netbox"
-                )
-            except Exception as exc:
-                msg = f"failed to bulk update interfaces: {exc}"
-                ret.errors.append(msg)
-                log.error(f"{self.name} - {msg}")
-                job.event(msg, severity="ERROR")
-                ret.failed = True
-
-        return ret
-
-    @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=UpdateInterfacesDescriptionInput,
     )
     def update_interfaces_description(
@@ -1064,27 +914,90 @@ class NetboxInterfacesTasks:
         **kwargs: Any,
     ) -> Result:
         """
-        Synchronize device interfaces with NetBox using normalized state,
-        DeepDiff-based reconciliation, and deterministic action planning.
+        Synchronize device interface configuration from live devices into NetBox using a
+        normalized state model and DeepDiff-based reconciliation.
+
+        The task follows a four-step pipeline:
+
+        1. **Fetch**: Pull current interface state from NetBox (source of truth).
+        2. **Collect live state**: Run a Nornir ``parse_ttp`` get interfaces job against 
+           devices to collect live interface attributes (type, enabled, MTU, VLANs, VRF, etc.).
+        3. **Diff**: Compare normalized NetBox state against normalized live state using
+           DeepDiff to classify each interface as ``create``, ``update``, ``delete``, or
+           ``in_sync``.
+        4. **Reconcile**: Apply changes to NetBox in a safe order — LAG interfaces
+           first, then parent interfaces, then child (sub)interfaces, then updates,
+           and finally deletions (only when ``process_deletions=True``).
+
+        **Side-Effects**
+
+        - Sync interfaces task creates VRFs if they do not exist in Netbox
+
+        **Prerequisites**
+
+        - VLANs must exist in Netbox otherwise sync will fail to associate vlans with interfaces
+        - Device must exist in Netbox
+
+        **Limitations**
+
+        - Sync interfaces task does not handles IP Addresses
+        - Sync interfaces task does not handles MAC Addresses
+        - Sync interfaces uses devices running configuration to pull interfaces data, interfaces
+          operational state data not used
+
+        **Dry-run mode** (``dry_run=True``): returns the raw diff plan without making
+        any changes. Result is keyed by device name::
+
+        ```
+        {
+            "<device>": {
+                "create": ["Loopback99", ...],
+                "update": {"Ethernet1": {"description": {"old_value": "x", "new_value": "y"}}},
+                "delete": ["StrayIface"],
+                "in_sync": ["Loopback0", ...]
+            }
+        }
+        ```
+
+        **Live-run mode** (``dry_run=False``, default): applies changes and returns a summary
+        of what was done, keyed by device name::
+
+        ```
+        {
+            "<device>": {
+                "created": ["Loopback99"],
+                "updated": ["Ethernet1"],
+                "deleted": ["StrayIface"],
+                "in_sync": ["Loopback0", ...]
+            }
+        }
+        ```
+
+        In non dry-run mode ``res["diff"]`` contains difference detail
+        for interfaces that were (or would be) created/updated/deleted.
 
         Args:
             job: NorFab Job object containing relevant metadata.
-            instance (str, optional): The Netbox instance name to use.
-            dry_run (bool, optional): If True, no changes will be made to Netbox.
-            timeout (int, optional): The timeout for the Nornir parse_ttp job.
-            devices (list, optional): List of devices to update.
-            process_deletions (bool, optional): If True, delete interfaces missing in live state.
-            branch (str, optional): Branch name to use, need to have branching plugin installed,
-                automatically creates branch if it does not exist in Netbox.
-            filter_by_name (str, optional): Glob pattern to filter interfaces by name before syncing,
-                e.g. ``'eth*'``. Only matching interfaces are included in the sync.
-            filter_by_description (str, optional): Glob pattern to filter interfaces by description
-                before syncing, e.g. ``'uplink*'``. Only matching interfaces are included.
-            **kwargs: Additional Nornir host filter keyword arguments (e.g. FL, FC, FB).
+            instance (str, optional): The NetBox instance name to use.
+            dry_run (bool, optional): If True, no changes will be made to NetBox.
+            timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
+            devices (list, optional): List of device names to sync.
+            process_deletions (bool, optional): If True, delete interfaces present in
+                NetBox but absent in live data. Defaults to False (safe by default).
+            branch (str, optional): NetBox branch name to use. The branching plugin
+                must be installed. The branch is created automatically if it does
+                not exist.
+            filter_by_name (str, optional): Glob pattern to restrict which interfaces
+                are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
+            filter_by_description (str, optional): Glob pattern to restrict which
+                interfaces are included by description, e.g. ``'uplink*'``.
+            **kwargs: Additional Nornir host filter keyword arguments passed to
+                ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
-            dict: Per-device action summary with interfaces, mac_addresses, and ip_addresses
-                create/update/delete actions and in_sync interfaces.
+            dict: Per-device action summary. Structure depends on ``dry_run``; see
+                above. Diff details are available in ``res["diff"]`` for non 
+                dry-run mode.
         """
         devices = devices or []
         instance = instance or self.default_instance
@@ -1116,8 +1029,8 @@ class NetboxInterfacesTasks:
 
         # filter out devices not define in Netbox
         nb_devices_data = {
-            d.name: {"id": d.id} 
-            for d in nb.dcim.devices.filter(name=devices, fields="id,name")
+            d.name: {"id": d.id, "site_id": d.site.id, "name": d.name}
+            for d in nb.dcim.devices.filter(name=devices, fields="id,name,site")
         }
         for d in list(devices):
             if d not in nb_devices_data:
@@ -1133,13 +1046,67 @@ class NetboxInterfacesTasks:
             instance=instance,
             branch=branch,
             devices=devices,
-            ip_addresses=True,
+            ip_addresses=False,
             cache="refresh"
         )
         if nb_interfaces_result.errors:
             ret.errors.extend(nb_interfaces_result.errors)
             ret.failed = True
             return ret
+
+        # Normalize NetBox interface data per device.
+        normalised_nb_all: dict = {}
+        for device_name, interfaces in nb_interfaces_result.result.items():
+            normalised_nb_all[device_name] = {}
+            for intf_name, data in (interfaces or {}).items():
+                if filter_by_name and not fnmatch.fnmatch(intf_name, filter_by_name):
+                    continue
+                if filter_by_description and not fnmatch.fnmatch(
+                    str(data.get("description") or ""), filter_by_description
+                ):
+                    continue
+                tagged_vlans = sorted(
+                    v.get("vid")
+                    for v in (data.get("tagged_vlans") or [])
+                    if isinstance(v, dict) and v.get("vid") is not None
+                )
+                parent_name = (
+                    data["parent"].get("name") if isinstance(data.get("parent"), dict) else None
+                )
+                lag = (
+                    data["lag"].get("name") if isinstance(data.get("lag"), dict) else None
+                )
+                vrf_name = (
+                    data["vrf"].get("name") if isinstance(data.get("vrf"), dict) else None
+                )
+                normalised_nb_all[device_name][intf_name] = {
+                    "name": intf_name,
+                    "type": (
+                        data["type"]["value"]
+                        if isinstance(data.get("type"), dict)
+                        else data.get("type")
+                    ),
+                    "enabled": bool(data.get("enabled", True)),
+                    "parent": parent_name,
+                    "lag": lag,
+                    "mtu": data.get("mtu"),
+                    "speed": data.get("speed"),
+                    "duplex": data.get("duplex"),
+                    "description": str(data.get("description") or ""),
+                    "mode": _normalize_mode(data.get("mode")),
+                    "untagged_vlan": (
+                        (data.get("untagged_vlan") or {}).get("vid")
+                        if isinstance(data.get("untagged_vlan"), dict)
+                        else data.get("untagged_vlan")
+                    ),
+                    "tagged_vlans": tagged_vlans,
+                    "qinq_svlan": (
+                        (data.get("qinq_svlan") or {}).get("vid")
+                        if isinstance(data.get("qinq_svlan"), dict)
+                        else data.get("qinq_svlan")
+                    ),
+                    "vrf": vrf_name,
+                }
 
         # Gather live source of truth from Nornir parse_ttp.
         job.event(f"retrieving live interfaces for {len(devices)} devices")
@@ -1151,13 +1118,6 @@ class NetboxInterfacesTasks:
             timeout=timeout,
         )
         
-        # Normalize NetBox interface data per device.
-        normalised_nb_all = _normalize_nb_interfaces_per_device(
-            nb_interfaces_result.result,
-            filter_by_name=filter_by_name,
-            filter_by_description=filter_by_description,
-        )
-
         # Normalize live interface data per device.
         normalised_live_all = {}
         for wname, wdata in parse_data.items():
@@ -1196,8 +1156,6 @@ class NetboxInterfacesTasks:
                         "tagged_vlans": data.get("tagged_vlans") or [],
                         "qinq_svlan": data.get("qinq_svlan"),
                         "vrf": data.get("vrf"),
-                        "ipv4_addresses": data.get("ipv4_addresses") or [],
-                        "ipv6_addresses": data.get("ipv6_addresses") or [],
                     }
 
         # Single diff on the full normalised datasets
@@ -1206,6 +1164,12 @@ class NetboxInterfacesTasks:
         if dry_run:
             ret.result = full_diff
             return ret
+        else:
+            ret.diff = full_diff
+
+        # Shared lookup cache for VLAN and VRF objects — avoids redundant NetBox
+        # API calls when the same VID or VRF name appears across multiple interfaces.
+        _lookup_cache: dict = {}
 
         # Per-device result tracking
         device_results = {
@@ -1213,438 +1177,297 @@ class NetboxInterfacesTasks:
                 "created": [],
                 "updated": [],
                 "deleted": [],
-                "in_sync": actions["in_sync"],
+                "in_sync": actions["in_sync"]
             }
             for device_name, actions in full_diff.items()
         }
+        ret.result = device_results
 
-        # Build bulk_create_interfaces list from full_diff
-        bulk_create_interfaces = []
+        # create LAG interfaces
+        bulk_create_lag_interfaces = []
         for device_name, actions in full_diff.items():
-            # make sure to create parent interfaces first
-            ordered_creates = sorted(actions["create"], key=lambda x: (x.count("."), x))
-            for intf_name in ordered_creates:
+            nb_device = nb_devices_data[device_name]
+            for intf_name in actions["create"]:
                 desired = normalised_live_all[device_name][intf_name]
-                payload = {
-                    "name": intf_name,
-                    "type": desired.get("type") or "other",
-                    "description": desired.get("description") or "",
-                    "enabled": desired.get("enabled", True),
-                }
-                if desired.get("mtu") is not None:
-                    payload["mtu"] = desired["mtu"]
-                if desired.get("speed") is not None:
-                    payload["speed"] = desired["speed"]
-                bulk_create_interfaces.append(payload)
+                if desired["type"] == "lag":
+                    payload = _build_interface_payload(
+                        job=job,
+                        ret=ret,
+                        worker_name=self.name,
+                        desired=desired,
+                        changed_fields=[k for k in desired.keys() if desired[k] is not None],
+                        device=nb_device,
+                        name_to_id={},
+                        intf_name=intf_name,
+                        nb=nb,
+                        _lookup_cache=_lookup_cache,
+                    )
+                    bulk_create_lag_interfaces.append(payload)
+        if bulk_create_lag_interfaces:
+            job.event(f"creating LAG interfaces")
+            try:
+                nb.dcim.interfaces.create(bulk_create_lag_interfaces)
+                job.event(f"created {len(bulk_create_lag_interfaces)} LAG interface(s)")
+                for device_name, device_data in nb_devices_data.items():
+                    for intf in bulk_create_lag_interfaces:
+                        if intf["device"] == device_data["id"]:
+                            device_results[device_name]["created"].append(intf["name"])
+            except Exception as e:
+                msg = f"failed to bulk create LAG interfaces: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")   
+                return ret
+
+        # re-fetch interface IDs after creating LAG interfaces
+        nb_intf_ids = {}
+        for intf in nb.dcim.interfaces.filter(device=devices, fields="id,name,device"):
+            nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
+
+        # create parent interfaces associating with LAG if required
+        bulk_create_parent_interfaces = []
+        for device_name, actions in full_diff.items():
+            name_to_id = nb_intf_ids[device_name]
+            nb_device = nb_devices_data[device_name]
+            for intf_name in actions["create"]:
+                desired = normalised_live_all[device_name][intf_name]
+                if not desired["parent"] and desired["type"] != "lag":
+                    payload = _build_interface_payload(
+                        job=job,
+                        ret=ret,
+                        worker_name=self.name,
+                        desired=desired,
+                        changed_fields=[k for k in desired.keys() if desired[k] is not None],
+                        device=nb_device,
+                        name_to_id=name_to_id,
+                        intf_name=intf_name,
+                        nb=nb,
+                        _lookup_cache=_lookup_cache,
+                    )
+                    bulk_create_parent_interfaces.append(payload)
+        if bulk_create_parent_interfaces:
+            job.event(f"creating non-child/main interfaces")
+            try:
+                nb.dcim.interfaces.create(bulk_create_parent_interfaces)
+                job.event(f"created {len(bulk_create_parent_interfaces)} non-child/main interface(s)")
+                for device_name, device_data in nb_devices_data.items():
+                    for intf in bulk_create_parent_interfaces:
+                        if intf["device"] == device_data["id"]:
+                            device_results[device_name]["created"].append(intf["name"])
+            except Exception as e:
+                msg = f"failed to bulk create non-child/main interfaces: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")   
+                return ret
+
+        # re-fetch interface IDs after creating parent interfaces
+        nb_intf_ids = {}
+        for intf in nb.dcim.interfaces.filter(device=devices, fields="id,name,device"):
+            nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
+
+        # create child interfaces associating with parent interfaces
+        bulk_create_child_interfaces = []
+        for device_name, actions in full_diff.items():
+            name_to_id = nb_intf_ids[device_name]
+            nb_device = nb_devices_data[device_name]
+            for intf_name in actions["create"]:
+                desired = normalised_live_all[device_name][intf_name]
+                if desired["parent"]:
+                    payload = _build_interface_payload(
+                        job=job,
+                        ret=ret,
+                        worker_name=self.name,
+                        desired=desired,
+                        changed_fields=[k for k in desired.keys() if desired[k] is not None],
+                        device=nb_device,
+                        name_to_id=name_to_id,
+                        intf_name=intf_name,
+                        nb=nb,
+                        _lookup_cache=_lookup_cache,
+                    )
+                    bulk_create_child_interfaces.append(payload)
+        if bulk_create_child_interfaces:
+            job.event(f"creating child interfaces")
+            try:
+                nb.dcim.interfaces.create(bulk_create_child_interfaces)
+                job.event(f"created {len(bulk_create_child_interfaces)} child interface(s)")
+                for device_name, device_data in nb_devices_data.items():
+                    for intf in bulk_create_child_interfaces:
+                        if intf["device"] == device_data["id"]:
+                            device_results[device_name]["created"].append(intf["name"])            
+            except Exception as e:
+                msg = f"failed to bulk create child interfaces: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")   
+                return ret
 
         # Build bulk_update_interfaces list from full_diff
-        bulk_update_interfaces = []
+        bulk_update_interfaces = {}
         for device_name, actions in full_diff.items():
-            nb_raw = nb_interfaces_result.result[device_name]
             nb_device = nb_devices_data[device_name]
-            name_to_id = {name: (nb_raw.get(name) or {}).get("id") for name in nb_raw}
+            name_to_id = nb_intf_ids[device_name]
             for intf_name, field_changes in actions["update"].items():
                 desired = normalised_live_all[device_name][intf_name]
-                intf_id = nb_raw[intf_name]["id"]
+                intf_id = nb_intf_ids[device_name][intf_name]
                 payload = _build_interface_payload(
+                    job=job,
+                    ret=ret,
+                    worker_name=self.name,
                     desired=desired,
                     changed_fields=set(field_changes.keys()),
-                    device_id=nb_device["id"],
+                    device=nb_device,
                     name_to_id=name_to_id,
+                    intf_name=intf_name,
+                    nb=nb,
+                    _lookup_cache=_lookup_cache,
                 )
                 payload["id"] = intf_id
-                payload["device"] = device_name
-                payload["name"] = intf_name
-                bulk_update_interfaces.append(payload)
+                bulk_update_interfaces[(device_name, intf_name)] = payload
+        if bulk_update_interfaces:
+            try:
+                nb.dcim.interfaces.update(list(bulk_update_interfaces.values()))
+                job.event(f"updated {len(bulk_update_interfaces)} interface(s)")
+                for k in bulk_update_interfaces.keys():
+                    device_name, intf_name = k
+                    device_results[device_name]["updated"].append(intf_name) 
+            except Exception as e:
+                msg = f"failed to bulk update interfaces: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")   
+                return ret
 
         # Build bulk_delete_interfaces payload from full_diff
         bulk_delete_interfaces = {} # keyed by intf id, values intf names
         if process_deletions:
+            job.event(f"processing interface deletions")
             for device_name, actions in full_diff.items():
-                nb_raw = nb_interfaces_result.result.get(device_name) or {}
                 # delete children before parents to avoid constraint errors
                 ordered_deletes = sorted(
                     actions["delete"], key=lambda x: (x.count("."), x), reverse=True
                 )
                 for intf_name in ordered_deletes:
-                    intf_id = nb_raw[intf_name]["id"]
-                    bulk_delete_interfaces[intf_id] = intf_name
-
-        # Delegate bulk creation to create_device_interfaces
-        if bulk_create_interfaces:
-            create_result = self.create_device_interfaces(
-                job=job,
-                devices=[device_name],
-                interfaces_data=bulk_create_interfaces,
-                instance=instance,
-                dry_run=False,
-                branch=branch,
-            )
-            ret.errors.extend(create_result.errors)
-            created_names = create_result.result[device_name]["created"]
-            for device_name, actions in full_diff.items():
-                for intf_name in actions["create"]:
-                    if intf_name in created_names:
-                        device_results[device_name]["created"].append(intf_name)
-
-        if bulk_update_interfaces:
-            update_result = self.update_interfaces(
-                job=job,
-                bulk_update=bulk_update_interfaces,
-                instance=instance,
-                dry_run=False,
-                branch=branch,
-            )
-            ret.errors.extend(update_result.errors)
-            updated_names = update_result.result[device_name]["update"]
-            for device_name, actions in full_diff.items():
-                for intf_name in actions["update"]:
-                    if intf_name in updated_names:
-                        device_results[device_name]["updated"].append(intf_name)
-
+                    intf_id = nb_intf_ids[device_name][intf_name]
+                    bulk_delete_interfaces[intf_id] = {"device": device_name, "interface": intf_name}
         if bulk_delete_interfaces:
             try:
                 nb.dcim.interfaces.delete(list(bulk_delete_interfaces.keys()))
                 job.event(f"deleted {len(bulk_delete_interfaces)} interface(s)")
+                for intf_data in bulk_delete_interfaces.values():
+                    device_name = intf_data["device"]
+                    intf_name = intf_data["interface"]
+                    device_results[device_name]["deleted"].append(intf_name)
             except Exception as exc:
                 msg = f"failed to bulk delete interfaces: {exc}"
                 ret.errors.append(msg)
                 log.error(msg)
+                job.event(msg, severity="ERROR")                      
+
+        return ret
+
+
+    def sync_mac_addresses(self):
+        device_results = {
+            device_name: {
+                "mac_addresses": {
+                    "created": [],
+                    "updated": [],
+                    "in_sync": [],
+                }
+            }
+            for device_name, actions in full_diff.items()
+        }
+        # re-fetch interfaces data for devices after creating/updating/deleting interfaces
+        nb_interfaces_result = self.get_interfaces(
+            job=job,
+            instance=instance,
+            branch=branch,
+            devices=devices,
+            ip_addresses=True,
+            cache="refresh"
+        )
+
+        # process MAC addresses
+        bulk_update_mac = []
+        bulk_create_mac = []
+        # collect all discovered MAC addresses
+        all_mac_live = {} # {mac: {device:.., intf:..}}
+        for device_name, interfaces in normalised_live_all.items():
+            for intf_name, intf_data in interfaces.items():
+                for m in intf_data.get("mac_address", []):
+                    all_mac_live[m] = {
+                        "device": device_name,
+                        "interface": intf_name,
+                    } 
+        # fetch existing MACs data from Netbox
+        nb_macs = {
+            m.mac_address.lower(): {
+                "id": m.id,
+                "device": m.assigned_object.device.name if m.assigned_object else None,
+                "interface": m.assigned_object.name if m.assigned_object else None
+            }
+            for m in nb.dcim.mac_addresses.filter(mac_address=list(all_mac_live.keys()), fields="id,mac_address,assigned_object")
+        }
+        # process and compare live MACs versus Netbox MACs
+        for mac, mac_data in all_mac_live.items():
+            device_name = mac_data["device"]
+            intf_name = mac_data["interface"]
+            nb_raw = nb_interfaces_result.result[device_name]
+            if nb_macs.get(mac, {}).get("interface") and nb_macs[mac]["interface"] != intf_name:
+                exist_intf = nb_macs[mac]["interface"]
+                exist_device = nb_macs[mac]["device"]
+                msg = (
+                    f"{device_name}:{intf_name} - {mac} already assigned to "
+                    f"a different interface {exist_device}:{exist_intf}"
+                )
+                log.error(msg)
+                ret.errors.append(msg)
                 job.event(msg, severity="ERROR")
+                continue
+            # MAC alrready assigned to interface
+            elif mac in nb_macs and nb_macs[mac]["interface"] == intf_name:
+                device_results[device_name]["mac_addresses"]["in_sync"].append(mac)
+            # update existing MAC if its not associated with interface
+            elif mac in nb_macs and nb_macs[mac]["interface"] is None:
+                bulk_update_mac.append(
+                    {
+                        "id": nb_macs[mac]["id"],
+                        "mac_address": mac,
+                        "assigned_object_type": "dcim.interface",
+                        "assigned_object_id": nb_raw[intf_name]["id"]
+                    }
+                )
             else:
-                device_results[device_name]["deleted"] = list(bulk_delete_interfaces.values())
-
-        ret.result = device_results
-
-        return ret
-
-        #     normalised_live = normalised_live_all.get(device_name, {})
-        #     normalised_nb = normalised_nb_all.get(device_name, {})
-        #     actions = full_diff.get(
-        #         device_name,
-        #         {"create": [], "update": {}, "delete": [], "in_sync": []},
-        #     )
-# 
-        #     plan = {
-        #         "interfaces": {
-        #             "create": actions["create"] if create else [],
-        #             "update": sorted(list(actions["update"].keys())),
-        #             "delete": actions["delete"] if delete else [],
-        #         },
-        #         "mac_addresses": {"create": [], "update": [], "delete": []},
-        #         "ip_addresses": {"create": [], "update": [], "delete": []},
-        #         "in_sync": actions["in_sync"],
-        #     }
-# 
-        #     update_payloads = []
-        #     name_to_id = {
-        #         name: (nb_raw.get(name) or {}).get("id") for name in nb_raw
-        #     }
-# 
-        #     for intf_name, field_changes in actions["update"].items():
-        #         desired = normalised_live.get(intf_name)
-        #         intf_id = (nb_raw.get(intf_name) or {}).get("id")
-        #         if not desired or intf_id is None:
-        #             continue
-        #         changed_fields = set(field_changes.keys())
-        #         payload = _build_interface_payload(
-        #             desired=desired,
-        #             changed_fields=changed_fields,
-        #             device_id=nb_device["id"],
-        #             name_to_id=name_to_id,
-        #         )
-        #         payload["id"] = intf_id
-        #         update_payloads.append(payload)
-# 
-        #     # MAC and IP reconciliation plan.
-        #     all_plan_names = sorted(
-        #         set(actions["in_sync"])
-        #         | set(actions["update"].keys())
-        #         | (set(actions["create"]) if create else set())
-        #         | (set(actions["delete"]) if delete else set())
-        #     )
-        #     mac_actions_create = []
-        #     mac_actions_update = []
-        #     mac_actions_delete = []
-        #     ip_actions_create = []
-        #     ip_actions_delete = []
-# 
-        #     for intf_name in all_plan_names:
-        #         live_intf = normalised_live.get(intf_name)
-        #         nb_intf = normalised_nb.get(intf_name)
-# 
-        #         live_macs = (live_intf or {}).get("mac_address", [])
-        #         nb_mac_entries = (nb_raw.get(intf_name) or {}).get("mac_addresses") or []
-        #         nb_macs = sorted(
-        #             {
-        #                 _normalize_mac((m or {}).get("mac_address"))
-        #                 for m in nb_mac_entries
-        #                 if _normalize_mac((m or {}).get("mac_address"))
-        #             }
-        #         )
-# 
-        #         if live_intf and (
-        #             intf_name in actions["update"]
-        #             or intf_name in actions["in_sync"]
-        #             or intf_name in actions["create"]
-        #         ):
-        #             if live_macs and not nb_macs:
-        #                 plan["mac_addresses"]["create"].append(intf_name)
-        #                 mac_actions_create.append(
-        #                     {"interface": intf_name, "mac_address": live_macs[0]}
-        #                 )
-        #             elif live_macs and nb_macs and live_macs[0] != nb_macs[0]:
-        #                 first_nb_mac = (nb_mac_entries or [{}])[0]
-        #                 if first_nb_mac.get("id"):
-        #                     plan["mac_addresses"]["update"].append(intf_name)
-        #                     mac_actions_update.append(
-        #                         {
-        #                             "id": int(first_nb_mac["id"]),
-        #                             "mac_address": live_macs[0],
-        #                             "interface": intf_name,
-        #                         }
-        #                     )
-        #             if delete and not live_macs and nb_macs:
-        #                 plan["mac_addresses"]["delete"].append(intf_name)
-        #                 for mac_entry in nb_mac_entries:
-        #                     if mac_entry.get("id"):
-        #                         mac_actions_delete.append(
-        #                             {
-        #                                 "id": int(mac_entry["id"]),
-        #                                 "interface": intf_name,
-        #                             }
-        #                         )
-# 
-        #         live_ips = sorted(
-        #             set((live_intf or {}).get("ipv4_addresses", []))
-        #             | set((live_intf or {}).get("ipv6_addresses", []))
-        #         )
-        #         nb_ip_entries = (nb_raw.get(intf_name) or {}).get("ip_addresses") or []
-        #         nb_ips = sorted(
-        #             {
-        #                 _normalize_cidr((ip_entry or {}).get("address"))
-        #                 for ip_entry in nb_ip_entries
-        #                 if _normalize_cidr((ip_entry or {}).get("address"))
-        #             }
-        #         )
-# 
-        #         if live_intf and (
-        #             intf_name in actions["update"]
-        #             or intf_name in actions["in_sync"]
-        #             or intf_name in actions["create"]
-        #         ):
-        #             for ip_cidr in sorted(set(live_ips) - set(nb_ips)):
-        #                 plan["ip_addresses"]["create"].append(f"{intf_name}:{ip_cidr}")
-        #                 ip_actions_create.append(
-        #                     {"interface": intf_name, "address": ip_cidr}
-        #                 )
-# 
-        #         if delete:
-        #             for ip_entry in nb_ip_entries:
-        #                 ip_cidr = _normalize_cidr((ip_entry or {}).get("address"))
-        #                 if not ip_cidr:
-        #                     continue
-        #                 if ip_cidr not in live_ips:
-        #                     plan["ip_addresses"]["delete"].append(
-        #                         f"{intf_name}:{ip_cidr}"
-        #                     )
-        #                     if ip_entry.get("id"):
-        #                         ip_actions_delete.append(
-        #                             {
-        #                                 "id": int(ip_entry["id"]),
-        #                                 "interface": intf_name,
-        #                                 "address": ip_cidr,
-        #                             }
-        #                         )
-# 
-        #     # Dry-run returns planned actions and diffs only.
-        #     if dry_run:
-        #         ret.result[device_name] = plan
-        #         if branch is not None:
-        #             ret.result[device_name]["branch"] = branch
-        #         continue
-# 
-        #     # 1) interface create
-        #     if create and plan["interfaces"]["create"]:
-        #         ordered_creates = sorted(
-        #             plan["interfaces"]["create"], key=lambda x: (x.count("."), x)
-        #         )
-        #         create_payloads = []
-        #         for intf_name in ordered_creates:
-        #             desired = normalised_live[intf_name]
-        #             payload = {
-        #                 "name": intf_name,
-        #                 "type": desired.get("type") or "other",
-        #                 "description": desired.get("description") or "",
-        #                 "enabled": desired.get("enabled", True),
-        #             }
-        #             if desired.get("mtu") is not None:
-        #                 payload["mtu"] = desired["mtu"]
-        #             if desired.get("speed") is not None:
-        #                 payload["speed"] = desired["speed"]
-        #             create_payloads.append(payload)
-# 
-        #         try:
-        #             create_ret = self.create_device_interfaces(
-        #                 job=job,
-        #                 devices=[device_name],
-        #                 interfaces_data=create_payloads,
-        #                 instance=instance,
-        #                 dry_run=False,
-        #                 branch=branch,
-        #             )
-        #             if create_ret.errors:
-        #                 ret.errors.extend(create_ret.errors)
-        #         except Exception as exc:
-        #             msg = f"failed to bulk create interfaces on '{device_name}': {exc}"
-        #             ret.errors.append(msg)
-        #             log.error(msg)
-        #             job.event(msg, severity="ERROR")
-# 
-        #         # Refresh only created interfaces to resolve NetBox IDs for MAC/IP steps.
-        #         try:
-        #             refreshed = self.get_interfaces(
-        #                 job=job,
-        #                 instance=instance,
-        #                 devices=[device_name],
-        #                 interface_list=plan["interfaces"]["create"],
-        #                 ip_addresses=True,
-        #                 cache="refresh",
-        #                 branch=branch,
-        #             ).result.get(device_name, {})
-        #             for created_name, created_data in refreshed.items():
-        #                 nb_raw[created_name] = created_data
-        #                 name_to_id[created_name] = created_data.get("id")
-        #         except Exception as exc:
-        #             msg = f"failed to refresh created interfaces on '{device_name}': {exc}"
-        #             ret.errors.append(msg)
-        #             log.error(msg)
-        #             job.event(msg, severity="ERROR")
-# 
-        #     # 2) interface update
-        #     if update_payloads:
-        #         try:
-        #             update_ret = self.update_interfaces(
-        #                 job=job,
-        #                 interfaces=update_payloads,
-        #                 instance=instance,
-        #                 dry_run=False,
-        #                 branch=branch,
-        #             )
-        #             if update_ret.errors:
-        #                 ret.errors.extend(update_ret.errors)
-        #         except Exception as exc:
-        #             msg = f"failed to update interfaces on '{device_name}': {exc}"
-        #             ret.errors.append(msg)
-        #             log.error(msg)
-        #             job.event(msg, severity="ERROR")
-# 
-        #     # 3) MAC create/update/delete
-        #     mac_create_payloads = []
-        #     for action in mac_actions_create:
-        #         intf_id = name_to_id.get(action["interface"])
-        #         if intf_id:
-        #             mac_create_payloads.append(
-        #                 {
-        #                     "mac_address": action["mac_address"],
-        #                     "assigned_object_type": "dcim.interface",
-        #                     "assigned_object_id": intf_id,
-        #                 }
-        #             )
-        #     if mac_create_payloads:
-        #         try:
-        #             nb.dcim.mac_addresses.create(mac_create_payloads)
-        #         except Exception as exc:
-        #             msg = f"failed to create MAC addresses on '{device_name}': {exc}"
-        #             ret.errors.append(msg)
-        #             log.error(msg)
-        #             job.event(msg, severity="ERROR")
-# 
-        #     if mac_actions_update:
-        #         try:
-        #             nb.dcim.mac_addresses.update(
-        #                 [{"id": a["id"], "mac_address": a["mac_address"]} for a in mac_actions_update]
-        #             )
-        #         except Exception as exc:
-        #             msg = f"failed to update MAC addresses on '{device_name}': {exc}"
-        #             ret.errors.append(msg)
-        #             log.error(msg)
-        #             job.event(msg, severity="ERROR")
-# 
-        #     if delete and mac_actions_delete:
-        #         for action in mac_actions_delete:
-        #             try:
-        #                 mac_obj = nb.dcim.mac_addresses.get(id=action["id"])
-        #                 if mac_obj:
-        #                     mac_obj.delete()
-        #             except Exception as exc:
-        #                 msg = f"failed to delete MAC id '{action['id']}' on '{device_name}': {exc}"
-        #                 ret.errors.append(msg)
-        #                 log.error(msg)
-        #                 job.event(msg, severity="ERROR")
-# 
-        #     # 4) IP create/delete
-        #     for action in ip_actions_create:
-        #         intf_id = name_to_id.get(action["interface"])
-        #         if not intf_id:
-        #             continue
-        #         try:
-        #             existing = list(nb.ipam.ip_addresses.filter(address=action["address"]))
-        #             if existing:
-        #                 ip_obj = existing[0]
-        #                 ip_obj.assigned_object_type = "dcim.interface"
-        #                 ip_obj.assigned_object_id = intf_id
-        #                 ip_obj.status = "active"
-        #                 ip_obj.save()
-        #             else:
-        #                 nb.ipam.ip_addresses.create(
-        #                     {
-        #                         "address": action["address"],
-        #                         "assigned_object_type": "dcim.interface",
-        #                         "assigned_object_id": intf_id,
-        #                         "status": "active",
-        #                     }
-        #                 )
-        #         except Exception as exc:
-        #             msg = f"failed to create IP '{action['address']}' on '{device_name}:{action['interface']}': {exc}"
-        #             ret.errors.append(msg)
-        #             log.error(msg)
-        #             job.event(msg, severity="ERROR")
-# 
-        #     if delete and ip_actions_delete:
-        #         for action in ip_actions_delete:
-        #             try:
-        #                 ip_obj = nb.ipam.ip_addresses.get(id=action["id"])
-        #                 if ip_obj:
-        #                     ip_obj.delete()
-        #             except Exception as exc:
-        #                 msg = f"failed to delete IP id '{action['id']}' on '{device_name}:{action['interface']}': {exc}"
-        #                 ret.errors.append(msg)
-        #                 log.error(msg)
-        #                 job.event(msg, severity="ERROR")
-# 
-        #     # 5) interface delete
-        #     if delete and plan["interfaces"]["delete"]:
-        #         ordered_deletes = sorted(
-        #             plan["interfaces"]["delete"], key=lambda x: (x.count("."), x), reverse=True
-        #         )
-        #         for intf_name in ordered_deletes:
-        #             intf_id = name_to_id.get(intf_name)
-        #             if not intf_id:
-        #                 continue
-        #             try:
-        #                 intf_obj = nb.dcim.interfaces.get(id=intf_id)
-        #                 if intf_obj:
-        #                     intf_obj.delete()
-        #                     job.event(f"deleted interface '{intf_name}' on '{device_name}'")
-        #             except Exception as exc:
-        #                 msg = f"failed to delete interface '{intf_name}' on '{device_name}': {exc}"
-        #                 ret.errors.append(msg)
-        #                 log.error(msg)
-        #                 job.event(msg, severity="ERROR")
-# 
-        #     ret.result[device_name] = plan
-        #     if branch is not None:
-        #         ret.result[device_name]["branch"] = branch
-
-        return ret
+                bulk_create_mac.append(
+                    {
+                        "mac_address": mac,
+                        "assigned_object_type": "dcim.interface",
+                        "assigned_object_id": nb_raw[intf_name]["id"]
+                    }
+                )
+        if bulk_create_mac:
+            try:
+                nb.dcim.mac_addresses.create(bulk_create_mac)
+                job.event(f"created {len(bulk_create_mac)} MAC addresses")
+                for m in bulk_create_mac:
+                    device_name = all_mac_live[m["mac_address"]]
+                    device_results[device_name]["mac_addresses"]["created"].append(m["mac_address"])
+            except Exception as e:
+                msg = f"failed to bulk create MAC addresses: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")               
+        if bulk_update_mac:
+            try:
+                nb.dcim.mac_addresses.update(bulk_update_mac)
+                job.event(f"updated {len(bulk_update_mac)} MAC addresses")
+                for m in bulk_update_mac:
+                    device_name = all_mac_live[m["mac_address"]]
+                    device_results[device_name]["mac_addresses"]["updated"].append(m["mac_address"])
+            except Exception as e:
+                msg = f"failed to bulk update MAC addresses: {e}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
