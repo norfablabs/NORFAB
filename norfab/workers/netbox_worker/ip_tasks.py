@@ -31,6 +31,12 @@ def resolve_ip_role(ip: str, intf_name: str, anycast_ranges: Union[None, str, li
 
     return None
 
+def make_prefix_from_ip(address: Union[None, str]) -> Union[None, str]:
+    try:
+        return str(ipaddress.ip_interface(str(address)).network)
+    except Exception:
+        return None
+        
 class NetboxIpTasks:
 
     @Task(

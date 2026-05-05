@@ -277,29 +277,30 @@ class SyncDeviceInterfacesInput(NetboxCommonArgs, use_enum_values=True, populate
     )
 
 
-def _normalize_mac(mac: Union[None, str]) -> Union[None, str]:
-    if not mac:
-        return None
-    mac_text = str(mac).strip().lower()
-    if mac_text in {"", "none", "null"}:
-        return None
-    return mac_text
-
-
-def make_prefix_from_ip(address: Union[None, str]) -> Union[None, str]:
-    try:
-        return str(ipaddress.ip_interface(str(address)).network)
-    except Exception:
-        return None
-
-
-def _normalize_mode(value: Any) -> Union[None, str]:
-    if value is None:
-        return None
-    if isinstance(value, dict):
-        return value.get("value")
-    text = str(value).strip().lower()
-    return text or None
+class SyncMacAddressesInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    devices: Union[None, list[StrictStr]] = Field(
+        None,
+        description="List of NetBox devices to sync MAC addresses for",
+    )
+    timeout: StrictInt = Field(
+        60,
+        description="Timeout in seconds for Nornir parse_ttp job",
+    )
+    filter_by_name: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter interfaces by name, e.g. 'eth*' or 'Gi0/*'",
+        alias="filter-by-name",
+    )
+    filter_by_description: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter interfaces by description, e.g. 'uplink*'",
+        alias="filter-by-description",
+    )
+    filter_by_mac: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter MAC addresses, e.g. 'aa:bb:*'",
+        alias="filter-by-mac",
+    )
 
 def _build_interface_payload(
     job: object,
@@ -1093,7 +1094,7 @@ class NetboxInterfacesTasks:
                     "speed": data.get("speed"),
                     "duplex": data.get("duplex"),
                     "description": str(data.get("description") or ""),
-                    "mode": _normalize_mode(data.get("mode")),
+                    "mode": (data.get("mode") or {}).get("value"),
                     "untagged_vlan": (
                         (data.get("untagged_vlan") or {}).get("vid")
                         if isinstance(data.get("untagged_vlan"), dict)
@@ -1134,12 +1135,6 @@ class NetboxInterfacesTasks:
                         str(data.get("description") or ""), filter_by_description
                     ):
                         continue
-                    raw_macs = data.get("mac_address")
-                    if isinstance(raw_macs, list):
-                        macs = [_normalize_mac(i) for i in raw_macs]
-                    else:
-                        mac = _normalize_mac(raw_macs)
-                        macs = [mac] if mac else []
                     normalised_live_all[device_name][intf_name] = {
                         "name": intf_name,
                         "type": data["type"],
@@ -1147,11 +1142,10 @@ class NetboxInterfacesTasks:
                         "parent": data.get("parent"),
                         "lag": data.get("lag"),
                         "mtu": data.get("mtu"),
-                        "mac_address": macs,
                         "speed": data.get("speed"),
                         "duplex": data.get("duplex"),
                         "description": str(data.get("description") or ""),
-                        "mode": _normalize_mode(data.get("mode")),
+                        "mode": data.get("mode"),
                         "untagged_vlan": data.get("untagged_vlan"),
                         "tagged_vlans": data.get("tagged_vlans") or [],
                         "qinq_svlan": data.get("qinq_svlan"),
@@ -1368,53 +1362,206 @@ class NetboxInterfacesTasks:
         return ret
 
 
-    def sync_mac_addresses(self):
-        device_results = {
-            device_name: {
-                "mac_addresses": {
-                    "created": [],
-                    "updated": [],
-                    "in_sync": [],
-                }
+    @Task(
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=SyncMacAddressesInput,
+    )
+    def sync_mac_addresses(
+        self,
+        job: Job,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        timeout: int = 60,
+        devices: Union[None, list] = None,
+        branch: str = None,
+        filter_by_name: Union[None, str] = None,
+        filter_by_description: Union[None, str] = None,
+        filter_by_mac: Union[None, str] = None,
+        **kwargs: Any,
+    ) -> Result:
+        """
+        Synchronize MAC addresses from live devices into NetBox.
+
+        The task follows a three-step pipeline:
+
+        1. **Collect live state**: Run a Nornir ``parse_ttp`` get interfaces job against
+           devices to collect live MAC addresses per interface.
+        2. **Fetch NetBox state**: Retrieve existing MAC address objects from NetBox.
+        3. **Reconcile**: Create new MAC address objects or update existing unassigned
+           ones to point at the correct interface.
+
+        **Dry-run mode** (``dry_run=True``): returns the reconciliation plan without
+        making any changes. Result is keyed by device name::
+
+        ```
+        {
+            "<device>": {
+                "created": ["aa:bb:cc:dd:ee:01", ...],
+                "updated": ["aa:bb:cc:dd:ee:02", ...],
+                "in_sync": ["aa:bb:cc:dd:ee:03", ...]
             }
-            for device_name, actions in full_diff.items()
         }
-        # re-fetch interfaces data for devices after creating/updating/deleting interfaces
+        ```
+
+        **Live-run mode** (``dry_run=False``, default): applies changes and returns
+        the same structure showing what was done.
+
+        Args:
+            job: NorFab Job object containing relevant metadata.
+            instance (str, optional): The NetBox instance name to use.
+            dry_run (bool, optional): If True, no changes will be made to NetBox.
+            timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
+            devices (list, optional): List of device names to sync.
+            branch (str, optional): NetBox branch name to use.
+            filter_by_name (str, optional): Glob pattern to restrict which interfaces
+                are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
+            filter_by_description (str, optional): Glob pattern to restrict which
+                interfaces are included by description, e.g. ``'uplink*'``.
+            filter_by_mac (str, optional): Glob pattern to restrict which MAC addresses
+                are included, e.g. ``'aa:bb:*'``.
+            **kwargs: Additional Nornir host filter keyword arguments passed to
+                ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).
+
+        Returns:
+            Result: Per-device action summary with ``created``, ``updated``, and
+                ``in_sync`` MAC address lists.
+        """
+        devices = devices or []
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:sync_mac_addresses",
+            result={},
+            resources=[instance],
+            dry_run=dry_run,
+        )
+        nb = self._get_pynetbox(instance, branch=branch)
+        log.info(
+            f"{self.name} - Sync MAC addresses: Processing {len(devices)} device(s) in '{instance}'"
+        )
+
+        # source additional hosts from Nornir filters
+        if kwargs:
+            nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
+            for host in nornir_hosts:
+                if host not in devices:
+                    devices.append(host)
+
+        if not devices:
+            ret.errors.append("no devices specified")
+            ret.failed = True
+            return ret
+
+        job.event(f"syncing MAC addresses for {len(devices)} devices")
+
+        # filter out devices not defined in NetBox
+        nb_devices_data = {
+            d.name: {"id": d.id, "name": d.name}
+            for d in nb.dcim.devices.filter(name=devices, fields="id,name")
+        }
+        for d in list(devices):
+            if d not in nb_devices_data:
+                msg = f"{d} - device not found in Netbox"
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+                devices.remove(d)
+        if not devices:
+            ret.failed = True
+            return ret
+
+        # gather live interface data from Nornir parse_ttp
+        job.event(f"retrieving live interfaces for {len(devices)} devices")
+        parse_data = self.client.run_job(
+            "nornir",
+            "parse_ttp",
+            kwargs={"get": "interfaces", "FL": devices},
+            workers="all",
+            timeout=timeout,
+        )
+
+        # collect all discovered MAC addresses applying interface and MAC filters
+        all_mac_live: dict = {}  # {mac: {"device": ..., "interface": ...}}
+        for wname, wdata in parse_data.items():
+            if wdata.get("failed"):
+                log.warning(f"{wname} - failed to parse devices")
+                continue
+            for device_name, host_interfaces in wdata["result"].items():
+                for data in host_interfaces:
+                    intf_name = data["name"]
+                    intf_description = data["description"]
+                    mac = data["mac_address"]
+                    if not mac:
+                        continue
+                    if filter_by_name and not fnmatch.fnmatch(intf_name, filter_by_name):
+                        continue
+                    if filter_by_description and intf_description and not fnmatch.fnmatch(
+                        intf_description, filter_by_description
+                    ):
+                        continue
+                    if filter_by_mac and not fnmatch.fnmatch(mac, filter_by_mac):
+                        continue
+                    all_mac_live[mac] = {
+                        "device": device_name,
+                        "interface": intf_name,
+                    }
+
+        if not all_mac_live:
+            log.info(
+                f"{self.name} - Sync MAC addresses: no MAC addresses found in live data"
+            )
+            return ret
+
+        # fetch interfaces data from NetBox to resolve interface IDs
         nb_interfaces_result = self.get_interfaces(
             job=job,
             instance=instance,
             branch=branch,
             devices=devices,
-            ip_addresses=True,
-            cache="refresh"
+            ip_addresses=False,
+            cache="refresh",
         )
+        if nb_interfaces_result.errors:
+            ret.errors.extend(nb_interfaces_result.errors)
+            ret.failed = True
+            return ret
 
-        # process MAC addresses
-        bulk_update_mac = []
-        bulk_create_mac = []
-        # collect all discovered MAC addresses
-        all_mac_live = {} # {mac: {device:.., intf:..}}
-        for device_name, interfaces in normalised_live_all.items():
-            for intf_name, intf_data in interfaces.items():
-                for m in intf_data.get("mac_address", []):
-                    all_mac_live[m] = {
-                        "device": device_name,
-                        "interface": intf_name,
-                    } 
-        # fetch existing MACs data from Netbox
+        # fetch existing MAC address objects from NetBox
         nb_macs = {
             m.mac_address.lower(): {
                 "id": m.id,
                 "device": m.assigned_object.device.name if m.assigned_object else None,
-                "interface": m.assigned_object.name if m.assigned_object else None
+                "interface": m.assigned_object.name if m.assigned_object else None,
             }
-            for m in nb.dcim.mac_addresses.filter(mac_address=list(all_mac_live.keys()), fields="id,mac_address,assigned_object")
+            for m in nb.dcim.mac_addresses.filter(
+                mac_address=list(all_mac_live.keys()),
+                fields="id,mac_address,assigned_object",
+            )
         }
-        # process and compare live MACs versus Netbox MACs
+
+        # per-device result tracking
+        device_results = {
+            device_name: {
+                "created": [],
+                "updated": [],
+                "in_sync": [],
+            }
+            for device_name in devices
+        }
+        ret.result = device_results
+
+        bulk_update_mac = []
+        bulk_create_mac = []
+
+        # process and compare live MACs versus NetBox MACs
         for mac, mac_data in all_mac_live.items():
             device_name = mac_data["device"]
             intf_name = mac_data["interface"]
-            nb_raw = nb_interfaces_result.result[device_name]
+            nb_raw = nb_interfaces_result.result.get(device_name, {})
+            if intf_name not in nb_raw:
+                msg = f"{device_name}:{intf_name} - interface not found in NetBox, skipping MAC {mac}"
+                log.warning(msg)
+                continue
+            # MAC already assigned to a different interface
             if nb_macs.get(mac, {}).get("interface") and nb_macs[mac]["interface"] != intf_name:
                 exist_intf = nb_macs[mac]["interface"]
                 exist_device = nb_macs[mac]["device"]
@@ -1426,48 +1573,61 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
                 job.event(msg, severity="ERROR")
                 continue
-            # MAC alrready assigned to interface
+            # MAC already assigned to correct interface
             elif mac in nb_macs and nb_macs[mac]["interface"] == intf_name:
-                device_results[device_name]["mac_addresses"]["in_sync"].append(mac)
-            # update existing MAC if its not associated with interface
+                device_results[device_name]["in_sync"].append(mac)
+            # update existing MAC if it is not associated with any interface
             elif mac in nb_macs and nb_macs[mac]["interface"] is None:
-                bulk_update_mac.append(
-                    {
-                        "id": nb_macs[mac]["id"],
-                        "mac_address": mac,
-                        "assigned_object_type": "dcim.interface",
-                        "assigned_object_id": nb_raw[intf_name]["id"]
-                    }
-                )
+                if dry_run:
+                    device_results[device_name]["updated"].append(mac)
+                else:
+                    bulk_update_mac.append(
+                        {
+                            "id": nb_macs[mac]["id"],
+                            "mac_address": mac,
+                            "assigned_object_type": "dcim.interface",
+                            "assigned_object_id": nb_raw[intf_name]["id"],
+                        }
+                    )
+            # create new MAC address entry
             else:
-                bulk_create_mac.append(
-                    {
-                        "mac_address": mac,
-                        "assigned_object_type": "dcim.interface",
-                        "assigned_object_id": nb_raw[intf_name]["id"]
-                    }
-                )
+                if dry_run:
+                    device_results[device_name]["created"].append(mac)
+                else:
+                    bulk_create_mac.append(
+                        {
+                            "mac_address": mac,
+                            "assigned_object_type": "dcim.interface",
+                            "assigned_object_id": nb_raw[intf_name]["id"],
+                        }
+                    )
+
+        if dry_run:
+            return ret
+
         if bulk_create_mac:
             try:
                 nb.dcim.mac_addresses.create(bulk_create_mac)
                 job.event(f"created {len(bulk_create_mac)} MAC addresses")
                 for m in bulk_create_mac:
-                    device_name = all_mac_live[m["mac_address"]]
-                    device_results[device_name]["mac_addresses"]["created"].append(m["mac_address"])
+                    device_name = all_mac_live[m["mac_address"]]["device"]
+                    device_results[device_name]["created"].append(m["mac_address"])
             except Exception as e:
                 msg = f"failed to bulk create MAC addresses: {e}"
                 ret.errors.append(msg)
                 log.error(msg)
-                job.event(msg, severity="ERROR")               
+                job.event(msg, severity="ERROR")
         if bulk_update_mac:
             try:
                 nb.dcim.mac_addresses.update(bulk_update_mac)
                 job.event(f"updated {len(bulk_update_mac)} MAC addresses")
                 for m in bulk_update_mac:
-                    device_name = all_mac_live[m["mac_address"]]
-                    device_results[device_name]["mac_addresses"]["updated"].append(m["mac_address"])
+                    device_name = all_mac_live[m["mac_address"]]["device"]
+                    device_results[device_name]["updated"].append(m["mac_address"])
             except Exception as e:
                 msg = f"failed to bulk update MAC addresses: {e}"
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
+
+        return ret
