@@ -89,4 +89,3 @@ class SyncDeviceInventoryShell(NetboxCommonArgs, NetboxClientRunJobArgs):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
-

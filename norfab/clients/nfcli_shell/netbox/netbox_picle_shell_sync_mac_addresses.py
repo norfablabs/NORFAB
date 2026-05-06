@@ -14,7 +14,9 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class SyncMacAddressesShell(NetboxClientRunJobArgs, SyncMacAddressesInput, NorniHostsFilters):
+class SyncMacAddressesShell(
+    NetboxClientRunJobArgs, SyncMacAddressesInput, NorniHostsFilters
+):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of Netbox devices to sync MAC addresses for",

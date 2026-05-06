@@ -22,9 +22,6 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-
-
-
 def resolve_asn(
     asn_str: Union[None, str],
     nb: Any,
@@ -120,6 +117,7 @@ def resolve_route_policy(
         log.error(f"{worker_name} - {msg}")
         ret.errors.append(msg)
         return None
+
 
 def resolve_peer_group(
     name: Union[None, str], nb: Any, job: Job, ret: Result, worker_name: str
@@ -1978,7 +1976,7 @@ class NetboxBgpPeeringsTasks:
             return ret
         else:
             ret.diff = full_diff
-            
+
         # Per-device result tracking
         device_results = {
             device_name: {

@@ -78,4 +78,3 @@ class NetboxFastApiArgs(NorFabClientRunJob):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "any", description="Filter worker to target"
     )
-

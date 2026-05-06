@@ -6,6 +6,7 @@ from norfab.models import Result
 
 log = logging.getLogger(__name__)
 
+
 def resolve_vrf(
     name: Union[None, str], nb: Any, job: Job, ret: Result, worker_name: str
 ) -> Union[int, None]:

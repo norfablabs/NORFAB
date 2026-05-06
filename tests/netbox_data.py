@@ -380,7 +380,13 @@ prefixes = [
     {"prefix": "1.0.1.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.100.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.10.0/24", "description": "Subinterface addresses"},
-    {"prefix": "192.168.100.0/24", "description": "Test IP allocation by role and site", "role": "prefix_role_1", "scope_type": "dcim.site", "scope_name": "NORFAB-LAB"}
+    {
+        "prefix": "192.168.100.0/24",
+        "description": "Test IP allocation by role and site",
+        "role": "prefix_role_1",
+        "scope_type": "dcim.site",
+        "scope_name": "NORFAB-LAB",
+    },
 ]
 
 prefix_roles = [
@@ -404,41 +410,35 @@ ip_addresses = [
     {"address": "10.0.2.10/30"},  # eth107 fceos5
     {"address": "10.0.2.8/30"},  # fceos4-fceos5-eth107-vrf
     {"address": "10.0.2.9/30"},  # fceos5-fceos4-eth107-vrf
-    {"address": "172.16.1.101/30"}, # BGP peering reolve localip via peer ip test
-    {"address": "172.16.1.102/30"}, # BGP peering reolve localip via peer ip test
+    {"address": "172.16.1.101/30"},  # BGP peering reolve localip via peer ip test
+    {"address": "172.16.1.102/30"},  # BGP peering reolve localip via peer ip test
 ]
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
 
-vlans = [
-    {"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)
-]
+vlans = [{"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)]
 vlans.extend(
     [
         {"name": "TEST_L1_TRUNK_A", "vid": 110},
         {"name": "TEST_L1_TRUNK_B", "vid": 111},
-        {"name": "TEST_L1_ACCESS",  "vid": 210},
-        {"name": "TEST_L1_SUBIF",   "vid": 310},
-
+        {"name": "TEST_L1_ACCESS", "vid": 210},
+        {"name": "TEST_L1_SUBIF", "vid": 310},
         {"name": "TEST_L2_TRUNK_A", "vid": 120},
         {"name": "TEST_L2_TRUNK_B", "vid": 121},
-        {"name": "TEST_L2_ACCESS",  "vid": 220},
-        {"name": "TEST_L2_SUBIF",   "vid": 320},
-
+        {"name": "TEST_L2_ACCESS", "vid": 220},
+        {"name": "TEST_L2_SUBIF", "vid": 320},
         {"name": "TEST_L3_TRUNK_A", "vid": 130},
         {"name": "TEST_L3_TRUNK_B", "vid": 131},
-        {"name": "TEST_L3_ACCESS",  "vid": 230},
-        {"name": "TEST_L3_SUBIF",   "vid": 330},
-
+        {"name": "TEST_L3_ACCESS", "vid": 230},
+        {"name": "TEST_L3_SUBIF", "vid": 330},
         {"name": "TEST_S1_TRUNK_A", "vid": 410},
         {"name": "TEST_S1_TRUNK_B", "vid": 411},
-        {"name": "TEST_S1_ACCESS",  "vid": 510},
-        {"name": "TEST_S1_SUBIF",   "vid": 610},
-
+        {"name": "TEST_S1_ACCESS", "vid": 510},
+        {"name": "TEST_S1_SUBIF", "vid": 610},
         {"name": "TEST_S2_TRUNK_A", "vid": 420},
         {"name": "TEST_S2_TRUNK_B", "vid": 421},
-        {"name": "TEST_S2_ACCESS",  "vid": 520},
-        {"name": "TEST_S2_SUBIF",   "vid": 620},
+        {"name": "TEST_S2_ACCESS", "vid": 520},
+        {"name": "TEST_S2_SUBIF", "vid": 620},
     ]
 )
 
@@ -574,7 +574,12 @@ interfaces = [
     {"name": "eth106", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
     {"name": "eth107", "device": {"name": "fceos4"}, "type": "10gbase-x-sfpp"},
     {"name": "eth107", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
-    {"name": "Loopback1001", "device": {"name": "ceos-leaf-1"}, "type": "virtual", "description": "BGP reolve local ip via peer ip test"},
+    {
+        "name": "Loopback1001",
+        "device": {"name": "ceos-leaf-1"},
+        "type": "virtual",
+        "description": "BGP reolve local ip via peer ip test",
+    },
 ]
 
 # add Containerlab devices interfaces

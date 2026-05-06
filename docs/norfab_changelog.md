@@ -6,7 +6,12 @@
 
 ## CHANGES
 
-1. Complete refactoring of netbox `sync_device_interfaces` task
+1. Complete refactoring of Netbox `sync_device_interfaces` task
+2. Complete refactoring of Netbox `sync_device_ip` task
+
+## FEATURES
+
+1. Created Netbox task `sync_mac_addresses`
 
 ---
 

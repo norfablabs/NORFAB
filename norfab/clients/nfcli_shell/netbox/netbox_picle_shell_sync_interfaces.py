@@ -14,7 +14,9 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class SyncInterfacesShell(NetboxClientRunJobArgs, SyncDeviceInterfacesInput, NorniHostsFilters):
+class SyncInterfacesShell(
+    NetboxClientRunJobArgs, SyncDeviceInterfacesInput, NorniHostsFilters
+):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of Netbox devices to sync",
