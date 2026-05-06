@@ -435,7 +435,7 @@ class NetboxIpTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
     )
-    def sync_device_ip(
+    def sync_device_ip_old(
         self,
         job: Job,
         instance: Union[None, str] = None,
@@ -589,28 +589,13 @@ class NetboxIpTasks:
         return ret
 
 
-    def sync_ip_new(self):
+    def sync_device_ip(self):
         device_results = {
             device_name: {
                 "created": [],
                 "updated": [],
                 "deleted": [],
                 "in_sync": actions["in_sync"],
-                "mac_addresses": {
-                    "created": [],
-                    "updated": [],
-                    "in_sync": [],
-                },
-                "ip_addresses": {
-                    "created": [],
-                    "updated": [],
-                    "in_sync": [],
-                },
-                "prefixes": {
-                    "created": [],
-                    "updated": [],
-                    "in_sync": [],
-                },
             }
             for device_name, actions in full_diff.items()
         }

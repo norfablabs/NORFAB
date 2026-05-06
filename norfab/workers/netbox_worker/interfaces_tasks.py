@@ -1526,17 +1526,24 @@ class NetboxInterfacesTasks:
             return ret
 
         # fetch existing MAC address objects from NetBox
-        nb_macs = {
-            m.mac_address.lower(): {
-                "id": m.id,
-                "device": m.assigned_object.device.name if m.assigned_object else None,
-                "interface": m.assigned_object.name if m.assigned_object else None,
+        # NetBox allows duplicate MAC entries; prefer assigned entries over
+        # unassigned ones so that a conflicting assignment is not silently
+        # overwritten by a later unassigned copy during dict construction.
+        nb_macs: dict = {}
+        for _m in nb.dcim.mac_addresses.filter(
+            mac_address=list(all_mac_live.keys()),
+            fields="id,mac_address,assigned_object",
+        ):
+            _mac = _m.mac_address.lower()
+            _entry = {
+                "id": _m.id,
+                "device": _m.assigned_object.device.name if _m.assigned_object else None,
+                "interface": _m.assigned_object.name if _m.assigned_object else None,
             }
-            for m in nb.dcim.mac_addresses.filter(
-                mac_address=list(all_mac_live.keys()),
-                fields="id,mac_address,assigned_object",
-            )
-        }
+            # keep the entry if we haven't seen this MAC yet, or if the new
+            # entry is assigned (has an interface) and the stored one is not
+            if _mac not in nb_macs or (_entry["interface"] is not None and nb_macs[_mac]["interface"] is None):
+                nb_macs[_mac] = _entry
 
         # per-device result tracking
         device_results = {

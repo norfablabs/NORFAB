@@ -153,6 +153,7 @@ nav:
       - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
       - Sync Device Facts: workers/netbox/services_netbox_service_tasks_sync_device_facts.md
       - Sync Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
+      - Sync MAC Addresses: workers/netbox/services_netbox_service_tasks_sync_mac_addresses.md
       - Sync Device IP: workers/netbox/services_netbox_service_tasks_sync_device_ip.md
       - Sync BGP Peerings: workers/netbox/services_netbox_service_tasks_sync_bgp_peerings.md
       - Create BGP Peering: workers/netbox/services_netbox_service_tasks_create_bgp_peering.md
