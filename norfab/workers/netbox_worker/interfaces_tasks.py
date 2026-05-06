@@ -39,7 +39,7 @@ class CreateDeviceInterfacesInput(
         description="List of per-interface payload dicts, each must include 'name'",
         alias="interfaces-data",
     )
-    interface_type: InterfaceTypeEnum = Field(
+    interface_type: Union[StrictStr, InterfaceTypeEnum] = Field(
         "other",
         description="Type of interface to create",
         alias="interface-type",

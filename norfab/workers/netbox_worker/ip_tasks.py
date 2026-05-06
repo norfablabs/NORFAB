@@ -638,10 +638,8 @@ class NetboxIpTasks:
                         intf_name, filter_by_name
                     ):
                         continue
-                    if (
-                        filter_by_description
-                        and intf_description
-                        and not fnmatch.fnmatch(intf_description, filter_by_description)
+                    if filter_by_description and not fnmatch.fnmatch(
+                        intf_description, filter_by_description
                     ):
                         continue
                     # apply IP-level filters if needed

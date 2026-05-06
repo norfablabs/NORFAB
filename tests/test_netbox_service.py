@@ -3830,6 +3830,20 @@ class TestSyncDeviceIP:
         pynb = get_pynetbox(nfclient)
         return list(pynb.ipam.ip_addresses.filter(device=device, interface=interface))
 
+    @pytest.fixture(autouse=True, scope="class")
+    def ensure_test_sync_interfaces(self, nfclient):
+        """Create TEST_SYNC interfaces in NetBox for all devices before any IP sync
+        test runs. TestSyncDeviceInterfaces cleans these up at the end of its own
+        tests, so they must be re-created here."""
+        nfclient.run_job(
+            "netbox",
+            "sync_device_interfaces",
+            workers="any",
+            kwargs={"devices": self.ALL_DEVICES},
+        )
+        yield
+        delete_interfaces_with_description(nfclient, self.ALL_DEVICES, "TEST_SYNC")
+
     # ------------------------------------------------------------------ #
     # Basic smoke tests                                                    #
     # ------------------------------------------------------------------ #

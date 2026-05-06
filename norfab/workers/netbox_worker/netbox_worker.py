@@ -187,6 +187,7 @@ class NetboxWorker(
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
             "diskcache": "",
+            "deepdiff": "",
             "netbox_version": self.nb_version,
         }
         # get version of packages installed
