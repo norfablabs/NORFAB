@@ -757,7 +757,8 @@ class NetboxIpTasks:
                 "interface": ip.assigned_object.name if ip.assigned_object else None,
             }
             for ip in nb.ipam.ip_addresses.filter(
-                address=[i["address"] for i in all_ip_live],
+                # do IP search ignoring mask, in case live and netbox IPs have mismatch
+                address=[i["address"].split("/")[0] for i in all_ip_live],
                 fields="id,address,vrf,role,assigned_object",
             )
         ]
@@ -771,7 +772,9 @@ class NetboxIpTasks:
             intf_name = ip_live.pop("interface")
             key = (device_name, intf_name, ip_live["address"])
             # find existing NetBox IPs of same value
-            matching_nb_ips = [i for i in nb_ips if i["address"] == ip_live["address"]]
+            ip_live_no_mask = ip_live["address"].split("/")[0]
+            # do IP comparison ignoring mask, in case live and netbox IPs have mask mismatch
+            matching_nb_ips = [i for i in nb_ips if i["address"].startswith(f"{ip_live_no_mask}/")]
             # no existing IP found, create it
             if not matching_nb_ips:
                 bulk_create_ip[key] = ip_live
