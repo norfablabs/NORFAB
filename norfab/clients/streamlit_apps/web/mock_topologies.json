@@ -1,0 +1,166 @@
+{
+  "L1": {
+    "nodes": [
+      {"id": "R1",  "name": "R1",  "type": "IOSX",  "ip": "172.20.20.11"},
+      {"id": "R2",  "name": "R2",  "type": "IOSX",  "ip": "172.20.20.12"},
+      {"id": "R3",  "name": "R3",  "type": "IOSX",  "ip": "172.20.20.13"},
+      {"id": "R4",  "name": "R4",  "type": "IOSX",  "ip": "172.20.20.14"},
+      {"id": "R5",  "name": "R5",  "type": "IOSX",  "ip": "172.20.20.15"},
+      {"id": "R6",  "name": "R6",  "type": "IOSX",  "ip": "172.20.20.16"},
+      {"id": "R7",  "name": "R7",  "type": "IOSX",  "ip": "172.20.20.17"},
+      {"id": "R8",  "name": "R8",  "type": "IOSX",  "ip": "172.20.20.18"},
+      {"id": "R9",  "name": "R9",  "type": "NXOS",  "ip": "172.20.21.11"},
+      {"id": "R10", "name": "R10", "type": "NXOS",  "ip": "172.20.21.12"},
+      {"id": "R11", "name": "R11", "type": "NXOS",  "ip": "172.20.21.13"},
+      {"id": "R12", "name": "R12", "type": "NXOS",  "ip": "172.20.21.14"},
+      {"id": "R13", "name": "R13", "type": "JunOS", "ip": "172.20.22.11"},
+      {"id": "R14", "name": "R14", "type": "JunOS", "ip": "172.20.22.12"},
+      {"id": "R15", "name": "R15", "type": "JunOS", "ip": "172.20.22.13"},
+      {"id": "R16", "name": "R16", "type": "EOS",   "ip": "172.20.23.11"},
+      {"id": "R17", "name": "R17", "type": "EOS",   "ip": "172.20.23.12"},
+      {"id": "R18", "name": "R18", "type": "EOS",   "ip": "172.20.23.13"},
+      {"id": "R19", "name": "R19", "type": "Linux", "ip": "172.20.24.11"},
+      {"id": "R20", "name": "R20", "type": "Linux", "ip": "172.20.24.12"}
+    ],
+    "links": [
+      {"source": "R1",  "target": "R2",  "src_iface": "Gi0/0",    "dst_iface": "Gi0/0"},
+      {"source": "R2",  "target": "R3",  "src_iface": "Gi0/1",    "dst_iface": "Gi0/0"},
+      {"source": "R3",  "target": "R1",  "src_iface": "Gi0/1",    "dst_iface": "Gi0/1"},
+      {"source": "R1",  "target": "R4",  "src_iface": "Gi0/2",    "dst_iface": "Gi0/0"},
+      {"source": "R1",  "target": "R5",  "src_iface": "Gi0/3",    "dst_iface": "Gi0/0"},
+      {"source": "R2",  "target": "R6",  "src_iface": "Gi0/2",    "dst_iface": "Gi0/0"},
+      {"source": "R2",  "target": "R7",  "src_iface": "Gi0/3",    "dst_iface": "Gi0/0"},
+      {"source": "R3",  "target": "R8",  "src_iface": "Gi0/2",    "dst_iface": "Gi0/0"},
+      {"source": "R4",  "target": "R9",  "src_iface": "Gi0/1",    "dst_iface": "Eth1/1"},
+      {"source": "R5",  "target": "R9",  "src_iface": "Gi0/1",    "dst_iface": "Eth1/2"},
+      {"source": "R6",  "target": "R10", "src_iface": "Gi0/1",    "dst_iface": "Eth1/1"},
+      {"source": "R7",  "target": "R10", "src_iface": "Gi0/1",    "dst_iface": "Eth1/2"},
+      {"source": "R8",  "target": "R11", "src_iface": "Gi0/1",    "dst_iface": "Eth1/1"},
+      {"source": "R9",  "target": "R10", "src_iface": "Eth1/3",   "dst_iface": "Eth1/3"},
+      {"source": "R10", "target": "R11", "src_iface": "Eth1/4",   "dst_iface": "Eth1/2"},
+      {"source": "R11", "target": "R12", "src_iface": "Eth1/3",   "dst_iface": "Eth1/1"},
+      {"source": "R9",  "target": "R13", "src_iface": "Eth1/5",   "dst_iface": "ge-0/0/0"},
+      {"source": "R12", "target": "R14", "src_iface": "Eth1/2",   "dst_iface": "ge-0/0/0"},
+      {"source": "R13", "target": "R14", "src_iface": "ge-0/0/1", "dst_iface": "ge-0/0/1"},
+      {"source": "R14", "target": "R15", "src_iface": "ge-0/0/2", "dst_iface": "ge-0/0/0"},
+      {"source": "R13", "target": "R16", "src_iface": "ge-0/0/2", "dst_iface": "Eth1"},
+      {"source": "R15", "target": "R17", "src_iface": "ge-0/0/1", "dst_iface": "Eth1"},
+      {"source": "R16", "target": "R17", "src_iface": "Eth2",     "dst_iface": "Eth2"},
+      {"source": "R17", "target": "R18", "src_iface": "Eth3",     "dst_iface": "Eth1"},
+      {"source": "R16", "target": "R19", "src_iface": "Eth3",     "dst_iface": "eth0"},
+      {"source": "R18", "target": "R20", "src_iface": "Eth2",     "dst_iface": "eth0"}
+    ]
+  },
+  "OSPF": {
+    "nodes": [
+      {"id": "R1",  "name": "R1",  "type": "IOSX",  "ip": "172.20.20.11", "area": "0"},
+      {"id": "R2",  "name": "R2",  "type": "IOSX",  "ip": "172.20.20.12", "area": "0"},
+      {"id": "R3",  "name": "R3",  "type": "IOSX",  "ip": "172.20.20.13", "area": "0"},
+      {"id": "R4",  "name": "R4",  "type": "IOSX",  "ip": "172.20.20.14", "area": "1"},
+      {"id": "R5",  "name": "R5",  "type": "IOSX",  "ip": "172.20.20.15", "area": "1"},
+      {"id": "R6",  "name": "R6",  "type": "IOSX",  "ip": "172.20.20.16", "area": "2"},
+      {"id": "R7",  "name": "R7",  "type": "IOSX",  "ip": "172.20.20.17", "area": "2"},
+      {"id": "R9",  "name": "R9",  "type": "NXOS",  "ip": "172.20.21.11", "area": "1"},
+      {"id": "R10", "name": "R10", "type": "NXOS",  "ip": "172.20.21.12", "area": "2"},
+      {"id": "R13", "name": "R13", "type": "JunOS", "ip": "172.20.22.11", "area": "3"},
+      {"id": "R14", "name": "R14", "type": "JunOS", "ip": "172.20.22.12", "area": "3"},
+      {"id": "R16", "name": "R16", "type": "EOS",   "ip": "172.20.23.11", "area": "3"}
+    ],
+    "links": [
+      {"source": "R1",  "target": "R2",  "metric": "10", "area": "0"},
+      {"source": "R2",  "target": "R3",  "metric": "10", "area": "0"},
+      {"source": "R3",  "target": "R1",  "metric": "10", "area": "0"},
+      {"source": "R1",  "target": "R4",  "metric": "20", "area": "1"},
+      {"source": "R1",  "target": "R5",  "metric": "20", "area": "1"},
+      {"source": "R4",  "target": "R9",  "metric": "10", "area": "1"},
+      {"source": "R5",  "target": "R9",  "metric": "15", "area": "1"},
+      {"source": "R2",  "target": "R6",  "metric": "20", "area": "2"},
+      {"source": "R2",  "target": "R7",  "metric": "20", "area": "2"},
+      {"source": "R6",  "target": "R10", "metric": "10", "area": "2"},
+      {"source": "R7",  "target": "R10", "metric": "15", "area": "2"},
+      {"source": "R3",  "target": "R13", "metric": "30", "area": "3"},
+      {"source": "R13", "target": "R14", "metric": "10", "area": "3"},
+      {"source": "R14", "target": "R16", "metric": "10", "area": "3"}
+    ]
+  },
+  "IS-IS": {
+    "nodes": [
+      {"id": "R1",  "name": "R1",  "type": "IOSX",  "ip": "172.20.20.11", "level": "L2"},
+      {"id": "R2",  "name": "R2",  "type": "IOSX",  "ip": "172.20.20.12", "level": "L2"},
+      {"id": "R3",  "name": "R3",  "type": "IOSX",  "ip": "172.20.20.13", "level": "L2"},
+      {"id": "R4",  "name": "R4",  "type": "IOSX",  "ip": "172.20.20.14", "level": "L1/L2"},
+      {"id": "R6",  "name": "R6",  "type": "IOSX",  "ip": "172.20.20.16", "level": "L1/L2"},
+      {"id": "R8",  "name": "R8",  "type": "IOSX",  "ip": "172.20.20.18", "level": "L1"},
+      {"id": "R9",  "name": "R9",  "type": "NXOS",  "ip": "172.20.21.11", "level": "L1"},
+      {"id": "R11", "name": "R11", "type": "NXOS",  "ip": "172.20.21.13", "level": "L1"},
+      {"id": "R13", "name": "R13", "type": "JunOS", "ip": "172.20.22.11", "level": "L2"},
+      {"id": "R15", "name": "R15", "type": "JunOS", "ip": "172.20.22.13", "level": "L1"}
+    ],
+    "links": [
+      {"source": "R1",  "target": "R2",  "metric": "10"},
+      {"source": "R2",  "target": "R3",  "metric": "10"},
+      {"source": "R1",  "target": "R4",  "metric": "20"},
+      {"source": "R2",  "target": "R6",  "metric": "20"},
+      {"source": "R3",  "target": "R13", "metric": "30"},
+      {"source": "R4",  "target": "R9",  "metric": "10"},
+      {"source": "R4",  "target": "R8",  "metric": "10"},
+      {"source": "R6",  "target": "R11", "metric": "10"},
+      {"source": "R8",  "target": "R9",  "metric": "10"},
+      {"source": "R13", "target": "R15", "metric": "15"}
+    ]
+  },
+  "BGP": {
+    "nodes": [
+      {"id": "R1",  "name": "R1",  "type": "IOSX",  "ip": "172.20.20.11", "asn": "65001"},
+      {"id": "R2",  "name": "R2",  "type": "IOSX",  "ip": "172.20.20.12", "asn": "65001"},
+      {"id": "R3",  "name": "R3",  "type": "IOSX",  "ip": "172.20.20.13", "asn": "65001"},
+      {"id": "R4",  "name": "R4",  "type": "IOSX",  "ip": "172.20.20.14", "asn": "65001"},
+      {"id": "R9",  "name": "R9",  "type": "NXOS",  "ip": "172.20.21.11", "asn": "65002"},
+      {"id": "R10", "name": "R10", "type": "NXOS",  "ip": "172.20.21.12", "asn": "65002"},
+      {"id": "R11", "name": "R11", "type": "NXOS",  "ip": "172.20.21.13", "asn": "65002"},
+      {"id": "R13", "name": "R13", "type": "JunOS", "ip": "172.20.22.11", "asn": "65003"},
+      {"id": "R14", "name": "R14", "type": "JunOS", "ip": "172.20.22.12", "asn": "65003"},
+      {"id": "R16", "name": "R16", "type": "EOS",   "ip": "172.20.23.11", "asn": "65004"},
+      {"id": "R17", "name": "R17", "type": "EOS",   "ip": "172.20.23.12", "asn": "65004"},
+      {"id": "R19", "name": "R19", "type": "Linux", "ip": "172.20.24.11", "asn": "65005"}
+    ],
+    "links": [
+      {"source": "R1",  "target": "R2",  "session_type": "iBGP"},
+      {"source": "R1",  "target": "R3",  "session_type": "iBGP"},
+      {"source": "R1",  "target": "R4",  "session_type": "iBGP"},
+      {"source": "R2",  "target": "R3",  "session_type": "iBGP"},
+      {"source": "R9",  "target": "R10", "session_type": "iBGP"},
+      {"source": "R9",  "target": "R11", "session_type": "iBGP"},
+      {"source": "R13", "target": "R14", "session_type": "iBGP"},
+      {"source": "R16", "target": "R17", "session_type": "iBGP"},
+      {"source": "R1",  "target": "R9",  "session_type": "eBGP"},
+      {"source": "R2",  "target": "R10", "session_type": "eBGP"},
+      {"source": "R9",  "target": "R13", "session_type": "eBGP"},
+      {"source": "R13", "target": "R16", "session_type": "eBGP"},
+      {"source": "R14", "target": "R17", "session_type": "eBGP"},
+      {"source": "R16", "target": "R19", "session_type": "eBGP"}
+    ]
+  },
+  "Tunnels": {
+    "nodes": [
+      {"id": "R1",  "name": "R1",  "type": "IOSX",  "ip": "172.20.20.11"},
+      {"id": "R3",  "name": "R3",  "type": "IOSX",  "ip": "172.20.20.13"},
+      {"id": "R5",  "name": "R5",  "type": "IOSX",  "ip": "172.20.20.15"},
+      {"id": "R7",  "name": "R7",  "type": "IOSX",  "ip": "172.20.20.17"},
+      {"id": "R10", "name": "R10", "type": "NXOS",  "ip": "172.20.21.12"},
+      {"id": "R12", "name": "R12", "type": "NXOS",  "ip": "172.20.21.14"},
+      {"id": "R14", "name": "R14", "type": "JunOS", "ip": "172.20.22.12"},
+      {"id": "R17", "name": "R17", "type": "EOS",   "ip": "172.20.23.12"}
+    ],
+    "links": [
+      {"source": "R1",  "target": "R5",  "tunnel_type": "GRE"},
+      {"source": "R1",  "target": "R7",  "tunnel_type": "GRE"},
+      {"source": "R3",  "target": "R10", "tunnel_type": "MPLS"},
+      {"source": "R3",  "target": "R12", "tunnel_type": "MPLS"},
+      {"source": "R5",  "target": "R14", "tunnel_type": "GRE"},
+      {"source": "R7",  "target": "R17", "tunnel_type": "GRE"},
+      {"source": "R10", "target": "R14", "tunnel_type": "MPLS"},
+      {"source": "R12", "target": "R17", "tunnel_type": "MPLS"}
+    ]
+  }
+}

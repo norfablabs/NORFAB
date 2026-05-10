@@ -23,6 +23,7 @@ from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 from ..common import log_error_or_result
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
+from .netbox_picle_shell_create_bgp_peering import CreateBgpPeeringShell
 from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
 from .netbox_picle_shell_create_ip import CreateIp
 from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
@@ -36,7 +37,7 @@ from .netbox_picle_shell_get_containerlab_inventory import (
 )
 from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_get_interfaces import GetInterfaces
-from .netbox_picle_shell_create_bgp_peering import CreateBgpPeeringShell
+from .netbox_picle_shell_get_topology import GetTopology
 from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
 from .netbox_picle_shell_sync_device import SyncDeviceInventoryShell
 from .netbox_picle_shell_sync_interfaces import SyncInterfacesShell
@@ -218,6 +219,9 @@ class GetCommands(BaseModel):
     )
     connections: GetConnections = Field(
         None, description="Query Netbox connections data for devices"
+    )
+    topology: GetTopology = Field(
+        None, description="Query Netbox topology data for devices"
     )
     containerlab_inventory: GetContainerlabInventoryCommand = Field(
         None,

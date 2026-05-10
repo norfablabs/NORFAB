@@ -31,6 +31,7 @@ from .netbox_crud import NetboxCrudTasks
 from .netbox_models import NetboxFastApiArgs
 from .nornir_inventory_tasks import NetboxNornirInventoryTasks
 from .prefix_tasks import NetboxPrefixTasks
+from .topology_tasks import NetboxTopologyTasks
 
 SERVICE = "netbox"
 
@@ -48,6 +49,7 @@ class NetboxWorker(
     NetboxNornirInventoryTasks,
     NetboxBgpPeeringsTasks,
     NetboxPrefixTasks,
+    NetboxTopologyTasks,
     NetboxContainerlabInventoryTasks,
     NetboxIpTasks,
     NetboxBranchTasks,

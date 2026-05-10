@@ -1,150 +1,224 @@
 import json
-import uuid
+import math
+from pathlib import Path
 
 import streamlit as st
-from streamlit.components.v1 import html
+
+_TAB_LABELS = ["\u26bf L1", "\u25c8 BGP"]
+_TAB_KEYS = ["L1", "BGP"]
+_SUBTITLES = {
+    "L1": "Physical Topology \u2014 LLDP Neighbors",
+    "BGP": "BGP Peerings",
+}
 
 
-def _default_graph():
-    return {
-        "nodes": [
-            {"id": "Node 1", "group": 1},
-            {"id": "Node 2", "group": 1},
-            {"id": "Node 3", "group": 2},
-            {"id": "Node 4", "group": 2},
-            {"id": "Node 5", "group": 3},
-        ],
-        "links": [
-            {"source": "Node 1", "target": "Node 2", "value": 1},
-            {"source": "Node 1", "target": "Node 3", "value": 2},
-            {"source": "Node 2", "target": "Node 4", "value": 1},
-            {"source": "Node 3", "target": "Node 5", "value": 1},
-        ],
-    }
+def _get_nfclient():
+    """Return the shared NorFab client from Streamlit session state."""
+    nfclient = st.session_state.get("nfclient")
+    if nfclient is None:
+        nfclient = st.session_state.get("NFCLIENT")
+
+    if nfclient is not None and "nfclient" not in st.session_state:
+        st.session_state["nfclient"] = nfclient
+
+    return nfclient
 
 
-_HTML_TEMPLATE = """
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    html,body {{ margin:0; padding:0; height:100%; overflow:hidden; background:{bg}; }}
-    #3d-graph {{ width:100%; height:100vh; }}
-  </style>
-</head>
-<body>
-  <div id="3d-graph"></div>
-  <!-- THREE.js and 3d-force-graph from CDN -->
-  <script src="https://unpkg.com/three@0.135.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/3d-force-graph@1.76.0/dist/3d-force-graph.min.js"></script>
-  <script>
-    const graphData = {graph_json};
-    const elem = document.getElementById('3d-graph');
-    const Graph = ForceGraph3D()(elem)
-      .graphData(graphData)
-      .linkDirectionalParticles({linkDirectionalParticles})
-      .linkWidth(d => Math.max(0.1, {link_width} * (d.value || 1)))
-      .nodeRelSize({node_size})
-      .nodeLabel(node => node.id ? node.id.toString() : '')
-      .nodeAutoColorBy('{color_field}')
-      .d3Force('link').distance({link_distance});
-
-    // background / camera / controls
-    Graph.cameraPosition({{ z: {camera_z} }});
-    Graph.onNodeClick(node => {{
-      const distance = 100;
-      const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-      Graph.cameraPosition(
-        {{ x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }},
-        node,
-        1000
-      );
-    }});
-  </script>
-</body>
-</html>
-"""
+def _get_web_folder() -> Path:
+    """Get the path to the web folder containing HTML templates."""
+    return Path(__file__).parent / "web"
 
 
-def _render_graph(
-    graph,
-    *,
-    bg="#111111",
-    node_size=4,
-    link_width=1,
-    link_distance=30,
-    camera_z=200,
-    color_field="group",
-    linkDirectionalParticles=0,
-) -> None:
-    graph_json = json.dumps(graph)
-    html_content = _HTML_TEMPLATE.format(
-        graph_json=graph_json,
-        bg=bg,
-        node_size=node_size,
-        link_width=link_width,
-        link_distance=link_distance,
-        camera_z=camera_z,
-        color_field=color_field,
-        linkDirectionalParticles=linkDirectionalParticles,
-    )
-    html(html_content, height=800, scrolling=True)
+def _load_topologies() -> dict:
+    """Load sample topologies from the mock_topologies.json file.
+
+    Returns:
+        Dictionary with topology data keyed by topology name.
+    """
+    topo_path = _get_web_folder() / "mock_topologies.json"
+    try:
+        return json.loads(topo_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Topologies file not found: {topo_path}. "
+            f"Make sure the 'web' folder exists with mock_topologies.json."
+        )
+
+
+@st.cache_data(show_spinner=False)
+def _fetch_topology_data(topology_key: str, refresh_nonce: int) -> dict:
+    """Fetch topology data through a helper function.
+
+    Args:
+        topology_key: Topology key such as "L1" or "BGP".
+        refresh_nonce: A monotonically increasing value to force re-fetch.
+
+    Returns:
+        Topology dictionary with nodes and links.
+    """
+    if topology_key == "L1":
+        nfclient = _get_nfclient()
+        if nfclient is not None:
+            result = nfclient.run_job(
+                "netbox",
+                "get_topology",
+                workers="any",
+                kwargs={"devices": ["bulk-conn-01"]},
+            )
+            # result is a dict keyed by worker name; take the first successful result
+            for worker_result in result.values():
+                if not worker_result.get("errors") and worker_result.get("result"):
+                    topo = worker_result["result"]
+                    return json.loads(json.dumps(topo))
+
+    topologies = _load_topologies()
+    topology = topologies.get(topology_key, {"nodes": [], "links": []})
+
+    # Return a detached copy so view-specific transforms don't affect cached source data.
+    return json.loads(json.dumps(topology))
+
+
+def _apply_link_curvature(topo: dict) -> dict:
+    """Add curvature and rotation to parallel links between the same device pair."""
+    links = topo.get("links", [])
+    pair_indices: dict = {}
+    for i, link in enumerate(links):
+        pair = tuple(sorted([str(link.get("source", "")), str(link.get("target", ""))]))
+        if pair not in pair_indices:
+            pair_indices[pair] = []
+        pair_indices[pair].append(i)
+
+    new_links = [dict(lnk) for lnk in links]
+    for indices in pair_indices.values():
+        n = len(indices)
+        if n == 1:
+            new_links[indices[0]]["curvature"] = 0
+            new_links[indices[0]]["rotation"] = 0
+        else:
+            for j, idx in enumerate(indices):
+                new_links[idx]["curvature"] = 0.8
+                new_links[idx]["rotation"] = (2 * math.pi / n) * j
+
+    return {**topo, "links": new_links}
+
+
+def _load_html_template(template_name: str) -> str:
+    """Load an HTML template from the web folder.
+
+    Args:
+        template_name: Name of the template file (e.g., 'graph_2d.html', 'graph_3d.html')
+
+    Returns:
+        The HTML template content as a string.
+    """
+    template_path = _get_web_folder() / template_name
+    try:
+        return template_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"HTML template not found: {template_path}. "
+            f"Make sure the 'web' folder exists with the required HTML files."
+        )
+
+
+def _build_html(topo: dict, use_3d: bool = False) -> str:
+    """Build the final HTML by injecting topology data into a template.
+
+    Args:
+        topo: Topology dictionary with nodes and links
+        use_3d: If True, use 3D visualization; otherwise use 2D
+
+    Returns:
+        Complete HTML string with injected data
+    """
+    topo = _apply_link_curvature(topo)
+
+    if use_3d:
+        # Map topology nodes to 3d-force-graph canonical structure:
+        # { id, name, val, ...extra fields preserved }
+        nodes_3d = [
+            {**n, "name": n.get("name", n.get("id", "")), "val": 1}
+            for n in topo.get("nodes", [])
+        ]
+        topo = {**topo, "nodes": nodes_3d}
+
+    # 3D: near-pure-black so UnrealBloomPass additive composite
+    # doesn't visibly alter the background (matches official example pattern)
+    bg = "#000003" if use_3d else "#0b0f1a"
+    data_vars = f"var GRAPH_DATA={json.dumps(topo)};" f"var BG_COLOR='{bg}';"
+
+    # Load the appropriate template
+    template_name = "graph_3d.html" if use_3d else "graph_2d.html"
+    template = _load_html_template(template_name)
+
+    # Inject the data variables
+    return template.replace("/*INJECT*/", data_vars)
+
+
+def _render_refresh_button(key: str, refresh_key: str, refreshing_key: str) -> None:
+    """Render a compact icon refresh button with inline loading state."""
+    is_refreshing = st.session_state[refreshing_key]
+    icon = ":material/progress_activity:" if is_refreshing else ":material/refresh:"
+    help_text = "Refreshing topology..." if is_refreshing else "Refresh topology"
+
+    if st.button(
+        " ",
+        key=f"refresh_{key}",
+        icon=icon,
+        type="tertiary",
+        help=help_text,
+        width="content",
+        disabled=is_refreshing,
+    ):
+        st.session_state[refreshing_key] = True
+        st.session_state[refresh_key] += 1
+        st.rerun()
 
 
 def network_visualizer_page() -> None:
-    col1, col2 = st.columns([1, 4])
+    st.markdown(
+        """
+        <style>
+        [data-testid="stMainBlockContainer"] {
+            padding-bottom: 10px !important;
+        }
 
-    with col1:
-        st.subheader("Controls")
-        graph = _default_graph()
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        st.subheader("Visualization parameters")
-        bg = st.color_picker("Background color", "#0b0f1a", key="nv_bg")
-        node_size = st.slider("Node relative size", 1, 40, 6, key="nv_node_size")
-        link_width = st.slider(
-            "Link width multiplier", 0.1, 5.0, 1.0, key="nv_link_width"
-        )
-        link_distance = st.slider("Link distance", 1, 200, 40, key="nv_link_distance")
-        camera_z = st.slider("Camera distance (z)", 50, 1000, 200, key="nv_camera_z")
-        color_field = st.text_input(
-            "Node color field (property name)", value="group", key="nv_color_field"
-        )
-        particles = st.checkbox(
-            "Show link directional particles", value=False, key="nv_particles"
-        )
-        link_particles = 4 if particles else 0
+    tabs = st.tabs(_TAB_LABELS)
+    for tab, key in zip(tabs, _TAB_KEYS):
+        with tab:
+            refresh_key = f"refresh_nonce_{key}"
+            refreshing_key = f"refreshing_{key}"
+            st.session_state.setdefault(refresh_key, 0)
+            st.session_state.setdefault(refreshing_key, False)
 
-        if st.button("Randomize node positions", key="nv_random"):
-            import random
+            # ── Toolbar: subtitle | 3D toggle | refresh  ─────────
+            c_title, c_mode, c_refresh, c_stats = st.columns([3.4, 0.9, 0.4, 1.2])
+            with c_title:
+                st.caption(_SUBTITLES[key])
+            with c_mode:
+                use_3d = st.toggle("3D", key=f"v3d_{key}", value=False)
+            with c_refresh:
+                _render_refresh_button(key, refresh_key, refreshing_key)
 
-            for n in graph.get("nodes", []):
-                n["x"] = random.uniform(-50, 50)
-                n["y"] = random.uniform(-50, 50)
-                n["z"] = random.uniform(-50, 50)
+            refresh_nonce = st.session_state[refresh_key]
+            topo = _fetch_topology_data(key, refresh_nonce)
 
-        st.markdown("Download the current graph:")
-        st.download_button(
-            "Download JSON",
-            data=json.dumps(graph, indent=2),
-            file_name=f"graph_{uuid.uuid4().hex}.json",
-            key="nv_download",
-        )
+            if st.session_state[refreshing_key]:
+                st.session_state[refreshing_key] = False
+                st.rerun()
 
-        st.session_state["_nv_graph"] = graph
+            n_nodes = len(topo.get("nodes", []))
+            n_links = len(topo.get("links", []))
+            with c_stats:
+                st.caption(f"**{n_nodes}** nodes \u00b7 **{n_links}** links")
 
-    with col2:
-        st.subheader("3D Graph")
-        _render_graph(
-            graph,
-            bg=bg,
-            node_size=node_size,
-            link_width=link_width,
-            link_distance=link_distance,
-            camera_z=camera_z,
-            color_field=color_field,
-            linkDirectionalParticles=link_particles,
-        )
+            with st.container(height="stretch", border=True):
+                st.iframe(_build_html(topo, use_3d), width="stretch", height=700)
 
 
 if __name__ == "__main__":

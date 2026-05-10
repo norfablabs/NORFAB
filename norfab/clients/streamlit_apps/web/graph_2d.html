@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>/*INJECT*/</script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      color: #e5e7eb;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 6px 12px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      flex-shrink: 0;
+    }
+    #search-box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      color: #e2e8f0;
+      font-size: 11px;
+      padding: 4px 10px;
+      font-family: inherit;
+      width: 200px;
+    }
+    #search-box:focus { outline: none; border-color: #3b82f6; }
+    #stats { font-size: 11px; color: #64748b; white-space: nowrap; }
+    #main { display: flex; flex: 1; overflow: hidden; }
+    #graph-container { flex: 1; position: relative; overflow: hidden; }
+    #details-panel {
+      width: 260px;
+      min-width: 200px;
+      background: #0f172a;
+      border-left: 2px solid #334155;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    #details-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e293b;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #64748b;
+      flex-shrink: 0;
+    }
+    #details-body { flex: 1; overflow-y: auto; padding: 12px 14px; }
+    #details-body::-webkit-scrollbar { width: 4px; }
+    #details-body::-webkit-scrollbar-track { background: #0f172a; }
+    #details-body::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .placeholder { color: #334155; font-size: 12px; text-align: center; margin-top: 50px; line-height: 1.8; }
+    .node-badge { display: inline-block; background: #1e3a5f; border: 1px solid #3b82f6; border-radius: 4px; padding: 3px 10px; font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 12px; }
+    .section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin: 14px 0 6px; }
+    .detail-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 1px solid #1e293b; gap: 8px; }
+    .detail-key { color: #64748b; font-size: 11px; flex-shrink: 0; }
+    .detail-val { color: #e2e8f0; font-size: 11px; font-weight: bold; text-align: right; word-break: break-all; }
+    .neighbor-card { padding: 7px 9px; margin: 4px 0; background: #1e293b; border-radius: 5px; border: 1px solid #334155; font-size: 11px; }
+    .neighbor-name { color: #e2e8f0; font-weight: bold; margin-bottom: 3px; }
+    .neighbor-iface { color: #64748b; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <input id="search-box" type="search" placeholder="Name, IP, Type…" oninput="onSearch(this.value)">
+    <span id="stats"></span>
+  </div>
+  <div id="main">
+    <div id="graph-container"></div>
+    <div id="details-panel">
+      <div id="details-header">Node Details</div>
+      <div id="details-body"><p class="placeholder">Click a node<br>to see details</p></div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/force-graph/dist/force-graph.min.js"></script>
+  <script>
+    let Graph = null, selectedNodeId = null, searchQuery = '';
+
+    function initGraph() {
+      const el = document.getElementById('graph-container');
+      document.body.style.background = BG_COLOR;
+      const data = JSON.parse(JSON.stringify(GRAPH_DATA));
+      Graph = ForceGraph()(el)
+        .backgroundColor(BG_COLOR)
+        .width(el.clientWidth)
+        .height(el.clientHeight)
+        .graphData(data)
+        .linkColor(() => '#475569')
+        .linkWidth(1.5)
+        .linkLabel(l => {
+          const p = [];
+          if (l.src_iface)    p.push(l.src_iface);
+          if (l.dst_iface)    p.push(l.dst_iface);
+          if (l.metric)       p.push('metric: ' + l.metric);
+          if (l.session_type) p.push(l.session_type);
+          if (l.tunnel_type)  p.push(l.tunnel_type);
+          if (l.area)         p.push('area: ' + l.area);
+          return p.join(' ↔ ');
+        })
+        .linkCanvasObjectMode(() => 'after')
+        .linkCanvasObject((link, ctx) => {
+          const lbl = link.src_iface
+            ? link.src_iface + (link.dst_iface ? '/' + link.dst_iface : '')
+            : (link.session_type || link.tunnel_type || (link.area ? 'area:' + link.area : ''));
+          if (!lbl) return;
+          const s = link.source, e = link.target;
+          if (typeof s !== 'object' || typeof e !== 'object') return;
+          ctx.save();
+          ctx.font = '4px monospace';
+          ctx.fillStyle = '#64748b';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(lbl, (s.x + e.x) / 2, (s.y + e.y) / 2);
+          ctx.restore();
+        })
+        .nodeCanvasObject((node, ctx) => {
+          const r = 18, isSel = node.id === selectedNodeId;
+          const q = searchQuery.toLowerCase();
+          const isMatch = q && (
+            (node.id   && node.id.toLowerCase().includes(q)) ||
+            (node.ip   && node.ip.toLowerCase().includes(q)) ||
+            (node.type && node.type.toLowerCase().includes(q))
+          );
+          if (isMatch) {
+            ctx.beginPath(); ctx.arc(node.x, node.y, r + 6, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(96,165,250,0.20)'; ctx.fill();
+          }
+          ctx.beginPath(); ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+          ctx.fillStyle = isSel ? '#2563eb' : (node.color ? '#' + node.color : '#475569');
+          ctx.fill();
+          ctx.strokeStyle = isSel ? '#93c5fd' : 'rgba(0,0,0,0.35)';
+          ctx.lineWidth = isSel ? 2 : 1; ctx.stroke();
+          ctx.font = 'bold 7px monospace'; ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(node.name || node.id, node.x, node.y);
+          if (node.ip) {
+            ctx.font = '6px monospace'; ctx.fillStyle = '#94a3b8';
+            ctx.textBaseline = 'top';
+            ctx.fillText(node.ip, node.x, node.y + r + 3);
+          }
+        })
+        .nodePointerAreaPaint((node, color, ctx) => {
+          ctx.beginPath(); ctx.arc(node.x, node.y, 20, 0, 2 * Math.PI);
+          ctx.fillStyle = color; ctx.fill();
+        })
+        .onNodeClick(onNodeClick)
+        .onBackgroundClick(clearSelection);
+      const cf = Graph.d3Force('charge'); if (cf) cf.strength(-350);
+      const lf = Graph.d3Force('link');   if (lf) lf.distance(100);
+      document.getElementById('stats').textContent =
+        data.nodes.length + ' nodes   ' + data.links.length + ' links';
+    }
+
+    function onNodeClick(node) {
+      selectedNodeId = node.id;
+      const nb = [];
+      Graph.graphData().links.forEach(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        if (s === node.id) nb.push({ peer: t, local_iface: l.src_iface, remote_iface: l.dst_iface });
+        else if (t === node.id) nb.push({ peer: s, local_iface: l.dst_iface, remote_iface: l.src_iface });
+      });
+      renderDetails(node, nb);
+    }
+
+    function clearSelection() {
+      selectedNodeId = null;
+      document.getElementById('details-body').innerHTML =
+        '<p class="placeholder">Click a node<br>to see details</p>';
+    }
+
+    function renderDetails(node, neighbors) {
+      const SKIP = new Set(['x','y','vx','vy','fx','fy','index','__threeObj','__indexColor']);
+      let rows = '';
+      for (const [k, v] of Object.entries(node)) {
+        if (SKIP.has(k) || k === 'id') continue;
+        rows += '<div class="detail-row"><span class="detail-key">' + k + '</span><span class="detail-val">' + v + '</span></div>';
+      }
+      let nb = '';
+      neighbors.forEach(n => {
+        const iface = (n.local_iface || n.remote_iface)
+          ? (n.local_iface || '?') + ' ↔ ' + (n.remote_iface || '?') : '';
+        nb += '<div class="neighbor-card"><div class="neighbor-name">' + n.peer + '</div>'
+          + (iface ? '<div class="neighbor-iface">' + iface + '</div>' : '') + '</div>';
+      });
+      document.getElementById('details-body').innerHTML =
+        '<div class="node-badge">' + node.id + '</div>' + rows
+        + '<p class="section-title">Neighbors (' + neighbors.length + ')</p>'
+        + (nb || '<p style="color:#334155;font-size:11px;margin-top:6px">No neighbors</p>');
+    }
+
+    function onSearch(q) { searchQuery = q; }
+
+    let graphReady = false;
+    function tryInit() {
+      if (graphReady) return;
+      const el = document.getElementById('graph-container');
+      if (el.clientWidth > 0 && el.clientHeight > 0) {
+        graphReady = true;
+        initGraph();
+      }
+    }
+    tryInit();
+    const _poll = setInterval(() => { tryInit(); if (graphReady) clearInterval(_poll); }, 100);
+    window.addEventListener('resize', () => {
+      if (!Graph) return;
+      const el = document.getElementById('graph-container');
+      if (el.clientWidth > 0) Graph.width(el.clientWidth).height(el.clientHeight);
+    });
+    try {
+      const pd = window.parent.document;
+      const fix = () => {
+        const el = pd.querySelector('[data-testid="collapsedControl"]');
+        if (el) { el.style.zIndex = '2147483647'; el.style.pointerEvents = 'auto'; el.style.position = 'fixed'; }
+      };
+      new MutationObserver(fix).observe(pd.body, { childList: true, subtree: true }); fix();
+    } catch (_) {}
+  </script>
+</body>
+</html>

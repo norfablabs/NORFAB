@@ -275,6 +275,11 @@ class SyncDeviceInterfacesInput(
         description="Glob pattern to filter interfaces by description, e.g. 'uplink*'",
         alias="filter-by-description",
     )
+    update_type: Union[None, StrictBool] = Field(
+        None,
+        description="Update interface types or not",
+        alias="update-type",
+    )
 
 
 class SyncMacAddressesInput(
@@ -926,6 +931,7 @@ class NetboxInterfacesTasks:
         branch: str = None,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
+        update_type: Union[None, bool] = "True",
         **kwargs: Any,
     ) -> Result:
         """
@@ -1006,6 +1012,10 @@ class NetboxInterfacesTasks:
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
                 interfaces are included by description, e.g. ``'uplink*'``.
+            update_type (str, boolean): update existing interfaces types or not,
+                sync interfaces task unable to fully resolve interface types and
+                defaults to interface type `other` for most interfaces, this knob
+                allows to keep existing Netbox interfaces type intact.
             **kwargs: Additional Nornir host filter keyword arguments passed to
                 ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).
 
@@ -1102,11 +1112,7 @@ class NetboxInterfacesTasks:
                 )
                 normalised_nb_all[device_name][intf_name] = {
                     "name": intf_name,
-                    "type": (
-                        data["type"]["value"]
-                        if isinstance(data.get("type"), dict)
-                        else data.get("type")
-                    ),
+                    "type": data["type"]["value"],
                     "enabled": bool(data.get("enabled", True)),
                     "parent": parent_name,
                     "lag": lag,
@@ -1116,15 +1122,15 @@ class NetboxInterfacesTasks:
                     "description": str(data.get("description") or ""),
                     "mode": (data.get("mode") or {}).get("value"),
                     "untagged_vlan": (
-                        (data.get("untagged_vlan") or {}).get("vid")
-                        if isinstance(data.get("untagged_vlan"), dict)
-                        else data.get("untagged_vlan")
+                        data.get("untagged_vlan").get("vid")
+                        if data.get("untagged_vlan")
+                        else None
                     ),
                     "tagged_vlans": tagged_vlans,
                     "qinq_svlan": (
-                        (data.get("qinq_svlan") or {}).get("vid")
-                        if isinstance(data.get("qinq_svlan"), dict)
-                        else data.get("qinq_svlan")
+                        data.get("qinq_svlan").get("vid")
+                        if data.get("qinq_svlan")
+                        else None
                     ),
                     "vrf": vrf_name,
                 }
@@ -1138,7 +1144,6 @@ class NetboxInterfacesTasks:
             workers="all",
             timeout=timeout,
         )
-
         # Normalize live interface data per device.
         normalised_live_all = {}
         for wname, wdata in parse_data.items():
@@ -1175,6 +1180,18 @@ class NetboxInterfacesTasks:
                         "qinq_svlan": data.get("qinq_svlan"),
                         "vrf": data.get("vrf"),
                     }
+
+        # remove devices that returned no parsing results
+        for device_name in devices:
+            if device_name not in normalised_live_all:
+                msg = f"{device_name} - parsing returned no interfaces data, skipping device"
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+                _ = normalised_nb_all.pop(device_name)
+        if not normalised_nb_all:
+            ret.failed = True
+            ret.errors.append("no interfaces parsing results collected for devices")
+            return ret
 
         # Single diff on the full normalised datasets
         full_diff = self.make_diff(normalised_live_all, normalised_nb_all)
@@ -1351,6 +1368,12 @@ class NetboxInterfacesTasks:
                     nb=nb,
                     _lookup_cache=_lookup_cache,
                 )
+                # remove interface type updates
+                if not update_type:
+                    _ = payload.pop("type")
+                # skip if nothing else to update
+                if set(payload) == {"device", "name"}:
+                    continue
                 payload["id"] = intf_id
                 bulk_update_interfaces[(device_name, intf_name)] = payload
         if bulk_update_interfaces:

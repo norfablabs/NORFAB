@@ -1672,6 +1672,408 @@ class TestGetConnections:
             ), f"{worker} returned {total_connections} connections, expected 600"
 
 
+class TestGetTopology:
+    devices = ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03"]
+
+    def test_get_topology(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert "links" in res["result"], f"{worker} - no links in result"
+            assert isinstance(
+                res["result"]["nodes"], list
+            ), f"{worker} - nodes should be a list"
+            assert isinstance(
+                res["result"]["links"], list
+            ), f"{worker} - links should be a list"
+            assert (
+                len(res["result"]["nodes"]) >= 3
+            ), f"{worker} - expected at least 3 nodes, got {len(res['result']['nodes'])}"
+            assert (
+                len(res["result"]["links"]) > 0
+            ), f"{worker} - expected at least one link"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for device in self.devices:
+                assert device in node_ids, f"{worker} - {device} missing from nodes"
+
+    def test_get_topology_node_structure(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices},
+        )
+        pprint.pprint(ret)
+
+        node_keys = [
+            "id",
+            "name",
+            "type",
+            "ip",
+            "status",
+            "role",
+            "site",
+            "tags",
+            "manufacturer",
+            "device_type",
+        ]
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            for node in res["result"]["nodes"]:
+                assert all(
+                    k in node for k in node_keys
+                ), f"{worker} - node missing required keys: {node}"
+                assert isinstance(
+                    node["id"], str
+                ), f"{worker} - node id should be a string"
+                assert isinstance(
+                    node["name"], str
+                ), f"{worker} - node name should be a string"
+                assert isinstance(
+                    node["tags"], list
+                ), f"{worker} - node tags should be a list"
+
+    def test_get_topology_link_structure(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices},
+        )
+        pprint.pprint(ret)
+
+        link_keys = ["source", "target", "src_iface", "dst_iface", "tags"]
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert all(
+                    k in link for k in link_keys
+                ), f"{worker} - link missing required keys: {link}"
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' not in nodes"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' not in nodes"
+                assert isinstance(
+                    link["tags"], list
+                ), f"{worker} - link tags should be a list"
+
+    def test_get_topology_links_deduplicated(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            seen = set()
+            for link in res["result"]["links"]:
+                key = tuple(
+                    sorted(
+                        [
+                            (link["source"], link["src_iface"]),
+                            (link["target"], link["dst_iface"]),
+                        ]
+                    )
+                )
+                assert key not in seen, f"{worker} - duplicate link found: {link}"
+                seen.add(key)
+
+    def test_get_topology_dry_run(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices, "dry_run": True},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert (
+                "device_filter" in res["result"]
+            ), f"{worker} - no device_filter in dry run result"
+            assert (
+                "graphql" in res["result"]
+            ), f"{worker} - no graphql in dry run result"
+
+    def test_get_topology_adjacent_nodes(self, nfclient):
+        """Devices connected to the filtered set must also appear as nodes."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            # every link endpoint must have a corresponding node entry
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_with_instance(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices, "instance": "prod"},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert "links" in res["result"], f"{worker} - no links in result"
+            assert (
+                len(res["result"]["nodes"]) >= 3
+            ), f"{worker} - expected at least 3 nodes"
+
+    def test_get_topology_only_internal_links(self, nfclient):
+        """Links should only reference devices present in the nodes list."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": self.devices},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids and link["target"] in node_ids
+                ), f"{worker} - link references device outside topology: {link}"
+
+    def test_get_topology_device_contains(self, nfclient):
+        """device_contains filter must return devices whose names contain the substring."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"device_contains": "bulk-conn-0"},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert "links" in res["result"], f"{worker} - no links in result"
+            assert (
+                len(res["result"]["nodes"]) > 0
+            ), f"{worker} - expected at least one node"
+            for node in res["result"]["nodes"]:
+                assert (
+                    "bulk-conn" in node["name"]
+                ), f"{worker} - node '{node['name']}' does not match device_contains filter"
+            # all link endpoints must have a node entry
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_device_regex(self, nfclient):
+        """device_regex filter must return only devices whose names match the pattern."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"device_regex": "^bulk-conn-0[123]$"},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert "links" in res["result"], f"{worker} - no links in result"
+            assert (
+                len(res["result"]["nodes"]) >= 3
+            ), f"{worker} - expected at least 3 nodes, got {len(res['result']['nodes'])}"
+            # the 3 explicitly matched devices must all be present
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for device in self.devices:
+                assert device in node_ids, f"{worker} - {device} missing from nodes"
+            # all link endpoints must have a node entry
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_filter_role(self, nfclient):
+        """role filter must return only devices with the given role slug."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"role": ["virtualrouter"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert (
+                len(res["result"]["nodes"]) > 0
+            ), f"{worker} - expected at least one node"
+            for node in res["result"]["nodes"]:
+                assert (
+                    node["role"].lower() == "virtualrouter"
+                ), f"{worker} - node '{node['name']}' has unexpected role '{node['role']}'"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_filter_platform(self, nfclient):
+        """platform filter must return only devices with the given platform slug."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"platform": ["arista_eos"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert (
+                len(res["result"]["nodes"]) > 0
+            ), f"{worker} - expected at least one node"
+            for node in res["result"]["nodes"]:
+                assert (
+                    node["type"] == "arista_eos"
+                ), f"{worker} - node '{node['name']}' has unexpected platform '{node['type']}'"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_filter_manufacturer(self, nfclient):
+        """manufacturers filter must return only devices from the given manufacturer."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"manufacturers": ["arista"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert (
+                len(res["result"]["nodes"]) > 0
+            ), f"{worker} - expected at least one node"
+            for node in res["result"]["nodes"]:
+                assert (
+                    node["manufacturer"].lower() == "arista"
+                ), f"{worker} - node '{node['name']}' has unexpected manufacturer '{node['manufacturer']}'"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_filter_status(self, nfclient):
+        """status filter must return only devices with the given status."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"status": ["active"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert (
+                len(res["result"]["nodes"]) > 0
+            ), f"{worker} - expected at least one node"
+            for node in res["result"]["nodes"]:
+                assert (
+                    node["status"] == "active"
+                ), f"{worker} - node '{node['name']}' has unexpected status '{node['status']}'"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+    def test_get_topology_filter_sites(self, nfclient):
+        """sites filter must return only devices from the given site slug."""
+        ret = nfclient.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"sites": ["saltnornir-lab"]},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "nodes" in res["result"], f"{worker} - no nodes in result"
+            assert (
+                len(res["result"]["nodes"]) > 0
+            ), f"{worker} - expected at least one node"
+            for node in res["result"]["nodes"]:
+                assert (
+                    node["site"].upper() == "SALTNORNIR-LAB"
+                ), f"{worker} - node '{node['name']}' has unexpected site '{node['site']}'"
+            node_ids = {n["id"] for n in res["result"]["nodes"]}
+            for link in res["result"]["links"]:
+                assert (
+                    link["source"] in node_ids
+                ), f"{worker} - link source '{link['source']}' has no node entry"
+                assert (
+                    link["target"] in node_ids
+                ), f"{worker} - link target '{link['target']}' has no node entry"
+
+
 class TestGetNornirInventory:
     nb_version = None
     device_data_keys = [

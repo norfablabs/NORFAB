@@ -15,17 +15,10 @@ from .netbox_worker_utilities import resolve_vrf
 log = logging.getLogger(__name__)
 
 
-def resolve_ip_role(ip: str, intf_name: str, anycast_ranges: Union[None, str, list]):
-    if anycast_ranges and isinstance(anycast_ranges, str):
-        anycast_ranges = [anycast_ranges]
-
+def resolve_ip_role(ip: str, intf_name: str, anycast_nets: list):
     # check if IP is part of anycast ranges
-    if anycast_ranges:
+    if anycast_nets:
         ip_addr = ipaddress.ip_interface(str(ip)).ip
-        anycast_nets = []
-        for pfx in anycast_ranges:
-            # strict=False allows host/mask entries such as 192.0.2.1/24.
-            anycast_nets.append(ipaddress.ip_network(str(pfx), strict=False))
         if any(ip_addr in net for net in anycast_nets):
             return "anycast"
 
@@ -61,6 +54,11 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         None,
         description="IP prefix(es) to classify as anycast role, e.g. '10.3.250.0/24'",
         alias="anycast-ranges",
+    )
+    ignore_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
+        None,
+        description="Prefix(es) to exclude IP addresses",
+        alias="ignore-ranges",
     )
     create_prefixes: StrictBool = Field(
         False,
@@ -497,7 +495,8 @@ class NetboxIpTasks:
         timeout: int = 60,
         devices: Union[None, list] = None,
         branch: str = None,
-        anycast_ranges: Union[None, str, list] = None,
+        anycast_ranges: Union[None, list] = None,
+        ignore_ranges: Union[None, list] = None,
         create_prefixes: bool = False,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
@@ -532,6 +531,11 @@ class NetboxIpTasks:
         **Live-run mode** (``dry_run=False``, default): applies changes and returns
         the same structure showing what was done.
 
+        **Side Effects**
+
+        1. When overlapping IP discovered in Netbox and it is part of anycast range,
+            existing IP role update to `anycast`
+
         Args:
             job: NorFab Job object containing relevant metadata.
             instance (str, optional): The NetBox instance name to use.
@@ -539,8 +543,10 @@ class NetboxIpTasks:
             timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branch name to use.
-            anycast_ranges (str or list, optional): IP prefix(es) used to classify
+            anycast_ranges (list, optional): IP prefix(es) used to classify
                 IP addresses as anycast role, e.g. ``'10.3.250.0/24'``.
+            ignore_ranges (list, optional): Prefixes to ignore IP addresses for, includes
+                by default 127.0.0.0/8, 224.0.0.0/24 and others
             create_prefixes (bool, optional): If True, create missing IP prefixes in
                 NetBox for each discovered IP address. No updates or deletions are done.
             filter_by_name (str, optional): Glob pattern to restrict which interfaces
@@ -569,6 +575,30 @@ class NetboxIpTasks:
         nb = self._get_pynetbox(instance, branch=branch)
         log.info(
             f"{self.name} - Sync device IP: Processing {len(devices)} device(s) in '{instance}'"
+        )
+
+        # pre-process ranges
+        ignore_ranges = ignore_ranges or [
+            "127.0.0.0/8",
+            "224.0.0.0/24",
+            "fe80::/10",
+            "ff02::/16",
+        ]
+        if isinstance(anycast_ranges, str):
+            anycast_ranges = [anycast_ranges]
+        if isinstance(ignore_ranges, str):
+            ignore_ranges = [ignore_ranges]
+        # convert prefix ranges to IP address objects
+        anycast_nets = [
+            ipaddress.ip_network(str(pfx), strict=False) for pfx in anycast_ranges or []
+        ]
+        ignore_nets = [
+            ipaddress.ip_network(str(pfx), strict=False) for pfx in ignore_ranges or []
+        ]
+        filter_prefix_net = (
+            ipaddress.ip_network(filter_by_prefix, strict=False)
+            if filter_by_prefix
+            else None
         )
 
         # source additional hosts from Nornir filters
@@ -617,13 +647,6 @@ class NetboxIpTasks:
 
         # normalise live data from Nornir parse_ttp results into {device: {intf: intf_data}}
         # applying interface name and description filters at collection phase
-        filter_prefix_net = None
-        if filter_by_prefix:
-            try:
-                filter_prefix_net = ipaddress.ip_network(filter_by_prefix, strict=False)
-            except Exception:
-                msg = f"invalid filter_by_prefix value '{filter_by_prefix}', ignoring"
-                log.warning(msg)
         normalised_live_all = {}
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
@@ -643,7 +666,7 @@ class NetboxIpTasks:
                     ):
                         continue
                     # apply IP-level filters if needed
-                    if filter_prefix_net or filter_by_ip:
+                    if filter_prefix_net or filter_by_ip or ignore_nets:
                         filtered_ipv4 = []
                         filtered_ipv6 = []
                         for ip in intf.get("ipv4_addresses") or []:
@@ -654,6 +677,10 @@ class NetboxIpTasks:
                                 str(ip_addr), filter_by_ip
                             ):
                                 continue
+                            if ignore_nets and any(
+                                ip_addr in net for net in ignore_nets
+                            ):
+                                continue
                             filtered_ipv4.append(ip)
                         for ip in intf.get("ipv6_addresses") or []:
                             ip_addr = ipaddress.ip_interface(str(ip)).ip
@@ -661,6 +688,10 @@ class NetboxIpTasks:
                                 continue
                             if filter_by_ip and not fnmatch.fnmatch(
                                 str(ip_addr), filter_by_ip
+                            ):
+                                continue
+                            if ignore_nets and any(
+                                ip_addr in net for net in ignore_nets
                             ):
                                 continue
                             filtered_ipv6.append(ip)
@@ -721,7 +752,7 @@ class NetboxIpTasks:
                             "interface": intf_name,
                             "address": ip,
                             "vrf": vrf,
-                            "role": resolve_ip_role(ip, intf_name, anycast_ranges),
+                            "role": resolve_ip_role(ip, intf_name, anycast_nets),
                             "assigned_object_type": "dcim.interface",
                             "assigned_object_id": nb_raw[intf_name]["id"],
                         }
@@ -774,7 +805,9 @@ class NetboxIpTasks:
             # find existing NetBox IPs of same value
             ip_live_no_mask = ip_live["address"].split("/")[0]
             # do IP comparison ignoring mask, in case live and netbox IPs have mask mismatch
-            matching_nb_ips = [i for i in nb_ips if i["address"].startswith(f"{ip_live_no_mask}/")]
+            matching_nb_ips = [
+                i for i in nb_ips if i["address"].startswith(f"{ip_live_no_mask}/")
+            ]
             # no existing IP found, create it
             if not matching_nb_ips:
                 bulk_create_ip[key] = ip_live
@@ -804,7 +837,7 @@ class NetboxIpTasks:
                     if nb_ip["assigned_object_id"]:
                         nb_ip_resolved_role = (
                             resolve_ip_role(
-                                nb_ip["address"], nb_ip["interface"], anycast_ranges
+                                nb_ip["address"], nb_ip["interface"], anycast_nets
                             )
                             or nb_ip["role"]
                         )
@@ -837,6 +870,17 @@ class NetboxIpTasks:
                     else:
                         ip_live["id"] = nb_ip["id"]
                         bulk_update_ip[key] = ip_live
+
+        # make sure all devices present in results
+        for key in list(bulk_create_ip) + list(bulk_update_ip):
+            device_results.setdefault(
+                key[0],
+                {
+                    "created": [],
+                    "updated": [],
+                    "in_sync": [],
+                },
+            )
 
         if dry_run:
             for key in bulk_create_ip:
@@ -877,9 +921,7 @@ class NetboxIpTasks:
                 for key in bulk_update_ip:
                     device_name = key[0]
                     ip_address = key[2]
-                    # updates might contain existing IPs that changed the role
-                    if device_name in device_results:
-                        device_results[device_name]["updated"].append(ip_address)
+                    device_results[device_name]["updated"].append(ip_address)
             except Exception as e:
                 msg = f"failed to bulk update IP addresses: {e}"
                 ret.errors.append(msg)

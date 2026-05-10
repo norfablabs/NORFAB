@@ -12,6 +12,8 @@
 ## FEATURES
 
 1. Created Netbox task `sync_mac_addresses`
+2. Enhancing streamlit web ui network map application to support 2d and 3d view of the topology
+3. Adding Netbox `get_topology` task to fetch devices and links in topology format
 
 ---
 
