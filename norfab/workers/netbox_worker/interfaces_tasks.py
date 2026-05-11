@@ -1369,7 +1369,7 @@ class NetboxInterfacesTasks:
                     _lookup_cache=_lookup_cache,
                 )
                 # remove interface type updates
-                if not update_type:
+                if not update_type and "type" in payload:
                     _ = payload.pop("type")
                 # skip if nothing else to update
                 if set(payload) == {"device", "name"}:

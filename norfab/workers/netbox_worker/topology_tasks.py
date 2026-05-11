@@ -1,13 +1,14 @@
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictInt, StrictStr, model_validator
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .netbox_exceptions import UnsupportedNetboxVersion
 from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
+from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_common import NorniHostsFilters
 
 log = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ query TopologyInterfacesQuery(
 # --------------------------------------------------------------------------
 
 
-class GetTopologyInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+class GetTopologyInput(NorniHostsFilters, NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     devices: Union[None, List[StrictStr]] = Field(
         None,
         description="List of device names to include in the topology; fetches all devices when omitted",
@@ -92,6 +93,36 @@ class GetTopologyInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=
         60,
         description="Timeout in seconds for Nornir host resolution when Fx filters are used",
     )
+
+    @model_validator(mode="after")
+    def check_at_least_one_filter(self) -> "GetTopologyInput":
+        has_device_filter = any(
+            f is not None
+            for f in (
+                self.devices,
+                self.device_contains,
+                self.device_regex,
+                self.role,
+                self.platform,
+                self.manufacturers,
+                self.status,
+                self.sites,
+            )
+        )
+        has_fx_filter = any(
+            f is not None
+            for f in (
+                self.FC, self.FL, self.FB, self.FG, self.FO,
+                self.FP, self.FH, self.FR, self.FM, self.FX,
+            )
+        )
+        if not has_device_filter and not has_fx_filter:
+            raise ValueError(
+                "at least one filter must be provided: 'devices', 'device_contains', "
+                "'device_regex', 'role', 'platform', 'manufacturers', 'status', 'sites', "
+                "or a Nornir Fx filter argument (FC, FL, FB, FG, FO, FP, FH, FR, FM, FX)"
+            )
+        return self
 
 
 # --------------------------------------------------------------------------

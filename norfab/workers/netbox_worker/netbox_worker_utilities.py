@@ -13,6 +13,8 @@ def resolve_vrf(
     """Resolve or create a VRF, return its NetBox ID or None."""
     if not name:
         return None
+    if name.lower() in ["global", "default"]:
+        return None
     vrf_obj = nb.ipam.vrfs.get(name=name)
     if vrf_obj:
         return vrf_obj.id

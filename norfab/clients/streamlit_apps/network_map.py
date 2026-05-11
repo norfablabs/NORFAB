@@ -46,24 +46,55 @@ def _load_topologies() -> dict:
 
 
 @st.cache_data(show_spinner=False)
-def _fetch_topology_data(topology_key: str, refresh_nonce: int) -> dict:
+def _fetch_device_names(refresh_nonce: int) -> list:
+    """Fetch all device names from NetBox via NorFab.
+
+    Args:
+        refresh_nonce: A monotonically increasing value to force re-fetch.
+
+    Returns:
+        Sorted list of device name strings.
+    """
+    nfclient = _get_nfclient()
+    if nfclient is None:
+        return []
+    result = nfclient.run_job(
+        "netbox",
+        "get_devices",
+        workers="any",
+        kwargs={"filters": [{"name__iregex": ".*"}]},
+    )
+    names = set()
+    for worker_result in result.values():
+        if not worker_result.get("errors") and worker_result.get("result"):
+            names.update(worker_result["result"].keys())
+    return sorted(names)
+
+
+@st.cache_data(show_spinner=False)
+def _fetch_topology_data(topology_key: str, refresh_nonce: int, devices: tuple = ()) -> dict:
     """Fetch topology data through a helper function.
 
     Args:
         topology_key: Topology key such as "L1" or "BGP".
         refresh_nonce: A monotonically increasing value to force re-fetch.
+        devices: Tuple of device names to include; empty tuple means all devices.
 
     Returns:
         Topology dictionary with nodes and links.
     """
+    if not devices:
+        return {"nodes": [], "links": []}
+
     if topology_key == "L1":
         nfclient = _get_nfclient()
         if nfclient is not None:
+            kwargs = {"devices": list(devices)}
             result = nfclient.run_job(
                 "netbox",
                 "get_topology",
                 workers="any",
-                kwargs={"devices": ["bulk-conn-01"]},
+                kwargs=kwargs,
             )
             # result is a dict keyed by worker name; take the first successful result
             for worker_result in result.values():
@@ -183,7 +214,13 @@ def network_visualizer_page() -> None:
             padding-bottom: 10px !important;
         }
 
+        /* Fix devices selector height */
+        div[data-testid="stMultiSelect"] [data-baseweb="select"] > div > div {
+            max-height: 35px !important; 
+            overflow: auto !important;
+        }
         </style>
+
         """,
         unsafe_allow_html=True,
     )
@@ -196,8 +233,8 @@ def network_visualizer_page() -> None:
             st.session_state.setdefault(refresh_key, 0)
             st.session_state.setdefault(refreshing_key, False)
 
-            # ── Toolbar: subtitle | 3D toggle | refresh  ─────────
-            c_title, c_mode, c_refresh, c_stats = st.columns([3.4, 0.9, 0.4, 1.2])
+            # ── Toolbar: subtitle | 3D toggle | refresh | device selector ──
+            c_title, c_mode, c_refresh, c_devices = st.columns([3.4, 0.9, 0.4, 1.2])
             with c_title:
                 st.caption(_SUBTITLES[key])
             with c_mode:
@@ -206,16 +243,23 @@ def network_visualizer_page() -> None:
                 _render_refresh_button(key, refresh_key, refreshing_key)
 
             refresh_nonce = st.session_state[refresh_key]
-            topo = _fetch_topology_data(key, refresh_nonce)
+
+            with c_devices:
+                device_names = _fetch_device_names(refresh_nonce)
+                selected = st.multiselect(
+                    "Devices",
+                    options=device_names,
+                    default=[],
+                    placeholder="Select devices",
+                    label_visibility="collapsed",
+                    key=f"devices_{key}",
+                )
+            selected_devices = tuple(selected)
+            topo = _fetch_topology_data(key, refresh_nonce, selected_devices)
 
             if st.session_state[refreshing_key]:
                 st.session_state[refreshing_key] = False
                 st.rerun()
-
-            n_nodes = len(topo.get("nodes", []))
-            n_links = len(topo.get("links", []))
-            with c_stats:
-                st.caption(f"**{n_nodes}** nodes \u00b7 **{n_links}** links")
 
             with st.container(height="stretch", border=True):
                 st.iframe(_build_html(topo, use_3d), width="stretch", height=700)

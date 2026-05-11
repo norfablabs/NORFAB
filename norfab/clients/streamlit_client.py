@@ -16,7 +16,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-st.set_option("client.toolbarMode", "minimal")
+st.set_option("client.toolbarMode", "viewer")
 
 
 def about() -> None:
