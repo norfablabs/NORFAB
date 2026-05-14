@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -7,110 +7,75 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Courier New', Courier, monospace;
-      color: #e5e7eb;
+      background: #000003;
       height: 100vh;
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
     }
-    #toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      padding: 6px 12px;
-      background: #0f172a;
-      border-bottom: 1px solid #1e293b;
-      flex-shrink: 0;
-    }
-    #search-box {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 4px;
-      color: #e2e8f0;
-      font-size: 11px;
-      padding: 4px 10px;
-      font-family: inherit;
-      width: 200px;
-    }
-    #search-box:focus { outline: none; border-color: #3b82f6; }
-    #stats { font-size: 11px; color: #64748b; white-space: nowrap; }
-    #main { display: flex; flex: 1; overflow: hidden; }
-    #graph-container { flex: 1; position: relative; overflow: hidden; }
-    #details-panel {
-      width: 260px;
-      min-width: 200px;
-      background: #0f172a;
-      border-left: 2px solid #334155;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-    #details-header {
-      padding: 10px 14px;
-      border-bottom: 1px solid #1e293b;
+    #graph-container { position: absolute; inset: 0; }
+    #stats-overlay {
+      position: absolute;
+      bottom: 8px;
+      left: 12px;
       font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #64748b;
-      flex-shrink: 0;
+      color: #334155;
+      pointer-events: none;
+      font-family: inherit;
     }
-    #details-body { flex: 1; overflow-y: auto; padding: 12px 14px; }
-    #details-body::-webkit-scrollbar { width: 4px; }
-    #details-body::-webkit-scrollbar-track { background: #0f172a; }
-    #details-body::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
-    .placeholder { color: #334155; font-size: 12px; text-align: center; margin-top: 50px; line-height: 1.8; }
-    .node-badge { display: inline-block; background: #1e3a5f; border: 1px solid #3b82f6; border-radius: 4px; padding: 3px 10px; font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 12px; }
-    .section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin: 14px 0 6px; }
-    .detail-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 1px solid #1e293b; gap: 8px; }
-    .detail-key { color: #64748b; font-size: 11px; flex-shrink: 0; }
-    .detail-val { color: #e2e8f0; font-size: 11px; font-weight: bold; text-align: right; word-break: break-all; }
-    .neighbor-card { padding: 7px 9px; margin: 4px 0; background: #1e293b; border-radius: 5px; border: 1px solid #334155; font-size: 11px; }
-    .neighbor-name { color: #e2e8f0; font-weight: bold; margin-bottom: 3px; }
-    .neighbor-iface { color: #64748b; font-size: 10px; }
   </style>
 </head>
 <body>
-  <div id="toolbar">
-    <input id="search-box" type="search" placeholder="Name, IP, Type…" oninput="onSearch(this.value)">
-    <div id="orbit-controls" style="display:flex;align-items:center;gap:5px;">
-      <button id="orbit-btn" onclick="toggleOrbit()" style="background:#1e293b;border:1px solid #334155;border-radius:4px;color:#94a3b8;font-size:11px;padding:3px 9px;cursor:pointer;font-family:inherit;">Orbit</button>
-      <button onclick="adjustSpeed(-1)" style="background:#1e293b;border:1px solid #334155;border-radius:4px;color:#94a3b8;font-size:12px;width:22px;height:22px;cursor:pointer;">-</button>
-      <span id="orbit-speed-lbl" style="font-size:11px;color:#64748b;min-width:28px;text-align:center;">1x</span>
-      <button onclick="adjustSpeed(1)" style="background:#1e293b;border:1px solid #334155;border-radius:4px;color:#94a3b8;font-size:12px;width:22px;height:22px;cursor:pointer;">+</button>
-    </div>
-    <button id="bloom-btn" onclick="toggleBloom()" style="background:#1e293b;border:1px solid #334155;border-radius:4px;color:#94a3b8;font-size:11px;padding:3px 9px;cursor:pointer;font-family:inherit;">Bloom</button>
-    <span id="stats"></span>
-  </div>
-  <div id="main">
-    <div id="graph-container"></div>
-    <div id="details-panel">
-      <div id="details-header">Node Details</div>
-      <div id="details-body"><p class="placeholder">Click a node<br>to see details</p></div>
-    </div>
-  </div>
+  <div id="graph-container"></div>
+  <div id="stats-overlay"></div>
   <script src="https://unpkg.com/3d-force-graph/dist/3d-force-graph.min.js"></script>
   <script type="module">
     import SpriteText from 'https://esm.sh/three-spritetext';
     import { UnrealBloomPass } from 'https://esm.sh/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+    const _TAB_KEY      = (typeof TAB_KEY      !== 'undefined') ? TAB_KEY      : '';
+    const _SEARCH_QUERY = (typeof SEARCH_QUERY !== 'undefined') ? SEARCH_QUERY : '';
+
+    const ORBIT_SPEEDS = [0.1, 0.3, 0.5, 1.0, 1.5, 2.0];
+    const _SKIP = new Set(['x','y','z','vx','vy','vz','fx','fy','fz','index','__threeObj','__indexColor','val','name']);
+
     let Graph = null, selectedNodeId = null;
     let bloomPass = null, bloomActive = false;
+    let orbitActive = false, orbitAngle = 0, orbitIdx = 2, orbitTimer = null;
+
+    function nodeMatchesSearch(node) {
+      const q = _SEARCH_QUERY.toLowerCase();
+      if (!q) return false;
+      return (
+        (node.id   && node.id.toLowerCase().includes(q)) ||
+        (node.ip   && node.ip.toLowerCase().includes(q)) ||
+        (node.type && node.type.toLowerCase().includes(q))
+      );
+    }
 
     function nodeColor(node) {
+      if (nodeMatchesSearch(node)) return '#60a5fa';
       return node.id === selectedNodeId ? '#2563eb' : (node.color ? '#' + node.color : '#475569');
     }
 
     function makeSprite(node) {
       const sprite = new SpriteText(node.name || node.id);
       sprite.material.depthWrite = false;
-      sprite.color = '#ffffff';
+      sprite.color = nodeMatchesSearch(node) ? '#60a5fa' : '#ffffff';
       sprite.textHeight = 8;
       sprite.center.y = -0.9;
       return sprite;
     }
 
+    function _nodePayload(node, neighbors) {
+      const data = {};
+      for (const [k, v] of Object.entries(node)) {
+        if (_SKIP.has(k) || k === 'id') continue;
+        if (typeof v !== 'object') data[k] = v;
+      }
+      return { _nfnm: 1, tab: _TAB_KEY, id: node.id, data: data, neighbors: neighbors };
+    }
+
     function initGraph() {
+      document.body.style.background = BG_COLOR;
       const data = JSON.parse(JSON.stringify(GRAPH_DATA));
       Graph = ForceGraph3D()(document.getElementById('graph-container'))
         .backgroundColor(BG_COLOR)
@@ -136,38 +101,24 @@
           if (l.session_type) p.push(l.session_type);
           if (l.tunnel_type)  p.push(l.tunnel_type);
           if (l.area)         p.push('area: ' + l.area);
-          return p.join(' ↔ ');
+          return p.join(' <-> ');
         })
         .onNodeClick(onNodeClick)
         .onBackgroundClick(clearSelection)
         .nodeThreeObject(makeSprite)
         .nodeThreeObjectExtend(true);
-      // Bloom pass — off by default
-      bloomPass = new UnrealBloomPass();
-      bloomPass.strength = 0.8;
-      bloomPass.radius = 0.3;
-      bloomPass.threshold = 0.4;
-      bloomPass.enabled = false;
-      Graph.postProcessingComposer().addPass(bloomPass);
-      document.getElementById('stats').textContent =
-        data.nodes.length + ' nodes   ' + data.links.length + ' links';
-    }
 
-    function toggleBloom() {
-      bloomActive = !bloomActive;
-      if (bloomPass) bloomPass.enabled = bloomActive;
-      const btn = document.getElementById('bloom-btn');
-      if (bloomActive) {
-        btn.style.background = '#1e3a5f';
-        btn.style.borderColor = '#a855f7';
-        btn.style.color = '#d8b4fe';
-      } else {
-        btn.style.background = '#1e293b';
-        btn.style.borderColor = '#334155';
-        btn.style.color = '#94a3b8';
-      }
+      bloomPass = new UnrealBloomPass();
+      bloomPass.strength  = 0.8;
+      bloomPass.radius    = 0.3;
+      bloomPass.threshold = 0.4;
+      bloomPass.enabled   = false;
+      bloomActive         = false;
+      Graph.postProcessingComposer().addPass(bloomPass);
+
+      document.getElementById('stats-overlay').textContent =
+        data.nodes.length + ' nodes - ' + data.links.length + ' links';
     }
-    window.toggleBloom = toggleBloom;
 
     function onNodeClick(node) {
       selectedNodeId = node.id;
@@ -179,47 +130,18 @@
         if (s === node.id) nb.push({ peer: t, local_iface: l.src_iface, remote_iface: l.dst_iface });
         else if (t === node.id) nb.push({ peer: s, local_iface: l.dst_iface, remote_iface: l.src_iface });
       });
-      renderDetails(node, nb);
+      try { window.parent.name = JSON.stringify(_nodePayload(node, nb)); } catch (_) {}
     }
 
     function clearSelection() {
       selectedNodeId = null;
       Graph.nodeColor(nodeColor);
-      document.getElementById('details-body').innerHTML =
-        '<p class="placeholder">Click a node<br>to see details</p>';
+      try { window.parent.name = ''; } catch (_) {}
     }
 
-    function renderDetails(node, neighbors) {
-      const SKIP = new Set(['x','y','z','vx','vy','vz','fx','fy','fz','index','__threeObj','__indexColor']);
-      let rows = '';
-      for (const [k, v] of Object.entries(node)) {
-        if (SKIP.has(k) || k === 'id') continue;
-        rows += '<div class="detail-row"><span class="detail-key">' + k + '</span><span class="detail-val">' + v + '</span></div>';
-      }
-      let nb = '';
-      neighbors.forEach(n => {
-        const iface = (n.local_iface || n.remote_iface)
-          ? (n.local_iface || '?') + ' ↔ ' + (n.remote_iface || '?') : '';
-        nb += '<div class="neighbor-card"><div class="neighbor-name">' + n.peer + '</div>'
-          + (iface ? '<div class="neighbor-iface">' + iface + '</div>' : '') + '</div>';
-      });
-      document.getElementById('details-body').innerHTML =
-        '<div class="node-badge">' + node.id + '</div>' + rows
-        + '<p class="section-title">Neighbors (' + neighbors.length + ')</p>'
-        + (nb || '<p style="color:#334155;font-size:11px;margin-top:6px">No neighbors</p>');
-    }
-
-    function onSearch(q) {}
-    window.onSearch = onSearch;
-
-    // ── Orbit controls ─────────────────────────────────────────────────
-    const ORBIT_SPEEDS = [0.1, 0.3, 0.5, 1.0, 1.5, 2.0];
-    const ORBIT_LABELS = ['0.1x', '0.3x', '0.5x', '1x', '1.5x', '2x'];
-    let orbitActive = false, orbitAngle = 0, orbitIdx = 2, orbitTimer = null;
-
-    function startOrbit() {
+    function _startOrbit() {
       if (orbitTimer) clearInterval(orbitTimer);
-      const cam = Graph.cameraPosition();
+      const cam  = Graph.cameraPosition();
       const dist = Math.sqrt(cam.x * cam.x + cam.y * cam.y + cam.z * cam.z) || 400;
       orbitAngle = Math.atan2(cam.x, cam.z);
       orbitTimer = setInterval(() => {
@@ -228,36 +150,38 @@
       }, 10);
     }
 
-    function stopOrbit() {
+    function _stopOrbit() {
       if (orbitTimer) { clearInterval(orbitTimer); orbitTimer = null; }
     }
 
-    function toggleOrbit() {
-      orbitActive = !orbitActive;
-      const btn = document.getElementById('orbit-btn');
-      if (orbitActive) {
-        btn.textContent = 'Stop';
-        btn.style.background = '#1e3a5f';
-        btn.style.borderColor = '#3b82f6';
-        btn.style.color = '#93c5fd';
-        startOrbit();
-      } else {
-        btn.textContent = 'Orbit';
-        btn.style.background = '#1e293b';
-        btn.style.borderColor = '#334155';
-        btn.style.color = '#94a3b8';
-        stopOrbit();
+    // Poll for orbit/bloom/speed changes pushed by the Streamlit _graph_ctrl
+    // component via window.parent._nf_gctrl_{TAB_KEY}.  Applying changes here
+    // avoids rebuilding the iframe HTML on every toggle, so zoom/camera is kept.
+    let _lastCtrl = null;
+    function _applyCtrl(ctrl) {
+      if (ctrl.orbit !== orbitActive) {
+        orbitActive = ctrl.orbit;
+        if (orbitActive) _startOrbit(); else _stopOrbit();
+      }
+      if (ctrl.bloom !== bloomActive) {
+        bloomActive = ctrl.bloom;
+        bloomPass.enabled = bloomActive;
+        Graph.renderer().toneMappingExposure = bloomActive ? 0.3 : 1;
+      }
+      if (ctrl.speed !== orbitIdx) {
+        orbitIdx = ctrl.speed;
+        if (orbitActive) { _stopOrbit(); _startOrbit(); }
       }
     }
-
-    function adjustSpeed(dir) {
-      orbitIdx = Math.max(0, Math.min(ORBIT_SPEEDS.length - 1, orbitIdx + dir));
-      document.getElementById('orbit-speed-lbl').textContent = ORBIT_LABELS[orbitIdx];
-      if (orbitActive) { stopOrbit(); startOrbit(); }
-    }
-
-    window.toggleOrbit = toggleOrbit;
-    window.adjustSpeed = adjustSpeed;
+    setInterval(() => {
+      if (!Graph) return;
+      try {
+        const ctrl = window.parent['_nf_gctrl_' + _TAB_KEY];
+        if (!ctrl || ctrl === _lastCtrl) return;
+        _lastCtrl = ctrl;
+        _applyCtrl(ctrl);
+      } catch (_) {}
+    }, 300);
 
     let graphReady = false;
     function tryInit() {
@@ -275,6 +199,9 @@
       const fix = () => {
         const el = pd.querySelector('[data-testid="collapsedControl"]');
         if (el) { el.style.zIndex = '2147483647'; el.style.pointerEvents = 'auto'; el.style.position = 'fixed'; }
+        // Style our own iframe from within — works because st.iframe srcdoc is same-origin.
+        const self = Array.from(pd.querySelectorAll('iframe')).find(f => { try { return f.contentWindow === window; } catch(_) { return false; } });
+        if (self) { self.style.border = '1px solid #334155'; self.style.borderRadius = '8px'; }
       };
       new MutationObserver(fix).observe(pd.body, { childList: true, subtree: true }); fix();
     } catch (_) {}

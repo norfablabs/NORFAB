@@ -53,7 +53,7 @@ def run_streamlit_app() -> None:
         "Apps": [
             st.Page(
                 page="./streamlit_apps/network_map.py",
-                title="Network Map",
+                title="Network Topology",
                 icon=":material/graph_2:",
             ),
         ],

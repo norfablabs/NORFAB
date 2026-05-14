@@ -3,13 +3,86 @@ import math
 from pathlib import Path
 
 import streamlit as st
-
 _TAB_LABELS = ["\u26bf L1", "\u25c8 BGP"]
 _TAB_KEYS = ["L1", "BGP"]
 _SUBTITLES = {
     "L1": "Physical Topology \u2014 LLDP Neighbors",
     "BGP": "BGP Peerings",
 }
+
+# Orbit speed labels for select_slider
+_SPEED_LABELS = ["0.1x", "0.3x", "0.5x", "1x", "1.5x", "2x"]
+
+# Register the node-receiver component using the v2 API.
+# st.components.v2.component() stores plain HTML/JS strings and does NOT call
+# inspect.getmodule(), so it is safe to call here even when Streamlit exec()s
+# this file via the path-based st.Page() pattern.
+# Controller component: pushes orbit/bloom/speed values to the 3D graph iframe
+# via window.parent without touching the iframe HTML.  This means the HTML string
+# passed to st.iframe stays identical when those toggles change, so the browser
+# never recreates the iframe and the camera/zoom position is preserved.
+_graph_ctrl = st.components.v2.component(
+    name="nf_graph_ctrl",
+    html="",
+    js="""
+    export default function({ parentElement, data }) {
+        try {
+            window.parent['_nf_gctrl_' + (data?.tab_key ?? '')] = {
+                orbit: data?.orbit_active  ?? false,
+                bloom: data?.bloom_active  ?? false,
+                speed: data?.orbit_speed_idx ?? 2,
+            };
+        } catch (_) {}
+    }
+    """,
+)
+
+_node_receiver = st.components.v2.component(
+    name="nf_node_receiver",
+    html="",  # invisible — zero visible content
+    js="""
+    export default function({ parentElement, data, setStateValue }) {
+        // Guard: set up the polling interval only once per DOM element
+        // (the component function is called again on every Streamlit rerun).
+        if (parentElement._nf_initialized) {
+            parentElement._nf_tab_key = data?.tab_key ?? null;
+            return;
+        }
+        parentElement._nf_initialized = true;
+        parentElement._nf_tab_key = data?.tab_key ?? null;
+
+        // lastSeen is a local closure variable (NOT a property on window.parent
+        // which would be blocked by the cross-origin policy for the component
+        // iframe).  Initialize it to the current window.parent.name so that on
+        // component remount (Streamlit rerun) we do NOT re-fire setStateValue
+        // for a value that was already processed before the rerun.
+        // window.parent.name is cross-origin accessible per the HTML spec and is
+        // used as the inter-iframe channel by both graph_2d.html and graph_3d.html.
+        let lastSeen;
+        try { lastSeen = window.parent.name; } catch (_) { lastSeen = undefined; }
+
+        function poll() {
+            try {
+                const raw = window.parent.name;
+                if (raw === lastSeen) return;
+                lastSeen = raw;
+                const tk = parentElement._nf_tab_key;
+                let parsed = null;
+                if (raw) {
+                    try { parsed = JSON.parse(raw); } catch (_) {}
+                }
+                if (parsed && parsed._nfnm && (!tk || parsed.tab === tk)) {
+                    setStateValue("node", parsed);
+                } else {
+                    setStateValue("node", null);
+                }
+            } catch (_) {}
+        }
+
+        setInterval(poll, 300);
+    }
+    """,
+)
 
 
 def _get_nfclient():
@@ -152,15 +225,28 @@ def _load_html_template(template_name: str) -> str:
         )
 
 
-def _build_html(topo: dict, use_3d: bool = False) -> str:
-    """Build the final HTML by injecting topology data into a template.
+def _build_html(
+    topo: dict,
+    use_3d: bool = False,
+    search_query: str = "",
+    orbit_active: bool = False,
+    bloom_active: bool = False,
+    orbit_speed_idx: int = 2,
+    tab_key: str = "",
+) -> str:
+    """Build the final HTML by injecting topology data and control state into a template.
 
     Args:
-        topo: Topology dictionary with nodes and links
-        use_3d: If True, use 3D visualization; otherwise use 2D
+        topo: Topology dictionary with nodes and links.
+        use_3d: If True, use 3D visualization; otherwise use 2D.
+        search_query: Search string to pre-highlight matching nodes.
+        orbit_active: If True, start 3D orbit on load (3D only).
+        bloom_active: If True, enable bloom effect on load (3D only).
+        orbit_speed_idx: Index into ORBIT_SPEEDS array (0-5).
+        tab_key: Tab identifier used for the node-selection bridge.
 
     Returns:
-        Complete HTML string with injected data
+        Complete HTML string with injected data.
     """
     topo = _apply_link_curvature(topo)
 
@@ -176,7 +262,12 @@ def _build_html(topo: dict, use_3d: bool = False) -> str:
     # 3D: near-pure-black so UnrealBloomPass additive composite
     # doesn't visibly alter the background (matches official example pattern)
     bg = "#000003" if use_3d else "#0b0f1a"
-    data_vars = f"var GRAPH_DATA={json.dumps(topo)};" f"var BG_COLOR='{bg}';"
+    data_vars = (
+        f"var GRAPH_DATA={json.dumps(topo)};"
+        f"var BG_COLOR='{bg}';"
+        f"var SEARCH_QUERY={json.dumps(search_query)};"
+        f"var TAB_KEY={json.dumps(tab_key)};"
+    )
 
     # Load the appropriate template
     template_name = "graph_3d.html" if use_3d else "graph_2d.html"
@@ -186,41 +277,107 @@ def _build_html(topo: dict, use_3d: bool = False) -> str:
     return template.replace("/*INJECT*/", data_vars)
 
 
-def _render_refresh_button(key: str, refresh_key: str, refreshing_key: str) -> None:
-    """Render a compact icon refresh button with inline loading state."""
-    is_refreshing = st.session_state[refreshing_key]
-    icon = ":material/progress_activity:" if is_refreshing else ":material/refresh:"
-    help_text = "Refreshing topology..." if is_refreshing else "Refresh topology"
+@st.fragment
+def _render_details_panel(tab_key: str) -> None:
+    """Fragment: renders selected-node details.  Reruns only when node selection
+    changes, leaving the graph iframe untouched.
+    """
+    result = _node_receiver(
+        data={"tab_key": tab_key},
+        default={"node": None},
+        on_node_change=lambda: None,
+        key=f"nr_{tab_key}",
+    )
+    selected = result.node if result else None
 
-    if st.button(
-        " ",
-        key=f"refresh_{key}",
-        icon=icon,
-        type="tertiary",
-        help=help_text,
-        width="content",
-        disabled=is_refreshing,
-    ):
-        st.session_state[refreshing_key] = True
-        st.session_state[refresh_key] += 1
-        st.rerun()
+    if selected is None:
+        st.markdown(
+            "<p style='color:#334155;font-size:12px;text-align:center;"
+            "margin-top:40px;line-height:1.8'>Click a node<br>to see details</p>",
+            unsafe_allow_html=True,
+        )
+        return
+
+    _skip = {"_nfnm", "tab", "neighbors", "x", "y", "z", "vx", "vy", "vz", "val"}
+    node_id = selected.get("id", "?")
+
+    # Build full detail block as one HTML string so it can share a single
+    # scrollable container without Streamlit wrapping each piece separately.
+    html_parts: list[str] = []
+
+    # Title badge
+    html_parts.append(
+        f"<div style='display:inline-block;background:#1e3a5f;border:1px solid "
+        f"#3b82f6;border-radius:4px;padding:3px 10px;font-size:13px;"
+        f"font-weight:bold;color:#fff;margin-bottom:10px;font-family:monospace'>"
+        f"{node_id}</div>"
+    )
+
+    # Properties table
+    node_data = selected.get("data", {})
+    rows_html = ""
+    for k, v in node_data.items():
+        if k in _skip or k == "id":
+            continue
+        rows_html += (
+            f"<div style='display:flex;justify-content:space-between;padding:3px 0;"
+            f"border-bottom:1px solid #1e293b;gap:6px'>"
+            f"<span style='color:#64748b;font-size:11px;flex-shrink:0'>{k}</span>"
+            f"<span style='color:#e2e8f0;font-size:11px;font-weight:bold;"
+            f"text-align:right;word-break:break-all'>{v}</span></div>"
+        )
+    if rows_html:
+        html_parts.append(f"<div style='font-family:monospace'>{rows_html}</div>")
+
+    # Neighbors
+    neighbors = selected.get("neighbors", [])
+    if neighbors:
+        html_parts.append(
+            f"<p style='font-size:9px;text-transform:uppercase;letter-spacing:1px;"
+            f"color:#475569;margin:12px 0 6px'>Neighbors ({len(neighbors)})</p>"
+        )
+        for nb in neighbors:
+            peer = nb.get("peer", "?")
+            li = nb.get("local_iface") or ""
+            ri = nb.get("remote_iface") or ""
+            iface_html = (
+                f"<div style='color:#64748b;font-size:10px'>{li or '?'} \u2194 {ri or '?'}</div>"
+                if (li or ri)
+                else ""
+            )
+            html_parts.append(
+                f"<div style='padding:6px 9px;margin:3px 0;background:#1e293b;"
+                f"border-radius:5px;border:1px solid #334155;font-family:monospace'>"
+                f"<div style='color:#e2e8f0;font-size:11px;font-weight:bold;"
+                f"margin-bottom:2px'>{peer}</div>{iface_html}</div>"
+            )
+
+    inner = "".join(html_parts)
+    st.markdown(
+        f"<div style='height:660px;overflow-y:auto;padding-right:4px'>{inner}</div>",
+        unsafe_allow_html=True,
+    )
+
 
 
 def network_visualizer_page() -> None:
+
     st.markdown(
         """
         <style>
-        [data-testid="stMainBlockContainer"] {
-            padding-bottom: 10px !important;
-        }
-
-        /* Fix devices selector height */
+        [data-testid="stMainBlockContainer"] { padding-bottom: 10px !important; }
+        /* Compact devices selector */
         div[data-testid="stMultiSelect"] [data-baseweb="select"] > div > div {
-            max-height: 35px !important; 
+            max-height: 35px !important;
             overflow: auto !important;
         }
+        /* Rounded visible border on the graph iframe */
+        [data-testid="stIFrame"] iframe {
+            border: 1px solid #334155 !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+        }
         </style>
-
         """,
         unsafe_allow_html=True,
     )
@@ -228,42 +385,149 @@ def network_visualizer_page() -> None:
     tabs = st.tabs(_TAB_LABELS)
     for tab, key in zip(tabs, _TAB_KEYS):
         with tab:
-            refresh_key = f"refresh_nonce_{key}"
-            refreshing_key = f"refreshing_{key}"
+            # ── Persistent state keys ────────────────────────────────────────────────────
+            refresh_key    = f"nmap_refresh_{key}"
+            show_left_key  = f"nmap_show_left_{key}"
+            show_right_key = f"nmap_show_right_{key}"
             st.session_state.setdefault(refresh_key, 0)
-            st.session_state.setdefault(refreshing_key, False)
+            st.session_state.setdefault(show_left_key, True)
+            st.session_state.setdefault(show_right_key, True)
 
-            # ── Toolbar: subtitle | 3D toggle | refresh | device selector ──
-            c_title, c_mode, c_refresh, c_devices = st.columns([3.4, 0.9, 0.4, 1.2])
-            with c_title:
-                st.caption(_SUBTITLES[key])
-            with c_mode:
-                use_3d = st.toggle("3D", key=f"v3d_{key}", value=False)
-            with c_refresh:
-                _render_refresh_button(key, refresh_key, refreshing_key)
+            show_left  = st.session_state[show_left_key]
+            show_right = st.session_state[show_right_key]
 
+            # ── Panel toggle buttons (minimal, above columns) ─────────────────────────
+            _bt = st.columns([0.3, 10.4, 0.3])
+            with _bt[0]:
+                left_icon = ":material/chevron_right:" if not show_left else ":material/chevron_left:"
+                if st.button(
+                    " ",
+                    key=f"nmap_tl_{key}",
+                    icon=left_icon,
+                    type="tertiary",
+                    help="Show/hide controls",
+                ):
+                    st.session_state[show_left_key] = not show_left
+                    st.rerun()
+            with _bt[2]:
+                right_icon = ":material/chevron_left:" if not show_right else ":material/chevron_right:"
+                if st.button(
+                    " ",
+                    key=f"nmap_tr_{key}",
+                    icon=right_icon,
+                    type="tertiary",
+                    help="Show/hide details",
+                ):
+                    st.session_state[show_right_key] = not show_right
+                    st.rerun()
+
+            # ── Column layout ──────────────────────────────────────────────────────────────
+            if show_left and show_right:
+                cols = st.columns([2, 7, 2.5])
+                left_col, graph_col, right_col = cols[0], cols[1], cols[2]
+            elif show_left:
+                cols = st.columns([2, 9])
+                left_col, graph_col, right_col = cols[0], cols[1], None
+            elif show_right:
+                cols = st.columns([9, 2.5])
+                left_col, graph_col, right_col = None, cols[0], cols[1]
+            else:
+                left_col, graph_col, right_col = None, st.container(), None
+
+            # ── Controls (left column) ───────────────────────────────────────────────
             refresh_nonce = st.session_state[refresh_key]
 
-            with c_devices:
-                device_names = _fetch_device_names(refresh_nonce)
-                selected = st.multiselect(
-                    "Devices",
-                    options=device_names,
-                    default=[],
-                    placeholder="Select devices",
-                    label_visibility="collapsed",
-                    key=f"devices_{key}",
+            if show_left:
+                with left_col:
+                    st.caption(_SUBTITLES[key])
+
+                    search_query = st.text_input(
+                        "Search",
+                        key=f"nmap_search_{key}",
+                        placeholder="Name, IP, type...",
+                        label_visibility="collapsed",
+                    )
+
+                    use_3d = st.toggle("3D view", key=f"nmap_3d_{key}", value=False)
+
+                    if use_3d:
+                        orbit_active = st.toggle("Orbit", key=f"nmap_orbit_{key}", value=False)
+                        bloom_active = st.toggle("Bloom", key=f"nmap_bloom_{key}", value=False)
+                        orbit_speed_idx = st.select_slider(
+                            "Speed",
+                            options=list(range(6)),
+                            value=2,
+                            format_func=lambda x: _SPEED_LABELS[x],
+                            key=f"nmap_ospeed_{key}",
+                            label_visibility="collapsed",
+                        )
+                    else:
+                        orbit_active    = False
+                        bloom_active    = False
+                        orbit_speed_idx = 2
+
+                    if st.button(
+                        " ",
+                        key=f"nmap_refresh_btn_{key}",
+                        icon=":material/refresh:",
+                        type="tertiary",
+                        help="Refresh topology",
+                        width="content",
+                    ):
+                        st.session_state[refresh_key] += 1
+                        refresh_nonce = st.session_state[refresh_key]
+
+                    device_names = _fetch_device_names(refresh_nonce)
+                    selected_devs = st.multiselect(
+                        "Devices",
+                        options=device_names,
+                        default=[],
+                        placeholder="Select devices",
+                        label_visibility="collapsed",
+                        key=f"nmap_devices_{key}",
+                    )
+                    selected_devices = tuple(selected_devs)
+            else:
+                # Read last-known values from session state when panel is hidden
+                search_query     = st.session_state.get(f"nmap_search_{key}", "")
+                use_3d           = st.session_state.get(f"nmap_3d_{key}", False)
+                orbit_active     = st.session_state.get(f"nmap_orbit_{key}", False) if use_3d else False
+                bloom_active     = st.session_state.get(f"nmap_bloom_{key}", False) if use_3d else False
+                orbit_speed_idx  = st.session_state.get(f"nmap_ospeed_{key}", 2) if use_3d else 2
+                selected_devices = tuple(st.session_state.get(f"nmap_devices_{key}", []))
+
+            # ── Graph (middle column) ─────────────────────────────────────────────────
+            with graph_col:
+                topo = _fetch_topology_data(key, refresh_nonce, selected_devices)
+                html = _build_html(
+                    topo,
+                    use_3d=use_3d,
+                    search_query=search_query,
+                    orbit_active=orbit_active,
+                    bloom_active=bloom_active,
+                    orbit_speed_idx=orbit_speed_idx,
+                    tab_key=key,
                 )
-            selected_devices = tuple(selected)
-            topo = _fetch_topology_data(key, refresh_nonce, selected_devices)
+                st.iframe(html, height=700)
+                if use_3d:
+                    _graph_ctrl(
+                        data={
+                            "tab_key": key,
+                            "orbit_active": orbit_active,
+                            "bloom_active": bloom_active,
+                            "orbit_speed_idx": int(orbit_speed_idx),
+                        },
+                        key=f"gc_{key}",
+                        height=0,
+                    )
 
-            if st.session_state[refreshing_key]:
-                st.session_state[refreshing_key] = False
-                st.rerun()
-
-            with st.container(height="stretch", border=True):
-                st.iframe(_build_html(topo, use_3d), width="stretch", height=700)
+            # ── Details panel (right column) ───────────────────────────────────────────
+            if show_right and right_col is not None:
+                with right_col:
+                    st.caption("Node Details")
+                    _render_details_panel(key)
 
 
 if __name__ == "__main__":
     network_visualizer_page()
+
