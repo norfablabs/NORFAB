@@ -90,7 +90,7 @@
         })
         .linkCurvature('curvature')
         .linkCurveRotation('rotation')
-        .linkColor(() => '#475569')
+        .linkColor(l => l.link_color || '#475569')
         .linkOpacity(0.6)
         .linkWidth(0.5)
         .linkLabel(l => {

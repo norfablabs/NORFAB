@@ -383,6 +383,8 @@ class NetboxCrudTasks:
         if brief:
             params["brief"] = 1
         elif fields:
+            if "id" not in fields:
+                fields.append("id")
             params["fields"] = ",".join(fields)
         if ordering:
             if isinstance(ordering, list):

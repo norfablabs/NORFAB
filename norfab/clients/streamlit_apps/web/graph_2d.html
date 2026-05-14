@@ -30,7 +30,8 @@
   <script>
     let Graph = null, selectedNodeId = null;
     let searchQuery = (typeof SEARCH_QUERY !== 'undefined' && SEARCH_QUERY) ? SEARCH_QUERY : '';
-    const _TAB_KEY = (typeof TAB_KEY !== 'undefined') ? TAB_KEY : '';
+    const _TAB_KEY   = (typeof TAB_KEY    !== 'undefined') ? TAB_KEY    : '';
+    const _LINK_STYLE = (typeof LINK_STYLE !== 'undefined') ? LINK_STYLE : 'straight';
     const _SKIP = new Set(['x','y','vx','vy','fx','fy','index','__threeObj','__indexColor']);
 
     function _nodePayload(node, neighbors) {
@@ -51,7 +52,8 @@
         .width(el.clientWidth)
         .height(el.clientHeight)
         .graphData(data)
-        .linkColor(() => '#475569')
+        .linkCurvature(_LINK_STYLE === 'curve' ? (l => l.curvature_2d || 0) : 0)
+        .linkColor(l => l.link_color || '#475569')
         .linkWidth(1.5)
         .linkLabel(l => {
           const p = [];
@@ -63,21 +65,52 @@
           if (l.area)         p.push('area: ' + l.area);
           return p.join(' ↔ ');
         })
-        .linkCanvasObjectMode(() => 'after')
+        .linkCanvasObjectMode(() => _LINK_STYLE === 'straight' ? 'replace' : 'after')
         .linkCanvasObject((link, ctx) => {
-          const lbl = link.src_iface
-            ? link.src_iface + (link.dst_iface ? '/' + link.dst_iface : '')
-            : (link.session_type || link.tunnel_type || (link.area ? 'area:' + link.area : ''));
-          if (!lbl) return;
-          const s = link.source, e = link.target;
-          if (typeof s !== 'object' || typeof e !== 'object') return;
-          ctx.save();
-          ctx.font = '4px monospace';
-          ctx.fillStyle = '#64748b';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(lbl, (s.x + e.x) / 2, (s.y + e.y) / 2);
-          ctx.restore();
+          if (_LINK_STYLE === 'straight') {
+            // Offset parallel links as evenly-spaced straight lines
+            const s = link.source, e = link.target;
+            if (typeof s !== 'object' || typeof e !== 'object') return;
+            const dx = e.x - s.x, dy = e.y - s.y;
+            const len = Math.sqrt(dx * dx + dy * dy) || 1;
+            const px = -dy / len, py = dx / len;
+            const off = link.offset_2d || 0;
+            const sx2 = s.x + px * off, sy2 = s.y + py * off;
+            const ex2 = e.x + px * off, ey2 = e.y + py * off;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(sx2, sy2);
+            ctx.lineTo(ex2, ey2);
+            ctx.strokeStyle = link.link_color || '#475569';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            const lbl = link.src_iface
+              ? link.src_iface + (link.dst_iface ? '/' + link.dst_iface : '')
+              : (link.session_type || link.tunnel_type || (link.area ? 'area:' + link.area : ''));
+            if (lbl) {
+              ctx.font = '4px monospace';
+              ctx.fillStyle = '#64748b';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(lbl, (sx2 + ex2) / 2, (sy2 + ey2) / 2);
+            }
+            ctx.restore();
+          } else {
+            // Curve mode: just draw the label at midpoint (force-graph draws the curve)
+            const lbl = link.src_iface
+              ? link.src_iface + (link.dst_iface ? '/' + link.dst_iface : '')
+              : (link.session_type || link.tunnel_type || (link.area ? 'area:' + link.area : ''));
+            if (!lbl) return;
+            const s = link.source, e = link.target;
+            if (typeof s !== 'object' || typeof e !== 'object') return;
+            ctx.save();
+            ctx.font = '4px monospace';
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(lbl, (s.x + e.x) / 2, (s.y + e.y) / 2);
+            ctx.restore();
+          }
         })
         // Full custom node rendering in 'replace' mode.
         // Click + hover are handled by a custom canvas listener (setupInteraction)

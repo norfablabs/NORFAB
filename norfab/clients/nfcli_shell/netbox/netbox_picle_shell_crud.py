@@ -122,7 +122,7 @@ class CrudReadShell(NetboxCommonArgs, NetboxClientRunJobArgs):
     object_type: StrictStr = Field(
         ...,
         description='Object type e.g. "dcim.devices"',
-        alias="object-type",
+        # alias="object-type",
     )
     object_id: StrictStr = Field(
         None,

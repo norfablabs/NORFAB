@@ -145,7 +145,7 @@ def _fetch_device_names(refresh_nonce: int) -> list:
 
 
 @st.cache_data(show_spinner=False)
-def _fetch_topology_data(topology_key: str, refresh_nonce: int, devices: tuple = ()) -> dict:
+def _fetch_netbox_topology_data(topology_key: str, refresh_nonce: int, devices: tuple = ()) -> dict:
     """Fetch topology data through a helper function.
 
     Args:
@@ -173,13 +173,184 @@ def _fetch_topology_data(topology_key: str, refresh_nonce: int, devices: tuple =
             for worker_result in result.values():
                 if not worker_result.get("errors") and worker_result.get("result"):
                     topo = worker_result["result"]
-                    return json.loads(json.dumps(topo))
+                    topo = json.loads(json.dumps(topo))
+                    for lnk in topo.get("links", []):
+                        lnk.setdefault("link_color", "#3b82f6")  # blue for NetBox
+                    return topo
 
     topologies = _load_topologies()
     topology = topologies.get(topology_key, {"nodes": [], "links": []})
 
     # Return a detached copy so view-specific transforms don't affect cached source data.
-    return json.loads(json.dumps(topology))
+    topology = json.loads(json.dumps(topology))
+    for lnk in topology.get("links", []):
+        lnk.setdefault("link_color", "#3b82f6")  # blue for NetBox
+    return topology
+
+
+@st.cache_data(show_spinner=False)
+def _fetch_lldp_data(devices: tuple, refresh_nonce: int) -> dict:
+    """Fetch LLDP neighbor data from devices via Nornir parse_ttp.
+
+    Args:
+        devices: Tuple of device names to query.
+        refresh_nonce: A monotonically increasing value to force re-fetch.
+
+    Returns:
+        Dictionary mapping device name to list of LLDP neighbor dicts.
+    """
+    nfclient = _get_nfclient()
+    if nfclient is None:
+        return {}
+    result = nfclient.run_job(
+        "nornir",
+        "parse_ttp",
+        kwargs={"get": "lldp_neighbors", "FL": list(devices)},
+        workers="all",
+    )
+    merged: dict = {}
+    for worker_result in result.values():
+        if not worker_result.get("errors") and worker_result.get("result"):
+            for device, neighbors in worker_result["result"].items():
+                if device not in merged:
+                    merged[device] = neighbors
+    return merged
+
+
+def _merge_lldp_into_topology(topo: dict, lldp_data: dict) -> dict:
+    """Overlay LLDP neighbor data as yellow links onto a topology graph.
+
+    Args:
+        topo: Base topology with nodes and links.
+        lldp_data: Dict mapping device name to list of LLDP neighbor dicts.
+
+    Returns:
+        New topology dict with LLDP links added in yellow.
+    """
+    nodes = {n["id"]: n for n in topo.get("nodes", [])}
+    links = list(topo.get("links", []))
+
+    for device, neighbors in lldp_data.items():
+        if device not in nodes:
+            nodes[device] = {"id": device, "name": device}
+        for nb in (neighbors or []):
+            remote = nb.get("remote_device", "")
+            if not remote:
+                continue
+            if remote not in nodes:
+                nodes[remote] = {"id": remote, "name": remote}
+            links.append({
+                "source": device,
+                "target": remote,
+                "src_iface": nb.get("interface", ""),
+                "dst_iface": nb.get("remote_interface", ""),
+                "link_color": "#eab308",  # yellow for LLDP
+                "link_type": "lldp",
+            })
+
+    return {"nodes": list(nodes.values()), "links": links}
+
+
+@st.cache_data(show_spinner=False)
+def _fetch_bgp_data(devices: tuple, refresh_nonce: int) -> tuple:
+    """Fetch BGP neighbor data and interface IPs for peer-IP-to-device resolution.
+
+    Args:
+        devices: Tuple of device names to query.
+        refresh_nonce: A monotonically increasing value to force re-fetch.
+
+    Returns:
+        Tuple of (bgp_data, ip_to_device) where bgp_data maps device name to list
+        of BGP peer dicts, and ip_to_device maps IP address string to device name.
+    """
+    nfclient = _get_nfclient()
+    if nfclient is None:
+        return {}, {}
+
+    bgp_result = nfclient.run_job(
+        "nornir",
+        "parse_ttp",
+        kwargs={"get": "bgp_neighbors", "FL": list(devices)},
+        workers="all",
+    )
+    bgp_data: dict = {}
+    for worker_result in bgp_result.values():
+        if not worker_result.get("errors") and worker_result.get("result"):
+            for device, neighbors in worker_result["result"].items():
+                if device not in bgp_data:
+                    bgp_data[device] = neighbors
+
+    # Collect all unique peer IPs across all devices
+    peer_ips = list({
+        nb.get("remote_address", "")
+        for neighbors in bgp_data.values()
+        for nb in (neighbors or [])
+        if nb.get("remote_address")
+    })
+
+    ip_to_device: dict = {}
+    if peer_ips:
+        ip_result = nfclient.run_job(
+            "netbox",
+            "crud_read",
+            kwargs={
+                "object_type": "ipam.ip_addresses",
+                "filters": [{"address": peer_ips}],
+                "fields": ["assigned_object", "address"]
+            },
+            workers="any",
+        )
+        for worker_result in ip_result.values():
+            for entry in worker_result["result"]["results"]:
+                ip = entry.get("address", "").split("/")[0]
+                assigned = entry.get("assigned_object") or {}
+                device_name = (assigned.get("device") or {}).get("name", "")
+                if ip and device_name:
+                    ip_to_device[ip] = device_name
+
+    return bgp_data, ip_to_device
+
+
+def _merge_bgp_into_topology(topo: dict, bgp_data: dict, ip_to_device: dict) -> dict:
+    """Overlay BGP peer sessions as purple links onto a topology graph.
+
+    Args:
+        topo: Base topology with nodes and links.
+        bgp_data: Dict mapping device name to list of BGP peer dicts.
+        ip_to_device: Dict mapping peer IP address to device name.
+
+    Returns:
+        New topology dict with BGP links added in purple.
+    """
+    nodes = {n["id"]: n for n in topo.get("nodes", [])}
+    links = list(topo.get("links", []))
+    seen_pairs: set = set()
+
+    for device, neighbors in bgp_data.items():
+        if device not in nodes:
+            nodes[device] = {"id": device, "name": device}
+        for nb in (neighbors or []):
+            remote_ip = nb.get("remote_address", "")
+            if not remote_ip:
+                continue
+            remote_device = ip_to_device.get(remote_ip, remote_ip)
+            if remote_device not in nodes:
+                nodes[remote_device] = {"id": remote_device, "name": remote_device}
+            # Deduplicate: both peers report the same session
+            pair = tuple(sorted([device, remote_device]))
+            if pair in seen_pairs:
+                continue
+            seen_pairs.add(pair)
+            links.append({
+                "source": device,
+                "target": remote_device,
+                "src_iface": nb.get("local_interface", ""),
+                "session_type": nb.get("peering_type", ""),
+                "link_color": "#a855f7",  # purple for BGP
+                "link_type": "bgp",
+            })
+
+    return {"nodes": list(nodes.values()), "links": links}
 
 
 def _apply_link_curvature(topo: dict) -> dict:
@@ -195,11 +366,18 @@ def _apply_link_curvature(topo: dict) -> dict:
     new_links = [dict(lnk) for lnk in links]
     for indices in pair_indices.values():
         n = len(indices)
-        if n == 1:
-            new_links[indices[0]]["curvature"] = 0
-            new_links[indices[0]]["rotation"] = 0
-        else:
-            for j, idx in enumerate(indices):
+        step = 8  # graph-unit perpendicular offset between parallel links
+        for j, idx in enumerate(indices):
+            offset = step * (j - (n - 1) / 2)
+            new_links[idx]["offset_2d"] = offset
+            # 2D curve mode: symmetric curvatures around 0
+            max_c = min(0.8, 0.3 + 0.1 * n)
+            new_links[idx]["curvature_2d"] = (-max_c + (2 * max_c / (n - 1)) * j) if n > 1 else 0
+            # 3D: fan arcs via curvature + rotation
+            if n == 1:
+                new_links[idx]["curvature"] = 0
+                new_links[idx]["rotation"] = 0
+            else:
                 new_links[idx]["curvature"] = 0.8
                 new_links[idx]["rotation"] = (2 * math.pi / n) * j
 
@@ -232,6 +410,7 @@ def _build_html(
     orbit_active: bool = False,
     bloom_active: bool = False,
     orbit_speed_idx: int = 2,
+    link_style: str = "straight",
     tab_key: str = "",
 ) -> str:
     """Build the final HTML by injecting topology data and control state into a template.
@@ -243,6 +422,7 @@ def _build_html(
         orbit_active: If True, start 3D orbit on load (3D only).
         bloom_active: If True, enable bloom effect on load (3D only).
         orbit_speed_idx: Index into ORBIT_SPEEDS array (0-5).
+        link_style: "straight" or "curve" (2D only).
         tab_key: Tab identifier used for the node-selection bridge.
 
     Returns:
@@ -267,6 +447,7 @@ def _build_html(
         f"var BG_COLOR='{bg}';"
         f"var SEARCH_QUERY={json.dumps(search_query)};"
         f"var TAB_KEY={json.dumps(tab_key)};"
+        f"var LINK_STYLE={json.dumps(link_style)};"
     )
 
     # Load the appropriate template
@@ -386,18 +567,15 @@ def network_visualizer_page() -> None:
     for tab, key in zip(tabs, _TAB_KEYS):
         with tab:
             # ── Persistent state keys ────────────────────────────────────────────────────
-            refresh_key    = f"nmap_refresh_{key}"
-            show_left_key  = f"nmap_show_left_{key}"
-            show_right_key = f"nmap_show_right_{key}"
+            refresh_key   = f"nmap_refresh_{key}"
+            show_left_key = f"nmap_show_left_{key}"
             st.session_state.setdefault(refresh_key, 0)
             st.session_state.setdefault(show_left_key, True)
-            st.session_state.setdefault(show_right_key, True)
 
-            show_left  = st.session_state[show_left_key]
-            show_right = st.session_state[show_right_key]
+            show_left = st.session_state[show_left_key]
 
-            # ── Panel toggle buttons (minimal, above columns) ─────────────────────────
-            _bt = st.columns([0.3, 10.4, 0.3])
+            # ── Panel toggle button (minimal, above columns) ──────────────────────────
+            _bt = st.columns([0.3, 11.7])
             with _bt[0]:
                 left_icon = ":material/chevron_right:" if not show_left else ":material/chevron_left:"
                 if st.button(
@@ -409,30 +587,14 @@ def network_visualizer_page() -> None:
                 ):
                     st.session_state[show_left_key] = not show_left
                     st.rerun()
-            with _bt[2]:
-                right_icon = ":material/chevron_left:" if not show_right else ":material/chevron_right:"
-                if st.button(
-                    " ",
-                    key=f"nmap_tr_{key}",
-                    icon=right_icon,
-                    type="tertiary",
-                    help="Show/hide details",
-                ):
-                    st.session_state[show_right_key] = not show_right
-                    st.rerun()
 
             # ── Column layout ──────────────────────────────────────────────────────────────
-            if show_left and show_right:
+            if show_left:
                 cols = st.columns([2, 7, 2.5])
                 left_col, graph_col, right_col = cols[0], cols[1], cols[2]
-            elif show_left:
-                cols = st.columns([2, 9])
-                left_col, graph_col, right_col = cols[0], cols[1], None
-            elif show_right:
+            else:
                 cols = st.columns([9, 2.5])
                 left_col, graph_col, right_col = None, cols[0], cols[1]
-            else:
-                left_col, graph_col, right_col = None, st.container(), None
 
             # ── Controls (left column) ───────────────────────────────────────────────
             refresh_nonce = st.session_state[refresh_key]
@@ -465,6 +627,15 @@ def network_visualizer_page() -> None:
                         orbit_active    = False
                         bloom_active    = False
                         orbit_speed_idx = 2
+                        link_style = st.selectbox(
+                            "Link style",
+                            options=["straight", "curve"],
+                            key=f"nmap_lstyle_{key}",
+                            label_visibility="visible",
+                        )
+
+                    if use_3d:
+                        link_style = "straight"  # not applicable in 3D
 
                     if st.button(
                         " ",
@@ -494,11 +665,51 @@ def network_visualizer_page() -> None:
                 orbit_active     = st.session_state.get(f"nmap_orbit_{key}", False) if use_3d else False
                 bloom_active     = st.session_state.get(f"nmap_bloom_{key}", False) if use_3d else False
                 orbit_speed_idx  = st.session_state.get(f"nmap_ospeed_{key}", 2) if use_3d else 2
+                link_style       = st.session_state.get(f"nmap_lstyle_{key}", "straight")
+                bgp_active       = st.session_state.get(f"nmap_bgp_{key}", False)
                 selected_devices = tuple(st.session_state.get(f"nmap_devices_{key}", []))
 
             # ── Graph (middle column) ─────────────────────────────────────────────────
             with graph_col:
-                topo = _fetch_topology_data(key, refresh_nonce, selected_devices)
+                st.markdown(
+                    """
+                    <style>
+                    label[data-testid="stCheckboxLabel"] span[data-nf-netbox] { color: #3b82f6; font-weight: bold; }
+                    </style>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                _cb_cols = st.columns(3)
+                with _cb_cols[0]:
+                    netbox_active = st.checkbox(
+                        ":blue[**NetBox**]",
+                        key=f"nmap_netbox_{key}",
+                        value=True,
+                    )
+                with _cb_cols[1]:
+                    lldp_active = st.checkbox(
+                        ":orange[**LLDP**]",
+                        key=f"nmap_lldp_{key}",
+                        value=False,
+                    )
+                with _cb_cols[2]:
+                    bgp_active = st.checkbox(
+                        ":violet[**BGP**]",
+                        key=f"nmap_bgp_{key}",
+                        value=False,
+                    )
+
+                topo: dict = {"nodes": [], "links": []}
+                # Auto-fetch NetBox data when devices are selected, regardless of checkbox
+                if netbox_active or selected_devices:
+                    topo = _fetch_netbox_topology_data(key, refresh_nonce, selected_devices)
+                if lldp_active and selected_devices:
+                    lldp_data = _fetch_lldp_data(selected_devices, refresh_nonce)
+                    topo = _merge_lldp_into_topology(topo, lldp_data)
+                if bgp_active and selected_devices:
+                    bgp_data, ip_to_device = _fetch_bgp_data(selected_devices, refresh_nonce)
+                    topo = _merge_bgp_into_topology(topo, bgp_data, ip_to_device)
+
                 html = _build_html(
                     topo,
                     use_3d=use_3d,
@@ -506,6 +717,7 @@ def network_visualizer_page() -> None:
                     orbit_active=orbit_active,
                     bloom_active=bloom_active,
                     orbit_speed_idx=orbit_speed_idx,
+                    link_style=link_style,
                     tab_key=key,
                 )
                 st.iframe(html, height=700)
@@ -522,10 +734,9 @@ def network_visualizer_page() -> None:
                     )
 
             # ── Details panel (right column) ───────────────────────────────────────────
-            if show_right and right_col is not None:
-                with right_col:
-                    st.caption("Node Details")
-                    _render_details_panel(key)
+            with right_col:
+                st.caption("Node Details")
+                _render_details_panel(key)
 
 
 if __name__ == "__main__":
