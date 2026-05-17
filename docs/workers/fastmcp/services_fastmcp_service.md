@@ -18,6 +18,17 @@ service_<service_name>__task_<task_name>
 
 By default, FastMCP server listens on `0.0.0.0:8001` and serves MCP at `/mcp/`.
 
+# Installation
+
+FastMCP uses [Python SDK MCP](https://github.com/modelcontextprotocol/python-sdk) library. Required dependencies can be installed using `fastmcpservice` extras:
+
+```
+pip install norfab[fastmcpservice]
+```
+
+> [!NOTE]
+> There is no dependency on name-twin [FastMCP project](https://github.com/PrefectHQ/fastmcp) that uses similar name and Python API, `mcp` library above is the only dependency.
+
 ## FastMCP Service Tasks
 
 FastMCP Service supports a small set of tasks to manage MCP exposure.

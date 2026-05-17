@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .netbox_models import NetboxFastApiArgs
+from .netbox_models import NetboxFastApiArgs, NetboxCommonArgs
 
 log = logging.getLogger(__name__)
 
@@ -23,8 +23,7 @@ OPENAPI_CACHE_TTL = 86400  # 24 hours
 # ------------------------------------------------------------------------------
 
 
-class CrudListObjectsArgs(BaseModel):
-    instance: Optional[StrictStr] = Field(None, description="NetBox instance name")
+class CrudListObjectsArgs(NetboxCommonArgs):
     app_filter: Union[None, StrictStr, List[StrictStr]] = Field(
         None, description='Filter by app(s) e.g. "dcim" or ["dcim", "ipam"]'
     )
@@ -37,7 +36,7 @@ class CrudListObjectsArgs(BaseModel):
     )
 
 
-class CrudSearchArgs(BaseModel):
+class CrudSearchArgs(NetboxCommonArgs):
     query: StrictStr = Field(..., description="Search term")
     object_types: Optional[List[StrictStr]] = Field(
         None, description='List of "app.resource" strings to search'
@@ -49,10 +48,9 @@ class CrudSearchArgs(BaseModel):
     limit: StrictInt = Field(
         10, ge=1, le=100, description="Max results per object type"
     )
-    instance: Optional[StrictStr] = Field(None, description="NetBox instance name")
 
 
-class CrudReadArgs(BaseModel):
+class CrudReadArgs(NetboxCommonArgs, populate_by_name=True):
     object_type: StrictStr = Field(
         ..., description='"app.resource" e.g. "dcim.devices"'
     )
@@ -69,23 +67,22 @@ class CrudReadArgs(BaseModel):
     limit: StrictInt = Field(50, ge=1, le=1000, description="Page size")
     offset: StrictInt = Field(0, ge=0, description="Pagination skip count")
     ordering: Union[None, StrictStr, List[StrictStr]] = Field(
-        None, description="Ordering field(s); prefix with '-' for descending"
+        None,
+        description="Comma-separated ordering fields, prefix '-' for descending e.g. name or -name,id",
     )
-    instance: Optional[StrictStr] = Field(None, description="NetBox instance name")
 
 
-class CrudCreateArgs(BaseModel):
+class CrudCreateArgs(NetboxCommonArgs):
     object_type: StrictStr = Field(
         ..., description='"app.resource" e.g. "dcim.interfaces"'
     )
     data: Union[Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         ..., description="Object data; dict for single, list for bulk"
     )
-    instance: Optional[StrictStr] = Field(None, description="NetBox instance name")
     dry_run: StrictBool = Field(False, description="Preview without creating")
 
 
-class CrudUpdateArgs(BaseModel):
+class CrudUpdateArgs(NetboxCommonArgs):
     object_type: StrictStr = Field(..., description='"app.resource"')
     data: Union[Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         ..., description="Object data; each item must contain 'id'"
@@ -93,20 +90,18 @@ class CrudUpdateArgs(BaseModel):
     partial: StrictBool = Field(
         True, description="True=PATCH (partial); False=PUT (full replace)"
     )
-    instance: Optional[StrictStr] = Field(None, description="NetBox instance name")
     dry_run: StrictBool = Field(False, description="Compute diffs without updating")
 
 
-class CrudDeleteArgs(BaseModel):
+class CrudDeleteArgs(NetboxCommonArgs):
     object_type: StrictStr = Field(..., description='"app.resource"')
     object_id: Union[StrictInt, List[StrictInt]] = Field(
         ..., description="Object ID(s) to delete"
     )
-    instance: Optional[StrictStr] = Field(None, description="NetBox instance name")
     dry_run: StrictBool = Field(False, description="Preview without deleting")
 
 
-class CrudChangelogArgs(BaseModel):
+class CrudChangelogArgs(NetboxCommonArgs):
     filters: Union[None, Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         None, description="Filter dict(s)"
     )
@@ -115,7 +110,6 @@ class CrudChangelogArgs(BaseModel):
     )
     limit: StrictInt = Field(50, ge=1, le=1000, description="Page size")
     offset: StrictInt = Field(0, ge=0, description="Pagination skip count")
-    instance: Optional[StrictStr] = Field(None, description="NetBox instance name")
 
 
 # ------------------------------------------------------------------------------
@@ -170,7 +164,10 @@ class NetboxCrudTasks:
         "virtualization.virtual-machines",
     ]
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CrudListObjectsArgs,
+    )
     def crud_list_objects(
         self,
         job: Job,
@@ -269,7 +266,10 @@ class NetboxCrudTasks:
         ret.result = result
         return ret
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CrudSearchArgs,
+    )
     def crud_search(
         self,
         job: Job,
@@ -337,7 +337,10 @@ class NetboxCrudTasks:
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CrudReadArgs,
+    )
     def crud_read(
         self,
         job: Job,
@@ -438,7 +441,8 @@ class NetboxCrudTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CrudCreateArgs,
     )
     def crud_create(
         self,
@@ -482,10 +486,10 @@ class NetboxCrudTasks:
                 f" {object_type}(s) would be created"
             )
             ret.result = {
-                "dry_run": True,
                 "count": len(data_list),
                 "preview": data_list,
             }
+            ret.dry_run = True
             return ret
 
         job.event(f"creating {len(data_list)} {object_type}(s)")
@@ -508,7 +512,8 @@ class NetboxCrudTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CrudUpdateArgs,
     )
     def crud_update(
         self,
@@ -577,10 +582,10 @@ class NetboxCrudTasks:
                 f" computed diffs for {len(diffs)} object(s)"
             )
             ret.result = {
-                "dry_run": True,
                 "count": len(diffs),
                 "changes": diffs,
             }
+            ret.dry_run = True
             return ret
 
         job.event(f"updating {len(data_list)} {object_type}(s)")
@@ -607,7 +612,11 @@ class NetboxCrudTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["DELETE"], "schema": NetboxFastApiArgs.model_json_schema()}
+        fastapi={
+            "methods": ["DELETE"],
+            "schema": NetboxFastApiArgs.model_json_schema(),
+        },
+        input=CrudDeleteArgs,
     )
     def crud_delete(
         self,
@@ -659,10 +668,10 @@ class NetboxCrudTasks:
                 f" would delete {len(id_list)} object(s)"
             )
             ret.result = {
-                "dry_run": True,
                 "count": len(preview),
                 "would_delete": preview,
             }
+            ret.dry_run = True
             return ret
 
         job.event(f"deleting {len(id_list)} {object_type}(s)")
@@ -682,7 +691,10 @@ class NetboxCrudTasks:
         ret.result = {"deleted": len(deleted_ids), "deleted_ids": deleted_ids}
         return ret
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CrudChangelogArgs,
+    )
     def crud_get_changelogs(
         self,
         job: Job,

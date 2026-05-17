@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import time
+import urllib.parse
 from datetime import datetime, timedelta
 from fnmatch import fnmatchcase
 from typing import Any, List, Union
@@ -628,6 +629,56 @@ class NetboxWorker(
             )
 
         return result
+
+    def bulk_filter(
+        self,
+        endpoint: object,
+        filter_by_key: str,
+        filter_by_values: list,
+        chunk_size: int = 4000,
+        **kwargs,
+    ) -> list:
+        """
+        Netbox REST API chokes when using list as a filter and it contains too many items in it.
+
+        This helper function chunks filtering requests to avoid hitting 414 (Request-URI Too Long) error.
+        Uses an adaptive mechanism: ``chunk_size`` is the maximum allowed URI length in characters
+        (default 4000, matching common gunicorn/nginx/apache request-line buffer limits of 4094). The function
+        measures the base URI cost from ``kwargs`` plus 50 characters for the endpoint path, then
+        dynamically determines how many items from ``filter_by_values`` fit in each request.
+
+        Args:
+            endpoint: pynetbox endpoint object, e.g. ``nb.ipam.ip_addresses``.
+            filter_by_key: keyword argument name passed to pynetbox ``filter()`` call.
+            filter_by_values: list of values to filter by, split adaptively across requests.
+            chunk_size (bytes): maximum URI character length per request. Defaults to 4000 bytes/characters.
+            kwargs: optional additional filter kwargs passed to every ``filter()`` call.
+
+        Returns:
+            list: All collected pynetbox objects across all chunked requests.
+        """
+        ret = []
+        # base URI length: 50 chars for the endpoint path + serialized static kwargs
+        base_length = 0
+        if kwargs:
+            base_length += len(urllib.parse.urlencode(kwargs, doseq=True))
+        # prefix cost per item: "&filter_by_key=<url-encoded-value>"
+        key_prefix_len = len(f"&{filter_by_key}=")
+
+        current_chunk = []
+        current_length = base_length
+        for value in filter_by_values:
+            item_length = key_prefix_len + len(urllib.parse.quote(str(value), safe=""))
+            if current_chunk and current_length + item_length > chunk_size:
+                ret.extend(endpoint.filter(**{filter_by_key: current_chunk}, **kwargs))
+                current_chunk = [value]
+                current_length = base_length + item_length
+            else:
+                current_chunk.append(value)
+                current_length += item_length
+        if current_chunk:
+            ret.extend(endpoint.filter(**{filter_by_key: current_chunk}, **kwargs))
+        return ret
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
     def cache_list(self, keys: str = "*", details: bool = False) -> Result:

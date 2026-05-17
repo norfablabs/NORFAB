@@ -3,6 +3,7 @@ import math
 from pathlib import Path
 
 import streamlit as st
+
 _TAB_LABELS = ["\u26bf L1", "\u25c8 BGP"]
 _TAB_KEYS = ["L1", "BGP"]
 _SUBTITLES = {
@@ -145,7 +146,9 @@ def _fetch_device_names(refresh_nonce: int) -> list:
 
 
 @st.cache_data(show_spinner=False)
-def _fetch_netbox_topology_data(topology_key: str, refresh_nonce: int, devices: tuple = ()) -> dict:
+def _fetch_netbox_topology_data(
+    topology_key: str, refresh_nonce: int, devices: tuple = ()
+) -> dict:
     """Fetch topology data through a helper function.
 
     Args:
@@ -233,20 +236,22 @@ def _merge_lldp_into_topology(topo: dict, lldp_data: dict) -> dict:
     for device, neighbors in lldp_data.items():
         if device not in nodes:
             nodes[device] = {"id": device, "name": device}
-        for nb in (neighbors or []):
+        for nb in neighbors or []:
             remote = nb.get("remote_device", "")
             if not remote:
                 continue
             if remote not in nodes:
                 nodes[remote] = {"id": remote, "name": remote}
-            links.append({
-                "source": device,
-                "target": remote,
-                "src_iface": nb.get("interface", ""),
-                "dst_iface": nb.get("remote_interface", ""),
-                "link_color": "#eab308",  # yellow for LLDP
-                "link_type": "lldp",
-            })
+            links.append(
+                {
+                    "source": device,
+                    "target": remote,
+                    "src_iface": nb.get("interface", ""),
+                    "dst_iface": nb.get("remote_interface", ""),
+                    "link_color": "#eab308",  # yellow for LLDP
+                    "link_type": "lldp",
+                }
+            )
 
     return {"nodes": list(nodes.values()), "links": links}
 
@@ -281,12 +286,14 @@ def _fetch_bgp_data(devices: tuple, refresh_nonce: int) -> tuple:
                     bgp_data[device] = neighbors
 
     # Collect all unique peer IPs across all devices
-    peer_ips = list({
-        nb.get("remote_address", "")
-        for neighbors in bgp_data.values()
-        for nb in (neighbors or [])
-        if nb.get("remote_address")
-    })
+    peer_ips = list(
+        {
+            nb.get("remote_address", "")
+            for neighbors in bgp_data.values()
+            for nb in (neighbors or [])
+            if nb.get("remote_address")
+        }
+    )
 
     ip_to_device: dict = {}
     if peer_ips:
@@ -296,7 +303,7 @@ def _fetch_bgp_data(devices: tuple, refresh_nonce: int) -> tuple:
             kwargs={
                 "object_type": "ipam.ip_addresses",
                 "filters": [{"address": peer_ips}],
-                "fields": ["assigned_object", "address"]
+                "fields": ["assigned_object", "address"],
             },
             workers="any",
         )
@@ -329,7 +336,7 @@ def _merge_bgp_into_topology(topo: dict, bgp_data: dict, ip_to_device: dict) -> 
     for device, neighbors in bgp_data.items():
         if device not in nodes:
             nodes[device] = {"id": device, "name": device}
-        for nb in (neighbors or []):
+        for nb in neighbors or []:
             remote_ip = nb.get("remote_address", "")
             if not remote_ip:
                 continue
@@ -341,14 +348,16 @@ def _merge_bgp_into_topology(topo: dict, bgp_data: dict, ip_to_device: dict) -> 
             if pair in seen_pairs:
                 continue
             seen_pairs.add(pair)
-            links.append({
-                "source": device,
-                "target": remote_device,
-                "src_iface": nb.get("local_interface", ""),
-                "session_type": nb.get("peering_type", ""),
-                "link_color": "#a855f7",  # purple for BGP
-                "link_type": "bgp",
-            })
+            links.append(
+                {
+                    "source": device,
+                    "target": remote_device,
+                    "src_iface": nb.get("local_interface", ""),
+                    "session_type": nb.get("peering_type", ""),
+                    "link_color": "#a855f7",  # purple for BGP
+                    "link_type": "bgp",
+                }
+            )
 
     return {"nodes": list(nodes.values()), "links": links}
 
@@ -372,7 +381,9 @@ def _apply_link_curvature(topo: dict) -> dict:
             new_links[idx]["offset_2d"] = offset
             # 2D curve mode: symmetric curvatures around 0
             max_c = min(0.8, 0.3 + 0.1 * n)
-            new_links[idx]["curvature_2d"] = (-max_c + (2 * max_c / (n - 1)) * j) if n > 1 else 0
+            new_links[idx]["curvature_2d"] = (
+                (-max_c + (2 * max_c / (n - 1)) * j) if n > 1 else 0
+            )
             # 3D: fan arcs via curvature + rotation
             if n == 1:
                 new_links[idx]["curvature"] = 0
@@ -540,7 +551,6 @@ def _render_details_panel(tab_key: str) -> None:
     )
 
 
-
 def network_visualizer_page() -> None:
 
     st.markdown(
@@ -567,7 +577,7 @@ def network_visualizer_page() -> None:
     for tab, key in zip(tabs, _TAB_KEYS):
         with tab:
             # ── Persistent state keys ────────────────────────────────────────────────────
-            refresh_key   = f"nmap_refresh_{key}"
+            refresh_key = f"nmap_refresh_{key}"
             show_left_key = f"nmap_show_left_{key}"
             st.session_state.setdefault(refresh_key, 0)
             st.session_state.setdefault(show_left_key, True)
@@ -577,7 +587,11 @@ def network_visualizer_page() -> None:
             # ── Panel toggle button (minimal, above columns) ──────────────────────────
             _bt = st.columns([0.3, 11.7])
             with _bt[0]:
-                left_icon = ":material/chevron_right:" if not show_left else ":material/chevron_left:"
+                left_icon = (
+                    ":material/chevron_right:"
+                    if not show_left
+                    else ":material/chevron_left:"
+                )
                 if st.button(
                     " ",
                     key=f"nmap_tl_{key}",
@@ -613,8 +627,12 @@ def network_visualizer_page() -> None:
                     use_3d = st.toggle("3D view", key=f"nmap_3d_{key}", value=False)
 
                     if use_3d:
-                        orbit_active = st.toggle("Orbit", key=f"nmap_orbit_{key}", value=False)
-                        bloom_active = st.toggle("Bloom", key=f"nmap_bloom_{key}", value=False)
+                        orbit_active = st.toggle(
+                            "Orbit", key=f"nmap_orbit_{key}", value=False
+                        )
+                        bloom_active = st.toggle(
+                            "Bloom", key=f"nmap_bloom_{key}", value=False
+                        )
                         orbit_speed_idx = st.select_slider(
                             "Speed",
                             options=list(range(6)),
@@ -624,8 +642,8 @@ def network_visualizer_page() -> None:
                             label_visibility="collapsed",
                         )
                     else:
-                        orbit_active    = False
-                        bloom_active    = False
+                        orbit_active = False
+                        bloom_active = False
                         orbit_speed_idx = 2
                         link_style = st.selectbox(
                             "Link style",
@@ -660,14 +678,26 @@ def network_visualizer_page() -> None:
                     selected_devices = tuple(selected_devs)
             else:
                 # Read last-known values from session state when panel is hidden
-                search_query     = st.session_state.get(f"nmap_search_{key}", "")
-                use_3d           = st.session_state.get(f"nmap_3d_{key}", False)
-                orbit_active     = st.session_state.get(f"nmap_orbit_{key}", False) if use_3d else False
-                bloom_active     = st.session_state.get(f"nmap_bloom_{key}", False) if use_3d else False
-                orbit_speed_idx  = st.session_state.get(f"nmap_ospeed_{key}", 2) if use_3d else 2
-                link_style       = st.session_state.get(f"nmap_lstyle_{key}", "straight")
-                bgp_active       = st.session_state.get(f"nmap_bgp_{key}", False)
-                selected_devices = tuple(st.session_state.get(f"nmap_devices_{key}", []))
+                search_query = st.session_state.get(f"nmap_search_{key}", "")
+                use_3d = st.session_state.get(f"nmap_3d_{key}", False)
+                orbit_active = (
+                    st.session_state.get(f"nmap_orbit_{key}", False)
+                    if use_3d
+                    else False
+                )
+                bloom_active = (
+                    st.session_state.get(f"nmap_bloom_{key}", False)
+                    if use_3d
+                    else False
+                )
+                orbit_speed_idx = (
+                    st.session_state.get(f"nmap_ospeed_{key}", 2) if use_3d else 2
+                )
+                link_style = st.session_state.get(f"nmap_lstyle_{key}", "straight")
+                bgp_active = st.session_state.get(f"nmap_bgp_{key}", False)
+                selected_devices = tuple(
+                    st.session_state.get(f"nmap_devices_{key}", [])
+                )
 
             # ── Graph (middle column) ─────────────────────────────────────────────────
             with graph_col:
@@ -702,12 +732,16 @@ def network_visualizer_page() -> None:
                 topo: dict = {"nodes": [], "links": []}
                 # Auto-fetch NetBox data when devices are selected, regardless of checkbox
                 if netbox_active or selected_devices:
-                    topo = _fetch_netbox_topology_data(key, refresh_nonce, selected_devices)
+                    topo = _fetch_netbox_topology_data(
+                        key, refresh_nonce, selected_devices
+                    )
                 if lldp_active and selected_devices:
                     lldp_data = _fetch_lldp_data(selected_devices, refresh_nonce)
                     topo = _merge_lldp_into_topology(topo, lldp_data)
                 if bgp_active and selected_devices:
-                    bgp_data, ip_to_device = _fetch_bgp_data(selected_devices, refresh_nonce)
+                    bgp_data, ip_to_device = _fetch_bgp_data(
+                        selected_devices, refresh_nonce
+                    )
                     topo = _merge_bgp_into_topology(topo, bgp_data, ip_to_device)
 
                 html = _build_html(
@@ -741,4 +775,3 @@ def network_visualizer_page() -> None:
 
 if __name__ == "__main__":
     network_visualizer_page()
-

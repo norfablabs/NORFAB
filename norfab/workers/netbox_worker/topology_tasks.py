@@ -8,7 +8,9 @@ from norfab.models import Result
 
 from .netbox_exceptions import UnsupportedNetboxVersion
 from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
-from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_common import NorniHostsFilters
+from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_common import (
+    NorniHostsFilters,
+)
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +56,9 @@ query TopologyInterfacesQuery(
 # --------------------------------------------------------------------------
 
 
-class GetTopologyInput(NorniHostsFilters, NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+class GetTopologyInput(
+    NorniHostsFilters, NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
     devices: Union[None, List[StrictStr]] = Field(
         None,
         description="List of device names to include in the topology; fetches all devices when omitted",
@@ -112,8 +116,16 @@ class GetTopologyInput(NorniHostsFilters, NetboxCommonArgs, use_enum_values=True
         has_fx_filter = any(
             f is not None
             for f in (
-                self.FC, self.FL, self.FB, self.FG, self.FO,
-                self.FP, self.FH, self.FR, self.FM, self.FX,
+                self.FC,
+                self.FL,
+                self.FB,
+                self.FG,
+                self.FO,
+                self.FP,
+                self.FH,
+                self.FR,
+                self.FM,
+                self.FX,
             )
         )
         if not has_device_filter and not has_fx_filter:

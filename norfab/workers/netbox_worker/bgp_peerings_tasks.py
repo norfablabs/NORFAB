@@ -994,7 +994,9 @@ class NetboxBgpPeeringsTasks:
                     f"fetching {len(session_ids_to_fetch)} updated BGP session(s) for '{device_name}'",
                     resource=instance,
                 )
-                for session in nb.plugins.bgp.session.filter(id=session_ids_to_fetch):
+                for session in self.bulk_filter(
+                    nb.plugins.bgp.session, "id", session_ids_to_fetch
+                ):
                     ret.result[device_name][session.name] = dict(session)
 
             # Update cache if any changes occurred
@@ -1277,7 +1279,9 @@ class NetboxBgpPeeringsTasks:
         # Step 5b: Pre-fetch device data for all collected device names (single API call)
         if all_device_names:
             try:
-                for dev_obj in nb.dcim.devices.filter(name=list(all_device_names)):
+                for dev_obj in self.bulk_filter(
+                    nb.dcim.devices, "name", list(all_device_names)
+                ):
                     all_device_names[dev_obj.name] = {
                         "id": dev_obj.id,
                         "site_id": dev_obj.site.id if dev_obj.site else None,
@@ -1293,8 +1297,11 @@ class NetboxBgpPeeringsTasks:
         existing_session_names = set()
         if all_device_names:
             try:
-                existing = nb.plugins.bgp.session.filter(
-                    device=list(all_device_names), fields="name,id"
+                existing = self.bulk_filter(
+                    nb.plugins.bgp.session,
+                    "device",
+                    list(all_device_names),
+                    fields="name,id",
                 )
                 existing_session_names = {s.name for s in existing}
             except Exception as exc:
@@ -1305,6 +1312,7 @@ class NetboxBgpPeeringsTasks:
 
         # Step 6: Process each resolved bgp_session
         if dry_run:
+            ret.dry_run = True
             result = {"create": [], "exists": []}
         else:
             result = {"created": [], "exists": []}
@@ -1618,15 +1626,16 @@ class NetboxBgpPeeringsTasks:
 
         result = {"updated": [], "in_sync": []}
         if dry_run:
+            ret.dry_run = True
             result = {"update": [], "in_sync": []}
 
         # Fetch all existing sessions in a single batch call
         session_names = [s["name"] for s in bgp_sessions]
-        nb_sessions_raw = list(
-            nb.plugins.bgp.session.filter(
-                name=session_names,
-                fields="id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
-            )
+        nb_sessions_raw = self.bulk_filter(
+            nb.plugins.bgp.session,
+            "name",
+            session_names,
+            fields="id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
         )
         normalised_nb = {
             s.name: normalise_nb_bgp_session(dict(s), vrf_custom_field=vrf_custom_field)
@@ -1670,6 +1679,7 @@ class NetboxBgpPeeringsTasks:
                 for sname, changes in sessions_diff["update"].items()
             ]
             ret.result = result
+            ret.dry_run = True
             return ret
 
         # Build update payloads — iterate over diff to get only changed fields per session
@@ -1973,6 +1983,7 @@ class NetboxBgpPeeringsTasks:
         # Return dry-run results per device
         if dry_run:
             ret.result = full_diff
+            ret.dry_run = True
             return ret
         else:
             ret.diff = full_diff
@@ -2074,8 +2085,8 @@ class NetboxBgpPeeringsTasks:
                 for sname in actions["delete"]:
                     all_deletions[sname] = device_name
             if all_deletions:
-                sessions_to_delete = list(
-                    nb.plugins.bgp.session.filter(name=list(all_deletions))
+                sessions_to_delete = self.bulk_filter(
+                    nb.plugins.bgp.session, "name", list(all_deletions)
                 )
                 for session in sessions_to_delete:
                     device_name = all_deletions[session.name]

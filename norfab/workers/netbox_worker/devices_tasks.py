@@ -61,6 +61,7 @@ class NetboxDevicesTasks:
         # return dry run result
         if dry_run:
             ret.result["get_devices_dry_run"] = {"filters": filters}
+            ret.dry_run = True
             return ret
 
         job.event(

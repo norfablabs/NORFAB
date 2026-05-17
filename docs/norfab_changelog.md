@@ -1,18 +1,23 @@
-# 0.17.4
+# 0.18.0
 
 ## BUGS
 
 1. Fixing Netbox prefix allocation with parent filtering by dictionary
+2. Fixing netbox crud tasks to use Pydantic model for input validation
+3. Enhancing netbox worker filtering for large number of items to avoid 414 error
 
 ## CHANGES
 
 1. Complete refactoring of Netbox `sync_device_interfaces` task
 2. Complete refactoring of Netbox `sync_device_ip` task
+3. Dependency updates:
+
+  - mcp 1.26.0 -> 1.27.1
 
 ## FEATURES
 
 1. Created Netbox task `sync_mac_addresses`
-2. Enhancing streamlit web ui network map application to support 2d and 3d view of the topology
+2. Enhancing streamlit web ui network map application to support 2d and 3d view of the topology - support Netbox data, LLD and BGP data overlay on single graph
 3. Adding Netbox `get_topology` task to fetch devices and links in topology format
 
 ---

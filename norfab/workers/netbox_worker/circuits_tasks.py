@@ -336,6 +336,7 @@ class NetboxCircuitsTasks:
             # return dry run result
             if dry_run:
                 ret.result["get_circuits_dry_run"] = last_updated.result
+                ret.dry_run = True
                 return ret
 
             # retrieve circuits data from cache
@@ -411,6 +412,7 @@ class NetboxCircuitsTasks:
 
             # return dry run result
             if dry_run is True:
+                ret.dry_run = True
                 return query_result
 
             all_circuits = query_result.result

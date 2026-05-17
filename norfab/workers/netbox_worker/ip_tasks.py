@@ -622,7 +622,9 @@ class NetboxIpTasks:
                 "name": d.name,
                 "site_id": d.site.id if d.site else None,
             }
-            for d in nb.dcim.devices.filter(name=devices, fields="id,name,site")
+            for d in self.bulk_filter(
+                nb.dcim.devices, "name", devices, fields="id,name,site"
+            )
         }
         for d in list(devices):
             if d not in nb_devices_data:
@@ -787,11 +789,17 @@ class NetboxIpTasks:
                 ),
                 "interface": ip.assigned_object.name if ip.assigned_object else None,
             }
-            for ip in nb.ipam.ip_addresses.filter(
-                # do IP search ignoring mask, in case live and netbox IPs have mismatch
-                address=[i["address"].split("/")[0] for i in all_ip_live],
+            for ip in self.bulk_filter(
+                endpoint=nb.ipam.ip_addresses,
+                filter_by_key="address",
+                filter_by_values=[i["address"].split("/")[0] for i in all_ip_live],
                 fields="id,address,vrf,role,assigned_object",
             )
+            # for ip in nb.ipam.ip_addresses.filter(
+            #     # do IP search ignoring mask, in case live and netbox IPs have mismatch
+            #     address=[i["address"].split("/")[0] for i in all_ip_live],
+            #     fields=
+            # )
         ]
 
         # process IP and Prefixes
@@ -889,6 +897,7 @@ class NetboxIpTasks:
             for key in bulk_update_ip:
                 device_name = key[0]
                 device_results[device_name]["updated"].append(key[2])
+            ret.dry_run = True
             return ret
 
         # check that update and create payloads have no non-anycast duplicate IPs

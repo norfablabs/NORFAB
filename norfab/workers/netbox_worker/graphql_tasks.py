@@ -269,6 +269,9 @@ class NetboxGraphqlTasks:
         query_string: str = None,
     ) -> Result:
         """
+        DEPRECIATION Warning: `graphql` task is deprecated in favour of `netbox_graphql` task
+        and will be phased out in future releases.
+
         Function to query Netbox v3 or Netbox v4 GraphQL API.
 
         Args:
@@ -339,6 +342,7 @@ class NetboxGraphqlTasks:
                     "Authorization": f"Token ...{nb_params['token'][-6:]}",
                 },
             }
+            ret.dry_run = True
             return ret
 
         # send request to Netbox GraphQL API

@@ -1,0 +1,214 @@
+---
+tags:
+  - netbox
+---
+
+# Netbox Update Interfaces Description Task
+
+> task api name: `update_interfaces_description`
+
+Updates the description field of interfaces, console ports, and console server ports for one or more devices in NetBox. Supports two mutually usable modes: **template mode** (`description_template`) renders descriptions dynamically using Jinja2 with live connection context, and **static mode** (`descriptions`) applies a fixed mapping of interface names to description strings.
+
+## How it Works
+
+1. Client submits `update_interfaces_description` request to NetBox worker
+2. Worker resolves the target NetBox instance and optionally the branch
+3. If `description_template` is provided, the worker fetches all interface connections for the given devices via `get_connections`
+4. For each interface, the Jinja2 template is rendered with the connection context (device, interface, remote device, cable attributes, etc.)
+5. If `descriptions` dict is provided, the worker iterates over the given device list and applies the fixed description values directly
+6. In dry-run mode — the before (`-`) / after (`+`) diff is returned without writing to NetBox
+7. Otherwise, the new description is saved to NetBox
+
+## Prerequisites
+
+- The devices must already exist in NetBox.
+- Only interfaces, console ports, console server ports and power outlet ports are supported as port types.
+
+## Branching Support
+
+`update_interfaces_description` is branch-aware. Pass `branch=<name>` to write all changes into a [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching) branch instead of main.
+
+## Dry Run Mode
+
+`dry_run=True` returns the before/after description diff without any NetBox writes:
+
+```python
+{
+    "<device>": {
+        "<interface>": {
+            "-": "<current description>",
+            "+": "<new description>",
+        },
+        ...
+    },
+    ...
+}
+```
+
+## Template Mode
+
+When `description_template` is provided, the Jinja2 template is rendered once per interface using the full connection context. The template can be an inline string or a remote NorFab file reference (`nf://path/to/template.txt`).
+
+Jinja2 context variables available in the template:
+
+- `device` — pynetbox `dcim.device` object
+- `interface` — pynetbox interface/console port/console server port object
+- `remote_device` — string
+- `remote_interface` — string
+- `termination_type` — string
+- `cable` — dictionary of directly attached cable attributes:
+    - `type`
+    - `status`
+    - `tenant` — dictionary `{name: tenant_name}`
+    - `label`
+    - `tags` — list of `{name: tag_name}` dictionaries
+    - `custom_fields` — dictionary with custom fields data
+    - `peer_termination_type`
+    - `peer_device`
+    - `peer_interface`
+
+Example template:
+
+```
+{{ remote_device }}:{{ remote_interface }}
+```
+
+## Static Mode
+
+When `descriptions` dict is provided, the same mapping is applied to all devices in the `devices` list. Only interfaces that exist in NetBox are updated — missing interfaces are silently skipped.
+
+```python
+descriptions = {
+    "Ethernet1": "uplink to spine-1",
+    "Ethernet2": "uplink to spine-2",
+}
+```
+
+## Examples
+
+=== "CLI"
+
+    Update interface descriptions using a Jinja2 template:
+
+    ```
+    nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}"
+    ```
+
+    Filter interfaces by regex pattern:
+
+    ```
+    nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" interface-regex "Ethernet.*"
+    ```
+
+    Dry run — preview changes without writing:
+
+    ```
+    nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" dry-run
+    ```
+
+    Update descriptions in a NetBox branch:
+
+    ```
+    nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" branch my-branch
+    ```
+
+=== "Python"
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    nf.start()
+    client = nf.make_client()
+
+    # update descriptions using a Jinja2 template
+    result = client.run_job(
+        "netbox",
+        "update_interfaces_description",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-leaf-1", "ceos-leaf-2"],
+            "description_template": "{{ remote_device }}:{{ remote_interface }}",
+        },
+    )
+
+    # filter interfaces by regex and use a remote template
+    result = client.run_job(
+        "netbox",
+        "update_interfaces_description",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-leaf-1"],
+            "description_template": "nf://templates/intf_desc.j2",
+            "interface_regex": "Ethernet.*",
+        },
+    )
+
+    # dry run — preview diff without writing
+    result = client.run_job(
+        "netbox",
+        "update_interfaces_description",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-leaf-1"],
+            "description_template": "{{ remote_device }}:{{ remote_interface }}",
+            "dry_run": True,
+        },
+    )
+
+    # static descriptions dict applied to multiple devices
+    result = client.run_job(
+        "netbox",
+        "update_interfaces_description",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-leaf-1", "ceos-leaf-2"],
+            "descriptions": {
+                "Ethernet1": "uplink to spine-1",
+                "Ethernet2": "uplink to spine-2",
+            },
+        },
+    )
+
+    # update into a NetBox branch
+    result = client.run_job(
+        "netbox",
+        "update_interfaces_description",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-leaf-1"],
+            "description_template": "{{ remote_device }}:{{ remote_interface }}",
+            "branch": "my-branch",
+        },
+    )
+
+    nf.destroy()
+    ```
+
+## NORFAB Netbox Update Interfaces Description Command Shell Reference
+
+NorFab shell supports these command options for the Netbox `update_interfaces_description` task:
+
+```
+nf# man tree netbox.update.interfaces.description
+root
+└── netbox:    Netbox service
+    └── update:    Update Netbox objects
+        └── interfaces:    Update interfaces
+            └── description:    Updates the description of interfaces for specified devices in NetBox
+                ├── timeout:    Job timeout
+                ├── workers:    Filter worker to target, default 'any'
+                ├── verbose-result:    Control output details, default 'False'
+                ├── progress:    Display progress events, default 'True'
+                ├── instance:    Netbox instance name to target
+                ├── branch:    Branching plugin branch name to use
+                ├── dry-run:    Return diff without writing to NetBox
+                ├── devices:    Device names to update interfaces for
+                ├── description-template:    Jinja2 template to render descriptions
+                └── interface-regex:    Regex pattern to match interfaces and ports
+nf#
+```
+
+## Python API Reference
+
+::: norfab.workers.netbox_worker.interfaces_tasks.NetboxInterfacesTasks.update_interfaces_description

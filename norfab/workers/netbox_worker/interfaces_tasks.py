@@ -279,6 +279,7 @@ class SyncDeviceInterfacesInput(
         None,
         description="Update interface types or not",
         alias="update-type",
+        json_schema_extra={"presence": True},
     )
 
 
@@ -506,6 +507,7 @@ class NetboxInterfacesTasks:
 
         if dry_run:
             ret.result = {"filter_params": filter_params}
+            ret.dry_run = True
             return ret
 
         job.event(f"retrieving interfaces for {len(devices)} device(s)")
@@ -584,7 +586,9 @@ class NetboxInterfacesTasks:
         # fetch IP addresses if requested (one bulk call keyed by assigned_object_id)
         if ip_addresses and devices_to_fetch:
             job.event(f"fetching IP addresses for {len(devices_to_fetch)} device(s)")
-            for ip in nb.ipam.ip_addresses.filter(device=devices_to_fetch):
+            for ip in self.bulk_filter(
+                nb.ipam.ip_addresses, "device", devices_to_fetch
+            ):
                 if (
                     ip.assigned_object_id
                     and ip.assigned_object_type == "dcim.interface"
@@ -594,7 +598,9 @@ class NetboxInterfacesTasks:
         # fetch inventory items if requested (one bulk call keyed by component_id)
         if inventory_items and devices_to_fetch:
             job.event(f"fetching inventory items for {len(devices_to_fetch)} device(s)")
-            for item in nb.dcim.inventory_items.filter(device=devices_to_fetch):
+            for item in self.bulk_filter(
+                nb.dcim.inventory_items, "device", devices_to_fetch
+            ):
                 if item.component_id and item.component_type == "dcim.interface":
                     inv_by_intf_id.setdefault(item.component_id, []).append(dict(item))
 
@@ -931,7 +937,7 @@ class NetboxInterfacesTasks:
         branch: str = None,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
-        update_type: Union[None, bool] = "True",
+        update_type: Union[None, bool] = False,
         **kwargs: Any,
     ) -> Result:
         """
@@ -1055,7 +1061,9 @@ class NetboxInterfacesTasks:
         # filter out devices not define in Netbox
         nb_devices_data = {
             d.name: {"id": d.id, "site_id": d.site.id, "name": d.name}
-            for d in nb.dcim.devices.filter(name=devices, fields="id,name,site")
+            for d in self.bulk_filter(
+                nb.dcim.devices, "name", devices, fields="id,name,site"
+            )
         }
         for d in list(devices):
             if d not in nb_devices_data:
@@ -1196,8 +1204,19 @@ class NetboxInterfacesTasks:
         # Single diff on the full normalised datasets
         full_diff = self.make_diff(normalised_live_all, normalised_nb_all)
 
+        # remove interface type from updates
+        if update_type is False:
+            for dev_name, dev_diff in full_diff.items():
+                for intf_name in list(dev_diff["update"].keys()):
+                    intf_updates = dev_diff["update"][intf_name]
+                    _ = intf_updates.pop("type", None)
+                    # remove interface from updates if nothing to update
+                    if not intf_updates:
+                        _ = dev_diff["update"].pop(intf_name)
+
         if dry_run:
             ret.result = full_diff
+            ret.dry_run = True
             return ret
         else:
             ret.diff = full_diff
@@ -1258,7 +1277,9 @@ class NetboxInterfacesTasks:
 
         # re-fetch interface IDs after creating LAG interfaces
         nb_intf_ids = {}
-        for intf in nb.dcim.interfaces.filter(device=devices, fields="id,name,device"):
+        for intf in self.bulk_filter(
+            nb.dcim.interfaces, "device", devices, fields="id,name,device"
+        ):
             nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
 
         # create parent interfaces associating with LAG if required
@@ -1304,7 +1325,9 @@ class NetboxInterfacesTasks:
 
         # re-fetch interface IDs after creating parent interfaces
         nb_intf_ids = {}
-        for intf in nb.dcim.interfaces.filter(device=devices, fields="id,name,device"):
+        for intf in self.bulk_filter(
+            nb.dcim.interfaces, "device", devices, fields="id,name,device"
+        ):
             nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
 
         # create child interfaces associating with parent interfaces
@@ -1368,9 +1391,6 @@ class NetboxInterfacesTasks:
                     nb=nb,
                     _lookup_cache=_lookup_cache,
                 )
-                # remove interface type updates
-                if not update_type and "type" in payload:
-                    _ = payload.pop("type")
                 # skip if nothing else to update
                 if set(payload) == {"device", "name"}:
                     continue
@@ -1515,7 +1535,9 @@ class NetboxInterfacesTasks:
         # filter out devices not defined in NetBox
         nb_devices_data = {
             d.name: {"id": d.id, "name": d.name}
-            for d in nb.dcim.devices.filter(name=devices, fields="id,name")
+            for d in self.bulk_filter(
+                nb.dcim.devices, "name", devices, fields="id,name"
+            )
         }
         for d in list(devices):
             if d not in nb_devices_data:
@@ -1593,8 +1615,10 @@ class NetboxInterfacesTasks:
         # unassigned ones so that a conflicting assignment is not silently
         # overwritten by a later unassigned copy during dict construction.
         nb_macs: dict = {}
-        for _m in nb.dcim.mac_addresses.filter(
-            mac_address=list(all_mac_live.keys()),
+        for _m in self.bulk_filter(
+            nb.dcim.mac_addresses,
+            "mac_address",
+            list(all_mac_live.keys()),
             fields="id,mac_address,assigned_object",
         ):
             _mac = _m.mac_address.lower()
@@ -1680,6 +1704,7 @@ class NetboxInterfacesTasks:
                     )
 
         if dry_run:
+            ret.dry_run = True
             return ret
 
         if bulk_create_mac:

@@ -158,6 +158,7 @@ nav:
       - Sync BGP Peerings: workers/netbox/services_netbox_service_tasks_sync_bgp_peerings.md
       - Create BGP Peering: workers/netbox/services_netbox_service_tasks_create_bgp_peering.md
       - Update BGP Peering: workers/netbox/services_netbox_service_tasks_update_bgp_peering.md
+      - Update Interfaces Description: workers/netbox/services_netbox_service_tasks_update_interfaces_description.md
       - CRUD: workers/netbox/services_netbox_service_tasks_crud.md
   - Agent:
     - Overview: workers/agent/services_agent_service.md

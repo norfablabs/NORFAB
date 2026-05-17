@@ -585,7 +585,7 @@ class TestCrudCreate:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
-            assert result.get("dry_run") is True, f"{worker} - expected dry_run=True"
+            assert res.get("dry_run") is True, f"{worker} - expected dry_run=True"
             assert result["count"] == 1, f"{worker} - expected count=1"
             assert result["preview"][0]["name"] == "NorFab Dry Run Manufacturer"
 
@@ -690,7 +690,7 @@ class TestCrudUpdate:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
-            assert result.get("dry_run") is True, f"{worker} - expected dry_run=True"
+            assert res.get("dry_run") is True, f"{worker} - expected dry_run=True"
             assert result["count"] == 1, f"{worker} - expected count=1"
             changes_entry = result["changes"][0]
             assert changes_entry["id"] == test_manufacturer
@@ -750,7 +750,7 @@ class TestCrudUpdate:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
-            assert result.get("dry_run") is True
+            assert res.get("dry_run") is True
             changes = result["changes"][0]["changes"]
             assert (
                 "name" not in changes
@@ -780,7 +780,7 @@ class TestCrudDelete:
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
-            assert result.get("dry_run") is True
+            assert res.get("dry_run") is True
             assert result["count"] == 1
             assert result["would_delete"][0]["id"] == test_manufacturer
 
