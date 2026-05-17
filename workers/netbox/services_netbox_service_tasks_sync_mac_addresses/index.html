@@ -12,13 +12,13 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_create_ip_bulk/">
+        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_sync_mac_addresses/">
       
       
-        <link rel="prev" href="../services_netbox_service_tasks_create_ip/">
+        <link rel="prev" href="../services_netbox_service_tasks_sync_device_interfaces/">
       
       
-        <link rel="next" href="../services_netbox_service_tasks_create_prefix/">
+        <link rel="next" href="../services_netbox_service_tasks_sync_device_ip/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Create IP Bulk - Network Automations Fabric [NORFAB]</title>
+        <title>Sync MAC Addresses - Network Automations Fabric [NORFAB]</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#netbox-create-ip-bulk-task" class="md-skip">
+        <a href="#netbox-sync-mac-addresses-task" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Create IP Bulk
+              Sync MAC Addresses
             
           </span>
         </div>
@@ -2300,37 +2300,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Create IP Bulk
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
         
   
   
@@ -2346,59 +2319,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Branching Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#norfab-netbox-create-ip-command-shell-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        NORFAB Netbox Create IP Command Shell Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#python-api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2520,10 +2440,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync MAC Addresses
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -2539,6 +2486,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#result-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#branching-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branching Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#duplicate-mac-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate MAC Handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-sync-mac-addresses-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox Sync MAC Addresses Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -5618,6 +5673,39 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#result-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5629,10 +5717,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-create-ip-command-shell-reference" class="md-nav__link">
+  <a href="#duplicate-mac-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Create IP Command Shell Reference
+        Duplicate MAC Handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-sync-mac-addresses-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox Sync MAC Addresses Command Shell Reference
       
     </span>
   </a>
@@ -5681,42 +5791,196 @@
   
 
 
-<h1 id="netbox-create-ip-bulk-task">Netbox Create IP Bulk Task<a class="headerlink" href="#netbox-create-ip-bulk-task" title="Permanent link">¤</a></h1>
+<h1 id="netbox-sync-mac-addresses-task">Netbox Sync MAC Addresses Task<a class="headerlink" href="#netbox-sync-mac-addresses-task" title="Permanent link">¤</a></h1>
 <blockquote>
-<p>task api name: <code>create_ip_bulk</code></p>
+<p>task api name: <code>sync_mac_addresses</code></p>
 </blockquote>
-<p>Task to allocate next available IP from prefix or get existing IP address for multiple devices and interfaces.</p>
+<p>The Netbox Sync MAC Addresses Task synchronizes interface MAC addresses from live network devices into NetBox. The task collects current MAC address state from devices, compares it against existing NetBox MAC address objects, and applies create or update operations to bring NetBox into alignment.</p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<p>The task follows a three-step pipeline:</p>
+<ol>
+<li><strong>Collect live state</strong> — Run a Nornir <a href="../../nornir/services_nornir_service_tasks_parse/"><code>parse_ttp</code></a> job against the target devices to collect live MAC addresses per interface.</li>
+<li><strong>Fetch NetBox state</strong> — Retrieve existing MAC address objects from NetBox for the discovered MACs.</li>
+<li><strong>Reconcile</strong> — Compare live versus NetBox state and apply changes:<ul>
+<li><strong>Create</strong> — MAC not present in NetBox at all: create a new MAC address object assigned to the correct interface.</li>
+<li><strong>Update</strong> — MAC exists in NetBox but has no <code>assigned_object</code> (unassigned): assign it to the correct interface.</li>
+<li><strong>In sync</strong> — MAC already assigned to the correct interface: no action needed.</li>
+<li><strong>Error</strong> — MAC exists in NetBox and is assigned to a <em>different</em> interface: report a conflict error without modifying the record.</li>
+</ul>
+</li>
+</ol>
+<h2 id="result-structure">Result Structure<a class="headerlink" href="#result-structure" title="Permanent link">¤</a></h2>
+<p>Both dry-run and live-run return the same structure, keyed by device name:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;&lt;device&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aa:bb:cc:dd:ee:01&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;aa:bb:cc:dd:ee:02&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aa:bb:cc:dd:ee:03&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aa:bb:cc:dd:ee:04&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>In <strong>dry-run mode</strong> (<code>dry_run=True</code>) the lists reflect what <em>would</em> happen — no changes are written to NetBox.</p>
+<p>In <strong>live-run mode</strong> (<code>dry_run=False</code>, default) the lists reflect what was actually done.</p>
+<p>Conflict errors (MAC assigned to a different interface) are reported in <code>res["errors"]</code> and do not appear in any action list.</p>
+<h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
+<p>MAC address collection can be scoped using glob patterns so that only a subset of interfaces and MACs is considered:</p>
+<ul>
+<li><code>filter_by_name</code> — match interface names, e.g. <code>"Loopback*"</code> or <code>"Ethernet[1-4]"</code></li>
+<li><code>filter_by_description</code> — match interface descriptions, e.g. <code>"uplink*"</code> or <code>"p2p*"</code></li>
+<li><code>filter_by_mac</code> — match MAC address strings, e.g. <code>"aa:bb:cc:*"</code></li>
+</ul>
+<p>All filters are applied before the reconciliation step. Interfaces or MACs that do not match are completely ignored — they are neither created nor updated.</p>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
-<p>Create IP task is branch aware and can create IP addresses within the branch. <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> need to be installed on Netbox instance.</p>
-<h2 id="norfab-netbox-create-ip-command-shell-reference">NORFAB Netbox Create IP Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-ip-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>create_ip</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf# man tree netbox.create.ip_bulk
+<p>The task is branch-aware and can push changes into a NetBox branch. The <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> must be installed. Specify the <code>branch</code> parameter; the branch is created automatically if it does not already exist.</p>
+<h2 id="duplicate-mac-handling">Duplicate MAC Handling<a class="headerlink" href="#duplicate-mac-handling" title="Permanent link">¤</a></h2>
+<p>NetBox permits multiple MAC address records with the same MAC value. The task handles this safely:</p>
+<ul>
+<li>If a MAC exists in NetBox with an assigned interface that <strong>matches</strong> the live data — reported as <code>in_sync</code>.</li>
+<li>If a MAC exists in NetBox with an assigned interface that <strong>differs</strong> from the live data — reported as a conflict error; the record is not modified.</li>
+<li>If a MAC exists in NetBox but is <strong>unassigned</strong> — the record is updated to point at the correct interface.</li>
+<li>If both an assigned (conflicting) and an unassigned copy of the same MAC exist in NetBox, the assigned (conflicting) entry takes precedence and a conflict error is raised.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Sync MAC addresses for a list of devices:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 ceos-spine-2
+</code></pre></div>
+<p>Preview changes without writing to NetBox (dry run):</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 dry-run
+</code></pre></div>
+<p>Restrict sync to Ethernet interfaces only:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-name &quot;Ethernet*&quot;
+</code></pre></div>
+<p>Restrict sync to interfaces whose description matches a glob pattern:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-description &quot;uplink*&quot;
+</code></pre></div>
+<p>Restrict sync to a specific MAC prefix:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 filter-by-mac &quot;aa:bb:cc:*&quot;
+</code></pre></div>
+<p>Sync MAC addresses into a NetBox branch:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses devices ceos-spine-1 ceos-spine-2 branch sprint-42-macs
+</code></pre></div>
+<p>Sync using Nornir host filters instead of explicit device names:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync mac-addresses FC spine
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+<span class="c1"># sync MAC addresses for specific devices</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># dry run — preview creates/updates without writing</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># restrict sync to Ethernet interfaces only</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;filter_by_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet*&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># restrict sync to interfaces with a specific description pattern</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;filter_by_description&quot;</span><span class="p">:</span> <span class="s2">&quot;uplink*&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># restrict sync to a specific MAC prefix</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;filter_by_mac&quot;</span><span class="p">:</span> <span class="s2">&quot;aa:bb:cc:*&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># sync into a NetBox branch</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;sprint-42-macs&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># use Nornir host filters instead of explicit device names</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="norfab-netbox-sync-mac-addresses-command-shell-reference">NORFAB Netbox Sync MAC Addresses Command Shell Reference<a class="headerlink" href="#norfab-netbox-sync-mac-addresses-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for the <code>sync_mac_addresses</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf# man tree netbox.sync.mac-addresses
 root
 └── netbox:    Netbox service
-    └── create:    Create objects in Netbox
-        └── ip-bulk:    Allocate next available IP address from prefix for multiple devices and interfaces
-            ├── timeout:    Job timeout
+    └── sync:    Sync Netbox data
+        └── mac-addresses:    Sync device MAC addresses with NetBox
+            ├── timeout:    Job timeout in seconds
             ├── workers:    Filter worker to target, default &#39;any&#39;
             ├── verbose-result:    Control output details, default &#39;False&#39;
             ├── progress:    Display progress events, default &#39;True&#39;
-            ├── nowait:    Do not wait for job to complete, default &#39;False&#39;
             ├── instance:    Netbox instance name to target
-            ├── dry-run:    Do not commit to database
-            ├── branch:    Branching plugin branch name to use
-            ├── *prefix:    Prefix to allocate IP address from, can also provide prefix name or filters
-            ├── *devices:    List of device names to create IP address for
-            ├── interface_regex:    Regular expression of device interface names to create IP address for
-            ├── interface_list:    List of interface names to create IP address for
-            ├── description:    IP address description
-            ├── vrf:    VRF to associate with IP address
-            ├── tags:    Tags to add to IP address
-            ├── dns_name:    IP address DNS name
-            ├── tenant:    Tenant name to associate with IP address
-            ├── comments:    IP address comments field
-            ├── role:    IP address functional role
-            ├── mask-len:    Mask length to use for IP address
-            ├── create-peer-ip:    Create link peer IP address as well
-            └── status:    IP address status
+            ├── dry-run:    Return reconciliation plan without pushing changes to NetBox
+            ├── devices:    List of NetBox device names to sync
+            ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Ethernet*&#39;
+            ├── filter-by-description:    Glob pattern to restrict sync by interface description
+            ├── filter-by-mac:    Glob pattern to restrict sync by MAC address, e.g. &#39;aa:bb:*&#39;
+            ├── branch:    Branching plugin branch name to push changes into
+            ├── FO:    Filter Nornir hosts using Filter Object
+            ├── FB:    Filter Nornir hosts by name using Glob Patterns
+            ├── FH:    Filter Nornir hosts by hostname
+            ├── FC:    Filter Nornir hosts by name containment
+            ├── FR:    Filter Nornir hosts by name using Regular Expressions
+            ├── FG:    Filter Nornir hosts by group
+            ├── FP:    Filter Nornir hosts by hostname using IP Prefix
+            ├── FL:    Filter Nornir hosts by names list
+            ├── FM:    Filter Nornir hosts by platform
+            └── FN:    Negate the Nornir host filter match
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -5729,7 +5993,27 @@ nf#
 
     <div class="doc doc-contents first">
 
-        <p>Bulk assigns IP addresses to interfaces of specified devices.</p>
+        <p>Synchronize MAC addresses from live devices into NetBox.</p>
+<p>The task follows a three-step pipeline:</p>
+<ol>
+<li><strong>Collect live state</strong>: Run a Nornir <code>parse_ttp</code> get interfaces job against
+   devices to collect live MAC addresses per interface.</li>
+<li><strong>Fetch NetBox state</strong>: Retrieve existing MAC address objects from NetBox.</li>
+<li><strong>Reconcile</strong>: Create new MAC address objects or update existing unassigned
+   ones to point at the correct interface.</li>
+</ol>
+<p><strong>Dry-run mode</strong> (<code>dry_run=True</code>): returns the reconciliation plan without
+making any changes. Result is keyed by device name::</p>
+<div class="highlight"><pre><span></span><code>{
+    &quot;&lt;device&gt;&quot;: {
+        &quot;created&quot;: [&quot;aa:bb:cc:dd:ee:01&quot;, ...],
+        &quot;updated&quot;: [&quot;aa:bb:cc:dd:ee:02&quot;, ...],
+        &quot;in_sync&quot;: [&quot;aa:bb:cc:dd:ee:03&quot;, ...]
+    }
+}
+</code></pre></div>
+<p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default): applies changes and returns
+the same structure showing what was done.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5752,75 +6036,11 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The job instance used for logging and tracking the task.</p>
+                <p>NorFab Job object containing relevant metadata.</p>
               </div>
             </td>
             <td>
                 <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>prefix</code>
-            </td>
-            <td>
-                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="dict">dict</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The IP prefix or a dictionary containing prefix details.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>devices</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A list of device names to process. Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>interface_list</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A list of specific interfaces to target. Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>interface_regex</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A regex pattern to match interfaces. Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5828,11 +6048,11 @@ nf#
                 <code>instance</code>
             </td>
             <td>
-                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The instance name to use. Defaults to None.</p>
+                <p>The NetBox instance name to use.</p>
               </div>
             </td>
             <td>
@@ -5841,14 +6061,130 @@ nf#
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>kwargs</code>
+                <code>dry_run</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span></code>
+                  <code><span title="bool">bool</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Additional arguments to pass to the <code>create_ip</code> method calls.</p>
+                <p>If True, no changes will be made to NetBox.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>timeout</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Timeout in seconds for the Nornir parse_ttp job.</p>
+              </div>
+            </td>
+            <td>
+                  <code>60</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>devices</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of device names to sync.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>branch</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NetBox branch name to use.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filter_by_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Glob pattern to restrict which interfaces
+are included by name, e.g. <code>'Loopback*'</code> or <code>'Eth*'</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filter_by_description</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Glob pattern to restrict which
+interfaces are included by description, e.g. <code>'uplink*'</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filter_by_mac</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Glob pattern to restrict which MAC addresses
+are included, e.g. <code>'aa:bb:*'</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional Nornir host filter keyword arguments passed to
+<code>parse_ttp</code> (e.g. <code>FL</code>, <code>FC</code>, <code>FB</code>).</p>
               </div>
             </td>
             <td>
@@ -5874,7 +6210,8 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A Result object containing the task details, results, and resources.</p>
+                <p>Per-device action summary with <code>created</code>, <code>updated</code>, and
+<code>in_sync</code> MAC address lists.</p>
               </div>
             </td>
           </tr>
@@ -5882,141 +6219,589 @@ nf#
     </table>
 
 
-<details class="notes" open>
-  <summary>Notes</summary>
-  <ul>
-<li>If both <code>interface_list</code> and <code>interface_regex</code> are provided, <code>interface_list</code> takes precedence.</li>
-<li>The <code>prefix</code> parameter can be a string representing the prefix or a dictionary with additional details.</li>
-</ul>
-</details>
-
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
+              <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1444</span>
+<span class="normal">1445</span>
+<span class="normal">1446</span>
+<span class="normal">1447</span>
+<span class="normal">1448</span>
+<span class="normal">1449</span>
+<span class="normal">1450</span>
+<span class="normal">1451</span>
+<span class="normal">1452</span>
+<span class="normal">1453</span>
+<span class="normal">1454</span>
+<span class="normal">1455</span>
+<span class="normal">1456</span>
+<span class="normal">1457</span>
+<span class="normal">1458</span>
+<span class="normal">1459</span>
+<span class="normal">1460</span>
+<span class="normal">1461</span>
+<span class="normal">1462</span>
+<span class="normal">1463</span>
+<span class="normal">1464</span>
+<span class="normal">1465</span>
+<span class="normal">1466</span>
+<span class="normal">1467</span>
+<span class="normal">1468</span>
+<span class="normal">1469</span>
+<span class="normal">1470</span>
+<span class="normal">1471</span>
+<span class="normal">1472</span>
+<span class="normal">1473</span>
+<span class="normal">1474</span>
+<span class="normal">1475</span>
+<span class="normal">1476</span>
+<span class="normal">1477</span>
+<span class="normal">1478</span>
+<span class="normal">1479</span>
+<span class="normal">1480</span>
+<span class="normal">1481</span>
+<span class="normal">1482</span>
+<span class="normal">1483</span>
+<span class="normal">1484</span>
+<span class="normal">1485</span>
+<span class="normal">1486</span>
+<span class="normal">1487</span>
+<span class="normal">1488</span>
+<span class="normal">1489</span>
+<span class="normal">1490</span>
+<span class="normal">1491</span>
+<span class="normal">1492</span>
+<span class="normal">1493</span>
+<span class="normal">1494</span>
+<span class="normal">1495</span>
+<span class="normal">1496</span>
+<span class="normal">1497</span>
+<span class="normal">1498</span>
+<span class="normal">1499</span>
+<span class="normal">1500</span>
+<span class="normal">1501</span>
+<span class="normal">1502</span>
+<span class="normal">1503</span>
+<span class="normal">1504</span>
+<span class="normal">1505</span>
+<span class="normal">1506</span>
+<span class="normal">1507</span>
+<span class="normal">1508</span>
+<span class="normal">1509</span>
+<span class="normal">1510</span>
+<span class="normal">1511</span>
+<span class="normal">1512</span>
+<span class="normal">1513</span>
+<span class="normal">1514</span>
+<span class="normal">1515</span>
+<span class="normal">1516</span>
+<span class="normal">1517</span>
+<span class="normal">1518</span>
+<span class="normal">1519</span>
+<span class="normal">1520</span>
+<span class="normal">1521</span>
+<span class="normal">1522</span>
+<span class="normal">1523</span>
+<span class="normal">1524</span>
+<span class="normal">1525</span>
+<span class="normal">1526</span>
+<span class="normal">1527</span>
+<span class="normal">1528</span>
+<span class="normal">1529</span>
+<span class="normal">1530</span>
+<span class="normal">1531</span>
+<span class="normal">1532</span>
+<span class="normal">1533</span>
+<span class="normal">1534</span>
+<span class="normal">1535</span>
+<span class="normal">1536</span>
+<span class="normal">1537</span>
+<span class="normal">1538</span>
+<span class="normal">1539</span>
+<span class="normal">1540</span>
+<span class="normal">1541</span>
+<span class="normal">1542</span>
+<span class="normal">1543</span>
+<span class="normal">1544</span>
+<span class="normal">1545</span>
+<span class="normal">1546</span>
+<span class="normal">1547</span>
+<span class="normal">1548</span>
+<span class="normal">1549</span>
+<span class="normal">1550</span>
+<span class="normal">1551</span>
+<span class="normal">1552</span>
+<span class="normal">1553</span>
+<span class="normal">1554</span>
+<span class="normal">1555</span>
+<span class="normal">1556</span>
+<span class="normal">1557</span>
+<span class="normal">1558</span>
+<span class="normal">1559</span>
+<span class="normal">1560</span>
+<span class="normal">1561</span>
+<span class="normal">1562</span>
+<span class="normal">1563</span>
+<span class="normal">1564</span>
+<span class="normal">1565</span>
+<span class="normal">1566</span>
+<span class="normal">1567</span>
+<span class="normal">1568</span>
+<span class="normal">1569</span>
+<span class="normal">1570</span>
+<span class="normal">1571</span>
+<span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span>
+<span class="normal">1576</span>
+<span class="normal">1577</span>
+<span class="normal">1578</span>
+<span class="normal">1579</span>
+<span class="normal">1580</span>
+<span class="normal">1581</span>
+<span class="normal">1582</span>
+<span class="normal">1583</span>
+<span class="normal">1584</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
+<span class="normal">1587</span>
+<span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
+<span class="normal">1591</span>
+<span class="normal">1592</span>
+<span class="normal">1593</span>
+<span class="normal">1594</span>
+<span class="normal">1595</span>
+<span class="normal">1596</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span>
+<span class="normal">1600</span>
+<span class="normal">1601</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span>
+<span class="normal">1612</span>
+<span class="normal">1613</span>
+<span class="normal">1614</span>
+<span class="normal">1615</span>
+<span class="normal">1616</span>
+<span class="normal">1617</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
+<span class="normal">1660</span>
+<span class="normal">1661</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span>
+<span class="normal">1666</span>
+<span class="normal">1667</span>
+<span class="normal">1668</span>
+<span class="normal">1669</span>
+<span class="normal">1670</span>
+<span class="normal">1671</span>
+<span class="normal">1672</span>
+<span class="normal">1673</span>
+<span class="normal">1674</span>
+<span class="normal">1675</span>
+<span class="normal">1676</span>
+<span class="normal">1677</span>
+<span class="normal">1678</span>
+<span class="normal">1679</span>
+<span class="normal">1680</span>
+<span class="normal">1681</span>
+<span class="normal">1682</span>
+<span class="normal">1683</span>
+<span class="normal">1684</span>
+<span class="normal">1685</span>
+<span class="normal">1686</span>
+<span class="normal">1687</span>
+<span class="normal">1688</span>
+<span class="normal">1689</span>
+<span class="normal">1690</span>
+<span class="normal">1691</span>
+<span class="normal">1692</span>
+<span class="normal">1693</span>
+<span class="normal">1694</span>
+<span class="normal">1695</span>
+<span class="normal">1696</span>
+<span class="normal">1697</span>
+<span class="normal">1698</span>
+<span class="normal">1699</span>
+<span class="normal">1700</span>
+<span class="normal">1701</span>
+<span class="normal">1702</span>
+<span class="normal">1703</span>
+<span class="normal">1704</span>
+<span class="normal">1705</span>
+<span class="normal">1706</span>
+<span class="normal">1707</span>
+<span class="normal">1708</span>
+<span class="normal">1709</span>
+<span class="normal">1710</span>
+<span class="normal">1711</span>
+<span class="normal">1712</span>
+<span class="normal">1713</span>
+<span class="normal">1714</span>
+<span class="normal">1715</span>
+<span class="normal">1716</span>
+<span class="normal">1717</span>
+<span class="normal">1718</span>
+<span class="normal">1719</span>
+<span class="normal">1720</span>
+<span class="normal">1721</span>
+<span class="normal">1722</span>
+<span class="normal">1723</span>
+<span class="normal">1724</span>
+<span class="normal">1725</span>
+<span class="normal">1726</span>
+<span class="normal">1727</span>
+<span class="normal">1728</span>
+<span class="normal">1729</span>
+<span class="normal">1730</span>
+<span class="normal">1731</span>
+<span class="normal">1732</span>
+<span class="normal">1733</span>
+<span class="normal">1734</span>
+<span class="normal">1735</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="nb">input</span><span class="o">=</span><span class="n">SyncMacAddressesInput</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_ip_bulk</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sync_mac_addresses</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
-    <span class="n">prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
-    <span class="n">devices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">interface_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">interface_regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_by_mac</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Bulk assigns IP addresses to interfaces of specified devices.</span>
+<span class="sd">    Synchronize MAC addresses from live devices into NetBox.</span>
+
+<span class="sd">    The task follows a three-step pipeline:</span>
+
+<span class="sd">    1. **Collect live state**: Run a Nornir ``parse_ttp`` get interfaces job against</span>
+<span class="sd">       devices to collect live MAC addresses per interface.</span>
+<span class="sd">    2. **Fetch NetBox state**: Retrieve existing MAC address objects from NetBox.</span>
+<span class="sd">    3. **Reconcile**: Create new MAC address objects or update existing unassigned</span>
+<span class="sd">       ones to point at the correct interface.</span>
+
+<span class="sd">    **Dry-run mode** (``dry_run=True``): returns the reconciliation plan without</span>
+<span class="sd">    making any changes. Result is keyed by device name::</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;&lt;device&gt;&quot;: {</span>
+<span class="sd">            &quot;created&quot;: [&quot;aa:bb:cc:dd:ee:01&quot;, ...],</span>
+<span class="sd">            &quot;updated&quot;: [&quot;aa:bb:cc:dd:ee:02&quot;, ...],</span>
+<span class="sd">            &quot;in_sync&quot;: [&quot;aa:bb:cc:dd:ee:03&quot;, ...]</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    **Live-run mode** (``dry_run=False``, default): applies changes and returns</span>
+<span class="sd">    the same structure showing what was done.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        job (Job): The job instance used for logging and tracking the task.</span>
-<span class="sd">        prefix (Union[str, dict]): The IP prefix or a dictionary containing prefix details.</span>
-<span class="sd">        devices (list[str], optional): A list of device names to process. Defaults to None.</span>
-<span class="sd">        interface_list (list[str], optional): A list of specific interfaces to target. Defaults to None.</span>
-<span class="sd">        interface_regex (str, optional): A regex pattern to match interfaces. Defaults to None.</span>
-<span class="sd">        instance (Union[None, str], optional): The instance name to use. Defaults to None.</span>
-<span class="sd">        kwargs (dict, optional): Additional arguments to pass to the `create_ip` method calls.</span>
+<span class="sd">        job: NorFab Job object containing relevant metadata.</span>
+<span class="sd">        instance (str, optional): The NetBox instance name to use.</span>
+<span class="sd">        dry_run (bool, optional): If True, no changes will be made to NetBox.</span>
+<span class="sd">        timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.</span>
+<span class="sd">        devices (list, optional): List of device names to sync.</span>
+<span class="sd">        branch (str, optional): NetBox branch name to use.</span>
+<span class="sd">        filter_by_name (str, optional): Glob pattern to restrict which interfaces</span>
+<span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
+<span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
+<span class="sd">            interfaces are included by description, e.g. ``&#39;uplink*&#39;``.</span>
+<span class="sd">        filter_by_mac (str, optional): Glob pattern to restrict which MAC addresses</span>
+<span class="sd">            are included, e.g. ``&#39;aa:bb:*&#39;``.</span>
+<span class="sd">        **kwargs: Additional Nornir host filter keyword arguments passed to</span>
+<span class="sd">            ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: A Result object containing the task details, results, and resources.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        - If both `interface_list` and `interface_regex` are provided, `interface_list` takes precedence.</span>
-<span class="sd">        - The `prefix` parameter can be a string representing the prefix or a dictionary with additional details.</span>
+<span class="sd">        Result: Per-device action summary with ``created``, ``updated``, and</span>
+<span class="sd">            ``in_sync`` MAC address lists.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Create IP bulk: Assigning IPs for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p">[])</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; Netbox&quot;</span>
-    <span class="p">)</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_ip_bulk&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{},</span> <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span>
+        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_mac_addresses&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+        <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync MAC addresses: Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
     <span class="p">)</span>
 
-    <span class="c1"># get list of all interfaces</span>
-    <span class="n">interfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
+    <span class="c1"># source additional hosts from Nornir filters</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">nornir_hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">nornir_hosts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;no devices specified&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;syncing MAC addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices&quot;</span><span class="p">)</span>
+
+    <span class="c1"># filter out devices not defined in NetBox</span>
+    <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2"> - device not found in Netbox&quot;</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">devices</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c1"># gather live interface data from Nornir parse_ttp</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving live interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> devices&quot;</span><span class="p">)</span>
+    <span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;interfaces&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># collect all discovered MAC addresses applying interface and MAC filters</span>
+    <span class="n">all_mac_live</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># {mac: {&quot;device&quot;: ..., &quot;interface&quot;: ...}}</span>
+    <span class="k">for</span> <span class="n">wname</span><span class="p">,</span> <span class="n">wdata</span> <span class="ow">in</span> <span class="n">parse_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> - failed to parse devices&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_interfaces</span> <span class="ow">in</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">host_interfaces</span><span class="p">:</span>
+                <span class="n">intf_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="n">intf_description</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+                <span class="n">mac</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">mac</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">filter_by_name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span>
+                    <span class="n">intf_name</span><span class="p">,</span> <span class="n">filter_by_name</span>
+                <span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">filter_by_description</span>
+                    <span class="ow">and</span> <span class="n">intf_description</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">intf_description</span><span class="p">,</span> <span class="n">filter_by_description</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">filter_by_mac</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">mac</span><span class="p">,</span> <span class="n">filter_by_mac</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">all_mac_live</span><span class="p">[</span><span class="n">mac</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                    <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
+                <span class="p">}</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_mac_live</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync MAC addresses: no MAC addresses found in live data&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c1"># fetch interfaces data from NetBox to resolve interface IDs</span>
+    <span class="n">nb_interfaces_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_interfaces</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-        <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-        <span class="n">interface_list</span><span class="o">=</span><span class="n">interface_list</span><span class="p">,</span>
-        <span class="n">interface_regex</span><span class="o">=</span><span class="n">interface_regex</span><span class="p">,</span>
         <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+        <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
+        <span class="n">ip_addresses</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="k">if</span> <span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="c1"># iterate over interfaces and assign IP addresses</span>
-    <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">device_interfaces</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">device_interfaces</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="n">create_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_ip</span><span class="p">(</span>
-                <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
-                <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
-                <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="c1"># fetch existing MAC address objects from NetBox</span>
+    <span class="c1"># NetBox allows duplicate MAC entries; prefer assigned entries over</span>
+    <span class="c1"># unassigned ones so that a conflicting assignment is not silently</span>
+    <span class="c1"># overwritten by a later unassigned copy during dict construction.</span>
+    <span class="n">nb_macs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">_m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="p">,</span>
+        <span class="s2">&quot;mac_address&quot;</span><span class="p">,</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">all_mac_live</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,mac_address,assigned_object&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">_mac</span> <span class="o">=</span> <span class="n">_m</span><span class="o">.</span><span class="n">mac_address</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">_entry</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">_m</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">_m</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># keep the entry if we haven&#39;t seen this MAC yet, or if the new</span>
+        <span class="c1"># entry is assigned (has an interface) and the stored one is not</span>
+        <span class="k">if</span> <span class="n">_mac</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">_entry</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">_mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="n">nb_macs</span><span class="p">[</span><span class="n">_mac</span><span class="p">]</span> <span class="o">=</span> <span class="n">_entry</span>
+
+    <span class="c1"># per-device result tracking</span>
+    <span class="n">device_results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span>
+    <span class="p">}</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">device_results</span>
+
+    <span class="n">bulk_update_mac</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">bulk_create_mac</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># process and compare live MACs versus NetBox MACs</span>
+    <span class="k">for</span> <span class="n">mac</span><span class="p">,</span> <span class="n">mac_data</span> <span class="ow">in</span> <span class="n">all_mac_live</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">device_name</span> <span class="o">=</span> <span class="n">mac_data</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+        <span class="n">intf_name</span> <span class="o">=</span> <span class="n">mac_data</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span>
+        <span class="n">nb_raw</span> <span class="o">=</span> <span class="n">nb_interfaces_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="n">intf_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_raw</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2"> - interface not found in NetBox, skipping MAC </span><span class="si">{</span><span class="n">mac</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="c1"># MAC already assigned to a different interface</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">nb_macs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mac</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interface&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">intf_name</span>
+        <span class="p">):</span>
+            <span class="n">exist_intf</span> <span class="o">=</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span>
+            <span class="n">exist_device</span> <span class="o">=</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">mac</span><span class="si">}</span><span class="s2"> already assigned to &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;a different interface </span><span class="si">{</span><span class="n">exist_device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">exist_intf</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">interface</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_ip</span><span class="o">.</span><span class="n">result</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="c1"># MAC already assigned to correct interface</span>
+        <span class="k">elif</span> <span class="n">mac</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">intf_name</span><span class="p">:</span>
+            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
+        <span class="c1"># update existing MAC if it is not associated with any interface</span>
+        <span class="k">elif</span> <span class="n">mac</span> <span class="ow">in</span> <span class="n">nb_macs</span> <span class="ow">and</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bulk_update_mac</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">nb_macs</span><span class="p">[</span><span class="n">mac</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;mac_address&quot;</span><span class="p">:</span> <span class="n">mac</span><span class="p">,</span>
+                        <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+        <span class="c1"># create new MAC address entry</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mac</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bulk_create_mac</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;mac_address&quot;</span><span class="p">:</span> <span class="n">mac</span><span class="p">,</span>
+                        <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="k">if</span> <span class="n">bulk_create_mac</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC addresses&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bulk_create_mac</span><span class="p">:</span>
+                <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to bulk create MAC addresses: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bulk_update_mac</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> MAC addresses&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bulk_update_mac</span><span class="p">:</span>
+                <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to bulk update MAC addresses: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
@@ -6056,7 +6841,7 @@ nf#
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../services_netbox_service_tasks_create_ip/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Create IP">
+          <a href="../services_netbox_service_tasks_sync_device_interfaces/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Sync Device Interfaces">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -6066,20 +6851,20 @@ nf#
                 Previous
               </span>
               <div class="md-ellipsis">
-                Create IP
+                Sync Device Interfaces
               </div>
             </div>
           </a>
         
         
           
-          <a href="../services_netbox_service_tasks_create_prefix/" class="md-footer__link md-footer__link--next" aria-label="Next: Create Prefix">
+          <a href="../services_netbox_service_tasks_sync_device_ip/" class="md-footer__link md-footer__link--next" aria-label="Next: Sync Device IP">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Create Prefix
+                Sync Device IP
               </div>
             </div>
             <div class="md-footer__button md-icon">

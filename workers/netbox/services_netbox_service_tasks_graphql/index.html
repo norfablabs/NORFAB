@@ -2355,6 +2355,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_get_topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Topology Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
@@ -2523,6 +2551,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync MAC Addresses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
@@ -2615,6 +2671,34 @@
     
   
     Update BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update Interfaces Description
   
 
     
@@ -5354,6 +5438,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Sync devices interfaces Task plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5643,7 +5755,9 @@
 
     <div class="doc doc-contents first">
 
-        <p>Function to query Netbox v3 or Netbox v4 GraphQL API.</p>
+        <p>DEPRECIATION Warning: <code>graphql</code> task is deprecated in favour of <code>netbox_graphql</code> task
+and will be phased out in future releases.</p>
+<p>Function to query Netbox v3 or Netbox v4 GraphQL API.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5971,7 +6085,11 @@
 <span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
-<span class="normal">381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">graphql</span><span class="p">(</span>
@@ -5986,6 +6104,9 @@
     <span class="n">query_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DEPRECIATION Warning: `graphql` task is deprecated in favour of `netbox_graphql` task</span>
+<span class="sd">    and will be phased out in future releases.</span>
+
 <span class="sd">    Function to query Netbox v3 or Netbox v4 GraphQL API.</span>
 
 <span class="sd">    Args:</span>
@@ -6056,6 +6177,7 @@
                 <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token ...</span><span class="si">{</span><span class="n">nb_params</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">6</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">}</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># send request to Netbox GraphQL API</span>

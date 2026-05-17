@@ -2243,6 +2243,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_get_topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Topology Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
@@ -2411,6 +2439,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync MAC Addresses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
@@ -2503,6 +2559,34 @@
     
   
     Update BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update Interfaces Description
   
 
     
@@ -3013,24 +3097,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -3047,58 +3113,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#fastmcp-service-tasks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FastMCP Service Tasks
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fastmcp-service-show-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FastMCP Service Show Commands
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#vs-code-mcp-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        VS Code MCP Integration
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -5324,6 +5338,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Sync devices interfaces Task plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5497,47 +5539,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#fastmcp-service-tasks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FastMCP Service Tasks
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fastmcp-service-show-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FastMCP Service Show Commands
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#vs-code-mcp-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        VS Code MCP Integration
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -5582,6 +5583,14 @@ MCP tools following this naming convention:</p>
 <div class="highlight"><pre><span></span><code>service_&lt;service_name&gt;__task_&lt;task_name&gt;
 </code></pre></div>
 <p>By default, FastMCP server listens on <code>0.0.0.0:8001</code> and serves MCP at <code>/mcp/</code>.</p>
+<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">¤</a></h1>
+<p>FastMCP uses <a href="https://github.com/modelcontextprotocol/python-sdk">Python SDK MCP</a> library. Required dependencies can be installed using <code>fastmcpservice</code> extras:</p>
+<div class="highlight"><pre><span></span><code>pip install norfab[fastmcpservice]
+</code></pre></div>
+<blockquote>
+<p>[!NOTE]
+There is no dependency on name-twin <a href="https://github.com/PrefectHQ/fastmcp">FastMCP project</a> that uses similar name and Python API, <code>mcp</code> library above is the only dependency.</p>
+</blockquote>
 <h2 id="fastmcp-service-tasks">FastMCP Service Tasks<a class="headerlink" href="#fastmcp-service-tasks" title="Permanent link">¤</a></h2>
 <p>FastMCP Service supports a small set of tasks to manage MCP exposure.</p>
 <table>

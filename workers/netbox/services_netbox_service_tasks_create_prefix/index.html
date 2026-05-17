@@ -2247,6 +2247,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_get_topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Topology Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
@@ -2495,6 +2523,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync MAC Addresses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
@@ -2587,6 +2643,34 @@
     
   
     Update BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update Interfaces Description
   
 
     
@@ -5326,6 +5410,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Sync devices interfaces Task plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5647,7 +5759,7 @@ nf#
 <li>IPv6 prefix string e.g. 2001::/64</li>
 <li>Prefix description string to filter by</li>
 <li>Dictionary with prefix filters for <code>pynetbox</code> prefixes.get method
-    e.g. <code>{"prefix": "10.0.0.0/24", "site__name": "foo"}</code></li>
+    e.g. <code>{"prefix": "10.0.0.0/24", "site": "foo"}</code></li>
 </ul>
               </div>
             </td>
@@ -6131,7 +6243,9 @@ automatically creates branch if it does not exist in Netbox.</p>
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreatePrefixInput</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
 <span class="p">)</span>
@@ -6162,7 +6276,7 @@ automatically creates branch if it does not exist in Netbox.</p>
 <span class="sd">            - IPv6 prefix string e.g. 2001::/64</span>
 <span class="sd">            - Prefix description string to filter by</span>
 <span class="sd">            - Dictionary with prefix filters for `pynetbox` prefixes.get method</span>
-<span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site__name&quot;: &quot;foo&quot;}`</span>
+<span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site&quot;: &quot;foo&quot;}`</span>
 
 <span class="sd">        description (str): Description for the new prefix, prefix description used for</span>
 <span class="sd">            deduplication to source existing prefixes.</span>
@@ -6218,6 +6332,8 @@ automatically creates branch if it does not exist in Netbox.</p>
             <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;vrf__name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
         <span class="k">elif</span> <span class="n">is_network</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">parent_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">parent</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">parent_filters</span> <span class="o">=</span> <span class="n">parent</span>
     <span class="n">nb_parent_prefix</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">parent_filters</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_parent_prefix</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
