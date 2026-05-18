@@ -290,7 +290,7 @@ class NetboxPrefixTasks:
                     nb_prefix.tags.append({"name": t})
 
         # save prefix into Netbox
-        if dry_run:
+        if dry_run is True:
             ret.status = "unchanged"
             ret.dry_run = True
             ret.diff = changed

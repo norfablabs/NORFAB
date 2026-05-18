@@ -77,6 +77,7 @@ class FileCopyTask:
         )
         if dry_run is True:
             result = nr.run(task=nr_test, name="file_copy_dry_run", **kwargs)
+            ret.dry_run = True
         else:
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)

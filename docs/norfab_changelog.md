@@ -1,3 +1,16 @@
+# 0.18.1
+
+## CHANGES
+
+1. Added `CreateIpInput` Pydantic model for Netbox `create_ip` task input validation and used it as `input` argument for `@Task` decorator
+2. Added `CreateIpBulkInput` Pydantic model for Netbox `create_ip_bulk` task input validation and used it as `input` argument for `@Task` decorator
+3. Replaced `**kwargs` in Netbox `create_ip_bulk` task with explicit typed arguments matching `create_ip` signature
+4. Enhanced IP allocation logic for allocating next available prefix when child prefix already contains IPs in Netbox
+5. Enhanced create ip logic for detecting IP address assigned object
+6. Changing norfab to produce json schema for tasks by model fields names instead of aliases `by_alias=False`. 
+
+---
+
 # 0.18.0
 
 ## BUGS
@@ -43,6 +56,7 @@
 2. Adding new Netbox `create_bgp_peerings` task to create BGP peerings
 3. Adding new Netbox `update_bgp_peerings` task to update BGP peerings
 4. Nornir Test markdown results adding results summary table when extensive is True
+5. Fixing logic of detecting assigned interface for create IP task
 
 ---
 

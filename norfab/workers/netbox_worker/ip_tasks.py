@@ -88,10 +88,143 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
     )
 
 
+class CreateIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    prefix: Union[StrictStr, dict] = Field(
+        ...,
+        description="Prefix to allocate IP from; IPv4/IPv6 network string, prefix description, or dict with pynetbox filter keys",
+    )
+    device: Union[None, StrictStr] = Field(
+        None,
+        description="Device name to associate the IP address with",
+    )
+    interface: Union[None, StrictStr] = Field(
+        None,
+        description="Interface name to associate the IP address with",
+    )
+    description: Union[None, StrictStr] = Field(
+        None,
+        description="Description for the allocated IP address",
+    )
+    vrf: Union[None, StrictStr] = Field(
+        None,
+        description="VRF name for the IP address",
+    )
+    tags: Union[None, list] = Field(
+        None,
+        description="List of tags to associate with the IP address",
+    )
+    dns_name: Union[None, StrictStr] = Field(
+        None,
+        description="DNS name for the IP address",
+        alias="dns-name",
+    )
+    tenant: Union[None, StrictStr] = Field(
+        None,
+        description="Tenant name to associate with the IP address",
+    )
+    comments: Union[None, StrictStr] = Field(
+        None,
+        description="Additional comments for the IP address",
+    )
+    role: Union[None, StrictStr] = Field(
+        None,
+        description="Role for the IP address, e.g. 'loopback', 'anycast'",
+    )
+    status: Union[None, StrictStr] = Field(
+        None,
+        description="Status for the IP address, e.g. 'active', 'reserved', 'deprecated'",
+    )
+    is_primary: Union[None, StrictBool] = Field(
+        None,
+        description="If True, set the IP address as the primary IP for the device",
+        alias="is-primary",
+    )
+    mask_len: Union[None, StrictInt] = Field(
+        None,
+        description="Mask length for the IP address; creates a child subnet of this length within the parent prefix",
+        alias="mask-len",
+    )
+    create_peer_ip: Union[None, StrictBool] = Field(
+        True,
+        description="If True, creates an IP address for the link peer interface",
+        alias="create-peer-ip",
+    )
+
+
+class CreateIpBulkInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    prefix: Union[StrictStr, dict] = Field(
+        ...,
+        description="Prefix to allocate IPs from; IPv4/IPv6 network string, prefix description, or dict with pynetbox filter keys",
+    )
+    devices: Union[None, list[StrictStr]] = Field(
+        None,
+        description="List of device names to assign IP addresses to",
+    )
+    interface_list: Union[None, list[StrictStr]] = Field(
+        None,
+        description="List of specific interface names to target",
+        alias="interface-list",
+    )
+    interface_regex: Union[None, StrictStr] = Field(
+        None,
+        description="Regex pattern to match interface names",
+        alias="interface-regex",
+    )
+    description: Union[None, StrictStr] = Field(
+        None,
+        description="Description for the allocated IP addresses",
+    )
+    vrf: Union[None, StrictStr] = Field(
+        None,
+        description="VRF name for the IP addresses",
+    )
+    tags: Union[None, list] = Field(
+        None,
+        description="List of tags to associate with the IP addresses",
+    )
+    dns_name: Union[None, StrictStr] = Field(
+        None,
+        description="DNS name for the IP addresses",
+        alias="dns-name",
+    )
+    tenant: Union[None, StrictStr] = Field(
+        None,
+        description="Tenant name to associate with the IP addresses",
+    )
+    comments: Union[None, StrictStr] = Field(
+        None,
+        description="Additional comments for the IP addresses",
+    )
+    role: Union[None, StrictStr] = Field(
+        None,
+        description="Role for the IP addresses, e.g. 'loopback', 'anycast'",
+    )
+    status: Union[None, StrictStr] = Field(
+        None,
+        description="Status for the IP addresses, e.g. 'active', 'reserved', 'deprecated'",
+    )
+    is_primary: Union[None, StrictBool] = Field(
+        None,
+        description="If True, set each IP address as the primary IP for its device",
+        alias="is-primary",
+    )
+    mask_len: Union[None, StrictInt] = Field(
+        None,
+        description="Mask length for the IP addresses; creates a child subnet of this length within the parent prefix",
+        alias="mask-len",
+    )
+    create_peer_ip: Union[None, StrictBool] = Field(
+        True,
+        description="If True, creates an IP address for the link peer interface",
+        alias="create-peer-ip",
+    )
+
+
 class NetboxIpTasks:
 
     @Task(
-        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CreateIpInput,
     )
     def create_ip(
         self,
@@ -287,26 +420,55 @@ class NetboxIpTasks:
                 prefix_status = status
                 if prefix_status not in ["active", "reserved", "deprecated"]:
                     prefix_status = None
-                child_subnet = self.create_prefix(
-                    job=job,
-                    parent=str(nb_prefix),
-                    prefixlen=mask_len,
-                    vrf=vrf,
-                    tags=tags,
-                    tenant=tenant,
-                    status=prefix_status,
-                    instance=instance,
-                    branch=branch,
-                )
-                prefix = {"prefix": child_subnet.result["prefix"]}
-                if vrf:
-                    prefix["vrf__name"] = vrf
-                nb_prefix = nb.ipam.prefixes.get(**prefix)
+                # find next available subnet with available IPs
+                max_attempts = 100
+                for attempt in range(max_attempts):
+                    child_subnet = self.create_prefix(
+                        job=job,
+                        parent=str(nb_prefix),
+                        prefixlen=mask_len,
+                        vrf=vrf,
+                        tags=tags,
+                        tenant=tenant,
+                        status=prefix_status,
+                        instance=instance,
+                        branch=branch,
+                    )
+                    if child_subnet.failed is True:
+                        raise NetboxAllocationError(
+                            f"Unable to create child subnet of mask length "
+                            f"'{mask_len}' inside '{prefix}' parent prefix"
+                        )
 
-                if not nb_prefix:
+                    child_prefix = {"prefix": child_subnet.result["prefix"]}
+                    if vrf:
+                        child_prefix["vrf__name"] = vrf
+                    nb_child_prefix = nb.ipam.prefixes.get(**child_prefix)
+
+                    if not nb_child_prefix:
+                        raise NetboxAllocationError(
+                            f"Unable to source child prefix of mask length "
+                            f"'{mask_len}' from '{child_prefix}' parent prefix"
+                        )
+
+                    # check how many IPs available in child prefix
+                    available_ip_count = len(nb_child_prefix.available_ips.list())
+                    if not available_ip_count:
+                        msg = f"{nb_child_prefix} - created child prefix but it has no available IPs, continue"
+                        log.info(msg)
+                        job.event(msg)
+                    elif create_peer_ip and available_ip_count < 2:
+                        msg = f"{nb_child_prefix} - created child prefix but it has less than 2 available IPs, create peer ip is True, need two IPs, continue"
+                        log.info(msg)
+                        job.event(msg)
+                    else:
+                        nb_prefix = nb_child_prefix
+                        break
+                else:
                     raise NetboxAllocationError(
-                        f"Unable to source child prefix of mask length "
-                        f"'{mask_len}' from '{prefix}' parent prefix"
+                        f"Unable to find a child subnet of mask length '{mask_len}' "
+                        f"with sufficient available IPs inside '{nb_prefix}' after "
+                        f"{max_attempts} attempts"
                     )
             # execute dry run on new IP
             if dry_run is True:
@@ -365,9 +527,8 @@ class NetboxIpTasks:
                 raise NetboxAllocationError(
                     f"Unable to source '{device}:{interface}' interface from Netbox"
                 )
-            if (
-                hasattr(nb_ip, "assigned_object")
-                and nb_ip.assigned_object != nb_interface.id
+            if not nb_ip.assigned_object or (
+                nb_ip.assigned_object.id != nb_interface.id
             ):
                 nb_ip.assigned_object_id = nb_interface.id
                 nb_ip.assigned_object_type = "dcim.interface"
@@ -375,13 +536,16 @@ class NetboxIpTasks:
                     nb_device = nb.dcim.devices.get(name=device)
                     nb_device.primary_ip4 = nb_ip.id
                 has_changes = True
+                log.info(
+                    f"{device}:{nb_interface} - association {nb_ip} IP address with interface"
+                )
         if mask_len and not str(nb_ip).endswith(f"/{mask_len}"):
             address = str(nb_ip).split("/")[0]
             nb_ip.address = f"{address}/{mask_len}"
             has_changes = True
 
         # save IP address into Netbox
-        if dry_run:
+        if dry_run is True:
             ret.status = "unchanged"
             ret.dry_run = True
         elif has_changes:
@@ -419,7 +583,8 @@ class NetboxIpTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CreateIpBulkInput,
     )
     def create_ip_bulk(
         self,
@@ -429,26 +594,49 @@ class NetboxIpTasks:
         interface_list: list[str] = None,
         interface_regex: str = None,
         instance: Union[None, str] = None,
-        **kwargs: object,
+        dry_run: Union[None, bool] = False,
+        branch: Union[None, str] = None,
+        description: Union[None, str] = None,
+        vrf: Union[None, str] = None,
+        tags: Union[None, list] = None,
+        dns_name: Union[None, str] = None,
+        tenant: Union[None, str] = None,
+        comments: Union[None, str] = None,
+        role: Union[None, str] = None,
+        status: Union[None, str] = None,
+        is_primary: Union[None, bool] = None,
+        mask_len: Union[None, int] = None,
+        create_peer_ip: Union[None, bool] = True,
     ) -> Result:
         """
         Bulk assigns IP addresses to interfaces of specified devices.
 
         Args:
             job (Job): The job instance used for logging and tracking the task.
-            prefix (Union[str, dict]): The IP prefix or a dictionary containing prefix details.
-            devices (list[str], optional): A list of device names to process. Defaults to None.
-            interface_list (list[str], optional): A list of specific interfaces to target. Defaults to None.
-            interface_regex (str, optional): A regex pattern to match interfaces. Defaults to None.
-            instance (Union[None, str], optional): The instance name to use. Defaults to None.
-            kwargs (dict, optional): Additional arguments to pass to the `create_ip` method calls.
+            prefix (Union[str, dict]): The prefix to allocate IPs from; IPv4/IPv6 network
+                string, prefix description, or dict with pynetbox filter keys.
+            devices (list[str], optional): List of device names to assign IP addresses to.
+            interface_list (list[str], optional): List of specific interface names to target.
+                Takes precedence over `interface_regex` when both are provided.
+            interface_regex (str, optional): Regex pattern to match interface names.
+            instance (str, optional): The NetBox instance name to use.
+            dry_run (bool, optional): If True, preview changes without committing to NetBox.
+            branch (str, optional): NetBox branching plugin branch name to use.
+            description (str, optional): Description for the allocated IP addresses.
+            vrf (str, optional): VRF name for the IP addresses.
+            tags (list, optional): List of tags to associate with the IP addresses.
+            dns_name (str, optional): DNS name for the IP addresses.
+            tenant (str, optional): Tenant name to associate with the IP addresses.
+            comments (str, optional): Additional comments for the IP addresses.
+            role (str, optional): Role for the IP addresses, e.g. 'loopback', 'anycast'.
+            status (str, optional): Status for the IP addresses, e.g. 'active', 'reserved', 'deprecated'.
+            is_primary (bool, optional): If True, set each IP as the primary IP for its device.
+            mask_len (int, optional): Mask length for the IP addresses; creates a child subnet
+                of this length within the parent prefix.
+            create_peer_ip (bool, optional): If True, creates an IP address for the link peer interface.
 
         Returns:
-            Result: A Result object containing the task details, results, and resources.
-
-        Notes:
-            - If both `interface_list` and `interface_regex` are provided, `interface_list` takes precedence.
-            - The `prefix` parameter can be a string representing the prefix or a dictionary with additional details.
+            Result: A Result object containing per-device, per-interface IP allocation results.
         """
         instance = instance or self.default_instance
         log.info(
@@ -477,7 +665,19 @@ class NetboxIpTasks:
                     interface=interface,
                     instance=instance,
                     prefix=prefix,
-                    **kwargs,
+                    dry_run=dry_run,
+                    branch=branch,
+                    description=description,
+                    vrf=vrf,
+                    tags=tags,
+                    dns_name=dns_name,
+                    tenant=tenant,
+                    comments=comments,
+                    role=role,
+                    status=status,
+                    is_primary=is_primary,
+                    mask_len=mask_len,
+                    create_peer_ip=create_peer_ip,
                 )
                 ret.result[device][interface] = create_ip.result
 
@@ -890,7 +1090,7 @@ class NetboxIpTasks:
                 },
             )
 
-        if dry_run:
+        if dry_run is True:
             for key in bulk_create_ip:
                 device_name = key[0]
                 device_results[device_name]["created"].append(key[2])

@@ -1311,7 +1311,7 @@ class NetboxBgpPeeringsTasks:
                 )
 
         # Step 6: Process each resolved bgp_session
-        if dry_run:
+        if dry_run is True:
             ret.dry_run = True
             result = {"create": [], "exists": []}
         else:
@@ -1350,7 +1350,7 @@ class NetboxBgpPeeringsTasks:
                 continue
 
             # Dry run — report name and move on (step 6j)
-            if dry_run:
+            if dry_run is True:
                 result["create"].append(sname)
                 continue
 
@@ -1625,7 +1625,7 @@ class NetboxBgpPeeringsTasks:
             bgp_sessions = [{"name": name, **bgp_session}]
 
         result = {"updated": [], "in_sync": []}
-        if dry_run:
+        if dry_run is True:
             ret.dry_run = True
             result = {"update": [], "in_sync": []}
 
@@ -1673,7 +1673,7 @@ class NetboxBgpPeeringsTasks:
         changed_snames = set(sessions_diff["update"].keys())
         result["in_sync"].extend(sessions_diff["in_sync"])
 
-        if dry_run:
+        if dry_run is True:
             result["update"] = [
                 {"name": sname, "diff": changes}
                 for sname, changes in sessions_diff["update"].items()
@@ -1981,7 +1981,7 @@ class NetboxBgpPeeringsTasks:
         full_diff = self.make_diff(normalised_live, normalised_nb)
 
         # Return dry-run results per device
-        if dry_run:
+        if dry_run is True:
             ret.result = full_diff
             ret.dry_run = True
             return ret

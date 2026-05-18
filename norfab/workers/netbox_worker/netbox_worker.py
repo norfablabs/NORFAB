@@ -652,7 +652,7 @@ class NetboxWorker(
             filter_by_key: keyword argument name passed to pynetbox ``filter()`` call.
             filter_by_values: list of values to filter by, split adaptively across requests.
             chunk_size (bytes): maximum URI character length per request. Defaults to 4000 bytes/characters.
-            kwargs: optional additional filter kwargs passed to every ``filter()`` call.
+            kwargs (any): optional additional filter kwargs passed to every ``filter()`` call.
 
         Returns:
             list: All collected pynetbox objects across all chunked requests.

@@ -281,7 +281,7 @@ class NetboxConnectionsTasks:
         )
 
         # return dry run result
-        if dry_run:
+        if dry_run is True:
             ret.dry_run = True
             ret.result = query_result.result
             return ret

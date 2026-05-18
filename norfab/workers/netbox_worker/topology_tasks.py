@@ -330,7 +330,7 @@ class NetboxTopologyTasks:
         if sites:
             device_filter_params["site"] = sites
 
-        if dry_run:
+        if dry_run is True:
             intf_dry = self.netbox_graphql(
                 job=job,
                 query=TOPOLOGY_INTERFACES_QUERY,

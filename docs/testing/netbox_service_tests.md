@@ -330,9 +330,9 @@ Interface status and configuration synchronization.
 
 ::: tests.test_netbox_service.TestSyncDeviceInterfaces.test_sync_device_interfaces_create
 
-#### Test Sync Device Interfaces Update
+#### Test Sync Device Interfaces Update Description
 
-::: tests.test_netbox_service.TestSyncDeviceInterfaces.test_sync_device_interfaces_update
+::: tests.test_netbox_service.TestSyncDeviceInterfaces.test_sync_device_interfaces_update_description
 
 #### Test Sync Device Interfaces Non Existing Device
 

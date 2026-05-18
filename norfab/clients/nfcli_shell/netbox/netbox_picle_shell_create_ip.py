@@ -8,11 +8,10 @@ from picle.models import Outputters
 from pydantic import (
     Field,
     StrictBool,
-    StrictInt,
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.ip_tasks import CreateIpInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -28,37 +27,9 @@ class IpStatusEnum(str, Enum):
     slaac = "slaac"
 
 
-class CreateIp(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=True):
-    prefix: StrictStr = Field(
-        ...,
-        description="Prefix to allocate IP address from, can also provide prefix name or filters",
-    )
-    device: StrictStr = Field(
-        None, description="Device name to associate IP address with"
-    )
-    interface: StrictStr = Field(
-        None, description="Device interface name to associate IP address with"
-    )
-    description: StrictStr = Field(None, description="IP address description")
-    vrf: StrictStr = Field(None, description="VRF to associate with IP address")
-    tags: Union[StrictStr, list[StrictStr]] = Field(
+class CreateIp(CreateIpInput, NetboxClientRunJobArgs, use_enum_values=True):
+    tags: Union[None, StrictStr, list[StrictStr]] = Field(
         None, description="Tags to add to IP address"
-    )
-    dns_name: StrictStr = Field(None, description="IP address DNS name")
-    tenant: StrictStr = Field(
-        None, description="Tenant name to associate with IP address"
-    )
-    comments: StrictStr = Field(None, description="IP address comments field")
-    role: StrictStr = Field(None, description="IP address functional role")
-    dry_run: StrictBool = Field(
-        None,
-        description="Do not commit to database",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
-    mask_len: StrictInt = Field(
-        None, description="Mask length to use for IP address", alias="mask-len"
     )
     create_peer_ip: StrictBool = Field(
         None,

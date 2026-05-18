@@ -8,11 +8,10 @@ from picle.models import Outputters
 from pydantic import (
     Field,
     StrictBool,
-    StrictInt,
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.ip_tasks import CreateIpBulkInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -28,42 +27,17 @@ class IpStatusEnum(str, Enum):
     slaac = "slaac"
 
 
-class CreateIpBulk(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=True):
-    prefix: StrictStr = Field(
-        ...,
-        description="Prefix to allocate IP address from, can also provide prefix name or filters",
-    )
+class CreateIpBulk(CreateIpBulkInput, NetboxClientRunJobArgs, use_enum_values=True):
     devices: Union[StrictStr, List[StrictStr]] = Field(
         ..., description="List of device names to create IP address for"
     )
-    interface_regex: StrictStr = Field(
-        None,
-        description="Regular expression of device interface names to create IP address for",
-    )
-    interface_list: StrictStr = Field(
+    interface_list: Union[None, StrictStr, List[StrictStr]] = Field(
         None,
         description="List of interface names to create IP address for",
+        alias="interface-list",
     )
-    description: StrictStr = Field(None, description="IP address description")
-    vrf: StrictStr = Field(None, description="VRF to associate with IP address")
-    tags: Union[StrictStr, list[StrictStr]] = Field(
+    tags: Union[None, StrictStr, List[StrictStr]] = Field(
         None, description="Tags to add to IP address"
-    )
-    dns_name: StrictStr = Field(None, description="IP address DNS name")
-    tenant: StrictStr = Field(
-        None, description="Tenant name to associate with IP address"
-    )
-    comments: StrictStr = Field(None, description="IP address comments field")
-    role: StrictStr = Field(None, description="IP address functional role")
-    dry_run: StrictBool = Field(
-        None,
-        description="Do not commit to database",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
-    mask_len: StrictInt = Field(
-        None, description="Mask length to use for IP address", alias="mask-len"
     )
     create_peer_ip: StrictBool = Field(
         None,
@@ -81,6 +55,12 @@ class CreateIpBulk(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=Tru
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
+        print(kwargs)
+
+        if "{" in kwargs["prefix"] and "}" in kwargs["prefix"]:
+            kwargs["prefix"] = json.loads(kwargs["prefix"])
+        if "[" in kwargs["interface_list"] and "]" in kwargs["interface_list"]:
+            kwargs["interface_list"] = json.loads(kwargs["interface_list"])
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
@@ -88,9 +68,6 @@ class CreateIpBulk(NetboxCommonArgs, NetboxClientRunJobArgs, use_enum_values=Tru
             kwargs["interface_list"] = [kwargs["interface_list"]]
         if isinstance(kwargs.get("tags"), str):
             kwargs["tags"] = [kwargs["tags"]]
-
-        if "{" in kwargs["prefix"] and "}" in kwargs["prefix"]:
-            kwargs["prefix"] = json.loads(kwargs["prefix"])
 
         result = NFCLIENT.run_job(
             "netbox",

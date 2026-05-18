@@ -146,6 +146,7 @@ class TestTask:
             ret.result = ResultSerializer(
                 result, to_dict=to_dict, add_details=add_details
             )
+            ret.dry_run = True
         # combine per-host tests in suites based on task and arguments
         # Why - to run tests using any nornir service tasks with various arguments
         else:

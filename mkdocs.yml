@@ -147,6 +147,7 @@ nav:
       - Get BGP Peerings: workers/netbox/services_netbox_service_tasks_get_bgp_peerings.md
       - Get Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
       - Get Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
+      - Get Topology Data: workers/netbox/services_netbox_service_tasks_get_topology.md
       - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
       - Create IP Bulk: workers/netbox/services_netbox_service_tasks_create_ip_bulk.md
       - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md
@@ -239,6 +240,7 @@ nav:
   - File Streaming (fetch_file): development/file_streaming_fetch_file.md
   - Architecture Design Records:
     - Netbox BGP Create/Update Tasks Plan: development/adr_netbox_bgp_create_update_tasks_plan.md
+    - Netbox Sync devices interfaces Task plan: development/adr_netbox_sync_device_interfaces_plan.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
     - Netbox Service Tests: testing/netbox_service_tests.md

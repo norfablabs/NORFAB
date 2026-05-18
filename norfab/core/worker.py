@@ -330,9 +330,9 @@ class Task:
                     - fastapi: FastAPI-specific metadata.
                     - mcp: Model Context protocol metadata
         """
-        input_json_schema = self.input.model_json_schema()
+        input_json_schema = self.input.model_json_schema(by_alias=False)
         _ = input_json_schema.pop("title")
-        output_json_schema = self.output.model_json_schema()
+        output_json_schema = self.output.model_json_schema(by_alias=False)
 
         return {
             self.name: {

@@ -479,7 +479,7 @@ class NetboxCrudTasks:
         else:
             data_list = list(data)
 
-        if dry_run:
+        if dry_run is True:
             job.event(f"dry-run: would create {len(data_list)} {object_type}(s)")
             log.info(
                 f"{self.name} - crud_create dry-run: {len(data_list)}"
@@ -562,7 +562,7 @@ class NetboxCrudTasks:
         nb = self._get_pynetbox(instance)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
-        if dry_run:
+        if dry_run is True:
             job.event(f"dry-run: computing diffs for {len(data_list)} {object_type}(s)")
             diffs = []
             for item in data_list:
@@ -656,7 +656,7 @@ class NetboxCrudTasks:
         nb = self._get_pynetbox(instance)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
-        if dry_run:
+        if dry_run is True:
             job.event(f"dry-run: would delete {len(id_list)} {object_type}(s)")
             preview = []
             for oid in id_list:

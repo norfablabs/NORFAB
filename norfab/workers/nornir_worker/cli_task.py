@@ -127,6 +127,7 @@ class CliTask:
             result = nr.run(
                 task=nr_test, use_task_data="commands", name="dry_run", **kwargs
             )
+            ret.dry_run = True
         else:
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)

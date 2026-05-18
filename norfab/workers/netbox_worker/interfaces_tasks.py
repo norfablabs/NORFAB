@@ -505,7 +505,7 @@ class NetboxInterfacesTasks:
         if interface_regex:
             filter_params["name__regex"] = interface_regex
 
-        if dry_run:
+        if dry_run is True:
             ret.result = {"filter_params": filter_params}
             ret.dry_run = True
             return ret
@@ -764,7 +764,7 @@ class NetboxInterfacesTasks:
                 result[device_name]["created"].append(intf_name)
 
             if interfaces_to_create:
-                if dry_run:
+                if dry_run is True:
                     job.event(
                         f"dry-run, would create {len(interfaces_to_create)} interface(s) on '{device_name}'"
                     )
@@ -1214,7 +1214,7 @@ class NetboxInterfacesTasks:
                     if not intf_updates:
                         _ = dev_diff["update"].pop(intf_name)
 
-        if dry_run:
+        if dry_run is True:
             ret.result = full_diff
             ret.dry_run = True
             return ret
@@ -1679,7 +1679,7 @@ class NetboxInterfacesTasks:
                 device_results[device_name]["in_sync"].append(mac)
             # update existing MAC if it is not associated with any interface
             elif mac in nb_macs and nb_macs[mac]["interface"] is None:
-                if dry_run:
+                if dry_run is True:
                     device_results[device_name]["updated"].append(mac)
                 else:
                     bulk_update_mac.append(
@@ -1692,7 +1692,7 @@ class NetboxInterfacesTasks:
                     )
             # create new MAC address entry
             else:
-                if dry_run:
+                if dry_run is True:
                     device_results[device_name]["created"].append(mac)
                 else:
                     bulk_create_mac.append(
@@ -1703,7 +1703,7 @@ class NetboxInterfacesTasks:
                         }
                     )
 
-        if dry_run:
+        if dry_run is True:
             ret.dry_run = True
             return ret
 

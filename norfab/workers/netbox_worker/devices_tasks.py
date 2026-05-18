@@ -59,7 +59,7 @@ class NetboxDevicesTasks:
             filters.append({"name": devices})
 
         # return dry run result
-        if dry_run:
+        if dry_run is True:
             ret.result["get_devices_dry_run"] = {"filters": filters}
             ret.dry_run = True
             return ret

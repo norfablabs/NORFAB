@@ -166,7 +166,7 @@ class NetboxGraphqlTasks:
         nb_params = self._get_instance_params(instance)
         ret = Result(task=f"{self.name}:graphql", resources=[instance])
 
-        if dry_run:
+        if dry_run is True:
             ret.dry_run = True
             ret.result = {
                 "url": f"{nb_params['url']}/graphql/",
@@ -328,7 +328,7 @@ class NetboxGraphqlTasks:
         payload = json.dumps({"query": query})
 
         # form and return dry run response
-        if dry_run:
+        if dry_run is True:
             log.info(
                 f"{self.name} - GraphQL dry run, returning query payload without executing"
             )

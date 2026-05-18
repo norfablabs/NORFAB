@@ -334,7 +334,7 @@ class NetboxCircuitsTasks:
             last_updated.raise_for_status(f"{self.name} - get circuits query failed")
 
             # return dry run result
-            if dry_run:
+            if dry_run is True:
                 ret.result["get_circuits_dry_run"] = last_updated.result
                 ret.dry_run = True
                 return ret

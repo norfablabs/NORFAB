@@ -100,6 +100,7 @@ class CfgTask:
             result = nr.run(
                 task=nr_test, use_task_data="config", name="dry_run", **kwargs
             )
+            ret.dry_run = True
         else:
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)
