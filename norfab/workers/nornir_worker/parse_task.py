@@ -2,7 +2,6 @@ import logging
 from enum import Enum
 from typing import Any, List, Union
 
-from nornir_napalm.plugins.tasks import napalm_get
 from nornir_salt.plugins.functions import FFun_functions, ResultSerializer
 from pydantic import (
     BaseModel,
@@ -98,18 +97,12 @@ class ParseTask:
         Returns:
             Result containing parsed NAPALM getter data.
         """
-        ret = Result(task=f"{self.name}:parse_napalm", result={} if to_dict else [])
-
-        filtered_nornir, ret = self.filter_hosts_and_validate(kwargs, ret)
-        if ret.status == "no_match":
-            return ret
-
-        nr = self._add_processors(filtered_nornir, kwargs, job)  # add processors
-        result = nr.run(task=napalm_get, getters=getters, **kwargs)
-        ret.result = ResultSerializer(result, to_dict=to_dict, add_details=add_details)
-        ret.failed = result.failed  # failed is true if any of the hosts failed
-
+        ret = self.task(
+            job=job, plugin="nornir_napalm.plugins.tasks.napalm_get", getters=getters, to_dict=to_dict, add_details=add_details, **kwargs
+        )
+        ret.task = f"{self.name}:parse_napalm"
         return ret
+
 
     @Task(fastapi={"methods": ["POST"]})
     def parse_textfsm(

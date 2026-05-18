@@ -11,12 +11,12 @@ log = logging.getLogger(__name__)
 try:
     from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell
 except ImportError as e:
-    log.warning(f"Failed to import NorFab Shell, needed libs not found - '{e}'")
+    log.error(f"Failed to import NorFab Shell, needed libs not found - '{e}'")
 
 try:
     from norfab.clients.textual.app import NorFabApp
 except ImportError as e:
-    log.warning(f"Failed to import NorFab Textual TUI, needed libs not found - '{e}'")
+    log.debug(f"Failed to import NorFab Textual TUI, needed libs not found - '{e}'")
     NorFabApp = None
 
 

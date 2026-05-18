@@ -8,6 +8,7 @@
 4. Enhanced IP allocation logic for allocating next available prefix when child prefix already contains IPs in Netbox
 5. Enhanced create ip logic for detecting IP address assigned object
 6. Changing norfab to produce json schema for tasks by model fields names instead of aliases `by_alias=False`. 
+7. Updating norni parse napalm to use nornir `task` task
 
 ---
 
