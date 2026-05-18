@@ -9,11 +9,6 @@ from norfab.core.nfapi import NorFab
 log = logging.getLogger(__name__)
 
 try:
-    from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell
-except ImportError as e:
-    log.error(f"Failed to import NorFab Shell, needed libs not found - '{e}'")
-
-try:
     from norfab.clients.textual.app import NorFabApp
 except ImportError as e:
     log.debug(f"Failed to import NorFab Textual TUI, needed libs not found - '{e}'")
@@ -282,6 +277,8 @@ def nfcli() -> str | None:
         proc.wait()
     # start interactive client shell only
     elif CLIENT:
+        from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell
+
         start_picle_shell(
             inventory=INVENTORY,
             run_workers=False,
@@ -290,6 +287,8 @@ def nfcli() -> str | None:
         )
     # default, start everything locally - interactive shell, broker and all workers
     elif SHELL:
+        from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell
+        
         start_picle_shell(
             inventory=INVENTORY,
             run_workers=WORKERS_LIST if WORKERS_LIST else True,
