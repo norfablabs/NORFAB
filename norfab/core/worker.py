@@ -54,6 +54,7 @@ class Job:
         "kwargs",
         "task",
         "client_input_queue",
+        "start_time",
     )
 
     def __init__(
@@ -75,9 +76,20 @@ class Job:
         self.kwargs = kwargs or {}
         self.task = task
         self.client_input_queue = client_input_queue
+        self.start_time = time.time()
 
     def __str__(self) -> str:
         return self.juuid
+
+    def is_timed_out(self) -> bool:
+        """Check if the job has exceeded its timeout.
+
+        Returns:
+            bool: True if the job has timed out, False otherwise or if timeout is not set.
+        """
+        if self.timeout is None:
+            return False
+        return (time.time() - self.start_time) >= self.timeout
 
     def event(self, message: str, **kwargs: Any) -> None:
         """

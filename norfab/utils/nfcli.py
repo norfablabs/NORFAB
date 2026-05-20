@@ -288,7 +288,7 @@ def nfcli() -> str | None:
     # default, start everything locally - interactive shell, broker and all workers
     elif SHELL:
         from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell
-        
+
         start_picle_shell(
             inventory=INVENTORY,
             run_workers=WORKERS_LIST if WORKERS_LIST else True,

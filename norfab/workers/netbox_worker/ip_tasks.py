@@ -6,7 +6,7 @@ from typing import Any, Union
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
-from pydantic import Field, StrictBool, StrictInt, StrictStr
+from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator
 
 from .netbox_exceptions import NetboxAllocationError
 from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
@@ -150,6 +150,15 @@ class CreateIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=Tru
         alias="create-peer-ip",
     )
 
+    @model_validator(mode="after")
+    def validate_mask_len_with_peer_ip(self) -> "CreateIpInput":
+        if self.mask_len in (32, 128) and self.create_peer_ip is True:
+            raise ValueError(
+                f"mask_len={self.mask_len} with create_peer_ip=True is invalid: "
+                "cannot create a peer IP for a host prefix (/32 or /128)"
+            )
+        return self
+
 
 class CreateIpBulkInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     prefix: Union[StrictStr, dict] = Field(
@@ -250,6 +259,12 @@ class NetboxIpTasks:
         """
         Allocate the next available IP address from a given subnet.
 
+        .. warning::
+
+            **Dry-run limitation**: when ``dry_run=True``, ``mask_len`` is ignored and
+            the candidate IP address is allocated directly from the parent prefix using
+            the parent prefix mask length — no child subnet is created.
+
         This task finds or creates an IP address in NetBox, updates its metadata,
         optionally links it to a device/interface, and supports a dry run mode for
         previewing changes.
@@ -279,8 +294,7 @@ class NetboxIpTasks:
             mask_len (int, optional): mask length to use for IP address on creation or to
                 update existing IP address. On new IP address creation will create child
                 subnet of `mask_len` within parent `prefix`, new subnet not created for
-                existing IP addresses. `mask_len` argument ignored on dry run and ip allocated
-                from parent prefix directly.
+                existing IP addresses. Ignored when ``dry_run=True``.
             create_peer_ip (bool, optional): If True creates IP address for link peer -
                 remote device interface connected to requested device and interface
 
@@ -335,12 +349,38 @@ class NetboxIpTasks:
                 prefix = {"description": prefix, "vrf__name": vrf}
             elif is_network is False:
                 prefix = {"description": prefix}
-        nb_prefix = nb.ipam.prefixes.get(**prefix)
-        if not nb_prefix:
+        nb_prefixes = nb.ipam.prefixes.filter(**prefix)
+        if not nb_prefixes:
             raise NetboxAllocationError(
                 f"Unable to source parent prefix from Netbox - {prefix}"
             )
-        parent_prefix_len = int(str(nb_prefix).split("/")[1])
+
+        # find parent prefix that has available subnets to allocate
+        for nb_prefix in nb_prefixes:
+            parent_prefix_len = int(str(nb_prefix).split("/")[1])
+            # check if can create child subnet in prefix
+            if mask_len and mask_len != parent_prefix_len:
+                try:
+                    candidate = self.create_prefix(
+                        job=job,
+                        parent=str(nb_prefix),
+                        prefixlen=mask_len,
+                        instance=instance,
+                        branch=branch,
+                        dry_run=True,
+                    )
+                    if candidate.failed is False and candidate.result.get("prefix"):
+                        break
+                except Exceptions as e:
+                    # error might be expected
+                    log.debug(f"Error while trying to allocate child subnet: {e}")
+                    continue
+            elif nb_prefix.available_ips.list():
+                break
+        else:
+            raise NetboxAllocationError(
+                f"No subnets of {mask_len} lenght or IPs available in parent prefix - {prefix}"
+            )
 
         # try to source existing IP from netbox
         if device and interface and description:
@@ -402,6 +442,7 @@ class NetboxIpTasks:
                             "status": status,
                             "create_peer_ip": False,
                             "instance": instance,
+                            "mask_len": mask_len,
                         }
                     # use peer subnet to create IP address
                     if nb_peer_prefix:
@@ -421,8 +462,7 @@ class NetboxIpTasks:
                 if prefix_status not in ["active", "reserved", "deprecated"]:
                     prefix_status = None
                 # find next available subnet with available IPs
-                max_attempts = 100
-                for attempt in range(max_attempts):
+                while not job.is_timed_out():
                     child_subnet = self.create_prefix(
                         job=job,
                         parent=str(nb_prefix),
@@ -467,8 +507,7 @@ class NetboxIpTasks:
                 else:
                     raise NetboxAllocationError(
                         f"Unable to find a child subnet of mask length '{mask_len}' "
-                        f"with sufficient available IPs inside '{nb_prefix}' after "
-                        f"{max_attempts} attempts"
+                        f"with sufficient available IPs inside '{nb_prefix}'"
                     )
             # execute dry run on new IP
             if dry_run is True:
@@ -611,6 +650,13 @@ class NetboxIpTasks:
         """
         Bulk assigns IP addresses to interfaces of specified devices.
 
+        .. warning::
+
+            **Dry-run limitation**: when ``dry_run=True``, ``mask_len`` is ignored and
+            the same candidate IP address (taken directly from the parent prefix using
+            the parent prefix mask length) is returned for every interface — no child
+            subnets are created.
+
         Args:
             job (Job): The job instance used for logging and tracking the task.
             prefix (Union[str, dict]): The prefix to allocate IPs from; IPv4/IPv6 network
@@ -632,7 +678,7 @@ class NetboxIpTasks:
             status (str, optional): Status for the IP addresses, e.g. 'active', 'reserved', 'deprecated'.
             is_primary (bool, optional): If True, set each IP as the primary IP for its device.
             mask_len (int, optional): Mask length for the IP addresses; creates a child subnet
-                of this length within the parent prefix.
+                of this length within the parent prefix. Ignored when ``dry_run=True``.
             create_peer_ip (bool, optional): If True, creates an IP address for the link peer interface.
 
         Returns:
@@ -680,6 +726,9 @@ class NetboxIpTasks:
                     create_peer_ip=create_peer_ip,
                 )
                 ret.result[device][interface] = create_ip.result
+
+        if dry_run is True:
+            ret.dry_run = True
 
         return ret
 
@@ -995,11 +1044,6 @@ class NetboxIpTasks:
                 filter_by_values=[i["address"].split("/")[0] for i in all_ip_live],
                 fields="id,address,vrf,role,assigned_object",
             )
-            # for ip in nb.ipam.ip_addresses.filter(
-            #     # do IP search ignoring mask, in case live and netbox IPs have mismatch
-            #     address=[i["address"].split("/")[0] for i in all_ip_live],
-            #     fields=
-            # )
         ]
 
         # process IP and Prefixes

@@ -8,7 +8,11 @@
 4. Enhanced IP allocation logic for allocating next available prefix when child prefix already contains IPs in Netbox
 5. Enhanced create ip logic for detecting IP address assigned object
 6. Changing norfab to produce json schema for tasks by model fields names instead of aliases `by_alias=False`. 
-7. Updating norni parse napalm to use nornir `task` task
+7. Updating nornir parse napalm to use nornir `task` task
+8. Fix create prefix task to make sure to check if /31 subnet can be allocated even if available prefixes return /30
+9. Create ip task enhanced to handle case when multiple parent prefixes matched in Netbox by prefix filter
+10. Fix create ip when create peer ip is true, check if mask len 32 or 128 raise error in that case - can not create peer ip for /32 or /128 prefixes
+11. Adding `is_timed_out` method to worker Job object to alow monitor job time out from inside tasks
 
 ---
 

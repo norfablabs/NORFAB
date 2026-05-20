@@ -209,9 +209,17 @@ class NetboxPrefixTasks:
                         nb_prefix = str(pfx)
                         break
                 else:
-                    raise NetboxAllocationError(
-                        f"Parent prefix '{parent}' has no child prefixes available with '/{prefixlen}' prefix length"
-                    )
+                    # For some reason Netbox does not always return /31 as available
+                    # subnet int he list, this is to check that child subnet fits into
+                    # first subnet available in Netbox
+                    if int(nb_prefixes[0].prefix.split("/")[1]) < prefixlen:
+                        nb_prefix = (
+                            nb_parent_prefix.prefix.split("/")[0] + f"/{prefixlen}"
+                        )
+                    else:
+                        raise NetboxAllocationError(
+                            f"Parent prefix '{parent}' has no child prefixes available with '/{prefixlen}' prefix length"
+                        )
                 ret.status = "unchanged"
                 ret.dry_run = True
                 ret.result = {

@@ -98,11 +98,15 @@ class ParseTask:
             Result containing parsed NAPALM getter data.
         """
         ret = self.task(
-            job=job, plugin="nornir_napalm.plugins.tasks.napalm_get", getters=getters, to_dict=to_dict, add_details=add_details, **kwargs
+            job=job,
+            plugin="nornir_napalm.plugins.tasks.napalm_get",
+            getters=getters,
+            to_dict=to_dict,
+            add_details=add_details,
+            **kwargs,
         )
         ret.task = f"{self.name}:parse_napalm"
         return ret
-
 
     @Task(fastapi={"methods": ["POST"]})
     def parse_textfsm(

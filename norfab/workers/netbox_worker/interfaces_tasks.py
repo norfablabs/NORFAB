@@ -851,6 +851,7 @@ class NetboxInterfacesTasks:
             task=f"{self.name}:update_interfaces_description",
             result=result,
             resources=[instance],
+            dry_run=dry_run,
         )
         nb = self._get_pynetbox(instance, branch=branch)
         log.info(
@@ -920,6 +921,7 @@ class NetboxInterfacesTasks:
                         nb_interface.description = description
                         if dry_run is False:
                             nb_interface.save()
+
         return ret
 
     @Task(
