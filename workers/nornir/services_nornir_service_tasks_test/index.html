@@ -7713,7 +7713,8 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
-<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
+<span class="normal">210</span>
+<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -7843,6 +7844,7 @@ the dictionary will contain both the test results and the rendered test suite.</
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ResultSerializer</span><span class="p">(</span>
             <span class="n">result</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span> <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span>
         <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="c1"># combine per-host tests in suites based on task and arguments</span>
     <span class="c1"># Why - to run tests using any nornir service tasks with various arguments</span>
     <span class="k">else</span><span class="p">:</span>

@@ -6728,7 +6728,7 @@ VRF object reference read from and written into
         <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">bgp_session</span><span class="p">}]</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[]}</span>
-    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[]}</span>
 
@@ -6776,7 +6776,7 @@ VRF object reference read from and written into
     <span class="n">changed_snames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">sessions_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
     <span class="n">result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sessions_diff</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">result</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">sname</span><span class="p">,</span> <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="n">changes</span><span class="p">}</span>
             <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">sessions_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>

@@ -5951,7 +5951,8 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\nornir_worker\parse_task.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 78</span>
+<span class="normal"> 79</span>
 <span class="normal"> 80</span>
 <span class="normal"> 81</span>
 <span class="normal"> 82</span>
@@ -5981,10 +5982,7 @@ nf#
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_napalm</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -6006,17 +6004,15 @@ nf#
 <span class="sd">    Returns:</span>
 <span class="sd">        Result containing parsed NAPALM getter data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_napalm&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="p">[])</span>
-
-    <span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_hosts_and_validate</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;no_match&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">ret</span>
-
-    <span class="n">nr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_processors</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>  <span class="c1"># add processors</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">napalm_get</span><span class="p">,</span> <span class="n">getters</span><span class="o">=</span><span class="n">getters</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ResultSerializer</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span> <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">)</span>
-    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span>  <span class="c1"># failed is true if any of the hosts failed</span>
-
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">(</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+        <span class="n">plugin</span><span class="o">=</span><span class="s2">&quot;nornir_napalm.plugins.tasks.napalm_get&quot;</span><span class="p">,</span>
+        <span class="n">getters</span><span class="o">=</span><span class="n">getters</span><span class="p">,</span>
+        <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
+        <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:parse_napalm&quot;</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6227,7 +6223,10 @@ definitions, then parses the collected output with TTP.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\nornir_worker\parse_task.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">171</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span>
 <span class="normal">174</span>
@@ -6356,10 +6355,7 @@ definitions, then parses the collected output with TTP.</p>
 <span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span> <span class="nb">input</span><span class="o">=</span><span class="n">ParseTTPInput</span><span class="p">)</span>
+<span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span> <span class="nb">input</span><span class="o">=</span><span class="n">ParseTTPInput</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_ttp</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
@@ -6650,7 +6646,10 @@ and the CLI collection task.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\nornir_worker\parse_task.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
@@ -6702,10 +6701,7 @@ and the CLI collection task.</p>
 <span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
+<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_textfsm</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>

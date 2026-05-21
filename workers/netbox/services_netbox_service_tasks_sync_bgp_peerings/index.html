@@ -7223,7 +7223,7 @@ VRF object reference read from and written into
     <span class="n">full_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span><span class="n">normalised_live</span><span class="p">,</span> <span class="n">normalised_nb</span><span class="p">)</span>
 
     <span class="c1"># Return dry-run results per device</span>
-    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>

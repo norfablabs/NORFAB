@@ -6742,7 +6742,8 @@ cannot be downloaded.</p>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
-<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">144</span>
+<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">NorniCliInput</span><span class="p">,</span>
 <span class="p">)</span>
@@ -6851,6 +6852,7 @@ cannot be downloaded.</p>
         <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
             <span class="n">task</span><span class="o">=</span><span class="n">nr_test</span><span class="p">,</span> <span class="n">use_task_data</span><span class="o">=</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dry_run&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_lock</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task_plugin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>

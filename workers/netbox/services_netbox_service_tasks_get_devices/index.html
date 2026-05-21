@@ -6036,7 +6036,7 @@ nf#
         <span class="n">filters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">})</span>
 
     <span class="c1"># return dry run result</span>
-    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;get_devices_dry_run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">}</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>

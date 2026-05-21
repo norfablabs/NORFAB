@@ -6338,7 +6338,7 @@ console server ports by name, case insensitive.</p>
     <span class="p">)</span>
 
     <span class="c1"># return dry run result</span>
-    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">query_result</span><span class="o">.</span><span class="n">result</span>
         <span class="k">return</span> <span class="n">ret</span>

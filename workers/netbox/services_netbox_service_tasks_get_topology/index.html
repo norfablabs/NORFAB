@@ -7130,7 +7130,7 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
     <span class="k">if</span> <span class="n">sites</span><span class="p">:</span>
         <span class="n">device_filter_params</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sites</span>
 
-    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">intf_dry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_graphql</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">query</span><span class="o">=</span><span class="n">TOPOLOGY_INTERFACES_QUERY</span><span class="p">,</span>

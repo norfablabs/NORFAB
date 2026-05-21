@@ -7330,7 +7330,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="p">)</span>
 
     <span class="c1"># Step 6: Process each resolved bgp_session</span>
-    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;exists&quot;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="k">else</span><span class="p">:</span>
@@ -7369,7 +7369,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="k">continue</span>
 
         <span class="c1"># Dry run — report name and move on (step 6j)</span>
-        <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">result</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
             <span class="k">continue</span>
 

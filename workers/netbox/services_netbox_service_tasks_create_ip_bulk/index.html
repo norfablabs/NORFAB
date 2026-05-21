@@ -5730,6 +5730,12 @@ nf#
     <div class="doc doc-contents first">
 
         <p>Bulk assigns IP addresses to interfaces of specified devices.</p>
+<p>.. warning::</p>
+<pre><code>**Dry-run limitation**: when ``dry_run=True``, ``mask_len`` is ignored and
+the same candidate IP address (taken directly from the parent prefix using
+the parent prefix mask length) is returned for every interface — no child
+subnets are created.
+</code></pre>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5768,7 +5774,8 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The IP prefix or a dictionary containing prefix details.</p>
+                <p>The prefix to allocate IPs from; IPv4/IPv6 network
+string, prefix description, or dict with pynetbox filter keys.</p>
               </div>
             </td>
             <td>
@@ -5784,7 +5791,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A list of device names to process. Defaults to None.</p>
+                <p>List of device names to assign IP addresses to.</p>
               </div>
             </td>
             <td>
@@ -5800,7 +5807,8 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A list of specific interfaces to target. Defaults to None.</p>
+                <p>List of specific interface names to target.
+Takes precedence over <code>interface_regex</code> when both are provided.</p>
               </div>
             </td>
             <td>
@@ -5816,7 +5824,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A regex pattern to match interfaces. Defaults to None.</p>
+                <p>Regex pattern to match interface names.</p>
               </div>
             </td>
             <td>
@@ -5828,11 +5836,11 @@ nf#
                 <code>instance</code>
             </td>
             <td>
-                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The instance name to use. Defaults to None.</p>
+                <p>The NetBox instance name to use.</p>
               </div>
             </td>
             <td>
@@ -5841,18 +5849,211 @@ nf#
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>kwargs</code>
+                <code>dry_run</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span></code>
+                  <code><span title="bool">bool</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Additional arguments to pass to the <code>create_ip</code> method calls.</p>
+                <p>If True, preview changes without committing to NetBox.</p>
               </div>
             </td>
             <td>
-                  <code>{}</code>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>branch</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NetBox branching plugin branch name to use.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>description</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description for the allocated IP addresses.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vrf</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>VRF name for the IP addresses.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tags</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of tags to associate with the IP addresses.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dns_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>DNS name for the IP addresses.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tenant</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Tenant name to associate with the IP addresses.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>comments</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional comments for the IP addresses.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>role</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Role for the IP addresses, e.g. 'loopback', 'anycast'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>status</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Status for the IP addresses, e.g. 'active', 'reserved', 'deprecated'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>is_primary</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, set each IP as the primary IP for its device.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>mask_len</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mask length for the IP addresses; creates a child subnet
+of this length within the parent prefix. Ignored when <code>dry_run=True</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>create_peer_ip</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, creates an IP address for the link peer interface.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
       </tbody>
@@ -5874,7 +6075,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A Result object containing the task details, results, and resources.</p>
+                <p>A Result object containing per-device, per-interface IP allocation results.</p>
               </div>
             </td>
           </tr>
@@ -5882,81 +6083,120 @@ nf#
     </table>
 
 
-<details class="notes" open>
-  <summary>Notes</summary>
-  <ul>
-<li>If both <code>interface_list</code> and <code>interface_regex</code> are provided, <code>interface_list</code> takes precedence.</li>
-<li>The <code>prefix</code> parameter can be a string representing the prefix or a dictionary with additional details.</li>
-</ul>
-</details>
-
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()}</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpBulkInput</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_ip_bulk</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
@@ -5966,26 +6206,56 @@ nf#
     <span class="n">interface_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">interface_regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vrf</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dns_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tenant</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">comments</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">role</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_primary</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask_len</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">create_peer_ip</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Bulk assigns IP addresses to interfaces of specified devices.</span>
 
+<span class="sd">    .. warning::</span>
+
+<span class="sd">        **Dry-run limitation**: when ``dry_run=True``, ``mask_len`` is ignored and</span>
+<span class="sd">        the same candidate IP address (taken directly from the parent prefix using</span>
+<span class="sd">        the parent prefix mask length) is returned for every interface — no child</span>
+<span class="sd">        subnets are created.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        job (Job): The job instance used for logging and tracking the task.</span>
-<span class="sd">        prefix (Union[str, dict]): The IP prefix or a dictionary containing prefix details.</span>
-<span class="sd">        devices (list[str], optional): A list of device names to process. Defaults to None.</span>
-<span class="sd">        interface_list (list[str], optional): A list of specific interfaces to target. Defaults to None.</span>
-<span class="sd">        interface_regex (str, optional): A regex pattern to match interfaces. Defaults to None.</span>
-<span class="sd">        instance (Union[None, str], optional): The instance name to use. Defaults to None.</span>
-<span class="sd">        kwargs (dict, optional): Additional arguments to pass to the `create_ip` method calls.</span>
+<span class="sd">        prefix (Union[str, dict]): The prefix to allocate IPs from; IPv4/IPv6 network</span>
+<span class="sd">            string, prefix description, or dict with pynetbox filter keys.</span>
+<span class="sd">        devices (list[str], optional): List of device names to assign IP addresses to.</span>
+<span class="sd">        interface_list (list[str], optional): List of specific interface names to target.</span>
+<span class="sd">            Takes precedence over `interface_regex` when both are provided.</span>
+<span class="sd">        interface_regex (str, optional): Regex pattern to match interface names.</span>
+<span class="sd">        instance (str, optional): The NetBox instance name to use.</span>
+<span class="sd">        dry_run (bool, optional): If True, preview changes without committing to NetBox.</span>
+<span class="sd">        branch (str, optional): NetBox branching plugin branch name to use.</span>
+<span class="sd">        description (str, optional): Description for the allocated IP addresses.</span>
+<span class="sd">        vrf (str, optional): VRF name for the IP addresses.</span>
+<span class="sd">        tags (list, optional): List of tags to associate with the IP addresses.</span>
+<span class="sd">        dns_name (str, optional): DNS name for the IP addresses.</span>
+<span class="sd">        tenant (str, optional): Tenant name to associate with the IP addresses.</span>
+<span class="sd">        comments (str, optional): Additional comments for the IP addresses.</span>
+<span class="sd">        role (str, optional): Role for the IP addresses, e.g. &#39;loopback&#39;, &#39;anycast&#39;.</span>
+<span class="sd">        status (str, optional): Status for the IP addresses, e.g. &#39;active&#39;, &#39;reserved&#39;, &#39;deprecated&#39;.</span>
+<span class="sd">        is_primary (bool, optional): If True, set each IP as the primary IP for its device.</span>
+<span class="sd">        mask_len (int, optional): Mask length for the IP addresses; creates a child subnet</span>
+<span class="sd">            of this length within the parent prefix. Ignored when ``dry_run=True``.</span>
+<span class="sd">        create_peer_ip (bool, optional): If True, creates an IP address for the link peer interface.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: A Result object containing the task details, results, and resources.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        - If both `interface_list` and `interface_regex` are provided, `interface_list` takes precedence.</span>
-<span class="sd">        - The `prefix` parameter can be a string representing the prefix or a dictionary with additional details.</span>
+<span class="sd">        Result: A Result object containing per-device, per-interface IP allocation results.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -6014,9 +6284,24 @@ nf#
                 <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
                 <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
                 <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
+                <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">vrf</span><span class="o">=</span><span class="n">vrf</span><span class="p">,</span>
+                <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span>
+                <span class="n">dns_name</span><span class="o">=</span><span class="n">dns_name</span><span class="p">,</span>
+                <span class="n">tenant</span><span class="o">=</span><span class="n">tenant</span><span class="p">,</span>
+                <span class="n">comments</span><span class="o">=</span><span class="n">comments</span><span class="p">,</span>
+                <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+                <span class="n">is_primary</span><span class="o">=</span><span class="n">is_primary</span><span class="p">,</span>
+                <span class="n">mask_len</span><span class="o">=</span><span class="n">mask_len</span><span class="p">,</span>
+                <span class="n">create_peer_ip</span><span class="o">=</span><span class="n">create_peer_ip</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="n">interface</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_ip</span><span class="o">.</span><span class="n">result</span>
+
+    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
