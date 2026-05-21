@@ -14,6 +14,10 @@
 10. Fix create ip when create peer ip is true, check if mask len 32 or 128 raise error in that case - can not create peer ip for /32 or /128 prefixes
 11. Adding `is_timed_out` method to worker Job object to alow monitor job time out from inside tasks
 
+## FEATURES
+
+1. Adding brief mode to get interfaces to return only essential interfaces data
+
 ---
 
 # 0.18.0

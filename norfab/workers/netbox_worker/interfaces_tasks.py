@@ -16,6 +16,79 @@ from .netbox_worker_utilities import resolve_vrf, resolve_ip
 log = logging.getLogger(__name__)
 
 
+def make_interfaces_brief(result: dict) -> dict:
+    """
+    Strip full interface data down to essential fields for MCP/LLM context window optimisation.
+
+    Returned per-interface keys: id, name, description, type (value string), enabled,
+    ip_addresses (id + address), connected_endpoints (device_name, device_id, id, name),
+    untagged_vlan (id, name, vid), tagged_vlans (id, name, vid), custom_fields, vrf.
+    """
+    brief_result = {}
+    for device_name, interfaces in result.items():
+        brief_result[device_name] = {}
+        for intf_name, intf in (interfaces or {}).items():
+            intf_type = intf.get("type")
+            if isinstance(intf_type, dict):
+                intf_type = intf_type.get("value")
+
+            untagged_vlan = None
+            if isinstance(intf.get("untagged_vlan"), dict):
+                untagged_vlan = {
+                    "id": intf["untagged_vlan"]["id"],
+                    "name": intf["untagged_vlan"]["name"],
+                    "vid": intf["untagged_vlan"]["vid"],
+                }
+
+            vrf = None
+            if isinstance(intf.get("vrf"), dict):
+                vrf = {
+                    "id": intf["vrf"]["id"],
+                    "name": intf["vrf"]["name"],
+                }
+
+            brief_result[device_name][intf_name] = {
+                "id": intf.get("id"),
+                "name": intf.get("name"),
+                "description": intf.get("description"),
+                "type": intf_type,
+                "enabled": intf.get("enabled"),
+                "ip_addresses": [
+                    {
+                        "id": ip.get("id"),
+                        "address": ip.get("address"),
+                        "family": ip.get("family", {}).get("label"),
+                    }
+                    for ip in (intf.get("ip_addresses") or [])
+                ],
+                "connected_endpoints": [
+                    {
+                        "device_name": (
+                            ep.get("device", {}).get("name")
+                            if isinstance(ep.get("device"), dict)
+                            else None
+                        ),
+                        "device_id": (
+                            ep.get("device", {}).get("id")
+                            if isinstance(ep.get("device"), dict)
+                            else None
+                        ),
+                        "id": ep.get("id"),
+                        "name": ep.get("name"),
+                    }
+                    for ep in (intf.get("connected_endpoints") or [])
+                ],
+                "untagged_vlan": untagged_vlan,
+                "tagged_vlans": [
+                    {"id": v.get("id"), "name": v.get("name"), "vid": v.get("vid")}
+                    for v in (intf.get("tagged_vlans") or [])
+                ],
+                "custom_fields": intf.get("custom_fields"),
+                "vrf": vrf,
+            }
+    return brief_result
+
+
 class InterfaceTypeEnum(str, Enum):
     virtual = "virtual"
     other = "other"
@@ -464,7 +537,7 @@ class NetboxInterfacesTasks:
             cache: ``True`` - use cache if up to date; ``False`` - skip cache;
                 ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check
             brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context
-                window optimisation. Full data is still fetched; brief mode only affects what is returned.
+                window optimization. Full data is still fetched; brief mode only affects what is returned.
 
         Returns:
             dict: Dictionary keyed by device name with interface details.
@@ -648,71 +721,9 @@ class NetboxInterfacesTasks:
                     )
 
         if brief:
-            ret.result = self._make_interfaces_brief(ret.result)
+            ret.result = make_interfaces_brief(ret.result)
 
         return ret
-
-    @staticmethod
-    def _make_interfaces_brief(result: dict) -> dict:
-        """Strip full interface data down to essential fields for MCP/LLM context window optimisation.
-
-        Returned per-interface keys: id, name, description, type (value string), enabled,
-        ip_addresses (id + address), connected_endpoints (device_name, device_id, id, name),
-        link_peers (device_name, device_id, id, name), untagged_vlan (id, name, vid),
-        tagged_vlans (id, name, vid), custom_fields.
-        """
-        brief_result = {}
-        for device_name, interfaces in result.items():
-            brief_result[device_name] = {}
-            for intf_name, intf in (interfaces or {}).items():
-                intf_type = intf.get("type")
-                if isinstance(intf_type, dict):
-                    intf_type = intf_type.get("value")
-
-                untagged_vlan = intf.get("untagged_vlan")
-                if isinstance(untagged_vlan, dict):
-                    untagged_vlan = {
-                        "id": untagged_vlan.get("id"),
-                        "name": untagged_vlan.get("name"),
-                        "vid": untagged_vlan.get("vid"),
-                    }
-
-                brief_result[device_name][intf_name] = {
-                    "id": intf.get("id"),
-                    "name": intf.get("name"),
-                    "description": intf.get("description"),
-                    "type": intf_type,
-                    "enabled": intf.get("enabled"),
-                    "ip_addresses": [
-                        {"id": ip.get("id"), "address": ip.get("address")}
-                        for ip in (intf.get("ip_addresses") or [])
-                    ],
-                    "connected_endpoints": [
-                        {
-                            "device_name": ep.get("device", {}).get("name") if isinstance(ep.get("device"), dict) else None,
-                            "device_id": ep.get("device", {}).get("id") if isinstance(ep.get("device"), dict) else None,
-                            "id": ep.get("id"),
-                            "name": ep.get("name"),
-                        }
-                        for ep in (intf.get("connected_endpoints") or [])
-                    ],
-                    "link_peers": [
-                        {
-                            "device_name": peer.get("device", {}).get("name") if isinstance(peer.get("device"), dict) else None,
-                            "device_id": peer.get("device", {}).get("id") if isinstance(peer.get("device"), dict) else None,
-                            "id": peer.get("id"),
-                            "name": peer.get("name"),
-                        }
-                        for peer in (intf.get("link_peers") or [])
-                    ],
-                    "untagged_vlan": untagged_vlan,
-                    "tagged_vlans": [
-                        {"id": v.get("id"), "name": v.get("name"), "vid": v.get("vid")}
-                        for v in (intf.get("tagged_vlans") or [])
-                    ],
-                    "custom_fields": intf.get("custom_fields"),
-                }
-        return brief_result
 
     @Task(
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
