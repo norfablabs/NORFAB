@@ -312,3 +312,34 @@ class NetboxDevicesTasks:
             )
 
         return ret
+
+    @Task(
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
+        # TODO input=DeviceCheckSyncInput model
+        # TODO output=DeviceCheckSyncOutput model
+    )
+    def check_sync(
+        self,
+        job: Job,
+        instance: Union[None, str] = None,
+        timeout: int = 60,
+        devices: Union[None, list] = None,
+        branch: str = None,
+        **kwargs: Any,
+    ) -> Result:
+        """
+        Task to check if Netbox device data is in sync with device live data.
+
+        kwargs = dictionary of Fx filters for nornir similar to sync_device_ip task usage
+        """
+
+        # TODO:
+        # task should call sync_device_interfaces, sync_mac_addresses, sync_device_ip, sync_bgp_peerings in dry run mode and produce
+        # a resulting report dictionary indicating what items are in sync and what are not, result diff attribute should contain 
+        # discovered differences details
+        #
+        # Create tests to validate check sync behaviour
+        # 
+        # Create PICLE shell to work with this task from cmmand line
+        # 
+        # Create documentation for this new task

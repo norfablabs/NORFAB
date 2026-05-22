@@ -68,33 +68,3 @@ class NornirHostsFilters(BaseModel, extra="forbid"):
             if k.startswith("F"):
                 data[k] = str(data[k])
         return data
-
-
-# -----------------------------------------------------------------------------------------
-# get_nornir_hosts Task Pydantic Models
-# -----------------------------------------------------------------------------------------
-
-
-class GetNornirHosts(NornirHostsFilters, extra="forbid"):
-    """
-    Pydantic model for Nornir get_nornir_hosts task.
-    """
-
-    job: object = Field(None, description="Job instance running this task")
-    details: Optional[StrictBool] = Field(
-        None, description="get_nornir_hosts task input arguments schema"
-    )
-
-
-class HostDetails(BaseModel, extra="forbid"):
-    platform: StrictStr = Field(None, description="Host's platform name")
-    hostname: StrictStr = Field(None, description="Host's hostname")
-    port: StrictStr = Field(None, description="Host's port to initiate connection with")
-    groups: List[StrictStr] = Field(None, description="Host's groups")
-    username: StrictStr = Field(None, description="Host's username")
-
-
-class GetNornirHostsResponse(Result):
-    result: Union[List[StrictStr], Dict[StrictStr, HostDetails], None] = Field(
-        None, description="get_nornir_host results schema"
-    )
