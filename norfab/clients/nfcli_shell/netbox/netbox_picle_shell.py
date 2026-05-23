@@ -45,6 +45,8 @@ from .netbox_picle_shell_sync_ip_addresses import SyncIpAddressesShell
 from .netbox_picle_shell_sync_mac_addresses import SyncMacAddressesShell
 from .netbox_picle_shell_update_bgp_peering import UpdateBgpPeeringShell
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
+from .netbox_picle_shell_check_sync import CheckSyncCommands
+from .netbox_picle_shell_sync_all import SyncAllDevicesShell
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"
@@ -299,6 +301,10 @@ class SyncCommands(BaseModel):
         description="Sync BGP peering sessions",
         alias="bgp-peerings",
     )
+    all: SyncAllDevicesShell = Field(
+        None,
+        description="Sync all device data: interfaces, MAC addresses, IP addresses and BGP peerings",
+    )
 
     class PicleConfig:
         subshell = True
@@ -334,6 +340,11 @@ class NetboxServiceCommands(BaseModel):
     graphql: GrapQLCommands = Field(None, description="Query Netbox GrapQL API")
     get: GetCommands = Field(None, description="Query data from Netbox")
     sync: SyncCommands = Field(None, description="Sync Netbox data")
+    check_sync: CheckSyncCommands = Field(
+        None,
+        description="Check if Netbox data is in sync with live device state",
+        alias="check-sync",
+    )
     update: UpdateCommands = Field(None, description="Update Netbox data")
     cache: NetboxServiceCache = Field(
         None, description="Work with Netbox service cached data"

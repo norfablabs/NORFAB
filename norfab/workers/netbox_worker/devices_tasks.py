@@ -1,14 +1,81 @@
 import copy
 import logging
-from typing import Any, Union
+from typing import Any, List, Union
+
+from pydantic import Field, StrictBool, StrictInt, StrictStr
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .netbox_models import NetboxFastApiArgs
+from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
+
+
+# -----------------------------------------------------------------------
+# INPUT MODELS
+# -----------------------------------------------------------------------
+
+
+class CheckDeviceSyncInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox devices to check sync state for",
+    )
+    timeout: StrictInt = Field(
+        60,
+        description="Timeout in seconds for Nornir parse_ttp jobs",
+    )
+    check_interfaces: StrictBool = Field(
+        True,
+        description="Check interface sync state",
+        json_schema_extra={"presence": True},
+        alias="check-interfaces",
+    )
+    check_mac_addresses: StrictBool = Field(
+        True,
+        description="Check MAC address sync state",
+        json_schema_extra={"presence": True},
+        alias="check-mac-addresses",
+    )
+    check_ip_addresses: StrictBool = Field(
+        True,
+        description="Check IP address sync state",
+        json_schema_extra={"presence": True},
+        alias="check-ip-addresses",
+    )
+    check_bgp_peerings: StrictBool = Field(
+        True,
+        description="Check BGP peering sync state",
+        json_schema_extra={"presence": True},
+        alias="check-bgp-peerings",
+    )
+
+
+class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox devices to sync",
+    )
+    timeout: StrictInt = Field(
+        60,
+        description="Timeout in seconds for Nornir parse_ttp jobs",
+    )
+    dry_run: StrictBool = Field(
+        False,
+        description="Return diff without writing to NetBox",
+        json_schema_extra={"presence": True},
+        alias="dry-run",
+    )
+    process_deletions: StrictBool = Field(
+        False,
+        description="Process deletions for interfaces and BGP peerings",
+        json_schema_extra={"presence": True},
+        alias="process-deletions",
+    )
 
 
 # -----------------------------------------------------------------------
@@ -314,32 +381,316 @@ class NetboxDevicesTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
-        # TODO input=DeviceCheckSyncInput model
-        # TODO output=DeviceCheckSyncOutput model
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CheckDeviceSyncInput,
     )
-    def check_sync(
+    def check_device_sync(
         self,
         job: Job,
         instance: Union[None, str] = None,
         timeout: int = 60,
         devices: Union[None, list] = None,
         branch: str = None,
+        check_interfaces: bool = True,
+        check_mac_addresses: bool = True,
+        check_ip_addresses: bool = True,
+        check_bgp_peerings: bool = True,
         **kwargs: Any,
     ) -> Result:
         """
-        Task to check if Netbox device data is in sync with device live data.
+        Check if NetBox device data is in sync with live device data.
 
-        kwargs = dictionary of Fx filters for nornir similar to sync_device_ip task usage
+        Calls ``sync_device_interfaces``, ``sync_mac_addresses``, ``sync_device_ip``,
+        and ``sync_bgp_peerings`` in dry-run mode and produces a per-device report
+        indicating which items are in sync and which are not.
+
+        ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by
+        sub-task name (``interfaces``, ``mac_addresses``, ``ip_addresses``,
+        ``bgp_peerings``).
+
+        Args:
+            job: NorFab Job object.
+            instance (str, optional): NetBox instance name.
+            timeout (int): Timeout in seconds for Nornir jobs. Defaults to 60.
+            devices (list, optional): List of device names to check.
+            branch (str, optional): NetBox branching plugin branch name.
+            check_interfaces (bool): Check interface sync state. Defaults to True.
+            check_mac_addresses (bool): Check MAC address sync state. Defaults to True.
+            check_ip_addresses (bool): Check IP address sync state. Defaults to True.
+            check_bgp_peerings (bool): Check BGP peering sync state. Defaults to True.
+            **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
+
+        Returns:
+            Result: Per-device sync summary keyed by device name::
+
+                {
+                    "<device>": {
+                        "interfaces":    {"in_sync": True | False},
+                        "mac_addresses": {"in_sync": True | False},
+                        "ip_addresses":  {"in_sync": True | False},
+                        "bgp_peerings":  {"in_sync": True | False},
+                    }
+                }
         """
+        devices = devices or []
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:check_device_sync",
+            result={},
+            resources=[instance],
+            diff={},
+        )
 
-        # TODO:
-        # task should call sync_device_interfaces, sync_mac_addresses, sync_device_ip, sync_bgp_peerings in dry run mode and produce
-        # a resulting report dictionary indicating what items are in sync and what are not, result diff attribute should contain 
-        # discovered differences details
-        #
-        # Create tests to validate check sync behaviour
-        # 
-        # Create PICLE shell to work with this task from cmmand line
-        # 
-        # Create documentation for this new task
+        # resolve devices from Nornir filters
+        if kwargs:
+            nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
+            for host in nornir_hosts:
+                if host not in devices:
+                    devices.append(host)
+
+        if not devices:
+            ret.errors.append("no devices specified")
+            ret.failed = True
+            return ret
+
+        log.info(
+            f"{self.name} - Check device sync for {len(devices)} device(s) in '{instance}'"
+        )
+        job.event(f"checking sync state for {len(devices)} device(s)")
+
+        # initialize per-device result structure
+        for device in devices:
+            ret.result[device] = {}
+
+        # --- check interfaces ---
+        if check_interfaces:
+            job.event("checking interfaces sync state")
+            intf_result = self.sync_device_interfaces(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+            if intf_result.errors:
+                ret.errors.extend(intf_result.errors)
+            for device, data in intf_result.result.items():
+                in_sync = (
+                    not data.get("create")
+                    and not data.get("update")
+                    and not data.get("delete")
+                )
+                ret.result.setdefault(device, {})["interfaces"] = {"in_sync": in_sync}
+            ret.diff["interfaces"] = intf_result.result
+
+        # --- check MAC addresses ---
+        if check_mac_addresses:
+            job.event("checking MAC addresses sync state")
+            mac_result = self.sync_mac_addresses(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+            if mac_result.errors:
+                ret.errors.extend(mac_result.errors)
+            for device, data in mac_result.result.items():
+                in_sync = not data.get("created") and not data.get("updated")
+                ret.result.setdefault(device, {})["mac_addresses"] = {
+                    "in_sync": in_sync
+                }
+            ret.diff["mac_addresses"] = mac_result.result
+
+        # --- check IP addresses ---
+        if check_ip_addresses:
+            job.event("checking IP addresses sync state")
+            ip_result = self.sync_device_ip(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+            if ip_result.errors:
+                ret.errors.extend(ip_result.errors)
+            for device, data in ip_result.result.items():
+                in_sync = not data.get("created") and not data.get("updated")
+                ret.result.setdefault(device, {})["ip_addresses"] = {
+                    "in_sync": in_sync
+                }
+            ret.diff["ip_addresses"] = ip_result.result
+
+        # --- check BGP peerings ---
+        if check_bgp_peerings:
+            job.event("checking BGP peerings sync state")
+            bgp_result = self.sync_bgp_peerings(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+            if bgp_result.errors:
+                ret.errors.extend(bgp_result.errors)
+            for device, data in bgp_result.result.items():
+                in_sync = (
+                    not data.get("create")
+                    and not data.get("update")
+                    and not data.get("delete")
+                )
+                ret.result.setdefault(device, {})["bgp_peerings"] = {
+                    "in_sync": in_sync
+                }
+            ret.diff["bgp_peerings"] = bgp_result.result
+
+        log.info(
+            f"{self.name} - Check device sync complete for {len(ret.result)} device(s)"
+        )
+        return ret
+
+    @Task(
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=SyncAllInput,
+    )
+    def sync_all(
+        self,
+        job: Job,
+        instance: Union[None, str] = None,
+        timeout: int = 60,
+        devices: Union[None, list] = None,
+        branch: str = None,
+        dry_run: bool = False,
+        process_deletions: bool = False,
+        **kwargs: Any,
+    ) -> Result:
+        """
+        Synchronize all device data from live devices into NetBox in sequence:
+        interfaces → MAC addresses → IP addresses → BGP peerings.
+
+        Pass ``dry_run=True`` to preview changes without writing to NetBox.
+
+        ``Result.result`` is keyed by device name, then by category::
+
+            {
+                "<device>": {
+                    "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
+                    "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
+                    "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
+                    "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},
+                }
+            }
+
+        Args:
+            job: NorFab Job object.
+            instance (str, optional): NetBox instance name.
+            timeout (int): Timeout in seconds for Nornir jobs. Defaults to 60.
+            devices (list, optional): List of device names to sync.
+            branch (str, optional): NetBox branching plugin branch name.
+            dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
+            process_deletions (bool): Process deletions for interfaces and BGP peerings. Defaults to False.
+            **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
+
+        Returns:
+            Result: Per-device sync results keyed by device name and category.
+        """
+        devices = devices or []
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:sync_all",
+            result={},
+            resources=[instance],
+            diff={},
+        )
+
+        # resolve devices from Nornir filters
+        if kwargs:
+            nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
+            for host in nornir_hosts:
+                if host not in devices:
+                    devices.append(host)
+
+        if not devices:
+            ret.errors.append("no devices specified")
+            ret.failed = True
+            return ret
+
+        log.info(
+            f"{self.name} - Sync all for {len(devices)} device(s) in '{instance}', dry_run={dry_run}"
+        )
+        job.event(f"syncing all data for {len(devices)} device(s), dry_run={dry_run}")
+
+        # initialize per-device result structure
+        for device in devices:
+            ret.result[device] = {}
+
+        # --- sync interfaces ---
+        job.event("syncing interfaces")
+        intf_result = self.sync_device_interfaces(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                process_deletions=process_deletions,
+            )
+        if intf_result.errors:
+            ret.errors.extend(intf_result.errors)
+        for device, data in intf_result.result.items():
+            ret.result.setdefault(device, {})["interfaces"] = data
+
+        # --- sync MAC addresses ---
+        job.event("syncing MAC addresses")
+        mac_result = self.sync_mac_addresses(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+        if mac_result.errors:
+            ret.errors.extend(mac_result.errors)
+        for device, data in mac_result.result.items():
+            ret.result.setdefault(device, {})["mac_addresses"] = data
+
+        # --- sync IP addresses ---
+        job.event("syncing IP addresses")
+        ip_result = self.sync_device_ip(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+        if ip_result.errors:
+            ret.errors.extend(ip_result.errors)
+        for device, data in ip_result.result.items():
+            ret.result.setdefault(device, {})["ip_addresses"] = data
+
+        # --- sync BGP peerings ---
+        job.event("syncing BGP peerings")
+        bgp_result = self.sync_bgp_peerings(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                process_deletions=process_deletions,
+            )
+        if bgp_result.errors:
+            ret.errors.extend(bgp_result.errors)
+        for device, data in bgp_result.result.items():
+            ret.result.setdefault(device, {})["bgp_peerings"] = data
+
+        log.info(
+            f"{self.name} - Sync all complete for {len(ret.result)} device(s)"
+        )
+        return ret

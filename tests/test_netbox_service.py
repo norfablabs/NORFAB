@@ -10072,3 +10072,492 @@ class TestSyncMacAddresses:
                 assert (
                     self.RESULT_KEYS <= device_data.keys()
                 ), f"{worker}:{device} missing keys in branch-run result"
+
+
+class TestCheckDeviceSync:
+    """Test suite for check_device_sync task."""
+
+    DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    # Expected per-device sub-categories when all checks are enabled
+    ALL_CATEGORIES = {"interfaces", "mac_addresses", "ip_addresses", "bgp_peerings"}
+
+    def test_check_device_sync_result_structure(self, nfclient):
+        """Result has a dict per device with all four sync categories."""
+        ret = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={"devices": self.DEVICES},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.DEVICES:
+                assert device in res["result"], f"{worker} missing {device} in result"
+                device_data = res["result"][device]
+                assert (
+                    self.ALL_CATEGORIES <= device_data.keys()
+                ), f"{worker}:{device} missing categories: {self.ALL_CATEGORIES - device_data.keys()}"
+                for category in self.ALL_CATEGORIES:
+                    assert "in_sync" in device_data[category], (
+                        f"{worker}:{device}:{category} missing 'in_sync' key"
+                    )
+                    assert isinstance(device_data[category]["in_sync"], bool), (
+                        f"{worker}:{device}:{category} 'in_sync' is not a bool"
+                    )
+
+    def test_check_device_sync_diff_structure(self, nfclient):
+        """Result.diff contains sub-task data keyed by category name."""
+        ret = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={"devices": self.DEVICES},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert isinstance(res["diff"], dict), f"{worker} diff should be a dict"
+            for category in self.ALL_CATEGORIES:
+                assert category in res["diff"], (
+                    f"{worker} diff missing '{category}' key"
+                )
+                assert isinstance(res["diff"][category], dict), (
+                    f"{worker} diff['{category}'] should be a dict"
+                )
+
+    def test_check_device_sync_no_writes_to_netbox(self, nfclient):
+        """check_device_sync must never write to NetBox."""
+        pynb = get_pynetbox(nfclient)
+        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
+        serial_before = nb_device.serial
+
+        nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={"devices": ["ceos-spine-1"]},
+        )
+
+        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
+        assert nb_device.serial == serial_before, (
+            "check_device_sync modified NetBox serial - writes must not occur"
+        )
+
+    def test_check_device_sync_selective_interfaces_only(self, nfclient):
+        """Only interfaces category returned when other checks disabled."""
+        ret = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": self.DEVICES,
+                "check_interfaces": True,
+                "check_mac_addresses": False,
+                "check_ip_addresses": False,
+                "check_bgp_peerings": False,
+            },
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.DEVICES:
+                assert device in res["result"], f"{worker} missing {device} in result"
+                device_data = res["result"][device]
+                assert "interfaces" in device_data, f"{worker}:{device} missing interfaces"
+                assert "mac_addresses" not in device_data, (
+                    f"{worker}:{device} mac_addresses should not be present"
+                )
+                assert "ip_addresses" not in device_data, (
+                    f"{worker}:{device} ip_addresses should not be present"
+                )
+                assert "bgp_peerings" not in device_data, (
+                    f"{worker}:{device} bgp_peerings should not be present"
+                )
+            assert "interfaces" in res["diff"], f"{worker} diff missing interfaces"
+            assert "mac_addresses" not in res["diff"], (
+                f"{worker} diff should not have mac_addresses"
+            )
+
+    def test_check_device_sync_selective_mac_and_ip_only(self, nfclient):
+        """Only mac_addresses and ip_addresses categories returned."""
+        ret = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": self.DEVICES,
+                "check_interfaces": False,
+                "check_mac_addresses": True,
+                "check_ip_addresses": True,
+                "check_bgp_peerings": False,
+            },
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.DEVICES:
+                device_data = res["result"][device]
+                assert "interfaces" not in device_data, (
+                    f"{worker}:{device} interfaces should not be present"
+                )
+                assert "mac_addresses" in device_data, (
+                    f"{worker}:{device} missing mac_addresses"
+                )
+                assert "ip_addresses" in device_data, (
+                    f"{worker}:{device} missing ip_addresses"
+                )
+                assert "bgp_peerings" not in device_data, (
+                    f"{worker}:{device} bgp_peerings should not be present"
+                )
+
+    def test_check_device_sync_with_nornir_filter(self, nfclient):
+        """Devices resolved via Nornir FC filter."""
+        ret = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={"FC": "spine"},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.DEVICES:
+                assert device in res["result"], (
+                    f"{worker} device {device} missing from filter-resolved result"
+                )
+
+    def test_check_device_sync_empty_devices(self, nfclient):
+        """Empty devices list with no filters must fail with an error."""
+        ret = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={"devices": []},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["failed"], f"{worker} should fail when no devices specified"
+            assert res["errors"], f"{worker} should report errors"
+
+
+class TestSyncAll:
+    """Test suite for sync_all task — verifies that sync_all calls all four sync
+    sub-tasks in sequence (interfaces → MAC addresses → IP addresses → BGP peerings)
+    and produces idempotent, correct NetBox state.
+
+    Each test performs a full cleanup before and after via setup_method/teardown_method
+    and uses out-of-band pynetbox queries to verify NetBox state directly.
+    """
+
+    SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    ALL_CATEGORIES = {"interfaces", "mac_addresses", "ip_addresses", "bgp_peerings"}
+
+    # Known TEST_SYNC items from interfaces_parse_data.json for spine devices
+    SPINE1_TEST_INTF = "Loopback10"         # TEST_SYNC_LOOPBACK_IPV4 — created by sync_device_interfaces
+    SPINE1_TEST_MAC = "02:00:00:11:00:09"   # created by sync_mac_addresses on Ethernet9
+    SPINE1_TEST_IP = "10.3.15.33/30"        # created by sync_device_ip on Ethernet9
+
+    # ------------------------------------------------------------------ #
+    # Lifecycle                                                            #
+    # ------------------------------------------------------------------ #
+
+    def setup_method(self):
+        """Clean all sync-managed data from NetBox before each test."""
+        self._do_cleanup()
+
+    def teardown_method(self):
+        """Clean all sync-managed data from NetBox after each test."""
+        self._do_cleanup()
+
+    @staticmethod
+    def _do_cleanup():
+        """Remove TEST_SYNC interfaces, all MACs, TEST_SYNC IPs and BGP sessions
+        for spine devices using pynetbox directly."""
+        nb = get_pynetbox(None)
+        devices = ["ceos-spine-1", "ceos-spine-2"]
+        # BGP sessions
+        for device in devices:
+            for session in list(nb.plugins.bgp.session.filter(device=device)):
+                session.delete()
+        # TEST_SYNC IP addresses
+        for parent_prefix in ["10.3.0.0/16", "2001:beef::/32"]:
+            for ip in nb.ipam.ip_addresses.filter(parent=parent_prefix):
+                ip.delete()
+        # MAC addresses — delete by device filter (assigned MACs) and by known
+        # MAC address values to catch unassigned/orphaned MACs left by other tests
+        for device in devices:
+            for mac in nb.dcim.mac_addresses.filter(device=device):
+                mac.delete()
+        for mac_addr in ["02:00:00:11:00:09", "02:00:00:12:00:09"]:
+            for mac in nb.dcim.mac_addresses.filter(mac_address=mac_addr):
+                mac.delete()
+        # TEST_SYNC interfaces — delete children before parents to avoid 409 conflicts.
+        # Exclude 'Ethernet9': pre-existing interface updated by sync; needed by TestSyncMacAddresses.
+        for device in devices:
+            intfs = list(
+                nb.dcim.interfaces.filter(
+                    device=device, description__ic="TEST_SYNC"
+                )
+            )
+            children = [i for i in intfs if i.parent]
+            parents = [i for i in intfs if not i.parent]
+            for intf in children + parents:
+                intf.delete()
+        print("sync_all cleanup complete")
+
+    # ------------------------------------------------------------------ #
+    # Class-level helpers                                                  #
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _sync(nfclient, devices, **extra_kwargs):
+        """Run sync_all and return the result dict."""
+        return nfclient.run_job(
+            "netbox",
+            "sync_all",
+            workers="any",
+            kwargs={"devices": devices, **extra_kwargs},
+        )
+
+    @staticmethod
+    def _get_nb_intf(device, name):
+        """Fetch a single interface record from NetBox. Returns None if not found."""
+        return get_pynetbox(None).dcim.interfaces.get(device=device, name=name)
+
+    @staticmethod
+    def _get_nb_macs(device, interface):
+        """Return list of MAC address records for the given device interface."""
+        return list(
+            get_pynetbox(None).dcim.mac_addresses.filter(
+                device=device, interface=interface
+            )
+        )
+
+    @staticmethod
+    def _get_nb_ips(device, interface):
+        """Return list of IP address records for the given device interface."""
+        return list(
+            get_pynetbox(None).ipam.ip_addresses.filter(
+                device=device, interface=interface
+            )
+        )
+
+    # ------------------------------------------------------------------ #
+    # Basic smoke tests                                                    #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_all_result_structure(self, nfclient):
+        """All four categories present per device in dry_run mode; each value is a dict."""
+        ret = self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.SPINE_DEVICES:
+                assert device in res["result"], f"{worker} missing {device} in result"
+                device_data = res["result"][device]
+                assert self.ALL_CATEGORIES <= device_data.keys(), (
+                    f"{worker}:{device} missing categories: "
+                    f"{self.ALL_CATEGORIES - device_data.keys()}"
+                )
+                for category in self.ALL_CATEGORIES:
+                    assert isinstance(device_data[category], dict), (
+                        f"{worker}:{device}:{category} result should be a dict, "
+                        f"got {type(device_data[category])}"
+                    )
+
+    def test_sync_all_dry_run_no_writes(self, nfclient):
+        """dry_run=True must not write any interfaces, MACs, or IPs to NetBox."""
+        self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
+
+        nb = get_pynetbox(None)
+        # Interface must not exist
+        intf = nb.dcim.interfaces.get(
+            device="ceos-spine-1", name=self.SPINE1_TEST_INTF
+        )
+        assert intf is None, (
+            f"dry_run wrote interface {self.SPINE1_TEST_INTF!r} to NetBox"
+        )
+        # MAC must not exist
+        macs = list(
+            nb.dcim.mac_addresses.filter(
+                device="ceos-spine-1", mac_address=self.SPINE1_TEST_MAC
+            )
+        )
+        assert not macs, (
+            f"dry_run wrote MAC {self.SPINE1_TEST_MAC!r} to NetBox"
+        )
+        # IP must not exist
+        ips = list(
+            nb.ipam.ip_addresses.filter(
+                address=self.SPINE1_TEST_IP, device="ceos-spine-1"
+            )
+        )
+        assert not ips, (
+            f"dry_run wrote IP {self.SPINE1_TEST_IP!r} to NetBox"
+        )
+
+    # ------------------------------------------------------------------ #
+    # Live run — creates in NetBox                                         #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_all_creates_interfaces_in_netbox(self, nfclient):
+        """After cleanup, sync_all must create TEST_SYNC interfaces in NetBox;
+        Loopback10 must appear with correct description."""
+        ret = self._sync(nfclient, self.SPINE_DEVICES)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.SPINE_DEVICES:
+                assert device in res["result"], f"{worker} missing {device}"
+                intf_data = res["result"][device].get("interfaces", {})
+                assert intf_data.get("created"), (
+                    f"{worker}:{device} no interfaces created after cleanup"
+                )
+
+        # Out-of-band: verify Loopback10 exists in NetBox with correct description
+        nb_intf = self._get_nb_intf("ceos-spine-1", self.SPINE1_TEST_INTF)
+        assert nb_intf is not None, (
+            f"{self.SPINE1_TEST_INTF} not found in NetBox after sync_all"
+        )
+        assert nb_intf.description == "TEST_SYNC_LOOPBACK_IPV4", (
+            f"{self.SPINE1_TEST_INTF} description mismatch: got {nb_intf.description!r}"
+        )
+        assert nb_intf.type.value == "virtual", (
+            f"{self.SPINE1_TEST_INTF} type mismatch: got {nb_intf.type.value!r}"
+        )
+
+    def test_sync_all_creates_mac_addresses_in_netbox(self, nfclient):
+        """After cleanup, sync_all must create MAC addresses in NetBox;
+        spine-1 MAC must appear on Ethernet9."""
+        ret = self._sync(nfclient, self.SPINE_DEVICES)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            mac_data = res["result"]["ceos-spine-1"].get("mac_addresses", {})
+            assert mac_data.get("created"), (
+                f"{worker}:ceos-spine-1 no MACs created after cleanup"
+            )
+
+        # Out-of-band: verify spine-1 MAC exists on Ethernet9
+        macs = self._get_nb_macs("ceos-spine-1", "Ethernet9")
+        mac_addresses = [str(m.mac_address).lower() for m in macs]
+        assert self.SPINE1_TEST_MAC in mac_addresses, (
+            f"MAC {self.SPINE1_TEST_MAC!r} not found on ceos-spine-1:Ethernet9 "
+            f"after sync_all; found: {mac_addresses}"
+        )
+
+    def test_sync_all_creates_ip_addresses_in_netbox(self, nfclient):
+        """After cleanup, sync_all must create IP addresses in NetBox;
+        spine-1 Ethernet9 IP must appear."""
+        ret = self._sync(nfclient, self.SPINE_DEVICES)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            ip_data = res["result"]["ceos-spine-1"].get("ip_addresses", {})
+            assert ip_data.get("created"), (
+                f"{worker}:ceos-spine-1 no IPs created after cleanup"
+            )
+
+        # Out-of-band: verify spine-1 Ethernet9 IP exists in NetBox
+        ips = self._get_nb_ips("ceos-spine-1", "Ethernet9")
+        ip_addresses = [str(ip.address) for ip in ips]
+        assert self.SPINE1_TEST_IP in ip_addresses, (
+            f"IP {self.SPINE1_TEST_IP!r} not found on ceos-spine-1:Ethernet9 "
+            f"after sync_all; found: {ip_addresses}"
+        )
+
+    # ------------------------------------------------------------------ #
+    # Idempotency                                                          #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_all_idempotent(self, nfclient):
+        """Second sync_all run must report nothing created for interfaces, MACs, or IPs,
+        and all of them in_sync."""
+        # First run — creates everything
+        first = self._sync(nfclient, self.SPINE_DEVICES)
+        for worker, res in first.items():
+            assert not res["failed"], (
+                f"First sync_all failed for {worker}: {res.get('errors')}"
+            )
+
+        # Second run — must be fully in_sync for interfaces/MACs/IPs
+        ret = self._sync(nfclient, self.SPINE_DEVICES)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.SPINE_DEVICES:
+                intf_data = res["result"][device].get("interfaces", {})
+                mac_data = res["result"][device].get("mac_addresses", {})
+                ip_data = res["result"][device].get("ip_addresses", {})
+                assert not intf_data.get("created"), (
+                    f"{worker}:{device} unexpected interface creates on 2nd run: "
+                    f"{intf_data.get('created')}"
+                )
+                assert not mac_data.get("created"), (
+                    f"{worker}:{device} unexpected MAC creates on 2nd run: "
+                    f"{mac_data.get('created')}"
+                )
+                assert not ip_data.get("created"), (
+                    f"{worker}:{device} unexpected IP creates on 2nd run: "
+                    f"{ip_data.get('created')}"
+                )
+                assert intf_data.get("in_sync"), (
+                    f"{worker}:{device} no interfaces in_sync on 2nd run"
+                )
+                assert mac_data.get("in_sync"), (
+                    f"{worker}:{device} no MACs in_sync on 2nd run"
+                )
+                assert ip_data.get("in_sync"), (
+                    f"{worker}:{device} no IPs in_sync on 2nd run"
+                )
+
+    # ------------------------------------------------------------------ #
+    # Filtering                                                            #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_all_with_nornir_filter(self, nfclient):
+        """Devices resolved via Nornir FC filter must include both spine devices."""
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_all",
+            workers="any",
+            kwargs={"FC": "spine", "dry_run": True},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.SPINE_DEVICES:
+                assert device in res["result"], (
+                    f"{worker} device {device!r} missing from filter-resolved result"
+                )
+
+    # ------------------------------------------------------------------ #
+    # Error cases                                                          #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_all_empty_devices(self, nfclient):
+        """Empty devices list with no filters must fail with an error."""
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_all",
+            workers="any",
+            kwargs={"devices": []},
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["failed"], f"{worker} should fail when no devices specified"
+            assert res["errors"], f"{worker} should report errors"
