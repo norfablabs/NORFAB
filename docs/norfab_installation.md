@@ -45,19 +45,19 @@ will be noted in service deployment details.
     Install the latest development version directly from GitHub:
 
     ```
-    pip install git+https://github.com/norfablabs/NORFAB.git
+    pip install git+https://github.com/norfablabs/NORFAB.git@master
     ```
 
     With extras:
 
     ```
-    pip install "norfab[nfcli,nornirservice] @ git+https://github.com/norfablabs/NORFAB.git"
+    pip install "norfab[nfcli,nornirservice] @ git+https://github.com/norfablabs/NORFAB.git@master"
     ```
 
     **Upgrade** (re-installs the latest commit):
 
     ```
-    pip install --upgrade git+https://github.com/norfablabs/NORFAB.git
+    pip install --upgrade git+https://github.com/norfablabs/NORFAB.git@master
     ```
 
 === "Windows"
@@ -66,7 +66,7 @@ will be noted in service deployment details.
     choosing a system-wide or virtual-environment install, selects service extras,
     and scaffolds a ready-to-run inventory for you.
 
-    **Step 1** — Download [install_norfab_windows.ps1](https://raw.githubusercontent.com/norfablabs/NORFAB/main/install_norfab_windows.ps1)
+    **Step 1** — Download [install_norfab_windows.ps1](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_windows.ps1)
     and move it into the folder where you want to install NorFab, then open PowerShell in that folder.
 
     **Step 2** — Unblock the file so Windows allows it to run, then execute it:
@@ -80,7 +80,7 @@ will be noted in service deployment details.
     (downloads, unblocks, and runs automatically):
 
     ```powershell
-    powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/main/install_norfab_windows.ps1' -OutFile \"$env:TEMP\install_norfab.ps1\"; & \"$env:TEMP\install_norfab.ps1\""
+    powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile \"$env:TEMP\install_norfab.ps1\"; & \"$env:TEMP\install_norfab.ps1\""
     ```
 
     !!! note "Prerequisite"

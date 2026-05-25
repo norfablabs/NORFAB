@@ -12,7 +12,7 @@
     *** HOW TO RUN THIS SCRIPT ***
 
     Option A - single command, downloads and runs directly from GitHub (recommended):
-        powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/main/install_norfab_windows.ps1' -OutFile \"$env:TEMP\install_norfab.ps1\"; & \"$env:TEMP\install_norfab.ps1\""
+        powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile \"$env:TEMP\install_norfab.ps1\"; & \"$env:TEMP\install_norfab.ps1\""
 
     Option B - if you have already downloaded the file:
         powershell -ExecutionPolicy Bypass -File .\install_norfab_windows.ps1
@@ -26,7 +26,7 @@
           Download: https://www.python.org/downloads/
 
 .EXAMPLE
-    powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/main/install_norfab_windows.ps1' -OutFile `"$env:TEMP\install_norfab.ps1`"; & `"$env:TEMP\install_norfab.ps1`""
+    powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile `"$env:TEMP\install_norfab.ps1`"; & `"$env:TEMP\install_norfab.ps1`""
 #>
 
 Set-StrictMode -Version Latest
@@ -155,6 +155,7 @@ hosts:
 "@
         }
         WorkersSection = @"
+
   nornir-*:
     - nornir/common.yaml
   nornir-worker-1:
@@ -186,6 +187,7 @@ instances:
 "@
         }
         WorkersSection = @"
+
   netbox-worker-1:
     - netbox/netbox-worker-1.yaml
 "@
@@ -218,6 +220,7 @@ uvicorn:
 "@
         }
         WorkersSection = @"
+
   fastapi-worker-1:
     - fastapi/fastapi-worker-1.yaml
 "@
@@ -240,6 +243,7 @@ llm_base_url: "http://127.0.0.1:11434"
 "@
         }
         WorkersSection = @"
+
   agent-worker-1:
     - agent/agent-worker-1.yaml
 "@
@@ -259,11 +263,18 @@ service: fastmcp
 host: "127.0.0.1"
 port: __FASTMCP_PORT__
 
+tools:
+  policy:
+    - service: "*"
+      tasks: ["*"]
+      action: allow
+
 fastmcp: {}
 uvicorn: {}
 "@
         }
         WorkersSection = @"
+
   fastmcp-worker-1:
     - fastmcp/fastmcp-worker-1.yaml
 "@
@@ -285,6 +296,7 @@ service: fakenos
 "@
         }
         WorkersSection = @"
+
   fakenos-worker-1:
     - fakenos/fakenos-worker-1.yaml
 "@
@@ -302,6 +314,7 @@ service: workflow
 "@
         }
         WorkersSection = @"
+
   workflow-worker-1:
     - workflow/workflow-worker-1.yaml
 "@
@@ -319,6 +332,7 @@ service: containerlab
 "@
         }
         WorkersSection = @"
+
   containerlab-worker-1:
     - containerlab/containerlab-worker-1.yaml
 "@
@@ -344,7 +358,7 @@ Write-Info  "  2. Let you choose which service extras to install"
 Write-Info  "  3. Create a NorFab environment folder with inventory files"
 Write-Host ""
 Write-Host "  TIP: share this one-liner with others to install NorFab:" -ForegroundColor DarkYellow
-Write-Info  "  powershell -ExecutionPolicy Bypass -Command `"iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/main/install_norfab_windows.ps1' -OutFile '`$env:TEMP\install_norfab.ps1'; & '`$env:TEMP\install_norfab.ps1'`""
+Write-Info  "  powershell -ExecutionPolicy Bypass -Command `"iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile '`$env:TEMP\install_norfab.ps1'; & '`$env:TEMP\install_norfab.ps1'`""
 Write-Host ""
 
 # ---------------------------------------------------------------------------
@@ -619,27 +633,94 @@ foreach ($svcName in $selectedServices) {
 }
 
 # ---------------------------------------------------------------------------
-# Step 7 - Activation hint
+# Step 7 - Validate generated YAML files
+# ---------------------------------------------------------------------------
+
+Write-Step "Validating generated YAML files..."
+$yamlValid = $true
+try {
+    & $pythonExe -c "import yaml" 2>$null
+    $yamlAvailable = $LASTEXITCODE -eq 0
+} catch {
+    $yamlAvailable = $false
+}
+
+if (-not $yamlAvailable) {
+    Write-Host "    [!] PyYAML not available — skipping validation. Run: pip install pyyaml" -ForegroundColor DarkYellow
+} else {
+    $filesToValidate = @($inventoryPath)
+    foreach ($svcName in $selectedServices) {
+        $svc = $Services | Where-Object { $_.Name -eq $svcName }
+        foreach ($fp in $svc.WorkerFiles.Keys) {
+            $filesToValidate += Join-Path $envDir $fp
+        }
+    }
+    foreach ($yf in $filesToValidate) {
+        $result = & $pythonExe -c "import yaml, sys; yaml.safe_load(open(sys.argv[1]).read())" $yf 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "    [!] Invalid YAML: $yf" -ForegroundColor Red
+            Write-Host "        $result" -ForegroundColor Red
+            $yamlValid = $false
+        } else {
+            Write-Host "    [ok] $yf" -ForegroundColor DarkGreen
+        }
+    }
+    if ($yamlValid) {
+        Write-Success "All YAML files are valid."
+    } else {
+        Write-Host "[!] Some YAML files have errors — review the files above before running NorFab." -ForegroundColor Red
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Step 8 - Activation hint
 # ---------------------------------------------------------------------------
 
 Write-Header "Installation Complete"
 
-if ($venvPath) {
-    $activateScript = Join-Path $venvPath "Scripts\Activate.ps1"
-    Write-Host "  To activate the virtual environment:" -ForegroundColor White
-    Write-Host "      . `"$activateScript`"" -ForegroundColor Cyan
-    Write-Host ""
+# Ask to cd into the project folder
+if ($envDir -ne ".") {
+    $doCd = Read-YesNo -Prompt "Change directory to '$envDir' now?" -Default $true
+} else {
+    $doCd = $false
 }
 
+# Ask to activate venv
+$doActivate = $false
+if ($venvPath) {
+    $doActivate = Read-YesNo -Prompt "Activate the virtual environment now?" -Default $true
+}
+
+if ($doCd)       { Set-Location $envDir }
+if ($doActivate) { $activateScript = Join-Path $venvPath "Scripts\Activate.ps1"; . $activateScript }
+
+Write-Host ""
 Write-Host "  To start NorFab:" -ForegroundColor White
 if ($venvPath) {
     $activateScript = Join-Path $venvPath "Scripts\Activate.ps1"
     Write-Host "      . `"$activateScript`"" -ForegroundColor Cyan
+    Write-Host "                                   # activate the virtual environment" -ForegroundColor DarkGray
 }
 if ($envDir -ne ".") {
     Write-Host "      cd `"$envDir`"" -ForegroundColor Cyan
 }
 Write-Host "      nfcli" -ForegroundColor Green
+Write-Host ""
+Write-Host "  nfcli will start the broker, all workers and an interactive shell." -ForegroundColor Gray
+Write-Host ""
+Write-Host "  Other useful commands:" -ForegroundColor White
+Write-Info  "  nfcli -b -l INFO               # broker only, with INFO logging"
+Write-Info  "  nfcli -w -l INFO               # workers only, with INFO logging"
+Write-Info  "  nfcli -c                        # client shell only (connect to a running broker)"
+Write-Info  "  nfcli --show-broker-shared-key # display broker public key for remote clients"
+Write-Info  "  nfcli --create-env <name>      # scaffold a new environment"
+Write-Host ""
+Write-Host "  Documentation:" -ForegroundColor White
+Write-Host "      https://docs.norfablabs.com/" -ForegroundColor DarkCyan
+Write-Host ""
+$line = "=" * 70
+Write-Host $line -ForegroundColor Cyan
+Write-Host ""
 Write-Host ""
 Write-Host "  nfcli will start the broker, all workers and an interactive shell." -ForegroundColor Gray
 Write-Host ""

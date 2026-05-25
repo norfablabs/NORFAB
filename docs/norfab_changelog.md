@@ -1,3 +1,13 @@
+# 0.18.2
+
+## FEATURES
+
+1. Added device check-sync task to Netbox service to check if device interfaces, ips, bgp, mac are in sync with Netbox
+2. Added device sync-all task to sync all data from live device into Netbox
+3. Adding powershell installation script and updating install instructions - this script install Norfab going through interactive installation process.
+
+---
+
 # 0.18.1
 
 ## CHANGES
