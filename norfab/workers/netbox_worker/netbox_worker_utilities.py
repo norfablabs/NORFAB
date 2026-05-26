@@ -33,14 +33,26 @@ def resolve_vrf(
 
 
 def resolve_ip(
-    address: Union[None, str], nb: Any, job: Job, ret: Result, worker_name: str
+    address: Union[None, str],
+    nb: Any,
+    job: Job,
+    ret: Result,
+    worker_name: str,
+    _lookup_cache: Union[None, dict] = None,
 ) -> Union[int, None]:
     """Resolve or create an IP address in IPAM, return its NetBox ID or None."""
     if not address:
         return None
+    if _lookup_cache is None:
+        _lookup_cache = {}
+    cache_key = ("ip", address)
+    if cache_key in _lookup_cache:
+        return _lookup_cache[cache_key]
     existing = list(nb.ipam.ip_addresses.filter(q=f"{address}/"))
     if existing:
-        return existing[0].id
+        ip_id = existing[0].id
+        _lookup_cache[cache_key] = ip_id
+        return ip_id
     # Try to find a containing prefix for mask length
     mask = None
     prefixes = list(nb.ipam.prefixes.filter(contains=address))
@@ -57,10 +69,12 @@ def resolve_ip(
         msg = f"created IP address '{address}/{mask}' in NetBox IPAM"
         job.event(msg)
         log.info(f"{worker_name} - {msg}")
+        _lookup_cache[cache_key] = new_ip.id
         return new_ip.id
     except Exception as e:
         msg = f"failed to create IP address '{address}/{mask}': {e}"
         job.event(msg, severity="ERROR")
         log.error(f"{worker_name} - {msg}")
         ret.errors.append(msg)
+        _lookup_cache[cache_key] = None
         return None

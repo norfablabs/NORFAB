@@ -1,3 +1,5 @@
+import logging
+
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import (
@@ -13,6 +15,8 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.core.inventory import merge_recursively
 from .nornir_models import NornirHostsFilters
+
+log = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------------------------------
 # Task Pydantic Models

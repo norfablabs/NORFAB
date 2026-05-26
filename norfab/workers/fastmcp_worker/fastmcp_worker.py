@@ -20,6 +20,25 @@ SERVICE = "fastmcp"
 log = logging.getLogger(__name__)
 
 
+def is_task_allowed_by_policy(
+    policy: list[dict[str, Any]], service: str, task_name: str
+) -> bool:
+    """
+    Return True when a NorFab service task is allowed by FastMCP tools policy.
+
+    Policy entries are evaluated in order; the first matching rule wins and the
+    default action is allow.
+    """
+    action = "allow"
+    for rule in policy:
+        if fnmatch(service, rule.get("service", "*")):
+            if any(fnmatch(task_name, p) for p in rule.get("tasks", ["*"])):
+                action = rule.get("action", "allow").lower()
+                break
+
+    return action != "reject"
+
+
 def service_tasks_discovery(
     worker: Any, cycles: int = 5, discover_service: str = "all"
 ) -> dict:
@@ -94,18 +113,10 @@ def service_tasks_discovery(
                 if task_tool["name"] in result[task["service"]]:
                     continue
                 # evaluate policy entries; first match wins, default is allow
-                if policy:
-                    action = "allow"  # default if no rule matches
-                    for rule in policy:
-                        if fnmatch(task["service"], rule.get("service", "*")):
-                            if any(
-                                fnmatch(task["name"], p)
-                                for p in rule.get("tasks", ["*"])
-                            ):
-                                action = rule.get("action", "allow")
-                                break
-                    if action == "reject":
-                        continue
+                if policy and not is_task_allowed_by_policy(
+                    policy, task["service"], task["name"]
+                ):
+                    continue
                 # save discovered task to return results
                 result[task["service"]][task_tool["name"]] = {
                     "tool": types.Tool(**task_tool),
@@ -306,6 +317,44 @@ class FastMCPWorker(NFPWorker):
             task=f"{self.name}:get_status",
         )
 
+    def get_allowed_task_call(self, name: str) -> tuple[str, str]:
+        """
+        Resolve an MCP tool name to a NorFab service/task pair and enforce policy.
+        """
+        try:
+            service_part, tool_part = name.split("__", 1)
+        except ValueError as exc:
+            raise ValueError(f"Invalid NorFab MCP tool name '{name}'") from exc
+
+        if not service_part.startswith("service_") or not tool_part.startswith(
+            "task_"
+        ):
+            raise ValueError(f"Invalid NorFab MCP tool name '{name}'")
+
+        service = service_part[8:]
+        tool_name = tool_part[5:]
+        if not service or not tool_name:
+            raise ValueError(f"Invalid NorFab MCP tool name '{name}'")
+
+        if service not in self.norfab_services_tasks:
+            raise ValueError(f"NorFab service '{service}' not found for tool '{name}'")
+
+        if name not in self.norfab_services_tasks[service]:
+            raise ValueError(f"NorFab MCP tool '{name}' is not registered")
+
+        task_name = self.norfab_services_tasks[service][name]["task"]["name"]
+        policy = self.fastmcp_inventory.get("tools", {}).get("policy", [])
+        if policy and not is_task_allowed_by_policy(policy, service, task_name):
+            log.warning(
+                f"Rejected MCP tool call '{name}' by policy: "
+                f"service='{service}', task='{task_name}'"
+            )
+            raise PermissionError(
+                f"MCP tool call '{name}' is rejected by FastMCP tools policy"
+            )
+
+        return service, task_name
+
     def fastmcp_start(self) -> None:
         """
         Starts the FastMCP server for the NorFab MCP application.
@@ -344,11 +393,7 @@ class FastMCPWorker(NFPWorker):
         async def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
             log.info(f"Calling tool '{name}' with arguments: '{arguments}'")
 
-            # form NorFab service and task names
-            service, tool_name = name.split("__")
-            service = service[8:]
-            tool_name = tool_name[5:]
-            task_name = self.norfab_services_tasks[service][name]["task"]["name"]
+            service, task_name = self.get_allowed_task_call(name)
 
             log.info(
                 f"Calling NorFab service '{service}' task '{task_name}' with arguments: '{arguments}'"

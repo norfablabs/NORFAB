@@ -6,6 +6,11 @@
 2. Added device sync-all task to sync all data from live device into Netbox
 3. Adding powershell installation script and updating install instructions - this script install Norfab going through interactive installation process.
 
+## ENHANCEMENTS
+
+1. Improving netbox Sync BGP peerings task to make better use of lookup cache for asn, vrf, rir, ip objects resolutions
+2. MCP service policy now enforced for tool calls not only for discovery
+
 ---
 
 # 0.18.1
