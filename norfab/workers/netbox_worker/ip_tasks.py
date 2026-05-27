@@ -61,7 +61,7 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         alias="ignore-ranges",
     )
     create_prefixes: StrictBool = Field(
-        False,
+        True,
         description="Create missing IP prefixes in NetBox for each discovered IP address",
         json_schema_extra={"presence": True},
         alias="create-prefixes",
@@ -332,6 +332,10 @@ class NetboxIpTasks:
         nb_device = None
         create_peer_ip_data = {}
         nb = self._get_pynetbox(instance, branch=branch)
+        job.event(
+            f"creating IP address in '{instance}' for "
+            f"'{device}:{interface}' from prefix '{prefix}', dry_run={dry_run}"
+        )
 
         # source parent prefix from Netbox
         if isinstance(prefix, str):
@@ -524,6 +528,7 @@ class NetboxIpTasks:
                 # add branch to results
                 if branch is not None:
                     ret.result["branch"] = branch
+                job.event(f"dry-run: would create IP address '{nb_ip}'")
                 return ret
             # create new IP
             else:
@@ -619,6 +624,7 @@ class NetboxIpTasks:
             if peer_ip.failed == False:
                 ret.result["peer"] = peer_ip.result
 
+        job.event(f"IP address task complete for '{str(nb_ip)}'")
         return ret
 
     @Task(
@@ -691,6 +697,9 @@ class NetboxIpTasks:
         ret = Result(
             task=f"{self.name}:create_ip_bulk", result={}, resources=[instance]
         )
+        job.event(
+            f"creating IP addresses in bulk for {len(devices)} device(s), dry_run={dry_run}"
+        )
 
         # get list of all interfaces
         interfaces = self.get_interfaces(
@@ -700,8 +709,16 @@ class NetboxIpTasks:
             interface_regex=interface_regex,
             instance=instance,
         )
+        if interfaces.errors:
+            job.event("failed to retrieve interfaces for bulk IP creation", severity="ERROR")
+            ret.errors.extend(interfaces.errors)
+            ret.failed = True
+            return ret
+        interface_count = sum(len(v) for v in interfaces.result.values())
+        job.event(f"retrieved {interface_count} interface(s) for bulk IP creation")
 
         # iterate over interfaces and assign IP addresses
+        job.event(f"processing {interface_count} interface(s) for bulk IP creation")
         for device, device_interfaces in interfaces.result.items():
             ret.result[device] = {}
             for interface in sorted(device_interfaces.keys()):
@@ -730,6 +747,7 @@ class NetboxIpTasks:
         if dry_run is True:
             ret.dry_run = True
 
+        job.event("bulk IP address creation task complete")
         return ret
 
     @Task(
@@ -746,7 +764,7 @@ class NetboxIpTasks:
         branch: str = None,
         anycast_ranges: Union[None, list] = None,
         ignore_ranges: Union[None, list] = None,
-        create_prefixes: bool = False,
+        create_prefixes: bool = True,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         filter_by_prefix: Union[None, str] = None,
@@ -852,19 +870,27 @@ class NetboxIpTasks:
 
         # source additional hosts from Nornir filters
         if kwargs:
+            job.event("resolving devices from Nornir filters")
             nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
             for host in nornir_hosts:
                 if host not in devices:
                     devices.append(host)
+            job.event(
+                f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
+                f"{len(devices)} total device(s) selected"
+            )
 
         if not devices:
-            ret.errors.append("no devices specified")
+            msg = "no devices specified"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
-        job.event(f"syncing IP addresses for {len(devices)} devices")
+        job.event(f"syncing IP addresses for {len(devices)} devices, dry_run={dry_run}")
 
         # filter out devices not defined in NetBox
+        job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {
             d.name: {
                 "id": d.id,
@@ -883,8 +909,10 @@ class NetboxIpTasks:
                 ret.errors.append(msg)
                 devices.remove(d)
         if not devices:
+            job.event("no valid NetBox devices remain after validation", severity="ERROR")
             ret.failed = True
             return ret
+        job.event(f"validated {len(devices)} device(s) in NetBox")
 
         # gather live interface data from Nornir parse_ttp
         job.event(f"retrieving live interfaces for {len(devices)} devices")
@@ -898,10 +926,13 @@ class NetboxIpTasks:
 
         # normalise live data from Nornir parse_ttp results into {device: {intf: intf_data}}
         # applying interface name and description filters at collection phase
+        job.event("normalising live interface IP data")
         normalised_live_all = {}
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
-                log.warning(f"{wname} - failed to parse devices")
+                msg = f"{wname} - failed to parse interface data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
                 continue
             for device_name, host_interfaces in wdata["result"].items():
                 filtered = {}
@@ -956,8 +987,13 @@ class NetboxIpTasks:
                         }
                     filtered[intf_name] = intf
                 normalised_live_all[device_name] = filtered
+        live_interface_count = sum(len(v) for v in normalised_live_all.values())
+        job.event(
+            f"normalised IP data from {live_interface_count} live interface(s)"
+        )
 
         # fetch interfaces data from NetBox to resolve interface IDs
+        job.event("fetching NetBox interfaces to resolve IP assignments")
         nb_interfaces_result = self.get_interfaces(
             job=job,
             instance=instance,
@@ -967,6 +1003,7 @@ class NetboxIpTasks:
             cache="refresh",
         )
         if nb_interfaces_result.errors:
+            job.event("failed to fetch NetBox interfaces for IP sync", severity="ERROR")
             ret.errors.extend(nb_interfaces_result.errors)
             ret.failed = True
             return ret
@@ -983,6 +1020,7 @@ class NetboxIpTasks:
         ret.result = device_results
 
         # collect all discovered IP addresses and prefixes
+        job.event("collecting live IP address and prefix candidates")
         all_ip_live = []
         all_prefixes_live = []
         for device_name, interfaces in normalised_live_all.items():
@@ -1021,9 +1059,14 @@ class NetboxIpTasks:
             log.info(
                 f"{self.name} - Sync device IP: no IP addresses found in live data"
             )
+            job.event("no IP addresses found in live data")
             return ret
+        job.event(
+            f"collected {len(all_ip_live)} live IP address candidate(s)"
+        )
 
         # fetch existing IP addresses from NetBox
+        job.event(f"fetching {len(all_ip_live)} matching IP address(es) from NetBox")
         nb_ips = [
             {
                 "id": ip.id,
@@ -1045,8 +1088,10 @@ class NetboxIpTasks:
                 fields="id,address,vrf,role,assigned_object",
             )
         ]
+        job.event(f"retrieved {len(nb_ips)} matching IP address object(s) from NetBox")
 
         # process IP and Prefixes
+        job.event("calculating IP address sync actions")
         bulk_update_ip = {}  # {(device, intf, ip): {ip data}}
         bulk_create_ip = {}  # {(device, intf, ip): {ip data}}
 
@@ -1121,7 +1166,12 @@ class NetboxIpTasks:
                     # ip exists but not assigned to any interface - update it
                     else:
                         ip_live["id"] = nb_ip["id"]
-                        bulk_update_ip[key] = ip_live
+                bulk_update_ip[key] = ip_live
+
+        job.event(
+            f"IP address sync actions: {len(bulk_create_ip)} create, "
+            f"{len(bulk_update_ip)} update"
+        )
 
         # make sure all devices present in results
         for key in list(bulk_create_ip) + list(bulk_update_ip):
@@ -1135,6 +1185,7 @@ class NetboxIpTasks:
             )
 
         if dry_run is True:
+            job.event("dry-run requested, returning IP address sync plan without changes")
             for key in bulk_create_ip:
                 device_name = key[0]
                 device_results[device_name]["created"].append(key[2])
@@ -1146,6 +1197,7 @@ class NetboxIpTasks:
 
         # check that update and create payloads have no non-anycast duplicate IPs
         # Netbox has a bug allowing to create duplicate IPs in single create request
+        job.event("checking IP address payloads for duplicate non-anycast addresses")
         ip_address_seen = {}  # {address: [key, ...]}
         for key, ip_data in {**bulk_create_ip, **bulk_update_ip}.items():
             addr = key[2]
@@ -1168,6 +1220,7 @@ class NetboxIpTasks:
 
         # update first, since existing IPs might change role to anycast
         if bulk_update_ip:
+            job.event(f"updating {len(bulk_update_ip)} IP address(es)")
             try:
                 nb.ipam.ip_addresses.update(list(bulk_update_ip.values()))
                 job.event(f"updated {len(bulk_update_ip)} IP addresses")
@@ -1180,9 +1233,12 @@ class NetboxIpTasks:
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
+        else:
+            job.event("no IP addresses to update")
 
         # create new IPs next
         if bulk_create_ip:
+            job.event(f"creating {len(bulk_create_ip)} IP address(es)")
             try:
                 nb.ipam.ip_addresses.create(list(bulk_create_ip.values()))
                 job.event(f"created {len(bulk_create_ip)} IP addresses")
@@ -1195,9 +1251,12 @@ class NetboxIpTasks:
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
+        else:
+            job.event("no IP addresses to create")
 
         # process prefixes - create only, no updates or deletions
         if create_prefixes and all_prefixes_live:
+            job.event(f"checking {len(all_prefixes_live)} prefix candidate(s)")
             nb_prefixes = {
                 (pfx.prefix, pfx.vrf.id if pfx.vrf else None)
                 for pfx in nb.ipam.prefixes.filter(
@@ -1220,6 +1279,7 @@ class NetboxIpTasks:
                     bulk_create_prefixes.append(payload)
                     seen_prefixes.add(pfx_key)
             if bulk_create_prefixes:
+                job.event(f"creating {len(bulk_create_prefixes)} prefix(es)")
                 try:
                     nb.ipam.prefixes.create(bulk_create_prefixes)
                     job.event(f"created {len(bulk_create_prefixes)} prefixes")
@@ -1228,5 +1288,11 @@ class NetboxIpTasks:
                     ret.errors.append(msg)
                     log.error(msg)
                     job.event(msg, severity="ERROR")
+            else:
+                job.event("no prefixes to create")
+        elif create_prefixes:
+            job.event("no prefix candidates found")
+
+        job.event("IP address sync complete")
 
         return ret

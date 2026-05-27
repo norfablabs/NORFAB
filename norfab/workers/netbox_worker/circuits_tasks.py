@@ -335,6 +335,7 @@ class NetboxCircuitsTasks:
 
             # return dry run result
             if dry_run is True:
+                job.event("dry-run requested, returning circuits cache freshness query")
                 ret.result["get_circuits_dry_run"] = last_updated.result
                 ret.dry_run = True
                 return ret
@@ -412,6 +413,7 @@ class NetboxCircuitsTasks:
 
             # return dry run result
             if dry_run is True:
+                job.event("dry-run requested, returning circuits query result")
                 ret.dry_run = True
                 return query_result
 
@@ -452,6 +454,9 @@ class NetboxCircuitsTasks:
                 interface_list=list(fetch_interfaces),
                 ip_addresses=True,
             ).result
+            job.event(
+                f"retrieved interface details for {len(fetch_devices)} device(s)"
+            )
             # map interfaces details to circuits
             for device_name, circuits in ret.result.items():
                 for circuit_id, ckt_data in circuits.items():
@@ -470,4 +475,9 @@ class NetboxCircuitsTasks:
                             f"{device_name}:{circuit_id} Failed to find '{interface_name}' interface details"
                         )
 
+        circuit_count = sum(len(circuits) for circuits in ret.result.values())
+        job.event(
+            f"retrieved circuits for {len(ret.result)} device(s), "
+            f"{circuit_count} circuit attachment(s)"
+        )
         return ret

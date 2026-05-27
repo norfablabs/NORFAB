@@ -167,6 +167,7 @@ class NetboxGraphqlTasks:
         ret = Result(task=f"{self.name}:graphql", resources=[instance])
 
         if dry_run is True:
+            job.event("dry-run requested, returning GraphQL request payload")
             ret.dry_run = True
             ret.result = {
                 "url": f"{nb_params['url']}/graphql/",
@@ -183,6 +184,10 @@ class NetboxGraphqlTasks:
         aggregated_data: dict[str, Any] = {}
         ssl_verify = nb_params.get("ssl_verify", True)
         nb_url = nb_params["url"]
+        job.event(
+            f"executing paginated GraphQL query against '{instance}' "
+            f"with page size {limit}"
+        )
 
         # paginate through all results, fetching grapqhl_max_workers pages per iteration
         while True:
@@ -222,6 +227,7 @@ class NetboxGraphqlTasks:
 
             # stop immediately if any page fetch failed — results would be incomplete
             if ret.failed:
+                job.event("GraphQL pagination stopped due to fetch errors", severity="ERROR")
                 break
 
             any_data_returned = False
@@ -251,6 +257,10 @@ class NetboxGraphqlTasks:
 
         if not ret.failed:
             ret.result = aggregated_data
+            total_items = sum(
+                len(value) for value in aggregated_data.values() if isinstance(value, list)
+            )
+            job.event(f"GraphQL query complete: {total_items} list item(s) retrieved")
 
         return ret
 
@@ -332,6 +342,7 @@ class NetboxGraphqlTasks:
             log.info(
                 f"{self.name} - GraphQL dry run, returning query payload without executing"
             )
+            job.event("dry-run requested, returning GraphQL query payload")
             ret.result = {
                 "url": f"{nb_params['url']}/graphql/",
                 "data": payload,
@@ -349,6 +360,7 @@ class NetboxGraphqlTasks:
         log.debug(
             f"{self.name} - sending GraphQL query '{payload}' to URL '{nb_params['url']}/graphql/'"
         )
+        job.event(f"executing GraphQL query against '{instance}'")
         req = requests.post(
             url=f"{nb_params['url']}/graphql/",
             headers={
@@ -374,6 +386,7 @@ class NetboxGraphqlTasks:
         if reply.get("errors"):
             msg = f"{self.name} - GrapQL query error '{reply['errors']}', query '{payload}'"
             log.error(msg)
+            job.event(msg, severity="ERROR")
             ret.errors.append(msg)
             if reply.get("data"):
                 ret.result = reply["data"]  # at least return some data
@@ -382,4 +395,5 @@ class NetboxGraphqlTasks:
         else:
             ret.result = reply["data"][obj]
 
+        job.event("GraphQL query complete")
         return ret

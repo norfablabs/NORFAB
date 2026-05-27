@@ -142,8 +142,10 @@ class NetboxContainerlabInventoryTasks:
             raise ValueError(f"Need ports to allocate, but '{ports}' given")
 
         # check Netbox status
+        job.event(f"checking NetBox status for '{instance}'")
         netbox_status = self.get_netbox_status(job=job, instance=instance)
         if netbox_status.result[instance]["status"] is False:
+            job.event(f"NetBox instance '{instance}' status check failed", severity="ERROR")
             ret.failed = True
             ret.messages = [f"Netbox status is no good: {netbox_status}"]
             return ret
@@ -160,6 +162,12 @@ class NetboxContainerlabInventoryTasks:
             instance=instance,
             cache=cache,
         )
+        if nb_devices.errors:
+            job.event("failed to fetch devices data from NetBox", severity="ERROR")
+            ret.errors.extend(nb_devices.errors)
+            ret.failed = True
+            return ret
+        job.event(f"processing {len(nb_devices.result)} device(s) for Containerlab inventory")
 
         # form Containerlab nodes inventory
         for device_name, device in nb_devices.result.items():
@@ -222,6 +230,7 @@ class NetboxContainerlabInventoryTasks:
                 f"devices - '{devices}', filters - '{filters}'"
             ]
             ret.errors = [msg]
+            job.event("no Containerlab nodes produced", severity="ERROR")
             return ret
 
         job.event("fetching connections data from Netbox")
@@ -230,6 +239,9 @@ class NetboxContainerlabInventoryTasks:
         nb_connections = self.get_connections(
             job=job, devices=list(nodes), instance=instance, cache=cache
         )
+        if nb_connections.errors:
+            job.event("connection retrieval completed with errors", severity="WARNING")
+            ret.errors.extend(nb_connections.errors)
         # save connections data to links inventory
         while nb_connections.result:
             device, device_connections = nb_connections.result.popitem()
@@ -283,6 +295,9 @@ class NetboxContainerlabInventoryTasks:
         nb_circuits = self.get_circuits(
             job=job, devices=list(nodes), instance=instance, cache=cache
         )
+        if nb_circuits.errors:
+            job.event("circuit retrieval completed with errors", severity="WARNING")
+            ret.errors.extend(nb_circuits.errors)
         # save circuits data to hosts' inventory
         while nb_circuits.result:
             device, device_circuits = nb_circuits.result.popitem()
@@ -364,4 +379,8 @@ class NetboxContainerlabInventoryTasks:
                             job.event(msg)
                             endpoint["interface"] = renamed
 
+        job.event(
+            f"Containerlab inventory build complete: {len(nodes)} node(s), "
+            f"{len(links)} link(s)"
+        )
         return ret

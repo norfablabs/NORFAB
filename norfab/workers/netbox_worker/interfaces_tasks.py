@@ -942,9 +942,12 @@ class NetboxInterfacesTasks:
             f"{self.name} - Update interfaces description: Updating descriptions for {len(devices)} device(s) in '{instance}'"
         )
 
-        job.event(f"updating interface descriptions for {len(devices)} device(s)")
+        job.event(
+            f"updating interface descriptions for {len(devices)} device(s), dry_run={dry_run}"
+        )
 
         if description_template:
+            job.event("rendering interface descriptions from connection data")
             # get list of all interfaces connections
             nb_connections = self.get_connections(
                 job=job,
@@ -1006,6 +1009,14 @@ class NetboxInterfacesTasks:
                         if dry_run is False:
                             nb_interface.save()
 
+        updated_count = sum(len(interfaces) for interfaces in ret.result.values())
+        if dry_run is True:
+            job.event(
+                f"dry-run: {updated_count} interface description update(s) calculated"
+            )
+        else:
+            job.event(f"updated {updated_count} interface description(s)")
+        job.event("interface description update task complete")
         return ret
 
     @Task(
@@ -1132,19 +1143,27 @@ class NetboxInterfacesTasks:
 
         # Source additional hosts from Nornir filters.
         if kwargs:
+            job.event("resolving devices from Nornir filters")
             nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
             for host in nornir_hosts:
                 if host not in devices:
                     devices.append(host)
+            job.event(
+                f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
+                f"{len(devices)} total device(s) selected"
+            )
 
         if not devices:
-            ret.errors.append("no devices specified")
+            msg = "no devices specified"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
-        job.event(f"syncing {len(devices)} devices")
+        job.event(f"syncing interfaces for {len(devices)} devices, dry_run={dry_run}")
 
         # filter out devices not define in Netbox
+        job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {
             d.name: {"id": d.id, "site_id": d.site.id, "name": d.name}
             for d in self.bulk_filter(
@@ -1158,8 +1177,14 @@ class NetboxInterfacesTasks:
                 job.event(msg, severity="ERROR")
                 ret.errors.append(msg)
                 devices.remove(d)
+        if not devices:
+            job.event("no valid NetBox devices remain after validation", severity="ERROR")
+            ret.failed = True
+            return ret
+        job.event(f"validated {len(devices)} device(s) in NetBox")
 
         # Gather NetBox source of truth with interface IP/MAC details.
+        job.event("fetching current interface data from NetBox")
         nb_interfaces_result = self.get_interfaces(
             job=job,
             instance=instance,
@@ -1169,11 +1194,13 @@ class NetboxInterfacesTasks:
             cache="refresh",
         )
         if nb_interfaces_result.errors:
+            job.event("failed to fetch NetBox interface data", severity="ERROR")
             ret.errors.extend(nb_interfaces_result.errors)
             ret.failed = True
             return ret
 
         # Normalize NetBox interface data per device.
+        job.event("normalising NetBox interface data")
         normalised_nb_all: dict = {}
         for device_name, interfaces in nb_interfaces_result.result.items():
             normalised_nb_all[device_name] = {}
@@ -1228,6 +1255,10 @@ class NetboxInterfacesTasks:
                     ),
                     "vrf": vrf_name,
                 }
+        nb_interface_count = sum(len(v) for v in normalised_nb_all.values())
+        job.event(
+            f"normalised {nb_interface_count} NetBox interface(s) after applying filters"
+        )
 
         # Gather live source of truth from Nornir parse_ttp.
         job.event(f"retrieving live interfaces for {len(devices)} devices")
@@ -1239,10 +1270,13 @@ class NetboxInterfacesTasks:
             timeout=timeout,
         )
         # Normalize live interface data per device.
+        job.event("normalising live interface data")
         normalised_live_all = {}
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
-                log.warning(f"{wname} - failed to parse devices")
+                msg = f"{wname} - failed to parse interface data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
                 continue
             for device_name, host_interfaces in wdata["result"].items():
                 normalised_live_all.setdefault(device_name, {})
@@ -1274,6 +1308,10 @@ class NetboxInterfacesTasks:
                         "qinq_svlan": data.get("qinq_svlan"),
                         "vrf": data.get("vrf"),
                     }
+        live_interface_count = sum(len(v) for v in normalised_live_all.values())
+        job.event(
+            f"normalised {live_interface_count} live interface(s) after applying filters"
+        )
 
         # remove devices that returned no parsing results
         for device_name in devices:
@@ -1283,11 +1321,13 @@ class NetboxInterfacesTasks:
                 job.event(msg, severity="ERROR")
                 _ = normalised_nb_all.pop(device_name)
         if not normalised_nb_all:
+            job.event("no interface parsing results collected for devices", severity="ERROR")
             ret.failed = True
             ret.errors.append("no interfaces parsing results collected for devices")
             return ret
 
         # Single diff on the full normalised datasets
+        job.event("calculating interface sync diff")
         full_diff = self.make_diff(normalised_live_all, normalised_nb_all)
 
         # remove interface type from updates
@@ -1299,8 +1339,18 @@ class NetboxInterfacesTasks:
                     # remove interface from updates if nothing to update
                     if not intf_updates:
                         _ = dev_diff["update"].pop(intf_name)
+        create_count = sum(len(actions["create"]) for actions in full_diff.values())
+        update_count = sum(len(actions["update"]) for actions in full_diff.values())
+        delete_count = sum(len(actions["delete"]) for actions in full_diff.values())
+        in_sync_count = sum(len(actions["in_sync"]) for actions in full_diff.values())
+        job.event(
+            "interface sync diff complete: "
+            f"{create_count} create, {update_count} update, "
+            f"{delete_count} delete, {in_sync_count} in sync"
+        )
 
         if dry_run is True:
+            job.event("dry-run requested, returning interface sync diff without changes")
             ret.result = full_diff
             ret.dry_run = True
             return ret
@@ -1324,6 +1374,7 @@ class NetboxInterfacesTasks:
         ret.result = device_results
 
         # create LAG interfaces
+        job.event("preparing LAG interface create payloads")
         bulk_create_lag_interfaces = []
         for device_name, actions in full_diff.items():
             nb_device = nb_devices_data[device_name]
@@ -1345,6 +1396,9 @@ class NetboxInterfacesTasks:
                         _lookup_cache=_lookup_cache,
                     )
                     bulk_create_lag_interfaces.append(payload)
+        job.event(
+            f"prepared {len(bulk_create_lag_interfaces)} LAG interface create payload(s)"
+        )
         if bulk_create_lag_interfaces:
             job.event(f"creating LAG interfaces")
             try:
@@ -1360,8 +1414,11 @@ class NetboxInterfacesTasks:
                 log.error(msg)
                 job.event(msg, severity="ERROR")
                 return ret
+        else:
+            job.event("no LAG interfaces to create")
 
         # re-fetch interface IDs after creating LAG interfaces
+        job.event("refreshing interface IDs after LAG interface creation")
         nb_intf_ids = {}
         for intf in self.bulk_filter(
             nb.dcim.interfaces, "device", devices, fields="id,name,device"
@@ -1369,6 +1426,7 @@ class NetboxInterfacesTasks:
             nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
 
         # create parent interfaces associating with LAG if required
+        job.event("preparing non-child/main interface create payloads")
         bulk_create_parent_interfaces = []
         for device_name, actions in full_diff.items():
             name_to_id = nb_intf_ids[device_name]
@@ -1391,6 +1449,9 @@ class NetboxInterfacesTasks:
                         _lookup_cache=_lookup_cache,
                     )
                     bulk_create_parent_interfaces.append(payload)
+        job.event(
+            f"prepared {len(bulk_create_parent_interfaces)} non-child/main interface create payload(s)"
+        )
         if bulk_create_parent_interfaces:
             job.event(f"creating non-child/main interfaces")
             try:
@@ -1408,8 +1469,11 @@ class NetboxInterfacesTasks:
                 log.error(msg)
                 job.event(msg, severity="ERROR")
                 return ret
+        else:
+            job.event("no non-child/main interfaces to create")
 
         # re-fetch interface IDs after creating parent interfaces
+        job.event("refreshing interface IDs after non-child/main interface creation")
         nb_intf_ids = {}
         for intf in self.bulk_filter(
             nb.dcim.interfaces, "device", devices, fields="id,name,device"
@@ -1417,6 +1481,7 @@ class NetboxInterfacesTasks:
             nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
 
         # create child interfaces associating with parent interfaces
+        job.event("preparing child interface create payloads")
         bulk_create_child_interfaces = []
         for device_name, actions in full_diff.items():
             name_to_id = nb_intf_ids[device_name]
@@ -1439,6 +1504,9 @@ class NetboxInterfacesTasks:
                         _lookup_cache=_lookup_cache,
                     )
                     bulk_create_child_interfaces.append(payload)
+        job.event(
+            f"prepared {len(bulk_create_child_interfaces)} child interface create payload(s)"
+        )
         if bulk_create_child_interfaces:
             job.event(f"creating child interfaces")
             try:
@@ -1456,8 +1524,11 @@ class NetboxInterfacesTasks:
                 log.error(msg)
                 job.event(msg, severity="ERROR")
                 return ret
+        else:
+            job.event("no child interfaces to create")
 
         # Build bulk_update_interfaces list from full_diff
+        job.event("preparing interface update payloads")
         bulk_update_interfaces = {}
         for device_name, actions in full_diff.items():
             nb_device = nb_devices_data[device_name]
@@ -1482,7 +1553,9 @@ class NetboxInterfacesTasks:
                     continue
                 payload["id"] = intf_id
                 bulk_update_interfaces[(device_name, intf_name)] = payload
+        job.event(f"prepared {len(bulk_update_interfaces)} interface update payload(s)")
         if bulk_update_interfaces:
+            job.event(f"updating {len(bulk_update_interfaces)} interface(s)")
             try:
                 nb.dcim.interfaces.update(list(bulk_update_interfaces.values()))
                 job.event(f"updated {len(bulk_update_interfaces)} interface(s)")
@@ -1495,6 +1568,8 @@ class NetboxInterfacesTasks:
                 log.error(msg)
                 job.event(msg, severity="ERROR")
                 return ret
+        else:
+            job.event("no interfaces to update")
 
         # Build bulk_delete_interfaces payload from full_diff
         bulk_delete_interfaces = {}  # keyed by intf id, values intf names
@@ -1511,7 +1586,13 @@ class NetboxInterfacesTasks:
                         "device": device_name,
                         "interface": intf_name,
                     }
+            job.event(f"prepared {len(bulk_delete_interfaces)} interface delete payload(s)")
+        elif delete_count:
+            job.event(
+                f"skipping {delete_count} interface deletion(s), process_deletions=False"
+            )
         if bulk_delete_interfaces:
+            job.event(f"deleting {len(bulk_delete_interfaces)} interface(s)")
             try:
                 nb.dcim.interfaces.delete(list(bulk_delete_interfaces.keys()))
                 job.event(f"deleted {len(bulk_delete_interfaces)} interface(s)")
@@ -1524,7 +1605,10 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
+        elif process_deletions:
+            job.event("no interfaces to delete")
 
+        job.event("interface sync complete")
         return ret
 
     @Task(
@@ -1606,19 +1690,27 @@ class NetboxInterfacesTasks:
 
         # source additional hosts from Nornir filters
         if kwargs:
+            job.event("resolving devices from Nornir filters")
             nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
             for host in nornir_hosts:
                 if host not in devices:
                     devices.append(host)
+            job.event(
+                f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
+                f"{len(devices)} total device(s) selected"
+            )
 
         if not devices:
-            ret.errors.append("no devices specified")
+            msg = "no devices specified"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
-        job.event(f"syncing MAC addresses for {len(devices)} devices")
+        job.event(f"syncing MAC addresses for {len(devices)} devices, dry_run={dry_run}")
 
         # filter out devices not defined in NetBox
+        job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {
             d.name: {"id": d.id, "name": d.name}
             for d in self.bulk_filter(
@@ -1633,8 +1725,10 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
                 devices.remove(d)
         if not devices:
+            job.event("no valid NetBox devices remain after validation", severity="ERROR")
             ret.failed = True
             return ret
+        job.event(f"validated {len(devices)} device(s) in NetBox")
 
         # gather live interface data from Nornir parse_ttp
         job.event(f"retrieving live interfaces for {len(devices)} devices")
@@ -1647,10 +1741,13 @@ class NetboxInterfacesTasks:
         )
 
         # collect all discovered MAC addresses applying interface and MAC filters
+        job.event("collecting live MAC address candidates")
         all_mac_live: dict = {}  # {mac: {"device": ..., "interface": ...}}
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
-                log.warning(f"{wname} - failed to parse devices")
+                msg = f"{wname} - failed to parse interface data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
                 continue
             for device_name, host_interfaces in wdata["result"].items():
                 for data in host_interfaces:
@@ -1680,9 +1777,12 @@ class NetboxInterfacesTasks:
             log.info(
                 f"{self.name} - Sync MAC addresses: no MAC addresses found in live data"
             )
+            job.event("no MAC addresses found in live data")
             return ret
+        job.event(f"collected {len(all_mac_live)} live MAC address candidate(s)")
 
         # fetch interfaces data from NetBox to resolve interface IDs
+        job.event("fetching NetBox interfaces to resolve MAC assignments")
         nb_interfaces_result = self.get_interfaces(
             job=job,
             instance=instance,
@@ -1692,6 +1792,7 @@ class NetboxInterfacesTasks:
             cache="refresh",
         )
         if nb_interfaces_result.errors:
+            job.event("failed to fetch NetBox interfaces for MAC sync", severity="ERROR")
             ret.errors.extend(nb_interfaces_result.errors)
             ret.failed = True
             return ret
@@ -1700,6 +1801,7 @@ class NetboxInterfacesTasks:
         # NetBox allows duplicate MAC entries; prefer assigned entries over
         # unassigned ones so that a conflicting assignment is not silently
         # overwritten by a later unassigned copy during dict construction.
+        job.event(f"fetching {len(all_mac_live)} matching MAC address object(s) from NetBox")
         nb_macs: dict = {}
         for _m in self.bulk_filter(
             nb.dcim.mac_addresses,
@@ -1721,6 +1823,7 @@ class NetboxInterfacesTasks:
                 _entry["interface"] is not None and nb_macs[_mac]["interface"] is None
             ):
                 nb_macs[_mac] = _entry
+        job.event(f"retrieved {len(nb_macs)} matching MAC address object(s) from NetBox")
 
         # per-device result tracking
         device_results = {
@@ -1737,6 +1840,7 @@ class NetboxInterfacesTasks:
         bulk_create_mac = []
 
         # process and compare live MACs versus NetBox MACs
+        job.event("calculating MAC address sync actions")
         for mac, mac_data in all_mac_live.items():
             device_name = mac_data["device"]
             intf_name = mac_data["interface"]
@@ -1789,11 +1893,18 @@ class NetboxInterfacesTasks:
                         }
                     )
 
+        job.event(
+            f"MAC address sync actions: {len(bulk_create_mac)} create, "
+            f"{len(bulk_update_mac)} update"
+        )
+
         if dry_run is True:
+            job.event("dry-run requested, returning MAC address sync plan without changes")
             ret.dry_run = True
             return ret
 
         if bulk_create_mac:
+            job.event(f"creating {len(bulk_create_mac)} MAC address(es)")
             try:
                 nb.dcim.mac_addresses.create(bulk_create_mac)
                 job.event(f"created {len(bulk_create_mac)} MAC addresses")
@@ -1805,7 +1916,10 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
+        else:
+            job.event("no MAC addresses to create")
         if bulk_update_mac:
+            job.event(f"updating {len(bulk_update_mac)} MAC address(es)")
             try:
                 nb.dcim.mac_addresses.update(bulk_update_mac)
                 job.event(f"updated {len(bulk_update_mac)} MAC addresses")
@@ -1817,5 +1931,8 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
+        else:
+            job.event("no MAC addresses to update")
 
+        job.event("MAC address sync complete")
         return ret

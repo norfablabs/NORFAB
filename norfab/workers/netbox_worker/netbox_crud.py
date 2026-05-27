@@ -509,6 +509,7 @@ class NetboxCrudTasks:
         )
 
         ret.result = {"created": len(created_dicts), "objects": created_dicts}
+        job.event(f"created {len(created_dicts)} {object_type}(s)")
         return ret
 
     @Task(
@@ -586,6 +587,10 @@ class NetboxCrudTasks:
                 "changes": diffs,
             }
             ret.dry_run = True
+            changed_count = sum(1 for item in diffs if item["changes"])
+            job.event(
+                f"dry-run: {changed_count} {object_type}(s) have pending change(s)"
+            )
             return ret
 
         job.event(f"updating {len(data_list)} {object_type}(s)")
@@ -609,6 +614,7 @@ class NetboxCrudTasks:
         )
 
         ret.result = {"updated": len(updated_dicts), "objects": updated_dicts}
+        job.event(f"updated {len(updated_dicts)} {object_type}(s)")
         return ret
 
     @Task(
@@ -672,6 +678,7 @@ class NetboxCrudTasks:
                 "would_delete": preview,
             }
             ret.dry_run = True
+            job.event(f"dry-run: found {len(preview)} {object_type}(s) to delete")
             return ret
 
         job.event(f"deleting {len(id_list)} {object_type}(s)")
@@ -689,6 +696,7 @@ class NetboxCrudTasks:
         )
 
         ret.result = {"deleted": len(deleted_ids), "deleted_ids": deleted_ids}
+        job.event(f"deleted {len(deleted_ids)} {object_type}(s)")
         return ret
 
     @Task(

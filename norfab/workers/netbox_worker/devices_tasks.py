@@ -268,9 +268,15 @@ class NetboxDevicesTasks:
         if datasource == "nornir":
             # source hosts list from Nornir
             if kwargs:
-                devices.extend(self.get_nornir_hosts(kwargs, timeout))
+                job.event("resolving devices from Nornir filters")
+                nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
+                devices.extend(nornir_hosts)
                 devices = list(set(devices))
-                job.event(f"syncing {len(devices)} devices")
+                job.event(
+                    f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
+                    f"{len(devices)} total device(s) selected"
+                )
+                job.event(f"syncing device facts for {len(devices)} devices, dry_run={dry_run}")
                 log.info(
                     f"{self.name} - sync_device_facts starting for {len(devices)} device(s): {', '.join(devices)}"
                 )
@@ -290,6 +296,10 @@ class NetboxDevicesTasks:
                     log.error(msg)
                     job.event(msg, severity="ERROR")
                     devices.remove(d)
+            if not devices:
+                job.event("no valid NetBox devices remain after validation", severity="ERROR")
+                ret.failed = True
+                return ret
             # iterate over devices in batches
             for i in range(0, len(devices), batch_size):
                 kwargs["FL"] = devices[i : i + batch_size]
@@ -305,6 +315,7 @@ class NetboxDevicesTasks:
 
                 # Collect devices to update in bulk
                 devices_to_update = []
+                job.event(f"processing facts for {len(kwargs['FL'])} device(s)")
 
                 for worker, results in data.items():
                     if results["failed"]:
@@ -378,6 +389,7 @@ class NetboxDevicesTasks:
                 f"'{datasource}' datasource service not supported"
             )
 
+        job.event("device facts sync complete")
         return ret
 
     @Task(
@@ -443,13 +455,20 @@ class NetboxDevicesTasks:
 
         # resolve devices from Nornir filters
         if kwargs:
+            job.event("resolving devices from Nornir filters")
             nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
             for host in nornir_hosts:
                 if host not in devices:
                     devices.append(host)
+            job.event(
+                f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
+                f"{len(devices)} total device(s) selected"
+            )
 
         if not devices:
-            ret.errors.append("no devices specified")
+            msg = "no devices specified"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
@@ -631,15 +650,16 @@ class NetboxDevicesTasks:
         # --- sync interfaces ---
         job.event("syncing interfaces")
         intf_result = self.sync_device_interfaces(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-                process_deletions=process_deletions,
-            )
+            job=job,
+            instance=instance,
+            dry_run=dry_run,
+            timeout=timeout,
+            devices=list(devices),
+            branch=branch,
+            process_deletions=process_deletions,
+        )
         if intf_result.errors:
+            job.event("interface sync completed with errors", severity="WARNING")
             ret.errors.extend(intf_result.errors)
         for device, data in intf_result.result.items():
             ret.result.setdefault(device, {})["interfaces"] = data
@@ -647,14 +667,15 @@ class NetboxDevicesTasks:
         # --- sync MAC addresses ---
         job.event("syncing MAC addresses")
         mac_result = self.sync_mac_addresses(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-            )
+            job=job,
+            instance=instance,
+            dry_run=dry_run,
+            timeout=timeout,
+            devices=list(devices),
+            branch=branch,
+        )
         if mac_result.errors:
+            job.event("MAC address sync completed with errors", severity="WARNING")
             ret.errors.extend(mac_result.errors)
         for device, data in mac_result.result.items():
             ret.result.setdefault(device, {})["mac_addresses"] = data
@@ -662,14 +683,15 @@ class NetboxDevicesTasks:
         # --- sync IP addresses ---
         job.event("syncing IP addresses")
         ip_result = self.sync_device_ip(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-            )
+            job=job,
+            instance=instance,
+            dry_run=dry_run,
+            timeout=timeout,
+            devices=list(devices),
+            branch=branch,
+        )
         if ip_result.errors:
+            job.event("IP address sync completed with errors", severity="WARNING")
             ret.errors.extend(ip_result.errors)
         for device, data in ip_result.result.items():
             ret.result.setdefault(device, {})["ip_addresses"] = data
@@ -677,15 +699,16 @@ class NetboxDevicesTasks:
         # --- sync BGP peerings ---
         job.event("syncing BGP peerings")
         bgp_result = self.sync_bgp_peerings(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-                process_deletions=process_deletions,
-            )
+            job=job,
+            instance=instance,
+            dry_run=dry_run,
+            timeout=timeout,
+            devices=list(devices),
+            branch=branch,
+            process_deletions=process_deletions,
+        )
         if bgp_result.errors:
+            job.event("BGP peerings sync completed with errors", severity="WARNING")
             ret.errors.extend(bgp_result.errors)
         for device, data in bgp_result.result.items():
             ret.result.setdefault(device, {})["bgp_peerings"] = data
@@ -693,4 +716,5 @@ class NetboxDevicesTasks:
         log.info(
             f"{self.name} - Sync all complete for {len(ret.result)} device(s)"
         )
+        job.event(f"sync all complete for {len(ret.result)} device(s)")
         return ret

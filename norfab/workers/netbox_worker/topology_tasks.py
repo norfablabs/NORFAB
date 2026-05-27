@@ -331,6 +331,7 @@ class NetboxTopologyTasks:
             device_filter_params["site"] = sites
 
         if dry_run is True:
+            job.event("dry-run requested, returning topology query parameters")
             intf_dry = self.netbox_graphql(
                 job=job,
                 query=TOPOLOGY_INTERFACES_QUERY,
@@ -384,6 +385,7 @@ class NetboxTopologyTasks:
             log.info(
                 f"{self.name} - Get topology: No devices found, returning empty topology"
             )
+            job.event("no devices found for topology")
             return ret
 
         # --- step 2: fetch interface connections for links ---
@@ -402,6 +404,7 @@ class NetboxTopologyTasks:
         )
 
         if query_result.failed:
+            job.event("failed to fetch topology interface connections", severity="ERROR")
             ret.failed = True
             ret.errors.extend(query_result.errors)
             return ret
@@ -409,6 +412,7 @@ class NetboxTopologyTasks:
         all_interfaces = (
             query_result.result.get("interface", []) if query_result.result else []
         )
+        job.event(f"processing {len(all_interfaces)} topology interface object(s)")
 
         # --- step 3: build deduplicated links ---
         seen_links: set = set()
@@ -477,5 +481,9 @@ class NetboxTopologyTasks:
         log.info(
             f"{self.name} - Get topology: Built topology with "
             f"{len(ret.result.nodes)} nodes and {len(ret.result.links)} links"
+        )
+        job.event(
+            f"topology build complete: {len(ret.result.nodes)} node(s), "
+            f"{len(ret.result.links)} link(s)"
         )
         return ret

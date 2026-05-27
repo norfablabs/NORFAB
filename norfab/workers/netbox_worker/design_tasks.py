@@ -457,8 +457,10 @@ class NetboxDesignTasks:
         )
         ret = Result(task=f"{self.name}:design_create", result={})
         nb = self._get_pynetbox(instance, branch=branch)
+        job.event(f"processing NetBox design data for '{instance}', dry_run={dry_run}")
 
         if self.is_url(context):
+            job.event("fetching design context from URL")
             context = self.fetch_file(context)
             if context is None:
                 raise FileNotFoundError(f"Context file download failed: {context}")
@@ -466,6 +468,7 @@ class NetboxDesignTasks:
             context = yaml.safe_load(context)
 
         if self.is_url(design_data):
+            job.event("fetching and rendering design data from URL")
             design_data = self.jinja2_render_templates(
                 templates=[design_data],
                 context={"norfab": self.client, "context": context, "netbox": nb},
@@ -477,23 +480,30 @@ class NetboxDesignTasks:
             raise ValueError("No design data provided")
 
         # build pydantic model out of Netbox OpenAPI schema and validate input data
+        job.event("building NetBox design validation model")
         netbox_api_model = self.build_design_model(design_data, nb.openapi())
 
         # Pre-process: auto-fill slug fields derived from name before validation
         self._preprocess_design_data(design_data, netbox_api_model)
 
         try:
+            job.event("validating NetBox design data")
             netbox_api_model.model_validate(design_data)
         except ValidationError as e:
+            job.event(
+                f"design validation found {len(e.errors())} issue(s), attempting input mutation",
+                severity="WARNING",
+            )
             for error in e.errors():
                 self.mutate_input_data(error, design_data, netbox_api_model)
 
         # push data to Netbox
+        created_count = 0
         for entity in design_data.get("create_order", DEFAULT_CREATE_ORDER):
             app, obj_type = entity.split(".")
 
             if data := design_data.get(app, {}).get(obj_type, []):
-                job.event(f"creating {app}.{obj_type}")
+                job.event(f"checking {len(data)} {app}.{obj_type} object(s)")
                 # identify existing objects to not create them
                 new_objects = []
                 while data:
@@ -511,7 +521,12 @@ class NetboxDesignTasks:
 
                 # create new objects
                 if new_objects:
+                    job.event(f"creating {len(new_objects)} {app}.{obj_type} object(s)")
                     result = getattr(getattr(nb, app), obj_type).create(new_objects)
                     ret.result.setdefault(app, {})[obj_type] = [str(i) for i in result]
+                    created_count += len(new_objects)
+                else:
+                    job.event(f"no new {app}.{obj_type} object(s) to create")
 
+        job.event(f"NetBox design task complete: {created_count} object(s) created")
         return ret

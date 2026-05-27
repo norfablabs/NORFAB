@@ -1136,21 +1136,24 @@ class NetboxBgpPeeringsTasks:
         )
 
         # Validate BGP plugin
+        job.event(f"validating NetBox BGP plugin for '{instance}'")
         if not self.has_plugin("netbox_bgp", instance, strict=True):
-            ret.errors.append(
-                f"'{instance}' NetBox instance has no BGP plugin installed"
-            )
+            msg = f"'{instance}' NetBox instance has no BGP plugin installed"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
         nb = self._get_pynetbox(instance, branch=branch)
 
         if message:
+            job.event("setting NetBox changelog message for BGP session create")
             nb.http_session.headers["X-Changelog-Message"] = message
 
         _lookup_cache: dict = {}
 
         # Validate VRF custom field and RIR
+        job.event("validating BGP session VRF custom field and RIR")
         vrf_custom_field = _resolve_vrf_custom_field(
             vrf_custom_field, nb, job, self.name
         )
@@ -1176,10 +1179,14 @@ class NetboxBgpPeeringsTasks:
                 "local_interface": local_interface,
             }
         ]
+        job.event(
+            f"preparing {len(bgp_sessions)} BGP session create request(s), dry_run={dry_run}"
+        )
 
         # Step 5a: Resolve interfaces, IPs, and discover remote devices for every
         # bgp_session in one pass.  Range expansion turns one bgp_session into many when a bracket
         # pattern is used in local_interface.
+        job.event("resolving BGP session interface and peer details")
         resolved_bgp_sessions = []
         # dict keyed by device name; values populated with {id, site_id, data} after batch fetch
         all_device_names = {}
@@ -1264,6 +1271,7 @@ class NetboxBgpPeeringsTasks:
                                 f"name_template '{name_template}' failed for session "
                                 f"'{new_bgp_session.get('name')}' on '{bgp_session_device}': {exc}"
                             )
+                            job.event(msg, severity="ERROR")
                             ret.errors.append(msg)
                             log.error(f"{self.name} - {msg}")
                             continue
@@ -1291,6 +1299,7 @@ class NetboxBgpPeeringsTasks:
                                 f"name_template '{name_template}' failed for mirror session "
                                 f"on '{remote_device_name}': {exc}"
                             )
+                            job.event(msg, severity="ERROR")
                             ret.errors.append(msg)
                             log.error(f"{self.name} - {msg}")
                         else:
@@ -1301,9 +1310,15 @@ class NetboxBgpPeeringsTasks:
                 if bgp_session_device:
                     all_device_names.setdefault(bgp_session_device, None)
                 resolved_bgp_sessions.append(bgp_session_copy)
+        job.event(
+            f"resolved {len(resolved_bgp_sessions)} BGP session create candidate(s)"
+        )
 
         # Step 5b: Pre-fetch device data for all collected device names (single API call)
         if all_device_names:
+            job.event(
+                f"fetching NetBox device data for {len(all_device_names)} device(s)"
+            )
             try:
                 for dev_obj in self.bulk_filter(
                     nb.dcim.devices, "name", list(all_device_names)
@@ -1314,14 +1329,19 @@ class NetboxBgpPeeringsTasks:
                         "data": dict(dev_obj),
                     }
             except Exception as exc:
-                log.warning(
-                    f"{self.name} - could not pre-fetch device data for "
-                    f"{list(all_device_names)}: {exc}"
+                msg = (
+                    f"could not pre-fetch device data for {list(all_device_names)}: "
+                    f"{exc}"
                 )
+                job.event(msg, severity="WARNING")
+                log.warning(f"{self.name} - {msg}")
 
         # Step 5c: Pre-fetch existing sessions for idempotency (single API call)
         existing_session_names = set()
         if all_device_names:
+            job.event(
+                f"checking existing BGP sessions on {len(all_device_names)} device(s)"
+            )
             try:
                 existing = self.bulk_filter(
                     nb.plugins.bgp.session,
@@ -1330,11 +1350,16 @@ class NetboxBgpPeeringsTasks:
                     fields="name,id",
                 )
                 existing_session_names = {s.name for s in existing}
-            except Exception as exc:
-                log.warning(
-                    f"{self.name} - could not pre-fetch BGP sessions for "
-                    f"{list(all_device_names)}: {exc}; will check per-session"
+                job.event(
+                    f"found {len(existing_session_names)} existing BGP session(s)"
                 )
+            except Exception as exc:
+                msg = (
+                    f"could not pre-fetch BGP sessions for {list(all_device_names)}: "
+                    f"{exc}; will check per-session"
+                )
+                job.event(msg, severity="WARNING")
+                log.warning(f"{self.name} - {msg}")
 
         # Step 6: Process each resolved bgp_session
         if dry_run is True:
@@ -1345,6 +1370,7 @@ class NetboxBgpPeeringsTasks:
 
         payloads = []
 
+        job.event("building BGP session create payloads")
         for bgp_session in resolved_bgp_sessions:
             bgp_session_device = bgp_session.get("device")
             bgp_session_local_address = bgp_session.get("local_address")
@@ -1365,6 +1391,7 @@ class NetboxBgpPeeringsTasks:
                         f"name_template '{name_template}' failed for session "
                         f"'{bgp_session.get('name')}' on '{bgp_session_device}': {exc}"
                     )
+                    job.event(msg, severity="ERROR")
                     ret.errors.append(msg)
                     log.error(f"{self.name} - {msg}")
                     continue
@@ -1502,6 +1529,18 @@ class NetboxBgpPeeringsTasks:
             )
 
             payloads.append(payload)
+        if dry_run is True:
+            job.event(
+                f"dry-run: {len(result['create'])} BGP session(s) would be created, "
+                f"{len(result['exists'])} already exist"
+            )
+            ret.result = result
+            job.event("BGP session create task complete")
+            return ret
+        job.event(
+            f"prepared {len(payloads)} BGP session create payload(s), "
+            f"{len(result['exists'])} already exist"
+        )
 
         # Bulk create (step 7)
         if payloads:
@@ -1514,11 +1553,14 @@ class NetboxBgpPeeringsTasks:
                 log.info(f"{self.name} - {msg}")
             except Exception as e:
                 msg = f"failed to create BGP sessions: {e}"
-                job.event(msg)
+                job.event(msg, severity="ERROR")
                 ret.errors.append(msg)
                 log.error(f"{self.name} - {msg}")
+        else:
+            job.event("no BGP sessions to create")
 
         ret.result = result
+        job.event("BGP session create task complete")
         return ret
 
     @Task(
@@ -1608,21 +1650,24 @@ class NetboxBgpPeeringsTasks:
         )
 
         # Validate BGP plugin
+        job.event(f"validating NetBox BGP plugin for '{instance}'")
         if not self.has_plugin("netbox_bgp", instance, strict=True):
-            ret.errors.append(
-                f"'{instance}' NetBox instance has no BGP plugin installed"
-            )
+            msg = f"'{instance}' NetBox instance has no BGP plugin installed"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
         nb = self._get_pynetbox(instance, branch=branch)
 
         if message:
+            job.event("setting NetBox changelog message for BGP session update")
             nb.http_session.headers["X-Changelog-Message"] = message
 
         _lookup_cache: dict = {}
 
         # Validate VRF custom field and RIR
+        job.event("validating BGP session VRF custom field and RIR")
         vrf_custom_field = _resolve_vrf_custom_field(
             vrf_custom_field, nb, job, self.name
         )
@@ -1652,6 +1697,9 @@ class NetboxBgpPeeringsTasks:
                 if k in _single_fields and v is not None
             }
             bgp_sessions = [{"name": name, **bgp_session}]
+        job.event(
+            f"preparing {len(bgp_sessions)} BGP session update request(s), dry_run={dry_run}"
+        )
 
         result = {"updated": [], "in_sync": []}
         if dry_run is True:
@@ -1660,6 +1708,7 @@ class NetboxBgpPeeringsTasks:
 
         # Fetch all existing sessions in a single batch call
         session_names = [s["name"] for s in bgp_sessions]
+        job.event(f"fetching {len(session_names)} BGP session(s) from NetBox")
         nb_sessions_raw = self.bulk_filter(
             nb.plugins.bgp.session,
             "name",
@@ -1670,8 +1719,10 @@ class NetboxBgpPeeringsTasks:
             s.name: normalise_nb_bgp_session(dict(s), vrf_custom_field=vrf_custom_field)
             for s in nb_sessions_raw
         }
+        job.event(f"retrieved {len(normalised_nb)} BGP session(s) from NetBox")
 
         # Build updates dictionary by session name
+        job.event("normalising BGP session update data")
         normalised_updates = {}
         for bgp_session in bgp_sessions:
             sname = bgp_session["name"]
@@ -1694,6 +1745,7 @@ class NetboxBgpPeeringsTasks:
                 }
 
         # Compare complete dictionaries using make_diff; classify in_sync vs changed
+        job.event("calculating BGP session update diff")
         sessions_diff = self.make_diff(
             {"_": normalised_updates},
             {"_": normalised_nb},
@@ -1701,17 +1753,24 @@ class NetboxBgpPeeringsTasks:
 
         changed_snames = set(sessions_diff["update"].keys())
         result["in_sync"].extend(sessions_diff["in_sync"])
+        job.event(
+            f"BGP session update diff complete: {len(changed_snames)} update, "
+            f"{len(sessions_diff['in_sync'])} in sync"
+        )
 
         if dry_run is True:
+            job.event("dry-run requested, returning BGP session update diff without changes")
             result["update"] = [
                 {"name": sname, "diff": changes}
                 for sname, changes in sessions_diff["update"].items()
             ]
             ret.result = result
             ret.dry_run = True
+            job.event("BGP session update task complete")
             return ret
 
         # Build update payloads — iterate over diff to get only changed fields per session
+        job.event("building BGP session update payloads")
         update_payloads = []
         for sname, field_changes in sessions_diff["update"].items():
             nb_session = normalised_nb[sname]
@@ -1731,9 +1790,11 @@ class NetboxBgpPeeringsTasks:
                 )
             )
             update_payloads.append(payload)
+        job.event(f"prepared {len(update_payloads)} BGP session update payload(s)")
 
         # Bulk update in a single pynetbox call
         if update_payloads:
+            job.event(f"updating {len(update_payloads)} BGP session(s)")
             try:
                 nb.plugins.bgp.session.update(update_payloads)
                 result["updated"].extend(changed_snames)
@@ -1742,10 +1803,14 @@ class NetboxBgpPeeringsTasks:
                 log.info(f"{self.name} - {msg}")
             except Exception as e:
                 msg = f"failed to bulk update BGP sessions: {e}"
+                job.event(msg, severity="ERROR")
                 ret.errors.append(msg)
                 log.error(f"{self.name} - {msg}")
+        else:
+            job.event("no BGP sessions to update")
 
         ret.result = result
+        job.event("BGP session update task complete")
         return ret
 
     @Task(
@@ -1858,14 +1923,16 @@ class NetboxBgpPeeringsTasks:
         )  # Live data:   device name -> session name -> normalised field values
 
         # Validate BGP plugin
+        job.event(f"validating NetBox BGP plugin for '{instance}'")
         if not self.has_plugin("netbox_bgp", instance, strict=True):
-            ret.errors.append(
-                f"'{instance}' NetBox instance has no BGP plugin installed"
-            )
+            msg = f"'{instance}' NetBox instance has no BGP plugin installed"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
         # Validate VRF custom field
+        job.event("validating BGP session VRF custom field")
         nb = self._get_pynetbox(instance)
         vrf_custom_field = _resolve_vrf_custom_field(
             vrf_custom_field, nb, job, self.name
@@ -1873,26 +1940,37 @@ class NetboxBgpPeeringsTasks:
 
         # Source additional devices from Nornir filters
         if kwargs:
+            job.event("resolving devices from Nornir filters")
             nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
             for host in nornir_hosts:
                 if host not in devices:
                     devices.append(host)
+            job.event(
+                f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
+                f"{len(devices)} total device(s) selected"
+            )
 
         if not devices:
-            ret.errors.append("no devices specified")
+            msg = "no devices specified"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
         log.info(
             f"{self.name} - Sync BGP peerings: processing {len(devices)} device(s) in '{instance}'"
         )
+        job.event(
+            f"syncing BGP peerings for {len(devices)} device(s) in '{instance}', dry_run={dry_run}"
+        )
 
         # Fetch existing NetBox BGP sessions
-        job.event(f"fetching BGP session data from Netbox for {len(devices)} device(s)")
+        job.event(f"fetching BGP session data from NetBox for {len(devices)} device(s)")
         nb_sessions_result = self.get_bgp_peerings(
             job=job, instance=instance, devices=devices, cache="refresh"
         )
         if nb_sessions_result.errors:
+            job.event("failed to fetch BGP session data from NetBox", severity="ERROR")
             ret.errors.extend(nb_sessions_result.errors)
             ret.failed = True
             return ret
@@ -1910,6 +1988,7 @@ class NetboxBgpPeeringsTasks:
         )
 
         # Build Netbox BGP sessions normalised dicts per device
+        job.event("normalising NetBox BGP session data")
         for device_name in devices:
             # Normalise NetBox sessions for this device
             normalised_nb[device_name] = {}
@@ -1938,11 +2017,18 @@ class NetboxBgpPeeringsTasks:
                 ):
                     continue
                 normalised_nb[device_name][sname] = normalised
+        nb_session_count = sum(len(sessions) for sessions in normalised_nb.values())
+        job.event(
+            f"normalised {nb_session_count} NetBox BGP session(s) after applying filters"
+        )
 
         # Normalize live parse data per device
+        job.event("normalising live BGP session data")
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
-                log.warning(f"{wname} - failed to parse devices")
+                msg = f"{wname} - failed to parse BGP session data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
                 continue
             for device_name, host_sessions in wdata.get("result", {}).items():
                 normalised_live.setdefault(device_name, {})
@@ -2004,12 +2090,27 @@ class NetboxBgpPeeringsTasks:
                         "prefix_list_in": s.get("prefix_list_in"),
                         "prefix_list_out": s.get("prefix_list_out"),
                     }
+        live_session_count = sum(len(sessions) for sessions in normalised_live.values())
+        job.event(
+            f"normalised {live_session_count} live BGP session(s) after applying filters"
+        )
 
         # Single diff on the full normalised datasets
+        job.event("calculating BGP session sync diff")
         full_diff = self.make_diff(normalised_live, normalised_nb)
+        create_count = sum(len(actions["create"]) for actions in full_diff.values())
+        update_count = sum(len(actions["update"]) for actions in full_diff.values())
+        delete_count = sum(len(actions["delete"]) for actions in full_diff.values())
+        in_sync_count = sum(len(actions["in_sync"]) for actions in full_diff.values())
+        job.event(
+            "BGP session sync diff complete: "
+            f"{create_count} create, {update_count} update, "
+            f"{delete_count} delete, {in_sync_count} in sync"
+        )
 
         # Return dry-run results per device
         if dry_run is True:
+            job.event("dry-run requested, returning BGP session sync diff without changes")
             ret.result = full_diff
             ret.dry_run = True
             return ret
@@ -2028,6 +2129,7 @@ class NetboxBgpPeeringsTasks:
         }
 
         # Build bulk_create list from full_diff — split pipe-separated policies to lists
+        job.event("preparing BGP session create payloads")
         bulk_create = []
         for device_name, actions in full_diff.items():
             for sname in actions["create"]:
@@ -2050,8 +2152,10 @@ class NetboxBgpPeeringsTasks:
                         "prefix_list_out": session_data.get("prefix_list_out"),
                     }
                 )
+        job.event(f"prepared {len(bulk_create)} BGP session create payload(s)")
 
         # Build bulk_update list from full_diff
+        job.event("preparing BGP session update payloads")
         bulk_update = []
         for device_name, actions in full_diff.items():
             for sname, field_changes in actions["update"].items():
@@ -2065,9 +2169,11 @@ class NetboxBgpPeeringsTasks:
                     else:
                         entry[field] = new_value
                 bulk_update.append(entry)
+        job.event(f"prepared {len(bulk_update)} BGP session update payload(s)")
 
         # Delegate writes to create_bgp_peering and update_bgp_peering
         if bulk_create:
+            job.event(f"creating {len(bulk_create)} BGP session(s) from sync diff")
             create_result = self.create_bgp_peering(
                 job=job,
                 instance=instance,
@@ -2084,8 +2190,11 @@ class NetboxBgpPeeringsTasks:
                 for sname in actions["create"]:
                     if sname in created_names:
                         device_results[device_name]["created"].append(sname)
+        else:
+            job.event("no BGP sessions to create")
 
         if bulk_update:
+            job.event(f"updating {len(bulk_update)} BGP session(s) from sync diff")
             update_result = self.update_bgp_peering(
                 job=job,
                 instance=instance,
@@ -2101,9 +2210,12 @@ class NetboxBgpPeeringsTasks:
                 for sname in actions["update"]:
                     if sname in updated_names:
                         device_results[device_name]["updated"].append(sname)
+        else:
+            job.event("no BGP sessions to update")
 
         # Deletion — batch-fetch all candidate sessions then delete individually
         if process_deletions:
+            job.event("processing BGP session deletions")
             nb = self._get_pynetbox(instance, branch=branch)
             if message:
                 nb.http_session.headers["X-Changelog-Message"] = message
@@ -2113,6 +2225,7 @@ class NetboxBgpPeeringsTasks:
                 for sname in actions["delete"]:
                     all_deletions[sname] = device_name
             if all_deletions:
+                job.event(f"fetching {len(all_deletions)} BGP session(s) to delete")
                 sessions_to_delete = self.bulk_filter(
                     nb.plugins.bgp.session, "name", list(all_deletions)
                 )
@@ -2130,7 +2243,16 @@ class NetboxBgpPeeringsTasks:
                         msg = f"failed to delete BGP session '{session.name}' for '{device_name}': {e}"
                         ret.errors.append(msg)
                         log.error(f"{self.name} - {msg}")
+            else:
+                job.event("no BGP sessions to delete")
+        elif delete_count:
+            job.event(
+                f"skipping {delete_count} BGP session deletion(s), process_deletions=False"
+            )
+        else:
+            job.event("no BGP sessions to delete")
 
         ret.result = device_results
+        job.event("BGP peerings sync complete")
 
         return ret

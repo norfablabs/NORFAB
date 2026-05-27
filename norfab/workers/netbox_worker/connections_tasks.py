@@ -250,7 +250,7 @@ class NetboxConnectionsTasks:
         log.info(
             f"{self.name} - Get connections: Fetching connections for {len(devices)} device(s) from '{instance}'"
         )
-        job.event(f"fetching connections for {len(devices)} device(s)")
+        job.event(f"fetching connections for {len(devices)} device(s), dry_run={dry_run}")
         ret = Result(
             task=f"{self.name}:get_connections",
             result={d: {} for d in devices},
@@ -279,9 +279,15 @@ class NetboxConnectionsTasks:
             instance=instance,
             dry_run=dry_run,
         )
+        if query_result.errors:
+            job.event("failed to fetch connection data from NetBox GraphQL", severity="ERROR")
+            ret.errors.extend(query_result.errors)
+            ret.failed = True
+            return ret
 
         # return dry run result
         if dry_run is True:
+            job.event("dry-run requested, returning connection GraphQL query result")
             ret.dry_run = True
             ret.result = query_result.result
             return ret
@@ -291,9 +297,12 @@ class NetboxConnectionsTasks:
             log.info(
                 f"{self.name} - Get connections: No ports returned for {len(devices)} device(s)"
             )
+            job.event("no connection ports returned from NetBox")
             return ret
 
         # extract physical interfaces connections
+        port_count = sum(len(ports or []) for ports in all_ports.values())
+        job.event(f"processing {port_count} connection port object(s)")
         for port_type, ports in all_ports.items():
             for port in ports:
                 # skip ports that have no remote device connected

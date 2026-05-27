@@ -159,6 +159,7 @@ class NetboxPrefixTasks:
             parent_filters = parent
         nb_parent_prefix = nb.ipam.prefixes.get(**parent_filters)
         if not nb_parent_prefix:
+            job.event(f"parent prefix not found in NetBox: {parent}", severity="ERROR")
             raise NetboxAllocationError(
                 f"Unable to source parent prefix from Netbox - {parent}"
             )
@@ -232,6 +233,7 @@ class NetboxPrefixTasks:
                 # add branch to results
                 if branch is not None:
                     ret.result["branch"] = branch
+                job.event(f"dry-run: would create prefix '{nb_prefix}'")
                 return ret
             # create new prefix
             else:
@@ -302,13 +304,20 @@ class NetboxPrefixTasks:
             ret.status = "unchanged"
             ret.dry_run = True
             ret.diff = changed
+            job.event(
+                f"dry-run: prefix '{nb_prefix.prefix}' has {len(changed)} pending change(s)"
+            )
         elif changed:
             ret.diff = changed
             nb_prefix.save()
             if ret.status != "created":
                 ret.status = "updated"
+            job.event(
+                f"updated prefix '{nb_prefix.prefix}' with {len(changed)} change(s)"
+            )
         else:
             ret.status = "unchanged"
+            job.event(f"prefix '{nb_prefix.prefix}' already in desired state")
 
         # source vrf name
         vrf_name = None
@@ -330,4 +339,5 @@ class NetboxPrefixTasks:
         if branch is not None:
             ret.result["branch"] = branch
 
+        job.event(f"prefix task complete for '{nb_prefix.prefix}'")
         return ret

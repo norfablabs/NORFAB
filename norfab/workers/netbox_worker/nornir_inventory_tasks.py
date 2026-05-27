@@ -60,14 +60,23 @@ class NetboxNornirInventoryTasks:
         ret = Result(task=f"{self.name}:get_nornir_inventory", result=inventory)
 
         # check Netbox status
+        job.event(f"checking NetBox status for '{instance or self.default_instance}'")
         netbox_status = self.get_netbox_status(job=job, instance=instance)
         if netbox_status.result[instance or self.default_instance]["status"] is False:
+            job.event("NetBox status check failed for Nornir inventory", severity="ERROR")
             return ret
 
         # retrieve devices data
+        job.event("fetching devices data for Nornir inventory")
         nb_devices = self.get_devices(
             job=job, filters=filters, devices=devices, instance=instance, cache=cache
         )
+        if nb_devices.errors:
+            job.event("failed to fetch devices for Nornir inventory", severity="ERROR")
+            ret.errors.extend(nb_devices.errors)
+            ret.failed = True
+            return ret
+        job.event(f"processing {len(nb_devices.result)} device(s) for Nornir inventory")
 
         # form Nornir hosts inventory
         for device_name, device in nb_devices.result.items():
@@ -96,10 +105,12 @@ class NetboxNornirInventoryTasks:
         # return if no hosts found for provided parameters
         if not hosts:
             log.warning(f"{self.name} - No viable hosts returned by Netbox")
+            job.event("no viable Nornir hosts returned by NetBox")
             return ret
 
         # add interfaces data
         if interfaces:
+            job.event(f"fetching interfaces for {len(hosts)} Nornir host(s)")
             # decide on get_interfaces arguments
             kwargs = interfaces if isinstance(interfaces, dict) else {}
             kwargs.setdefault("cache", cache)
@@ -110,6 +121,9 @@ class NetboxNornirInventoryTasks:
             nb_interfaces = self.get_interfaces(
                 job=job, devices=list(hosts), instance=instance, **kwargs
             )
+            if nb_interfaces.errors:
+                job.event("interface retrieval completed with errors", severity="WARNING")
+                ret.errors.extend(nb_interfaces.errors)
             # save interfaces data to hosts' inventory
             while nb_interfaces.result:
                 device, device_interfaces = nb_interfaces.result.popitem()
@@ -117,6 +131,7 @@ class NetboxNornirInventoryTasks:
 
         # add connections data
         if connections:
+            job.event(f"fetching connections for {len(hosts)} Nornir host(s)")
             # decide on get_interfaces arguments
             kwargs = connections if isinstance(connections, dict) else {}
             kwargs.setdefault("cache", cache)
@@ -127,6 +142,9 @@ class NetboxNornirInventoryTasks:
             nb_connections = self.get_connections(
                 job=job, devices=list(hosts), instance=instance, **kwargs
             )
+            if nb_connections.errors:
+                job.event("connection retrieval completed with errors", severity="WARNING")
+                ret.errors.extend(nb_connections.errors)
             # save connections data to hosts' inventory
             while nb_connections.result:
                 device, device_connections = nb_connections.result.popitem()
@@ -134,6 +152,7 @@ class NetboxNornirInventoryTasks:
 
         # add circuits data
         if circuits:
+            job.event(f"fetching circuits for {len(hosts)} Nornir host(s)")
             # decide on get_interfaces arguments
             kwargs = circuits if isinstance(circuits, dict) else {}
             kwargs.setdefault("cache", cache)
@@ -144,6 +163,9 @@ class NetboxNornirInventoryTasks:
             nb_circuits = self.get_circuits(
                 job=job, devices=list(hosts), instance=instance, **kwargs
             )
+            if nb_circuits.errors:
+                job.event("circuit retrieval completed with errors", severity="WARNING")
+                ret.errors.extend(nb_circuits.errors)
             # save circuits data to hosts' inventory
             while nb_circuits.result:
                 device, device_circuits = nb_circuits.result.popitem()
@@ -151,6 +173,7 @@ class NetboxNornirInventoryTasks:
 
         # add bgp peerings data
         if bgp_peerings:
+            job.event(f"fetching BGP peerings for {len(hosts)} Nornir host(s)")
             # decide on get_interfaces arguments
             kwargs = bgp_peerings if isinstance(bgp_peerings, dict) else {}
             kwargs.setdefault("cache", cache)
@@ -161,9 +184,13 @@ class NetboxNornirInventoryTasks:
             nb_bgp_peerings = self.get_bgp_peerings(
                 job=job, devices=list(hosts), instance=instance, **kwargs
             )
+            if nb_bgp_peerings.errors:
+                job.event("BGP peering retrieval completed with errors", severity="WARNING")
+                ret.errors.extend(nb_bgp_peerings.errors)
             # save circuits data to hosts' inventory
             while nb_bgp_peerings.result:
                 device, device_bgp_peerings = nb_bgp_peerings.result.popitem()
                 hosts[device]["data"]["bgp_peerings"] = device_bgp_peerings
 
+        job.event(f"Nornir inventory build complete: {len(hosts)} host(s)")
         return ret

@@ -203,7 +203,9 @@ class NetboxWorker(
         return Result(task=f"{self.name}:get_version", result=libs)
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
-    def get_netbox_status(self, instance: Union[None, str] = None) -> Result:
+    def get_netbox_status(
+        self, job: Union[None, Job] = None, instance: Union[None, str] = None
+    ) -> Result:
         """
         Retrieve the status of NetBox instances.
 
@@ -220,13 +222,24 @@ class NetboxWorker(
         """
         ret = Result(result={}, task=f"{self.name}:get_netbox_status")
         if instance:
+            if job:
+                job.event(f"checking NetBox status for '{instance}'")
             log.info(f"{self.name} - fetching '{instance}' Netbox status")
             ret.result[instance] = self._query_netbox_status(instance)
         else:
+            if job:
+                job.event(
+                    f"checking NetBox status for {len(self.netbox_inventory['instances'])} instance(s)"
+                )
             for name in self.netbox_inventory["instances"].keys():
                 log.info(f"{self.name} - fetching '{name}' Netbox status")
                 ret.result[name] = self._query_netbox_status(name)
         log.info(f"{self.name} - Netbox instance(s) status retrieval completed")
+        if job:
+            reachable = sum(1 for status in ret.result.values() if status.get("status"))
+            job.event(
+                f"NetBox status check complete: {reachable}/{len(ret.result)} instance(s) reachable"
+            )
         return ret
 
     @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
@@ -741,6 +754,7 @@ class NetboxWorker(
         # check if has keys to clear
         if key == keys == None:  # noqa
             ret.result = "Nothing to clear, specify key or keys"
+            job.event("no cache key pattern provided, nothing to clear")
             return ret
         # remove specific key from cache
         if key:
@@ -791,6 +805,10 @@ class NetboxWorker(
             KeyError: If raise_missing is True and the specific key is not found in the cache.
         """
         ret = Result(task=f"{self.name}:cache_clear", result={})
+        job.event(
+            f"retrieving cache entries by "
+            f"{'key' if key else 'pattern' if keys else 'empty selector'}"
+        )
         # get specific key from cache
         if key:
             if key in self.cache:
@@ -802,6 +820,7 @@ class NetboxWorker(
             for cache_key in self.cache:
                 if fnmatchcase(cache_key, keys):
                     ret.result[cache_key] = self.cache[cache_key]
+        job.event(f"retrieved {len(ret.result)} cache entry(s)")
         return ret
 
     @Task(
