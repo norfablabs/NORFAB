@@ -11,7 +11,7 @@ from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator
 from norfab.utils.text import expand_alphanumeric_range
 
 from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
-from .netbox_worker_utilities import resolve_vrf, resolve_ip
+from .netbox_worker_utilities import resolve_vlan, resolve_vrf, resolve_ip
 
 log = logging.getLogger(__name__)
 
@@ -359,6 +359,11 @@ class SyncDeviceInterfacesInput(
         alias="update-type",
         json_schema_extra={"presence": True},
     )
+    vlan_group: Union[None, StrictStr, StrictInt] = Field(
+        None,
+        description="VLAN group name, slug, or ID to use when resolving or creating interface VLANs",
+        alias="vlan-group",
+    )
 
 
 class SyncMacAddressesInput(
@@ -400,12 +405,12 @@ def _build_interface_payload(
     intf_name: str = None,
     nb: object = None,
     _lookup_cache: Union[None, dict] = None,
+    vlan_group: Union[None, str, int] = None,
 ) -> dict:
     """Build a NetBox interface API payload from desired state and changed fields.
 
     ``_lookup_cache`` is an optional dict shared across multiple calls within the
     same task invocation to avoid redundant NetBox lookups for VLAN and VRF objects.
-    Keyed by ``("vlan", vid, site_id)``, ``("vlan_global", vid)``, or ``("vrf", name)``.
     """  # noqa: D205
     if _lookup_cache is None:
         _lookup_cache = {}
@@ -435,60 +440,63 @@ def _build_interface_payload(
 
     if "untagged_vlan" in changed_fields:
         vid = desired["untagged_vlan"]
-        site_key = ("vlan", vid, device["site_id"])
-        global_key = ("vlan_global", vid)
-        if site_key not in _lookup_cache:
-            nb_vlan = list(nb.ipam.vlans.filter(vid=vid, site_id=device["site_id"]))
-            _lookup_cache[site_key] = nb_vlan[0].id if nb_vlan else None
-            if _lookup_cache[site_key] is None:
-                nb_vlan = list(nb.ipam.vlans.filter(vid=vid))
-                _lookup_cache[global_key] = nb_vlan[0].id if nb_vlan else None
-        vlan_id = _lookup_cache[site_key] or _lookup_cache.get(global_key)
+        vlan_id = resolve_vlan(
+            vid=vid,
+            nb=nb,
+            job=job,
+            ret=ret,
+            worker_name=worker_name,
+            site_id=device["site_id"],
+            vlan_group=vlan_group,
+            _lookup_cache=_lookup_cache,
+        )
         if vlan_id:
             payload["untagged_vlan"] = vlan_id
         else:
             log.warning(
                 f"{device['name']}:{intf_name} untagged vlan "
-                f"'{vid}' does not exist in Netbox"
+                f"'{vid}' could not be resolved or created in NetBox"
             )
 
     if "qinq_svlan" in changed_fields:
         vid = desired["qinq_svlan"]
-        site_key = ("vlan", vid, device["site_id"])
-        global_key = ("vlan_global", vid)
-        if site_key not in _lookup_cache:
-            nb_vlan = list(nb.ipam.vlans.filter(vid=vid, site_id=device["site_id"]))
-            _lookup_cache[site_key] = nb_vlan[0].id if nb_vlan else None
-            if _lookup_cache[site_key] is None:
-                nb_vlan = list(nb.ipam.vlans.filter(vid=vid))
-                _lookup_cache[global_key] = nb_vlan[0].id if nb_vlan else None
-        vlan_id = _lookup_cache[site_key] or _lookup_cache.get(global_key)
+        vlan_id = resolve_vlan(
+            vid=vid,
+            nb=nb,
+            job=job,
+            ret=ret,
+            worker_name=worker_name,
+            site_id=device["site_id"],
+            vlan_group=vlan_group,
+            _lookup_cache=_lookup_cache,
+        )
         if vlan_id:
             payload["qinq_svlan"] = vlan_id
         else:
             log.warning(
                 f"{device['name']}:{intf_name} qinq svlan "
-                f"'{vid}' does not exist in Netbox"
+                f"'{vid}' could not be resolved or created in NetBox"
             )
 
     if "tagged_vlans" in changed_fields:
         payload["tagged_vlans"] = []
         for vid in desired["tagged_vlans"]:
-            site_key = ("vlan", vid, device["site_id"])
-            global_key = ("vlan_global", vid)
-            if site_key not in _lookup_cache:
-                nb_vlan = list(nb.ipam.vlans.filter(vid=vid, site_id=device["site_id"]))
-                _lookup_cache[site_key] = nb_vlan[0].id if nb_vlan else None
-                if _lookup_cache[site_key] is None:
-                    nb_vlan = list(nb.ipam.vlans.filter(vid=vid))
-                    _lookup_cache[global_key] = nb_vlan[0].id if nb_vlan else None
-            vlan_id = _lookup_cache[site_key] or _lookup_cache.get(global_key)
+            vlan_id = resolve_vlan(
+                vid=vid,
+                nb=nb,
+                job=job,
+                ret=ret,
+                worker_name=worker_name,
+                site_id=device["site_id"],
+                vlan_group=vlan_group,
+                _lookup_cache=_lookup_cache,
+            )
             if vlan_id:
                 payload["tagged_vlans"].append(vlan_id)
             else:
                 log.warning(
                     f"{device['name']}:{intf_name} tagged vlan "
-                    f"'{vid}' does not exist in Netbox"
+                    f"'{vid}' could not be resolved or created in NetBox"
                 )
 
     if "vrf" in changed_fields:
@@ -1035,6 +1043,7 @@ class NetboxInterfacesTasks:
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         update_type: Union[None, bool] = False,
+        vlan_group: Union[None, str, int] = None,
         **kwargs: Any,
     ) -> Result:
         """
@@ -1056,11 +1065,12 @@ class NetboxInterfacesTasks:
         **Side-Effects**
 
         - Sync interfaces task creates VRFs if they do not exist in Netbox
+        - Sync interfaces task creates VLANs if they do not exist in Netbox
 
         **Prerequisites**
 
-        - VLANs must exist in Netbox otherwise sync will fail to associate vlans with interfaces
         - Device must exist in Netbox
+        - If specified, vlan group must exist in Netbox
 
         **Limitations**
 
@@ -1119,6 +1129,9 @@ class NetboxInterfacesTasks:
                 sync interfaces task unable to fully resolve interface types and
                 defaults to interface type `other` for most interfaces, this knob
                 allows to keep existing Netbox interfaces type intact.
+            vlan_group (str, int, optional): VLAN group name, slug, or ID to use
+                when resolving interface VLANs. Missing VLANs are created in this
+                group; otherwise they are created in the device site.
             **kwargs: Additional Nornir host filter keyword arguments passed to
                 ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).
 
@@ -1394,6 +1407,7 @@ class NetboxInterfacesTasks:
                         intf_name=intf_name,
                         nb=nb,
                         _lookup_cache=_lookup_cache,
+                        vlan_group=vlan_group,
                     )
                     bulk_create_lag_interfaces.append(payload)
         job.event(
@@ -1447,6 +1461,7 @@ class NetboxInterfacesTasks:
                         intf_name=intf_name,
                         nb=nb,
                         _lookup_cache=_lookup_cache,
+                        vlan_group=vlan_group,
                     )
                     bulk_create_parent_interfaces.append(payload)
         job.event(
@@ -1502,6 +1517,7 @@ class NetboxInterfacesTasks:
                         intf_name=intf_name,
                         nb=nb,
                         _lookup_cache=_lookup_cache,
+                        vlan_group=vlan_group,
                     )
                     bulk_create_child_interfaces.append(payload)
         job.event(
@@ -1547,6 +1563,7 @@ class NetboxInterfacesTasks:
                     intf_name=intf_name,
                     nb=nb,
                     _lookup_cache=_lookup_cache,
+                    vlan_group=vlan_group,
                 )
                 # skip if nothing else to update
                 if set(payload) == {"device", "name"}:

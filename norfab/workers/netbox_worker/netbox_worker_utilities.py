@@ -32,6 +32,93 @@ def resolve_vrf(
         return None
 
 
+def resolve_vlan(
+    vid: Union[None, int],
+    nb: Any,
+    job: Job,
+    ret: Result,
+    worker_name: str,
+    site_id: Union[None, int] = None,
+    vlan_group: Union[None, int, str] = None,
+    _lookup_cache: Union[None, dict] = None,
+) -> Union[int, None]:
+    """Resolve or create a VLAN, return its NetBox ID or None."""
+    if vid is None:
+        return None
+    if _lookup_cache is None:
+        _lookup_cache = {}
+
+    group_id = None
+    if vlan_group:
+        group_cache_key = ("vlan_group", vlan_group)
+        if group_cache_key not in _lookup_cache:
+            group_obj = None
+            if isinstance(vlan_group, int) or str(vlan_group).isdigit():
+                group_obj = nb.ipam.vlan_groups.get(id=int(vlan_group))
+            if group_obj is None:
+                group_obj = nb.ipam.vlan_groups.get(name=str(vlan_group))
+            if group_obj is None:
+                group_obj = nb.ipam.vlan_groups.get(slug=str(vlan_group))
+            if group_obj is None:
+                msg = f"VLAN group '{vlan_group}' does not exist in NetBox"
+                job.event(msg, severity="ERROR")
+                log.error(f"{worker_name} - {msg}")
+                ret.errors.append(msg)
+                _lookup_cache[group_cache_key] = None
+            else:
+                _lookup_cache[group_cache_key] = group_obj.id
+        group_id = _lookup_cache[group_cache_key]
+        if group_id is None:
+            return None
+
+    cache_key = (
+        "vlan",
+        vid,
+        "group",
+        group_id,
+    ) if group_id else ("vlan", vid, "site", site_id)
+    if cache_key in _lookup_cache:
+        return _lookup_cache[cache_key]
+
+    filter_kwargs = {"vid": vid}
+    if group_id:
+        filter_kwargs["group_id"] = group_id
+    elif site_id:
+        filter_kwargs["site_id"] = site_id
+
+    nb_vlans = list(nb.ipam.vlans.filter(**filter_kwargs))
+    if not nb_vlans and not group_id and site_id:
+        nb_vlans = list(nb.ipam.vlans.filter(vid=vid))
+    if nb_vlans:
+        _lookup_cache[cache_key] = nb_vlans[0].id
+        return nb_vlans[0].id
+
+    payload = {"vid": vid, "name": f"VLAN_{vid}", "description": f"VLAN_{vid}"}
+    if site_id:
+        payload["site"] = site_id
+    if group_id:
+        payload["group"] = group_id
+
+    try:
+        new_vlan = nb.ipam.vlans.create(**payload)
+        msg = f"created VLAN '{vid}' in NetBox"
+        if group_id:
+            msg += f" in VLAN group '{vlan_group}'"
+        if site_id:
+            msg += f" for site ID '{site_id}'"
+        job.event(msg)
+        log.info(f"{worker_name} - {msg}")
+        _lookup_cache[cache_key] = new_vlan.id
+        return new_vlan.id
+    except Exception as e:
+        msg = f"failed to create VLAN '{vid}' in NetBox: {e}"
+        job.event(msg, severity="ERROR")
+        log.error(f"{worker_name} - {msg}")
+        ret.errors.append(msg)
+        _lookup_cache[cache_key] = None
+        return None
+
+
 def resolve_ip(
     address: Union[None, str],
     nb: Any,

@@ -3091,8 +3091,8 @@ class TestSyncDeviceFacts:
         pprint.pprint(ret, width=200)
 
         for worker, res in ret.items():
-            # Should complete without error, just process no devices
-            assert not res["failed"], f"{worker} failed"
+            # Should complete with error
+            assert res["failed"], f"{worker} not failed"
             assert (
                 res["result"] == {} or len(res["result"]) == 0
             ), "Should have empty result"
@@ -3149,8 +3149,32 @@ class TestSyncDeviceInterfaces:
 
     @staticmethod
     def _cleanup(nfclient, devices):
-        """Delete all NetBox interfaces with 'TEST_SYNC' in description for given devices."""
-        delete_interfaces_with_description(nfclient, devices, "TEST_SYNC")
+        """Delete TEST_SYNC interfaces and VLAN 410 from NetBox."""
+        delete_interfaces_with_description(
+            nfclient, TestSyncDeviceInterfaces.ALL_DEVICES, "TEST_SYNC"
+        )
+        TestSyncDeviceInterfaces._delete_vlan(nfclient, 410)
+
+    @staticmethod
+    def _delete_vlan(nfclient, vid):
+        """Delete all NetBox VLANs matching VID."""
+        pynb = get_pynetbox(nfclient)
+        for vlan in list(pynb.ipam.vlans.filter(vid=vid)):
+            vlan.delete()
+        print(f"Deleted VLAN '{vid}' from NetBox")
+
+    @staticmethod
+    def _get_vlan(nfclient, vid):
+        """Fetch a single VLAN by VID from NetBox via pynetbox."""
+        pynb = get_pynetbox(nfclient)
+        vlans = list(pynb.ipam.vlans.filter(vid=vid))
+        return vlans[0] if vlans else None
+
+    @staticmethod
+    def _get_vlan_group(nfclient, name):
+        """Fetch a single VLAN group by name from NetBox."""
+        pynb = get_pynetbox(nfclient)
+        return pynb.ipam.vlan_groups.get(name=name)
 
     @staticmethod
     def _sync(nfclient, devices, **extra_kwargs):
@@ -3382,6 +3406,17 @@ class TestSyncDeviceInterfaces:
             411,
             510,
         } <= lag_vids, f"Port-Channel41 tagged_vlans mismatch: expected {{410, 411, 510}} subset, got VIDs {lag_vids}"
+        nb_vlan_410 = self._get_vlan(nfclient, 410)
+        assert nb_vlan_410 is not None, "VLAN 410 not recreated in NetBox after sync"
+        assert (
+            nb_vlan_410.name == "VLAN_410"
+        ), f"VLAN 410 name mismatch: got {nb_vlan_410.name!r}"
+        assert (
+            nb_vlan_410.description == "VLAN_410"
+        ), f"VLAN 410 description mismatch: got {nb_vlan_410.description!r}"
+        assert (
+            nb_vlan_410.site is not None and nb_vlan_410.site.name == "NORFAB-LAB"
+        ), f"VLAN 410 site mismatch: got {nb_vlan_410.site!r}"
         # Validate LAG member Ethernet6
         nb_eth6 = self._get_nb_intf(nfclient, "ceos-spine-1", "Ethernet6")
         assert nb_eth6 is not None, "Ethernet6 not found in NetBox after sync"
@@ -3400,6 +3435,46 @@ class TestSyncDeviceInterfaces:
         assert (
             nb_eth7.lag is not None and nb_eth7.lag.name == "Port-Channel41"
         ), f"Ethernet7 lag association mismatch: got {nb_eth7.lag!r}"
+
+    def test_sync_device_interfaces_create_vlan_with_group(self, nfclient):
+        """Delete VLAN 510 then sync with vlan_group and verify it is recreated in that group."""
+        vlan_group_name = "VLAN_GROUP_1"
+        self._cleanup(nfclient, ["ceos-spine-1"])
+        nb_vlan_group = self._get_vlan_group(nfclient, vlan_group_name)
+        assert nb_vlan_group is not None, f"{vlan_group_name} VLAN group not found"
+        self._delete_vlan(nfclient, 510)
+
+        try:
+            ret = self._sync(
+                nfclient,
+                ["ceos-spine-1"],
+                vlan_group=vlan_group_name,
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed - {res}"
+                device_data = res["result"]["ceos-spine-1"]
+                assert (
+                    "Ethernet8" in device_data["created"]
+                ), f"{worker} Ethernet8 not created during VLAN group sync"
+
+            nb_vlan_510 = self._get_vlan(nfclient, 510)
+            assert nb_vlan_510 is not None, "VLAN 510 not recreated in NetBox after sync"
+            assert (
+                nb_vlan_510.name == "VLAN_510"
+            ), f"VLAN 510 name mismatch: got {nb_vlan_510.name!r}"
+            assert (
+                nb_vlan_510.description == "VLAN_510"
+            ), f"VLAN 510 description mismatch: got {nb_vlan_510.description!r}"
+            assert (
+                nb_vlan_510.group is not None
+                and nb_vlan_510.group.name == vlan_group_name
+            ), f"VLAN 510 group mismatch: got {nb_vlan_510.group!r}"
+        finally:
+            delete_interfaces_with_description(
+                nfclient, TestSyncDeviceInterfaces.ALL_DEVICES, "TEST_SYNC"
+            )
+            self._delete_vlan(nfclient, 510)
 
     # ------------------------------------------------------------------ #
     # Update scenarios                                                     #
@@ -3485,7 +3560,7 @@ class TestSyncDeviceInterfaces:
 
     def test_sync_device_interfaces_update_tagged_vlans(self, nfclient):
         """Clean TEST_SYNC for spine-1, run sync to create Port-Channel41
-        (TEST_SYNC_LAG_TRUNK, tagged_vlans=[510]), then clear VLANs and verify
+        (TEST_SYNC_LAG_TRUNK, tagged_vlans=[410, 411, 510]), then clear VLANs and verify
         sync restores the VLAN list."""
         self._cleanup(nfclient, ["ceos-spine-1"])
 
@@ -10099,12 +10174,19 @@ class TestCheckDeviceSync:
                 assert (
                     self.ALL_CATEGORIES <= device_data.keys()
                 ), f"{worker}:{device} missing categories: {self.ALL_CATEGORIES - device_data.keys()}"
+                assert "in_sync" in device_data, (
+                    f"{worker}:{device} missing top-level 'in_sync' key"
+                )
+                assert isinstance(device_data["in_sync"], bool), (
+                    f"{worker}:{device} top-level 'in_sync' is not a bool"
+                )
+                assert device_data["in_sync"] == all(
+                    device_data[category]
+                    for category in self.ALL_CATEGORIES
+                ), f"{worker}:{device} top-level 'in_sync' does not match categories"
                 for category in self.ALL_CATEGORIES:
-                    assert "in_sync" in device_data[category], (
-                        f"{worker}:{device}:{category} missing 'in_sync' key"
-                    )
-                    assert isinstance(device_data[category]["in_sync"], bool), (
-                        f"{worker}:{device}:{category} 'in_sync' is not a bool"
+                    assert isinstance(device_data[category], bool), (
+                        f"{worker}:{device}:{category} is not a bool"
                     )
 
     def test_check_device_sync_diff_structure(self, nfclient):

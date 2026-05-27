@@ -437,10 +437,11 @@ class NetboxDevicesTasks:
 
                 {
                     "<device>": {
-                        "interfaces":    {"in_sync": True | False},
-                        "mac_addresses": {"in_sync": True | False},
-                        "ip_addresses":  {"in_sync": True | False},
-                        "bgp_peerings":  {"in_sync": True | False},
+                        "in_sync": True | False,
+                        "interfaces":    True | False,
+                        "mac_addresses": True | False,
+                        "ip_addresses":  True | False,
+                        "bgp_peerings":  True | False,
                     }
                 }
         """
@@ -500,7 +501,7 @@ class NetboxDevicesTasks:
                     and not data.get("update")
                     and not data.get("delete")
                 )
-                ret.result.setdefault(device, {})["interfaces"] = {"in_sync": in_sync}
+                ret.result.setdefault(device, {})["interfaces"] = in_sync
             ret.diff["interfaces"] = intf_result.result
 
         # --- check MAC addresses ---
@@ -518,9 +519,7 @@ class NetboxDevicesTasks:
                 ret.errors.extend(mac_result.errors)
             for device, data in mac_result.result.items():
                 in_sync = not data.get("created") and not data.get("updated")
-                ret.result.setdefault(device, {})["mac_addresses"] = {
-                    "in_sync": in_sync
-                }
+                ret.result.setdefault(device, {})["mac_addresses"] = in_sync
             ret.diff["mac_addresses"] = mac_result.result
 
         # --- check IP addresses ---
@@ -538,9 +537,7 @@ class NetboxDevicesTasks:
                 ret.errors.extend(ip_result.errors)
             for device, data in ip_result.result.items():
                 in_sync = not data.get("created") and not data.get("updated")
-                ret.result.setdefault(device, {})["ip_addresses"] = {
-                    "in_sync": in_sync
-                }
+                ret.result.setdefault(device, {})["ip_addresses"] = in_sync
             ret.diff["ip_addresses"] = ip_result.result
 
         # --- check BGP peerings ---
@@ -562,10 +559,21 @@ class NetboxDevicesTasks:
                     and not data.get("update")
                     and not data.get("delete")
                 )
-                ret.result.setdefault(device, {})["bgp_peerings"] = {
-                    "in_sync": in_sync
-                }
+                ret.result.setdefault(device, {})["bgp_peerings"] = in_sync
             ret.diff["bgp_peerings"] = bgp_result.result
+
+        checked_categories = {
+            "interfaces": check_interfaces,
+            "mac_addresses": check_mac_addresses,
+            "ip_addresses": check_ip_addresses,
+            "bgp_peerings": check_bgp_peerings,
+        }
+        for device, device_data in ret.result.items():
+            device_data["in_sync"] = all(
+                device_data.get(category) is True
+                for category, checked in checked_categories.items()
+                if checked
+            )
 
         log.info(
             f"{self.name} - Check device sync complete for {len(ret.result)} device(s)"

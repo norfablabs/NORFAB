@@ -25,10 +25,11 @@ No data is written to NetBox. Each sub-check can be individually enabled or disa
     # per-device summary — one entry per resolved device
     "result": {
         "ceos-spine-1": {
-            "interfaces":    {"in_sync": True},
-            "mac_addresses": {"in_sync": False},
-            "ip_addresses":  {"in_sync": True},
-            "bgp_peerings":  {"in_sync": True},
+            "in_sync":       False,
+            "interfaces":    True,
+            "mac_addresses": False,
+            "ip_addresses":  True,
+            "bgp_peerings":  True,
         },
         ...
     },

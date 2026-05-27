@@ -416,6 +416,8 @@ ip_addresses = [
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
 
+vlan_groups = [{"name": "VLAN_GROUP_1"}]
+
 vlans = [{"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)]
 vlans.extend(
     [
@@ -2218,6 +2220,20 @@ def create_vlans():
     )
 
 
+def create_vlan_groups():
+    log.info("creating vlan groups")
+    payloads = [
+        dict(vlan_group, slug=vlan_group.get("slug", slugify(vlan_group["name"])))
+        for vlan_group in vlan_groups
+    ]
+    _create_in_batches(
+        endpoint=nb.ipam.vlan_groups,
+        items=payloads,
+        item_name="vlan group",
+        batch_size=100,
+    )
+
+
 def create_interfaces():
     log.info("creating interfaces")
     lag_interfaces = []
@@ -2992,6 +3008,17 @@ def delete_vlans():
             log.error(f"deleting vlan '{vlan}' error '{e}'")
 
 
+def delete_vlan_groups():
+    log.info("deleting vlan groups")
+    for vlan_group in vlan_groups:
+        try:
+            nb_vlan_group = nb.ipam.vlan_groups.get(name=vlan_group["name"])
+            if nb_vlan_group:
+                nb_vlan_group.delete()
+        except Exception as e:
+            log.error(f"deleting vlan group '{vlan_group}' error '{e}'")
+
+
 def delete_device_roles():
     log.info("delete device roles")
     for device_role in device_roles:
@@ -3244,6 +3271,7 @@ def clean_up_netbox():
     delete_ip_addresses()
     delete_vrfs()
     delete_vlans()
+    delete_vlan_groups()
     delete_device_roles()
     delete_device_types()
     delete_platforms()
@@ -3273,6 +3301,7 @@ def populate_netbox():
     create_ip_addresses()
     create_tags()
     create_devices()
+    create_vlan_groups()
     create_vlans()
     create_interfaces()
     create_mac_addresses()

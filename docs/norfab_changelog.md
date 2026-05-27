@@ -10,6 +10,7 @@
 
 1. Improving netbox Sync BGP peerings task to make better use of lookup cache for asn, vrf, rir, ip objects resolutions
 2. MCP service policy now enforced for tool calls not only for discovery
+3. Netbox sync device interfaces improved VLAN handling - now it creates vlan if its missing, added `vlan_group` argument to specify group to associate with vlan, otherwise it is associated with device site
 
 ---
 
