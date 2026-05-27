@@ -203,6 +203,63 @@ class WorkersPingCommand(ClientRunJobArgs):
         )
 
 
+class WorkersShellCommand(ClientRunJobArgs):
+    command: StrictStr = Field(
+        ...,
+        description="Shell command to run on workers",
+        json_schema_extra={"multiline": True},
+    )
+    command_timeout: StrictInt = Field(
+        None,
+        description="Shell command timeout in seconds",
+        alias="command-timeout",
+    )
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
+
+    @staticmethod
+    def source_workers() -> list:
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    @staticmethod
+    @listen_events
+    def run(uuid: str, **kwargs: object):
+        NFCLIENT = builtins.NFCLIENT
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result")
+        nowait = kwargs.pop("nowait", False)
+
+        command_timeout = kwargs.pop("command_timeout", None)
+        if command_timeout is not None:
+            kwargs["timeout"] = command_timeout
+
+        result = NFCLIENT.run_job(
+            "all",
+            "run_shell_cmd",
+            kwargs=kwargs,
+            workers=workers,
+            timeout=timeout,
+            uuid=uuid,
+            nowait=nowait,
+        )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        return log_error_or_result(
+            result, verbose_result=verbose_result, verbose_on_fail=True
+        )
+
+
 # ---------------------------------------------------------------------------------------------
 # WORKERS MAIN SHELL MODEL
 # ---------------------------------------------------------------------------------------------
@@ -210,6 +267,11 @@ class WorkersPingCommand(ClientRunJobArgs):
 
 class NorfabWorkersCommands(BaseModel):
     ping: WorkersPingCommand = Field(None, description="Ping workers")
+    run_shell_command: WorkersShellCommand = Field(
+        None,
+        description="Run shell command on workers",
+        alias="run-shell-command",
+    )
 
     class PicleConfig:
         subshell = True

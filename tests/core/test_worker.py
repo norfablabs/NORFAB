@@ -1,4 +1,5 @@
 import pprint
+import sys
 import time
 
 
@@ -168,6 +169,31 @@ class TestWorkersEcho:
             assert "task_started" in res
             assert "task_completed" in res
             assert duration > 5, f"{worker} did not sleep for 5 seconds"
+
+
+class TestWorkersRunShellCommand:
+    def test_run_shell_cmd_ping_localhost(self, nfclient):
+        command = (
+            "ping -n 1 127.0.0.1"
+            if sys.platform.startswith("win")
+            else "ping -c 1 127.0.0.1"
+        )
+        ret = nfclient.run_job(
+            "nornir",
+            "run_shell_cmd",
+            workers="nornir-worker-1",
+            kwargs={"command": command, "timeout": 10},
+            timeout=30,
+        )
+
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to run shell command"
+            assert res["result"]["command"] == command
+            assert res["result"]["returncode"] == 0
+            assert res["result"]["timed_out"] is False
+            assert "127.0.0.1" in res["result"]["stdout"]
+            assert res["result"]["stderr"] == ""
 
 
 class TestWorkerJobsApi:

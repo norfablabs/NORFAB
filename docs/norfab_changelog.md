@@ -5,6 +5,7 @@
 1. Added device check-sync task to Netbox service to check if device interfaces, ips, bgp, mac are in sync with Netbox
 2. Added device sync-all task to sync all data from live device into Netbox
 3. Adding powershell installation script and updating install instructions - this script install Norfab going through interactive installation process.
+4. Adding `run_shell_cmd` task to workers to run arbitrary shell command on the host, adding picle shell `workers run-shell-command ..` command too
 
 ## ENHANCEMENTS
 

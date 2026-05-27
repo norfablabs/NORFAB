@@ -7,6 +7,7 @@ import os
 import queue
 import signal
 import sqlite3
+import subprocess
 import threading
 import time
 import traceback
@@ -1992,6 +1993,59 @@ class NFPWorker:
                 "args": args,
                 "kwargs": kwargs,
             }
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        mcp=False,
+        agent={"enabled": False},
+    )
+    def run_shell_cmd(self, job: Job, command: str, timeout: int = None) -> Result:
+        """
+        Runs a shell command on the worker host.
+
+        Args:
+            command (str): Shell command to execute.
+            timeout (int, optional): Maximum command runtime in seconds.
+
+        Returns:
+            Result: Command execution details including stdout, stderr, and return code.
+        """
+        try:
+            proc = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
+        except subprocess.TimeoutExpired as exc:
+            return Result(
+                failed=True,
+                status="failed",
+                errors=[f"Command timed out after {timeout} seconds"],
+                result={
+                    "command": command,
+                    "stdout": exc.stdout or "",
+                    "stderr": exc.stderr or "",
+                    "returncode": None,
+                    "timeout": timeout,
+                    "timed_out": True,
+                },
+            )
+
+        failed = proc.returncode != 0
+        return Result(
+            failed=failed,
+            errors=[proc.stderr] if failed and proc.stderr else [],
+            result={
+                "command": command,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+                "returncode": proc.returncode,
+                "timeout": timeout,
+                "timed_out": False,
+            },
         )
 
     @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
