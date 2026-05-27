@@ -2,6 +2,13 @@ from typing import List
 
 """NORFAB Protocol definitions"""
 
+
+def bytest_to_text(frame) -> str:
+    """Return a readable representation of a protocol frame for logs/status."""
+    if isinstance(frame, bytes):
+        return frame.decode("utf-8", errors="backslashreplace")
+    return str(frame)
+
 # This is the version of NFP/Client we implement
 CLIENT = b"NFPC01"
 

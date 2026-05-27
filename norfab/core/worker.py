@@ -1185,7 +1185,7 @@ def _post(worker, post_queue, destroy_event) -> None:
             ],
         )
         log.debug(
-            f"{worker.name} - '{suuid.decode('utf-8')}' job, sent ACK back to client '{client_address.decode('utf-8')}'"
+            f"{worker.name} - '{suuid.decode('utf-8')}' job, sent ACK back to client '{NFP.bytest_to_text(client_address)}'"
         )
 
         post_queue.task_done()

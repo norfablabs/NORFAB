@@ -336,12 +336,26 @@ class NFPBroker:
                 header = msg.pop(0)
 
                 if header == NFP.CLIENT:
-                    self.process_client(sender, msg)
+                    try:
+                        self.process_client(sender, msg)
+                    except Exception as e:
+                        log.error(
+                            f"NFPBroker - failed to process client message from "
+                            f"'{NFP.bytest_to_text(sender)}': {e}",
+                            exc_info=True,
+                        )
                 elif header == NFP.WORKER:
-                    self.process_worker(sender, msg)
+                    try:
+                        self.process_worker(sender, msg)
+                    except Exception as e:
+                        log.error(
+                            f"NFPBroker - failed to process worker message from "
+                            f"'{NFP.bytest_to_text(sender)}': {e}",
+                            exc_info=True,
+                        )
                 else:
                     log.error(
-                        f"NFPBroker - message from '{sender}' contains unsupported header '{header}'"
+                        f"NFPBroker - message from '{NFP.bytest_to_text(sender)}' contains unsupported header '{header}'"
                     )
 
             self.purge_workers()
@@ -408,7 +422,7 @@ class NFPBroker:
                 if not w.keepaliver.is_alive():
                     self.delete_worker(w, False)
                     log.info(
-                        f"NFPBroker - {w.address.decode(encoding='utf-8')} worker keepalives expired"
+                        f"NFPBroker - {NFP.bytest_to_text(w.address)} worker keepalives expired"
                     )
 
     def send_to_worker(
@@ -569,7 +583,7 @@ class NFPBroker:
                 socket_lock=self.socket_lock,
             )
             log.info(
-                f"NFPBroker - registered new worker {address.decode(encoding='utf-8')}"
+                f"NFPBroker - registered new worker {NFP.bytest_to_text(address)}"
             )
 
         return self.workers[address]
@@ -588,7 +602,7 @@ class NFPBroker:
             service = NFPService(name)
             self.services[name] = service
             log.debug(
-                f"NFPBroker - registered new service {name.decode(encoding='utf-8')}"
+                f"NFPBroker - registered new service {NFP.bytest_to_text(name)}"
             )
 
         return self.services[name]

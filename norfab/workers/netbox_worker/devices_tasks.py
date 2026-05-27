@@ -641,14 +641,14 @@ class NetboxDevicesTasks:
         log.info(
             f"{self.name} - Sync all for {len(devices)} device(s) in '{instance}', dry_run={dry_run}"
         )
-        job.event(f"syncing all data for {len(devices)} device(s), dry_run={dry_run}")
+        job.event(f"SYNCING all data for {len(devices)} device(s), dry_run={dry_run}")
 
         # initialize per-device result structure
         for device in devices:
             ret.result[device] = {}
 
         # --- sync interfaces ---
-        job.event("syncing interfaces")
+        job.event("SYNCING interfaces")
         intf_result = self.sync_device_interfaces(
             job=job,
             instance=instance,
@@ -665,7 +665,7 @@ class NetboxDevicesTasks:
             ret.result.setdefault(device, {})["interfaces"] = data
 
         # --- sync MAC addresses ---
-        job.event("syncing MAC addresses")
+        job.event("SYNCING MAC addresses")
         mac_result = self.sync_mac_addresses(
             job=job,
             instance=instance,
@@ -681,7 +681,7 @@ class NetboxDevicesTasks:
             ret.result.setdefault(device, {})["mac_addresses"] = data
 
         # --- sync IP addresses ---
-        job.event("syncing IP addresses")
+        job.event("SYNCING IP addresses")
         ip_result = self.sync_device_ip(
             job=job,
             instance=instance,
@@ -697,7 +697,7 @@ class NetboxDevicesTasks:
             ret.result.setdefault(device, {})["ip_addresses"] = data
 
         # --- sync BGP peerings ---
-        job.event("syncing BGP peerings")
+        job.event("SYNCING BGP peerings")
         bgp_result = self.sync_bgp_peerings(
             job=job,
             instance=instance,
