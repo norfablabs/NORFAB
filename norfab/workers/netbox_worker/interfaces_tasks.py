@@ -11,7 +11,7 @@ from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator
 from norfab.utils.text import expand_alphanumeric_range
 
 from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
-from .netbox_worker_utilities import resolve_vlan, resolve_vrf, resolve_ip
+from .netbox_worker_utilities import resolve_vlan, resolve_vrf
 
 log = logging.getLogger(__name__)
 

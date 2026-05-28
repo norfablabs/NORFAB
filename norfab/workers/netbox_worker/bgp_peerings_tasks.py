@@ -29,7 +29,7 @@ def resolve_asn(
     job: Job,
     ret: Result,
     worker_name: str,
-    _lookup_cache: Union[None, dict] = None,
+    lookup_cache: Union[None, dict] = None,
 ) -> Union[int, None]:
     """Resolve or create an ASN, return its NetBox ID or None."""
     if not asn_str:
@@ -38,36 +38,36 @@ def resolve_asn(
         asn_int = int(asn_str)
     except (ValueError, TypeError):
         return None
-    if _lookup_cache is None:
-        _lookup_cache = {}
+    if lookup_cache is None:
+        lookup_cache = {}
     cache_key = ("asn", asn_int, rir_id)
-    if cache_key in _lookup_cache:
-        return _lookup_cache[cache_key]
+    if cache_key in lookup_cache:
+        return lookup_cache[cache_key]
     existing = list(nb.ipam.asns.filter(asn=asn_int))
     if existing:
         asn_id = existing[0].id
-        _lookup_cache[cache_key] = asn_id
+        lookup_cache[cache_key] = asn_id
         return asn_id
     if not rir_id:
         msg = f"cannot create ASN '{asn_str}': no RIR provided, use 'rir' parameter"
         job.event(msg, severity="WARNING")
         log.warning(f"{worker_name} - {msg}")
         ret.errors.append(msg)
-        _lookup_cache[cache_key] = None
+        lookup_cache[cache_key] = None
         return None
     try:
         new_asn = nb.ipam.asns.create(asn=asn_int, rir=rir_id)
         msg = f"created ASN '{asn_str}' in NetBox IPAM"
         job.event(msg)
         log.info(f"{worker_name} - {msg}")
-        _lookup_cache[cache_key] = new_asn.id
+        lookup_cache[cache_key] = new_asn.id
         return new_asn.id
     except Exception as e:
         msg = f"failed to create ASN '{asn_str}': {e}"
         job.event(msg, severity="ERROR")
         log.error(f"{worker_name} - {msg}")
         ret.errors.append(msg)
-        _lookup_cache[cache_key] = None
+        lookup_cache[cache_key] = None
         return None
 
 
@@ -339,7 +339,7 @@ def resolve_bgp_session_payload_fields(
     ret: Result,
     worker_name: str,
     addr_family: str,
-    _lookup_cache: Union[None, dict] = None,
+    lookup_cache: Union[None, dict] = None,
     vrf_custom_field: str = "vrf",
 ) -> dict:
     """Resolve BGP session field name/value pairs to a partial NetBox API payload dict.
@@ -351,21 +351,21 @@ def resolve_bgp_session_payload_fields(
     ``import_policies`` / ``export_policies`` values may be either a list of policy
     names or a pipe-separated string; both forms are handled.
 
-    ``_lookup_cache`` is an optional dict shared across multiple calls within the same
+    ``lookup_cache`` is an optional dict shared across multiple calls within the same
     task invocation to avoid redundant NetBox lookups for IP address / ASN / VRF /
     peer group / routing policy / prefix list objects.
     """
-    if _lookup_cache is None:
-        _lookup_cache = {}
+    if lookup_cache is None:
+        lookup_cache = {}
     payload = {}
     for field, value in fields.items():
         if field in ("local_address", "remote_address"):
-            ip_id = resolve_ip(value, nb, job, ret, worker_name, _lookup_cache)
+            ip_id = resolve_ip(value, nb, job, ret, worker_name, lookup_cache)
             if ip_id:
                 payload[field] = ip_id
         elif field in ("local_as", "remote_as"):
             asn_id = resolve_asn(
-                value, nb, rir_id, job, ret, worker_name, _lookup_cache
+                value, nb, rir_id, job, ret, worker_name, lookup_cache
             )
             if asn_id:
                 payload[field] = asn_id
@@ -376,22 +376,22 @@ def resolve_bgp_session_payload_fields(
                 pass
             elif value:
                 cache_key = ("vrf", value)
-                if cache_key not in _lookup_cache:
-                    _lookup_cache[cache_key] = resolve_vrf(
+                if cache_key not in lookup_cache:
+                    lookup_cache[cache_key] = resolve_vrf(
                         value, nb, job, ret, worker_name
                     )
-                vrf_id = _lookup_cache[cache_key]
+                vrf_id = lookup_cache[cache_key]
                 payload.setdefault("custom_fields", {})[vrf_custom_field] = vrf_id
             else:
                 payload.setdefault("custom_fields", {})[vrf_custom_field] = None
         elif field == "peer_group":
             if value:
                 cache_key = ("peer_group", value)
-                if cache_key not in _lookup_cache:
-                    _lookup_cache[cache_key] = resolve_peer_group(
+                if cache_key not in lookup_cache:
+                    lookup_cache[cache_key] = resolve_peer_group(
                         value, nb, job, ret, worker_name
                     )
-                payload["peer_group"] = _lookup_cache[cache_key]
+                payload["peer_group"] = lookup_cache[cache_key]
             else:
                 payload["peer_group"] = None
         elif field in ("import_policies", "export_policies"):
@@ -403,21 +403,21 @@ def resolve_bgp_session_payload_fields(
             ids = []
             for p_name in policies:
                 cache_key = ("route_policy", p_name)
-                if cache_key not in _lookup_cache:
-                    _lookup_cache[cache_key] = resolve_route_policy(
+                if cache_key not in lookup_cache:
+                    lookup_cache[cache_key] = resolve_route_policy(
                         p_name, nb, job, ret, worker_name
                     )
-                if _lookup_cache[cache_key]:
-                    ids.append(_lookup_cache[cache_key])
+                if lookup_cache[cache_key]:
+                    ids.append(lookup_cache[cache_key])
             payload[field] = ids
         elif field in ("prefix_list_in", "prefix_list_out"):
             if value:
                 cache_key = ("prefix_list", value, addr_family)
-                if cache_key not in _lookup_cache:
-                    _lookup_cache[cache_key] = resolve_prefix_list(
+                if cache_key not in lookup_cache:
+                    lookup_cache[cache_key] = resolve_prefix_list(
                         value, nb, job, ret, worker_name, family=addr_family
                     )
-                payload[field] = _lookup_cache[cache_key]
+                payload[field] = lookup_cache[cache_key]
             else:
                 payload[field] = None
     return payload
@@ -428,24 +428,24 @@ def _resolve_rir_id(
     nb: Any,
     job: Job,
     worker_name: str,
-    _lookup_cache: Union[None, dict] = None,
+    lookup_cache: Union[None, dict] = None,
 ) -> Union[None, int]:
     """Resolve RIR name to its NetBox ID; log a warning when not found."""
     if not rir:
         return None
-    if _lookup_cache is None:
-        _lookup_cache = {}
+    if lookup_cache is None:
+        lookup_cache = {}
     cache_key = ("rir", rir)
-    if cache_key in _lookup_cache:
-        return _lookup_cache[cache_key]
+    if cache_key in lookup_cache:
+        return lookup_cache[cache_key]
     rir_obj = nb.ipam.rirs.get(name=rir)
     if rir_obj:
-        _lookup_cache[cache_key] = rir_obj.id
+        lookup_cache[cache_key] = rir_obj.id
         return rir_obj.id
     msg = f"RIR '{rir}' not found in NetBox, ASN creation will fail if needed"
     job.event(msg, severity="WARNING")
     log.warning(f"{worker_name} - {msg}")
-    _lookup_cache[cache_key] = None
+    lookup_cache[cache_key] = None
     return None
 
 
@@ -1074,6 +1074,7 @@ class NetboxBgpPeeringsTasks:
         branch: Union[None, str] = None,
         dry_run: bool = False,
         vrf_custom_field: str = "vrf",
+        lookup_cache: Union[None, dict] = None,
     ) -> Result:
         """
         Create one or many BGP sessions in NetBox.
@@ -1150,14 +1151,14 @@ class NetboxBgpPeeringsTasks:
             job.event("setting NetBox changelog message for BGP session create")
             nb.http_session.headers["X-Changelog-Message"] = message
 
-        _lookup_cache: dict = {}
+        lookup_cache = lookup_cache if lookup_cache is not None else {}
 
         # Validate VRF custom field and RIR
         job.event("validating BGP session VRF custom field and RIR")
         vrf_custom_field = _resolve_vrf_custom_field(
             vrf_custom_field, nb, job, self.name
         )
-        rir_id = _resolve_rir_id(rir, nb, job, self.name, _lookup_cache)
+        rir_id = _resolve_rir_id(rir, nb, job, self.name, lookup_cache)
 
         # Build initial bgp_sessions list
         bgp_sessions = bulk_create or [
@@ -1446,16 +1447,16 @@ class NetboxBgpPeeringsTasks:
 
             # Resolve IP IDs and ASN IDs (steps 6d / 6e)
             local_ip_id = resolve_ip(
-                bgp_session_local_address, nb, job, ret, self.name, _lookup_cache
+                bgp_session_local_address, nb, job, ret, self.name, lookup_cache
             )
             remote_ip_id = resolve_ip(
-                bgp_session_remote_address, nb, job, ret, self.name, _lookup_cache
+                bgp_session_remote_address, nb, job, ret, self.name, lookup_cache
             )
             local_as_id = resolve_asn(
-                bgp_session_local_as, nb, rir_id, job, ret, self.name, _lookup_cache
+                bgp_session_local_as, nb, rir_id, job, ret, self.name, lookup_cache
             )
             remote_as_id = resolve_asn(
-                bgp_session_remote_as, nb, rir_id, job, ret, self.name, _lookup_cache
+                bgp_session_remote_as, nb, rir_id, job, ret, self.name, lookup_cache
             )
 
             resolution_errors = []
@@ -1523,7 +1524,7 @@ class NetboxBgpPeeringsTasks:
                     ret,
                     self.name,
                     addr_family,
-                    _lookup_cache=_lookup_cache,
+                    lookup_cache=lookup_cache,
                     vrf_custom_field=vrf_custom_field,
                 )
             )
@@ -1593,6 +1594,7 @@ class NetboxBgpPeeringsTasks:
         dry_run: bool = False,
         instance: Union[None, str] = None,
         vrf_custom_field: str = "vrf",
+        lookup_cache: Union[None, dict] = None,
     ) -> Result:
         """
         Update one or many existing BGP sessions in NetBox.
@@ -1664,14 +1666,14 @@ class NetboxBgpPeeringsTasks:
             job.event("setting NetBox changelog message for BGP session update")
             nb.http_session.headers["X-Changelog-Message"] = message
 
-        _lookup_cache: dict = {}
+        lookup_cache = lookup_cache if lookup_cache is not None else {}
 
         # Validate VRF custom field and RIR
         job.event("validating BGP session VRF custom field and RIR")
         vrf_custom_field = _resolve_vrf_custom_field(
             vrf_custom_field, nb, job, self.name
         )
-        rir_id = _resolve_rir_id(rir, nb, job, self.name, _lookup_cache)
+        rir_id = _resolve_rir_id(rir, nb, job, self.name, lookup_cache)
 
         # Build list of sessions to update
         if bulk_update is not None:
@@ -1785,7 +1787,7 @@ class NetboxBgpPeeringsTasks:
                     ret,
                     self.name,
                     addr_family,
-                    _lookup_cache=_lookup_cache,
+                    lookup_cache=lookup_cache,
                     vrf_custom_field=vrf_custom_field,
                 )
             )
@@ -1921,6 +1923,7 @@ class NetboxBgpPeeringsTasks:
         normalised_live = (
             {}
         )  # Live data:   device name -> session name -> normalised field values
+        lookup_cache: dict = {}
 
         # Validate BGP plugin
         job.event(f"validating NetBox BGP plugin for '{instance}'")
@@ -2017,6 +2020,8 @@ class NetboxBgpPeeringsTasks:
                 ):
                     continue
                 normalised_nb[device_name][sname] = normalised
+                lookup_cache[("ip", nb_session["local_address"])] = None
+                lookup_cache[("ip", nb_session["remote_address"])] = None                    
         nb_session_count = sum(len(sessions) for sessions in normalised_nb.values())
         job.event(
             f"normalised {nb_session_count} NetBox BGP session(s) after applying filters"
@@ -2090,6 +2095,8 @@ class NetboxBgpPeeringsTasks:
                         "prefix_list_in": s.get("prefix_list_in"),
                         "prefix_list_out": s.get("prefix_list_out"),
                     }
+                    lookup_cache[("ip", local_address)] = None
+                    lookup_cache[("ip", remote_address)] = None   
         live_session_count = sum(len(sessions) for sessions in normalised_live.values())
         job.event(
             f"normalised {live_session_count} live BGP session(s) after applying filters"
@@ -2116,6 +2123,32 @@ class NetboxBgpPeeringsTasks:
             return ret
         else:
             ret.diff = full_diff
+
+        if (create_count or update_count):
+            job.event(
+                f"pre-seeding BGP session IP lookup cache for {len(lookup_cache)} address(es)"
+            )
+            try:
+                nb_ips = self.bulk_filter(
+                    endpoint=nb.ipam.ip_addresses,
+                    filter_by_key="address",
+                    filter_by_values=[i[1] for i in lookup_cache],
+                    fields="id,address",
+                )
+                for ip in nb_ips:
+                    lookup_cache[("ip", ip.address)] = ip.id
+                    lookup_cache[("ip", ip.address.split("/")[0])] = ip.id
+                # remove IPs not found in netbox
+                for k in list(lookup_cache.keys()):
+                    if lookup_cache[k] is None:
+                        lookup_cache.pop(k)
+                job.event(
+                    f"pre-seeded BGP session IP lookup cache with {len(lookup_cache) / 2} NetBox IP object(s)"
+                )
+            except Exception as exc:
+                msg = f"failed to pre-seed BGP session IP lookup cache: {exc}"
+                job.event(msg, severity="WARNING")
+                log.warning(f"{self.name} - {msg}")
 
         # Per-device result tracking
         device_results = {
@@ -2183,6 +2216,7 @@ class NetboxBgpPeeringsTasks:
                 branch=branch,
                 create_reverse=False,
                 vrf_custom_field=vrf_custom_field,
+                lookup_cache=lookup_cache,
             )
             ret.errors.extend(create_result.errors)
             created_names = create_result.result.get("created", [])
@@ -2203,6 +2237,7 @@ class NetboxBgpPeeringsTasks:
                 message=message,
                 branch=branch,
                 vrf_custom_field=vrf_custom_field,
+                lookup_cache=lookup_cache,
             )
             ret.errors.extend(update_result.errors)
             updated_names = set(update_result.result.get("updated", []))
