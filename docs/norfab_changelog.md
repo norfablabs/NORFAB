@@ -13,6 +13,11 @@
 2. MCP service policy now enforced for tool calls not only for discovery
 3. Netbox sync device interfaces improved VLAN handling - now it creates vlan if its missing, added `vlan_group` argument to specify group to associate with vlan, otherwise it is associated with device site
 
+## BUGS
+
+1. Fixing ip sync task bulk update list construction, making sure IDs are always present for items
+2. Fixing IP sync prefixes filtering using `bulk_filter`
+
 ---
 
 # 0.18.1

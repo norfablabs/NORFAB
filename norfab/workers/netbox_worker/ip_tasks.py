@@ -1166,7 +1166,7 @@ class NetboxIpTasks:
                     # ip exists but not assigned to any interface - update it
                     else:
                         ip_live["id"] = nb_ip["id"]
-                bulk_update_ip[key] = ip_live
+                        bulk_update_ip[key] = ip_live
 
         job.event(
             f"IP address sync actions: {len(bulk_create_ip)} create, "
@@ -1259,8 +1259,10 @@ class NetboxIpTasks:
             job.event(f"checking {len(all_prefixes_live)} prefix candidate(s)")
             nb_prefixes = {
                 (pfx.prefix, pfx.vrf.id if pfx.vrf else None)
-                for pfx in nb.ipam.prefixes.filter(
-                    prefix=[p["prefix"] for p in all_prefixes_live if p["prefix"]],
+                for pfx in self.bulk_filter(
+                    endpoint=nb.ipam.prefixes,
+                    filter_by_key="prefix",
+                    filter_by_values=[p["prefix"] for p in all_prefixes_live if p["prefix"]],
                     fields="id,prefix,vrf",
                 )
             }
