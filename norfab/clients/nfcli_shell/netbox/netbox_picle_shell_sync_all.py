@@ -21,9 +21,7 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class SyncAllDevicesShell(
-    NetboxClientRunJobArgs, SyncAllInput, NorniHostsFilters
-):
+class SyncAllDevicesShell(NetboxClientRunJobArgs, SyncAllInput, NorniHostsFilters):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of NetBox devices to sync all data for",

@@ -404,7 +404,9 @@ class NetboxTopologyTasks:
         )
 
         if query_result.failed:
-            job.event("failed to fetch topology interface connections", severity="ERROR")
+            job.event(
+                "failed to fetch topology interface connections", severity="ERROR"
+            )
             ret.failed = True
             ret.errors.extend(query_result.errors)
             return ret

@@ -250,7 +250,9 @@ class NetboxConnectionsTasks:
         log.info(
             f"{self.name} - Get connections: Fetching connections for {len(devices)} device(s) from '{instance}'"
         )
-        job.event(f"fetching connections for {len(devices)} device(s), dry_run={dry_run}")
+        job.event(
+            f"fetching connections for {len(devices)} device(s), dry_run={dry_run}"
+        )
         ret = Result(
             task=f"{self.name}:get_connections",
             result={d: {} for d in devices},
@@ -280,7 +282,9 @@ class NetboxConnectionsTasks:
             dry_run=dry_run,
         )
         if query_result.errors:
-            job.event("failed to fetch connection data from NetBox GraphQL", severity="ERROR")
+            job.event(
+                "failed to fetch connection data from NetBox GraphQL", severity="ERROR"
+            )
             ret.errors.extend(query_result.errors)
             ret.failed = True
             return ret

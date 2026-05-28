@@ -22,6 +22,7 @@ log = logging.getLogger(__name__)
 # Task Pydantic Models
 # -----------------------------------------------------------------------------------------
 
+
 class GetNornirHosts(NornirHostsFilters, extra="forbid"):
     """
     Pydantic model for Nornir get_nornir_hosts task.
@@ -50,6 +51,7 @@ class GetNornirHostsResponse(Result):
 # -----------------------------------------------------------------------------------------
 # Tasks
 # -----------------------------------------------------------------------------------------
+
 
 class InventoryTasks:
     @Task(fastapi={"methods": ["POST"]})
@@ -211,7 +213,7 @@ class InventoryTasks:
             job.event("nornir instance re-initialized")
 
         return ret
-        
+
     @Task(fastapi={"methods": ["GET"]})
     def get_inventory(self, **kwargs: dict) -> Result:
         """

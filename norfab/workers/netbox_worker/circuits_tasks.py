@@ -454,9 +454,7 @@ class NetboxCircuitsTasks:
                 interface_list=list(fetch_interfaces),
                 ip_addresses=True,
             ).result
-            job.event(
-                f"retrieved interface details for {len(fetch_devices)} device(s)"
-            )
+            job.event(f"retrieved interface details for {len(fetch_devices)} device(s)")
             # map interfaces details to circuits
             for device_name, circuits in ret.result.items():
                 for circuit_id, ckt_data in circuits.items():

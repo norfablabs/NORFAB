@@ -326,9 +326,7 @@ class FastMCPWorker(NFPWorker):
         except ValueError as exc:
             raise ValueError(f"Invalid NorFab MCP tool name '{name}'") from exc
 
-        if not service_part.startswith("service_") or not tool_part.startswith(
-            "task_"
-        ):
+        if not service_part.startswith("service_") or not tool_part.startswith("task_"):
             raise ValueError(f"Invalid NorFab MCP tool name '{name}'")
 
         service = service_part[8:]

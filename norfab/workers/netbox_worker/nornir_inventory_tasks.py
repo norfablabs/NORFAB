@@ -63,7 +63,9 @@ class NetboxNornirInventoryTasks:
         job.event(f"checking NetBox status for '{instance or self.default_instance}'")
         netbox_status = self.get_netbox_status(job=job, instance=instance)
         if netbox_status.result[instance or self.default_instance]["status"] is False:
-            job.event("NetBox status check failed for Nornir inventory", severity="ERROR")
+            job.event(
+                "NetBox status check failed for Nornir inventory", severity="ERROR"
+            )
             return ret
 
         # retrieve devices data
@@ -122,7 +124,9 @@ class NetboxNornirInventoryTasks:
                 job=job, devices=list(hosts), instance=instance, **kwargs
             )
             if nb_interfaces.errors:
-                job.event("interface retrieval completed with errors", severity="WARNING")
+                job.event(
+                    "interface retrieval completed with errors", severity="WARNING"
+                )
                 ret.errors.extend(nb_interfaces.errors)
             # save interfaces data to hosts' inventory
             while nb_interfaces.result:
@@ -143,7 +147,9 @@ class NetboxNornirInventoryTasks:
                 job=job, devices=list(hosts), instance=instance, **kwargs
             )
             if nb_connections.errors:
-                job.event("connection retrieval completed with errors", severity="WARNING")
+                job.event(
+                    "connection retrieval completed with errors", severity="WARNING"
+                )
                 ret.errors.extend(nb_connections.errors)
             # save connections data to hosts' inventory
             while nb_connections.result:
@@ -185,7 +191,9 @@ class NetboxNornirInventoryTasks:
                 job=job, devices=list(hosts), instance=instance, **kwargs
             )
             if nb_bgp_peerings.errors:
-                job.event("BGP peering retrieval completed with errors", severity="WARNING")
+                job.event(
+                    "BGP peering retrieval completed with errors", severity="WARNING"
+                )
                 ret.errors.extend(nb_bgp_peerings.errors)
             # save circuits data to hosts' inventory
             while nb_bgp_peerings.result:

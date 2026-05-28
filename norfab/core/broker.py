@@ -582,9 +582,7 @@ class NFPBroker:
                 keepalive=self.keepalive,
                 socket_lock=self.socket_lock,
             )
-            log.info(
-                f"NFPBroker - registered new worker {NFP.bytest_to_text(address)}"
-            )
+            log.info(f"NFPBroker - registered new worker {NFP.bytest_to_text(address)}")
 
         return self.workers[address]
 
@@ -601,9 +599,7 @@ class NFPBroker:
         if not self.services.get(name):
             service = NFPService(name)
             self.services[name] = service
-            log.debug(
-                f"NFPBroker - registered new service {NFP.bytest_to_text(name)}"
-            )
+            log.debug(f"NFPBroker - registered new service {NFP.bytest_to_text(name)}")
 
         return self.services[name]
 

@@ -227,7 +227,9 @@ class NetboxGraphqlTasks:
 
             # stop immediately if any page fetch failed — results would be incomplete
             if ret.failed:
-                job.event("GraphQL pagination stopped due to fetch errors", severity="ERROR")
+                job.event(
+                    "GraphQL pagination stopped due to fetch errors", severity="ERROR"
+                )
                 break
 
             any_data_returned = False
@@ -258,7 +260,9 @@ class NetboxGraphqlTasks:
         if not ret.failed:
             ret.result = aggregated_data
             total_items = sum(
-                len(value) for value in aggregated_data.values() if isinstance(value, list)
+                len(value)
+                for value in aggregated_data.values()
+                if isinstance(value, list)
             )
             job.event(f"GraphQL query complete: {total_items} list item(s) retrieved")
 

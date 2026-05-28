@@ -710,7 +710,9 @@ class NetboxIpTasks:
             instance=instance,
         )
         if interfaces.errors:
-            job.event("failed to retrieve interfaces for bulk IP creation", severity="ERROR")
+            job.event(
+                "failed to retrieve interfaces for bulk IP creation", severity="ERROR"
+            )
             ret.errors.extend(interfaces.errors)
             ret.failed = True
             return ret
@@ -909,7 +911,9 @@ class NetboxIpTasks:
                 ret.errors.append(msg)
                 devices.remove(d)
         if not devices:
-            job.event("no valid NetBox devices remain after validation", severity="ERROR")
+            job.event(
+                "no valid NetBox devices remain after validation", severity="ERROR"
+            )
             ret.failed = True
             return ret
         job.event(f"validated {len(devices)} device(s) in NetBox")
@@ -988,9 +992,7 @@ class NetboxIpTasks:
                     filtered[intf_name] = intf
                 normalised_live_all[device_name] = filtered
         live_interface_count = sum(len(v) for v in normalised_live_all.values())
-        job.event(
-            f"normalised IP data from {live_interface_count} live interface(s)"
-        )
+        job.event(f"normalised IP data from {live_interface_count} live interface(s)")
 
         # fetch interfaces data from NetBox to resolve interface IDs
         job.event("fetching NetBox interfaces to resolve IP assignments")
@@ -1061,9 +1063,7 @@ class NetboxIpTasks:
             )
             job.event("no IP addresses found in live data")
             return ret
-        job.event(
-            f"collected {len(all_ip_live)} live IP address candidate(s)"
-        )
+        job.event(f"collected {len(all_ip_live)} live IP address candidate(s)")
 
         # fetch existing IP addresses from NetBox
         job.event(f"fetching {len(all_ip_live)} matching IP address(es) from NetBox")
@@ -1185,7 +1185,9 @@ class NetboxIpTasks:
             )
 
         if dry_run is True:
-            job.event("dry-run requested, returning IP address sync plan without changes")
+            job.event(
+                "dry-run requested, returning IP address sync plan without changes"
+            )
             for key in bulk_create_ip:
                 device_name = key[0]
                 device_results[device_name]["created"].append(key[2])
@@ -1262,7 +1264,9 @@ class NetboxIpTasks:
                 for pfx in self.bulk_filter(
                     endpoint=nb.ipam.prefixes,
                     filter_by_key="prefix",
-                    filter_by_values=[p["prefix"] for p in all_prefixes_live if p["prefix"]],
+                    filter_by_values=[
+                        p["prefix"] for p in all_prefixes_live if p["prefix"]
+                    ],
                     fields="id,prefix,vrf",
                 )
             }

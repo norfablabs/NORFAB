@@ -145,7 +145,9 @@ class NetboxContainerlabInventoryTasks:
         job.event(f"checking NetBox status for '{instance}'")
         netbox_status = self.get_netbox_status(job=job, instance=instance)
         if netbox_status.result[instance]["status"] is False:
-            job.event(f"NetBox instance '{instance}' status check failed", severity="ERROR")
+            job.event(
+                f"NetBox instance '{instance}' status check failed", severity="ERROR"
+            )
             ret.failed = True
             ret.messages = [f"Netbox status is no good: {netbox_status}"]
             return ret
@@ -167,7 +169,9 @@ class NetboxContainerlabInventoryTasks:
             ret.errors.extend(nb_devices.errors)
             ret.failed = True
             return ret
-        job.event(f"processing {len(nb_devices.result)} device(s) for Containerlab inventory")
+        job.event(
+            f"processing {len(nb_devices.result)} device(s) for Containerlab inventory"
+        )
 
         # form Containerlab nodes inventory
         for device_name, device in nb_devices.result.items():

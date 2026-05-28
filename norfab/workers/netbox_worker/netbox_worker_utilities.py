@@ -72,11 +72,15 @@ def resolve_vlan(
             return None
 
     cache_key = (
-        "vlan",
-        vid,
-        "group",
-        group_id,
-    ) if group_id else ("vlan", vid, "site", site_id)
+        (
+            "vlan",
+            vid,
+            "group",
+            group_id,
+        )
+        if group_id
+        else ("vlan", vid, "site", site_id)
+    )
     if cache_key in _lookup_cache:
         return _lookup_cache[cache_key]
 

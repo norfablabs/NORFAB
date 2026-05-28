@@ -9,6 +9,7 @@ def bytest_to_text(frame) -> str:
         return frame.decode("utf-8", errors="backslashreplace")
     return str(frame)
 
+
 # This is the version of NFP/Client we implement
 CLIENT = b"NFPC01"
 

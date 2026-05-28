@@ -40,7 +40,7 @@ def resolve_asn(
         return None
     if lookup_cache is None:
         lookup_cache = {}
-    cache_key = ("asn", asn_int, rir_id)
+    cache_key = ("asn", asn_int)
     if cache_key in lookup_cache:
         return lookup_cache[cache_key]
     existing = list(nb.ipam.asns.filter(asn=asn_int))
@@ -364,9 +364,7 @@ def resolve_bgp_session_payload_fields(
             if ip_id:
                 payload[field] = ip_id
         elif field in ("local_as", "remote_as"):
-            asn_id = resolve_asn(
-                value, nb, rir_id, job, ret, worker_name, lookup_cache
-            )
+            asn_id = resolve_asn(value, nb, rir_id, job, ret, worker_name, lookup_cache)
             if asn_id:
                 payload[field] = asn_id
         elif field in ("description", "status"):
@@ -1761,7 +1759,9 @@ class NetboxBgpPeeringsTasks:
         )
 
         if dry_run is True:
-            job.event("dry-run requested, returning BGP session update diff without changes")
+            job.event(
+                "dry-run requested, returning BGP session update diff without changes"
+            )
             result["update"] = [
                 {"name": sname, "diff": changes}
                 for sname, changes in sessions_diff["update"].items()
@@ -2020,8 +2020,11 @@ class NetboxBgpPeeringsTasks:
                 ):
                     continue
                 normalised_nb[device_name][sname] = normalised
-                lookup_cache[("ip", nb_session["local_address"])] = None
-                lookup_cache[("ip", nb_session["remote_address"])] = None                    
+                # populate lookup cache for future use
+                lookup_cache[("ip", normalised["local_address"])] = None
+                lookup_cache[("ip", normalised["remote_address"])] = None
+                lookup_cache[("asn", normalised["local_as"])] = None
+                lookup_cache[("asn", normalised["local_as"])] = None
         nb_session_count = sum(len(sessions) for sessions in normalised_nb.values())
         job.event(
             f"normalised {nb_session_count} NetBox BGP session(s) after applying filters"
@@ -2095,8 +2098,13 @@ class NetboxBgpPeeringsTasks:
                         "prefix_list_in": s.get("prefix_list_in"),
                         "prefix_list_out": s.get("prefix_list_out"),
                     }
+                    # populate lookup cache for future use
                     lookup_cache[("ip", local_address)] = None
-                    lookup_cache[("ip", remote_address)] = None   
+                    lookup_cache[("ip", remote_address)] = None
+                    if remote_as_val:
+                        lookup_cache[("asn", remote_as_val)] = None
+                    if s.get("local_as"):
+                        lookup_cache[("asn", s.get("local_as"))] = None
         live_session_count = sum(len(sessions) for sessions in normalised_live.values())
         job.event(
             f"normalised {live_session_count} live BGP session(s) after applying filters"
@@ -2117,38 +2125,62 @@ class NetboxBgpPeeringsTasks:
 
         # Return dry-run results per device
         if dry_run is True:
-            job.event("dry-run requested, returning BGP session sync diff without changes")
+            job.event(
+                "dry-run requested, returning BGP session sync diff without changes"
+            )
             ret.result = full_diff
             ret.dry_run = True
             return ret
         else:
             ret.diff = full_diff
 
-        if (create_count or update_count):
-            job.event(
-                f"pre-seeding BGP session IP lookup cache for {len(lookup_cache)} address(es)"
-            )
+        if create_count or update_count:
+            # pre-seed cache for IPs
             try:
+                ips_filter = [i[1].split("/")[0] for i in lookup_cache if i[0] == "ip"]
                 nb_ips = self.bulk_filter(
                     endpoint=nb.ipam.ip_addresses,
                     filter_by_key="address",
-                    filter_by_values=[i[1] for i in lookup_cache],
+                    filter_by_values=ips_filter,
                     fields="id,address",
                 )
+                ip_cache_count = 0
                 for ip in nb_ips:
                     lookup_cache[("ip", ip.address)] = ip.id
                     lookup_cache[("ip", ip.address.split("/")[0])] = ip.id
-                # remove IPs not found in netbox
-                for k in list(lookup_cache.keys()):
-                    if lookup_cache[k] is None:
-                        lookup_cache.pop(k)
+                    ip_cache_count += 1
                 job.event(
-                    f"pre-seeded BGP session IP lookup cache with {len(lookup_cache) / 2} NetBox IP object(s)"
+                    f"pre-seeded BGP session IP lookup cache with {ip_cache_count} NetBox IP objects"
                 )
             except Exception as exc:
                 msg = f"failed to pre-seed BGP session IP lookup cache: {exc}"
                 job.event(msg, severity="WARNING")
                 log.warning(f"{self.name} - {msg}")
+            # pre-seed cache for BGP ASN
+            try:
+                asn_filter = [i[1] for i in lookup_cache if i[0] == "asn"]
+                nb_asns = self.bulk_filter(
+                    endpoint=nb.ipam.asns,
+                    filter_by_key="asn",
+                    filter_by_values=asn_filter,
+                    fields="id,asn",
+                )
+                asn_cache_count = 0
+                for asn in nb_asns:
+                    lookup_cache[("asn", int(asn.asn))] = asn.id
+                    asn_cache_count += 1
+                job.event(
+                    f"pre-seeded BGP session ASN lookup cache with {asn_cache_count} NetBox ASN objects"
+                )
+            except Exception as exc:
+                msg = f"failed to pre-seed BGP session ASN lookup cache: {exc}"
+                job.event(msg, severity="WARNING")
+                log.warning(f"{self.name} - {msg}")
+
+        # remove IPs or ASNs not found in netbox
+        for k in list(lookup_cache):
+            if lookup_cache[k] is None:
+                lookup_cache.pop(k)
 
         # Per-device result tracking
         device_results = {
@@ -2262,7 +2294,10 @@ class NetboxBgpPeeringsTasks:
             if all_deletions:
                 job.event(f"fetching {len(all_deletions)} BGP session(s) to delete")
                 sessions_to_delete = self.bulk_filter(
-                    nb.plugins.bgp.session, "name", list(all_deletions)
+                    nb.plugins.bgp.session,
+                    "name",
+                    list(all_deletions),
+                    fields="id,name",
                 )
                 for session in sessions_to_delete:
                     device_name = all_deletions[session.name]

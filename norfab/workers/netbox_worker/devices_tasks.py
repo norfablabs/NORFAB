@@ -276,7 +276,9 @@ class NetboxDevicesTasks:
                     f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
                     f"{len(devices)} total device(s) selected"
                 )
-                job.event(f"syncing device facts for {len(devices)} devices, dry_run={dry_run}")
+                job.event(
+                    f"syncing device facts for {len(devices)} devices, dry_run={dry_run}"
+                )
                 log.info(
                     f"{self.name} - sync_device_facts starting for {len(devices)} device(s): {', '.join(devices)}"
                 )
@@ -297,7 +299,9 @@ class NetboxDevicesTasks:
                     job.event(msg, severity="ERROR")
                     devices.remove(d)
             if not devices:
-                job.event("no valid NetBox devices remain after validation", severity="ERROR")
+                job.event(
+                    "no valid NetBox devices remain after validation", severity="ERROR"
+                )
                 ret.failed = True
                 return ret
             # iterate over devices in batches
@@ -721,8 +725,6 @@ class NetboxDevicesTasks:
         for device, data in bgp_result.result.items():
             ret.result.setdefault(device, {})["bgp_peerings"] = data
 
-        log.info(
-            f"{self.name} - Sync all complete for {len(ret.result)} device(s)"
-        )
+        log.info(f"{self.name} - Sync all complete for {len(ret.result)} device(s)")
         job.event(f"sync all complete for {len(ret.result)} device(s)")
         return ret

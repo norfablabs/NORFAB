@@ -1191,7 +1191,9 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
                 devices.remove(d)
         if not devices:
-            job.event("no valid NetBox devices remain after validation", severity="ERROR")
+            job.event(
+                "no valid NetBox devices remain after validation", severity="ERROR"
+            )
             ret.failed = True
             return ret
         job.event(f"validated {len(devices)} device(s) in NetBox")
@@ -1334,7 +1336,9 @@ class NetboxInterfacesTasks:
                 job.event(msg, severity="ERROR")
                 _ = normalised_nb_all.pop(device_name)
         if not normalised_nb_all:
-            job.event("no interface parsing results collected for devices", severity="ERROR")
+            job.event(
+                "no interface parsing results collected for devices", severity="ERROR"
+            )
             ret.failed = True
             ret.errors.append("no interfaces parsing results collected for devices")
             return ret
@@ -1363,7 +1367,9 @@ class NetboxInterfacesTasks:
         )
 
         if dry_run is True:
-            job.event("dry-run requested, returning interface sync diff without changes")
+            job.event(
+                "dry-run requested, returning interface sync diff without changes"
+            )
             ret.result = full_diff
             ret.dry_run = True
             return ret
@@ -1603,7 +1609,9 @@ class NetboxInterfacesTasks:
                         "device": device_name,
                         "interface": intf_name,
                     }
-            job.event(f"prepared {len(bulk_delete_interfaces)} interface delete payload(s)")
+            job.event(
+                f"prepared {len(bulk_delete_interfaces)} interface delete payload(s)"
+            )
         elif delete_count:
             job.event(
                 f"skipping {delete_count} interface deletion(s), process_deletions=False"
@@ -1724,7 +1732,9 @@ class NetboxInterfacesTasks:
             ret.failed = True
             return ret
 
-        job.event(f"syncing MAC addresses for {len(devices)} devices, dry_run={dry_run}")
+        job.event(
+            f"syncing MAC addresses for {len(devices)} devices, dry_run={dry_run}"
+        )
 
         # filter out devices not defined in NetBox
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
@@ -1742,7 +1752,9 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
                 devices.remove(d)
         if not devices:
-            job.event("no valid NetBox devices remain after validation", severity="ERROR")
+            job.event(
+                "no valid NetBox devices remain after validation", severity="ERROR"
+            )
             ret.failed = True
             return ret
         job.event(f"validated {len(devices)} device(s) in NetBox")
@@ -1809,7 +1821,9 @@ class NetboxInterfacesTasks:
             cache="refresh",
         )
         if nb_interfaces_result.errors:
-            job.event("failed to fetch NetBox interfaces for MAC sync", severity="ERROR")
+            job.event(
+                "failed to fetch NetBox interfaces for MAC sync", severity="ERROR"
+            )
             ret.errors.extend(nb_interfaces_result.errors)
             ret.failed = True
             return ret
@@ -1818,7 +1832,9 @@ class NetboxInterfacesTasks:
         # NetBox allows duplicate MAC entries; prefer assigned entries over
         # unassigned ones so that a conflicting assignment is not silently
         # overwritten by a later unassigned copy during dict construction.
-        job.event(f"fetching {len(all_mac_live)} matching MAC address object(s) from NetBox")
+        job.event(
+            f"fetching {len(all_mac_live)} matching MAC address object(s) from NetBox"
+        )
         nb_macs: dict = {}
         for _m in self.bulk_filter(
             nb.dcim.mac_addresses,
@@ -1840,7 +1856,9 @@ class NetboxInterfacesTasks:
                 _entry["interface"] is not None and nb_macs[_mac]["interface"] is None
             ):
                 nb_macs[_mac] = _entry
-        job.event(f"retrieved {len(nb_macs)} matching MAC address object(s) from NetBox")
+        job.event(
+            f"retrieved {len(nb_macs)} matching MAC address object(s) from NetBox"
+        )
 
         # per-device result tracking
         device_results = {
@@ -1916,7 +1934,9 @@ class NetboxInterfacesTasks:
         )
 
         if dry_run is True:
-            job.event("dry-run requested, returning MAC address sync plan without changes")
+            job.event(
+                "dry-run requested, returning MAC address sync plan without changes"
+            )
             ret.dry_run = True
             return ret
 
