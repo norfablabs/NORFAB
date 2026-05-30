@@ -9,7 +9,9 @@ from pydantic import (
 from ..common import ClientRunJobArgs
 
 
-class NetboxClientRunJobArgs(ClientRunJobArgs):
+class NetboxClientRunJobArgs(
+    ClientRunJobArgs, use_enum_values=True, populate_by_name=True
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "any", description="Filter worker to target"
     )

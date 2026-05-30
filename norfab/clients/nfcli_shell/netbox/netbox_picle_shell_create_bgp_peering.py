@@ -14,7 +14,12 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class CreateBgpPeeringShell(NetboxClientRunJobArgs, CreateBgpPeeringInput):
+class CreateBgpPeeringShell(
+    NetboxClientRunJobArgs,
+    CreateBgpPeeringInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
 
     @staticmethod
     @listen_events

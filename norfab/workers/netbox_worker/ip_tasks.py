@@ -229,11 +229,33 @@ class CreateIpBulkInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
     )
 
 
+class CreateIpResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Allocated IP address result data",
+    )
+
+
+class CreateIpBulkResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Bulk IP allocation result data",
+    )
+
+
+class SyncDeviceIpResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="IP address sync result keyed by device name",
+    )
+
+
 class NetboxIpTasks:
 
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateIpInput,
+        output=CreateIpResult,
     )
     def create_ip(
         self,
@@ -630,6 +652,7 @@ class NetboxIpTasks:
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateIpBulkInput,
+        output=CreateIpBulkResult,
     )
     def create_ip_bulk(
         self,
@@ -755,6 +778,7 @@ class NetboxIpTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncDeviceIpInput,
+        output=SyncDeviceIpResult,
     )
     def sync_device_ip(
         self,

@@ -481,7 +481,22 @@ class BgpSessionStatusEnum(str, Enum):
     decommissioned = "decommissioned"
 
 
-class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
+class GetBgpPeeringsInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Device names to retrieve BGP peerings for",
+    )
+    cache: Union[None, StrictBool, StrictStr] = Field(
+        None,
+        description="Cache usage mode",
+    )
+
+
+class SyncBgpPeeringsInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
     devices: Union[None, List] = Field(
         None,
         description="List of device names to create BGP peerings for",
@@ -493,6 +508,8 @@ class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
     process_deletions: bool = Field(
         False,
         description="Delete BGP sessions present in NetBox but not found on the device",
+        alias="process-deletions",
+        json_schema_extra={"presence": True},
     )
     timeout: StrictInt = Field(
         60,
@@ -509,6 +526,7 @@ class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
     name_template: str = Field(
         "{device}_{name}",
         description=("Template f-string for BGP session names in NetBox. "),
+        alias="name-template",
         examples=[
             "Available variables: device, name, "
             "description, local_address, local_as, remote_address, remote_as, "
@@ -518,18 +536,22 @@ class SyncBgpPeeringsInput(NetboxCommonArgs, use_enum_values=True):
     filter_by_remote_as: Union[None, List[int]] = Field(
         None,
         description="Only sync sessions whose remote AS number matches one of the provided integer values",
+        alias="filter-by-remote-as",
     )
     filter_by_peer_group: Union[None, List[str]] = Field(
         None,
         description="Only sync sessions whose peer group name matches one of the provided values",
+        alias="filter-by-peer-group",
     )
     filter_by_description: Union[None, str] = Field(
         None,
         description="Only sync sessions whose description matches this glob pattern (e.g. '*uplink*')",
+        alias="filter-by-description",
     )
     vrf_custom_field: Union[StrictBool, StrictStr] = Field(
         "vrf",
         description="BGP session Object-type custom field name used to store VRF reference.",
+        alias="vrf-custom-field",
         examples=[
             "Object-type custom field in NetBox pointing to the VRF content-type. "
             "The value is always a single VRF object reference read from and written to "
@@ -587,7 +609,9 @@ class BgpSessionBulkCreateFields(BgpSessionCommonFields):
         )
 
 
-class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
+class CreateBgpPeeringInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
     """Input model for create_bgp_peering task."""
 
     name: Union[None, StrictStr] = Field(None, description="Session name")
@@ -675,7 +699,9 @@ class CreateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
         return values
 
 
-class UpdateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
+class UpdateBgpPeeringInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
     """Input model for update_bgp_peering task."""
 
     # --- Single-session mode ---
@@ -738,9 +764,41 @@ class UpdateBgpPeeringInput(NetboxCommonArgs, use_enum_values=True):
         return self
 
 
+class GetBgpPeeringsResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="BGP peering data keyed by device name",
+    )
+
+
+class CreateBgpPeeringResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="BGP peering create result data",
+    )
+
+
+class UpdateBgpPeeringResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="BGP peering update result data",
+    )
+
+
+class SyncBgpPeeringsResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="BGP peering sync result keyed by device name",
+    )
+
+
 class NetboxBgpPeeringsTasks:
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetBgpPeeringsInput,
+        output=GetBgpPeeringsResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_bgp_peerings(
         self,
         job: Job,
@@ -1038,6 +1096,7 @@ class NetboxBgpPeeringsTasks:
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateBgpPeeringInput,
+        output=CreateBgpPeeringResult,
     )
     def create_bgp_peering(
         self,
@@ -1565,6 +1624,7 @@ class NetboxBgpPeeringsTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=UpdateBgpPeeringInput,
+        output=UpdateBgpPeeringResult,
     )
     def update_bgp_peering(
         self,
@@ -1818,6 +1878,7 @@ class NetboxBgpPeeringsTasks:
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncBgpPeeringsInput,
+        output=SyncBgpPeeringsResult,
     )
     def sync_bgp_peerings(
         self,

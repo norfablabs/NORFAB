@@ -22,7 +22,11 @@ log = logging.getLogger(__name__)
 
 
 class CheckSyncDevicesShell(
-    NetboxClientRunJobArgs, CheckDeviceSyncInput, NorniHostsFilters
+    NetboxClientRunJobArgs,
+    CheckDeviceSyncInput,
+    NorniHostsFilters,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,

@@ -1,6 +1,6 @@
 import builtins
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from pydantic import (
     BaseModel,
@@ -46,10 +46,10 @@ class NetboxConfigModel(BaseModel):
 # --------------------------------------------------------------------------
 
 
-class NetboxCommonArgs(BaseModel):
+class NetboxCommonArgs(BaseModel, use_enum_values=True, populate_by_name=True):
     """Model to enlist arguments common across Netbox service tasks"""
 
-    instance: Optional[StrictStr] = Field(
+    instance: Union[None, StrictStr] = Field(
         None,
         description="Netbox instance name to target",
     )
@@ -72,7 +72,9 @@ class NetboxCommonArgs(BaseModel):
             return list(inventory["result"]["instances"])
 
 
-class NetboxFastApiArgs(NorFabClientRunJob):
+class NetboxFastApiArgs(
+    NorFabClientRunJob, use_enum_values=True, populate_by_name=True
+):
     """Model to specify arguments for FastAPI REST API endpoints"""
 
     workers: Union[StrictStr, List[StrictStr]] = Field(

@@ -11,7 +11,12 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class CreateDeviceInterfacesShell(NetboxClientRunJobArgs, CreateDeviceInterfacesInput):
+class CreateDeviceInterfacesShell(
+    NetboxClientRunJobArgs,
+    CreateDeviceInterfacesInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     @listen_events
     def run(uuid: str, *args: object, **kwargs: object):

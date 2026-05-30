@@ -155,6 +155,11 @@ poetry run mkdocs serve
 poetry run mkdocs build
 ```
 
+### Reference Guides
+
+- Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
+- Documentation style: `docs/development/documentation_style_guide.md`
+
 ## Inventory File Structure
 
 NorFab is configured via a YAML `inventory.yaml`. The default search path is `./inventory.yaml`.

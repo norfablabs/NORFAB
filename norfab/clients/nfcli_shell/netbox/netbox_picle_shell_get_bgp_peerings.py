@@ -1,16 +1,14 @@
 import builtins
-import json
 import logging
 from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     Field,
-    StrictBool,
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.bgp_peerings_tasks import GetBgpPeeringsInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_cache import CacheEnum
@@ -19,15 +17,14 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class GetBGPPeerings(NetboxCommonArgs, NetboxClientRunJobArgs):
+class GetBGPPeerings(
+    NetboxClientRunJobArgs,
+    GetBgpPeeringsInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     devices: Union[StrictStr, List[StrictStr]] = Field(
         ..., description="Device names to query data for"
-    )
-    dry_run: StrictBool = Field(
-        None,
-        description="Only return query content, do not run it",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
     )
     cache: CacheEnum = Field(True, description="How to use cache")
 
@@ -42,9 +39,6 @@ class GetBGPPeerings(NetboxCommonArgs, NetboxClientRunJobArgs):
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
-        if isinstance(kwargs.get("filters"), str):
-            kwargs["filters"] = json.loads(kwargs["filters"])
-
         result = NFCLIENT.run_job(
             "netbox",
             "get_bgp_peerings",

@@ -6,11 +6,12 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.interfaces_tasks import (
+    UpdateInterfacesDescriptionInput,
+)
 
 from ..common import log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -18,25 +19,14 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class UpdateInterfacesDescription(NetboxCommonArgs, NetboxClientRunJobArgs):
+class UpdateInterfacesDescription(
+    NetboxClientRunJobArgs,
+    UpdateInterfacesDescriptionInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     devices: Union[StrictStr, List[StrictStr]] = Field(
         None, description="Device names to query data for"
-    )
-    description_template: StrictStr = Field(
-        None,
-        description="Jinja2 template to render descriptions",
-        alias="description-template",
-    )
-    dry_run: StrictBool = Field(
-        None,
-        description="Only return query content, do not run it",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    interface_regex: StrictStr = Field(
-        None,
-        description="Regex pattern to match interfaces and ports",
-        alias="interface-regex",
     )
 
     @staticmethod

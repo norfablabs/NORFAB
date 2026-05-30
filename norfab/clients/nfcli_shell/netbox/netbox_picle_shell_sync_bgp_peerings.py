@@ -15,28 +15,15 @@ log = logging.getLogger(__name__)
 
 
 class SyncBgpPeeringsShell(
-    NetboxClientRunJobArgs, SyncBgpPeeringsInput, NorniHostsFilters
+    NetboxClientRunJobArgs,
+    SyncBgpPeeringsInput,
+    NorniHostsFilters,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
-    process_deletions: bool = Field(
-        False,
-        description="Delete BGP sessions present in NetBox but not found on the device",
-        alias="process-deletions",
-        json_schema_extra={"presence": True},
-    )
-    filter_by_remote_as: Union[None, List[int]] = Field(
+    devices: Union[None, List[str], str] = Field(
         None,
-        description="Only sync sessions with matching remote AS number(s)",
-        alias="filter-by-remote-as",
-    )
-    filter_by_peer_group: Union[None, List[str]] = Field(
-        None,
-        description="Only sync sessions with matching peer group name(s)",
-        alias="filter-by-peer-group",
-    )
-    filter_by_description: Union[None, str] = Field(
-        None,
-        description="Only sync sessions whose description matches this glob pattern",
-        alias="filter-by-description",
+        description="List of device names to create BGP peerings for",
     )
 
     @staticmethod

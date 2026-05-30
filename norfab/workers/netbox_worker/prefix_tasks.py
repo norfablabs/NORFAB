@@ -1,7 +1,7 @@
 import ipaddress
 import logging
 from enum import Enum
-from typing import Union
+from typing import Any, Union
 
 from pydantic import (
     Field,
@@ -29,7 +29,7 @@ class PrefixStatusEnum(str, Enum):
     deprecated = "deprecated"
 
 
-class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True):
+class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     parent: Union[StrictStr, dict] = Field(
         ...,
         description="Parent prefix to allocate new prefix from",
@@ -61,6 +61,13 @@ class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True):
     )
 
 
+class CreatePrefixResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Created or updated prefix data",
+    )
+
+
 # --------------------------------------------------------------------------
 # PREFIX TASKS
 # --------------------------------------------------------------------------
@@ -70,6 +77,7 @@ class NetboxPrefixTasks:
 
     @Task(
         input=CreatePrefixInput,
+        output=CreatePrefixResult,
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
     )
     def create_prefix(

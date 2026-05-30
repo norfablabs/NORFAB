@@ -27,7 +27,12 @@ class IpStatusEnum(str, Enum):
     slaac = "slaac"
 
 
-class CreateIp(CreateIpInput, NetboxClientRunJobArgs, use_enum_values=True):
+class CreateIp(
+    CreateIpInput,
+    NetboxClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     tags: Union[None, StrictStr, list[StrictStr]] = Field(
         None, description="Tags to add to IP address"
     )

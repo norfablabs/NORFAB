@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Type, Union
 
 import yaml
 from datamodel_code_generator import (
@@ -8,7 +8,15 @@ from datamodel_code_generator import (
     GenerateConfig,
     generate_dynamic_models,
 )
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, create_model
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictStr,
+    ValidationError,
+    create_model,
+)
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -78,6 +86,39 @@ _DMCG_CONFIG = GenerateConfig(
 )
 
 
+class CreateDesignInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    design_data: Union[StrictStr, dict[StrictStr, Any]] = Field(
+        ...,
+        description="NetBox design data as YAML string, URL, or dictionary",
+        alias="design-data",
+    )
+    context: Union[StrictStr, dict[StrictStr, Any]] = Field(
+        {},
+        description="Template context as YAML string, URL, or dictionary",
+    )
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+    dry_run: StrictBool = Field(
+        False,
+        description="Validate design without writing to NetBox",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
+    )
+
+
+class CreateDesignResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="NetBox design creation result data",
+    )
+
+
 def _collect_schema_refs(
     fragment: Any, all_definitions: Dict[str, Any], collected: Dict[str, Any]
 ) -> None:
@@ -104,7 +145,7 @@ class NetboxDesignTasks:
 
     def get_schema_name(
         self, app: str, object_type: str, schema: dict
-    ) -> Optional[str]:
+    ) -> Union[None, str]:
         """Extract the write-model schema name from the OpenAPI spec for a given endpoint."""
         path_spec = schema.get("paths", {}).get(f"/api/{app}/{object_type}/", {})
         schema_ref = (
@@ -126,8 +167,8 @@ class NetboxDesignTasks:
         self,
         schema_name: str,
         all_definitions: Dict[str, Any],
-        cache: Dict[str, Optional[Type[BaseModel]]],
-    ) -> Optional[Type[BaseModel]]:
+        cache: Dict[str, Union[None, Type[BaseModel]]],
+    ) -> Union[None, Type[BaseModel]]:
         """
         Generate a Pydantic model for a single Netbox entity from its OpenAPI
         component schema definition.
@@ -188,7 +229,7 @@ class NetboxDesignTasks:
         )
         # per-call cache: avoids re-generating models for schemas that appear
         # in multiple entity types within the same design file
-        entity_model_cache: Dict[str, Optional[Type[BaseModel]]] = {}
+        entity_model_cache: Dict[str, Union[None, Type[BaseModel]]] = {}
         app_fields: Dict[str, Any] = {}
 
         for app_name, app_data in design_data.items():
@@ -213,8 +254,8 @@ class NetboxDesignTasks:
 
                 if entity_model is not None:
                     obj_fields[obj_type] = (
-                        Optional[List[entity_model]],
-                        Field(default_factory=list),
+                        Union[None, List[entity_model]],
+                        Field([]),
                     )
                 else:
                     log.debug(
@@ -222,8 +263,8 @@ class NetboxDesignTasks:
                         f"(looked up '{schema_name}') — using untyped dict list"
                     )
                     obj_fields[obj_type] = (
-                        Optional[List[Dict[str, Any]]],
-                        Field(default_factory=list),
+                        Union[None, List[Dict[str, Any]]],
+                        Field([]),
                     )
 
             if obj_fields:
@@ -232,10 +273,10 @@ class NetboxDesignTasks:
                     __config__=ConfigDict(extra="allow", populate_by_name=True),
                     **obj_fields,
                 )
-                app_fields[app_name] = (Optional[app_model], None)
+                app_fields[app_name] = (Union[None, app_model], None)
 
         if "create_order" in design_data:
-            app_fields["create_order"] = (Optional[List[str]], None)
+            app_fields["create_order"] = (Union[None, List[str]], None)
 
         return create_model(
             "DesignModel",
@@ -245,10 +286,10 @@ class NetboxDesignTasks:
 
     def get_model_by_path(
         self, model: Type[BaseModel], path: tuple
-    ) -> Optional[Type[BaseModel]]:
+    ) -> Union[None, Type[BaseModel]]:
         """
         Navigate a nested Pydantic model structure by a sequence of field names,
-        unwrapping Optional/List/Union at each step.
+        unwrapping Union/List layers at each step.
         """
         current = model
         for segment in path:
@@ -259,7 +300,7 @@ class NetboxDesignTasks:
             if field_info is None:
                 return None
 
-            # Unwrap Optional / Union / List layers to find the inner BaseModel
+            # Unwrap Union / List layers to find the inner BaseModel
             found = None
             queue = [field_info.annotation]
             while queue:
@@ -440,7 +481,9 @@ class NetboxDesignTasks:
         return False
 
     @Task(
-        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+        input=CreateDesignInput,
+        output=CreateDesignResult,
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
     )
     def create_design(
         self,

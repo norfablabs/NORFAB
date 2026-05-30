@@ -1,7 +1,9 @@
 import concurrent.futures
 import copy
 import logging
-from typing import Union
+from typing import Any, Literal, Union
+
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -10,6 +12,50 @@ from .netbox_exceptions import UnsupportedNetboxVersion
 from .netbox_models import NetboxFastApiArgs
 
 log = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------
+# CIRCUITS TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class GetCircuitsInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    devices: list[StrictStr] = Field(
+        ...,
+        description="Device names to retrieve circuits for",
+        alias="device-list",
+    )
+    cid: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Circuit identifiers to retrieve",
+    )
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+    dry_run: StrictBool = Field(
+        False,
+        description="Return query content without running it",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    cache: Union[None, StrictBool, Literal["refresh", "force"]] = Field(
+        None,
+        description="Cache usage mode",
+    )
+    add_interface_details: StrictBool = Field(
+        False,
+        description="Add interface details to circuit results",
+        alias="add-interface-details",
+        json_schema_extra={"presence": True},
+    )
+
+
+class GetCircuitsResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Circuit data keyed by device name and circuit ID",
+    )
 
 
 class NetboxCircuitsTasks:
@@ -150,7 +196,11 @@ class NetboxCircuitsTasks:
         job.event(msg)
         return True
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetCircuitsInput,
+        output=GetCircuitsResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_circuits(
         self,
         job: Job,

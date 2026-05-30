@@ -13,7 +13,12 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class GetInterfaces(GetInterfacesInput, NetboxClientRunJobArgs):
+class GetInterfaces(
+    GetInterfacesInput,
+    NetboxClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     devices: Union[StrictStr, List[StrictStr]] = Field(
         None,
         description="List of device names to retrieve interfaces for",
@@ -32,7 +37,7 @@ class GetInterfaces(GetInterfacesInput, NetboxClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
-        if isinstance(kwargs["devices"], str):
+        if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
         if isinstance(kwargs.get("interface_list"), str):
             kwargs["interface_list"] = [kwargs["interface_list"]]

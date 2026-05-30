@@ -27,7 +27,12 @@ class IpStatusEnum(str, Enum):
     slaac = "slaac"
 
 
-class CreateIpBulk(CreateIpBulkInput, NetboxClientRunJobArgs, use_enum_values=True):
+class CreateIpBulk(
+    CreateIpBulkInput,
+    NetboxClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     devices: Union[StrictStr, List[StrictStr]] = Field(
         ..., description="List of device names to create IP address for"
     )

@@ -1,8 +1,8 @@
 import copy
 import logging
-from typing import Any, List, Union
+from typing import Any, List, Literal, Union
 
-from pydantic import Field, StrictBool, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
@@ -16,6 +16,53 @@ log = logging.getLogger(__name__)
 # -----------------------------------------------------------------------
 # INPUT MODELS
 # -----------------------------------------------------------------------
+
+
+class GetDevicesInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    filters: Union[None, list[dict[StrictStr, Any]]] = Field(
+        None,
+        description="NetBox device filter dictionaries",
+    )
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+    dry_run: StrictBool = Field(
+        False,
+        description="Return filters without querying NetBox",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    devices: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Device names to retrieve",
+    )
+    cache: Union[None, StrictBool, Literal["refresh", "force"]] = Field(
+        None,
+        description="Cache usage mode",
+    )
+
+
+class SyncDeviceFactsInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
+    datasource: StrictStr = Field(
+        "nornir",
+        description="Service to use as source for device facts",
+    )
+    timeout: StrictInt = Field(
+        60,
+        description="Timeout in seconds for datasource jobs",
+    )
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox devices to sync facts for",
+    )
+    batch_size: StrictInt = Field(
+        10,
+        description="Number of devices to process per batch",
+        alias="batch-size",
+    )
 
 
 class CheckDeviceSyncInput(
@@ -79,13 +126,50 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
 
 
 # -----------------------------------------------------------------------
+# OUTPUT MODELS
+# -----------------------------------------------------------------------
+
+
+class GetDevicesResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Device data keyed by device name",
+    )
+
+
+class SyncDeviceFactsResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Device fact sync result keyed by device name",
+    )
+
+
+class CheckDeviceSyncResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Device sync check summary keyed by device name",
+    )
+
+
+class SyncAllResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Per-device sync results keyed by device name",
+    )
+
+
+# -----------------------------------------------------------------------
 # MAIN CLASS WITH TASKS
 # -----------------------------------------------------------------------
 
 
 class NetboxDevicesTasks:
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetDevicesInput,
+        output=GetDevicesResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_devices(
         self,
         job: Job,
@@ -211,7 +295,9 @@ class NetboxDevicesTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()}
+        input=SyncDeviceFactsInput,
+        output=SyncDeviceFactsResult,
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
     )
     def sync_device_facts(
         self,
@@ -399,6 +485,7 @@ class NetboxDevicesTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CheckDeviceSyncInput,
+        output=CheckDeviceSyncResult,
     )
     def check_device_sync(
         self,
@@ -587,6 +674,7 @@ class NetboxDevicesTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncAllInput,
+        output=SyncAllResult,
     )
     def sync_all(
         self,

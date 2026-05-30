@@ -2,12 +2,19 @@ import builtins
 import json
 import logging
 
-from typing import Union, List, Dict
+from typing import Union, List
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictStr
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
-from norfab.workers.netbox_worker.netbox_crud import CrudReadArgs
+from norfab.workers.netbox_worker.netbox_crud import (
+    CrudChangelogArgs,
+    CrudCreateArgs,
+    CrudDeleteArgs,
+    CrudListObjectsArgs,
+    CrudReadArgs,
+    CrudSearchArgs,
+    CrudUpdateArgs,
+)
 
 
 from ..common import listen_events, log_error_or_result
@@ -16,19 +23,12 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class CrudListObjectsShell(NetboxCommonArgs, NetboxClientRunJobArgs):
-    app_filter: StrictStr = Field(
-        None,
-        description="Filter by app(s) e.g. dcim or dcim,ipam (comma-separated)",
-        alias="app-filter",
-    )
-    include_metadata: StrictBool = Field(
-        True,
-        description="Include path/methods/schema_name/description",
-        alias="include-metadata",
-        json_schema_extra={"presence": True},
-    )
-
+class CrudListObjectsShell(
+    NetboxClientRunJobArgs,
+    CrudListObjectsArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     @listen_events
     def run(uuid: str, *args: object, **kwargs: object):
@@ -63,8 +63,12 @@ class CrudListObjectsShell(NetboxCommonArgs, NetboxClientRunJobArgs):
         pipe = PipeFunctionsModel
 
 
-class CrudSearchShell(NetboxCommonArgs, NetboxClientRunJobArgs):
-    query: StrictStr = Field(..., description="Search term")
+class CrudSearchShell(
+    NetboxClientRunJobArgs,
+    CrudSearchArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     object_types: StrictStr = Field(
         None,
         description="Comma-separated app.resource types to search e.g. dcim.devices,ipam.prefixes",
@@ -73,14 +77,6 @@ class CrudSearchShell(NetboxCommonArgs, NetboxClientRunJobArgs):
     fields: StrictStr = Field(
         None,
         description="Comma-separated fields to return",
-    )
-    brief: StrictBool = Field(
-        False,
-        description="Return brief representation",
-        json_schema_extra={"presence": True},
-    )
-    limit: StrictInt = Field(
-        10, ge=1, le=100, description="Max results per object type"
     )
 
     @staticmethod
@@ -121,7 +117,12 @@ class CrudSearchShell(NetboxCommonArgs, NetboxClientRunJobArgs):
         pipe = PipeFunctionsModel
 
 
-class CrudReadShell(NetboxClientRunJobArgs, CrudReadArgs):
+class CrudReadShell(
+    NetboxClientRunJobArgs,
+    CrudReadArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     filters: StrictStr = Field(
         None,
         description='JSON string - filter dict or list of dicts e.g. [{"name":"ceos1"}]',
@@ -146,7 +147,7 @@ class CrudReadShell(NetboxClientRunJobArgs, CrudReadArgs):
         if isinstance(kwargs.get("filters"), str):
             kwargs["filters"] = json.loads(kwargs.get("filters"))
         if isinstance(kwargs.get("fields"), str):
-            kwargs["fields"] = [s.strip() for s in fields.split(",")]
+            kwargs["fields"] = [s.strip() for s in kwargs["fields"].split(",")]
         if isinstance(ordering, str):
             kwargs["ordering"] = [ordering]
 
@@ -171,21 +172,15 @@ class CrudReadShell(NetboxClientRunJobArgs, CrudReadArgs):
         pipe = PipeFunctionsModel
 
 
-class CrudCreateShell(NetboxCommonArgs, NetboxClientRunJobArgs):
-    object_type: StrictStr = Field(
-        ...,
-        description='Object type e.g. "dcim.manufacturers"',
-        alias="object-type",
-    )
+class CrudCreateShell(
+    NetboxClientRunJobArgs,
+    CrudCreateArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     data: StrictStr = Field(
         ...,
         description='JSON dict or list of dicts with object field values e.g. \'{"name":"Foo","slug":"foo"}\'',
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Preview without creating",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
     )
 
     @staticmethod
@@ -220,26 +215,15 @@ class CrudCreateShell(NetboxCommonArgs, NetboxClientRunJobArgs):
         pipe = PipeFunctionsModel
 
 
-class CrudUpdateShell(NetboxCommonArgs, NetboxClientRunJobArgs):
-    object_type: StrictStr = Field(
-        ...,
-        description='Object type e.g. "dcim.manufacturers"',
-        alias="object-type",
-    )
+class CrudUpdateShell(
+    NetboxClientRunJobArgs,
+    CrudUpdateArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     data: StrictStr = Field(
         ...,
         description='JSON dict or list of dicts; each must contain "id" e.g. \'{"id":1,"name":"Bar"}\'',
-    )
-    partial: StrictBool = Field(
-        True,
-        description="PATCH (partial=True) vs PUT (partial=False)",
-        json_schema_extra={"presence": True},
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Show diffs without updating",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
     )
 
     @staticmethod
@@ -274,22 +258,16 @@ class CrudUpdateShell(NetboxCommonArgs, NetboxClientRunJobArgs):
         pipe = PipeFunctionsModel
 
 
-class CrudDeleteShell(NetboxCommonArgs, NetboxClientRunJobArgs):
-    object_type: StrictStr = Field(
-        ...,
-        description='Object type e.g. "dcim.manufacturers"',
-        alias="object-type",
-    )
+class CrudDeleteShell(
+    NetboxClientRunJobArgs,
+    CrudDeleteArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     object_id: StrictStr = Field(
         ...,
         description="Comma-separated integer ID(s) to delete",
         alias="object-id",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Preview objects that would be deleted",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
     )
 
     @staticmethod
@@ -328,20 +306,20 @@ class CrudDeleteShell(NetboxCommonArgs, NetboxClientRunJobArgs):
         pipe = PipeFunctionsModel
 
 
-class CrudGetChangelogsShell(NetboxCommonArgs, NetboxClientRunJobArgs):
+class CrudGetChangelogsShell(
+    NetboxClientRunJobArgs,
+    CrudChangelogArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     filters: StrictStr = Field(
         None,
-        description=(
-            "JSON filter dict or list of dicts; supported keys: user, action, "
-            "changed_object_id, object_repr, time_before, time_after, q"
-        ),
+        description="JSON filter dict or list of dicts for NetBox changelog lookup",
     )
     fields: StrictStr = Field(
         None,
         description="Comma-separated fields to return",
     )
-    limit: StrictInt = Field(50, ge=1, le=1000, description="Page size")
-    offset: StrictInt = Field(0, ge=0, description="Pagination skip count")
 
     @staticmethod
     @listen_events

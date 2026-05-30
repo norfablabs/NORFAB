@@ -1,4 +1,7 @@
 import logging
+from typing import Union
+
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -8,10 +11,38 @@ from .netbox_models import NetboxFastApiArgs
 log = logging.getLogger(__name__)
 
 
+# --------------------------------------------------------------------------
+# BRANCH TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class DeleteBranchInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="Branch name to delete",
+    )
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+
+
+class DeleteBranchResult(Result):
+    result: Union[StrictBool, None] = Field(
+        None,
+        description="True when branch was deleted; None when branch was not found",
+    )
+
+
 class NetboxBranchTasks:
 
     @Task(
-        fastapi={"methods": ["DELETE"], "schema": NetboxFastApiArgs.model_json_schema()}
+        input=DeleteBranchInput,
+        output=DeleteBranchResult,
+        fastapi={
+            "methods": ["DELETE"],
+            "schema": NetboxFastApiArgs.model_json_schema(),
+        },
     )
     def delete_branch(
         self,

@@ -2,7 +2,7 @@ import fnmatch
 import ipaddress
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -124,7 +124,9 @@ class CreateDeviceInterfacesInput(
     mtu: StrictInt = Field(None, description="Maximum transmission unit size in bytes")
 
 
-class BulkUpdateInterfaceItem(NetboxCommonArgs, use_enum_values=True):
+class BulkUpdateInterfaceItem(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
     """A single interface update payload for bulk-update mode."""
 
     device: StrictStr = Field(
@@ -394,6 +396,41 @@ class SyncMacAddressesInput(
     )
 
 
+class GetInterfacesResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Interface data keyed by device and interface name",
+    )
+
+
+class CreateDeviceInterfacesResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Created interface data keyed by device name",
+    )
+
+
+class UpdateInterfacesDescriptionResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Interface description update result keyed by device name",
+    )
+
+
+class SyncDeviceInterfacesResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Interface sync result keyed by device name",
+    )
+
+
+class SyncMacAddressesResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="MAC address sync result keyed by device name",
+    )
+
+
 def _build_interface_payload(
     job: object,
     desired: dict,
@@ -515,6 +552,7 @@ class NetboxInterfacesTasks:
     @Task(
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=GetInterfacesInput,
+        output=GetInterfacesResult,
     )
     def get_interfaces(
         self,
@@ -736,6 +774,7 @@ class NetboxInterfacesTasks:
     @Task(
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateDeviceInterfacesInput,
+        output=CreateDeviceInterfacesResult,
     )
     def create_device_interfaces(
         self,
@@ -877,6 +916,7 @@ class NetboxInterfacesTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=UpdateInterfacesDescriptionInput,
+        output=UpdateInterfacesDescriptionResult,
     )
     def update_interfaces_description(
         self,
@@ -1030,6 +1070,7 @@ class NetboxInterfacesTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncDeviceInterfacesInput,
+        output=SyncDeviceInterfacesResult,
     )
     def sync_device_interfaces(
         self,
@@ -1639,6 +1680,7 @@ class NetboxInterfacesTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncMacAddressesInput,
+        output=SyncMacAddressesResult,
     )
     def sync_mac_addresses(
         self,

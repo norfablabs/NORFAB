@@ -10,7 +10,9 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.containerlab_inventory_tasks import (
+    GetContainerlabInventoryInput,
+)
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -81,13 +83,12 @@ class NetboxDeviceFilters(BaseModel):
         pipe = PipeFunctionsModel
 
 
-class GetContainerlabInventoryCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
-    lab_name: StrictStr = Field(
-        None, description="Lab name to generate lab inventory for", alias="lab-name"
-    )
-    tenant: StrictStr = Field(
-        None, description="Tenant name to generate lab inventory for"
-    )
+class GetContainerlabInventoryCommand(
+    NetboxClientRunJobArgs,
+    GetContainerlabInventoryInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     filters: NetboxDeviceFilters = Field(
         None, description="Netbox device filters to generate lab inventory for"
     )
@@ -102,15 +103,6 @@ class GetContainerlabInventoryCommand(NetboxCommonArgs, NetboxClientRunJobArgs):
         None,
         description="Name of Netbox instance to pull inventory from",
         alias="netbox-instance",
-    )
-    ipv4_subnet: StrictStr = Field(
-        "172.100.100.0/24",
-        description="IPv4 management subnet to use for lab",
-        alias="ipv4-subnet",
-    )
-    image: StrictStr = Field(
-        None,
-        description="Docker image to use for all nodes",
     )
     ports: List[StrictInt] = Field(
         [12000, 13000],

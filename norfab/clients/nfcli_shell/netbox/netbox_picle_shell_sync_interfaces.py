@@ -1,6 +1,6 @@
 import builtins
 import logging
-from typing import List, Optional, Union
+from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import Field, StrictBool, StrictStr
@@ -15,13 +15,17 @@ log = logging.getLogger(__name__)
 
 
 class SyncInterfacesShell(
-    NetboxClientRunJobArgs, SyncDeviceInterfacesInput, NorniHostsFilters
+    NetboxClientRunJobArgs,
+    SyncDeviceInterfacesInput,
+    NorniHostsFilters,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of Netbox devices to sync",
     )
-    delete: Optional[StrictBool] = Field(
+    delete: Union[None, StrictBool] = Field(
         None,
         description="Delete interfaces present in NetBox but absent in live data",
         json_schema_extra={"presence": True},

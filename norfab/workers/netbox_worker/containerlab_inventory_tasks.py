@@ -1,7 +1,9 @@
 import ipaddress
 import logging
 import re
-from typing import Union
+from typing import Any, Literal, Union
+
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -11,9 +13,73 @@ from .netbox_models import NetboxFastApiArgs
 log = logging.getLogger(__name__)
 
 
+# --------------------------------------------------------------------------
+# CONTAINERLAB INVENTORY TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class GetContainerlabInventoryInput(
+    BaseModel, use_enum_values=True, populate_by_name=True
+):
+    lab_name: Union[None, StrictStr] = Field(
+        None,
+        description="Containerlab lab name",
+        alias="lab-name",
+    )
+    tenant: Union[None, StrictStr] = Field(
+        None,
+        description="Tenant name to source devices from",
+    )
+    filters: Union[None, list[dict[StrictStr, Any]]] = Field(
+        None,
+        description="NetBox device filter dictionaries",
+    )
+    devices: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Device names to include in the lab",
+    )
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+    image: Union[None, StrictStr] = Field(
+        None,
+        description="Container image to use for all nodes",
+    )
+    ipv4_subnet: StrictStr = Field(
+        "172.100.100.0/24",
+        description="IPv4 management subnet to allocate node addresses from",
+        alias="ipv4-subnet",
+    )
+    ports: tuple[StrictInt, StrictInt] = Field(
+        (12000, 15000),
+        description="TCP/UDP port allocation range",
+    )
+    ports_map: Union[None, dict[StrictStr, Any]] = Field(
+        None,
+        description="Port mappings keyed by node name",
+        alias="ports-map",
+    )
+    cache: Union[StrictBool, Literal["refresh", "force"]] = Field(
+        False,
+        description="Cache usage mode",
+    )
+
+
+class GetContainerlabInventoryResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Containerlab inventory data",
+    )
+
+
 class NetboxContainerlabInventoryTasks:
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetContainerlabInventoryInput,
+        output=GetContainerlabInventoryResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_containerlab_inventory(
         self,
         job: Job,

@@ -13,6 +13,7 @@ import pynetbox
 import requests
 from deepdiff import DeepDiff
 from diskcache import FanoutCache
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from norfab.core.worker import Job, NFPWorker, Task
@@ -37,6 +38,141 @@ from .topology_tasks import NetboxTopologyTasks
 SERVICE = "netbox"
 
 log = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------
+# NETBOX WORKER TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class GetInventoryInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetInventoryResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="NetBox worker inventory data",
+    )
+
+
+class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetVersionResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="NetBox worker package and service versions",
+    )
+
+
+class GetNetboxStatusInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+
+
+class GetNetboxStatusResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="NetBox status data keyed by instance name",
+    )
+
+
+class GetCompatibilityInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetCompatibilityResult(Result):
+    result: dict[StrictStr, Union[StrictBool, None]] = Field(
+        {},
+        description="NetBox compatibility state keyed by instance name",
+    )
+
+
+class CacheListInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    keys: StrictStr = Field(
+        "*",
+        description="Glob pattern to match cache keys",
+    )
+    details: StrictBool = Field(
+        False,
+        description="Return cache key age and expiry details",
+        json_schema_extra={"presence": True},
+    )
+
+
+class CacheListResult(Result):
+    result: list[Any] = Field(
+        [],
+        description="Cache keys or cache key details",
+    )
+
+
+class CacheClearInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    key: Union[None, StrictStr] = Field(
+        None,
+        description="Cache key to remove",
+    )
+    keys: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern of cache keys to remove",
+    )
+
+
+class CacheClearResult(Result):
+    result: Union[list[StrictStr], StrictStr] = Field(
+        [],
+        description="Removed cache keys or no-op message",
+    )
+
+
+class CacheGetInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    key: Union[None, StrictStr] = Field(
+        None,
+        description="Cache key to retrieve",
+    )
+    keys: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern of cache keys to retrieve",
+    )
+    raise_missing: StrictBool = Field(
+        False,
+        description="Raise an error when requested cache key is missing",
+        alias="raise-missing",
+        json_schema_extra={"presence": True},
+    )
+
+
+class CacheGetResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Cache values keyed by cache key",
+    )
+
+
+class RestInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+    method: StrictStr = Field(
+        "get",
+        description="HTTP method to use",
+    )
+    api: StrictStr = Field(
+        "",
+        description="NetBox API path under /api",
+    )
+
+
+class RestResult(Result):
+    result: Any = Field(
+        {},
+        description="NetBox REST API response payload",
+    )
 
 
 class NetboxWorker(
@@ -163,7 +299,11 @@ class NetboxWorker(
     # Netbox Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetInventoryInput,
+        output=GetInventoryResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_inventory(self) -> Result:
         """
         NorFab Task to return running inventory for NetBox worker.
@@ -175,7 +315,11 @@ class NetboxWorker(
             task=f"{self.name}:get_inventory", result=dict(self.netbox_inventory)
         )
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetVersionInput,
+        output=GetVersionResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_version(self, **kwargs: Any) -> Result:
         """
         Retrieves the version information of Netbox instances.
@@ -202,7 +346,11 @@ class NetboxWorker(
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetNetboxStatusInput,
+        output=GetNetboxStatusResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_netbox_status(
         self, job: Union[None, Job] = None, instance: Union[None, str] = None
     ) -> Result:
@@ -242,7 +390,11 @@ class NetboxWorker(
             )
         return ret
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetCompatibilityInput,
+        output=GetCompatibilityResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_compatibility(self, job: Job) -> Result:
         """
         Checks the compatibility of Netbox instances based on their version.
@@ -693,7 +845,11 @@ class NetboxWorker(
             ret.extend(endpoint.filter(**{filter_by_key: current_chunk}, **kwargs))
         return ret
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=CacheListInput,
+        output=CacheListResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def cache_list(self, keys: str = "*", details: bool = False) -> Result:
         """
         Retrieve a list of cache keys, optionally with details about each key.
@@ -727,7 +883,12 @@ class NetboxWorker(
         return ret
 
     @Task(
-        fastapi={"methods": ["DELETE"], "schema": NetboxFastApiArgs.model_json_schema()}
+        input=CacheClearInput,
+        output=CacheClearResult,
+        fastapi={
+            "methods": ["DELETE"],
+            "schema": NetboxFastApiArgs.model_json_schema(),
+        },
     )
     def cache_clear(self, job: Job, key: str = None, keys: str = None) -> Result:
         """
@@ -783,7 +944,11 @@ class NetboxWorker(
             )
         return ret
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=CacheGetInput,
+        output=CacheGetResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def cache_get(
         self, job: Job, key: str = None, keys: str = None, raise_missing: bool = False
     ) -> Result:
@@ -824,7 +989,9 @@ class NetboxWorker(
         return ret
 
     @Task(
-        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()}
+        input=RestInput,
+        output=RestResult,
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
     )
     def rest(
         self,

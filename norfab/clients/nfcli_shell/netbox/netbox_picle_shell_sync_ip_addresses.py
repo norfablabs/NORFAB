@@ -1,9 +1,9 @@
 import builtins
 import logging
-from typing import List, Optional, Union
+from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import Field, StrictBool, StrictStr
+from pydantic import Field, StrictStr
 
 from norfab.workers.netbox_worker.ip_tasks import SyncDeviceIpInput
 
@@ -15,17 +15,15 @@ log = logging.getLogger(__name__)
 
 
 class SyncIpAddressesShell(
-    NetboxClientRunJobArgs, SyncDeviceIpInput, NorniHostsFilters
+    NetboxClientRunJobArgs,
+    SyncDeviceIpInput,
+    NorniHostsFilters,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of Netbox devices to sync IP addresses for",
-    )
-    dry_run: Optional[StrictBool] = Field(
-        None,
-        description="Return sync plan without applying changes to NetBox",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
     )
 
     @staticmethod

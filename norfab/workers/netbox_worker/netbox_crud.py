@@ -1,7 +1,7 @@
 import itertools
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 
@@ -23,25 +23,32 @@ OPENAPI_CACHE_TTL = 86400  # 24 hours
 # ------------------------------------------------------------------------------
 
 
-class CrudListObjectsArgs(NetboxCommonArgs):
+class CrudListObjectsArgs(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
     app_filter: Union[None, StrictStr, List[StrictStr]] = Field(
-        None, description='Filter by app(s) e.g. "dcim" or ["dcim", "ipam"]'
+        None,
+        description="Filter by NetBox app label or labels",
+        alias="app-filter",
+        examples=["dcim", ["dcim", "ipam"]],
     )
     include_metadata: StrictBool = Field(
         True,
-        description=(
-            "If False returns object names only; "
-            "if True includes path, methods, schema_name, description"
-        ),
+        description="Include path, methods, schema name, and description in results",
+        alias="include-metadata",
+        json_schema_extra={"presence": True},
     )
 
 
-class CrudSearchArgs(NetboxCommonArgs):
+class CrudSearchArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     query: StrictStr = Field(..., description="Search term")
-    object_types: Optional[List[StrictStr]] = Field(
-        None, description='List of "app.resource" strings to search'
+    object_types: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of app.resource object types to search",
+        alias="object-types",
+        examples=[["dcim.devices", "ipam.prefixes"]],
     )
-    fields: Optional[List[StrictStr]] = Field(
+    fields: Union[None, List[StrictStr]] = Field(
         None, description="Specific fields to return; ignored when brief=True"
     )
     brief: StrictBool = Field(False, description="Return brief representation")
@@ -50,17 +57,22 @@ class CrudSearchArgs(NetboxCommonArgs):
     )
 
 
-class CrudReadArgs(NetboxCommonArgs, populate_by_name=True):
+class CrudReadArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     object_type: StrictStr = Field(
-        ..., description='"app.resource" e.g. "dcim.devices"'
+        ...,
+        description="NetBox object type in app.resource format",
+        alias="object-type",
+        examples=["dcim.devices"],
     )
     object_id: Union[None, StrictInt, List[StrictInt]] = Field(
-        None, description="Object ID(s); when set, filters is ignored"
+        None,
+        description="Object ID or IDs to retrieve; ignores filters when set",
+        alias="object-id",
     )
     filters: Union[None, Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         None, description="Filter dict(s)"
     )
-    fields: Optional[List[StrictStr]] = Field(
+    fields: Union[None, List[StrictStr]] = Field(
         None, description="Specific fields to return; ignored when brief=True"
     )
     brief: StrictBool = Field(False, description="Return brief representation")
@@ -68,13 +80,17 @@ class CrudReadArgs(NetboxCommonArgs, populate_by_name=True):
     offset: StrictInt = Field(0, ge=0, description="Pagination skip count")
     ordering: Union[None, StrictStr, List[StrictStr]] = Field(
         None,
-        description="Comma-separated ordering fields, prefix '-' for descending e.g. name or -name,id",
+        description="Ordering field or fields; prefix with '-' for descending",
+        examples=["name", ["-name", "id"]],
     )
 
 
-class CrudCreateArgs(NetboxCommonArgs):
+class CrudCreateArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     object_type: StrictStr = Field(
-        ..., description='"app.resource" e.g. "dcim.interfaces"'
+        ...,
+        description="NetBox object type in app.resource format",
+        alias="object-type",
+        examples=["dcim.interfaces"],
     )
     data: Union[Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         ..., description="Object data; dict for single, list for bulk"
@@ -82,8 +98,12 @@ class CrudCreateArgs(NetboxCommonArgs):
     dry_run: StrictBool = Field(False, description="Preview without creating")
 
 
-class CrudUpdateArgs(NetboxCommonArgs):
-    object_type: StrictStr = Field(..., description='"app.resource"')
+class CrudUpdateArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    object_type: StrictStr = Field(
+        ...,
+        description="NetBox object type in app.resource format",
+        alias="object-type",
+    )
     data: Union[Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         ..., description="Object data; each item must contain 'id'"
     )
@@ -93,23 +113,78 @@ class CrudUpdateArgs(NetboxCommonArgs):
     dry_run: StrictBool = Field(False, description="Compute diffs without updating")
 
 
-class CrudDeleteArgs(NetboxCommonArgs):
-    object_type: StrictStr = Field(..., description='"app.resource"')
+class CrudDeleteArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    object_type: StrictStr = Field(
+        ...,
+        description="NetBox object type in app.resource format",
+        alias="object-type",
+    )
     object_id: Union[StrictInt, List[StrictInt]] = Field(
-        ..., description="Object ID(s) to delete"
+        ...,
+        description="Object ID or IDs to delete",
+        alias="object-id",
     )
     dry_run: StrictBool = Field(False, description="Preview without deleting")
 
 
-class CrudChangelogArgs(NetboxCommonArgs):
+class CrudChangelogArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     filters: Union[None, Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         None, description="Filter dict(s)"
     )
-    fields: Optional[List[StrictStr]] = Field(
+    fields: Union[None, List[StrictStr]] = Field(
         None, description="Specific fields to return"
     )
     limit: StrictInt = Field(50, ge=1, le=1000, description="Page size")
     offset: StrictInt = Field(0, ge=0, description="Pagination skip count")
+
+
+class CrudListObjectsResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="NetBox object types keyed by app name",
+    )
+
+
+class CrudSearchResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Search results keyed by object type",
+    )
+
+
+class CrudReadResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Read result with count and object list",
+    )
+
+
+class CrudCreateResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Create result with object count and payloads",
+    )
+
+
+class CrudUpdateResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Update result with object count and payloads",
+    )
+
+
+class CrudDeleteResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Delete result with object count and IDs",
+    )
+
+
+class CrudChangelogResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Changelog result with count and entries",
+    )
 
 
 # ------------------------------------------------------------------------------
@@ -128,7 +203,7 @@ def _get_pynetbox_accessor(nb: Any, object_type: str) -> Any:
     return getattr(getattr(nb, app), resource_attr)
 
 
-def _schema_name_from_path_spec(path_spec: dict) -> Optional[str]:
+def _schema_name_from_path_spec(path_spec: dict) -> Union[None, str]:
     """Extract the write-model schema name from the POST requestBody of a path spec."""
     schema_ref = (
         path_spec.get("post", {})
@@ -167,6 +242,7 @@ class NetboxCrudTasks:
     @Task(
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudListObjectsArgs,
+        output=CrudListObjectsResult,
     )
     def crud_list_objects(
         self,
@@ -269,6 +345,7 @@ class NetboxCrudTasks:
     @Task(
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudSearchArgs,
+        output=CrudSearchResult,
     )
     def crud_search(
         self,
@@ -340,6 +417,7 @@ class NetboxCrudTasks:
     @Task(
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudReadArgs,
+        output=CrudReadResult,
     )
     def crud_read(
         self,
@@ -443,6 +521,7 @@ class NetboxCrudTasks:
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudCreateArgs,
+        output=CrudCreateResult,
     )
     def crud_create(
         self,
@@ -515,6 +594,7 @@ class NetboxCrudTasks:
     @Task(
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudUpdateArgs,
+        output=CrudUpdateResult,
     )
     def crud_update(
         self,
@@ -623,6 +703,7 @@ class NetboxCrudTasks:
             "schema": NetboxFastApiArgs.model_json_schema(),
         },
         input=CrudDeleteArgs,
+        output=CrudDeleteResult,
     )
     def crud_delete(
         self,
@@ -702,6 +783,7 @@ class NetboxCrudTasks:
     @Task(
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudChangelogArgs,
+        output=CrudChangelogResult,
     )
     def crud_get_changelogs(
         self,

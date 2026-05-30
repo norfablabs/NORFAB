@@ -1,15 +1,10 @@
 import builtins
 import logging
-from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import (
-    Field,
-    StrictBool,
-    StrictStr,
-)
+from pydantic import Field
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.circuits_tasks import GetCircuitsInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_cache import CacheEnum
@@ -18,19 +13,12 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class GetCircuits(NetboxCommonArgs, NetboxClientRunJobArgs):
-    devices: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="Device names to query data for", alias="device-list"
-    )
-    dry_run: StrictBool = Field(
-        None,
-        description="Only return query content, do not run it",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    cid: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="List of circuit identifiers to retrieve data for"
-    )
+class GetCircuits(
+    NetboxClientRunJobArgs,
+    GetCircuitsInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     cache: CacheEnum = Field(True, description="How to use cache")
 
     @staticmethod

@@ -14,7 +14,13 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class GetTopology(GetTopologyInput, NorniHostsFilters, NetboxClientRunJobArgs):
+class GetTopology(
+    GetTopologyInput,
+    NorniHostsFilters,
+    NetboxClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     devices: Union[StrictStr, List[StrictStr]] = Field(
         None,
         description="List of device names to build topology for",

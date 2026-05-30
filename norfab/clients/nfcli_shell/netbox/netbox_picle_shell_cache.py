@@ -10,6 +10,12 @@ from pydantic import (
     StrictStr,
 )
 
+from norfab.workers.netbox_worker.netbox_worker import (
+    CacheClearInput,
+    CacheGetInput,
+    CacheListInput,
+)
+
 from ..common import BoolEnum, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
@@ -23,13 +29,11 @@ class CacheEnum(Enum):
     FORCE = "force"
 
 
-class CacheList(NetboxClientRunJobArgs):
-    keys: StrictStr = Field("*", description="Glob pattern to list keys for")
+class CacheList(
+    NetboxClientRunJobArgs, CacheListInput, use_enum_values=True, populate_by_name=True
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Filter worker to target"
-    )
-    details: BoolEnum = Field(
-        False, description="Return key details", json_schema_extra={"presence": True}
     )
     table: BoolEnum = Field(
         True,
@@ -95,11 +99,12 @@ class CacheList(NetboxClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class CacheClear(NetboxClientRunJobArgs):
-    key: StrictStr = Field(None, description="Key name to remove from cache")
-    keys: StrictStr = Field(
-        None, description="Glob pattern of keys to remove from cache"
-    )
+class CacheClear(
+    NetboxClientRunJobArgs,
+    CacheClearInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Filter worker to target"
     )
@@ -140,11 +145,9 @@ class CacheClear(NetboxClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class CacheGet(NetboxClientRunJobArgs):
-    key: StrictStr = Field(None, description="Key name to retrieve data for from cache")
-    keys: StrictStr = Field(
-        None, description="Glob pattern of keys to retrieve data for from cache"
-    )
+class CacheGet(
+    NetboxClientRunJobArgs, CacheGetInput, use_enum_values=True, populate_by_name=True
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Filter worker to target"
     )

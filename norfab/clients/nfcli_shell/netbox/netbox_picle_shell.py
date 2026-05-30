@@ -6,18 +6,19 @@ Client that implements interactive shell to work with NorFab.
 """
 
 import builtins
+import json
 import logging
-from typing import Any, Optional
+from typing import Any, Union
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
     StrictStr,
 )
 from rich.console import Console
 
+from norfab.workers.netbox_worker.graphql_tasks import GraphqlInput
 from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
 
 from ..common import log_error_or_result
@@ -58,33 +59,20 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
-    dry_run: Optional[StrictBool] = Field(
+class GrapQLCommands(
+    NetboxClientRunJobArgs, GraphqlInput, use_enum_values=True, populate_by_name=True
+):
+    filters: Union[None, StrictStr] = Field(
         None,
-        description="Only return query content, do not run it",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
+        description="JSON dictionary or raw filter string to filter by",
     )
-    obj: Optional[StrictStr] = Field(
+    fields: Union[None, StrictStr] = Field(
         None,
-        description="Object to return data for e.g. device_list, interface, ip_address",
+        description="Comma-separated GraphQL fields to return",
     )
-    filters: Optional[StrictStr] = Field(
+    queries: Union[None, StrictStr] = Field(
         None,
-        description="Dictionary of key-value pairs to filter by",
-    )
-    fields: Optional[StrictStr] = Field(
-        None,
-        description="List of data fields to return",
-    )
-    queries: Optional[StrictStr] = Field(
-        None,
-        description="Dictionary keyed by GraphQL aliases with values of obj, filters, fields dictionary",
-    )
-    query_string: Optional[StrictStr] = Field(
-        None,
-        description="Complete GraphQL query string to send as is",
-        alias="query-string",
+        description="JSON dictionary keyed by GraphQL aliases",
     )
 
     @staticmethod
@@ -94,6 +82,15 @@ class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         nowait = kwargs.pop("nowait", False)
         verbose_result = kwargs.pop("verbose_result", False)
+        if isinstance(kwargs.get("filters"), str):
+            try:
+                kwargs["filters"] = json.loads(kwargs["filters"])
+            except json.JSONDecodeError:
+                pass
+        if isinstance(kwargs.get("fields"), str):
+            kwargs["fields"] = [f.strip() for f in kwargs["fields"].split(",")]
+        if isinstance(kwargs.get("queries"), str):
+            kwargs["queries"] = json.loads(kwargs["queries"])
 
         result = NFCLIENT.run_job(
             "netbox",
@@ -121,7 +118,12 @@ class GrapQLCommands(NetboxCommonArgs, NetboxClientRunJobArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class NetboxShowCommandsModel(NetboxCommonArgs, NetboxClientRunJobArgs):
+class NetboxShowCommandsModel(
+    NetboxCommonArgs,
+    NetboxClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     inventory: Any = Field(
         None,
         description="show Netbox inventory data",

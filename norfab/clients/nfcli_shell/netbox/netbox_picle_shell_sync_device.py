@@ -1,17 +1,15 @@
 import builtins
 import logging
-from typing import List, Optional, Union
+from typing import List, Union
 
 from picle.models import Outputters
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
-    StrictInt,
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.devices_tasks import SyncDeviceFactsInput
 
 from ..common import listen_events, log_error_or_result
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters, NornirCommonArgs
@@ -20,7 +18,12 @@ from .netbox_picle_shell_common import NetboxClientRunJobArgs
 log = logging.getLogger(__name__)
 
 
-class SyncDeviceInventoryDatasourcesNornir(NornirCommonArgs, NorniHostsFilters):
+class SyncDeviceInventoryDatasourcesNornir(
+    NornirCommonArgs,
+    NorniHostsFilters,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     def run(*args: object, **kwargs: object):
         kwargs["datasource"] = "nornir"
@@ -37,25 +40,20 @@ class UpdateDeviceInventoryDatasources(BaseModel):
     )
 
 
-class SyncDeviceInventoryShell(NetboxCommonArgs, NetboxClientRunJobArgs):
-    dry_run: Optional[StrictBool] = Field(
-        None,
-        description="Return information that would be pushed to Netbox but do not push it",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
-    )
+class SyncDeviceInventoryShell(
+    NetboxClientRunJobArgs,
+    SyncDeviceFactsInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     devices: Union[List[StrictStr], StrictStr] = Field(
         None,
         description="List of Netbox devices to sync",
-    )
-    batch_size: StrictInt = Field(
-        10, description="Number of devices to process at a time", alias="batch-size"
     )
     datasource: UpdateDeviceInventoryDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
     )
-    branch: StrictStr = Field(None, description="Branching plugin branch name to use")
 
     @staticmethod
     @listen_events

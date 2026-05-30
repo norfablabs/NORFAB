@@ -239,6 +239,7 @@ nav:
 
 - Development:
   - Documentation Style Guide: development/documentation_style_guide.md
+  - Task Pydantic Models Guide: development/tasks_pydantic_models_guide.md
   - File Streaming (fetch_file): development/file_streaming_fetch_file.md
   - Architecture Design Records:
     - Netbox BGP Create/Update Tasks Plan: development/adr_netbox_bgp_create_update_tasks_plan.md

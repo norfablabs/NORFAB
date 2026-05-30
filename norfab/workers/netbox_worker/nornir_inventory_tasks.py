@@ -1,5 +1,7 @@
 import logging
-from typing import Union
+from typing import Any, Literal, Union
+
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -9,9 +11,71 @@ from .netbox_models import NetboxFastApiArgs
 log = logging.getLogger(__name__)
 
 
+# --------------------------------------------------------------------------
+# NORNIR INVENTORY TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class GetNornirInventoryInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    filters: Union[None, list[dict[StrictStr, Any]]] = Field(
+        None,
+        description="NetBox device filter dictionaries",
+    )
+    devices: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Device names to include in inventory",
+    )
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+    interfaces: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include interface data or provide interface task kwargs",
+    )
+    connections: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include connection data or provide connection task kwargs",
+    )
+    circuits: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include circuit data or provide circuit task kwargs",
+    )
+    nbdata: StrictBool = Field(
+        True,
+        description="Include NetBox device data in host data",
+        json_schema_extra={"presence": True},
+    )
+    bgp_peerings: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include BGP peering data or provide BGP task kwargs",
+        alias="bgp-peerings",
+    )
+    primary_ip: StrictStr = Field(
+        "ip4",
+        description="Primary IP family to use for hostname",
+        alias="primary-ip",
+    )
+    cache: Union[None, StrictBool, Literal["refresh", "force"]] = Field(
+        None,
+        description="Cache usage mode",
+    )
+
+
+class GetNornirInventoryResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Nornir inventory data",
+    )
+
+
 class NetboxNornirInventoryTasks:
 
-    @Task(fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()})
+    @Task(
+        input=GetNornirInventoryInput,
+        output=GetNornirInventoryResult,
+        fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+    )
     def get_nornir_inventory(
         self,
         job: Job,
