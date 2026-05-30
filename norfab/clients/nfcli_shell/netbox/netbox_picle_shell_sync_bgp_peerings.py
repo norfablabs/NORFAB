@@ -37,6 +37,8 @@ class SyncBgpPeeringsShell(
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
+        if isinstance(kwargs.get("ignore_peer_ranges"), str):
+            kwargs["ignore_peer_ranges"] = [kwargs["ignore_peer_ranges"]]
 
         result = NFCLIENT.run_job(
             "netbox",

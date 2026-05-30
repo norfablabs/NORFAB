@@ -48,6 +48,7 @@ def resolve_vlan(
     if _lookup_cache is None:
         _lookup_cache = {}
 
+    # find vlan group
     group_id = None
     if vlan_group:
         group_cache_key = ("vlan_group", vlan_group)
@@ -84,19 +85,31 @@ def resolve_vlan(
     if cache_key in _lookup_cache:
         return _lookup_cache[cache_key]
 
+    # fetch vlans from Netbox
     filter_kwargs = {"vid": vid}
     if group_id:
         filter_kwargs["group_id"] = group_id
+        nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
+        if nb_vlan:
+            _lookup_cache[cache_key] = nb_vlan.id
     elif site_id:
         filter_kwargs["site_id"] = site_id
 
-    nb_vlans = list(nb.ipam.vlans.filter(**filter_kwargs))
-    if not nb_vlans and not group_id and site_id:
-        nb_vlans = list(nb.ipam.vlans.filter(vid=vid))
-    if nb_vlans:
-        _lookup_cache[cache_key] = nb_vlans[0].id
-        return nb_vlans[0].id
+        nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
+        if nb_vlan:
+            _lookup_cache[cache_key] = nb_vlan.id
+    # try to source global vlan - not assigned to site or group
+    else:
+        for nb_vlan in nb.ipam.vlans.filter(**filter_kwargs):
+            if not nb_vlan.site and not nb_vlan.group:
+                _lookup_cache[cache_key] = nb_vlan.id
+                break
 
+    # check if managed to find a matching vlan
+    if cache_key in _lookup_cache:
+        return _lookup_cache[cache_key]
+
+    # create new vlan if no existing vlan found
     payload = {"vid": vid, "name": f"VLAN_{vid}", "description": f"VLAN_{vid}"}
     if site_id:
         payload["site"] = site_id
@@ -109,7 +122,7 @@ def resolve_vlan(
         if group_id:
             msg += f" in VLAN group '{vlan_group}'"
         if site_id:
-            msg += f" for site ID '{site_id}'"
+            msg += f" for site '{new_vlan.site.name}'"
         job.event(msg)
         log.info(f"{worker_name} - {msg}")
         _lookup_cache[cache_key] = new_vlan.id
@@ -147,10 +160,11 @@ def resolve_ip(
         lookup_cache[cache_key] = ip_id
         return ip_id
     # Try to find a containing prefix for mask length
-    mask = None
+    mask: str = None
     prefixes = list(nb.ipam.prefixes.filter(contains=address))
     if prefixes:
-        mask = prefixes[0].prefix.split("/")[1]
+        # pick up longest IP mask
+        mask = str(max([int(p.prefix.split("/")[1]) for p in prefixes]))
     if not mask:
         try:
             net = ipaddress.ip_network(address, strict=False)

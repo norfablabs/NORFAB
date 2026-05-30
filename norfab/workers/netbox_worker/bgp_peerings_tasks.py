@@ -548,6 +548,11 @@ class SyncBgpPeeringsInput(
         description="Only sync sessions whose description matches this glob pattern (e.g. '*uplink*')",
         alias="filter-by-description",
     )
+    ignore_peer_ranges: Union[None, List[str]] = Field(
+        None,
+        description="Only sync sessions whose peer IP is not within one of provided prefixes",
+        alias="ignore-peer-ranges",
+    )
     vrf_custom_field: Union[StrictBool, StrictStr] = Field(
         "vrf",
         description="BGP session Object-type custom field name used to store VRF reference.",
@@ -1896,6 +1901,7 @@ class NetboxBgpPeeringsTasks:
         filter_by_remote_as: Union[None, List[int]] = None,
         filter_by_peer_group: Union[None, list] = None,
         filter_by_description: Union[None, str] = None,
+        ignore_peer_ranges: Union[None, list] = None,
         vrf_custom_field: str = "vrf",
         **kwargs: object,
     ) -> Result:
@@ -1938,6 +1944,7 @@ class NetboxBgpPeeringsTasks:
                 one of the provided values. Applied to both NetBox and live device sessions.
             filter_by_description (str, optional): Only include sessions whose description matches
                 this glob pattern (e.g. ``'*uplink*'``). Applied to both NetBox and live device sessions.
+            ignore_peer_ranges (list, optional): provide prefixes to ingore BGP peers
             vrf_custom_field (str): Name of the BGP session custom field that stores
                 the VRF object reference.  The custom field must be of type Object in
                 NetBox pointing to the VRF content-type.  The value is always a single
@@ -1985,6 +1992,16 @@ class NetboxBgpPeeringsTasks:
             {}
         )  # Live data:   device name -> session name -> normalised field values
         lookup_cache: dict = {}
+        # handle ranges
+        ignore_peer_ranges = ignore_peer_ranges or [
+            "127.0.0.0/8",
+            "224.0.0.0/24",
+            "fe80::/10",
+            "ff02::/16",
+        ]
+        ignore_peer_nets = [
+            ipaddress.ip_network(str(pfx), strict=False) for pfx in ignore_peer_ranges
+        ]
 
         # Validate BGP plugin
         job.event(f"validating NetBox BGP plugin for '{instance}'")
@@ -2080,6 +2097,10 @@ class NetboxBgpPeeringsTasks:
                     normalised.get("description") or "", filter_by_description
                 ):
                     continue
+                if ignore_peer_nets:
+                    peer_ip_addr = ipaddress.ip_address(normalised["remote_address"])
+                    if any(peer_ip_addr in net for net in ignore_peer_nets):
+                        continue
                 normalised_nb[device_name][sname] = normalised
                 # populate lookup cache for future use
                 lookup_cache[("ip", normalised["local_address"])] = None
@@ -2115,21 +2136,50 @@ class NetboxBgpPeeringsTasks:
                     remote_as_val = s.get("remote_as")
                     peer_group_val = s.get("peer_group")
                     description_val = s.get("description") or ""
+                    local_address = s.get("local_address")
+                    remote_address = s.get("remote_address")
                     if filter_by_remote_as:
                         if (remote_as_val or 0) not in filter_by_remote_as:
+                            log.info(
+                                f"{self.name} - {session_name} - skipping, "
+                                f"remote_as '{remote_as_val}' not in "
+                                f"filter_by_remote_as {filter_by_remote_as}"
+                            )
                             continue
                     if (
                         filter_by_peer_group
                         and peer_group_val not in filter_by_peer_group
                     ):
+                        log.info(
+                            f"{self.name} - {session_name} - skipping, "
+                            f"peer_group '{peer_group_val}' not in "
+                            f"filter_by_peer_group {filter_by_peer_group}"
+                        )
                         continue
                     if filter_by_description and not fnmatch.fnmatch(
                         description_val, filter_by_description
                     ):
+                        log.info(
+                            f"{self.name} - {session_name} - skipping, "
+                            f"description '{description_val}' does not match "
+                            f"filter_by_description '{filter_by_description}'"
+                        )
                         continue
+                    if ignore_peer_nets and remote_address:
+                        peer_ip_addr = ipaddress.ip_address(remote_address)
+                        matched_ignore_net = None
+                        for net in ignore_peer_nets:
+                            if peer_ip_addr in net:
+                                matched_ignore_net = str(net)
+                                break
+                        if matched_ignore_net:
+                            log.info(
+                                f"{self.name} - {session_name} - skipping, "
+                                f"remote_address '{remote_address}' matches "
+                                f"ignore_peer_ranges prefix '{matched_ignore_net}'"
+                            )
+                            continue
                     # attempt to resolve local ip if empty
-                    local_address = s.get("local_address")
-                    remote_address = s.get("remote_address")
                     if not local_address and remote_address:
                         local_address = resolve_local_ip_via_peer(
                             device_name, remote_address, nb

@@ -4,6 +4,7 @@ import random
 import pytest
 
 from .test_netbox_service import delete_ips
+
 # ----------------------------------------------------------------------------
 # NORNIR WORKER TESTS
 # ----------------------------------------------------------------------------
@@ -2703,7 +2704,7 @@ class TestNBCreatePrefix:
     def test_nb_create_prefix_jinja2_template_with_filter(self, nfclient):
         self.delete_prefixes_within("10.1.0.0/24", nfclient)
         delete_ips("10.1.0.0/30", nfclient)
-        
+
         ret = nfclient.run_job(
             "nornir",
             "cfg",

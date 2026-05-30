@@ -6,22 +6,24 @@
 2. Added device sync-all task to sync all data from live device into Netbox
 3. Adding powershell installation script and updating install instructions - this script install Norfab going through interactive installation process.
 4. Adding `run_shell_cmd` task to workers to run arbitrary shell command on the host, adding picle shell `workers run-shell-command ..` command too
+5. Adding `ignore_peer_ranges` argument to sync bgp peerings task
 
 ## ENHANCEMENTS
 
 1. Improving netbox Sync BGP peerings task to make better use of lookup cache for asn, vrf, rir, ip objects resolutions
 2. MCP service policy now enforced for tool calls not only for discovery
-3. Netbox sync device interfaces improved VLAN handling - now it creates vlan if its missing, added `vlan_group` argument to specify group to associate with vlan, otherwise it is associated with device site
+3. Netbox sync device interfaces improved VLAN handling - now it creates vlan if its missing, added `vlan_group` argument to specify group to associate with vlan, otherwise it is associated with device site. Vlan retrieval for existing vlan helper is either via group, device site or global.
 
 ## BUGS
 
 1. Fixing ip sync task bulk update list construction, making sure IDs are always present for items
 2. Fixing IP sync prefixes filtering using `bulk_filter`
 3. Fixing IP creation logic to check existing ip first, and if not found proceed with find a suitable prefix
+4. Fixing `resolve_ip` helper function to pickup longest prefix length prefix to create IP in
 
 ## CHANGES
 
-1. Creating Pydantic task input models for Netbox and Nornir services, refactoring NFCLI shells to use these models.
+1. Adding Pydantic task input and output models for all services, refactoring NFCLI shells to use these models.
 
 ---
 
