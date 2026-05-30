@@ -8,15 +8,68 @@ import yaml
 from nornir_salt.plugins.functions import FFun_functions, ResultSerializer
 from nornir_salt.plugins.tasks import nr_test
 from nornir_salt.utils.pydantic_models import modelTestsProcessorSuite
+from pydantic import Field, StrictBool, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
+from .nornir_models import NornirCommonArgs
+
 log = logging.getLogger(__name__)
 
 
+# --------------------------------------------------------------------------
+# TEST TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class TestInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    suite: Union[StrictStr, list[dict[StrictStr, Any]], list[Any]] = Field(
+        ...,
+        description="Test suite as a NorFab URL, template, or list of test definitions",
+    )
+    subset: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter tests by name",
+    )
+    dry_run: StrictBool = Field(
+        False,
+        description="Render and return tests without executing them",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    return_tests_suite: StrictBool = Field(
+        False,
+        description="Include rendered per-host test suites in the result",
+        alias="return-tests-suite",
+        json_schema_extra={"presence": True},
+    )
+    job_data: Union[None, StrictStr, dict[StrictStr, Any], list[Any]] = Field(
+        None,
+        description="Job data as a NorFab URL, dictionary, or list for Jinja2 rendering",
+        alias="job-data",
+    )
+    extensive: StrictBool = Field(
+        False,
+        description="Return extensive test output and rendered suites",
+        json_schema_extra={"presence": True},
+    )
+    groups: Union[None, list[StrictStr]] = Field(
+        None, description="List of test group names to run"
+    )
+
+
+class TestResult(Result):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="Test results keyed by host, serialized as records, or including rendered suites",
+    )
+
+
 class TestTask:
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(fastapi={"methods": ["POST"]}, input=TestInput, output=TestResult)
     def test(
         self,
         job: Job,

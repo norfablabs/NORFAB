@@ -1,16 +1,20 @@
 import builtins
 import logging
-from enum import Enum
-from typing import Any, List, Optional, Union
+from typing import Any, List, Union
 
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
     StrictStr,
 )
+
+from norfab.workers.nornir_worker.inventory_tasks import (
+    GetInventoryInput,
+    GetNornirHostsInput,
+)
+from norfab.workers.nornir_worker.nornir_worker import RefreshNornirInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_cfg import NornirCfgShell
@@ -37,12 +41,14 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-class NornirShowHostsModel(NorniHostsFilters, TabulateTableModel, ClientRunJobArgs):
-    details: Optional[StrictBool] = Field(
-        None,
-        description="show hosts details",
-        json_schema_extra={"presence": True},
-    )
+class NornirShowHostsModel(
+    GetNornirHostsInput,
+    NorniHostsFilters,
+    TabulateTableModel,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -145,7 +151,13 @@ class ShowWatchDogModel(NorniHostsFilters):
         return log_error_or_result(result)
 
 
-class NornirShowInventoryModel(NorniHostsFilters, ClientRunJobArgs):
+class NornirShowInventoryModel(
+    GetInventoryInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     class PicleConfig:
         outputter = Outputters.outputter_yaml
         pipe = PipeFunctionsModel
@@ -218,24 +230,14 @@ class NornirShowCommandsModel(BaseModel):
 # ---------------------------------------------------------------------------------------------
 
 
-class NornirExternalInentories(str, Enum):
-    netbox = "netbox"
-    containerlab = "containerlab"
-
-
-class RefreshNornirModel(ClientRunJobArgs):
+class RefreshNornirModel(
+    RefreshNornirInput,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         ..., description="Workers to refresh"
-    )
-    external_inventories: NornirExternalInentories = Field(
-        None,
-        description="External sources to fetch inventories from",
-        alias="external-inventories",
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
     )
 
     class PicleConfig:
@@ -259,9 +261,6 @@ class RefreshNornirModel(ClientRunJobArgs):
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
         nowait = kwargs.pop("nowait", False)
-
-        if isinstance(kwargs.get("external_inventories"), str):
-            kwargs["external_inventories"] = [kwargs["external_inventories"]]
 
         result = NFCLIENT.run_job(
             "nornir",

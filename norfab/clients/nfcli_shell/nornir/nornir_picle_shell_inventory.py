@@ -1,49 +1,34 @@
 import builtins
 import json
-from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
-    StrictInt,
     StrictStr,
+)
+
+from norfab.workers.nornir_worker.inventory_tasks import (
+    NornirInventoryLoadContainerlabInput,
+    RuntimeCreateHostInput,
+    RuntimeDeleteHostInput,
+    RuntimeReadHostDataInput,
+    RuntimeUpdateHostInput,
 )
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import NorniHostsFilters
 
 
-class CreateHostModel(ClientRunJobArgs):
+class CreateHostModel(
+    RuntimeCreateHostInput,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "any", description="Nornir workers to target"
-    )
-    name: StrictStr = Field(..., description="Name of the host")
-    username: StrictInt = Field(None, description="Host connections username")
-    password: StrictInt = Field(None, description="Host connections password")
-    platform: StrictInt = Field(
-        None, description="Host platform recognized by connection plugin"
-    )
-    hostname: StrictStr = Field(
-        None,
-        description="Hostname of the host to initiate connection with, IP address or FQDN",
-    )
-    port: StrictInt = Field(22, description="TCP port to initiate connection with")
-    connection_options: Dict = Field(
-        None,
-        description="JSON string with connection options",
-        alias="connection-options",
-    )
-    groups: List[StrictStr] = Field(
-        None, description="List of groups to associate with this host"
-    )
-    data: Dict = Field(None, description="JSON string with arbitrary host data")
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
     )
 
     @staticmethod
@@ -83,43 +68,14 @@ class CreateHostModel(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class GroupsUpdateAction(str, Enum):
-    append = "append"
-    insert = "insert"
-    remove = "remove"
-
-
-class UpdateHostModel(ClientRunJobArgs):
+class UpdateHostModel(
+    RuntimeUpdateHostInput,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Nornir workers to target"
-    )
-    name: StrictStr = Field(..., description="Name of the host")
-    username: StrictInt = Field(None, description="Host connections username")
-    password: StrictInt = Field(None, description="Host connections password")
-    platform: StrictInt = Field(
-        None, description="Host platform recognized by connection plugin"
-    )
-    hostname: StrictStr = Field(
-        None,
-        description="Hostname of the host to initiate connection with, IP address or FQDN",
-    )
-    port: StrictInt = Field(22, description="TCP port to initiate connection with")
-    connection_options: Dict = Field(
-        None,
-        description="JSON string with connection options",
-        alias="connection-options",
-    )
-    groups: List[StrictStr] = Field(
-        None, description="List of groups to associate with this host"
-    )
-    groups_action: GroupsUpdateAction = Field(
-        "append", description="Action to perform with groups", alias="groups-action"
-    )
-    data: Dict = Field(None, description="JSON string with arbitrary host data")
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
     )
 
     class PicleConfig:
@@ -160,15 +116,14 @@ class UpdateHostModel(ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
-class DeleteHostModel(ClientRunJobArgs):
+class DeleteHostModel(
+    RuntimeDeleteHostInput,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Nornir workers to target"
-    )
-    name: StrictStr = Field(..., description="Name of the host")
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
     )
 
     @staticmethod
@@ -201,19 +156,15 @@ class DeleteHostModel(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
+class ReadHostDataKeyModel(
+    RuntimeReadHostDataInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         "all", description="Nornir workers to target"
-    )
-    keys: Union[StrictStr, List[StrictStr]] = Field(
-        ...,
-        description="Dot separated path within host data",
-        examples="config.interfaces.Lo0",
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
     )
 
     @staticmethod
@@ -249,7 +200,12 @@ class ReadHostDataKeyModel(NorniHostsFilters, ClientRunJobArgs):
         outputter = Outputters.outputter_json
 
 
-class InventoryLoadContainerlabModel(ClientRunJobArgs):
+class InventoryLoadContainerlabModel(
+    NornirInventoryLoadContainerlabInput,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     workers: Union[StrictStr, List[StrictStr]] = Field(
         ...,
         description="Nornir workers to load inventory into",
@@ -259,11 +215,6 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
         description="Containerlab workers to load inventory from",
         alias="clab-workers",
     )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
     lab_name: StrictStr = Field(
         None,
         description="Name of Containerlab lab to load hosts' inventory",
@@ -272,17 +223,6 @@ class InventoryLoadContainerlabModel(ClientRunJobArgs):
     groups: Union[StrictStr, List[StrictStr]] = Field(
         None,
         description="List of Nornir groups to associate with hosts",
-    )
-    use_default_credentials: StrictBool = Field(
-        None,
-        description="Use Containerlab default credentials for all hosts",
-        alias="use-default-credentials",
-    )
-    dry_run: StrictBool = Field(
-        None,
-        description="Do not refresh Nornir, only return pulled inventory",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
     )
 
     class PicleConfig:

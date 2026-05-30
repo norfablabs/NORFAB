@@ -375,55 +375,58 @@ class NetboxIpTasks:
                 prefix = {"description": prefix, "vrf__name": vrf}
             elif is_network is False:
                 prefix = {"description": prefix}
-        nb_prefixes = nb.ipam.prefixes.filter(**prefix)
+        nb_prefixes = list(nb.ipam.prefixes.filter(**prefix))
         if not nb_prefixes:
             raise NetboxAllocationError(
                 f"Unable to source parent prefix from Netbox - {prefix}"
             )
 
-        # find parent prefix that has available subnets to allocate
-        for nb_prefix in nb_prefixes:
-            parent_prefix_len = int(str(nb_prefix).split("/")[1])
-            # check if can create child subnet in prefix
-            if mask_len and mask_len != parent_prefix_len:
-                try:
-                    candidate = self.create_prefix(
-                        job=job,
-                        parent=str(nb_prefix),
-                        prefixlen=mask_len,
-                        instance=instance,
-                        branch=branch,
-                        dry_run=True,
-                    )
-                    if candidate.failed is False and candidate.result.get("prefix"):
-                        break
-                except Exceptions as e:
-                    # error might be expected
-                    log.debug(f"Error while trying to allocate child subnet: {e}")
-                    continue
-            elif nb_prefix.available_ips.list():
-                break
-        else:
-            raise NetboxAllocationError(
-                f"No subnets of {mask_len} lenght or IPs available in parent prefix - {prefix}"
-            )
-
         # try to source existing IP from netbox
-        if device and interface and description:
-            nb_ip = nb.ipam.ip_addresses.get(
-                device=device,
-                interface=interface,
-                description=description,
-                parent=str(nb_prefix),
-            )
-        elif device and interface:
-            nb_ip = nb.ipam.ip_addresses.get(
-                device=device, interface=interface, parent=str(nb_prefix)
-            )
-        elif description:
-            nb_ip = nb.ipam.ip_addresses.get(
-                description=description, parent=str(nb_prefix)
-            )
+        for nb_prefix in nb_prefixes:
+            if device and interface and description:
+                nb_ip = nb.ipam.ip_addresses.get(
+                    device=device,
+                    interface=interface,
+                    description=description,
+                    parent=str(nb_prefix),
+                )
+            elif device and interface:
+                nb_ip = nb.ipam.ip_addresses.get(
+                    device=device, interface=interface, parent=str(nb_prefix)
+                )
+            elif description:
+                nb_ip = nb.ipam.ip_addresses.get(
+                    description=description, parent=str(nb_prefix)
+                )
+            if nb_ip:
+                break
+        # if no existing IP found, find parent prefix that has available subnets to allocate
+        else:
+            for nb_prefix in nb_prefixes:
+                parent_prefix_len = int(str(nb_prefix).split("/")[1])
+                # check if can create child subnet in prefix
+                if mask_len and mask_len != parent_prefix_len:
+                    try:
+                        candidate = self.create_prefix(
+                            job=job,
+                            parent=str(nb_prefix),
+                            prefixlen=mask_len,
+                            instance=instance,
+                            branch=branch,
+                            dry_run=True,
+                        )
+                        if candidate.failed is False and candidate.result.get("prefix"):
+                            break
+                    except Exceptions as e:
+                        # error might be expected
+                        log.debug(f"Error while trying to allocate child subnet: {e}")
+                        continue
+                elif nb_prefix.available_ips.list():
+                    break
+            else:
+                raise NetboxAllocationError(
+                    f"No subnets of {mask_len} lenght or IPs available in parent prefix - {prefix}"
+                )
 
         # create new IP address
         if not nb_ip:

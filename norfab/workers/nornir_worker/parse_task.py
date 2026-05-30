@@ -1,27 +1,59 @@
 import logging
 from enum import Enum
-from typing import Any, List, Union
+from typing import Any, Union
 
-from nornir_salt.plugins.functions import FFun_functions, ResultSerializer
-from pydantic import (
-    BaseModel,
-    Field,
-    StrictBool,
-    StrictStr,
-    model_validator,
-)
+from nornir_salt.plugins.functions import FFun_functions
+from pydantic import Field, StrictBool, StrictStr, model_validator
 from ttp import ttp
 from ttp_templates import get_template
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
+from .nornir_models import (
+    NornirCliPlugin,
+    NornirCommonArgs,
+    NornirSerializedResult,
+)
+
 log = logging.getLogger(__name__)
 
 
-# --------------------------------------------------------------------------------------
-# TTP TASK MODELS
-# --------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# PARSE TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class NapalmGettersEnum(str, Enum):
+    get_arp_table = "get_arp_table"
+    get_bgp_config = "get_bgp_config"
+    get_bgp_neighbors = "get_bgp_neighbors"
+    get_bgp_neighbors_detail = "get_bgp_neighbors_detail"
+    get_config = "get_config"
+    get_environment = "get_environment"
+    get_facts = "get_facts"
+    get_firewall_policies = "get_firewall_policies"
+    get_interfaces = "get_interfaces"
+    get_interfaces_counters = "get_interfaces_counters"
+    get_interfaces_ip = "get_interfaces_ip"
+    get_ipv6_neighbors_table = "get_ipv6_neighbors_table"
+    get_lldp_neighbors = "get_lldp_neighbors"
+    get_lldp_neighbors_detail = "get_lldp_neighbors_detail"
+    get_mac_address_table = "get_mac_address_table"
+    get_network_instances = "get_network_instances"
+    get_ntp_peers = "get_ntp_peers"
+    get_ntp_servers = "get_ntp_servers"
+    get_ntp_stats = "get_ntp_stats"
+    get_optics = "get_optics"
+    get_probes_config = "get_probes_config"
+    get_probes_results = "get_probes_results"
+    get_route_to = "get_route_to"
+    get_snmp_information = "get_snmp_information"
+    get_users = "get_users"
+    get_vlans = "get_vlans"
+    is_alive = "is_alive"
+    ping = "ping"
+    traceroute = "traceroute"
 
 
 class TTPStructureEnum(str, Enum):
@@ -30,42 +62,85 @@ class TTPStructureEnum(str, Enum):
     dictionary = "dictionary"
 
 
-class TTPPluginEnum(str, Enum):
-    netmiko = "netmiko"
-    scrapli = "scrapli"
-    napalm = "napalm"
+class ParseNapalmInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    getters: Union[
+        NapalmGettersEnum, StrictStr, list[Union[NapalmGettersEnum, StrictStr]]
+    ] = Field(
+        "get_facts",
+        description="NAPALM getter name or list of getter names to call",
+    )
 
 
-class ParseTTPInput(BaseModel, extra="allow", use_enum_values=True):
-    """Pydantic model for Nornir parse_ttp task."""
+class ParseNapalmResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="NAPALM getter results keyed by host or returned as serialized task records",
+    )
 
-    template: StrictStr = Field(
-        None, description="TTP template string, nf:// path, or ttp:// path"
+
+class ParseTextfsmInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    commands: Union[None, StrictStr, list[StrictStr]] = Field(
+        None,
+        description="Commands to collect and parse with TextFSM",
+    )
+    template: Union[None, StrictStr] = Field(
+        None,
+        description="TextFSM template path, NorFab URL, or template text",
+    )
+
+
+class ParseTextfsmResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="TextFSM parsed results keyed by host or returned as serialized task records",
+    )
+
+
+class ParseTTPInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    template: Union[None, StrictStr] = Field(
+        None,
+        description="TTP template string, nf:// path, or ttp:// path",
     )
     strict: StrictBool = Field(
-        True, description="Raise error when a host produces no parsed output"
+        True,
+        description="Raise an error when a host produces no parsed output",
+        json_schema_extra={"presence": True},
     )
     structure: TTPStructureEnum = Field(
-        TTPStructureEnum.flat_list, description="TTP result structure"
+        TTPStructureEnum.flat_list,
+        description="TTP result structure",
     )
-    commands: Union[List[StrictStr], StrictStr] = Field(
+    commands: Union[None, StrictStr, list[StrictStr]] = Field(
         None,
-        description="Fallback commands to collect when template input defines no commands",
+        description="Fallback commands to collect when template input defines none",
     )
-    get: StrictStr = Field(None, description="TTP getter template name to use")
-    plugin: TTPPluginEnum = Field(
-        TTPPluginEnum.netmiko,
-        description="Nornir connection plugin for CLI collection",
+    get: Union[None, StrictStr] = Field(
+        None,
+        description="TTP templates getter name to load",
+    )
+    plugin: NornirCliPlugin = Field(
+        NornirCliPlugin.netmiko,
+        description="Nornir CLI connection plugin for output collection",
     )
 
-    @model_validator(mode="before")
-    @classmethod
-    def validate_template_or_get(cls, data: Any) -> Any:
-        if not isinstance(data, dict):
-            return data
-        if not data.get("template") and not data.get("get"):
+    @model_validator(mode="after")
+    def validate_template_or_get(self) -> "ParseTTPInput":
+        if not self.template and not self.get:
             raise ValueError("Either 'template' or 'get' must be provided")
-        return data
+        return self
+
+
+class ParseTTPResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="TTP parsed data keyed by host",
+    )
 
 
 # --------------------------------------------------------------------------------------
@@ -75,7 +150,11 @@ class ParseTTPInput(BaseModel, extra="allow", use_enum_values=True):
 
 class ParseTask:
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=ParseNapalmInput,
+        output=ParseNapalmResult,
+    )
     def parse_napalm(
         self,
         job: Job,
@@ -108,7 +187,11 @@ class ParseTask:
         ret.task = f"{self.name}:parse_napalm"
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=ParseTextfsmInput,
+        output=ParseTextfsmResult,
+    )
     def parse_textfsm(
         self,
         job: Job,
@@ -165,7 +248,11 @@ class ParseTask:
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]}, input=ParseTTPInput)
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=ParseTTPInput,
+        output=ParseTTPResult,
+    )
     def parse_ttp(
         self,
         job: Job,

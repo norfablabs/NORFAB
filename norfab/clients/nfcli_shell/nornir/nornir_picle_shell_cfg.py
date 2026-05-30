@@ -8,105 +8,24 @@ from pydantic import (
     BaseModel,
     Field,
     StrictBool,
-    StrictInt,
     StrictStr,
+)
+
+from norfab.workers.nornir_worker.cfg_task import (
+    CfgInput,
+    NrCfgPluginNapalm as TaskNrCfgPluginNapalm,
+    NrCfgPluginNetmiko as TaskNrCfgPluginNetmiko,
+    NrCfgPluginScrapli as TaskNrCfgPluginScrapli,
 )
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    NornirCommonArgs,
     TabulateTableModel,
 )
 
 
-class NrCfgPluginNetmiko(BaseModel):
-    enable: Optional[StrictBool] = Field(
-        None,
-        description="Attempt to enter enable-mode",
-        json_schema_extra={"presence": True},
-    )
-    exit_config_mode: Optional[StrictBool] = Field(
-        None,
-        description="Determines whether or not to exit config mode after complete",
-        json_schema_extra={"presence": True},
-        alias="exit-config-mode",
-    )
-    strip_prompt: Optional[StrictBool] = Field(
-        None,
-        description="Determines whether or not to strip the prompt",
-        json_schema_extra={"presence": True},
-        alias="strip-prompt",
-    )
-    strip_command: Optional[StrictBool] = Field(
-        None,
-        description="Determines whether or not to strip the command",
-        json_schema_extra={"presence": True},
-        alias="strip-command",
-    )
-    read_timeout: Optional[StrictInt] = Field(
-        None,
-        description="Absolute timer to send to read_channel_timing",
-        alias="read-timeout",
-    )
-    config_mode_command: Optional[StrictStr] = Field(
-        None,
-        description="The command to enter into config mode",
-        alias="config-mode-command",
-    )
-    cmd_verify: Optional[StrictBool] = Field(
-        None,
-        description="Whether or not to verify command echo for each command in config_set",
-        json_schema_extra={"presence": True},
-        alias="cmd-verify",
-    )
-    enter_config_mode: Optional[StrictBool] = Field(
-        None,
-        description="Do you enter config mode before sending config commands",
-        json_schema_extra={"presence": True},
-        alias="enter-config-mode",
-    )
-    error_pattern: Optional[StrictStr] = Field(
-        None,
-        description="Regular expression pattern to detect config errors in the output",
-        alias="error-pattern",
-    )
-    terminator: Optional[StrictStr] = Field(
-        None, description="Regular expression pattern to use as an alternate terminator"
-    )
-    bypass_commands: Optional[StrictStr] = Field(
-        None,
-        description="Regular expression pattern indicating configuration commands, cmd_verify is automatically disabled",
-        alias="bypass-commands",
-    )
-    commit: Optional[Union[StrictBool, StrictStr]] = Field(
-        True,
-        description="Commit configuration",
-        json_schema_extra={"presence": True},
-    )
-    commit_confirm: Optional[StrictBool] = Field(
-        None,
-        description="Perform commit confirm on supported platforms",
-        alias="commit-confirm",
-        json_schema_extra={"presence": True},
-    )
-    commit_confirm_delay: Optional[StrictInt] = Field(
-        None,
-        description="Confirmed commit rollback timeout in minutes, used with commit-confirm",
-        alias="commit-confirm-delay",
-    )
-    commit_final_delay: Optional[StrictInt] = Field(
-        None,
-        description="Time to wait in seconds before doing final commit, used with commit-confirm",
-        alias="commit-final-delay",
-    )
-    commit_comment: Optional[StrictStr] = Field(
-        None, description="Commit operation comment", alias="commit-comment"
-    )
-    batch: Optional[StrictInt] = Field(
-        None, description="Commands count to send in batches"
-    )
-
+class NrCfgPluginNetmiko(TaskNrCfgPluginNetmiko):
     @staticmethod
     def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "netmiko"
@@ -129,46 +48,7 @@ class NrCfgPluginNetmiko(BaseModel):
         outputter = Outputters.outputter_nested
 
 
-class NrCfgPluginScrapli(BaseModel):
-    dry_run: Optional[StrictBool] = Field(
-        None,
-        description="Apply changes or not, also tests if possible to enter config mode",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
-    )
-    strip_prompt: Optional[StrictBool] = Field(
-        None,
-        description="Strip prompt from returned output",
-        json_schema_extra={"presence": True},
-        alias="strip-prompt",
-    )
-    failed_when_contains: Optional[StrictStr] = Field(
-        None,
-        description="String or list of strings indicating failure if found in response",
-        alias="failed-when-contains",
-    )
-    stop_on_failed: Optional[StrictBool] = Field(
-        None,
-        description="Stop executing commands if command fails",
-        json_schema_extra={"presence": True},
-        alias="stop-on-failed",
-    )
-    privilege_level: Optional[StrictStr] = Field(
-        None,
-        description="Name of configuration privilege level to acquire",
-        alias="privilege-level",
-    )
-    eager: Optional[StrictBool] = Field(
-        None,
-        description="Do not read until prompt is seen at each command sent to the channel",
-        json_schema_extra={"presence": True},
-    )
-    timeout_ops: Optional[StrictInt] = Field(
-        None,
-        description="Timeout ops value for this operation",
-        alias="timeout-ops",
-    )
-
+class NrCfgPluginScrapli(TaskNrCfgPluginScrapli):
     @staticmethod
     def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "scrapli"
@@ -178,24 +58,7 @@ class NrCfgPluginScrapli(BaseModel):
         outputter = Outputters.outputter_nested
 
 
-class NrCfgPluginNapalm(BaseModel):
-    replace: Optional[StrictBool] = Field(
-        None,
-        description="Whether to replace or merge the configuration",
-        json_schema_extra={"presence": True},
-    )
-    dry_run: Optional[StrictBool] = Field(
-        None,
-        description="Apply changes or not, also tests if possible to enter config mode",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
-    )
-    revert_in: Optional[StrictInt] = Field(
-        None,
-        description="Amount of time in seconds after which to revert the commit",
-        alias="revert-in",
-    )
-
+class NrCfgPluginNapalm(TaskNrCfgPluginNapalm):
     @staticmethod
     def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "napalm"
@@ -218,14 +81,13 @@ class NrCfgPlugins(BaseModel):
 
 
 class NornirCfgShell(
-    NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
+    CfgInput,
+    NorniHostsFilters,
+    TabulateTableModel,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
-    dry_run: Optional[StrictBool] = Field(
-        None,
-        description="Dry run cfg function",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
-    )
     config: Union[StrictStr, List[StrictStr]] = Field(
         ...,
         description="List of configuration commands to send to devices",

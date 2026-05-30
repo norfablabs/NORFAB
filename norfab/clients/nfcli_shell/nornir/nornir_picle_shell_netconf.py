@@ -1,35 +1,22 @@
 ﻿import builtins
-from enum import Enum
 
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import (
-    BaseModel,
-    Field,
-    StrictStr,
+from pydantic import BaseModel, Field
+
+from norfab.workers.nornir_worker.netconf_task import (
+    NetconfCapabilitiesInput,
+    NetconfGetConfigInput,
 )
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
-from .nornir_picle_shell_common import (
-    NorniHostsFilters,
-    NornirCommonArgs,
-)
-
-
-class EnumNetconfPlugins(str, Enum):
-    scrapli = "scrapli"
-    ncclient = "ncclient"
-
-
-class EnumConfigSource(str, Enum):
-    running = "running"
-    candidate = "candidate"
+from .nornir_picle_shell_common import NorniHostsFilters
 
 
 class NrNetconfPluginNcclient(BaseModel):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        kwargs["plugin"] = "netmiko"
+        kwargs["plugin"] = "ncclient"
         return NornirNetconfShell.run(*args, **kwargs)
 
     class PicleConfig:
@@ -54,19 +41,13 @@ class NrNetconfPlugins(BaseModel):
     )
 
 
-class CallGetConfig(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
-    plugin: EnumNetconfPlugins = Field(
-        description="NETCONF plugin to use", default="ncclient"
-    )
-    source: EnumConfigSource = Field(
-        description="Configuration source to retrieve", default="running"
-    )
-    filter_subtree: StrictStr = Field(
-        None,
-        description="XML subtree to retrieve portion of configuration",
-        alias="filter-subtree",
-    )
-
+class CallGetConfig(
+    NetconfGetConfigInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     def run(*args: object, **kwargs: object):
         kwargs["call"] = "get_config"
@@ -76,14 +57,13 @@ class CallGetConfig(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class CallCapabilities(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
-    plugin: EnumNetconfPlugins = Field(
-        description="NETCONF plugin to use", default="ncclient"
-    )
-    capab_filter: StrictStr = Field(
-        None, description="Glob pattern to filter capabilities", alias="capab-filter"
-    )
-
+class CallCapabilities(
+    NetconfCapabilitiesInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     def run(*args: object, **kwargs: object):
         kwargs["call"] = "server_capabilities"

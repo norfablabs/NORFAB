@@ -11,10 +11,11 @@ from pydantic import (
     StrictStr,
 )
 
+from norfab.workers.nornir_worker.test_task import TestInput
+
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    NornirCommonArgs,
     TabulateTableModel,
 )
 
@@ -26,31 +27,14 @@ class EnumTableTypes(str, Enum):
 
 
 class NornirTestShell(
-    NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
+    TestInput,
+    NorniHostsFilters,
+    TabulateTableModel,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     suite: StrictStr = Field(..., description="Nornir suite nf://path/to/file.py")
-    dry_run: Optional[StrictBool] = Field(
-        None,
-        description="Return produced per-host tests suite content without running tests",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
-    )
-    subset: Optional[StrictStr] = Field(
-        None,
-        description="Filter tests by name",
-    )
-    failed_only: Optional[StrictBool] = Field(
-        None,
-        description="Return test results for failed tests only",
-        json_schema_extra={"presence": True},
-        alias="failed-only",
-    )
-    remove_tasks: Optional[StrictBool] = Field(
-        None,
-        description="Include/Exclude tested task results",
-        json_schema_extra={"presence": True},
-        alias="remove-tasks",
-    )
     job_data: Optional[StrictStr] = Field(
         None, description="Path to YAML file with job data", alias="job-data"
     )

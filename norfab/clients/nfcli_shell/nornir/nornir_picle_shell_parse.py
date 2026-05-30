@@ -1,5 +1,4 @@
 ﻿import builtins
-from enum import Enum
 from typing import List, Union
 
 try:
@@ -12,7 +11,12 @@ except Exception:
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field, StrictBool, StrictStr
 
-from norfab.workers.nornir_worker.parse_task import ParseTTPInput
+from norfab.workers.nornir_worker.parse_task import (
+    NapalmGettersEnum,
+    ParseNapalmInput,
+    ParseTTPInput,
+    ParseTextfsmInput,
+)
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_cli import (
@@ -22,43 +26,16 @@ from .nornir_picle_shell_cli import (
 )
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    NornirCommonArgs,
 )
 
 
-class NapalmGettersEnum(str, Enum):
-    get_arp_table = "get_arp_table"
-    get_bgp_config = "get_bgp_config"
-    get_bgp_neighbors = "get_bgp_neighbors"
-    get_bgp_neighbors_detail = "get_bgp_neighbors_detail"
-    get_config = "get_config"
-    get_environment = "get_environment"
-    get_facts = "get_facts"
-    get_firewall_policies = "get_firewall_policies"
-    get_interfaces = "get_interfaces"
-    get_interfaces_counters = "get_interfaces_counters"
-    get_interfaces_ip = "get_interfaces_ip"
-    get_ipv6_neighbors_table = "get_ipv6_neighbors_table"
-    get_lldp_neighbors = "get_lldp_neighbors"
-    get_lldp_neighbors_detail = "get_lldp_neighbors_detail"
-    get_mac_address_table = "get_mac_address_table"
-    get_network_instances = "get_network_instances"
-    get_ntp_peers = "get_ntp_peers"
-    get_ntp_servers = "get_ntp_servers"
-    get_ntp_stats = "get_ntp_stats"
-    get_optics = "get_optics"
-    get_probes_config = "get_probes_config"
-    get_probes_results = "get_probes_results"
-    get_route_to = "get_route_to"
-    get_snmp_information = "get_snmp_information"
-    get_users = "get_users"
-    get_vlans = "get_vlans"
-    is_alive = "is_alive"
-    ping = "ping"
-    traceroute = "traceroute"
-
-
-class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
+class NapalmGettersModel(
+    ParseNapalmInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     getters: NapalmGettersEnum = Field(..., description="Select NAPALM getters")
 
     @staticmethod
@@ -88,12 +65,6 @@ class NapalmGettersModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
-
-
-class TTPStructureOptions(str, Enum):
-    list_ = "list"
-    dictionary = "dictionary"
-    flat_list = "flat_list"
 
 
 class TTPParseNrCliPluginNetmiko(NrCliPluginNetmiko):
@@ -130,7 +101,11 @@ class TTPParseNrCliPlugins(BaseModel):
 
 
 class TTPParseModel(
-    NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs, ParseTTPInput
+    ParseTTPInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     commands: Union[StrictStr, List[StrictStr]] = Field(
         None,
@@ -193,7 +168,13 @@ class TTPParseModel(
         outputter = Outputters.outputter_nested
 
 
-class TextFSMParseModel(NorniHostsFilters, NornirCommonArgs, ClientRunJobArgs):
+class TextFSMParseModel(
+    ParseTextfsmInput,
+    NorniHostsFilters,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     template: StrictStr = Field(None, description="Path to a TextFSM template file")
     commands: Union[StrictStr, List[StrictStr]] = Field(
         None,

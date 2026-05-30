@@ -8,16 +8,22 @@ from pydantic import (
     StrictStr,
 )
 
+from norfab.workers.nornir_worker.task_task import TaskInput
+
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    NornirCommonArgs,
     TabulateTableModel,
 )
 
 
 class NornirTaskShell(
-    NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
+    TaskInput,
+    NorniHostsFilters,
+    TabulateTableModel,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     plugin: StrictStr = Field(
         ...,

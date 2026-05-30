@@ -17,6 +17,11 @@
 
 1. Fixing ip sync task bulk update list construction, making sure IDs are always present for items
 2. Fixing IP sync prefixes filtering using `bulk_filter`
+3. Fixing IP creation logic to check existing ip first, and if not found proceed with find a suitable prefix
+
+## CHANGES
+
+1. Creating Pydantic task input models for Netbox and Nornir services, refactoring NFCLI shells to use these models.
 
 ---
 

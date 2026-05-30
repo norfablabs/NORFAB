@@ -1,59 +1,26 @@
 ﻿import builtins
-from enum import Enum
 
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
-    StrictFloat,
     StrictStr,
+)
+
+from norfab.workers.nornir_worker.file_copy_task import (
+    FileCopyInput,
+    NrFileCopyPluginNetmiko as TaskNrFileCopyPluginNetmiko,
 )
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    NornirCommonArgs,
     TabulateTableModel,
 )
 
 
-class SCPDirection(str, Enum):
-    put = "put"
-    get = "get"
-
-
-class NrFileCopyPluginNetmiko(BaseModel):
-    dest_file: StrictStr = Field(
-        None, description="Destination file to copy", alias="destination-file"
-    )
-    file_system: StrictStr = Field(
-        None, description="Destination file system", alias="file-system"
-    )
-    direction: SCPDirection = Field("put", description="Direction of file copy")
-    inline_transfer: StrictBool = Field(
-        False,
-        description="Use inline transfer, supported by Cisco IOS",
-        alias="inline-transfer",
-        json_schema_extra={"presence": True},
-    )
-    overwrite_file: StrictBool = Field(
-        False,
-        description="Overwrite destination file if it exists",
-        alias="overwrite-file",
-        json_schema_extra={"presence": True},
-    )
-    socket_timeout: StrictFloat = Field(
-        10.0, description="Socket timeout in seconds", alias="socket-timeout"
-    )
-    verify_file: StrictBool = Field(
-        True,
-        description="Verify destination file hash after copy",
-        alias="verify-file",
-        json_schema_extra={"presence": True},
-    )
-
+class NrFileCopyPluginNetmiko(TaskNrFileCopyPluginNetmiko):
     @staticmethod
     def run(*args: object, **kwargs: object):
         kwargs["plugin"] = "netmiko"
@@ -70,18 +37,17 @@ class NrFileCopyPlugins(BaseModel):
 
 
 class NornirFileCopyShell(
-    NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
+    FileCopyInput,
+    NorniHostsFilters,
+    TabulateTableModel,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     source_file: StrictStr = Field(
         ..., description="Source file to copy", alias="source-file"
     )
     plugin: NrFileCopyPlugins = Field(None, description="Connection plugin parameters")
-    dry_run: StrictBool = Field(
-        False,
-        description="Do not copy files, just show what would be done",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
 
     @staticmethod
     def source_source_file() -> list:

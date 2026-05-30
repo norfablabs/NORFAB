@@ -1,50 +1,240 @@
 import logging
 
-from typing import Any, Dict, List, Optional, Union
-
-from pydantic import (
-    BaseModel,
-    Field,
-    StrictBool,
-    StrictStr,
-    model_validator,
-)
+from enum import Enum
+from typing import Any, Union
 
 from nornir_salt.plugins.functions import InventoryFun
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+
+from norfab.core.inventory import merge_recursively
 from norfab.core.worker import Job, Task
 from norfab.models import Result
-from norfab.core.inventory import merge_recursively
+
 from .nornir_models import NornirHostsFilters
 
 log = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------------------------------
-# Task Pydantic Models
+# INVENTORY TASK MODELS
 # -----------------------------------------------------------------------------------------
 
 
-class GetNornirHosts(NornirHostsFilters, extra="forbid"):
-    """
-    Pydantic model for Nornir get_nornir_hosts task.
-    """
-
-    job: object = Field(None, description="Job instance running this task")
-    details: Optional[StrictBool] = Field(
-        None, description="get_nornir_hosts task input arguments schema"
+class NornirInventoryLoadNetboxInput(
+    BaseModel, use_enum_values=True, populate_by_name=True
+):
+    progress: StrictBool = Field(
+        False,
+        description="Emit progress events during NetBox inventory load",
+        json_schema_extra={"presence": True},
     )
 
 
-class HostDetails(BaseModel, extra="forbid"):
-    platform: StrictStr = Field(None, description="Host's platform name")
-    hostname: StrictStr = Field(None, description="Host's hostname")
-    port: StrictStr = Field(None, description="Host's port to initiate connection with")
-    groups: List[StrictStr] = Field(None, description="Host's groups")
-    username: StrictStr = Field(None, description="Host's username")
+class NornirInventoryLoadNetboxResult(Result):
+    result: StrictBool = Field(
+        True,
+        description="True if NetBox inventory data was merged successfully",
+    )
 
 
-class GetNornirHostsResponse(Result):
-    result: Union[List[StrictStr], Dict[StrictStr, HostDetails], None] = Field(
-        None, description="get_nornir_host results schema"
+class NornirInventoryLoadContainerlabInput(
+    BaseModel, use_enum_values=True, populate_by_name=True
+):
+    lab_name: Union[None, StrictStr] = Field(
+        None,
+        description="Containerlab lab name to load inventory from",
+        alias="lab-name",
+    )
+    groups: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Nornir group names to attach to imported hosts",
+    )
+    clab_workers: Union[StrictStr, list[StrictStr]] = Field(
+        "all",
+        description="Containerlab workers to query for inventory",
+        alias="clab-workers",
+    )
+    use_default_credentials: StrictBool = Field(
+        True,
+        description="Use Containerlab default credentials for hosts",
+        alias="use-default-credentials",
+        json_schema_extra={"presence": True},
+    )
+    progress: StrictBool = Field(
+        False,
+        description="Emit progress events during Containerlab inventory load",
+        json_schema_extra={"presence": True},
+    )
+    dry_run: StrictBool = Field(
+        False,
+        description="Return pulled inventory without merging it",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    re_init_nornir: StrictBool = Field(
+        True,
+        description="Re-initialize Nornir after merging inventory",
+        alias="re-init-nornir",
+        json_schema_extra={"presence": True},
+    )
+
+
+class NornirInventoryLoadContainerlabResult(Result):
+    result: Union[StrictBool, dict[StrictStr, Any]] = Field(
+        True,
+        description="True when merged, or pulled inventory data keyed by worker for dry runs",
+    )
+
+
+class GetInventoryInput(
+    NornirHostsFilters, use_enum_values=True, populate_by_name=True
+):
+    pass
+
+
+class GetInventoryResult(Result):
+    result: Union[dict[StrictStr, Any], None] = Field(
+        {},
+        description="Running Nornir inventory dictionary for matched hosts",
+    )
+
+
+class GetNornirHostsInput(
+    NornirHostsFilters, extra="forbid", use_enum_values=True, populate_by_name=True
+):
+    details: StrictBool = Field(
+        False,
+        description="Return host details instead of host names",
+        json_schema_extra={"presence": True},
+    )
+
+
+class HostDetails(BaseModel, extra="forbid", use_enum_values=True):
+    platform: StrictStr = Field(None, description="Host platform name")
+    hostname: StrictStr = Field(None, description="Host connection hostname")
+    port: StrictStr = Field(None, description="Host connection TCP port")
+    groups: list[StrictStr] = Field([], description="Host group names")
+    username: StrictStr = Field(None, description="Host connection username")
+
+
+class GetNornirHostsResult(Result):
+    result: Union[list[StrictStr], dict[StrictStr, HostDetails], None] = Field(
+        None,
+        description="Host names list, host details keyed by name, or None when no hosts match",
+    )
+
+
+class RuntimeInventoryAction(str, Enum):
+    create_host = "create_host"
+    create = "create"
+    read_host = "read_host"
+    read = "read"
+    update_host = "update_host"
+    update = "update"
+    delete_host = "delete_host"
+    delete = "delete"
+    load = "load"
+    read_inventory = "read_inventory"
+    read_host_data = "read_host_data"
+    list_hosts = "list_hosts"
+    list_hosts_platforms = "list_hosts_platforms"
+    update_defaults = "update_defaults"
+
+
+class RuntimeInventoryInput(
+    BaseModel, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    action: Union[RuntimeInventoryAction, StrictStr] = Field(
+        ...,
+        description="Runtime inventory action to perform",
+    )
+    progress: StrictBool = Field(
+        True,
+        description="Emit progress events during inventory action",
+        json_schema_extra={"presence": True},
+    )
+
+
+class GroupsUpdateAction(str, Enum):
+    append = "append"
+    insert = "insert"
+    remove = "remove"
+
+
+class RuntimeCreateHostInput(
+    RuntimeInventoryInput, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    action: RuntimeInventoryAction = Field(
+        RuntimeInventoryAction.create_host,
+        description="Runtime inventory action to perform",
+    )
+    name: StrictStr = Field(..., description="Name of the host")
+    username: StrictStr = Field(None, description="Host connections username")
+    password: StrictStr = Field(None, description="Host connections password")
+    platform: StrictStr = Field(
+        None, description="Host platform recognized by connection plugin"
+    )
+    hostname: StrictStr = Field(
+        None,
+        description="Hostname of the host to initiate connection with, IP address or FQDN",
+    )
+    port: StrictInt = Field(22, description="TCP port to initiate connection with")
+    connection_options: dict = Field(
+        None,
+        description="JSON string with connection options",
+        alias="connection-options",
+    )
+    groups: list[StrictStr] = Field(
+        None, description="List of groups to associate with this host"
+    )
+    data: dict = Field(None, description="JSON string with arbitrary host data")
+
+
+class RuntimeUpdateHostInput(
+    RuntimeCreateHostInput, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    action: RuntimeInventoryAction = Field(
+        RuntimeInventoryAction.update_host,
+        description="Runtime inventory action to perform",
+    )
+    groups_action: GroupsUpdateAction = Field(
+        GroupsUpdateAction.append,
+        description="Action to perform with groups",
+        alias="groups-action",
+    )
+
+
+class RuntimeDeleteHostInput(
+    RuntimeInventoryInput, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    action: RuntimeInventoryAction = Field(
+        RuntimeInventoryAction.delete_host,
+        description="Runtime inventory action to perform",
+    )
+    name: StrictStr = Field(..., description="Name of the host")
+
+
+class RuntimeReadHostDataInput(
+    RuntimeInventoryInput,
+    NornirHostsFilters,
+    extra="allow",
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    action: RuntimeInventoryAction = Field(
+        RuntimeInventoryAction.read_host_data,
+        description="Runtime inventory action to perform",
+    )
+    keys: Union[StrictStr, list[StrictStr]] = Field(
+        ...,
+        description="Dot separated path within host data",
+        examples="config.interfaces.Lo0",
+    )
+
+
+class RuntimeInventoryResult(Result):
+    result: Any = Field(
+        None,
+        description="Runtime inventory action result",
     )
 
 
@@ -54,7 +244,11 @@ class GetNornirHostsResponse(Result):
 
 
 class InventoryTasks:
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NornirInventoryLoadNetboxInput,
+        output=NornirInventoryLoadNetboxResult,
+    )
     def nornir_inventory_load_netbox(
         self,
         job: Job,
@@ -126,7 +320,11 @@ class InventoryTasks:
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NornirInventoryLoadContainerlabInput,
+        output=NornirInventoryLoadContainerlabResult,
+    )
     def nornir_inventory_load_containerlab(
         self,
         job: Job,
@@ -214,7 +412,11 @@ class InventoryTasks:
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        fastapi={"methods": ["GET"]},
+        input=GetInventoryInput,
+        output=GetInventoryResult,
+    )
     def get_inventory(self, **kwargs: dict) -> Result:
         """
         Retrieve running Nornir inventory for requested hosts
@@ -233,8 +435,8 @@ class InventoryTasks:
 
     @Task(
         fastapi={"methods": ["GET"]},
-        input=GetNornirHosts,
-        output=GetNornirHostsResponse,
+        input=GetNornirHostsInput,
+        output=GetNornirHostsResult,
     )
     def get_nornir_hosts(self, details: bool = False, **kwargs: dict) -> Result:
         """
@@ -266,7 +468,11 @@ class InventoryTasks:
             ret.result = list(filtered_nornir.inventory.hosts)
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=RuntimeInventoryInput,
+        output=RuntimeInventoryResult,
+    )
     def runtime_inventory(self, job: Job, action: str, **kwargs: Any) -> Result:
         """
         Task to work with Nornir runtime (in-memory) inventory.

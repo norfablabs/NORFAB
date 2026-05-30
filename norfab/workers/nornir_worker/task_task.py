@@ -1,16 +1,40 @@
 import logging
-from typing import Any
+from typing import Any, Union
 
 from nornir_salt.plugins.functions import ResultSerializer
+from pydantic import Field, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
+from .nornir_models import NornirCommonArgs, NornirSerializedResult
+
 log = logging.getLogger(__name__)
 
 
+# --------------------------------------------------------------------------
+# TASK TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class TaskInput(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    plugin: StrictStr = Field(
+        ...,
+        description="Python import path or nf:// URL for a Nornir task plugin",
+    )
+
+
+class TaskResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="Custom Nornir task results keyed by host or returned as serialized task records",
+    )
+
+
 class TaskTask:
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(fastapi={"methods": ["POST"]}, input=TaskInput, output=TaskResult)
     def task(self, job: Job, plugin: str, **kwargs: Any) -> Result:
         """
         Execute a Nornir task plugin.

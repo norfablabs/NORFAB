@@ -3,6 +3,7 @@ import random
 
 import pytest
 
+from .test_netbox_service import delete_ips
 # ----------------------------------------------------------------------------
 # NORNIR WORKER TESTS
 # ----------------------------------------------------------------------------
@@ -799,7 +800,7 @@ class TestNornirCfg:
 
         for worker, results in ret.items():
             assert (
-                "UnsupportedPluginError" in results["errors"][0]
+                "ValidationError" in results["errors"][0]
             ), f"{worker} did not raise error"
 
     def test_config_from_file_dry_run(self, nfclient):
@@ -2701,7 +2702,8 @@ class TestNBCreatePrefix:
 
     def test_nb_create_prefix_jinja2_template_with_filter(self, nfclient):
         self.delete_prefixes_within("10.1.0.0/24", nfclient)
-
+        delete_ips("10.1.0.0/30", nfclient)
+        
         ret = nfclient.run_job(
             "nornir",
             "cfg",
@@ -2726,6 +2728,7 @@ class TestNBCreatePrefix:
 
     def test_nb_create_prefix_jinja2_template_with_set(self, nfclient):
         self.delete_prefixes_within("10.1.0.0/24", nfclient)
+        delete_ips("10.1.0.0/30", nfclient)
 
         ret = nfclient.run_job(
             "nornir",

@@ -1,66 +1,25 @@
 ﻿import builtins
-from typing import List, Union
-
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import (
-    BaseModel,
-    Field,
-    StrictBool,
-    StrictInt,
-    StrictStr,
-)
+from pydantic import BaseModel, Field
+
+from norfab.workers.nornir_worker.network_task import NetworkDnsInput, NetworkPingInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
-    NornirCommonArgs,
     TabulateTableModel,
 )
 
 
 class NornirNetworkPing(
-    NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
+    NetworkPingInput,
+    NorniHostsFilters,
+    TabulateTableModel,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
-    use_host_name: StrictBool = Field(
-        None,
-        description="Ping host's name instead of host's hostname",
-        json_schema_extra={"presence": True},
-        alias="use-host-name",
-    )
-    count: StrictInt = Field(None, description="Number of pings to run")
-    ping_timeout: StrictInt = Field(
-        None,
-        description="Time in seconds before considering each non-arrived reply permanently lost",
-        alias="ping-timeout",
-    )
-    size: StrictInt = Field(None, description="Size of the entire packet to send")
-    interval: Union[int, float] = Field(
-        None, description="Interval to wait between pings"
-    )
-    payload: str = Field(None, description="Payload content if size is not set")
-    sweep_start: StrictInt = Field(
-        None,
-        description="If size is not set, initial size in a sweep of sizes",
-        alias="sweep-start",
-    )
-    sweep_end: StrictInt = Field(
-        None,
-        description="If size is not set, final size in a sweep of sizes",
-        alias="sweep-end",
-    )
-    df: StrictBool = Field(
-        None,
-        description="Don't Fragment flag value for IP Header",
-        json_schema_extra={"presence": True},
-    )
-    match: StrictBool = Field(
-        None,
-        description="Do payload matching between request and reply",
-        json_schema_extra={"presence": True},
-    )
-    source: StrictStr = Field(None, description="Source IP address")
-
     class PicleConfig:
         outputter = Outputters.outputter_nested
 
@@ -126,29 +85,13 @@ class NornirNetworkPing(
 
 
 class NornirNetworkDns(
-    NorniHostsFilters, TabulateTableModel, NornirCommonArgs, ClientRunJobArgs
+    NetworkDnsInput,
+    NorniHostsFilters,
+    TabulateTableModel,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
-    use_host_name: StrictBool = Field(
-        None,
-        description="Ping host's name instead of host's hostname",
-        json_schema_extra={"presence": True},
-        alias="use-host-name",
-    )
-    servers: Union[StrictStr, List[StrictStr]] = Field(
-        None, description="List of DNS servers to use"
-    )
-    dns_timeout: StrictInt = Field(
-        None,
-        description="Time in seconds before considering request lost",
-        alias="dns-timeout",
-    )
-    ipv4: StrictBool = Field(
-        None, description="Resolve 'A' record", json_schema_extra={"presence": True}
-    )
-    ipv6: StrictBool = Field(
-        None, description="Resolve 'AAAA' record", json_schema_extra={"presence": True}
-    )
-
     class PicleConfig:
         outputter = Outputters.outputter_nested
 

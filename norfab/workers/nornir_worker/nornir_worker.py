@@ -24,6 +24,7 @@ from nornir_salt.plugins.processors import (
 from nornir_salt.plugins.tasks import (
     connections as nr_connections,
 )
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 from norfab.core.worker import Job, NFPWorker, Task, WorkerWatchDog
 from norfab.models import Result
@@ -42,6 +43,51 @@ from .test_task import TestTask
 SERVICE = "nornir"
 
 log = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------
+# NORNIR WORKER TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetVersionResult(Result):
+    result: Dict[StrictStr, StrictStr] = Field(
+        {},
+        description="Installed package versions keyed by package name",
+    )
+
+
+class GetWatchdogConnectionsInput(
+    BaseModel, use_enum_values=True, populate_by_name=True
+):
+    pass
+
+
+class GetWatchdogConnectionsResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="Watchdog connection state keyed by host and plugin",
+    )
+
+
+class RefreshNornirInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    progress: StrictBool = Field(
+        False,
+        description="Emit progress events while refreshing Nornir",
+        json_schema_extra={"presence": True},
+    )
+
+
+class RefreshNornirResult(Result):
+    result: StrictBool = Field(
+        True,
+        description="True if Nornir refreshed successfully",
+    )
+
 
 # ----------------------------------------------------------------------
 # Nornir Service watchdog class
@@ -721,7 +767,11 @@ class NornirWorker(
     # Nornir Service Functions that exposed for calling
     # ----------------------------------------------------------------------
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        fastapi={"methods": ["GET"]},
+        input=GetVersionInput,
+        output=GetVersionResult,
+    )
     def get_version(self) -> Result:
         """
         Retrieve the versions of various libraries and system information.
@@ -781,7 +831,11 @@ class NornirWorker(
 
         return Result(result=libs)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        fastapi={"methods": ["GET"]},
+        input=GetWatchdogConnectionsInput,
+        output=GetWatchdogConnectionsResult,
+    )
     def get_watchdog_connections(self) -> Result:
         """
         Retrieve the list of connections currently managed by watchdog.
@@ -792,7 +846,11 @@ class NornirWorker(
         """
         return Result(result=self.watchdog.connections_get())
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=RefreshNornirInput,
+        output=RefreshNornirResult,
+    )
     def refresh_nornir(
         self,
         job: Job,
