@@ -13,7 +13,7 @@ from diskcache import FanoutCache
 from fastapi import Body, Depends, FastAPI, HTTPException, Request
 from fastapi.openapi.utils import get_openapi
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 from starlette import status
 from starlette.routing import Route
 
@@ -28,6 +28,117 @@ log = logging.getLogger(__name__)
 
 class UnauthorizedMessage(BaseModel):
     detail: str = "Bearer token missing or unknown"
+
+
+# --------------------------------------------------------------------------
+# FASTAPI TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetVersionResult(Result):
+    result: Dict[StrictStr, StrictStr] = Field(
+        {},
+        description="Installed package versions keyed by package name",
+    )
+
+
+class GetInventoryInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetInventoryResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="FastAPI worker inventory and Uvicorn configuration",
+    )
+
+
+class GetOpenapiSchemaInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    paths: StrictBool = Field(
+        False,
+        description="Return only OpenAPI endpoint paths",
+        json_schema_extra={"presence": True},
+    )
+
+
+class GetOpenapiSchemaResult(Result):
+    result: Union[List[StrictStr], Dict[StrictStr, Any]] = Field(
+        {},
+        description="OpenAPI schema dictionary or list of API paths",
+    )
+
+
+class BearerTokenStoreInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    username: StrictStr = Field(..., description="User name to store the token for")
+    token: StrictStr = Field(..., description="Bearer token string to store")
+    expire: Union[None, StrictInt] = Field(
+        None,
+        description="Token expiration time in seconds",
+    )
+
+
+class BoolResult(Result):
+    result: StrictBool = Field(
+        False,
+        description="True when the operation succeeds",
+    )
+
+
+class BearerTokenDeleteInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    username: Union[None, StrictStr] = Field(
+        None, description="User name whose tokens should be deleted"
+    )
+    token: Union[None, StrictStr] = Field(
+        None, description="Bearer token string to delete"
+    )
+
+
+class BearerTokenListInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    username: Union[None, StrictStr] = Field(
+        None, description="User name to list tokens for"
+    )
+
+
+class BearerTokenPayload(BaseModel):
+    username: StrictStr = Field("", description="Token owner user name")
+    token: StrictStr = Field("", description="Bearer token string")
+    age: StrictStr = Field("", description="Token age")
+    creation: StrictStr = Field("", description="Token creation timestamp")
+    expires: StrictStr = Field("", description="Token expiration timestamp")
+
+
+class BearerTokenListResult(Result):
+    result: List[BearerTokenPayload] = Field(
+        [],
+        description="Bearer token records",
+    )
+
+
+class BearerTokenCheckInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    token: StrictStr = Field(..., description="Bearer token string to check")
+
+
+class DiscoverInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    service: StrictStr = Field(
+        "all",
+        description="Service name to discover tasks for",
+    )
+    progress: StrictBool = Field(
+        True,
+        description="Emit progress events while discovering tasks",
+        json_schema_extra={"presence": True},
+    )
+
+
+class DiscoverResult(Result):
+    result: Dict[StrictStr, List[StrictStr]] = Field(
+        {},
+        description="Discovered API endpoints keyed by service name",
+    )
 
 
 def create_api_endpoint(
@@ -367,7 +478,7 @@ class FastAPIWorker(NFPWorker):
         """
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Produce a report of the versions of various Python packages.
@@ -397,7 +508,11 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetInventoryInput,
+        output=GetInventoryResult,
+        fastapi={"methods": ["GET"]},
+    )
     def get_inventory(self) -> Result:
         """
         Retrieve the inventory of the FastAPI worker.
@@ -410,7 +525,11 @@ class FastAPIWorker(NFPWorker):
             task=f"{self.name}:get_inventory",
         )
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetOpenapiSchemaInput,
+        output=GetOpenapiSchemaResult,
+        fastapi={"methods": ["GET"]},
+    )
     def get_openapi_schema(self, paths: bool = False) -> Result:
         """
         Generates and returns the OpenAPI schema for the FastAPI application.
@@ -434,7 +553,7 @@ class FastAPIWorker(NFPWorker):
                 task=f"{self.name}:get_openapi_schema",
             )
 
-    @Task(fastapi=False, mcp=False)
+    @Task(input=BearerTokenStoreInput, output=BoolResult, fastapi=False, mcp=False)
     def bearer_token_store(
         self, job: Job, username: str, token: str, expire: int = None
     ) -> Result:
@@ -471,7 +590,7 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_store", result=True)
 
-    @Task(fastapi=False, mcp=False)
+    @Task(input=BearerTokenDeleteInput, output=BoolResult, fastapi=False, mcp=False)
     def bearer_token_delete(
         self, job: Job, username: str = None, token: str = None
     ) -> Result:
@@ -515,7 +634,12 @@ class FastAPIWorker(NFPWorker):
 
         return Result(task=f"{self.name}:bearer_token_delete", result=True)
 
-    @Task(fastapi=False, mcp=False)
+    @Task(
+        input=BearerTokenListInput,
+        output=BearerTokenListResult,
+        fastapi=False,
+        mcp=False,
+    )
     def bearer_token_list(self, job: Job, username: str = None) -> Result:
         """
         Retrieves a list of bearer tokens from the cache, optionally filtered by username.
@@ -573,7 +697,7 @@ class FastAPIWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi=False, mcp=False)
+    @Task(input=BearerTokenCheckInput, output=BoolResult, fastapi=False, mcp=False)
     def bearer_token_check(self, token: str, job: Job) -> Result:
         """
         Checks if the provided bearer token is present in the cache and still active.
@@ -590,7 +714,7 @@ class FastAPIWorker(NFPWorker):
             task=f"{self.name}:bearer_token_check", result=cache_key in self.cache
         )
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]})
     def discover(self, job, service: str = "all", progress: bool = True) -> Result:
         """
         Discovers available services tasks and auto-generate API endpoints for them.

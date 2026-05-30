@@ -1,29 +1,18 @@
 import builtins
 import logging
-from typing import Optional
 
 from picle.models import Outputters
-from pydantic import (
-    Field,
-    StrictBool,
-    StrictStr,
-)
+
+from norfab.workers.fastapi_worker.fastapi_worker import DiscoverInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 
 log = logging.getLogger(__name__)
 
 
-class Discover(ClientRunJobArgs):
-    service: StrictStr = Field(
-        "all", description="Service name to discover tasks and generate API for"
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
-
+class Discover(
+    ClientRunJobArgs, DiscoverInput, use_enum_values=True, populate_by_name=True
+):
     @staticmethod
     @listen_events
     def run(uuid: str, *args: object, **kwargs: object):

@@ -1,25 +1,23 @@
 import builtins
-from typing import Optional
+from typing import Union
 
 from picle.models import Outputters
 from pydantic import (
     Field,
-    StrictBool,
     StrictStr,
 )
+
+from norfab.workers.workflow_worker.workflow_worker import RunInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 
 
-class WorkflowRunShell(ClientRunJobArgs):
-    workflow: StrictStr = Field(
+class WorkflowRunShell(
+    ClientRunJobArgs, RunInput, use_enum_values=True, populate_by_name=True
+):
+    workflow: Union[None, StrictStr] = Field(
         None,
         description="Workflow to run",
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
     )
 
     class PicleConfig:

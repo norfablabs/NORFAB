@@ -1,13 +1,20 @@
 import builtins
 import logging
+from typing import Union
 from uuid import uuid4  # random uuid
 
 from picle.models import Outputters
 from pydantic import (
     BaseModel,
     Field,
-    StrictInt,
     StrictStr,
+)
+
+from norfab.workers.fastapi_worker.fastapi_worker import (
+    BearerTokenCheckInput,
+    BearerTokenDeleteInput,
+    BearerTokenListInput,
+    BearerTokenStoreInput,
 )
 
 from ..common import ClientRunJobArgs, log_error_or_result
@@ -15,12 +22,15 @@ from ..common import ClientRunJobArgs, log_error_or_result
 log = logging.getLogger(__name__)
 
 
-class CreateAuthToken(ClientRunJobArgs):
-    token: StrictStr = Field(
+class CreateAuthToken(
+    ClientRunJobArgs,
+    BearerTokenStoreInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    token: Union[None, StrictStr] = Field(
         None, description="Token string to store, autogenerate if not given"
     )
-    username: StrictStr = Field(..., description="Name of the user to store token for")
-    expire: StrictInt = Field(None, description="Seconds before token expire")
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -51,9 +61,12 @@ class CreateAuthToken(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class ListAuthToken(ClientRunJobArgs):
-    username: StrictStr = Field(None, description="Name of the user to list tokens for")
-
+class ListAuthToken(
+    ClientRunJobArgs,
+    BearerTokenListInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
@@ -87,12 +100,12 @@ class ListAuthToken(ClientRunJobArgs):
         outputter_kwargs = {"sortby": "worker"}
 
 
-class DeleteAuthToken(ClientRunJobArgs):
-    username: StrictStr = Field(
-        None, description="Name of the user to delete tokens for"
-    )
-    token: StrictStr = Field(None, description="Token string to delete")
-
+class DeleteAuthToken(
+    ClientRunJobArgs,
+    BearerTokenDeleteInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
@@ -119,9 +132,12 @@ class DeleteAuthToken(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
-class CheckAuthToken(ClientRunJobArgs):
-    token: StrictStr = Field(..., description="Token string to check")
-
+class CheckAuthToken(
+    ClientRunJobArgs,
+    BearerTokenCheckInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT

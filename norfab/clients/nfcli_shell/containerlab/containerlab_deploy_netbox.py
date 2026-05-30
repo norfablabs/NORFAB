@@ -1,17 +1,19 @@
 import builtins
 import logging
-from typing import Optional
+from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     Field,
-    StrictBool,
+    StrictInt,
+    StrictStr,
 )
 from rich.console import Console
 
-from ..common import listen_events, log_error_or_result
+from norfab.workers.containerlab_worker.containerlab_worker import DeployNetboxInput
+
+from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from ..netbox.netbox_picle_shell_get_containerlab_inventory import (
-    GetContainerlabInventoryCommand,
     NetboxDeviceFilters,
 )
 
@@ -52,20 +54,30 @@ class DeployNetboxDeviceFilters(NetboxDeviceFilters):
         pipe = PipeFunctionsModel
 
 
-class DeployNetboxCommand(GetContainerlabInventoryCommand):
-    reconfigure: StrictBool = Field(
-        False,
-        description="Destroy the lab and then re-deploy it.",
-        json_schema_extra={"presence": True},
-    )
+class DeployNetboxCommand(
+    ClientRunJobArgs,
+    DeployNetboxInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     filters: DeployNetboxDeviceFilters = Field(
         None, description="Netbox device filters to generate lab inventory for"
     )
-    dry_run: Optional[StrictBool] = Field(
+    devices: Union[List[StrictStr], StrictStr] = Field(
         None,
-        description="Do not deploy, only fetch inventory from Netbox",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
+        description="List of devices to generate lab inventory for",
+    )
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        "any", description="Filter worker to target"
+    )
+    instance: StrictStr = Field(
+        None,
+        description="Name of Netbox instance to pull inventory from",
+        alias="netbox-instance",
+    )
+    ports: List[StrictInt] = Field(
+        [12000, 15000],
+        description="Range of TCP/UDP ports to use for nodes",
     )
 
     @staticmethod

@@ -6,9 +6,9 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
-    StrictStr,
 )
+
+from norfab.workers.fastmcp_worker.fastmcp_worker import GetToolsInput
 
 from ..common import ClientRunJobArgs, log_error_or_result
 from .fastmcp_picle_shell_discover import Discover
@@ -75,21 +75,9 @@ class FastMCPShowStatusModel(ClientRunJobArgs):
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
-class FastMCPShowToolsModel(ClientRunJobArgs):
-    brief: StrictBool = Field(
-        None,
-        description="show tools names only",
-        json_schema_extra={"presence": True},
-    )
-    service: StrictStr = Field(
-        None,
-        description="filter tools by service name",
-    )
-    name: StrictStr = Field(
-        None,
-        description="filter tools by name using glob pattern",
-    )
-
+class FastMCPShowToolsModel(
+    ClientRunJobArgs, GetToolsInput, use_enum_values=True, populate_by_name=True
+):
     class PicleConfig:
         outputter = Outputters.outputter_nested
         pipe = PipeFunctionsModel

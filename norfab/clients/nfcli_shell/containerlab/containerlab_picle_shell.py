@@ -1,16 +1,24 @@
 import builtins
 import logging
 import os
-from typing import Any, List, Optional, Union
+from typing import Any
 
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
-    StrictStr,
 )
 from rich.console import Console
+
+from norfab.workers.containerlab_worker.containerlab_worker import (
+    DeployInput,
+    DestroyLabInput,
+    GetNornirInventoryInput,
+    GetRunningLabsInput,
+    InspectInput,
+    RestartLabInput,
+    SaveInput,
+)
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .containerlab_deploy_netbox import DeployNetboxCommand
@@ -25,24 +33,9 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-class DeployCommand(ClientRunJobArgs):
-    topology: StrictStr = Field(..., description="URL to topology file to deploy")
-    reconfigure: StrictBool = Field(
-        False,
-        description="Destroy the lab and then re-deploy it.",
-        json_schema_extra={"presence": True},
-    )
-    node_filter: StrictStr = Field(
-        None,
-        description="Comma-separated list of node names to deploy",
-        alias="node-filter",
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
-
+class DeployCommand(
+    ClientRunJobArgs, DeployInput, use_enum_values=True, populate_by_name=True
+):
     @staticmethod
     def source_topology() -> list:
         return ClientRunJobArgs.walk_norfab_files()
@@ -82,16 +75,9 @@ class DeployCommand(ClientRunJobArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class DestroyCommand(ClientRunJobArgs):
-    lab_name: StrictStr = Field(
-        None, description="Lab name to destroy", alias="lab-name"
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
-
+class DestroyCommand(
+    ClientRunJobArgs, DestroyLabInput, use_enum_values=True, populate_by_name=True
+):
     @staticmethod
     def source_lab_name() -> list:
         NFCLIENT = builtins.NFCLIENT
@@ -136,16 +122,9 @@ class DestroyCommand(ClientRunJobArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class RestartCommand(ClientRunJobArgs):
-    lab_name: StrictStr = Field(
-        None, description="Lab name to restart", alias="lab-name"
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
-
+class RestartCommand(
+    ClientRunJobArgs, RestartLabInput, use_enum_values=True, populate_by_name=True
+):
     @staticmethod
     def source_lab_name() -> list:
         NFCLIENT = builtins.NFCLIENT
@@ -190,16 +169,9 @@ class RestartCommand(ClientRunJobArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class SaveCommand(ClientRunJobArgs):
-    lab_name: StrictStr = Field(
-        None, description="Lab name to save configurations for", alias="lab-name"
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
-
+class SaveCommand(
+    ClientRunJobArgs, SaveInput, use_enum_values=True, populate_by_name=True
+):
     @staticmethod
     def source_lab_name() -> list:
         NFCLIENT = builtins.NFCLIENT
@@ -244,20 +216,12 @@ class SaveCommand(ClientRunJobArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class GetNornirInventoryCommand(ClientRunJobArgs):
-    lab_name: StrictStr = Field(
-        None, description="Lab name to get Nornir inventory for", alias="lab-name"
-    )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
-    groups: Union[StrictStr, List[StrictStr]] = Field(
-        None,
-        description="List of groups to include in host's inventory",
-    )
-
+class GetNornirInventoryCommand(
+    ClientRunJobArgs,
+    GetNornirInventoryInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     @staticmethod
     def source_lab_name() -> list:
         NFCLIENT = builtins.NFCLIENT
@@ -309,16 +273,9 @@ class GetNornirInventoryCommand(ClientRunJobArgs):
 # ---------------------------------------------------------------------------------------------
 
 
-class ShowContainers(ClientRunJobArgs):
-    details: StrictBool = Field(
-        None,
-        description="Show container labs details",
-        json_schema_extra={"presence": True},
-    )
-    lab_name: StrictStr = Field(
-        None, description="Show container for given lab only", alias="lab-name"
-    )
-
+class ShowContainers(
+    ClientRunJobArgs, InspectInput, use_enum_values=True, populate_by_name=True
+):
     @staticmethod
     def source_lab_name() -> list:
         NFCLIENT = builtins.NFCLIENT
@@ -367,7 +324,9 @@ class ShowContainers(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
 
-class ShowRunningLabs(ClientRunJobArgs):
+class ShowRunningLabs(
+    ClientRunJobArgs, GetRunningLabsInput, use_enum_values=True, populate_by_name=True
+):
     @staticmethod
     def run(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT

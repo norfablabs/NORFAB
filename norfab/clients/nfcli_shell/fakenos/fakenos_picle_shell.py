@@ -8,7 +8,7 @@ from pydantic import (
     StrictBool,
 )
 
-from norfab.workers.fakenos_worker.fakenos_models import (
+from norfab.workers.fakenos_worker.fakenos_worker import (
     FakeNOSListNetworksInput,
     FakeNOSRestartInput,
     FakeNOSStartInput,
@@ -48,7 +48,9 @@ class FakeNOSShowInventoryModel(BaseModel):
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
-class FakeNOSShowNetworksCommand(FakeNOSListNetworksInput):
+class FakeNOSShowNetworksCommand(
+    FakeNOSListNetworksInput, use_enum_values=True, populate_by_name=True
+):
     details: StrictBool = Field(
         False, description="show network details", json_schema_extra={"presence": True}
     )
@@ -123,7 +125,9 @@ class FakeNOSShowCommands(BaseModel):
 # ---------------------------------------------------------------------------------------------
 
 
-class FakeNOSStartCommand(ClientRunJobArgs, FakeNOSStartInput):
+class FakeNOSStartCommand(
+    ClientRunJobArgs, FakeNOSStartInput, use_enum_values=True, populate_by_name=True
+):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -156,7 +160,9 @@ class FakeNOSStartCommand(ClientRunJobArgs, FakeNOSStartInput):
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
-class FakeNOSStopCommand(ClientRunJobArgs, FakeNOSStopInput):
+class FakeNOSStopCommand(
+    ClientRunJobArgs, FakeNOSStopInput, use_enum_values=True, populate_by_name=True
+):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -194,7 +200,9 @@ class FakeNOSStopCommand(ClientRunJobArgs, FakeNOSStopInput):
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
-class FakeNOSRestartCommand(ClientRunJobArgs, FakeNOSRestartInput):
+class FakeNOSRestartCommand(
+    ClientRunJobArgs, FakeNOSRestartInput, use_enum_values=True, populate_by_name=True
+):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -232,7 +240,12 @@ class FakeNOSRestartCommand(ClientRunJobArgs, FakeNOSRestartInput):
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
-class GetFakeNOSNornirInventoryCommand(ClientRunJobArgs, GetNornirInventoryInput):
+class GetFakeNOSNornirInventoryCommand(
+    ClientRunJobArgs,
+    GetNornirInventoryInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
 
     class PicleConfig:
         outputter = Outputters.outputter_nested

@@ -6,8 +6,9 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
 )
+
+from norfab.workers.fastapi_worker.fastapi_worker import GetOpenapiSchemaInput
 
 from ..common import ClientRunJobArgs, log_error_or_result
 from .fastapi_picle_shell_auth import FastAPIAuthCommandsModel
@@ -21,13 +22,12 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-class FastAPIShowOpenAPISchema(ClientRunJobArgs):
-    paths: StrictBool = Field(
-        None,
-        description="show FastAPI app paths only",
-        json_schema_extra={"presence": True},
-    )
-
+class FastAPIShowOpenAPISchema(
+    ClientRunJobArgs,
+    GetOpenapiSchemaInput,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     class PicleConfig:
         outputter = Outputters.outputter_json
         pipe = PipeFunctionsModel

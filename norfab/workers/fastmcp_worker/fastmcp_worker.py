@@ -6,11 +6,12 @@ import sys
 import threading
 import time
 from fnmatch import fnmatch
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from diskcache import FanoutCache
 from mcp import types
 from mcp.server.fastmcp import FastMCP
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 
 from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
@@ -18,6 +19,92 @@ from norfab.models import Result
 SERVICE = "fastmcp"
 
 log = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------
+# FASTMCP TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetVersionResult(Result):
+    result: dict[StrictStr, StrictStr] = Field(
+        {},
+        description="Installed package versions keyed by package name",
+    )
+
+
+class GetInventoryInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetInventoryResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="FastMCP worker inventory data",
+    )
+
+
+class GetToolsInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    brief: StrictBool = Field(
+        False,
+        description="Return only tool names",
+        json_schema_extra={"presence": True},
+    )
+    service: StrictStr = Field(
+        "all",
+        description="Service name to filter tools by",
+    )
+    name: StrictStr = Field(
+        "*",
+        description="Glob pattern to filter tool names",
+    )
+
+
+class GetToolsResult(Result):
+    result: Union[list[StrictStr], dict[StrictStr, dict[StrictStr, Any]]] = Field(
+        {},
+        description="Tool names or tool definitions keyed by tool name",
+    )
+
+
+class DiscoverInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    service: StrictStr = Field(
+        "all",
+        description="Service name to discover tasks for",
+    )
+    progress: StrictBool = Field(
+        True,
+        description="Emit progress events while discovering tasks",
+        json_schema_extra={"presence": True},
+    )
+
+
+class DiscoverResult(Result):
+    result: dict[StrictStr, dict[StrictStr, Any]] = Field(
+        {},
+        description="Discovered MCP tools keyed by service name",
+    )
+
+
+class GetStatusInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetStatusPayload(BaseModel):
+    name: StrictStr = Field(None, description="MCP server name")
+    url: StrictStr = Field(None, description="MCP server URL")
+    tools_count: StrictInt = Field(None, description="Number of registered tools")
+
+
+class GetStatusResult(Result):
+    result: GetStatusPayload = Field(
+        {},
+        description="FastMCP server status",
+    )
 
 
 def is_task_allowed_by_policy(
@@ -198,7 +285,7 @@ class FastMCPWorker(NFPWorker):
     def worker_exit(self) -> None:
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Retrieves version information for key libraries and the current Python environment.
@@ -226,7 +313,11 @@ class FastMCPWorker(NFPWorker):
 
         return Result(task=f"{self.name}:get_version", result=libs)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetInventoryInput,
+        output=GetInventoryResult,
+        fastapi={"methods": ["GET"]},
+    )
     def get_inventory(self) -> Result:
         """
         Retrieves the current inventory from the FastMCP worker.
@@ -239,7 +330,7 @@ class FastMCPWorker(NFPWorker):
             task=f"{self.name}:get_inventory",
         )
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(input=GetToolsInput, output=GetToolsResult, fastapi={"methods": ["GET"]})
     def get_tools(
         self, brief: bool = False, service: str = "all", name: str = "*"
     ) -> Result:
@@ -279,7 +370,7 @@ class FastMCPWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]})
     def discover(self, job, service: str = "all", progress: bool = True) -> Result:
         """
         Discovers available services tasks and auto-generate tools for them.
@@ -296,7 +387,7 @@ class FastMCPWorker(NFPWorker):
 
         return ret
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(input=GetStatusInput, output=GetStatusResult, fastapi={"methods": ["GET"]})
     def get_status(self) -> Result:
         """
         Retrieves the current status of the application, including its name,

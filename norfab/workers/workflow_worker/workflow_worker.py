@@ -5,6 +5,7 @@ import sys
 from typing import Any, Dict, Tuple, Union
 
 import yaml
+from pydantic import BaseModel, Field, StrictStr
 
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
@@ -12,6 +13,47 @@ from norfab.models import Result
 SERVICE = "workflow"
 
 log = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------
+# WORKFLOW TASKS MODELS
+# --------------------------------------------------------------------------
+
+
+class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetVersionResult(Result):
+    result: Dict[StrictStr, StrictStr] = Field(
+        {},
+        description="Installed package versions keyed by package name",
+    )
+
+
+class GetInventoryInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class GetInventoryResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="Workflow worker inventory data",
+    )
+
+
+class RunInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    workflow: Union[StrictStr, Dict[StrictStr, Any]] = Field(
+        ...,
+        description="Workflow definition or URL to a YAML workflow file",
+    )
+
+
+class RunResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="Workflow execution results keyed by workflow name",
+    )
 
 
 class WorkflowWorker(NFPWorker):
@@ -59,7 +101,7 @@ class WorkflowWorker(NFPWorker):
     def worker_exit(self) -> None:
         pass
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
     def get_version(self) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
@@ -86,7 +128,11 @@ class WorkflowWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetInventoryInput,
+        output=GetInventoryResult,
+        fastapi={"methods": ["GET"]},
+    )
     def get_inventory(self) -> Result:
         """
         NorFab task to retrieve the workflow's worker inventory.
@@ -251,7 +297,7 @@ class WorkflowWorker(NFPWorker):
                     return True  # stop the workflow since a failure occurred
         return False
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(input=RunInput, output=RunResult, fastapi={"methods": ["POST"]})
     def run(self, job: Job, workflow: Union[str, Dict]) -> Result:
         """
         Executes a workflow defined by a dictionary.

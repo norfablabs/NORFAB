@@ -23,6 +23,10 @@ from rich.console import Console
 
 from norfab.core.nfapi import NorFab
 from norfab.models.norfab_configuration import NorFabInventory
+from norfab.workers.filesharing_worker.filesharing_worker import (
+    FileDetailsInput,
+    ListFilesInput,
+)
 
 from .agent import agent_picle_shell
 from .client_agent import client_agent_picle_shell
@@ -193,7 +197,7 @@ class ShowCommandsModel(BaseModel):
 # ---------------------------------------------------------------------------------------------
 
 
-class ListFilesModel(BaseModel):
+class ListFilesModel(ListFilesInput, use_enum_values=True, populate_by_name=True):
     url: StrictStr = Field("nf://", description="Directory to list content for")
 
     @staticmethod
@@ -253,7 +257,7 @@ class CopyFileModel(BaseModel):
         outputter = Outputters.outputter_nested
 
 
-class ListFileDetails(BaseModel):
+class ListFileDetails(FileDetailsInput, use_enum_values=True, populate_by_name=True):
     url: StrictStr = Field("nf://", description="File location")
 
     @staticmethod
