@@ -296,7 +296,20 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
                 log.error(f"{name} - Plugin load failed, error: {e}", exc_info=True)
         return ret
 
-    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetVersionInput,
+        output=GetVersionResult,
+        fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_version(self) -> Result:
         """
         Return version information for key packages and the Python runtime.
@@ -326,6 +339,15 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         input=GetInventoryInput,
         output=GetInventoryResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self) -> Result:
         """
@@ -340,6 +362,15 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         input=FakeNOSStopInput,
         output=FakeNOSNetworkActionResult,
         fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Stop FakeNOS Network",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def stop(self, job: Job, network: Union[str, None] = None) -> Result:
         """
@@ -377,6 +408,15 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         input=FakeNOSStartInput,
         output=FakeNOSNetworkActionResult,
         fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Start FakeNOS Network",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def start(
         self, job: Job, network: str, inventory: Union[str, dict, None] = None
@@ -442,6 +482,15 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         input=FakeNOSRestartInput,
         output=FakeNOSNetworkActionResult,
         fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Restart FakeNOS Network",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": False,
+            }
+        },
     )
     def restart(self, job: Job, network: str) -> Result:
         """
@@ -470,6 +519,15 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         input=FakeNOSListNetworksInput,
         output=FakeNOSInspectNetworksResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Inspect FakeNOS Networks",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def inspect_networks(
         self, job: Job, network: Union[str, None] = None, details: bool = True

@@ -771,6 +771,15 @@ class NornirWorker(
         fastapi={"methods": ["GET"]},
         input=GetVersionInput,
         output=GetVersionResult,
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_version(self) -> Result:
         """
@@ -835,6 +844,15 @@ class NornirWorker(
         fastapi={"methods": ["GET"]},
         input=GetWatchdogConnectionsInput,
         output=GetWatchdogConnectionsResult,
+        mcp={
+            "annotations": {
+                "title": "Get Watchdog Connections",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_watchdog_connections(self) -> Result:
         """
@@ -850,6 +868,15 @@ class NornirWorker(
         fastapi={"methods": ["POST"]},
         input=RefreshNornirInput,
         output=RefreshNornirResult,
+        mcp={
+            "annotations": {
+                "title": "Refresh Nornir Inventory",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def refresh_nornir(
         self,

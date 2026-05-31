@@ -303,6 +303,15 @@ class NetboxWorker(
         input=GetInventoryInput,
         output=GetInventoryResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self) -> Result:
         """
@@ -319,6 +328,15 @@ class NetboxWorker(
         input=GetVersionInput,
         output=GetVersionResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_version(self, **kwargs: Any) -> Result:
         """
@@ -350,6 +368,15 @@ class NetboxWorker(
         input=GetNetboxStatusInput,
         output=GetNetboxStatusResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get NetBox Status",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_netbox_status(
         self, job: Union[None, Job] = None, instance: Union[None, str] = None
@@ -394,6 +421,15 @@ class NetboxWorker(
         input=GetCompatibilityInput,
         output=GetCompatibilityResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get NetBox Compatibility",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_compatibility(self, job: Job) -> Result:
         """
@@ -849,6 +885,15 @@ class NetboxWorker(
         input=CacheListInput,
         output=CacheListResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "List NetBox Cache",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def cache_list(self, keys: str = "*", details: bool = False) -> Result:
         """
@@ -888,6 +933,15 @@ class NetboxWorker(
         fastapi={
             "methods": ["DELETE"],
             "schema": NetboxFastApiArgs.model_json_schema(),
+        },
+        mcp={
+            "annotations": {
+                "title": "Clear NetBox Cache",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
         },
     )
     def cache_clear(self, job: Job, key: str = None, keys: str = None) -> Result:
@@ -948,6 +1002,15 @@ class NetboxWorker(
         input=CacheGetInput,
         output=CacheGetResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get NetBox Cache",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def cache_get(
         self, job: Job, key: str = None, keys: str = None, raise_missing: bool = False
@@ -992,6 +1055,15 @@ class NetboxWorker(
         input=RestInput,
         output=RestResult,
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Call NetBox REST API",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def rest(
         self,

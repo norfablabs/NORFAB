@@ -34,7 +34,20 @@ class TaskResult(NornirSerializedResult):
 
 
 class TaskTask:
-    @Task(fastapi={"methods": ["POST"]}, input=TaskInput, output=TaskResult)
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=TaskInput,
+        output=TaskResult,
+        mcp={
+            "annotations": {
+                "title": "Run Nornir Task Plugin",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
     def task(self, job: Job, plugin: str, **kwargs: Any) -> Result:
         """
         Execute a Nornir task plugin.

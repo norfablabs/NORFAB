@@ -248,6 +248,15 @@ class InventoryTasks:
         fastapi={"methods": ["POST"]},
         input=NornirInventoryLoadNetboxInput,
         output=NornirInventoryLoadNetboxResult,
+        mcp={
+            "annotations": {
+                "title": "Load Nornir Inventory from NetBox",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def nornir_inventory_load_netbox(
         self,
@@ -324,6 +333,15 @@ class InventoryTasks:
         fastapi={"methods": ["POST"]},
         input=NornirInventoryLoadContainerlabInput,
         output=NornirInventoryLoadContainerlabResult,
+        mcp={
+            "annotations": {
+                "title": "Load Nornir Inventory from Containerlab",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def nornir_inventory_load_containerlab(
         self,
@@ -416,6 +434,15 @@ class InventoryTasks:
         fastapi={"methods": ["GET"]},
         input=GetInventoryInput,
         output=GetInventoryResult,
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self, **kwargs: dict) -> Result:
         """
@@ -437,6 +464,15 @@ class InventoryTasks:
         fastapi={"methods": ["GET"]},
         input=GetNornirHostsInput,
         output=GetNornirHostsResult,
+        mcp={
+            "annotations": {
+                "title": "Get Nornir Hosts",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_nornir_hosts(self, details: bool = False, **kwargs: dict) -> Result:
         """
@@ -472,6 +508,15 @@ class InventoryTasks:
         fastapi={"methods": ["POST"]},
         input=RuntimeInventoryInput,
         output=RuntimeInventoryResult,
+        mcp={
+            "annotations": {
+                "title": "Update Runtime Inventory",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": False,
+            }
+        },
     )
     def runtime_inventory(self, job: Job, action: str, **kwargs: Any) -> Result:
         """

@@ -101,7 +101,18 @@ class WorkflowWorker(NFPWorker):
     def worker_exit(self) -> None:
         pass
 
-    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_version(self) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
@@ -132,6 +143,15 @@ class WorkflowWorker(NFPWorker):
         input=GetInventoryInput,
         output=GetInventoryResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self) -> Result:
         """
@@ -297,7 +317,18 @@ class WorkflowWorker(NFPWorker):
                     return True  # stop the workflow since a failure occurred
         return False
 
-    @Task(input=RunInput, output=RunResult, fastapi={"methods": ["POST"]})
+    @Task(
+        input=RunInput, output=RunResult, fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Run Workflow",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
     def run(self, job: Job, workflow: Union[str, Dict]) -> Result:
         """
         Executes a workflow defined by a dictionary.

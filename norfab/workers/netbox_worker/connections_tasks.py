@@ -219,6 +219,15 @@ class NetboxConnectionsTasks:
         input=GetConnectionsInput,
         output=GetConnectionsResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get Connections",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_connections(
         self,

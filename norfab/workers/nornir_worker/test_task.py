@@ -69,7 +69,20 @@ class TestResult(Result):
 
 
 class TestTask:
-    @Task(fastapi={"methods": ["POST"]}, input=TestInput, output=TestResult)
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=TestInput,
+        output=TestResult,
+        mcp={
+            "annotations": {
+                "title": "Run Nornir Tests",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
     def test(
         self,
         job: Job,

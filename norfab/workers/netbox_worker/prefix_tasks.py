@@ -79,6 +79,15 @@ class NetboxPrefixTasks:
         input=CreatePrefixInput,
         output=CreatePrefixResult,
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Create Prefix",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def create_prefix(
         self,

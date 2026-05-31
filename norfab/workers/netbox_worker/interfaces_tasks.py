@@ -553,6 +553,15 @@ class NetboxInterfacesTasks:
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=GetInterfacesInput,
         output=GetInterfacesResult,
+        mcp={
+            "annotations": {
+                "title": "Get Interfaces",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_interfaces(
         self,
@@ -775,6 +784,15 @@ class NetboxInterfacesTasks:
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateDeviceInterfacesInput,
         output=CreateDeviceInterfacesResult,
+        mcp={
+            "annotations": {
+                "title": "Create Device Interfaces",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def create_device_interfaces(
         self,
@@ -917,6 +935,15 @@ class NetboxInterfacesTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=UpdateInterfacesDescriptionInput,
         output=UpdateInterfacesDescriptionResult,
+        mcp={
+            "annotations": {
+                "title": "Update Interface Descriptions",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def update_interfaces_description(
         self,
@@ -1071,6 +1098,15 @@ class NetboxInterfacesTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncDeviceInterfacesInput,
         output=SyncDeviceInterfacesResult,
+        mcp={
+            "annotations": {
+                "title": "Sync Device Interfaces",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def sync_device_interfaces(
         self,
@@ -1681,6 +1717,15 @@ class NetboxInterfacesTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncMacAddressesInput,
         output=SyncMacAddressesResult,
+        mcp={
+            "annotations": {
+                "title": "Sync MAC Addresses",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def sync_mac_addresses(
         self,

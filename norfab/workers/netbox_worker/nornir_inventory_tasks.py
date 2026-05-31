@@ -75,6 +75,15 @@ class NetboxNornirInventoryTasks:
         input=GetNornirInventoryInput,
         output=GetNornirInventoryResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get Nornir Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_nornir_inventory(
         self,

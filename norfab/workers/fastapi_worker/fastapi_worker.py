@@ -478,7 +478,18 @@ class FastAPIWorker(NFPWorker):
         """
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_version(self) -> Result:
         """
         Produce a report of the versions of various Python packages.
@@ -512,6 +523,15 @@ class FastAPIWorker(NFPWorker):
         input=GetInventoryInput,
         output=GetInventoryResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self) -> Result:
         """
@@ -529,6 +549,15 @@ class FastAPIWorker(NFPWorker):
         input=GetOpenapiSchemaInput,
         output=GetOpenapiSchemaResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get OpenAPI Schema",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_openapi_schema(self, paths: bool = False) -> Result:
         """
@@ -714,7 +743,18 @@ class FastAPIWorker(NFPWorker):
             task=f"{self.name}:bearer_token_check", result=cache_key in self.cache
         )
 
-    @Task(input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]})
+    @Task(
+        input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Discover FastAPI Tasks",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def discover(self, job, service: str = "all", progress: bool = True) -> Result:
         """
         Discovers available services tasks and auto-generate API endpoints for them.

@@ -243,6 +243,15 @@ class NetboxCrudTasks:
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudListObjectsArgs,
         output=CrudListObjectsResult,
+        mcp={
+            "annotations": {
+                "title": "List NetBox Object Types",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def crud_list_objects(
         self,
@@ -346,6 +355,15 @@ class NetboxCrudTasks:
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudSearchArgs,
         output=CrudSearchResult,
+        mcp={
+            "annotations": {
+                "title": "Search NetBox Objects",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def crud_search(
         self,
@@ -418,6 +436,15 @@ class NetboxCrudTasks:
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudReadArgs,
         output=CrudReadResult,
+        mcp={
+            "annotations": {
+                "title": "Read NetBox Object",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def crud_read(
         self,
@@ -522,6 +549,15 @@ class NetboxCrudTasks:
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudCreateArgs,
         output=CrudCreateResult,
+        mcp={
+            "annotations": {
+                "title": "Create NetBox Object",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def crud_create(
         self,
@@ -595,6 +631,15 @@ class NetboxCrudTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudUpdateArgs,
         output=CrudUpdateResult,
+        mcp={
+            "annotations": {
+                "title": "Update NetBox Object",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def crud_update(
         self,
@@ -704,6 +749,15 @@ class NetboxCrudTasks:
         },
         input=CrudDeleteArgs,
         output=CrudDeleteResult,
+        mcp={
+            "annotations": {
+                "title": "Delete NetBox Object",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def crud_delete(
         self,
@@ -784,6 +838,15 @@ class NetboxCrudTasks:
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CrudChangelogArgs,
         output=CrudChangelogResult,
+        mcp={
+            "annotations": {
+                "title": "Get NetBox Changelogs",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def crud_get_changelogs(
         self,

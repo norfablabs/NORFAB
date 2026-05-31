@@ -105,7 +105,20 @@ class FileCopyResult(NornirSerializedResult):
 
 
 class FileCopyTask:
-    @Task(fastapi={"methods": ["POST"]}, input=FileCopyInput, output=FileCopyResult)
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=FileCopyInput,
+        output=FileCopyResult,
+        mcp={
+            "annotations": {
+                "title": "Copy File to Devices",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
     def file_copy(
         self,
         job: Job,

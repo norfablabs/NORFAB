@@ -218,6 +218,15 @@ class NetboxGraphqlTasks:
         input=NetboxGraphqlInput,
         output=NetboxGraphqlResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Query NetBox GraphQL",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def netbox_graphql(
         self,
@@ -359,6 +368,15 @@ class NetboxGraphqlTasks:
         input=GraphqlInput,
         output=GraphqlResult,
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Query GraphQL",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def graphql(
         self,

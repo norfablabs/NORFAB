@@ -43,6 +43,15 @@ class NetboxBranchTasks:
             "methods": ["DELETE"],
             "schema": NetboxFastApiArgs.model_json_schema(),
         },
+        mcp={
+            "annotations": {
+                "title": "Delete Branch",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def delete_branch(
         self,

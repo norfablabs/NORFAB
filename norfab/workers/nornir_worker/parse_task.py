@@ -154,6 +154,15 @@ class ParseTask:
         fastapi={"methods": ["POST"]},
         input=ParseNapalmInput,
         output=ParseNapalmResult,
+        mcp={
+            "annotations": {
+                "title": "Parse NAPALM Output",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def parse_napalm(
         self,
@@ -191,6 +200,15 @@ class ParseTask:
         fastapi={"methods": ["POST"]},
         input=ParseTextfsmInput,
         output=ParseTextfsmResult,
+        mcp={
+            "annotations": {
+                "title": "Parse TextFSM Output",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def parse_textfsm(
         self,
@@ -252,6 +270,15 @@ class ParseTask:
         fastapi={"methods": ["POST"]},
         input=ParseTTPInput,
         output=ParseTTPResult,
+        mcp={
+            "annotations": {
+                "title": "Parse TTP Output",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def parse_ttp(
         self,

@@ -256,6 +256,15 @@ class NetboxIpTasks:
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateIpInput,
         output=CreateIpResult,
+        mcp={
+            "annotations": {
+                "title": "Create IP Address",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def create_ip(
         self,
@@ -656,6 +665,15 @@ class NetboxIpTasks:
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateIpBulkInput,
         output=CreateIpBulkResult,
+        mcp={
+            "annotations": {
+                "title": "Create IP Addresses Bulk",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def create_ip_bulk(
         self,
@@ -782,6 +800,15 @@ class NetboxIpTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncDeviceIpInput,
         output=SyncDeviceIpResult,
+        mcp={
+            "annotations": {
+                "title": "Sync Device IP Addresses",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def sync_device_ip(
         self,

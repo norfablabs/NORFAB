@@ -169,6 +169,15 @@ class NetboxDevicesTasks:
         input=GetDevicesInput,
         output=GetDevicesResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get Devices",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_devices(
         self,
@@ -298,6 +307,15 @@ class NetboxDevicesTasks:
         input=SyncDeviceFactsInput,
         output=SyncDeviceFactsResult,
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Sync Device Facts",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def sync_device_facts(
         self,
@@ -486,6 +504,15 @@ class NetboxDevicesTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CheckDeviceSyncInput,
         output=CheckDeviceSyncResult,
+        mcp={
+            "annotations": {
+                "title": "Check Device Sync",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def check_device_sync(
         self,
@@ -675,6 +702,15 @@ class NetboxDevicesTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncAllInput,
         output=SyncAllResult,
+        mcp={
+            "annotations": {
+                "title": "Sync All Device Data",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def sync_all(
         self,

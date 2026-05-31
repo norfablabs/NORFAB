@@ -37,6 +37,15 @@ class FakeNOSNornirInventoryTasks:
         input=GetNornirInventoryInput,
         output=GetNornirInventoryResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Nornir Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_nornir_inventory(
         self,

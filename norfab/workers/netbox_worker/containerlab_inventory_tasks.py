@@ -79,6 +79,15 @@ class NetboxContainerlabInventoryTasks:
         input=GetContainerlabInventoryInput,
         output=GetContainerlabInventoryResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get Containerlab Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_containerlab_inventory(
         self,

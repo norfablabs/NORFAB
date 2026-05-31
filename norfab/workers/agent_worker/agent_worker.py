@@ -210,7 +210,18 @@ class AgentWorker(NFPWorker):
             log.error(f"Unsupported agent type '{agent}'")
             return None
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_version(self) -> Result:
         """
         Generate a report of the versions of specific Python packages and system information.
@@ -241,7 +252,18 @@ class AgentWorker(NFPWorker):
 
         return Result(result=libs)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_inventory(self) -> Result:
         """
         NorFab task to retrieve the agent's inventory.
@@ -251,7 +273,18 @@ class AgentWorker(NFPWorker):
         """
         return Result(result=self.agent_inventory)
 
-    @Task(fastapi={"methods": ["GET"]})
+    @Task(
+        fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Status",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_status(self) -> Result:
         """
         NorFab Task that retrieves the status of the agent worker.
@@ -261,7 +294,18 @@ class AgentWorker(NFPWorker):
         """
         return Result(result="OK")
 
-    @Task(fastapi={"methods": ["POST"]})
+    @Task(
+        fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Invoke Agent",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
     def invoke(
         self,
         job: Job,

@@ -184,6 +184,15 @@ class FileSharingWorker(NFPWorker):
         output=GetVersionResult,
         fastapi={"methods": ["GET"]},
         agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_version(self) -> Result:
         libs = {
@@ -204,6 +213,15 @@ class FileSharingWorker(NFPWorker):
         output=GetInventoryResult,
         fastapi={"methods": ["GET"]},
         agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self) -> Result:
         return Result(result=self.filesharing_inventory)
@@ -213,6 +231,15 @@ class FileSharingWorker(NFPWorker):
         output=GetStatusResult,
         fastapi={"methods": ["GET"]},
         agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "Get Status",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_status(self) -> Result:
         return Result(result="OK")
@@ -222,6 +249,15 @@ class FileSharingWorker(NFPWorker):
         output=ListFilesResult,
         fastapi={"methods": ["GET"]},
         agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "List Files",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def list_files(self, url: str) -> Result:
         """
@@ -253,6 +289,15 @@ class FileSharingWorker(NFPWorker):
         output=FileDetailsResult,
         fastapi={"methods": ["GET"]},
         agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "Get File Details",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def file_details(self, url: str) -> Result:
         """
@@ -300,6 +345,15 @@ class FileSharingWorker(NFPWorker):
         output=WalkResult,
         fastapi={"methods": ["GET"]},
         agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "Walk Files",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def walk(self, url: str) -> Result:
         """
@@ -347,6 +401,15 @@ class FileSharingWorker(NFPWorker):
         output=FetchFileResult,
         fastapi={"methods": ["GET"]},
         agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "Fetch File",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def fetch_file(
         self,

@@ -803,6 +803,15 @@ class NetboxBgpPeeringsTasks:
         input=GetBgpPeeringsInput,
         output=GetBgpPeeringsResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get BGP Peerings",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_bgp_peerings(
         self,
@@ -1102,6 +1111,15 @@ class NetboxBgpPeeringsTasks:
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CreateBgpPeeringInput,
         output=CreateBgpPeeringResult,
+        mcp={
+            "annotations": {
+                "title": "Create BGP Peering",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def create_bgp_peering(
         self,
@@ -1630,6 +1648,15 @@ class NetboxBgpPeeringsTasks:
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=UpdateBgpPeeringInput,
         output=UpdateBgpPeeringResult,
+        mcp={
+            "annotations": {
+                "title": "Update BGP Peering",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def update_bgp_peering(
         self,
@@ -1884,6 +1911,15 @@ class NetboxBgpPeeringsTasks:
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncBgpPeeringsInput,
         output=SyncBgpPeeringsResult,
+        mcp={
+            "annotations": {
+                "title": "Sync BGP Peerings",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def sync_bgp_peerings(
         self,

@@ -111,7 +111,20 @@ class NetworkResult(NornirSerializedResult):
 
 
 class NetworkTask:
-    @Task(fastapi={"methods": ["POST"]}, input=NetworkInput, output=NetworkResult)
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetworkInput,
+        output=NetworkResult,
+        mcp={
+            "annotations": {
+                "title": "Run Network Operation",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
     def network(self, job: Job, fun: str, **kwargs: object) -> Result:
         """
         Task to call various network-related utility functions.

@@ -376,7 +376,18 @@ class ContainerlabWorker(NFPWorker):
         """
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_version(self) -> Result:
         """
         Produce a report of the versions of various Python packages.
@@ -410,6 +421,15 @@ class ContainerlabWorker(NFPWorker):
         input=GetInventoryInput,
         output=GetInventoryResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self) -> Result:
         """
@@ -427,6 +447,15 @@ class ContainerlabWorker(NFPWorker):
         input=GetContainerlabStatusInput,
         output=GetContainerlabStatusResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Containerlab Status",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_containerlab_status(self) -> Result:
         """
@@ -445,6 +474,15 @@ class ContainerlabWorker(NFPWorker):
         input=GetRunningLabsInput,
         output=GetRunningLabsResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Running Labs",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_running_labs(self, job: Job, timeout: int = None) -> Result:
         """
@@ -477,6 +515,15 @@ class ContainerlabWorker(NFPWorker):
         input=RunContainerlabCommandInput,
         output=RunContainerlabCommandResult,
         fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Run Containerlab Command",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def run_containerlab_command(
         self,
@@ -586,7 +633,18 @@ class ContainerlabWorker(NFPWorker):
         else:
             return output, logs, proc
 
-    @Task(input=DeployInput, output=DeployResult, fastapi={"methods": ["POST"]})
+    @Task(
+        input=DeployInput, output=DeployResult, fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Deploy Lab",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
     def deploy(
         self,
         job: Job,
@@ -659,6 +717,15 @@ class ContainerlabWorker(NFPWorker):
         input=DestroyLabInput,
         output=LabActionResult,
         fastapi={"methods": ["DELETE"]},
+        mcp={
+            "annotations": {
+                "title": "Destroy Lab",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def destroy_lab(self, lab_name: str, job: Job, timeout: int = None) -> Result:
         """
@@ -713,7 +780,18 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task(input=InspectInput, output=InspectResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=InspectInput, output=InspectResult, fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Inspect Lab",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
     def inspect(
         self,
         job: Job,
@@ -768,7 +846,18 @@ class ContainerlabWorker(NFPWorker):
 
         return ret
 
-    @Task(input=SaveInput, output=LabActionResult, fastapi={"methods": ["POST"]})
+    @Task(
+        input=SaveInput, output=LabActionResult, fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Save Lab",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
     def save(self, job: Job, lab_name: str, timeout: int = None) -> Result:
         """
         Saves the config of a specified lab devices by invoking the `containerlab save` command.
@@ -822,6 +911,15 @@ class ContainerlabWorker(NFPWorker):
         input=RestartLabInput,
         output=LabActionResult,
         fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Restart Lab",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def restart_lab(self, job: Job, lab_name: str, timeout: int = None) -> Result:
         """
@@ -888,6 +986,15 @@ class ContainerlabWorker(NFPWorker):
         input=GetNornirInventoryInput,
         output=GetNornirInventoryResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Nornir Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_nornir_inventory(
         self,
@@ -1032,6 +1139,15 @@ class ContainerlabWorker(NFPWorker):
         input=DeployNetboxInput,
         output=DeployNetboxResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Deploy NetBox Lab",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def deploy_netbox(
         self,

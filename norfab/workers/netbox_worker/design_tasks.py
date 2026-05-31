@@ -484,6 +484,15 @@ class NetboxDesignTasks:
         input=CreateDesignInput,
         output=CreateDesignResult,
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Create Design",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def create_design(
         self,

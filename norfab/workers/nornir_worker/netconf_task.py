@@ -83,7 +83,20 @@ class NetconfResult(NornirSerializedResult):
 
 
 class NetconfTask:
-    @Task(fastapi={"methods": ["POST"]}, input=NetconfInput, output=NetconfResult)
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=NetconfInput,
+        output=NetconfResult,
+        mcp={
+            "annotations": {
+                "title": "Run NETCONF Operation",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
+    )
     def netconf(
         self,
         job: Job,

@@ -224,6 +224,15 @@ class CfgTask:
         fastapi={"methods": ["POST"]},
         input=CfgInput,
         output=CfgResult,
+        mcp={
+            "annotations": {
+                "title": "Configure Devices",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def cfg(
         self,

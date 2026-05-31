@@ -186,6 +186,15 @@ class NetboxTopologyTasks:
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=GetTopologyInput,
         output=GetTopologyResult,
+        mcp={
+            "annotations": {
+                "title": "Get Topology",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_topology(
         self,

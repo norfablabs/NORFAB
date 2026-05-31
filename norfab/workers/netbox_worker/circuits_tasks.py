@@ -200,6 +200,15 @@ class NetboxCircuitsTasks:
         input=GetCircuitsInput,
         output=GetCircuitsResult,
         fastapi={"methods": ["GET"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Get Circuits",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
     )
     def get_circuits(
         self,

@@ -285,6 +285,15 @@ class CliTask:
         fastapi={"methods": ["POST"]},
         input=CliInput,
         output=CliResult,
+        mcp={
+            "annotations": {
+                "title": "Run CLI Commands",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
+            }
+        },
     )
     def cli(
         self,

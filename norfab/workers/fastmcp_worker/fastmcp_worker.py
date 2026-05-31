@@ -285,7 +285,18 @@ class FastMCPWorker(NFPWorker):
     def worker_exit(self) -> None:
         os.kill(os.getpid(), signal.SIGTERM)
 
-    @Task(input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Version",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_version(self) -> Result:
         """
         Retrieves version information for key libraries and the current Python environment.
@@ -317,6 +328,15 @@ class FastMCPWorker(NFPWorker):
         input=GetInventoryInput,
         output=GetInventoryResult,
         fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get Inventory",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
     )
     def get_inventory(self) -> Result:
         """
@@ -330,7 +350,18 @@ class FastMCPWorker(NFPWorker):
             task=f"{self.name}:get_inventory",
         )
 
-    @Task(input=GetToolsInput, output=GetToolsResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetToolsInput, output=GetToolsResult, fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get MCP Tools",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_tools(
         self, brief: bool = False, service: str = "all", name: str = "*"
     ) -> Result:
@@ -370,7 +401,18 @@ class FastMCPWorker(NFPWorker):
 
         return ret
 
-    @Task(input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]})
+    @Task(
+        input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]},
+        mcp={
+            "annotations": {
+                "title": "Discover MCP Tools",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def discover(self, job, service: str = "all", progress: bool = True) -> Result:
         """
         Discovers available services tasks and auto-generate tools for them.
@@ -387,7 +429,18 @@ class FastMCPWorker(NFPWorker):
 
         return ret
 
-    @Task(input=GetStatusInput, output=GetStatusResult, fastapi={"methods": ["GET"]})
+    @Task(
+        input=GetStatusInput, output=GetStatusResult, fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get MCP Status",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
     def get_status(self) -> Result:
         """
         Retrieves the current status of the application, including its name,
