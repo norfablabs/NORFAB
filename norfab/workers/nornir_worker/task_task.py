@@ -1,13 +1,15 @@
 import logging
-from typing import Any, Union
+from typing import Any
 
 from nornir_salt.plugins.functions import ResultSerializer
-from pydantic import Field, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .nornir_models import NornirCommonArgs, NornirSerializedResult
+from .nornir_models import (
+    TaskInput,
+    TaskResult,
+)
 
 log = logging.getLogger(__name__)
 
@@ -15,22 +17,6 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 # TASK TASK MODELS
 # --------------------------------------------------------------------------
-
-
-class TaskInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
-):
-    plugin: StrictStr = Field(
-        ...,
-        description="Python import path or nf:// URL for a Nornir task plugin",
-    )
-
-
-class TaskResult(NornirSerializedResult):
-    result: Union[dict[StrictStr, Any], list[Any]] = Field(
-        {},
-        description="Custom Nornir task results keyed by host or returned as serialized task records",
-    )
 
 
 class TaskTask:

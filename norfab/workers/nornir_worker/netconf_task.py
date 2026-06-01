@@ -1,85 +1,16 @@
-from enum import Enum
 from typing import Any
-from typing import Union
-
-from pydantic import Field, StrictStr
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .nornir_models import NornirCommonArgs, NornirSerializedResult
+from .nornir_models import (
+    NetconfInput,
+    NetconfResult,
+)
 
 # --------------------------------------------------------------------------
 # NETCONF TASK MODELS
 # --------------------------------------------------------------------------
-
-
-class NetconfPlugin(str, Enum):
-    ncclient = "ncclient"
-    scrapli = "scrapli"
-
-
-class NetconfConfigSource(str, Enum):
-    running = "running"
-    candidate = "candidate"
-
-
-class NetconfInput(
-    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
-):
-    call: StrictStr = Field(
-        ...,
-        description="NETCONF method or special call to execute",
-    )
-    plugin: NetconfPlugin = Field(
-        NetconfPlugin.ncclient,
-        description="NETCONF connection plugin to use",
-    )
-    data: Union[None, StrictStr] = Field(
-        None,
-        description="RPC content or path to RPC data",
-    )
-
-
-class NetconfGetConfigInput(
-    NetconfInput, extra="allow", use_enum_values=True, populate_by_name=True
-):
-    call: StrictStr = Field("get_config", description="NETCONF method to execute")
-    plugin: NetconfPlugin = Field(
-        NetconfPlugin.ncclient,
-        description="NETCONF plugin to use",
-    )
-    source: NetconfConfigSource = Field(
-        NetconfConfigSource.running,
-        description="Configuration source to retrieve",
-    )
-    filter_subtree: Union[None, StrictStr] = Field(
-        None,
-        description="XML subtree to retrieve portion of configuration",
-        alias="filter-subtree",
-    )
-
-
-class NetconfCapabilitiesInput(
-    NetconfInput, extra="allow", use_enum_values=True, populate_by_name=True
-):
-    call: StrictStr = Field(
-        "server_capabilities", description="NETCONF method to execute"
-    )
-    plugin: NetconfPlugin = Field(
-        NetconfPlugin.ncclient,
-        description="NETCONF plugin to use",
-    )
-    capab_filter: Union[None, StrictStr] = Field(
-        None, description="Glob pattern to filter capabilities", alias="capab-filter"
-    )
-
-
-class NetconfResult(NornirSerializedResult):
-    result: Union[dict[StrictStr, Any], list[Any]] = Field(
-        {},
-        description="NETCONF operation results keyed by host or returned as serialized task records",
-    )
 
 
 class NetconfTask:

@@ -8,8 +8,10 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.nornir_worker.file_copy_task import (
+from norfab.workers.nornir_worker.nornir_models import (
     FileCopyInput,
+)
+from norfab.workers.nornir_worker.nornir_models import (
     NrFileCopyPluginNetmiko as TaskNrFileCopyPluginNetmiko,
 )
 

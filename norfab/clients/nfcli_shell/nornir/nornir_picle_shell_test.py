@@ -11,7 +11,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.nornir_worker.test_task import TestInput
+from norfab.workers.nornir_worker.nornir_models import TestInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (

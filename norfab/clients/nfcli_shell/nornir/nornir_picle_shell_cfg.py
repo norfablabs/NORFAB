@@ -7,14 +7,19 @@ from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
     Field,
-    StrictBool,
     StrictStr,
 )
 
-from norfab.workers.nornir_worker.cfg_task import (
+from norfab.workers.nornir_worker.nornir_models import (
     CfgInput,
+)
+from norfab.workers.nornir_worker.nornir_models import (
     NrCfgPluginNapalm as TaskNrCfgPluginNapalm,
+)
+from norfab.workers.nornir_worker.nornir_models import (
     NrCfgPluginNetmiko as TaskNrCfgPluginNetmiko,
+)
+from norfab.workers.nornir_worker.nornir_models import (
     NrCfgPluginScrapli as TaskNrCfgPluginScrapli,
 )
 

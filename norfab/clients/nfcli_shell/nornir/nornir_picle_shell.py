@@ -10,11 +10,11 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.nornir_worker.inventory_tasks import (
+from norfab.workers.nornir_worker.nornir_models import (
     GetInventoryInput,
     GetNornirHostsInput,
+    RefreshNornirInput,
 )
-from norfab.workers.nornir_worker.nornir_worker import RefreshNornirInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_cfg import NornirCfgShell

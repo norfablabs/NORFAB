@@ -12,10 +12,16 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.nornir_worker.cli_task import (
+from norfab.workers.nornir_worker.nornir_models import (
     CliInput,
+)
+from norfab.workers.nornir_worker.nornir_models import (
     NrCliPluginNapalm as TaskNrCliPluginNapalm,
+)
+from norfab.workers.nornir_worker.nornir_models import (
     NrCliPluginNetmiko as TaskNrCliPluginNetmiko,
+)
+from norfab.workers.nornir_worker.nornir_models import (
     NrCliPluginScrapli as TaskNrCliPluginScrapli,
 )
 

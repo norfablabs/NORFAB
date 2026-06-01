@@ -1,18 +1,19 @@
 import logging
 import os
-from enum import Enum
-from typing import Any, Union
+from typing import Any
 
 from nornir_netmiko.tasks import netmiko_file_transfer
 from nornir_salt.plugins.functions import ResultSerializer
 from nornir_salt.plugins.tasks import nr_test
-from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 
 from norfab.core.exceptions import UnsupportedPluginError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .nornir_models import NornirCommonArgs, NornirSerializedResult
+from .nornir_models import (
+    FileCopyInput,
+    FileCopyResult,
+)
 
 log = logging.getLogger(__name__)
 
@@ -20,88 +21,6 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 # FILE COPY TASK MODELS
 # --------------------------------------------------------------------------
-
-
-class FileCopyPlugin(str, Enum):
-    netmiko = "netmiko"
-
-
-class SCPDirection(str, Enum):
-    put = "put"
-    get = "get"
-
-
-class NrFileCopyPluginNetmiko(
-    BaseModel, extra="allow", use_enum_values=True, populate_by_name=True
-):
-    dest_file: Union[None, StrictStr] = Field(
-        None,
-        description="Destination file to copy",
-        alias="destination-file",
-    )
-    file_system: Union[None, StrictStr] = Field(
-        None,
-        description="Destination file system",
-        alias="file-system",
-    )
-    direction: SCPDirection = Field(
-        SCPDirection.put,
-        description="Direction of file copy",
-    )
-    inline_transfer: StrictBool = Field(
-        False,
-        description="Use inline transfer, supported by Cisco IOS",
-        alias="inline-transfer",
-        json_schema_extra={"presence": True},
-    )
-    overwrite_file: StrictBool = Field(
-        False,
-        description="Overwrite destination file if it exists",
-        alias="overwrite-file",
-        json_schema_extra={"presence": True},
-    )
-    socket_timeout: Union[StrictFloat, StrictInt] = Field(
-        10.0,
-        description="Socket timeout in seconds",
-        alias="socket-timeout",
-    )
-    verify_file: StrictBool = Field(
-        True,
-        description="Verify destination file hash after copy",
-        alias="verify-file",
-        json_schema_extra={"presence": True},
-    )
-
-
-class FileCopyInput(
-    NrFileCopyPluginNetmiko,
-    NornirCommonArgs,
-    extra="allow",
-    use_enum_values=True,
-    populate_by_name=True,
-):
-    source_file: StrictStr = Field(
-        ...,
-        description="Source file path or NorFab URL to copy",
-        alias="source-file",
-    )
-    plugin: FileCopyPlugin = Field(
-        FileCopyPlugin.netmiko,
-        description="Nornir file transfer plugin to use",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Show file transfer task data without copying files",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-
-
-class FileCopyResult(NornirSerializedResult):
-    result: Union[dict[StrictStr, Any], list[Any]] = Field(
-        {},
-        description="File copy results keyed by host or returned as serialized task records",
-    )
 
 
 class FileCopyTask:

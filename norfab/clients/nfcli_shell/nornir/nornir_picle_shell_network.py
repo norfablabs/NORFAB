@@ -1,9 +1,10 @@
 ﻿import builtins
+
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field
 
-from norfab.workers.nornir_worker.network_task import NetworkDnsInput, NetworkPingInput
+from norfab.workers.nornir_worker.nornir_models import NetworkDnsInput, NetworkPingInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (

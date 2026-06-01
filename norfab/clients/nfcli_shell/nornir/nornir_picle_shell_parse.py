@@ -11,7 +11,7 @@ except Exception:
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field, StrictBool, StrictStr
 
-from norfab.workers.nornir_worker.parse_task import (
+from norfab.workers.nornir_worker.nornir_models import (
     NapalmGettersEnum,
     ParseNapalmInput,
     ParseTTPInput,

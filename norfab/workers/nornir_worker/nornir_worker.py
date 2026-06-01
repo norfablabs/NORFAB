@@ -5,7 +5,7 @@ import os
 import sys
 import time
 from threading import Lock
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Tuple
 
 import yaml
 from nornir import InitNornir
@@ -24,7 +24,6 @@ from nornir_salt.plugins.processors import (
 from nornir_salt.plugins.tasks import (
     connections as nr_connections,
 )
-from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 from norfab.core.worker import Job, NFPWorker, Task, WorkerWatchDog
 from norfab.models import Result
@@ -33,10 +32,18 @@ from norfab.utils.text import format_duration
 from .cfg_task import CfgTask
 from .cli_task import CliTask
 from .file_copy_task import FileCopyTask
+from .inventory_tasks import InventoryTasks
 from .netconf_task import NetconfTask
 from .network_task import NetworkTask
+from .nornir_models import (
+    GetVersionInput,
+    GetVersionResult,
+    GetWatchdogConnectionsInput,
+    GetWatchdogConnectionsResult,
+    RefreshNornirInput,
+    RefreshNornirResult,
+)
 from .parse_task import ParseTask
-from .inventory_tasks import InventoryTasks
 from .task_task import TaskTask
 from .test_task import TestTask
 
@@ -48,45 +55,6 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 # NORNIR WORKER TASK MODELS
 # --------------------------------------------------------------------------
-
-
-class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    pass
-
-
-class GetVersionResult(Result):
-    result: Dict[StrictStr, StrictStr] = Field(
-        {},
-        description="Installed package versions keyed by package name",
-    )
-
-
-class GetWatchdogConnectionsInput(
-    BaseModel, use_enum_values=True, populate_by_name=True
-):
-    pass
-
-
-class GetWatchdogConnectionsResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
-        description="Watchdog connection state keyed by host and plugin",
-    )
-
-
-class RefreshNornirInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    progress: StrictBool = Field(
-        False,
-        description="Emit progress events while refreshing Nornir",
-        json_schema_extra={"presence": True},
-    )
-
-
-class RefreshNornirResult(Result):
-    result: StrictBool = Field(
-        True,
-        description="True if Nornir refreshed successfully",
-    )
 
 
 # ----------------------------------------------------------------------

@@ -3,7 +3,7 @@
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field
 
-from norfab.workers.nornir_worker.netconf_task import (
+from norfab.workers.nornir_worker.nornir_models import (
     NetconfCapabilitiesInput,
     NetconfGetConfigInput,
 )

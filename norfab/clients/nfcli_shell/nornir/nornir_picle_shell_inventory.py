@@ -9,7 +9,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.nornir_worker.inventory_tasks import (
+from norfab.workers.nornir_worker.nornir_models import (
     NornirInventoryLoadContainerlabInput,
     RuntimeCreateHostInput,
     RuntimeDeleteHostInput,

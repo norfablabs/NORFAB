@@ -8,7 +8,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.nornir_worker.task_task import TaskInput
+from norfab.workers.nornir_worker.nornir_models import TaskInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from .nornir_picle_shell_common import (
