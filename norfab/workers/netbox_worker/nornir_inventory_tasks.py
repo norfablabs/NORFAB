@@ -12,12 +12,6 @@ from .netbox_models import (
 
 log = logging.getLogger(__name__)
 
-
-# --------------------------------------------------------------------------
-# NORNIR INVENTORY TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 class NetboxNornirInventoryTasks:
 
     @Task(

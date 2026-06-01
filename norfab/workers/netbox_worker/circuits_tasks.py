@@ -16,11 +16,6 @@ from .netbox_models import (
 log = logging.getLogger(__name__)
 
 
-# --------------------------------------------------------------------------
-# CIRCUITS TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 class NetboxCircuitsTasks:
 
     def _map_circuit(

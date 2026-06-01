@@ -178,11 +178,6 @@ query ConnectionsQuery(
 """
 
 
-# --------------------------------------------------------------------------
-# CONNECTIONS TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 class NetboxConnectionsTasks:
     @Task(
         input=GetConnectionsInput,

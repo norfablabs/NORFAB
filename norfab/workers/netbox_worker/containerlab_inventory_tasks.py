@@ -15,11 +15,6 @@ from .netbox_models import (
 log = logging.getLogger(__name__)
 
 
-# --------------------------------------------------------------------------
-# CONTAINERLAB INVENTORY TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 class NetboxContainerlabInventoryTasks:
 
     @Task(

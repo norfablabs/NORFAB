@@ -12,11 +12,6 @@ from .netbox_models import (
 log = logging.getLogger(__name__)
 
 
-# --------------------------------------------------------------------------
-# BRANCH TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 class NetboxBranchTasks:
 
     @Task(

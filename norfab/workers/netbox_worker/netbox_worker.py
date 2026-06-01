@@ -56,11 +56,6 @@ SERVICE = "netbox"
 log = logging.getLogger(__name__)
 
 
-# --------------------------------------------------------------------------
-# NETBOX WORKER TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 class NetboxWorker(
     NFPWorker,
     NetboxGraphqlTasks,

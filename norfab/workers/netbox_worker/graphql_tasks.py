@@ -67,11 +67,6 @@ def _form_query_v4(obj, filters, fields, alias=None) -> str:
     return query
 
 
-# --------------------------------------------------------------------------
-# GRAPHQL TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 def graphql_fetch_page(
     token: str,
     nb_url: str,

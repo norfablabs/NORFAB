@@ -42,11 +42,6 @@ def make_prefix_from_ip(address: Union[None, str]) -> Union[None, str]:
         return None
 
 
-# --------------------------------------------------------------------------
-# IP TASKS MODELS
-# --------------------------------------------------------------------------
-
-
 class NetboxIpTasks:
 
     @Task(
