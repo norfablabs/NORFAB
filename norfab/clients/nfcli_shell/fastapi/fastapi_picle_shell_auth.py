@@ -10,7 +10,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.fastapi_worker.fastapi_worker import (
+from norfab.workers.fastapi_worker.fastapi_models import (
     BearerTokenCheckInput,
     BearerTokenDeleteInput,
     BearerTokenListInput,

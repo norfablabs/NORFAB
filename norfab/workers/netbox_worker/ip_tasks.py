@@ -906,6 +906,7 @@ class NetboxIpTasks:
             "224.0.0.0/24",
             "fe80::/10",
             "ff02::/16",
+            "::ffff:0:0/96",
         ]
         if isinstance(anycast_ranges, str):
             anycast_ranges = [anycast_ranges]

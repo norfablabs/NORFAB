@@ -8,7 +8,7 @@ from pydantic import (
     Field,
 )
 
-from norfab.workers.fastapi_worker.fastapi_worker import GetOpenapiSchemaInput
+from norfab.workers.fastapi_worker.fastapi_models import GetOpenapiSchemaInput
 
 from ..common import ClientRunJobArgs, log_error_or_result
 from .fastapi_picle_shell_auth import FastAPIAuthCommandsModel
