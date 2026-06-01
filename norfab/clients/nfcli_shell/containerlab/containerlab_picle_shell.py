@@ -10,7 +10,7 @@ from pydantic import (
 )
 from rich.console import Console
 
-from norfab.workers.containerlab_worker.containerlab_worker import (
+from norfab.workers.containerlab_worker.containerlab_models import (
     DeployInput,
     DestroyLabInput,
     GetNornirInventoryInput,

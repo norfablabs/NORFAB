@@ -8,13 +8,13 @@ from pydantic import (
     StrictBool,
 )
 
-from norfab.workers.fakenos_worker.fakenos_worker import (
+from norfab.workers.fakenos_worker.fakenos_models import (
     FakeNOSListNetworksInput,
     FakeNOSRestartInput,
     FakeNOSStartInput,
     FakeNOSStopInput,
+    GetNornirInventoryInput,
 )
-from norfab.workers.fakenos_worker.nornir_inventory_tasks import GetNornirInventoryInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 

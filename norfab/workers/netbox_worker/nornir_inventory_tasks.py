@@ -12,6 +12,7 @@ from .netbox_models import (
 
 log = logging.getLogger(__name__)
 
+
 class NetboxNornirInventoryTasks:
 
     @Task(

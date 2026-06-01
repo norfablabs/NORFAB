@@ -10,7 +10,7 @@ from pydantic import (
 )
 from rich.console import Console
 
-from norfab.workers.containerlab_worker.containerlab_worker import DeployNetboxInput
+from norfab.workers.containerlab_worker.containerlab_models import DeployNetboxInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 from ..netbox.netbox_picle_shell_get_containerlab_inventory import (

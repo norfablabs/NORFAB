@@ -8,7 +8,7 @@ from pydantic import (
     Field,
 )
 
-from norfab.workers.fastmcp_worker.fastmcp_worker import GetToolsInput
+from norfab.workers.fastmcp_worker.fastmcp_models import GetToolsInput
 
 from ..common import ClientRunJobArgs, log_error_or_result
 from .fastmcp_picle_shell_auth import FastMCPAuthCommandsModel

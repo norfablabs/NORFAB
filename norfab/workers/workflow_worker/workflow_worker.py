@@ -5,10 +5,18 @@ import sys
 from typing import Any, Dict, Tuple, Union
 
 import yaml
-from pydantic import BaseModel, Field, StrictStr
 
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
+
+from .workflow_models import (
+    GetInventoryInput,
+    GetInventoryResult,
+    GetVersionInput,
+    GetVersionResult,
+    RunInput,
+    RunResult,
+)
 
 SERVICE = "workflow"
 
@@ -18,42 +26,6 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 # WORKFLOW TASKS MODELS
 # --------------------------------------------------------------------------
-
-
-class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    pass
-
-
-class GetVersionResult(Result):
-    result: Dict[StrictStr, StrictStr] = Field(
-        {},
-        description="Installed package versions keyed by package name",
-    )
-
-
-class GetInventoryInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    pass
-
-
-class GetInventoryResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
-        description="Workflow worker inventory data",
-    )
-
-
-class RunInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    workflow: Union[StrictStr, Dict[StrictStr, Any]] = Field(
-        ...,
-        description="Workflow definition or URL to a YAML workflow file",
-    )
-
-
-class RunResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
-        description="Workflow execution results keyed by workflow name",
-    )
 
 
 class WorkflowWorker(NFPWorker):

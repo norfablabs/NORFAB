@@ -13,6 +13,16 @@ from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
 from . import norfab_agent
+from .agent_models import (
+    GetInventoryInput,
+    GetInventoryResult,
+    GetStatusInput,
+    GetStatusResult,
+    GetVersionInput,
+    GetVersionResult,
+    InvokeInput,
+    InvokeResult,
+)
 
 SERVICE = "agent"
 
@@ -211,6 +221,8 @@ class AgentWorker(NFPWorker):
             return None
 
     @Task(
+        input=GetVersionInput,
+        output=GetVersionResult,
         fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
@@ -253,6 +265,8 @@ class AgentWorker(NFPWorker):
         return Result(result=libs)
 
     @Task(
+        input=GetInventoryInput,
+        output=GetInventoryResult,
         fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
@@ -274,6 +288,8 @@ class AgentWorker(NFPWorker):
         return Result(result=self.agent_inventory)
 
     @Task(
+        input=GetStatusInput,
+        output=GetStatusResult,
         fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
@@ -295,6 +311,8 @@ class AgentWorker(NFPWorker):
         return Result(result="OK")
 
     @Task(
+        input=InvokeInput,
+        output=InvokeResult,
         fastapi={"methods": ["POST"]},
         mcp={
             "annotations": {

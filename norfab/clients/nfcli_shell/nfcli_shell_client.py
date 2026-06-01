@@ -23,7 +23,7 @@ from rich.console import Console
 
 from norfab.core.nfapi import NorFab
 from norfab.models.norfab_configuration import NorFabInventory
-from norfab.workers.filesharing_worker.filesharing_worker import (
+from norfab.workers.filesharing_worker.filesharing_models import (
     FileDetailsInput,
     ListFilesInput,
 )

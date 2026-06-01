@@ -3,7 +3,7 @@ import logging
 
 from picle.models import Outputters
 
-from norfab.workers.fastmcp_worker.fastmcp_worker import DiscoverInput
+from norfab.workers.fastmcp_worker.fastmcp_models import DiscoverInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 

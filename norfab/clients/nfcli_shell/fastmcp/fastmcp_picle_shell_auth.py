@@ -10,7 +10,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.fastmcp_worker.fastmcp_worker import (
+from norfab.workers.fastmcp_worker.fastmcp_models import (
     BearerTokenCheckInput,
     BearerTokenDeleteInput,
     BearerTokenListInput,

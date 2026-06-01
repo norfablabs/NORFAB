@@ -7,7 +7,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.workflow_worker.workflow_worker import RunInput
+from norfab.workers.workflow_worker.workflow_models import RunInput
 
 from ..common import ClientRunJobArgs, listen_events, log_error_or_result
 
