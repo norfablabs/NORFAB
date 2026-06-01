@@ -1,13 +1,15 @@
 import logging
-from typing import Any, Literal, Union
-
-from pydantic import BaseModel, Field, StrictBool, StrictStr
+from typing import Union
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .netbox_exceptions import UnsupportedNetboxVersion
-from .netbox_models import NetboxFastApiArgs
+from .netbox_models import (
+    GetConnectionsInput,
+    GetConnectionsResult,
+    NetboxFastApiArgs,
+)
 
 log = logging.getLogger(__name__)
 
@@ -179,39 +181,6 @@ query ConnectionsQuery(
 # --------------------------------------------------------------------------
 # CONNECTIONS TASKS MODELS
 # --------------------------------------------------------------------------
-
-
-class GetConnectionsInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    devices: list[StrictStr] = Field(
-        ...,
-        description="Device names to retrieve connections for",
-    )
-    interface_regex: Union[None, StrictStr] = Field(
-        None,
-        description="Regex pattern to match interfaces and ports",
-        alias="interface-regex",
-    )
-    instance: Union[None, StrictStr] = Field(
-        None,
-        description="NetBox instance name to target",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Return query content without running it",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    cache: Union[None, StrictBool, Literal["refresh", "force"]] = Field(
-        None,
-        description="Cache usage mode",
-    )
-
-
-class GetConnectionsResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Connection data keyed by device and interface name",
-    )
 
 
 class NetboxConnectionsTasks:

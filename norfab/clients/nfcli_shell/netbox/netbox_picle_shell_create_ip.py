@@ -11,7 +11,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.ip_tasks import CreateIpInput
+from norfab.workers.netbox_worker.netbox_models import CreateIpInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs

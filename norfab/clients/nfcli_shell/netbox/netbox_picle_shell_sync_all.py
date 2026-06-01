@@ -10,9 +10,9 @@ import logging
 from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import BaseModel, Field, StrictStr
+from pydantic import Field, StrictStr
 
-from norfab.workers.netbox_worker.devices_tasks import SyncAllInput
+from norfab.workers.netbox_worker.netbox_models import SyncAllInput
 
 from ..common import listen_events, log_error_or_result
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters

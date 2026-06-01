@@ -5,7 +5,7 @@ from typing import List, Union
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import Field, StrictStr
 
-from norfab.workers.netbox_worker.ip_tasks import SyncDeviceIpInput
+from norfab.workers.netbox_worker.netbox_models import SyncDeviceIpInput
 
 from ..common import listen_events, log_error_or_result
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters

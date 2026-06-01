@@ -1,14 +1,28 @@
 import itertools
 import logging
 import re
-from typing import Any, Dict, List, Union
-
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+from typing import Any, Dict, Union
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .netbox_models import NetboxFastApiArgs, NetboxCommonArgs
+from .netbox_models import (
+    CrudChangelogArgs,
+    CrudChangelogResult,
+    CrudCreateArgs,
+    CrudCreateResult,
+    CrudDeleteArgs,
+    CrudDeleteResult,
+    CrudListObjectsArgs,
+    CrudListObjectsResult,
+    CrudReadArgs,
+    CrudReadResult,
+    CrudSearchArgs,
+    CrudSearchResult,
+    CrudUpdateArgs,
+    CrudUpdateResult,
+    NetboxFastApiArgs,
+)
 
 log = logging.getLogger(__name__)
 
@@ -21,170 +35,6 @@ OPENAPI_CACHE_TTL = 86400  # 24 hours
 # ------------------------------------------------------------------------------
 # PYDANTIC INPUT MODELS
 # ------------------------------------------------------------------------------
-
-
-class CrudListObjectsArgs(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
-):
-    app_filter: Union[None, StrictStr, List[StrictStr]] = Field(
-        None,
-        description="Filter by NetBox app label or labels",
-        alias="app-filter",
-        examples=["dcim", ["dcim", "ipam"]],
-    )
-    include_metadata: StrictBool = Field(
-        True,
-        description="Include path, methods, schema name, and description in results",
-        alias="include-metadata",
-        json_schema_extra={"presence": True},
-    )
-
-
-class CrudSearchArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    query: StrictStr = Field(..., description="Search term")
-    object_types: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of app.resource object types to search",
-        alias="object-types",
-        examples=[["dcim.devices", "ipam.prefixes"]],
-    )
-    fields: Union[None, List[StrictStr]] = Field(
-        None, description="Specific fields to return; ignored when brief=True"
-    )
-    brief: StrictBool = Field(False, description="Return brief representation")
-    limit: StrictInt = Field(
-        10, ge=1, le=100, description="Max results per object type"
-    )
-
-
-class CrudReadArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    object_type: StrictStr = Field(
-        ...,
-        description="NetBox object type in app.resource format",
-        alias="object-type",
-        examples=["dcim.devices"],
-    )
-    object_id: Union[None, StrictInt, List[StrictInt]] = Field(
-        None,
-        description="Object ID or IDs to retrieve; ignores filters when set",
-        alias="object-id",
-    )
-    filters: Union[None, Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
-        None, description="Filter dict(s)"
-    )
-    fields: Union[None, List[StrictStr]] = Field(
-        None, description="Specific fields to return; ignored when brief=True"
-    )
-    brief: StrictBool = Field(False, description="Return brief representation")
-    limit: StrictInt = Field(50, ge=1, le=1000, description="Page size")
-    offset: StrictInt = Field(0, ge=0, description="Pagination skip count")
-    ordering: Union[None, StrictStr, List[StrictStr]] = Field(
-        None,
-        description="Ordering field or fields; prefix with '-' for descending",
-        examples=["name", ["-name", "id"]],
-    )
-
-
-class CrudCreateArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    object_type: StrictStr = Field(
-        ...,
-        description="NetBox object type in app.resource format",
-        alias="object-type",
-        examples=["dcim.interfaces"],
-    )
-    data: Union[Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
-        ..., description="Object data; dict for single, list for bulk"
-    )
-    dry_run: StrictBool = Field(False, description="Preview without creating")
-
-
-class CrudUpdateArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    object_type: StrictStr = Field(
-        ...,
-        description="NetBox object type in app.resource format",
-        alias="object-type",
-    )
-    data: Union[Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
-        ..., description="Object data; each item must contain 'id'"
-    )
-    partial: StrictBool = Field(
-        True, description="True=PATCH (partial); False=PUT (full replace)"
-    )
-    dry_run: StrictBool = Field(False, description="Compute diffs without updating")
-
-
-class CrudDeleteArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    object_type: StrictStr = Field(
-        ...,
-        description="NetBox object type in app.resource format",
-        alias="object-type",
-    )
-    object_id: Union[StrictInt, List[StrictInt]] = Field(
-        ...,
-        description="Object ID or IDs to delete",
-        alias="object-id",
-    )
-    dry_run: StrictBool = Field(False, description="Preview without deleting")
-
-
-class CrudChangelogArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    filters: Union[None, Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
-        None, description="Filter dict(s)"
-    )
-    fields: Union[None, List[StrictStr]] = Field(
-        None, description="Specific fields to return"
-    )
-    limit: StrictInt = Field(50, ge=1, le=1000, description="Page size")
-    offset: StrictInt = Field(0, ge=0, description="Pagination skip count")
-
-
-class CrudListObjectsResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="NetBox object types keyed by app name",
-    )
-
-
-class CrudSearchResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Search results keyed by object type",
-    )
-
-
-class CrudReadResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Read result with count and object list",
-    )
-
-
-class CrudCreateResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Create result with object count and payloads",
-    )
-
-
-class CrudUpdateResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Update result with object count and payloads",
-    )
-
-
-class CrudDeleteResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Delete result with object count and IDs",
-    )
-
-
-class CrudChangelogResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Changelog result with count and entries",
-    )
 
 
 # ------------------------------------------------------------------------------

@@ -4,7 +4,7 @@ import logging
 
 from picle.models import Outputters, PipeFunctionsModel
 
-from norfab.workers.netbox_worker.bgp_peerings_tasks import UpdateBgpPeeringInput
+from norfab.workers.netbox_worker.netbox_models import UpdateBgpPeeringInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_common import NetboxClientRunJobArgs

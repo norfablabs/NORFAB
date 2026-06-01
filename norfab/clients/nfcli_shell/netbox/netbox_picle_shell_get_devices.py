@@ -9,7 +9,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.devices_tasks import GetDevicesInput
+from norfab.workers.netbox_worker.netbox_models import GetDevicesInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_cache import CacheEnum

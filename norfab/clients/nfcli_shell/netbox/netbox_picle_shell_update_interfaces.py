@@ -9,7 +9,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.interfaces_tasks import (
+from norfab.workers.netbox_worker.netbox_models import (
     UpdateInterfacesDescriptionInput,
 )
 

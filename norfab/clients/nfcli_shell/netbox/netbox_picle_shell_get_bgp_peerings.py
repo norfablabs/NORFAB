@@ -8,7 +8,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.bgp_peerings_tasks import GetBgpPeeringsInput
+from norfab.workers.netbox_worker.netbox_models import GetBgpPeeringsInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_cache import CacheEnum

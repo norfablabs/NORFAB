@@ -9,7 +9,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.devices_tasks import SyncDeviceFactsInput
+from norfab.workers.netbox_worker.netbox_models import SyncDeviceFactsInput
 
 from ..common import listen_events, log_error_or_result
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters, NornirCommonArgs

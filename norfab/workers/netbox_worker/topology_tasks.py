@@ -1,15 +1,14 @@
 import logging
-from typing import Any, Dict, List, Union
-
-from pydantic import BaseModel, Field, StrictInt, StrictStr, model_validator
+from typing import Any, Dict, Union
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .netbox_exceptions import UnsupportedNetboxVersion
-from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
-from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_common import (
-    NorniHostsFilters,
+from .netbox_models import (
+    GetTopologyInput,
+    GetTopologyResult,
+    NetboxFastApiArgs,
 )
 
 log = logging.getLogger(__name__)
@@ -56,106 +55,9 @@ query TopologyInterfacesQuery(
 # --------------------------------------------------------------------------
 
 
-class GetTopologyInput(
-    NorniHostsFilters, NetboxCommonArgs, use_enum_values=True, populate_by_name=True
-):
-    devices: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of device names to include in the topology; fetches all devices when omitted",
-    )
-    device_contains: Union[None, StrictStr] = Field(
-        None,
-        description="Case-insensitive substring to filter device names by",
-        alias="device-contains",
-    )
-    device_regex: Union[None, StrictStr] = Field(
-        None,
-        description="Regex pattern to filter device names by",
-        alias="device-regex",
-    )
-    role: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of device role slugs to filter by",
-    )
-    platform: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of platform slugs to filter by",
-    )
-    manufacturers: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of manufacturer slugs to filter by",
-    )
-    status: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of device status values to filter by (e.g. 'active', 'planned')",
-    )
-    sites: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of site slugs to filter by",
-    )
-    timeout: StrictInt = Field(
-        60,
-        description="Timeout in seconds for Nornir host resolution when Fx filters are used",
-    )
-
-    @model_validator(mode="after")
-    def check_at_least_one_filter(self) -> "GetTopologyInput":
-        has_device_filter = any(
-            f is not None
-            for f in (
-                self.devices,
-                self.device_contains,
-                self.device_regex,
-                self.role,
-                self.platform,
-                self.manufacturers,
-                self.status,
-                self.sites,
-            )
-        )
-        has_fx_filter = any(
-            f is not None
-            for f in (
-                self.FC,
-                self.FL,
-                self.FB,
-                self.FG,
-                self.FO,
-                self.FP,
-                self.FH,
-                self.FR,
-                self.FM,
-                self.FX,
-            )
-        )
-        if not has_device_filter and not has_fx_filter:
-            raise ValueError(
-                "at least one filter must be provided: 'devices', 'device_contains', "
-                "'device_regex', 'role', 'platform', 'manufacturers', 'status', 'sites', "
-                "or a Nornir Fx filter argument (FC, FL, FB, FG, FO, FP, FH, FR, FM, FX)"
-            )
-        return self
-
-
 # --------------------------------------------------------------------------
 # OUTPUT PYDANTIC MODELS
 # --------------------------------------------------------------------------
-
-
-class GetTopologyResultPayload(BaseModel):
-    nodes: List[Dict[str, Any]] = Field(
-        None, description="List of topology nodes (devices)"
-    )
-    links: List[Dict[str, Any]] = Field(
-        None, description="List of topology links (connections)"
-    )
-
-
-class GetTopologyResult(Result):
-    result: Union[GetTopologyResultPayload, Dict, None] = Field(
-        None,
-        description="Topology data containing nodes (devices) and links (connections)",
-    )
 
 
 # --------------------------------------------------------------------------

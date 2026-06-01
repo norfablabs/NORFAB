@@ -3,7 +3,6 @@ import json
 import logging
 from typing import Any, Union
 
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -12,7 +11,13 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .netbox_exceptions import UnsupportedNetboxVersion
-from .netbox_models import NetboxFastApiArgs
+from .netbox_models import (
+    GraphqlInput,
+    GraphqlResult,
+    NetboxFastApiArgs,
+    NetboxGraphqlInput,
+    NetboxGraphqlResult,
+)
 
 log = logging.getLogger(__name__)
 
@@ -65,83 +70,6 @@ def _form_query_v4(obj, filters, fields, alias=None) -> str:
 # --------------------------------------------------------------------------
 # GRAPHQL TASKS MODELS
 # --------------------------------------------------------------------------
-
-
-class NetboxGraphqlInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    instance: StrictStr = Field(
-        ...,
-        description="NetBox instance name to target",
-    )
-    query: StrictStr = Field(
-        ...,
-        description="GraphQL query string to execute",
-    )
-    variables: Union[None, dict[StrictStr, Any]] = Field(
-        None,
-        description="GraphQL variables keyed by variable name",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Return request payload without executing it",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    offset: StrictInt = Field(
-        0,
-        description="Starting pagination offset in records",
-    )
-    limit: StrictInt = Field(
-        50,
-        description="Number of records to fetch per GraphQL page",
-    )
-
-
-class NetboxGraphqlResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Merged GraphQL data payload",
-    )
-
-
-class GraphqlInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    instance: Union[None, StrictStr] = Field(
-        None,
-        description="NetBox instance name to target",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Return query payload without executing it",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    obj: Union[None, StrictStr, dict[StrictStr, Any]] = Field(
-        None,
-        description="NetBox GraphQL object name or query object",
-    )
-    filters: Union[None, dict[StrictStr, Any], StrictStr] = Field(
-        None,
-        description="GraphQL filters as dict or raw filter string",
-    )
-    fields: Union[None, list[StrictStr]] = Field(
-        None,
-        description="GraphQL fields to return",
-    )
-    queries: Union[None, dict[StrictStr, Any]] = Field(
-        None,
-        description="GraphQL query definitions keyed by alias",
-    )
-    query_string: Union[None, StrictStr] = Field(
-        None,
-        description="Complete GraphQL query string to send as is",
-        alias="query-string",
-    )
-
-
-class GraphqlResult(Result):
-    result: Any = Field(
-        {},
-        description="GraphQL response payload",
-    )
 
 
 def graphql_fetch_page(

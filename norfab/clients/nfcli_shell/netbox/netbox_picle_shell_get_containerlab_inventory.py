@@ -10,7 +10,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.containerlab_inventory_tasks import (
+from norfab.workers.netbox_worker.netbox_models import (
     GetContainerlabInventoryInput,
 )
 

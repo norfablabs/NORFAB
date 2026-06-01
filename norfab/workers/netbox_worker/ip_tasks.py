@@ -3,13 +3,19 @@ import ipaddress
 import logging
 from typing import Any, Union
 
-from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
-from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator
 
 from .netbox_exceptions import NetboxAllocationError
-from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
+from .netbox_models import (
+    CreateIpBulkInput,
+    CreateIpBulkResult,
+    CreateIpInput,
+    CreateIpResult,
+    NetboxFastApiArgs,
+    SyncDeviceIpInput,
+    SyncDeviceIpResult,
+)
 from .netbox_worker_utilities import resolve_vrf
 
 log = logging.getLogger(__name__)
@@ -39,215 +45,6 @@ def make_prefix_from_ip(address: Union[None, str]) -> Union[None, str]:
 # --------------------------------------------------------------------------
 # IP TASKS MODELS
 # --------------------------------------------------------------------------
-
-
-class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    devices: Union[None, list[StrictStr]] = Field(
-        None,
-        description="List of NetBox devices to sync IP addresses for",
-    )
-    timeout: StrictInt = Field(
-        60,
-        description="Timeout in seconds for Nornir parse_ttp job",
-    )
-    anycast_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
-        None,
-        description="IP prefix(es) to classify as anycast role, e.g. '10.3.250.0/24'",
-        alias="anycast-ranges",
-    )
-    ignore_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
-        None,
-        description="Prefix(es) to exclude IP addresses",
-        alias="ignore-ranges",
-    )
-    create_prefixes: StrictBool = Field(
-        True,
-        description="Create missing IP prefixes in NetBox for each discovered IP address",
-        json_schema_extra={"presence": True},
-        alias="create-prefixes",
-    )
-    filter_by_name: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to restrict which interfaces are included by name, e.g. 'Loopback*' or 'Eth*'",
-        alias="filter-by-name",
-    )
-    filter_by_description: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to restrict which interfaces are included by description, e.g. 'uplink*'",
-        alias="filter-by-description",
-    )
-    filter_by_prefix: Union[None, StrictStr] = Field(
-        None,
-        description="IP prefix to restrict which IP addresses are included, e.g. '10.0.0.0/8'",
-        alias="filter-by-prefix",
-    )
-    filter_by_ip: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to restrict which IP addresses are included, e.g. '10.0.*'",
-        alias="filter-by-ip",
-    )
-
-
-class CreateIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    prefix: Union[StrictStr, dict] = Field(
-        ...,
-        description="Prefix to allocate IP from; IPv4/IPv6 network string, prefix description, or dict with pynetbox filter keys",
-    )
-    device: Union[None, StrictStr] = Field(
-        None,
-        description="Device name to associate the IP address with",
-    )
-    interface: Union[None, StrictStr] = Field(
-        None,
-        description="Interface name to associate the IP address with",
-    )
-    description: Union[None, StrictStr] = Field(
-        None,
-        description="Description for the allocated IP address",
-    )
-    vrf: Union[None, StrictStr] = Field(
-        None,
-        description="VRF name for the IP address",
-    )
-    tags: Union[None, list] = Field(
-        None,
-        description="List of tags to associate with the IP address",
-    )
-    dns_name: Union[None, StrictStr] = Field(
-        None,
-        description="DNS name for the IP address",
-        alias="dns-name",
-    )
-    tenant: Union[None, StrictStr] = Field(
-        None,
-        description="Tenant name to associate with the IP address",
-    )
-    comments: Union[None, StrictStr] = Field(
-        None,
-        description="Additional comments for the IP address",
-    )
-    role: Union[None, StrictStr] = Field(
-        None,
-        description="Role for the IP address, e.g. 'loopback', 'anycast'",
-    )
-    status: Union[None, StrictStr] = Field(
-        None,
-        description="Status for the IP address, e.g. 'active', 'reserved', 'deprecated'",
-    )
-    is_primary: Union[None, StrictBool] = Field(
-        None,
-        description="If True, set the IP address as the primary IP for the device",
-        alias="is-primary",
-    )
-    mask_len: Union[None, StrictInt] = Field(
-        None,
-        description="Mask length for the IP address; creates a child subnet of this length within the parent prefix",
-        alias="mask-len",
-    )
-    create_peer_ip: Union[None, StrictBool] = Field(
-        True,
-        description="If True, creates an IP address for the link peer interface",
-        alias="create-peer-ip",
-    )
-
-    @model_validator(mode="after")
-    def validate_mask_len_with_peer_ip(self) -> "CreateIpInput":
-        if self.mask_len in (32, 128) and self.create_peer_ip is True:
-            raise ValueError(
-                f"mask_len={self.mask_len} with create_peer_ip=True is invalid: "
-                "cannot create a peer IP for a host prefix (/32 or /128)"
-            )
-        return self
-
-
-class CreateIpBulkInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    prefix: Union[StrictStr, dict] = Field(
-        ...,
-        description="Prefix to allocate IPs from; IPv4/IPv6 network string, prefix description, or dict with pynetbox filter keys",
-    )
-    devices: Union[None, list[StrictStr]] = Field(
-        None,
-        description="List of device names to assign IP addresses to",
-    )
-    interface_list: Union[None, list[StrictStr]] = Field(
-        None,
-        description="List of specific interface names to target",
-        alias="interface-list",
-    )
-    interface_regex: Union[None, StrictStr] = Field(
-        None,
-        description="Regex pattern to match interface names",
-        alias="interface-regex",
-    )
-    description: Union[None, StrictStr] = Field(
-        None,
-        description="Description for the allocated IP addresses",
-    )
-    vrf: Union[None, StrictStr] = Field(
-        None,
-        description="VRF name for the IP addresses",
-    )
-    tags: Union[None, list] = Field(
-        None,
-        description="List of tags to associate with the IP addresses",
-    )
-    dns_name: Union[None, StrictStr] = Field(
-        None,
-        description="DNS name for the IP addresses",
-        alias="dns-name",
-    )
-    tenant: Union[None, StrictStr] = Field(
-        None,
-        description="Tenant name to associate with the IP addresses",
-    )
-    comments: Union[None, StrictStr] = Field(
-        None,
-        description="Additional comments for the IP addresses",
-    )
-    role: Union[None, StrictStr] = Field(
-        None,
-        description="Role for the IP addresses, e.g. 'loopback', 'anycast'",
-    )
-    status: Union[None, StrictStr] = Field(
-        None,
-        description="Status for the IP addresses, e.g. 'active', 'reserved', 'deprecated'",
-    )
-    is_primary: Union[None, StrictBool] = Field(
-        None,
-        description="If True, set each IP address as the primary IP for its device",
-        alias="is-primary",
-    )
-    mask_len: Union[None, StrictInt] = Field(
-        None,
-        description="Mask length for the IP addresses; creates a child subnet of this length within the parent prefix",
-        alias="mask-len",
-    )
-    create_peer_ip: Union[None, StrictBool] = Field(
-        True,
-        description="If True, creates an IP address for the link peer interface",
-        alias="create-peer-ip",
-    )
-
-
-class CreateIpResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Allocated IP address result data",
-    )
-
-
-class CreateIpBulkResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Bulk IP allocation result data",
-    )
-
-
-class SyncDeviceIpResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="IP address sync result keyed by device name",
-    )
 
 
 class NetboxIpTasks:

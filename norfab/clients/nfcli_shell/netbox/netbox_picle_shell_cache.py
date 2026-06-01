@@ -10,7 +10,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_worker import (
+from norfab.workers.netbox_worker.netbox_models import (
     CacheClearInput,
     CacheGetInput,
     CacheListInput,

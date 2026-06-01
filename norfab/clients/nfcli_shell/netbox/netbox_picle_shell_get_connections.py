@@ -4,7 +4,7 @@ import logging
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import Field
 
-from norfab.workers.netbox_worker.connections_tasks import GetConnectionsInput
+from norfab.workers.netbox_worker.netbox_models import GetConnectionsInput
 
 from ..common import listen_events, log_error_or_result
 from .netbox_picle_shell_cache import CacheEnum

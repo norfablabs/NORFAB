@@ -1,14 +1,22 @@
 import copy
 import logging
-from typing import Any, List, Literal, Union
-
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+from typing import Any, Union
 
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .netbox_models import NetboxCommonArgs, NetboxFastApiArgs
+from .netbox_models import (
+    CheckDeviceSyncInput,
+    CheckDeviceSyncResult,
+    GetDevicesInput,
+    GetDevicesResult,
+    NetboxFastApiArgs,
+    SyncAllInput,
+    SyncAllResult,
+    SyncDeviceFactsInput,
+    SyncDeviceFactsResult,
+)
 
 log = logging.getLogger(__name__)
 
@@ -18,144 +26,9 @@ log = logging.getLogger(__name__)
 # -----------------------------------------------------------------------
 
 
-class GetDevicesInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    filters: Union[None, list[dict[StrictStr, Any]]] = Field(
-        None,
-        description="NetBox device filter dictionaries",
-    )
-    instance: Union[None, StrictStr] = Field(
-        None,
-        description="NetBox instance name to target",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Return filters without querying NetBox",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    devices: Union[None, list[StrictStr]] = Field(
-        None,
-        description="Device names to retrieve",
-    )
-    cache: Union[None, StrictBool, Literal["refresh", "force"]] = Field(
-        None,
-        description="Cache usage mode",
-    )
-
-
-class SyncDeviceFactsInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
-):
-    datasource: StrictStr = Field(
-        "nornir",
-        description="Service to use as source for device facts",
-    )
-    timeout: StrictInt = Field(
-        60,
-        description="Timeout in seconds for datasource jobs",
-    )
-    devices: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of NetBox devices to sync facts for",
-    )
-    batch_size: StrictInt = Field(
-        10,
-        description="Number of devices to process per batch",
-        alias="batch-size",
-    )
-
-
-class CheckDeviceSyncInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
-):
-    devices: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of NetBox devices to check sync state for",
-    )
-    timeout: StrictInt = Field(
-        60,
-        description="Timeout in seconds for Nornir parse_ttp jobs",
-    )
-    check_interfaces: StrictBool = Field(
-        True,
-        description="Check interface sync state",
-        json_schema_extra={"presence": True},
-        alias="check-interfaces",
-    )
-    check_mac_addresses: StrictBool = Field(
-        True,
-        description="Check MAC address sync state",
-        json_schema_extra={"presence": True},
-        alias="check-mac-addresses",
-    )
-    check_ip_addresses: StrictBool = Field(
-        True,
-        description="Check IP address sync state",
-        json_schema_extra={"presence": True},
-        alias="check-ip-addresses",
-    )
-    check_bgp_peerings: StrictBool = Field(
-        True,
-        description="Check BGP peering sync state",
-        json_schema_extra={"presence": True},
-        alias="check-bgp-peerings",
-    )
-
-
-class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
-    devices: Union[None, List[StrictStr]] = Field(
-        None,
-        description="List of NetBox devices to sync",
-    )
-    timeout: StrictInt = Field(
-        60,
-        description="Timeout in seconds for Nornir parse_ttp jobs",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Return diff without writing to NetBox",
-        json_schema_extra={"presence": True},
-        alias="dry-run",
-    )
-    process_deletions: StrictBool = Field(
-        False,
-        description="Process deletions for interfaces and BGP peerings",
-        json_schema_extra={"presence": True},
-        alias="process-deletions",
-    )
-
-
 # -----------------------------------------------------------------------
 # OUTPUT MODELS
 # -----------------------------------------------------------------------
-
-
-class GetDevicesResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Device data keyed by device name",
-    )
-
-
-class SyncDeviceFactsResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Device fact sync result keyed by device name",
-    )
-
-
-class CheckDeviceSyncResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Device sync check summary keyed by device name",
-    )
-
-
-class SyncAllResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Per-device sync results keyed by device name",
-    )
 
 
 # -----------------------------------------------------------------------

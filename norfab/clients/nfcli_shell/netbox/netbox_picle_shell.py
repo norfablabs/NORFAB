@@ -18,11 +18,11 @@ from pydantic import (
 )
 from rich.console import Console
 
-from norfab.workers.netbox_worker.graphql_tasks import GraphqlInput
-from norfab.workers.netbox_worker.netbox_models import NetboxCommonArgs
+from norfab.workers.netbox_worker.netbox_models import GraphqlInput, NetboxCommonArgs
 
 from ..common import log_error_or_result
 from .netbox_picle_shell_cache import NetboxServiceCache
+from .netbox_picle_shell_check_sync import CheckSyncCommands
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 from .netbox_picle_shell_create_bgp_peering import CreateBgpPeeringShell
 from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
@@ -39,6 +39,7 @@ from .netbox_picle_shell_get_containerlab_inventory import (
 from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_get_interfaces import GetInterfaces
 from .netbox_picle_shell_get_topology import GetTopology
+from .netbox_picle_shell_sync_all import SyncAllDevicesShell
 from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
 from .netbox_picle_shell_sync_device import SyncDeviceInventoryShell
 from .netbox_picle_shell_sync_interfaces import SyncInterfacesShell
@@ -46,8 +47,6 @@ from .netbox_picle_shell_sync_ip_addresses import SyncIpAddressesShell
 from .netbox_picle_shell_sync_mac_addresses import SyncMacAddressesShell
 from .netbox_picle_shell_update_bgp_peering import UpdateBgpPeeringShell
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
-from .netbox_picle_shell_check_sync import CheckSyncCommands
-from .netbox_picle_shell_sync_all import SyncAllDevicesShell
 
 RICHCONSOLE = Console()
 SERVICE = "netbox"

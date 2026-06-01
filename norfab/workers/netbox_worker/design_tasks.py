@@ -12,8 +12,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    StrictBool,
-    StrictStr,
     ValidationError,
     create_model,
 )
@@ -22,7 +20,11 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import slugify
 
-from .netbox_models import NetboxFastApiArgs
+from .netbox_models import (
+    CreateDesignInput,
+    CreateDesignResult,
+    NetboxFastApiArgs,
+)
 
 log = logging.getLogger(__name__)
 
@@ -84,39 +86,6 @@ _DMCG_CONFIG = GenerateConfig(
     force_optional_for_required_fields=True,
     allow_extra_fields=False,
 )
-
-
-class CreateDesignInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    design_data: Union[StrictStr, dict[StrictStr, Any]] = Field(
-        ...,
-        description="NetBox design data as YAML string, URL, or dictionary",
-        alias="design-data",
-    )
-    context: Union[StrictStr, dict[StrictStr, Any]] = Field(
-        {},
-        description="Template context as YAML string, URL, or dictionary",
-    )
-    instance: Union[None, StrictStr] = Field(
-        None,
-        description="NetBox instance name to target",
-    )
-    dry_run: StrictBool = Field(
-        False,
-        description="Validate design without writing to NetBox",
-        alias="dry-run",
-        json_schema_extra={"presence": True},
-    )
-    branch: Union[None, StrictStr] = Field(
-        None,
-        description="NetBox branching plugin branch name to use",
-    )
-
-
-class CreateDesignResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="NetBox design creation result data",
-    )
 
 
 def _collect_schema_refs(

@@ -1,7 +1,6 @@
 import importlib.metadata
 import logging
 import os
-import re
 import sys
 import time
 import urllib.parse
@@ -13,7 +12,6 @@ import pynetbox
 import requests
 from deepdiff import DeepDiff
 from diskcache import FanoutCache
-from pydantic import BaseModel, Field, StrictBool, StrictStr
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from norfab.core.worker import Job, NFPWorker, Task
@@ -30,7 +28,25 @@ from .graphql_tasks import NetboxGraphqlTasks
 from .interfaces_tasks import NetboxInterfacesTasks
 from .ip_tasks import NetboxIpTasks
 from .netbox_crud import NetboxCrudTasks
-from .netbox_models import NetboxFastApiArgs
+from .netbox_models import (
+    CacheClearInput,
+    CacheClearResult,
+    CacheGetInput,
+    CacheGetResult,
+    CacheListInput,
+    CacheListResult,
+    GetCompatibilityInput,
+    GetCompatibilityResult,
+    GetInventoryInput,
+    GetInventoryResult,
+    GetNetboxStatusInput,
+    GetNetboxStatusResult,
+    GetVersionInput,
+    GetVersionResult,
+    NetboxFastApiArgs,
+    RestInput,
+    RestResult,
+)
 from .nornir_inventory_tasks import NetboxNornirInventoryTasks
 from .prefix_tasks import NetboxPrefixTasks
 from .topology_tasks import NetboxTopologyTasks
@@ -43,136 +59,6 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 # NETBOX WORKER TASKS MODELS
 # --------------------------------------------------------------------------
-
-
-class GetInventoryInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    pass
-
-
-class GetInventoryResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="NetBox worker inventory data",
-    )
-
-
-class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    pass
-
-
-class GetVersionResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="NetBox worker package and service versions",
-    )
-
-
-class GetNetboxStatusInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    instance: Union[None, StrictStr] = Field(
-        None,
-        description="NetBox instance name to target",
-    )
-
-
-class GetNetboxStatusResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="NetBox status data keyed by instance name",
-    )
-
-
-class GetCompatibilityInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    pass
-
-
-class GetCompatibilityResult(Result):
-    result: dict[StrictStr, Union[StrictBool, None]] = Field(
-        {},
-        description="NetBox compatibility state keyed by instance name",
-    )
-
-
-class CacheListInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    keys: StrictStr = Field(
-        "*",
-        description="Glob pattern to match cache keys",
-    )
-    details: StrictBool = Field(
-        False,
-        description="Return cache key age and expiry details",
-        json_schema_extra={"presence": True},
-    )
-
-
-class CacheListResult(Result):
-    result: list[Any] = Field(
-        [],
-        description="Cache keys or cache key details",
-    )
-
-
-class CacheClearInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    key: Union[None, StrictStr] = Field(
-        None,
-        description="Cache key to remove",
-    )
-    keys: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern of cache keys to remove",
-    )
-
-
-class CacheClearResult(Result):
-    result: Union[list[StrictStr], StrictStr] = Field(
-        [],
-        description="Removed cache keys or no-op message",
-    )
-
-
-class CacheGetInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    key: Union[None, StrictStr] = Field(
-        None,
-        description="Cache key to retrieve",
-    )
-    keys: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern of cache keys to retrieve",
-    )
-    raise_missing: StrictBool = Field(
-        False,
-        description="Raise an error when requested cache key is missing",
-        alias="raise-missing",
-        json_schema_extra={"presence": True},
-    )
-
-
-class CacheGetResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Cache values keyed by cache key",
-    )
-
-
-class RestInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    instance: Union[None, StrictStr] = Field(
-        None,
-        description="NetBox instance name to target",
-    )
-    method: StrictStr = Field(
-        "get",
-        description="HTTP method to use",
-    )
-    api: StrictStr = Field(
-        "",
-        description="NetBox API path under /api",
-    )
-
-
-class RestResult(Result):
-    result: Any = Field(
-        {},
-        description="NetBox REST API response payload",
-    )
 
 
 class NetboxWorker(
