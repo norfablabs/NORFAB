@@ -401,6 +401,9 @@ class NorFabShell(BaseModel):
     fastapi: fastapi_picle_shell.FastAPIServiceCommands = Field(
         None, description="FastAPI service"
     )
+    fastmcp: fastmcp_picle_shell.FastMCPServiceCommands = Field(
+        None, description="FastMCP service"
+    )
     fakenos: fakenos_picle_shell.FakeNOSServiceCommands = Field(
         None, description="FakeNOS service"
     )

@@ -479,7 +479,9 @@ class FastAPIWorker(NFPWorker):
         os.kill(os.getpid(), signal.SIGTERM)
 
     @Task(
-        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        input=GetVersionInput,
+        output=GetVersionResult,
+        fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
                 "title": "Get Version",
@@ -744,7 +746,9 @@ class FastAPIWorker(NFPWorker):
         )
 
     @Task(
-        input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]},
+        input=DiscoverInput,
+        output=DiscoverResult,
+        fastapi={"methods": ["POST"]},
         mcp={
             "annotations": {
                 "title": "Discover FastAPI Tasks",

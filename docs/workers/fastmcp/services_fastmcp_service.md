@@ -36,6 +36,7 @@ FastMCP Service supports a small set of tasks to manage MCP exposure.
 | Task | Description | Use Cases |
 |------|-------------|-----------|
 | **[get_tools](services_fastmcp_service_task_get_tools.md)** | Return tools exposed by FastMCP worker (optionally filtered). | Tool discovery, debugging integrations, building MCP allow-lists. |
+| **[auth](services_fastmcp_service_task_auth.md)** | Store, list, delete, and check bearer tokens for optional MCP authentication. | Securing MCP access, rotating client tokens, auditing active tokens. |
 
 ## FastMCP Service Show Commands
 
@@ -59,6 +60,22 @@ root
             ├── brief:    show tools names only
             ├── service:    filter tools by service name
             └── name:    filter tools by name using glob pattern
+nf#
+```
+
+## FastMCP Service Auth Commands
+
+FastMCP service shell supports bearer token management commands:
+
+```
+nf#man tree fastmcp.auth
+root
+└── fastmcp:    FastMCP service
+    └── auth:    Manage auth tokens
+        ├── create-token:    Create authentication token
+        ├── list-tokens:    Retrieve authentication tokens
+        ├── delete-token:    Delete existing authentication token
+        └── check-token:    Check if given token valid
 nf#
 ```
 

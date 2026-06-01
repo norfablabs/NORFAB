@@ -102,7 +102,9 @@ class WorkflowWorker(NFPWorker):
         pass
 
     @Task(
-        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        input=GetVersionInput,
+        output=GetVersionResult,
+        fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
                 "title": "Get Version",
@@ -318,7 +320,9 @@ class WorkflowWorker(NFPWorker):
         return False
 
     @Task(
-        input=RunInput, output=RunResult, fastapi={"methods": ["POST"]},
+        input=RunInput,
+        output=RunResult,
+        fastapi={"methods": ["POST"]},
         mcp={
             "annotations": {
                 "title": "Run Workflow",

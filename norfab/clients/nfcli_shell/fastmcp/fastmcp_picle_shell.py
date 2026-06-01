@@ -11,9 +11,10 @@ from pydantic import (
 from norfab.workers.fastmcp_worker.fastmcp_worker import GetToolsInput
 
 from ..common import ClientRunJobArgs, log_error_or_result
+from .fastmcp_picle_shell_auth import FastMCPAuthCommandsModel
 from .fastmcp_picle_shell_discover import Discover
 
-SERVICE = "fasmcp"
+SERVICE = "fastmcp"
 log = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------------------------
@@ -145,6 +146,7 @@ class FastMCPShowCommandsModel(BaseModel):
 
 
 class FastMCPServiceCommands(BaseModel):
+    auth: FastMCPAuthCommandsModel = Field(None, description="Manage auth tokens")
     discover: Discover = Field(
         None, description="Discover NorFab services tasks and create tools"
     )

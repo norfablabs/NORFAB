@@ -208,7 +208,8 @@ clientagent = [
     "langgraph-checkpoint-sqlite"
 ]
 fastmcpservice = [
-    "mcp"
+    "mcp",
+    "diskcache"
 ]
 fakenosservice = [
     "fakenos"

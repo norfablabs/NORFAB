@@ -5,15 +5,18 @@ import signal
 import sys
 import threading
 import time
+from datetime import datetime
 from fnmatch import fnmatch
 from typing import Any, Optional, Union
 
 from diskcache import FanoutCache
 from mcp import types
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+from mcp.server.auth.provider import AccessToken
+from mcp.server.auth.settings import AuthSettings
+from pydantic import AnyHttpUrl, BaseModel, Field, StrictBool, StrictInt, StrictStr
 
-from norfab.core.worker import NFPWorker, Task
+from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
 SERVICE = "fastmcp"
@@ -105,6 +108,82 @@ class GetStatusResult(Result):
         {},
         description="FastMCP server status",
     )
+
+
+class BearerTokenStoreInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    username: StrictStr = Field(..., description="User name to store the token for")
+    token: StrictStr = Field(..., description="Bearer token string to store")
+    expire: Union[None, StrictInt] = Field(
+        None,
+        description="Token expiration time in seconds",
+    )
+
+
+class BoolResult(Result):
+    result: StrictBool = Field(
+        False,
+        description="True when the operation succeeds",
+    )
+
+
+class BearerTokenDeleteInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    username: Union[None, StrictStr] = Field(
+        None, description="User name whose tokens should be deleted"
+    )
+    token: Union[None, StrictStr] = Field(
+        None, description="Bearer token string to delete"
+    )
+
+
+class BearerTokenListInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    username: Union[None, StrictStr] = Field(
+        None, description="User name to list tokens for"
+    )
+
+
+class BearerTokenPayload(BaseModel):
+    username: StrictStr = Field("", description="Token owner user name")
+    token: StrictStr = Field("", description="Bearer token string")
+    age: StrictStr = Field("", description="Token age")
+    creation: StrictStr = Field("", description="Token creation timestamp")
+    expires: StrictStr = Field("", description="Token expiration timestamp")
+
+
+class BearerTokenListResult(Result):
+    result: list[BearerTokenPayload] = Field(
+        [],
+        description="Bearer token records",
+    )
+
+
+class BearerTokenCheckInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    token: StrictStr = Field(..., description="Bearer token string to check")
+
+
+class DiskcacheBearerTokenVerifier:
+    """
+    MCP bearer token verifier backed by the worker diskcache token database.
+    """
+
+    def __init__(self, cache: FanoutCache, scopes: list[str] | None = None) -> None:
+        self.cache = cache
+        self.scopes = scopes or []
+
+    async def verify_token(self, token: str) -> AccessToken | None:
+        self.cache.expire()
+        cache_key = f"bearer_token::{token}"
+        token_data, expires, tag = self.cache.get(
+            cache_key, default=None, expire_time=True, tag=True
+        )
+        if token_data is None:
+            return None
+
+        return AccessToken(
+            token=token,
+            client_id=token_data.get("username") or tag or "unknown",
+            scopes=self.scopes,
+            expires_at=int(expires) if expires is not None else None,
+        )
 
 
 def is_task_allowed_by_policy(
@@ -244,6 +323,9 @@ class FastMCPWorker(NFPWorker):
         self.fastmcp_inventory = self.load_inventory()
         self.fastmcp_inventory.setdefault("host", "0.0.0.0")
         self.fastmcp_inventory.setdefault("port", 8001)
+        self.fastmcp_inventory.setdefault("authentication_enabled", False)
+        self.fastmcp_inventory.setdefault("auth_bearer", {})
+        self.authentication_enabled = self.is_authentication_enabled()
 
         # instantiate cache
         self.cache_dir = os.path.join(self.base_dir, "cache")
@@ -285,8 +367,53 @@ class FastMCPWorker(NFPWorker):
     def worker_exit(self) -> None:
         os.kill(os.getpid(), signal.SIGTERM)
 
+    def is_authentication_enabled(self) -> bool:
+        """
+        Return True when MCP bearer token authentication is enabled in inventory.
+        """
+        value = self.fastmcp_inventory.get("authentication_enabled", False)
+        if isinstance(value, str):
+            return value.lower() in ("1", "true", "yes", "on")
+        return value is True
+
+    def get_auth_server_url(self) -> str:
+        """
+        Return the default public MCP auth/resource URL.
+        """
+        host = self.fastmcp_inventory["host"]
+        if host in ("0.0.0.0", "::", ""):
+            host = "127.0.0.1"
+        elif ":" in host and not host.startswith("["):
+            host = f"[{host}]"
+
+        return f"http://{host}:{self.fastmcp_inventory['port']}"
+
+    def get_auth_settings(self) -> AuthSettings:
+        """
+        Build MCP authentication settings from FastMCP inventory.
+        """
+        auth_bearer = self.fastmcp_inventory.get("auth_bearer", {})
+        auth_server_url = self.get_auth_server_url()
+
+        return AuthSettings(
+            issuer_url=AnyHttpUrl(auth_bearer.get("issuer_url", auth_server_url)),
+            resource_server_url=AnyHttpUrl(
+                auth_bearer.get("resource_server_url", auth_server_url)
+            ),
+            required_scopes=auth_bearer.get("required_scopes"),
+        )
+
+    def get_token_scopes(self) -> list[str]:
+        """
+        Return scopes assigned to locally verified bearer tokens.
+        """
+        auth_bearer = self.fastmcp_inventory.get("auth_bearer", {})
+        return auth_bearer.get("token_scopes", auth_bearer.get("required_scopes", []))
+
     @Task(
-        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        input=GetVersionInput,
+        output=GetVersionResult,
+        fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
                 "title": "Get Version",
@@ -351,7 +478,9 @@ class FastMCPWorker(NFPWorker):
         )
 
     @Task(
-        input=GetToolsInput, output=GetToolsResult, fastapi={"methods": ["GET"]},
+        input=GetToolsInput,
+        output=GetToolsResult,
+        fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
                 "title": "Get MCP Tools",
@@ -401,8 +530,120 @@ class FastMCPWorker(NFPWorker):
 
         return ret
 
+    @Task(input=BearerTokenStoreInput, output=BoolResult, fastapi=False, mcp=False)
+    def bearer_token_store(
+        self, job: Job, username: str, token: str, expire: int = None
+    ) -> Result:
+        """
+        Store a bearer token in the FastMCP worker token database.
+        """
+        expire = expire or self.fastmcp_inventory.get("auth_bearer", {}).get(
+            "token_ttl", expire
+        )
+        self.cache.expire()
+        cache_key = f"bearer_token::{token}"
+        if cache_key in self.cache:
+            user_token = self.cache.get(cache_key)
+        else:
+            user_token = {
+                "token": token,
+                "username": username,
+                "created": str(datetime.now()),
+            }
+        self.cache.set(cache_key, user_token, expire=expire, tag=username)
+
+        return Result(task=f"{self.name}:bearer_token_store", result=True)
+
+    @Task(input=BearerTokenDeleteInput, output=BoolResult, fastapi=False, mcp=False)
+    def bearer_token_delete(
+        self, job: Job, username: str = None, token: str = None
+    ) -> Result:
+        """
+        Delete bearer tokens by username or token value.
+        """
+        self.cache.expire()
+        token_removed_count = 0
+        if token:
+            cache_key = f"bearer_token::{token}"
+            if cache_key in self.cache:
+                if self.cache.delete(cache_key, retry=True):
+                    token_removed_count = 1
+                else:
+                    raise RuntimeError(f"Failed to remove {username} token from cache")
+        elif username:
+            token_removed_count = self.cache.evict(tag=username, retry=True)
+        else:
+            raise Exception("Cannot delete, either username or token must be provided")
+
+        log.info(
+            f"{self.name} removed {token_removed_count} token(s) for user {username}"
+        )
+
+        return Result(task=f"{self.name}:bearer_token_delete", result=True)
+
     @Task(
-        input=DiscoverInput, output=DiscoverResult, fastapi={"methods": ["POST"]},
+        input=BearerTokenListInput,
+        output=BearerTokenListResult,
+        fastapi=False,
+        mcp=False,
+    )
+    def bearer_token_list(self, job: Job, username: str = None) -> Result:
+        """
+        List bearer tokens stored in the FastMCP worker token database.
+        """
+        self.cache.expire()
+        ret = Result(task=f"{self.name}:bearer_token_list", result=[])
+
+        for cache_key in self.cache:
+            if not str(cache_key).startswith("bearer_token::"):
+                continue
+            token_data, expires, tag = self.cache.get(
+                cache_key, expire_time=True, tag=True
+            )
+            if username and tag != username:
+                continue
+            if expires is not None:
+                expires = datetime.fromtimestamp(expires)
+            creation = datetime.fromisoformat(token_data["created"])
+            age = datetime.now() - creation
+            ret.result.append(
+                {
+                    "username": token_data["username"],
+                    "token": token_data["token"],
+                    "age": str(age),
+                    "creation": str(creation),
+                    "expires": str(expires),
+                }
+            )
+
+        if not ret.result:
+            ret.result = [
+                {
+                    "username": "",
+                    "token": "",
+                    "age": "",
+                    "creation": "",
+                    "expires": "",
+                }
+            ]
+
+        return ret
+
+    @Task(input=BearerTokenCheckInput, output=BoolResult, fastapi=False, mcp=False)
+    def bearer_token_check(self, token: str, job: Job) -> Result:
+        """
+        Check if a bearer token is present and active in the FastMCP token database.
+        """
+        self.cache.expire()
+        cache_key = f"bearer_token::{token}"
+        return Result(
+            task=f"{self.name}:bearer_token_check", result=cache_key in self.cache
+        )
+
+    @Task(
+        input=DiscoverInput,
+        output=DiscoverResult,
+        fastapi={"methods": ["POST"]},
         mcp={
             "annotations": {
                 "title": "Discover MCP Tools",
@@ -430,7 +671,9 @@ class FastMCPWorker(NFPWorker):
         return ret
 
     @Task(
-        input=GetStatusInput, output=GetStatusResult, fastapi={"methods": ["GET"]},
+        input=GetStatusInput,
+        output=GetStatusResult,
+        fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
                 "title": "Get MCP Status",
@@ -517,11 +760,21 @@ class FastMCPWorker(NFPWorker):
         The FastMCP server is started in a separate thread using the
         "streamable-http" transport.
         """
-        self.app = FastMCP(
-            self.mcp_server_name,
-            port=self.fastmcp_inventory["port"],
-            host=self.fastmcp_inventory["host"],
-        )
+        fastmcp_kwargs = {
+            "port": self.fastmcp_inventory["port"],
+            "host": self.fastmcp_inventory["host"],
+        }
+        if self.authentication_enabled:
+            fastmcp_kwargs.update(
+                {
+                    "auth": self.get_auth_settings(),
+                    "token_verifier": DiskcacheBearerTokenVerifier(
+                        self.cache, scopes=self.get_token_scopes()
+                    ),
+                }
+            )
+
+        self.app = FastMCP(self.mcp_server_name, **fastmcp_kwargs)
 
         @self.app._mcp_server.list_tools()
         async def list_tools() -> list[types.Tool]:

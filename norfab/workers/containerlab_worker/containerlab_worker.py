@@ -377,7 +377,9 @@ class ContainerlabWorker(NFPWorker):
         os.kill(os.getpid(), signal.SIGTERM)
 
     @Task(
-        input=GetVersionInput, output=GetVersionResult, fastapi={"methods": ["GET"]},
+        input=GetVersionInput,
+        output=GetVersionResult,
+        fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
                 "title": "Get Version",
@@ -634,7 +636,9 @@ class ContainerlabWorker(NFPWorker):
             return output, logs, proc
 
     @Task(
-        input=DeployInput, output=DeployResult, fastapi={"methods": ["POST"]},
+        input=DeployInput,
+        output=DeployResult,
+        fastapi={"methods": ["POST"]},
         mcp={
             "annotations": {
                 "title": "Deploy Lab",
@@ -781,7 +785,9 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     @Task(
-        input=InspectInput, output=InspectResult, fastapi={"methods": ["GET"]},
+        input=InspectInput,
+        output=InspectResult,
+        fastapi={"methods": ["GET"]},
         mcp={
             "annotations": {
                 "title": "Inspect Lab",
@@ -847,7 +853,9 @@ class ContainerlabWorker(NFPWorker):
         return ret
 
     @Task(
-        input=SaveInput, output=LabActionResult, fastapi={"methods": ["POST"]},
+        input=SaveInput,
+        output=LabActionResult,
+        fastapi={"methods": ["POST"]},
         mcp={
             "annotations": {
                 "title": "Save Lab",

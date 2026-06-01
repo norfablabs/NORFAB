@@ -177,6 +177,7 @@ nav:
     - Overview: workers/fastmcp/services_fastmcp_service.md
     - Inventory: workers/fastmcp/services_fastmcp_service_inventory.md
     - Tasks:
+      - Auth: workers/fastmcp/services_fastmcp_service_task_auth.md
       - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
   - Workflow:
     - Overview: workers/workflow/services_workflow_service.md

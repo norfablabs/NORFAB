@@ -7,6 +7,7 @@
 3. Adding powershell installation script and updating install instructions - this script install Norfab going through interactive installation process.
 4. Adding `run_shell_cmd` task to workers to run arbitrary shell command on the host, adding picle shell `workers run-shell-command ..` command too
 5. Adding `ignore_peer_ranges` argument to sync bgp peerings task
+6. Adding bearer token authentication support for fastmcp service, together with related task and nfcli shell commands
 
 ## ENHANCEMENTS
 

@@ -35,6 +35,11 @@ Sample FastMCP worker inventory definition
         # MCP server bind settings
         host: "127.0.0.1"
         port: 8001
+
+        # Optional bearer authentication for MCP streamable HTTP
+        authentication_enabled: false
+        auth_bearer:
+          token_ttl: null
         
         # Optional sections reserved for future/extended configuration
         fastmcp: {}
@@ -127,6 +132,42 @@ For local development and VS Code MCP integration, prefer `127.0.0.1`.
 **port**
 
 TCP port to serve MCP HTTP endpoint on. Default is `8001`.
+
+---
+
+## Authentication
+
+FastMCP bearer authentication is disabled by default. Enable it with
+`authentication_enabled: true` to require MCP clients to send
+`Authorization: Bearer <token>` on the MCP streamable HTTP endpoint.
+
+```yaml
+service: fastmcp
+host: "127.0.0.1"
+port: 8001
+
+authentication_enabled: true
+auth_bearer:
+  token_ttl: 86400
+  issuer_url: "http://127.0.0.1:8001"
+  resource_server_url: "http://127.0.0.1:8001"
+  required_scopes: []
+```
+
+Tokens are stored in the FastMCP worker diskcache using the same
+`bearer_token::<token>` key format as the FastAPI worker:
+
+```python
+nfclient.run_job(
+    "fastmcp",
+    "bearer_token_store",
+    kwargs={"username": "automation", "token": "secret-token", "expire": 86400},
+)
+```
+
+Use `bearer_token_list`, `bearer_token_check`, and `bearer_token_delete` to
+inspect or remove tokens. Token management tasks are available through NorFab
+client jobs and are not exposed as MCP tools.
 
 ---
 

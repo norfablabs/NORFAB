@@ -2,10 +2,14 @@ import asyncio
 import json
 import pprint
 import time
+from datetime import datetime
 
 import pytest
+from diskcache import FanoutCache
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
+
+from norfab.workers.fastmcp_worker.fastmcp_worker import DiskcacheBearerTokenVerifier
 
 
 @pytest.fixture
@@ -82,6 +86,72 @@ class TestFastMCPWorker:
             assert all(
                 data["result"][k] for k in ["name", "url", "tools_count"]
             ), f"{worker_name} status data incomplete"
+
+    def test_bearer_token_store_check_list_delete(self, nfclient):
+        username = "test_fastmcp_bearer_token"
+        token = "fastmcp-token-1"
+
+        nfclient.run_job(
+            "fastmcp",
+            "bearer_token_delete",
+            kwargs={"username": username},
+        )
+
+        stored = nfclient.run_job(
+            "fastmcp",
+            "bearer_token_store",
+            kwargs={"username": username, "token": token, "expire": 60},
+        )
+        pprint.pprint(stored)
+        for worker_name, results in stored.items():
+            assert results["result"] == True, f"{worker_name} failed storing token"
+
+        checked = nfclient.run_job(
+            "fastmcp", "bearer_token_check", kwargs={"token": token}
+        )
+        pprint.pprint(checked)
+        for worker_name, results in checked.items():
+            assert results["result"] == True, f"{worker_name} token is not valid"
+
+        listed = nfclient.run_job(
+            "fastmcp", "bearer_token_list", kwargs={"username": username}
+        )
+        pprint.pprint(listed)
+        for worker_name, results in listed.items():
+            assert results["result"][0]["username"] == username
+            assert results["result"][0]["token"] == token
+
+        deleted = nfclient.run_job(
+            "fastmcp", "bearer_token_delete", kwargs={"token": token}
+        )
+        pprint.pprint(deleted)
+        for worker_name, results in deleted.items():
+            assert results["result"] == True, f"{worker_name} failed deleting token"
+
+
+class TestFastMCPBearerVerifier:
+    def test_diskcache_bearer_token_verifier(self, tmp_path):
+        cache = FanoutCache(directory=str(tmp_path / "cache"))
+        cache.set(
+            "bearer_token::valid-token",
+            {
+                "token": "valid-token",
+                "username": "pytest",
+                "created": str(datetime.now()),
+            },
+            expire=60,
+            tag="pytest",
+        )
+
+        verifier = DiskcacheBearerTokenVerifier(cache, scopes=["norfab"])
+
+        valid = asyncio.run(verifier.verify_token("valid-token"))
+        assert valid is not None
+        assert valid.client_id == "pytest"
+        assert valid.scopes == ["norfab"]
+
+        assert asyncio.run(verifier.verify_token("missing-token")) is None
+        cache.close()
 
 
 class TestGetTools:

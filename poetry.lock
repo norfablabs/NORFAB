@@ -988,7 +988,7 @@ description = "Disk Cache -- Disk and file backed persistent cache."
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "extra == \"netboxservice\" or extra == \"fastapiservice\" or extra == \"full\""
+markers = "extra == \"netboxservice\" or extra == \"fastapiservice\" or extra == \"fastmcpservice\" or extra == \"full\""
 files = [
     {file = "diskcache-5.6.3-py3-none-any.whl", hash = "sha256:5e31b2d5fbad117cc363ebaf6b689474db18a1f6438bc82358b024abd4c2ca19"},
     {file = "diskcache-5.6.3.tar.gz", hash = "sha256:2c3a3fa2743d8535d832ec61c2054a1641f41775aa7c556758a109941e33e4fc"},
@@ -7820,7 +7820,7 @@ clientagent = ["langchain-anthropic", "langchain-mcp-adapters", "langchain-ollam
 docs = ["mkdocs", "mkdocs-material", "mkdocs-material-extensions", "mkdocstrings", "pygments", "pymdown-extensions"]
 fakenosservice = ["fakenos"]
 fastapiservice = ["diskcache", "fastapi", "python-multipart", "uvicorn"]
-fastmcpservice = ["mcp"]
+fastmcpservice = ["diskcache", "mcp"]
 full = ["N2G", "cerberus", "diskcache", "dnspython", "fastapi", "httpx", "jmespath", "langchain", "langchain-community", "langchain-ollama", "lxml", "mcp", "napalm", "ncclient", "netmiko", "nornir", "nornir-napalm", "nornir-netmiko", "nornir-salt", "nornir-scrapli", "ntc-templates", "ollama", "paramiko", "picle", "puresnmp", "pydantic", "pydantic", "pygnmi", "pynetbox", "python-multipart", "pythonping", "requests", "requests", "rich", "robotframework", "scrapli", "scrapli-community", "scrapli-netconf", "tabulate", "tabulate", "textfsm", "ttp", "ttp-templates", "uvicorn", "xmltodict"]
 netboxservice = ["datamodel-code-generator", "deepdiff", "diskcache", "httpx", "pynetbox", "requests"]
 nfcli = ["nornir-salt", "picle", "pydantic", "pyreadline3", "rich", "tabulate"]
@@ -7831,4 +7831,4 @@ tui = ["textual"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<=3.14"
-content-hash = "30eb97a1cd6ae833a6cb4447829126eb67f7dffdffdcec008fa043ffcd9b17c0"
+content-hash = "af3915a0e1ba0d2af4a50f681710647d5a291a7d255d5f5ba6a914d1a0592edc"
