@@ -579,6 +579,29 @@ class NetboxDevicesTasks:
         branch: str = None,
         dry_run: bool = False,
         process_deletions: bool = False,
+        interfaces_filter_by_name: Union[None, str] = None,
+        interfaces_filter_by_description: Union[None, str] = None,
+        interfaces_update_type: Union[None, bool] = False,
+        interfaces_vlan_group: Union[None, str, int] = None,
+        mac_filter_by_name: Union[None, str] = None,
+        mac_filter_by_description: Union[None, str] = None,
+        mac_filter_by_mac: Union[None, str] = None,
+        ip_anycast_ranges: Union[None, list] = None,
+        ip_ignore_ranges: Union[None, list] = None,
+        ip_create_prefixes: bool = True,
+        ip_filter_by_name: Union[None, str] = None,
+        ip_filter_by_description: Union[None, str] = None,
+        ip_filter_by_prefix: Union[None, str] = None,
+        ip_filter_by_ip: Union[None, str] = None,
+        bgp_status: str = "active",
+        bgp_rir: Union[None, str] = None,
+        bgp_message: Union[None, str] = None,
+        bgp_name_template: str = "{device}_{name}",
+        bgp_filter_by_remote_as: Union[None, list] = None,
+        bgp_filter_by_peer_group: Union[None, list] = None,
+        bgp_filter_by_description: Union[None, str] = None,
+        bgp_ignore_peer_ranges: Union[None, list] = None,
+        bgp_vrf_custom_field: str = "vrf",
         **kwargs: Any,
     ) -> Result:
         """
@@ -606,6 +629,29 @@ class NetboxDevicesTasks:
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
             process_deletions (bool): Process deletions for interfaces and BGP peerings. Defaults to False.
+            interfaces_filter_by_name (str, optional): Glob pattern to filter interfaces by name.
+            interfaces_filter_by_description (str, optional): Glob pattern to filter interfaces by description.
+            interfaces_update_type (bool, optional): Update existing NetBox interface types.
+            interfaces_vlan_group (str, int, optional): VLAN group name, slug, or ID for interface VLAN resolution.
+            mac_filter_by_name (str, optional): Glob pattern to filter MAC sync interfaces by name.
+            mac_filter_by_description (str, optional): Glob pattern to filter MAC sync interfaces by description.
+            mac_filter_by_mac (str, optional): Glob pattern to filter MAC addresses.
+            ip_anycast_ranges (list, optional): IP prefixes to classify as anycast.
+            ip_ignore_ranges (list, optional): IP prefixes to exclude from IP sync.
+            ip_create_prefixes (bool): Create missing prefixes during IP sync.
+            ip_filter_by_name (str, optional): Glob pattern to filter IP sync interfaces by name.
+            ip_filter_by_description (str, optional): Glob pattern to filter IP sync interfaces by description.
+            ip_filter_by_prefix (str, optional): IP prefix to restrict synced IP addresses.
+            ip_filter_by_ip (str, optional): Glob pattern to restrict synced IP addresses.
+            bgp_status (str): Status to set on created/updated BGP sessions.
+            bgp_rir (str, optional): RIR name to use when creating new ASNs.
+            bgp_message (str, optional): Changelog message for BGP operations.
+            bgp_name_template (str): Template string for BGP session names.
+            bgp_filter_by_remote_as (list, optional): Only sync sessions matching remote AS numbers.
+            bgp_filter_by_peer_group (list, optional): Only sync sessions matching peer groups.
+            bgp_filter_by_description (str, optional): Only sync sessions matching description glob.
+            bgp_ignore_peer_ranges (list, optional): Prefixes to ignore BGP peers.
+            bgp_vrf_custom_field (str): BGP session custom field name used to store VRF reference.
             **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
@@ -651,6 +697,10 @@ class NetboxDevicesTasks:
             devices=list(devices),
             branch=branch,
             process_deletions=process_deletions,
+            filter_by_name=interfaces_filter_by_name,
+            filter_by_description=interfaces_filter_by_description,
+            update_type=interfaces_update_type,
+            vlan_group=interfaces_vlan_group,
         )
         if intf_result.errors:
             job.event("interface sync completed with errors", severity="WARNING")
@@ -667,6 +717,9 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
+            filter_by_name=mac_filter_by_name,
+            filter_by_description=mac_filter_by_description,
+            filter_by_mac=mac_filter_by_mac,
         )
         if mac_result.errors:
             job.event("MAC address sync completed with errors", severity="WARNING")
@@ -683,6 +736,13 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
+            anycast_ranges=ip_anycast_ranges,
+            ignore_ranges=ip_ignore_ranges,
+            create_prefixes=ip_create_prefixes,
+            filter_by_name=ip_filter_by_name,
+            filter_by_description=ip_filter_by_description,
+            filter_by_prefix=ip_filter_by_prefix,
+            filter_by_ip=ip_filter_by_ip,
         )
         if ip_result.errors:
             job.event("IP address sync completed with errors", severity="WARNING")
@@ -695,11 +755,20 @@ class NetboxDevicesTasks:
         bgp_result = self.sync_bgp_peerings(
             job=job,
             instance=instance,
+            status=bgp_status,
             dry_run=dry_run,
             timeout=timeout,
             devices=list(devices),
             branch=branch,
             process_deletions=process_deletions,
+            rir=bgp_rir,
+            message=bgp_message,
+            name_template=bgp_name_template,
+            filter_by_remote_as=bgp_filter_by_remote_as,
+            filter_by_peer_group=bgp_filter_by_peer_group,
+            filter_by_description=bgp_filter_by_description,
+            ignore_peer_ranges=bgp_ignore_peer_ranges,
+            vrf_custom_field=bgp_vrf_custom_field,
         )
         if bgp_result.errors:
             job.event("BGP peerings sync completed with errors", severity="WARNING")

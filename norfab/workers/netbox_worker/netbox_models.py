@@ -776,6 +776,123 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         json_schema_extra={"presence": True},
         alias="process-deletions",
     )
+    interfaces_filter_by_name: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter interfaces by name",
+        alias="interfaces-filter-by-name",
+    )
+    interfaces_filter_by_description: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter interfaces by description",
+        alias="interfaces-filter-by-description",
+    )
+    interfaces_update_type: Union[None, StrictBool] = Field(
+        False,
+        description="Update existing NetBox interface types",
+        json_schema_extra={"presence": True},
+        alias="interfaces-update-type",
+    )
+    interfaces_vlan_group: Union[None, StrictStr, StrictInt] = Field(
+        None,
+        description="VLAN group name, slug, or ID for interface VLAN resolution",
+        alias="interfaces-vlan-group",
+    )
+    mac_filter_by_name: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter MAC sync interfaces by name",
+        alias="mac-filter-by-name",
+    )
+    mac_filter_by_description: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter MAC sync interfaces by description",
+        alias="mac-filter-by-description",
+    )
+    mac_filter_by_mac: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter MAC addresses",
+        alias="mac-filter-by-mac",
+    )
+    ip_anycast_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
+        None,
+        description="IP prefix(es) to classify as anycast",
+        alias="ip-anycast-ranges",
+    )
+    ip_ignore_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
+        None,
+        description="IP prefix(es) to exclude from IP sync",
+        alias="ip-ignore-ranges",
+    )
+    ip_create_prefixes: StrictBool = Field(
+        True,
+        description="Create missing prefixes during IP sync",
+        json_schema_extra={"presence": True},
+        alias="ip-create-prefixes",
+    )
+    ip_filter_by_name: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter IP sync interfaces by name",
+        alias="ip-filter-by-name",
+    )
+    ip_filter_by_description: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to filter IP sync interfaces by description",
+        alias="ip-filter-by-description",
+    )
+    ip_filter_by_prefix: Union[None, StrictStr] = Field(
+        None,
+        description="IP prefix to restrict synced IP addresses",
+        alias="ip-filter-by-prefix",
+    )
+    ip_filter_by_ip: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to restrict synced IP addresses",
+        alias="ip-filter-by-ip",
+    )
+    bgp_status: BgpSessionStatusEnum = Field(
+        "active",
+        description="Status to set on created/updated BGP sessions",
+        alias="bgp-status",
+    )
+    bgp_rir: Union[None, StrictStr] = Field(
+        None,
+        description="RIR name to use when creating new ASNs",
+        alias="bgp-rir",
+    )
+    bgp_message: Union[None, StrictStr] = Field(
+        None,
+        description="Changelog message for BGP operations",
+        alias="bgp-message",
+    )
+    bgp_name_template: StrictStr = Field(
+        "{device}_{name}",
+        description="Template string for BGP session names",
+        alias="bgp-name-template",
+    )
+    bgp_filter_by_remote_as: Union[None, List[int]] = Field(
+        None,
+        description="Only sync BGP sessions matching remote AS numbers",
+        alias="bgp-filter-by-remote-as",
+    )
+    bgp_filter_by_peer_group: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Only sync BGP sessions matching peer groups",
+        alias="bgp-filter-by-peer-group",
+    )
+    bgp_filter_by_description: Union[None, StrictStr] = Field(
+        None,
+        description="Only sync BGP sessions matching description glob",
+        alias="bgp-filter-by-description",
+    )
+    bgp_ignore_peer_ranges: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Prefix(es) to ignore BGP peers",
+        alias="bgp-ignore-peer-ranges",
+    )
+    bgp_vrf_custom_field: Union[StrictBool, StrictStr] = Field(
+        "vrf",
+        description="BGP session custom field name used to store VRF reference",
+        alias="bgp-vrf-custom-field",
+    )
 
 
 class GetDevicesResult(Result):
