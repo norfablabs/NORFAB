@@ -15,9 +15,13 @@ def resolve_vrf(
         return None
     if name.lower() in ["global", "default"]:
         return None
-    vrf_obj = nb.ipam.vrfs.get(name=name)
-    if vrf_obj:
-        return vrf_obj.id
+    vrf_objects = list(nb.ipam.vrfs.filter(name=name))
+    if vrf_objects:
+        if len(vrf_objects) > 1:
+            msg = f"Found multiple VRF in Netbox matching name '{name}', using VRF with ID {vrf_objects[0].id}"
+            log.warning(msg)
+            job.event(msg, severity="WARNING")
+        return vrf_objects[0].id
     try:
         new_vrf = nb.ipam.vrfs.create(name=name)
         msg = f"created VRF '{name}' in NetBox"
@@ -163,7 +167,7 @@ def resolve_ip(
     mask: str = None
     prefixes = list(nb.ipam.prefixes.filter(contains=address))
     if prefixes:
-        # pick up longest IP mask
+        # pick up longest prefix length for the mask
         mask = str(max([int(p.prefix.split("/")[1]) for p in prefixes]))
     if not mask:
         try:

@@ -961,6 +961,12 @@ class NetboxIpTasks:
                 if nb_ip["assigned_object_id"]:
                     # ip already assigned to same interface
                     if nb_ip["assigned_object_id"] == ip_live["assigned_object_id"]:
+                        # if Netbox IP has anycast role, override live IP to use anycast role too
+                        if nb_ip["role"] == "anycast":
+                            msg = f"Found existing Netbox IP with 'anycast' role {nb_ip['address']}, assigning anycast role to live IP"
+                            log.info(msg)
+                            job.event(msg)
+                            ip_live["role"] = "anycast"
                         # check if vrf or role need an update
                         if any(
                             nb_ip[k] != ip_live[k]
@@ -979,12 +985,21 @@ class NetboxIpTasks:
                 for nb_ip in matching_nb_ips:
                     # existing NB IP already assigned to an interface
                     if nb_ip["assigned_object_id"]:
-                        nb_ip_resolved_role = (
-                            resolve_ip_role(
-                                nb_ip["address"], nb_ip["interface"], anycast_nets
+                        # if existing Netbox IP role is anycast - override live IP role to anycast too
+                        if nb_ip["role"] == "anycast":
+                            msg = f"Found existing Netbox IP with 'anycast' role {nb_ip['address']}, assigning anycast role to live IP"
+                            log.info(msg)
+                            job.event(msg)
+                            nb_ip_resolved_role = "anycast"
+                            ip_live["role"] = "anycast"
+                        # attempt to resolve IP role
+                        else:
+                            nb_ip_resolved_role = (
+                                resolve_ip_role(
+                                    nb_ip["address"], nb_ip["interface"], anycast_nets
+                                )
+                                or nb_ip["role"]
                             )
-                            or nb_ip["role"]
-                        )
                         # add existing IP to updates if its role needs correcting
                         if nb_ip["role"] != nb_ip_resolved_role:
                             nb_ip_key = (

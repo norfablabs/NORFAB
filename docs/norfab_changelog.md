@@ -14,6 +14,7 @@
 1. Improving netbox Sync BGP peerings task to make better use of lookup cache for asn, vrf, rir, ip objects resolutions
 2. MCP service policy now enforced for tool calls not only for discovery
 3. Netbox sync device interfaces improved VLAN handling - now it creates vlan if its missing, added `vlan_group` argument to specify group to associate with vlan, otherwise it is associated with device site. Vlan retrieval for existing vlan helper is either via group, device site or global.
+4. Netbox service sync IP task updated to honor anycast role for existing Netbox IPs and re-use role anycast for discovered IPs
 
 ## BUGS
 
@@ -21,10 +22,12 @@
 2. Fixing IP sync prefixes filtering using `bulk_filter`
 3. Fixing IP creation logic to check existing ip first, and if not found proceed with find a suitable prefix
 4. Fixing `resolve_ip` helper function to pickup longest prefix length prefix to create IP in
+5. Fixing `resolve_vrf` function to detect when multiple VRF with same name present in netbox and to emit warning message to the user
 
 ## CHANGES
 
-1. Adding Pydantic task input and output models for all services, refactoring NFCLI shells to use these models.
+1. Adding Pydantic task input and output models for all services, refactoring NFCLI shells to use these models. 
+2. Moving pydantic models to dedicated per-worker files.
 
 ---
 
