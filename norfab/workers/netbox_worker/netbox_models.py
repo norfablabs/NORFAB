@@ -190,11 +190,11 @@ class SyncBgpPeeringsInput(
         description="Changelog message to record in NetBox for all create, update, and delete operations",
     )
     name_template: str = Field(
-        "{device}_{name}",
-        description=("Template f-string for BGP session names in NetBox. "),
+        "{{device}}_{{name}}",
+        description=("Jinja2 template string for BGP session names in NetBox. "),
         alias="name-template",
         examples=[
-            "Available variables: device, name, "
+            "Available variables: device, remote_device, name, "
             "description, local_address, local_as, remote_address, remote_as, "
             "vrf, state, peer_group."
         ],
@@ -320,11 +320,11 @@ class CreateBgpPeeringInput(
         ),
     )
     name_template: Union[None, StrictStr] = Field(
-        None,
-        description=("Template string for BGP session names."),
+        "{{device}}_{{vrf}}_{{remote_address}}",
+        description=("Jinja2 template string for BGP session names."),
         examples=[
-            "Available variables: device, local_address, remote_address. "
-            "Default: '{device}_{vrf}_{remote_address}'."
+            "Available variables: device, remote_device, "
+            "local_address, remote_address. Default: '{{device}}_{{vrf}}_{{remote_address}}'."
         ],
     )
     create_reverse: bool = Field(
@@ -864,8 +864,8 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         alias="bgp-message",
     )
     bgp_name_template: StrictStr = Field(
-        "{device}_{name}",
-        description="Template string for BGP session names",
+        "{{device}}_{{name}}",
+        description="Jinja2 template string for BGP session names",
         alias="bgp-name-template",
     )
     bgp_filter_by_remote_as: Union[None, List[int]] = Field(

@@ -7952,7 +7952,7 @@ class TestSyncBgpPeerings:
         """Custom name_template produces correctly named sessions in NetBox."""
         nb = get_pynetbox(nfclient)
         target_device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
-        template = "{device}_BGP_{name}"
+        template = "{{device}}_BGP_{{name}}"
 
         ret = nfclient.run_job(
             "netbox",

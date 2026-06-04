@@ -3,6 +3,8 @@ import ipaddress
 import logging
 from typing import Any, Dict, List, Union
 
+from jinja2 import Environment, StrictUndefined
+
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import expand_alphanumeric_range
@@ -21,6 +23,8 @@ from .netbox_models import (
 from .netbox_worker_utilities import resolve_ip, resolve_vrf
 
 log = logging.getLogger(__name__)
+
+BGP_NAME_TEMPLATE_ENV = Environment(undefined=StrictUndefined, autoescape=False)
 
 
 # ---------------------------------------------------------------------------
@@ -184,6 +188,64 @@ def get_p2p_peer_ip(cidr: str) -> Union[None, str]:
         return None
     except Exception:
         return None
+
+
+def _cached_bgp_ip_object(address: Union[None, str], lookup_cache: dict) -> Any:
+    """Return a cached pynetbox IP address object for a bare IP address."""
+    if not address:
+        return None
+    return lookup_cache.get(("ip_address_object", str(address)))
+
+
+def _cached_bgp_device_info(device_name: Union[None, str], lookup_cache: dict) -> dict:
+    """Return cached device ID/site/data dict used by create/update payload code."""
+    if not device_name:
+        return {}
+    device_obj = lookup_cache.get(("device_object", device_name))
+    if not device_obj:
+        return {}
+    return {
+        "id": lookup_cache.get(("device", device_name), device_obj.id),
+        "site_id": lookup_cache.get(("site", device_name)),
+        "data": dict(device_obj),
+    }
+
+
+def _bgp_session_template_context(session: dict, lookup_cache: dict) -> dict:
+    """Build the Jinja2 context for BGP session name rendering."""
+    context = dict(session)
+    device_name = session.get("device")
+    remote_device_name = session.get("remote_device_name")
+    if not remote_device_name:
+        ip_obj = _cached_bgp_ip_object(session.get("remote_address"), lookup_cache)
+        assigned_object = getattr(ip_obj, "assigned_object", None)
+        remote_device = getattr(assigned_object, "device", None)
+        remote_device_name = getattr(remote_device, "name", None)
+    context.pop("device", None)
+    context.pop("remote_device", None)
+    context.pop("device_name", None)
+    context.pop("remote_device_name", None)
+    device_obj = lookup_cache.get(("device_object", device_name))
+    remote_device_obj = lookup_cache.get(("device_object", remote_device_name))
+    if device_obj is not None:
+        context["device"] = device_obj
+    if remote_device_obj is not None:
+        context["remote_device"] = remote_device_obj
+    return context
+
+
+def render_bgp_session_name(
+    name_template: str, session: dict, lookup_cache: dict
+) -> str:
+    """Render a BGP session name using a Jinja2 template and cached NetBox objects."""
+    context = _bgp_session_template_context(session, lookup_cache)
+    return BGP_NAME_TEMPLATE_ENV.from_string(name_template).render(**context)
+
+
+def _remote_device_name_from_ip(ip_obj: Any) -> Union[None, str]:
+    assigned_object = getattr(ip_obj, "assigned_object", None)
+    remote_device = getattr(assigned_object, "device", None)
+    return getattr(remote_device, "name", None)
 
 
 def resolve_asn_from_source(
@@ -478,6 +540,143 @@ def _resolve_vrf_custom_field(
         log.warning(f"{worker_name} - {msg}")
         return False
     return vrf_custom_field
+
+
+def preseed_bgp_lookup_cache(
+    nb: Any,
+    bgp_sessions: List[dict],
+    lookup_cache: dict,
+    job: Job,
+    bulk_filter: Any,
+    worker_name: str,
+) -> None:
+    """Bulk-populate lookup_cache for BGP session IP, device, ASN, and VRF objects."""
+    lookup_cache = lookup_cache if lookup_cache is not None else {}
+    ip_values, device_names, asn_values, vrf_values = set(), set(), set(), set()
+
+    for session in bgp_sessions:
+        local_address = session.get("local_address")
+        remote_address = session.get("remote_address")
+        if local_address and ("ip_address_object", local_address) not in lookup_cache:
+            ip_values.add(local_address)
+        if remote_address and ("ip_address_object", remote_address) not in lookup_cache:
+            ip_values.add(remote_address)
+
+        device_name = session.get("device_name") or session.get("device")
+        remote_device_name = session.get("remote_device_name")
+        if device_name and ("device_object", device_name) not in lookup_cache:
+            device_names.add(device_name)
+        if (
+            remote_device_name
+            and ("device_object", remote_device_name) not in lookup_cache
+        ):
+            device_names.add(remote_device_name)
+
+        remote_device_name = _remote_device_name_from_ip(
+            _cached_bgp_ip_object(remote_address, lookup_cache)
+        )
+        if remote_device_name:
+            session["remote_device_name"] = remote_device_name
+            if ("device_object", remote_device_name) not in lookup_cache:
+                device_names.add(remote_device_name)
+
+        try:
+            local_as = int(session.get("local_as"))
+        except (TypeError, ValueError):
+            local_as = None
+        if local_as is not None and ("asn", local_as) not in lookup_cache:
+            asn_values.add(local_as)
+
+        try:
+            remote_as = int(session.get("remote_as"))
+        except (TypeError, ValueError):
+            remote_as = None
+        if remote_as is not None and ("asn", remote_as) not in lookup_cache:
+            asn_values.add(remote_as)
+
+        vrf = session.get("vrf")
+        if (
+            vrf
+            and str(vrf).lower() not in ["global", "default"]
+            and ("vrf", vrf) not in lookup_cache
+        ):
+            vrf_values.add(vrf)
+
+    try:
+        if ip_values:
+            nb_ips = bulk_filter(
+                nb.ipam.ip_addresses,
+                "address",
+                list(ip_values),
+                fields="id,address,assigned_object",
+            )
+            for ip_obj in nb_ips:
+                lookup_cache[("ip_address_object", ip_obj.address)] = ip_obj
+                lookup_cache[("ip", ip_obj.address)] = ip_obj.id
+                remote_device_name = _remote_device_name_from_ip(ip_obj)
+                if (
+                    remote_device_name
+                    and ("device_object", remote_device_name) not in lookup_cache
+                ):
+                    device_names.add(remote_device_name)
+            job.event(
+                f"pre-seeded BGP IP lookup cache with {len(nb_ips)} NetBox IP object(s)"
+            )
+
+        for session in bgp_sessions:
+            if not session.get("remote_device_name"):
+                session["remote_device_name"] = _remote_device_name_from_ip(
+                    _cached_bgp_ip_object(session.get("remote_address"), lookup_cache)
+                )
+
+        if device_names:
+            nb_devices = bulk_filter(
+                nb.dcim.devices,
+                "name",
+                list(device_names),
+                fields="id,name,platform,site,device_type",
+            )
+            found_names = set()
+            for device_obj in nb_devices:
+                name = device_obj.name
+                site_name = device_obj.site.name
+                lookup_cache[("device_object", name)] = device_obj
+                lookup_cache[("device", name)] = device_obj.id
+                lookup_cache[("site", site_name)] = device_obj.site.id
+                lookup_cache[("site_object", site_name)] = device_obj.site
+                found_names.add(name)
+            for name in device_names:
+                if name not in found_names:
+                    lookup_cache[("device_object", name)] = None
+            job.event(
+                f"pre-seeded BGP device lookup cache with {len(nb_devices)} NetBox device object(s)"
+            )
+
+        if asn_values:
+            nb_asns = bulk_filter(
+                nb.ipam.asns, "asn", list(asn_values), fields="id,asn"
+            )
+            for asn_obj in nb_asns:
+                lookup_cache[("asn", int(asn_obj.asn))] = asn_obj.id
+                lookup_cache[("asn_object", int(asn_obj.asn))] = asn_obj
+            job.event(
+                f"pre-seeded BGP ASN lookup cache with {len(nb_asns)} NetBox ASN object(s)"
+            )
+
+        if vrf_values:
+            nb_vrfs = bulk_filter(
+                nb.ipam.vrfs, "name", list(vrf_values), fields="id,name"
+            )
+            for vrf_obj in nb_vrfs:
+                lookup_cache[("vrf", vrf_obj.name)] = vrf_obj.id
+                lookup_cache[("vrf_object", vrf_obj.name)] = vrf_obj
+            job.event(
+                f"pre-seeded BGP VRF lookup cache with {len(nb_vrfs)} NetBox VRF object(s)"
+            )
+    except Exception as exc:
+        msg = f"failed to pre-seed BGP lookup cache: {exc}"
+        job.event(msg, severity="WARNING")
+        log.warning(f"{worker_name} - {msg}")
 
 
 class NetboxBgpPeeringsTasks:
@@ -826,7 +1025,7 @@ class NetboxBgpPeeringsTasks:
         # interface-driven resolution
         local_interface: Union[None, str] = None,
         asn_source: Union[None, str, dict] = None,
-        name_template: Union[None, str] = "{device}_{vrf}_{remote_address}",
+        name_template: Union[None, str] = "{{device}}_{{vrf}}_{{remote_address}}",
         # mirror session
         create_reverse: bool = True,
         # bulk mode
@@ -868,8 +1067,8 @@ class NetboxBgpPeeringsTasks:
             local_interface (str, optional): Local interface name or bracket-range pattern.
             asn_source (str or dict, optional): Dot-path string through device data or
                 dict of kwargs for ``nb.ipam.asn.get`` for automatic ASN resolution.
-            name_template (str, optional): Format string for session names. Default
-                ``'{device}_{vrf}_{remote_address}'``.
+            name_template (str, optional): Jinja2 template string for session names.
+                Default ``'{{device}}_{{vrf}}_{{remote_address}}'``.
             create_reverse (bool): When ``True`` also create a mirror session on the
                 remote device with local and remote IPs/ASNs swapped. Default ``True``.
             bulk_create (list, optional): List of session dicts for bulk creation.
@@ -915,6 +1114,7 @@ class NetboxBgpPeeringsTasks:
             nb.http_session.headers["X-Changelog-Message"] = message
 
         lookup_cache = lookup_cache if lookup_cache is not None else {}
+        name_template = name_template or "{{device}}_{{vrf}}_{{remote_address}}"
 
         # Validate VRF custom field and RIR
         job.event("validating BGP session VRF custom field and RIR")
@@ -951,9 +1151,7 @@ class NetboxBgpPeeringsTasks:
         # bgp_session in one pass.  Range expansion turns one bgp_session into many when a bracket
         # pattern is used in local_interface.
         job.event("resolving BGP session interface and peer details")
-        resolved_bgp_sessions = []
-        # dict keyed by device name; values populated with {id, site_id, data} after batch fetch
-        all_device_names = {}
+        base_bgp_sessions = []
 
         for bgp_session in bgp_sessions:
             bgp_session_device = bgp_session["device"]
@@ -966,15 +1164,21 @@ class NetboxBgpPeeringsTasks:
                 # Batch fetch interfaces and their IPs in two calls instead of 2N
                 intf_by_name = {
                     i.name: i
-                    for i in nb.dcim.interfaces.filter(
-                        device=bgp_session_device, name=intf_names, fields="id,name"
+                    for i in self.bulk_filter(
+                        endpoint=nb.dcim.interfaces,
+                        filter_by_key="name",
+                        filter_by_values=intf_names,
+                        device=bgp_session_device,
+                        fields="id,name",
                     )
                 }
                 found_intf_ids = [i.id for i in intf_by_name.values()]
                 ips_by_intf_id: Dict[int, list] = {}
                 if found_intf_ids:
-                    for _ip in nb.ipam.ip_addresses.filter(
-                        interface_id=found_intf_ids,
+                    for _ip in self.bulk_filter(
+                        endpoint=nb.ipam.ip_addresses,
+                        filter_by_key="interface_id",
+                        filter_by_values=found_intf_ids,
                         fields="id,address,assigned_object_id",
                     ):
                         ips_by_intf_id.setdefault(_ip.assigned_object_id, []).append(
@@ -1002,103 +1206,72 @@ class NetboxBgpPeeringsTasks:
                     local_addr = ip_cidr.split("/")[0]
 
                     bgp_session_remote_address = bgp_session.get("remote_address")
-                    remote_device_name = None
 
                     if not bgp_session_remote_address:
                         peer_ip = get_p2p_peer_ip(ip_cidr)
                         if peer_ip:
                             bgp_session_remote_address = peer_ip
-                            peer_ip_list = list(
-                                nb.ipam.ip_addresses.filter(address=peer_ip)
-                            )
-                            if peer_ip_list and peer_ip_list[0].assigned_object:
-                                obj = peer_ip_list[0].assigned_object
-                                if hasattr(obj, "device") and obj.device:
-                                    remote_device_name = obj.device.name
-                                    all_device_names.setdefault(
-                                        remote_device_name, None
-                                    )
 
                     new_bgp_session = dict(bgp_session)
                     new_bgp_session["device"] = bgp_session_device
+                    new_bgp_session["device_name"] = bgp_session_device
                     new_bgp_session["local_address"] = local_addr
                     new_bgp_session["remote_address"] = bgp_session_remote_address
-                    new_bgp_session["remote_device_name"] = remote_device_name
-
-                    if not new_bgp_session.get("name"):
-                        try:
-                            new_bgp_session["name"] = name_template.format(
-                                **new_bgp_session,
-                            )
-                        except Exception as exc:
-                            msg = (
-                                f"name_template '{name_template}' failed for session "
-                                f"'{new_bgp_session.get('name')}' on '{bgp_session_device}': {exc}"
-                            )
-                            job.event(msg, severity="ERROR")
-                            ret.errors.append(msg)
-                            log.error(f"{self.name} - {msg}")
-                            continue
-
-                    all_device_names.setdefault(bgp_session_device, None)
-                    resolved_bgp_sessions.append(new_bgp_session)
-
-                    # Build mirror (reverse) session at resolution time if remote device identified
-                    if create_reverse and remote_device_name:
-                        mirror_session = dict(bgp_session)
-                        mirror_session["device"] = remote_device_name
-                        mirror_session["local_address"] = bgp_session_remote_address
-                        mirror_session["remote_address"] = local_addr
-                        mirror_session["local_as"] = bgp_session.get("remote_as")
-                        mirror_session["remote_as"] = bgp_session.get("local_as")
-                        mirror_session["remote_device_name"] = bgp_session_device
-                        mirror_session["local_interface"] = None
-                        mirror_session["name"] = None
-                        try:
-                            mirror_session["name"] = name_template.format(
-                                **mirror_session,
-                            )
-                        except Exception as exc:
-                            msg = (
-                                f"name_template '{name_template}' failed for mirror session "
-                                f"on '{remote_device_name}': {exc}"
-                            )
-                            job.event(msg, severity="ERROR")
-                            ret.errors.append(msg)
-                            log.error(f"{self.name} - {msg}")
-                        else:
-                            resolved_bgp_sessions.append(mirror_session)
+                    new_bgp_session.setdefault("remote_device_name", None)
+                    base_bgp_sessions.append(new_bgp_session)
             else:
                 bgp_session_copy = dict(bgp_session)
-                bgp_session_copy["remote_device_name"] = None
-                if bgp_session_device:
-                    all_device_names.setdefault(bgp_session_device, None)
-                resolved_bgp_sessions.append(bgp_session_copy)
+                bgp_session_copy["device_name"] = bgp_session_device
+                bgp_session_copy.setdefault("remote_device_name", None)
+                base_bgp_sessions.append(bgp_session_copy)
+
+        preseed_bgp_lookup_cache(
+            nb, base_bgp_sessions, lookup_cache, job, self.bulk_filter, self.name
+        )
+
+        resolved_bgp_sessions = list(base_bgp_sessions)
+        if create_reverse:
+            reverse_sessions = []
+            for bgp_session in base_bgp_sessions:
+                remote_device_name = bgp_session.get("remote_device_name")
+                if not remote_device_name:
+                    continue
+                mirror_session = dict(bgp_session)
+                mirror_session["device"] = remote_device_name
+                mirror_session["device_name"] = remote_device_name
+                mirror_session["local_address"] = bgp_session.get("remote_address")
+                mirror_session["remote_address"] = bgp_session.get("local_address")
+                mirror_session["local_as"] = bgp_session.get("remote_as")
+                mirror_session["remote_as"] = bgp_session.get("local_as")
+                mirror_session["remote_device_name"] = bgp_session.get(
+                    "device_name"
+                ) or bgp_session.get("device")
+                mirror_session["local_interface"] = None
+                mirror_session["name"] = None
+                reverse_sessions.append(mirror_session)
+            if reverse_sessions:
+                resolved_bgp_sessions.extend(reverse_sessions)
+                preseed_bgp_lookup_cache(
+                    nb,
+                    resolved_bgp_sessions,
+                    lookup_cache,
+                    job,
+                    self.bulk_filter,
+                    self.name,
+                )
+
+        all_device_names = {
+            name: _cached_bgp_device_info(name, lookup_cache)
+            for bgp_session in resolved_bgp_sessions
+            for name in (
+                bgp_session.get("device_name") or bgp_session.get("device"),
+                bgp_session.get("remote_device_name"),
+            )
+            if name
+        }
         job.event(
             f"resolved {len(resolved_bgp_sessions)} BGP session create candidate(s)"
         )
-
-        # Step 5b: Pre-fetch device data for all collected device names (single API call)
-        if all_device_names:
-            job.event(
-                f"fetching NetBox device data for {len(all_device_names)} device(s)"
-            )
-            try:
-                for dev_obj in self.bulk_filter(
-                    nb.dcim.devices, "name", list(all_device_names)
-                ):
-                    all_device_names[dev_obj.name] = {
-                        "id": dev_obj.id,
-                        "site_id": dev_obj.site.id if dev_obj.site else None,
-                        "data": dict(dev_obj),
-                    }
-            except Exception as exc:
-                msg = (
-                    f"could not pre-fetch device data for {list(all_device_names)}: "
-                    f"{exc}"
-                )
-                job.event(msg, severity="WARNING")
-                log.warning(f"{self.name} - {msg}")
 
         # Step 5c: Pre-fetch existing sessions for idempotency (single API call)
         existing_session_names = set()
@@ -1147,18 +1320,19 @@ class NetboxBgpPeeringsTasks:
             sname = bgp_session.get("name")
             if not sname:
                 try:
-                    sname = name_template.format(
-                        **bgp_session,
+                    sname = render_bgp_session_name(
+                        name_template, bgp_session, lookup_cache
                     )
                 except Exception as exc:
                     msg = (
-                        f"name_template '{name_template}' failed for session "
+                        f"failed to render name_template '{name_template}' for session "
                         f"'{bgp_session.get('name')}' on '{bgp_session_device}': {exc}"
                     )
                     job.event(msg, severity="ERROR")
                     ret.errors.append(msg)
                     log.error(f"{self.name} - {msg}")
                     continue
+                bgp_session["name"] = sname
 
             # Idempotency check (step 6i)
             if sname in existing_session_names:
@@ -1616,7 +1790,7 @@ class NetboxBgpPeeringsTasks:
         branch: str = None,
         rir: str = None,
         message: str = None,
-        name_template: str = "{device}_{name}",
+        name_template: str = "{{device}}_{{name}}",
         filter_by_remote_as: Union[None, List[int]] = None,
         filter_by_peer_group: Union[None, list] = None,
         filter_by_description: Union[None, str] = None,
@@ -1642,10 +1816,11 @@ class NetboxBgpPeeringsTasks:
             branch (str, optional): NetBox branching plugin branch name.
             rir (str, optional): RIR name to use when creating new ASNs in NetBox (e.g. ``RFC 1918``, ``ARIN``).
             message (str, optional): Changelog message recorded in NetBox for all create, update, and delete operations.
-            name_template (str): Template string for BGP session names written to NetBox. Formatted with the
-                following keyword arguments from parsing results:
+            name_template (str): Jinja2 template string for BGP session names written to NetBox.
+                The template context includes the following values:
 
-                - ``device`` — device name (e.g. ``ceos-leaf-1``)
+                - ``device`` — NetBox device object, rendered as device name by default
+                - ``remote_device`` — NetBox remote device object resolved via remote_address
                 - ``name`` — parsed session name - ``{vrf}_{remote_address}`` by default
                 - ``description`` — session description
                 - ``local_address`` — local IP address string (e.g. ``10.0.0.1``)
@@ -1656,7 +1831,7 @@ class NetboxBgpPeeringsTasks:
                 - ``state`` — device-reported state (e.g. ``established``)
                 - ``peer_group`` — peer group name or ``None``
 
-                Default: ``"{device}_{name}"``.
+                Default: ``"{{device}}_{{name}}"``.
             filter_by_remote_as (list of int, optional): Only include sessions whose remote AS number
                 matches one of the provided integer values. Applied to both NetBox and live device sessions.
             filter_by_peer_group (list, optional): Only include sessions whose peer group name matches
@@ -1805,7 +1980,7 @@ class NetboxBgpPeeringsTasks:
                     )
                     continue
                 if filter_by_remote_as:
-                    if (normalised.get("remote_as") or 0) not in filter_by_remote_as:
+                    if normalised.get("remote_as") not in filter_by_remote_as:
                         continue
                 if (
                     filter_by_peer_group
@@ -1821,15 +1996,39 @@ class NetboxBgpPeeringsTasks:
                     if any(peer_ip_addr in net for net in ignore_peer_nets):
                         continue
                 normalised_nb[device_name][sname] = normalised
-                # populate lookup cache for future use
-                lookup_cache[("ip", normalised["local_address"])] = None
-                lookup_cache[("ip", normalised["remote_address"])] = None
-                lookup_cache[("asn", normalised["local_as"])] = None
-                lookup_cache[("asn", normalised["local_as"])] = None
         nb_session_count = sum(len(sessions) for sessions in normalised_nb.values())
         job.event(
             f"normalised {nb_session_count} NetBox BGP session(s) after applying filters"
         )
+
+        # pre-seed lookup cache from fetched NetBox sessions and all parsed live
+        # sessions before rendering live session names.
+        sessions_for_cache = []
+        for device_name, sessions in normalised_nb.items():
+            for session_data in sessions.values():
+                sessions_for_cache.append({"device": device_name, **session_data})
+        for wdata in parse_data.values():
+            if wdata.get("failed"):
+                continue
+            for device_name, host_sessions in wdata.get("result", {}).items():
+                for s in host_sessions:
+                    sessions_for_cache.append(
+                        {
+                            "device": device_name,
+                            "local_address": s.get("local_address"),
+                            "remote_address": s.get("remote_address"),
+                            "local_as": s.get("local_as"),
+                            "remote_as": s.get("remote_as"),
+                            "vrf": s.get("vrf"),
+                        }
+                    )
+        if sessions_for_cache:
+            job.event(
+                f"pre-seeding BGP lookup cache from {len(sessions_for_cache)} NetBox/live session(s)"
+            )
+            preseed_bgp_lookup_cache(
+                nb, sessions_for_cache, lookup_cache, job, self.bulk_filter, self.name
+            )
 
         # Normalize live parse data per device
         job.event("normalising live BGP session data")
@@ -1839,48 +2038,88 @@ class NetboxBgpPeeringsTasks:
                 log.warning(msg)
                 job.event(msg, severity="WARNING")
                 continue
-            for device_name, host_sessions in wdata.get("result", {}).items():
+            for device_name, host_sessions in (wdata.get("result") or {}).items():
                 normalised_live.setdefault(device_name, {})
                 for s in host_sessions:
+                    parsed_name = s.get("name")
+                    description = s.get("description") or ""
+                    local_address = s.get("local_address")
+                    local_as = s.get("local_as")
+                    remote_address = s.get("remote_address")
+                    remote_as = s.get("remote_as")
+                    peer_group = s.get("peer_group")
+                    session_data = {
+                        "device": device_name,
+                        "name": parsed_name,
+                        "description": description,
+                        "local_address": local_address,
+                        "local_as": local_as,
+                        "remote_address": remote_address,
+                        "remote_as": remote_as,
+                        "vrf": s.get("vrf"),
+                        "status": (
+                            "active" if s.get("state") == "established" else status
+                        ),
+                        "peer_group": peer_group,
+                        "import_policies": s.get("import_policies"),
+                        "export_policies": s.get("export_policies"),
+                        "prefix_list_in": s.get("prefix_list_in"),
+                        "prefix_list_out": s.get("prefix_list_out"),
+                    }
+                    # attempt to resolve local ip if empty
+                    if not local_address and remote_address:
+                        local_address = resolve_local_ip_via_peer(
+                            device_name, remote_address, nb
+                        )
+                        if not local_address:
+                            msg = (
+                                f"{parsed_name or remote_address or 'unknown'} "
+                                "- skipping, no local ip in parsed data, failed to resolve using peer ip"
+                            )
+                            log.error(msg)
+                            job.event(msg, severity="ERROR")
+                            continue
+                        session_data["local_address"] = local_address
+                        msg = (
+                            f"{session_name} - resolved local ip "
+                            f"'{local_address}' using peer ip"
+                        )
+                        log.info(msg)
+                        job.event(msg)
                     try:
-                        session_name = name_template.format(device=device_name, **s)
+                        session_name = render_bgp_session_name(
+                            name_template, session_data, lookup_cache
+                        )
                     except Exception as exc:
                         msg = (
-                            f"name_template '{name_template}' failed for session "
-                            f"'{s.get('name')}' on '{device_name}': {exc}"
+                            f"failed to render name_template '{name_template}' for session "
+                            f"'{parsed_name}' on '{device_name}': {exc}"
                         )
                         ret.errors.append(msg)
+                        job.event(msg, severity="ERROR")
                         log.error(f"{self.name} - {msg}")
                         continue
-                    remote_as_val = s.get("remote_as")
-                    peer_group_val = s.get("peer_group")
-                    description_val = s.get("description") or ""
-                    local_address = s.get("local_address")
-                    remote_address = s.get("remote_address")
                     if filter_by_remote_as:
-                        if (remote_as_val or 0) not in filter_by_remote_as:
+                        if remote_as not in filter_by_remote_as:
                             log.info(
                                 f"{self.name} - {session_name} - skipping, "
-                                f"remote_as '{remote_as_val}' not in "
+                                f"remote_as '{remote_as}' not in "
                                 f"filter_by_remote_as {filter_by_remote_as}"
                             )
                             continue
-                    if (
-                        filter_by_peer_group
-                        and peer_group_val not in filter_by_peer_group
-                    ):
+                    if filter_by_peer_group and peer_group not in filter_by_peer_group:
                         log.info(
                             f"{self.name} - {session_name} - skipping, "
-                            f"peer_group '{peer_group_val}' not in "
+                            f"peer_group '{peer_group}' not in "
                             f"filter_by_peer_group {filter_by_peer_group}"
                         )
                         continue
                     if filter_by_description and not fnmatch.fnmatch(
-                        description_val, filter_by_description
+                        description, filter_by_description
                     ):
                         log.info(
                             f"{self.name} - {session_name} - skipping, "
-                            f"description '{description_val}' does not match "
+                            f"description '{description}' does not match "
                             f"filter_by_description '{filter_by_description}'"
                         )
                         continue
@@ -1898,43 +2137,9 @@ class NetboxBgpPeeringsTasks:
                                 f"ignore_peer_ranges prefix '{matched_ignore_net}'"
                             )
                             continue
-                    # attempt to resolve local ip if empty
-                    if not local_address and remote_address:
-                        local_address = resolve_local_ip_via_peer(
-                            device_name, remote_address, nb
-                        )
-                        if not local_address:
-                            msg = f"{session_name} - skipping, no local ip in parsed data, failed to resolve using peer ip"
-                            log.error(msg)
-                            job.event(msg, severity="ERROR")
-                            continue
-                        msg = f"{session_name} - resolved local ip '{local_address}' using peer ip"
-                        log.info(msg)
-                        job.event(msg)
-                    normalised_live[device_name][session_name] = {
-                        "name": session_name,
-                        "description": description_val,
-                        "local_address": local_address,
-                        "local_as": s.get("local_as"),
-                        "remote_address": remote_address,
-                        "remote_as": remote_as_val,
-                        "vrf": s.get("vrf"),
-                        "status": (
-                            "active" if s.get("state") == "established" else status
-                        ),
-                        "peer_group": peer_group_val,
-                        "import_policies": s.get("import_policies"),
-                        "export_policies": s.get("export_policies"),
-                        "prefix_list_in": s.get("prefix_list_in"),
-                        "prefix_list_out": s.get("prefix_list_out"),
-                    }
-                    # populate lookup cache for future use
-                    lookup_cache[("ip", local_address)] = None
-                    lookup_cache[("ip", remote_address)] = None
-                    if remote_as_val:
-                        lookup_cache[("asn", remote_as_val)] = None
-                    if s.get("local_as"):
-                        lookup_cache[("asn", s.get("local_as"))] = None
+                    session_data["name"] = session_name
+                    session_data.pop("device", None)
+                    normalised_live[device_name][session_name] = session_data
         live_session_count = sum(len(sessions) for sessions in normalised_live.values())
         job.event(
             f"normalised {live_session_count} live BGP session(s) after applying filters"
@@ -1963,54 +2168,6 @@ class NetboxBgpPeeringsTasks:
             return ret
         else:
             ret.diff = full_diff
-
-        if create_count or update_count:
-            # pre-seed cache for IPs
-            try:
-                ips_filter = [i[1].split("/")[0] for i in lookup_cache if i[0] == "ip"]
-                nb_ips = self.bulk_filter(
-                    endpoint=nb.ipam.ip_addresses,
-                    filter_by_key="address",
-                    filter_by_values=ips_filter,
-                    fields="id,address",
-                )
-                ip_cache_count = 0
-                for ip in nb_ips:
-                    lookup_cache[("ip", ip.address)] = ip.id
-                    lookup_cache[("ip", ip.address.split("/")[0])] = ip.id
-                    ip_cache_count += 1
-                job.event(
-                    f"pre-seeded BGP session IP lookup cache with {ip_cache_count} NetBox IP objects"
-                )
-            except Exception as exc:
-                msg = f"failed to pre-seed BGP session IP lookup cache: {exc}"
-                job.event(msg, severity="WARNING")
-                log.warning(f"{self.name} - {msg}")
-            # pre-seed cache for BGP ASN
-            try:
-                asn_filter = [i[1] for i in lookup_cache if i[0] == "asn"]
-                nb_asns = self.bulk_filter(
-                    endpoint=nb.ipam.asns,
-                    filter_by_key="asn",
-                    filter_by_values=asn_filter,
-                    fields="id,asn",
-                )
-                asn_cache_count = 0
-                for asn in nb_asns:
-                    lookup_cache[("asn", int(asn.asn))] = asn.id
-                    asn_cache_count += 1
-                job.event(
-                    f"pre-seeded BGP session ASN lookup cache with {asn_cache_count} NetBox ASN objects"
-                )
-            except Exception as exc:
-                msg = f"failed to pre-seed BGP session ASN lookup cache: {exc}"
-                job.event(msg, severity="WARNING")
-                log.warning(f"{self.name} - {msg}")
-
-        # remove IPs or ASNs not found in netbox
-        for k in list(lookup_cache):
-            if lookup_cache[k] is None:
-                lookup_cache.pop(k)
 
         # Per-device result tracking
         device_results = {
