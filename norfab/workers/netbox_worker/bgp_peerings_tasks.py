@@ -216,18 +216,16 @@ def _bgp_session_template_context(session: dict, lookup_cache: dict) -> dict:
     """Build the Jinja2 context for BGP session name rendering."""
     context = dict(session)
     device_name = session.get("device")
-    remote_device_name = session.get("remote_device_name")
-    if not remote_device_name:
+    remote_device = session.get("remote_device")
+    if not remote_device:
         ip_obj = _cached_bgp_ip_object(session.get("remote_address"), lookup_cache)
         assigned_object = getattr(ip_obj, "assigned_object", None)
-        remote_device = getattr(assigned_object, "device", None)
-        remote_device_name = getattr(remote_device, "name", None)
+        remote_device_obj = getattr(assigned_object, "device", None)
+        remote_device = getattr(remote_device_obj, "name", None)
     context.pop("device", None)
     context.pop("remote_device", None)
-    context.pop("device_name", None)
-    context.pop("remote_device_name", None)
     device_obj = lookup_cache.get(("device_object", device_name))
-    remote_device_obj = lookup_cache.get(("device_object", remote_device_name))
+    remote_device_obj = lookup_cache.get(("device_object", remote_device))
     if device_obj is not None:
         context["device"] = device_obj
     if remote_device_obj is not None:
@@ -243,7 +241,7 @@ def render_bgp_session_name(
     return BGP_NAME_TEMPLATE_ENV.from_string(name_template).render(**context)
 
 
-def _remote_device_name_from_ip(ip_obj: Any) -> Union[None, str]:
+def _remote_device_from_ip(ip_obj: Any) -> Union[None, str]:
     assigned_object = getattr(ip_obj, "assigned_object", None)
     remote_device = getattr(assigned_object, "device", None)
     return getattr(remote_device, "name", None)
@@ -574,17 +572,15 @@ def preseed_bgp_lookup_cache(
         if ("ip_address_object", remote_address) not in lookup_cache:
             ip_values.add(remote_address)
 
-        device_name = (
-            session["device_name"] if "device_name" in session else session["device"]
-        )
-        remote_device_name = session.get("remote_device_name")
+        device_name = session["device"]
+        remote_device = session.get("remote_device")
         if ("device_object", device_name) not in lookup_cache:
             device_names.add(device_name)
         if (
-            remote_device_name
-            and ("device_object", remote_device_name) not in lookup_cache
+            remote_device
+            and ("device_object", remote_device) not in lookup_cache
         ):
-            device_names.add(remote_device_name)
+            device_names.add(remote_device)
 
         if "local_as" in session and session["local_as"] is not None:
             local_as = int(session["local_as"])
@@ -616,12 +612,12 @@ def preseed_bgp_lookup_cache(
                 address = ip_obj.address.split("/")[0]
                 lookup_cache[("ip_address_object", address)] = ip_obj
                 lookup_cache[("ip", address)] = ip_obj.id
-                remote_device_name = _remote_device_name_from_ip(ip_obj)
+                remote_device = _remote_device_from_ip(ip_obj)
                 if (
-                    remote_device_name
-                    and ("device_object", remote_device_name) not in lookup_cache
+                    remote_device
+                    and ("device_object", remote_device) not in lookup_cache
                 ):
-                    device_names.add(remote_device_name)
+                    device_names.add(remote_device)
             job.event(
                 f"pre-seeded BGP IP lookup cache with {len(nb_ips)} NetBox IP object(s)"
             )
@@ -1218,10 +1214,9 @@ class NetboxBgpPeeringsTasks:
 
                     new_bgp_session = dict(bgp_session)
                     new_bgp_session["device"] = bgp_session_device
-                    new_bgp_session["device_name"] = bgp_session_device
                     new_bgp_session["local_address"] = local_addr
                     new_bgp_session["remote_address"] = bgp_session_remote_address
-                    new_bgp_session.setdefault("remote_device_name", None)
+                    new_bgp_session.setdefault("remote_device", None)
                     base_bgp_sessions.append(new_bgp_session)
             else:
                 if not bgp_session.get("remote_address"):
@@ -1234,8 +1229,7 @@ class NetboxBgpPeeringsTasks:
                     ret.errors.append(msg)
                     continue
                 bgp_session_copy = dict(bgp_session)
-                bgp_session_copy["device_name"] = bgp_session_device
-                bgp_session_copy.setdefault("remote_device_name", None)
+                bgp_session_copy.setdefault("remote_device", None)
                 base_bgp_sessions.append(bgp_session_copy)
 
         preseed_bgp_lookup_cache(
@@ -1245,12 +1239,12 @@ class NetboxBgpPeeringsTasks:
         reverse_sessions = []
         if create_reverse:
             for bgp_session in base_bgp_sessions:
-                remote_device_name = bgp_session.get(
-                    "remote_device_name"
-                ) or _remote_device_name_from_ip(
+                remote_device = bgp_session.get(
+                    "remote_device"
+                ) or _remote_device_from_ip(
                     _cached_bgp_ip_object(bgp_session["remote_address"], lookup_cache)
                 )
-                if not remote_device_name:
+                if not remote_device:
                     session_label = (
                         bgp_session.get("name")
                         or bgp_session.get("remote_address")
@@ -1265,13 +1259,12 @@ class NetboxBgpPeeringsTasks:
                     ret.errors.append(msg)
                     continue
                 mirror_session = dict(bgp_session)
-                mirror_session["device"] = remote_device_name
-                mirror_session["device_name"] = remote_device_name
+                mirror_session["device"] = remote_device
                 mirror_session["local_address"] = bgp_session["remote_address"]
                 mirror_session["remote_address"] = bgp_session["local_address"]
                 mirror_session["local_as"] = bgp_session.get("remote_as")
                 mirror_session["remote_as"] = bgp_session.get("local_as")
-                mirror_session["remote_device_name"] = bgp_session["device_name"]
+                mirror_session["remote_device"] = bgp_session["device"]
                 mirror_session["local_interface"] = None
                 mirror_session["name"] = None
                 reverse_sessions.append(mirror_session)
@@ -1281,8 +1274,8 @@ class NetboxBgpPeeringsTasks:
             name: _cached_bgp_device_info(name, lookup_cache)
             for bgp_session in bgp_sessions
             for name in (
-                bgp_session["device_name"],
-                bgp_session.get("remote_device_name"),
+                bgp_session["device"],
+                bgp_session.get("remote_device"),
             )
             if name
         }
@@ -1329,7 +1322,7 @@ class NetboxBgpPeeringsTasks:
             bgp_session_remote_address = bgp_session.get("remote_address")
             bgp_session_local_as = bgp_session.get("local_as")
             bgp_session_remote_as = bgp_session.get("remote_as")
-            remote_device_name = bgp_session.get("remote_device_name")
+            remote_device = bgp_session.get("remote_device")
 
             # Determine session name
             sname = bgp_session.get("name")
@@ -1375,7 +1368,7 @@ class NetboxBgpPeeringsTasks:
                     continue
 
             if asn_source and not bgp_session_remote_as:
-                if not remote_device_name:
+                if not remote_device:
                     msg = (
                         f"cannot resolve remote AS for '{sname}': remote device not "
                         f"identified and remote_as not provided"
@@ -1384,7 +1377,7 @@ class NetboxBgpPeeringsTasks:
                     log.error(f"{self.name} - {msg}")
                     ret.errors.append(msg)
                     continue
-                remote_dev_data = (all_device_names.get(remote_device_name) or {}).get(
+                remote_dev_data = (all_device_names.get(remote_device) or {}).get(
                     "data", {}
                 )
                 bgp_session_remote_as = resolve_asn_from_source(
