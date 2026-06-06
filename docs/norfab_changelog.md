@@ -16,6 +16,7 @@
 3. Netbox sync device interfaces improved VLAN handling - now it creates vlan if its missing, added `vlan_group` argument to specify group to associate with vlan, otherwise it is associated with device site. Vlan retrieval for existing vlan helper is either via group, device site or global.
 4. Netbox service sync IP task updated to honor anycast role for existing Netbox IPs and re-use role anycast for discovered IPs
 5. Refactoring bgp peerings sync to support name template being a jinja2 template string as well as adding extra variables to renderer context
+6. Enhancing bgp syn task to use 5 tuple to represent  bgp session identity instead of name, allowing to detect session name changes.
 
 ## BUGS
 

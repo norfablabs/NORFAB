@@ -7979,6 +7979,115 @@ class TestSyncBgpPeerings:
                     custom_sessions
                 ), f"{worker}: no sessions with '_BGP_' found in NetBox for '{target_device}'"
 
+    def test_sync_bgp_peerings_name_template_dry_run_updates_existing(self, nfclient):
+        """Changing name_template must report updates for existing tuple-matched sessions."""
+        nb = get_pynetbox(nfclient)
+        target_device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        template = "{{device}}_BGP_{{name}}"
+
+        nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+        original_names = sorted(
+            s.name for s in nb.plugins.bgp.session.filter(device=target_device)
+        )
+        assert original_names, f"No sessions found for '{target_device}'"
+
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [target_device],
+                "rir": "lab",
+                "dry_run": True,
+                "name_template": template,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                device_result = res["result"][target_device]
+                assert (
+                    device_result["create"] == []
+                ), f"{worker}: expected no creates for existing tuple identities"
+                assert (
+                    device_result["delete"] == []
+                ), f"{worker}: expected no deletes for existing tuple identities"
+                assert set(device_result["update"]) == set(original_names), (
+                    f"{worker}: expected updates keyed by current NetBox names, "
+                    f"got {list(device_result['update'])}"
+                )
+                for sname, changes in device_result["update"].items():
+                    assert "name" in changes, (
+                        f"{worker}: expected name field update for '{sname}', "
+                        f"got {changes}"
+                    )
+
+        current_names = sorted(
+            s.name for s in nb.plugins.bgp.session.filter(device=target_device)
+        )
+        assert current_names == original_names, "Dry-run changed NetBox session names"
+
+    def test_sync_bgp_peerings_name_template_renames_existing(self, nfclient):
+        """Changing name_template must rename existing tuple-matched sessions."""
+        nb = get_pynetbox(nfclient)
+        target_device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        template = "{{device}}_BGP_{{name}}"
+
+        nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+        original_names = sorted(
+            s.name for s in nb.plugins.bgp.session.filter(device=target_device)
+        )
+        assert original_names, f"No sessions found for '{target_device}'"
+
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [target_device],
+                "rir": "lab",
+                "name_template": template,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            if target_device in res["result"]:
+                device_result = res["result"][target_device]
+                assert (
+                    device_result["created"] == []
+                ), f"{worker}: expected no creates for existing tuple identities"
+                assert (
+                    device_result["deleted"] == []
+                ), f"{worker}: expected no deletes for existing tuple identities"
+                assert set(device_result["updated"]) == set(original_names), (
+                    f"{worker}: expected updates keyed by current NetBox names, "
+                    f"got {device_result['updated']}"
+                )
+
+        renamed_sessions = list(nb.plugins.bgp.session.filter(device=target_device))
+        renamed_names = [s.name for s in renamed_sessions]
+        assert renamed_sessions, f"No sessions found for '{target_device}' after rename"
+        for old_name in original_names:
+            assert (
+                old_name not in renamed_names
+            ), f"old session name '{old_name}' still exists after sync rename"
+        for renamed_name in renamed_names:
+            assert (
+                "_BGP_" in renamed_name
+            ), f"renamed session '{renamed_name}' does not match template '{template}'"
+
     def test_sync_bgp_peerings_asn_type_idempotency(self, nfclient):
         """Regression: Bug #2 — ASN type mismatch (int in NB vs str from device) must not
         cause false 'updated' entries on second sync when nothing has changed."""

@@ -410,6 +410,79 @@ def bgp_session_matches_filters(
     return True
 
 
+def _normalise_bgp_identity_ip(address: Any) -> Union[None, str]:
+    """Return bare IP address string for BGP identity comparison."""
+    if not address:
+        return None
+    try:
+        return str(ipaddress.ip_interface(str(address)).ip)
+    except Exception:
+        return str(address).split("/")[0]
+
+
+def _normalise_bgp_identity_asn(asn: Any) -> Any:
+    """Return ASN as int where possible for BGP identity comparison."""
+    if asn is None:
+        return None
+    try:
+        return int(asn)
+    except (TypeError, ValueError):
+        return asn
+
+
+def bgp_session_identity(device_name: str, session: dict) -> tuple:
+    """Return sync identity tuple for a BGP session."""
+    return (
+        device_name,
+        _normalise_bgp_identity_ip(session.get("local_address")),
+        _normalise_bgp_identity_asn(session.get("local_as")),
+        _normalise_bgp_identity_ip(session.get("remote_address")),
+        _normalise_bgp_identity_asn(session.get("remote_as")),
+    )
+
+
+def bgp_session_name_from_identity_diff(
+    identity_diff: dict, source_data: dict, target_data: dict
+) -> dict:
+    """Convert identity-keyed BGP diff to the public name-keyed shape."""
+    name_diff = {}
+    for device_name, actions in identity_diff.items():
+        name_diff[device_name] = {
+            "create": [],
+            "delete": [],
+            "update": {},
+            "in_sync": [],
+        }
+        for identity in actions["create"]:
+            session_data = source_data.get(device_name, {}).get(identity, {})
+            name_diff[device_name]["create"].append(session_data.get("name"))
+        for identity in actions["delete"]:
+            session_data = target_data.get(device_name, {}).get(identity, {})
+            name_diff[device_name]["delete"].append(session_data.get("name"))
+        for identity, field_changes in actions["update"].items():
+            session_data = target_data.get(device_name, {}).get(identity, {})
+            name_diff[device_name]["update"][session_data.get("name")] = field_changes
+        for identity in actions["in_sync"]:
+            session_data = target_data.get(device_name, {}).get(identity, {})
+            name_diff[device_name]["in_sync"].append(session_data.get("name"))
+
+        name_diff[device_name]["create"] = sorted(
+            name for name in name_diff[device_name]["create"] if name
+        )
+        name_diff[device_name]["delete"] = sorted(
+            name for name in name_diff[device_name]["delete"] if name
+        )
+        name_diff[device_name]["in_sync"] = sorted(
+            name for name in name_diff[device_name]["in_sync"] if name
+        )
+        name_diff[device_name]["update"] = {
+            name: changes
+            for name, changes in name_diff[device_name]["update"].items()
+            if name
+        }
+    return name_diff
+
+
 def resolve_bgp_session_payload_fields(
     fields: dict,
     nb: Any,
@@ -446,7 +519,7 @@ def resolve_bgp_session_payload_fields(
             asn_id = resolve_asn(value, nb, rir_id, job, ret, worker_name, lookup_cache)
             if asn_id:
                 payload[field] = asn_id
-        elif field in ("description", "status"):
+        elif field in ("name", "description", "status"):
             payload[field] = value
         elif field == "vrf":
             if not vrf_custom_field:
@@ -576,10 +649,7 @@ def preseed_bgp_lookup_cache(
         remote_device = session.get("remote_device")
         if ("device_object", device_name) not in lookup_cache:
             device_names.add(device_name)
-        if (
-            remote_device
-            and ("device_object", remote_device) not in lookup_cache
-        ):
+        if remote_device and ("device_object", remote_device) not in lookup_cache:
             device_names.add(remote_device)
 
         if "local_as" in session and session["local_as"] is not None:
@@ -1695,11 +1765,21 @@ class NetboxBgpPeeringsTasks:
                     bgp_session["import_policies"] = [bgp_session["import_policies"]]
                 if isinstance(bgp_session.get("export_policies"), str):
                     bgp_session["export_policies"] = [bgp_session["export_policies"]]
-                normalised_updates[sname] = {
-                    **bgp_session,
-                    "import_policies": sorted(bgp_session.get("import_policies") or []),
-                    "export_policies": sorted(bgp_session.get("export_policies") or []),
+                bgp_session_data = {
+                    k: v for k, v in bgp_session.items() if k != "new_name"
                 }
+                bgp_session_data["name"] = bgp_session.get(
+                    "new_name", bgp_session_data["name"]
+                )
+                normalised_updates[sname] = dict(bgp_session_data)
+                if "import_policies" in bgp_session_data:
+                    normalised_updates[sname]["import_policies"] = sorted(
+                        bgp_session_data.get("import_policies") or []
+                    )
+                if "export_policies" in bgp_session_data:
+                    normalised_updates[sname]["export_policies"] = sorted(
+                        bgp_session_data.get("export_policies") or []
+                    )
 
         # Compare complete dictionaries using make_diff; classify in_sync vs changed
         job.event("calculating BGP session update diff")
@@ -1886,13 +1966,9 @@ class NetboxBgpPeeringsTasks:
             resources=[instance],
         )
 
-        # Normalised session dicts keyed by device name -> session name -> session field values
-        normalised_nb = (
-            {}
-        )  # NetBox data: device name -> session name -> normalised field values
-        normalised_live = (
-            {}
-        )  # Live data:   device name -> session name -> normalised field values
+        # Normalised session dicts keyed by device name -> BGP identity tuple -> field values
+        normalised_nb = {}
+        normalised_live = {}
         lookup_cache: dict = {}
         # handle ranges
         ignore_peer_ranges = ignore_peer_ranges or [
@@ -1995,7 +2071,8 @@ class NetboxBgpPeeringsTasks:
                     ignore_peer_nets=ignore_peer_nets,
                 ):
                     continue
-                normalised_nb[device_name][sname] = normalised
+                identity = bgp_session_identity(device_name, normalised)
+                normalised_nb[device_name][identity] = normalised
         nb_session_count = sum(len(sessions) for sessions in normalised_nb.values())
         job.event(
             f"normalised {nb_session_count} NetBox BGP session(s) after applying filters"
@@ -2044,9 +2121,9 @@ class NetboxBgpPeeringsTasks:
                     parsed_name = s.get("name")
                     description = s.get("description") or ""
                     local_address = s.get("local_address")
-                    local_as = s["local_as"]
+                    local_as = _normalise_bgp_identity_asn(s["local_as"])
                     remote_address = s["remote_address"]
-                    remote_as = s["remote_as"]
+                    remote_as = _normalise_bgp_identity_asn(s["remote_as"])
                     peer_group = s.get("peer_group")
                     session_data = {
                         "device": device_name,
@@ -2108,8 +2185,9 @@ class NetboxBgpPeeringsTasks:
                     ):
                         continue
                     session_data["name"] = session_name
+                    identity = bgp_session_identity(device_name, session_data)
                     session_data.pop("device", None)
-                    normalised_live[device_name][session_name] = session_data
+                    normalised_live[device_name][identity] = session_data
         live_session_count = sum(len(sessions) for sessions in normalised_live.values())
         job.event(
             f"normalised {live_session_count} live BGP session(s) after applying filters"
@@ -2117,11 +2195,16 @@ class NetboxBgpPeeringsTasks:
 
         # Single diff on the full normalised datasets
         job.event("calculating BGP session sync diff")
-        full_diff = self.make_diff(normalised_live, normalised_nb)
-        create_count = sum(len(actions["create"]) for actions in full_diff.values())
-        update_count = sum(len(actions["update"]) for actions in full_diff.values())
-        delete_count = sum(len(actions["delete"]) for actions in full_diff.values())
-        in_sync_count = sum(len(actions["in_sync"]) for actions in full_diff.values())
+        identity_diff = self.make_diff(normalised_live, normalised_nb)
+        full_diff = bgp_session_name_from_identity_diff(
+            identity_diff, normalised_live, normalised_nb
+        )
+        create_count = sum(len(actions["create"]) for actions in identity_diff.values())
+        update_count = sum(len(actions["update"]) for actions in identity_diff.values())
+        delete_count = sum(len(actions["delete"]) for actions in identity_diff.values())
+        in_sync_count = sum(
+            len(actions["in_sync"]) for actions in identity_diff.values()
+        )
         job.event(
             "BGP session sync diff complete: "
             f"{create_count} create, {update_count} update, "
@@ -2153,12 +2236,12 @@ class NetboxBgpPeeringsTasks:
         # Build bulk_create list from full_diff — split pipe-separated policies to lists
         job.event("preparing BGP session create payloads")
         bulk_create = []
-        for device_name, actions in full_diff.items():
-            for sname in actions["create"]:
-                session_data = normalised_live[device_name][sname]
+        for device_name, actions in identity_diff.items():
+            for identity in actions["create"]:
+                session_data = normalised_live[device_name][identity]
                 bulk_create.append(
                     {
-                        "name": sname,
+                        "name": session_data.get("name"),
                         "device": device_name,
                         "description": session_data.get("description") or "",
                         "local_address": session_data.get("local_address"),
@@ -2179,12 +2262,14 @@ class NetboxBgpPeeringsTasks:
         # Build bulk_update list from full_diff
         job.event("preparing BGP session update payloads")
         bulk_update = []
-        for device_name, actions in full_diff.items():
-            for sname, field_changes in actions["update"].items():
-                entry = {"name": sname}
+        for device_name, actions in identity_diff.items():
+            for identity, field_changes in actions["update"].items():
+                entry = {"name": normalised_nb[device_name][identity]["name"]}
                 for field, change in field_changes.items():
                     new_value = change["new_value"]
-                    if field in ("import_policies", "export_policies"):
+                    if field == "name":
+                        entry["new_name"] = new_value
+                    elif field in ("import_policies", "export_policies"):
                         entry[field] = new_value if new_value is not None else []
                     elif field in ("prefix_list_in", "prefix_list_out"):
                         entry[field] = new_value if new_value else None
