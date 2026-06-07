@@ -5,7 +5,6 @@ PICLE Shell Client
 sync-all commands for Netbox service.
 """
 
-import builtins
 import logging
 from typing import List, Union
 
@@ -14,7 +13,7 @@ from pydantic import Field, StrictStr
 
 from norfab.workers.netbox_worker.netbox_models import SyncAllInput
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
@@ -34,9 +33,7 @@ class SyncAllDevicesShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(**kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         kwargs["timeout"] = int(timeout * 0.9)
@@ -46,13 +43,12 @@ class SyncAllDevicesShell(
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "sync_all",
             workers=workers,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

@@ -10,7 +10,7 @@ from pydantic import (
     StrictStr,
 )
 
-from ..common import log_error_or_result
+from ..common import log_error_or_result, run_future_job
 
 # ---------------------------------------------------------------------------------------------
 # COMMON MODELS
@@ -182,9 +182,8 @@ class NorniHostsFilters(BaseModel):
 
     @staticmethod
     def source_hosts() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = set()
-        result = NFCLIENT.run_job("nornir", "get_nornir_hosts")
+        result = run_future_job("nornir", "get_nornir_hosts")
         result = log_error_or_result(result)
         # result is a dict keyed by worker name with lists of hosts values
         for worker, result in result.items():
@@ -198,12 +197,11 @@ class NorniHostsFilters(BaseModel):
 
     @staticmethod
     def get_nornir_hosts(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "get_nornir_hosts",
             workers=workers,

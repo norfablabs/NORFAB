@@ -1,4 +1,3 @@
-﻿import builtins
 from typing import List, Union
 
 try:
@@ -18,7 +17,7 @@ from norfab.workers.nornir_worker.nornir_models import (
     ParseTextfsmInput,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_cli import (
     NrCliPluginNapalm,
     NrCliPluginNetmiko,
@@ -39,21 +38,18 @@ class NapalmGettersModel(
     getters: NapalmGettersEnum = Field(..., description="Select NAPALM getters")
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "parse_napalm",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )
@@ -140,21 +136,18 @@ class TTPParseModel(
         return []
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "parse_ttp",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )
@@ -187,21 +180,18 @@ class TextFSMParseModel(
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "parse_textfsm",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )

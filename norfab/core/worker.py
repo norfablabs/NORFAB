@@ -24,7 +24,7 @@ from pydantic import BaseModel, create_model
 
 from norfab import models
 from norfab.core.inventory import NorFabInventory
-from norfab.models import NorFabEvent, Result
+from norfab.models import InputRequestModel, NorFabEvent, Result
 from norfab.utils.text import format_duration
 
 from . import NFP
@@ -56,6 +56,7 @@ class Job:
         "task",
         "client_input_queue",
         "start_time",
+        "pending_input_request",
     )
 
     def __init__(
@@ -78,6 +79,7 @@ class Job:
         self.task = task
         self.client_input_queue = client_input_queue
         self.start_time = time.time()
+        self.pending_input_request = None
 
     def __str__(self) -> str:
         return self.juuid
@@ -101,7 +103,8 @@ class Job:
             **kwargs: Additional keyword arguments to include in the event.
         """
         kwargs.setdefault("task", self.task)
-        if self.kwargs.get("progress", False) and self.juuid and self.worker:
+        kwargs.setdefault("event_type", "progress")
+        if self.juuid and self.worker:
             self.worker.event(
                 message=message,
                 juuid=self.juuid,
@@ -145,6 +148,84 @@ class Job:
             pass
 
         return None
+
+    def request_input(
+        self,
+        question: str,
+        default: Any = False,
+        timeout: int = 120,
+        metadata: dict | None = None,
+    ) -> Any:
+        input_request = InputRequestModel(
+            question=question,
+            default=default,
+            metadata=metadata or {},
+        ).model_dump()
+        self.pending_input_request = input_request
+        self.worker.db.set_job_status(self.juuid, "WAITING_CLIENT_INPUT")
+        self.worker.event(
+            message=question,
+            juuid=self.juuid,
+            client_address=self.client_address,
+            task=self.task,
+            event_type="input_request",
+            status="waiting_client_input",
+            timeout=timeout,
+            extras={"input_request": input_request},
+        )
+
+        deadline = time.time() + timeout
+        response = None
+        while time.time() < deadline:
+            wait_time = min(0.2, deadline - time.time())
+            client_input = self.wait_client_input(timeout=wait_time)
+            if not client_input:
+                continue
+            if client_input.get("input_id") == input_request["id"]:
+                response = client_input
+                break
+
+        self.pending_input_request = None
+        self.worker.db.set_job_status(self.juuid, "STARTED")
+
+        if not response:
+            self.worker.event(
+                message=question,
+                juuid=self.juuid,
+                client_address=self.client_address,
+                task=self.task,
+                event_type="input_response",
+                status="timeout",
+                extras={"input_response": {"input_id": input_request["id"]}},
+            )
+            raise TimeoutError(f"Client input timed out for job {self.juuid}")
+
+        response_event = {
+            "input_id": input_request["id"],
+            "metadata": response.get("metadata", {}),
+        }
+        if response.get("cancel"):
+            self.worker.event(
+                message=question,
+                juuid=self.juuid,
+                client_address=self.client_address,
+                task=self.task,
+                event_type="input_response",
+                status="cancelled",
+                extras={"input_response": response_event},
+            )
+            raise RuntimeError(f"Client cancelled input for job {self.juuid}")
+
+        self.worker.event(
+            message=question,
+            juuid=self.juuid,
+            client_address=self.client_address,
+            task=self.task,
+            event_type="input_response",
+            status="received",
+            extras={"input_response": response_event},
+        )
+        return response.get("value", default)
 
 
 # --------------------------------------------------------------------------------------------
@@ -724,8 +805,17 @@ class JobDatabase:
                 UPDATE jobs
                 SET status = 'FAILED', completed_timestamp = ?, result_data = ?
                 WHERE uuid = ?
-            """,
+                """,
                 (time.ctime(), self._compress_data(result_data), uuid),
+            )
+
+    def set_job_status(self, uuid: str, status: str) -> None:
+        with self._transaction(write=True) as conn:
+            conn.execute(
+                """
+                UPDATE jobs SET status = ? WHERE uuid = ?
+            """,
+                (status, uuid),
             )
 
     def get_job_info(
@@ -902,7 +992,9 @@ class JobDatabase:
             else:
                 status_conditions = []
                 if pending:
-                    status_conditions.append("status IN ('PENDING', 'STARTED')")
+                    status_conditions.append(
+                        "status IN ('PENDING', 'STARTED', 'WAITING_CLIENT_INPUT')"
+                    )
                 if completed:
                     status_conditions.append("status IN ('COMPLETED', 'FAILED')")
                 if status_conditions:
@@ -1235,6 +1327,9 @@ def _get(worker, get_queue, destroy_event) -> None:
             # Job is still in progress - return status with timestamps
             status = b"102"
             payload["status"] = job_info["status"]
+            running_job = worker.running_jobs.get(uuid_str)
+            if running_job and running_job.pending_input_request:
+                payload["input_request"] = running_job.pending_input_request
         elif job_info["status"] in ("COMPLETED", "FAILED"):
             result_dict = job_info.get("result_data")
             status = result_dict.get("status_code", "200").encode("utf-8")
@@ -1828,6 +1923,7 @@ class NFPWorker:
         Logs:
             Error: Logs an error message if the event data cannot be formed.
         """
+        kwargs.setdefault("event_type", "progress")
         # construct NorFabEvent
         try:
             event_data = NorFabEvent(

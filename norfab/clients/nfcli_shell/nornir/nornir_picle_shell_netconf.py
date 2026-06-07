@@ -1,5 +1,3 @@
-﻿import builtins
-
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import BaseModel, Field
 
@@ -8,7 +6,7 @@ from norfab.workers.nornir_worker.nornir_models import (
     NetconfGetConfigInput,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_common import NorniHostsFilters
 
 
@@ -84,21 +82,18 @@ class NornirNetconfShell(BaseModel):
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "netconf",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )

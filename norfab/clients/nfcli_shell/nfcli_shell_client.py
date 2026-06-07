@@ -30,7 +30,7 @@ from norfab.workers.filesharing_worker.filesharing_models import (
 
 from .agent import agent_picle_shell
 from .client_agent import client_agent_picle_shell
-from .common import ClientRunJobArgs, listen_events, log_error_or_result
+from .common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .containerlab import containerlab_picle_shell
 from .fakenos import fakenos_picle_shell
 from .fastapi import fastapi_picle_shell
@@ -202,20 +202,18 @@ class ListFilesModel(ListFilesInput, use_enum_values=True, populate_by_name=True
 
     @staticmethod
     def source_url() -> list:
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.run_job(
+        broker_files = run_future_job(
             "filesharing",
             "walk",
             workers="any",
             kwargs={"url": "nf://"},
         )
-        print(broker_files)
         for w_name, wres in broker_files.items():
             return wres["result"]
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        reply = NFCLIENT.run_job(
+        reply = run_future_job(
             "filesharing",
             "list_files",
             args=args,
@@ -239,8 +237,7 @@ class CopyFileModel(BaseModel):
 
     @staticmethod
     def source_url() -> list:
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.run_job(
+        broker_files = run_future_job(
             "filesharing",
             "walk",
             kwargs={"url": "nf://"},
@@ -262,8 +259,7 @@ class ListFileDetails(FileDetailsInput, use_enum_values=True, populate_by_name=T
 
     @staticmethod
     def source_url() -> list:
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.run_job(
+        broker_files = run_future_job(
             "filesharing",
             "walk",
             kwargs={"url": "nf://"},
@@ -274,7 +270,7 @@ class ListFileDetails(FileDetailsInput, use_enum_values=True, populate_by_name=T
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        reply = NFCLIENT.run_job(
+        reply = run_future_job(
             "filesharing",
             "file_details",
             args=args,
@@ -293,21 +289,18 @@ class DeleteFetchedFiles(ClientRunJobArgs):
     filepath: StrictStr = Field("*", description="Files location glob pattern")
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "all",
             "delete_fetched_files",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )
@@ -319,8 +312,7 @@ class DeleteFetchedFiles(ClientRunJobArgs):
 
     @staticmethod
     def source_filepath() -> list:
-        NFCLIENT = builtins.NFCLIENT
-        broker_files = NFCLIENT.run_job(
+        broker_files = run_future_job(
             "filesharing", "any", "walk", kwargs={"url": "nf://"}
         )
         for w_name, wres in broker_files.items():
@@ -446,14 +438,12 @@ class ManTasks(BaseModel):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, **kwargs: object):
+    def run(**kwargs: object):
         service = kwargs.pop("service", "all")
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             service,
             "list_tasks",
-            uuid=uuid,
             workers="any",
             timeout=60,
             kwargs=kwargs,

@@ -16,7 +16,7 @@ from norfab.workers.nornir_worker.nornir_models import (
     RefreshNornirInput,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_cfg import NornirCfgShell
 from .nornir_picle_shell_cli import NornirCliShell
 from .nornir_picle_shell_common import (
@@ -120,32 +120,27 @@ class ShowWatchDogModel(NorniHostsFilters):
 
     @staticmethod
     def get_watchdog_stats(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
-        result = NFCLIENT.run_job("nornir", "get_watchdog_stats", workers=workers)
+        result = run_future_job("nornir", "get_watchdog_stats", workers=workers)
         if nowait:
             return result
         return log_error_or_result(result)
 
     @staticmethod
     def get_watchdog_configuration(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
-        result = NFCLIENT.run_job(
-            "nornir", "get_watchdog_configuration", workers=workers
-        )
+        result = run_future_job("nornir", "get_watchdog_configuration", workers=workers)
         if nowait:
             return result
         return log_error_or_result(result)
 
     @staticmethod
     def get_watchdog_connections(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
-        result = NFCLIENT.run_job("nornir", "get_watchdog_connections", workers=workers)
+        result = run_future_job("nornir", "get_watchdog_connections", workers=workers)
         if nowait:
             return result
         return log_error_or_result(result)
@@ -164,13 +159,12 @@ class NornirShowInventoryModel(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "get_inventory",
             kwargs=kwargs,
@@ -214,12 +208,9 @@ class NornirShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_version(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
-        result = NFCLIENT.run_job(
-            "nornir", "get_version", workers=workers, nowait=nowait
-        )
+        result = run_future_job("nornir", "get_version", workers=workers, nowait=nowait)
         if nowait:
             return result
         return log_error_or_result(result)
@@ -254,21 +245,18 @@ class RefreshNornirModel(
         return ["all", "any"] + workers
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(**kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "refresh_nornir",
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
         if nowait:

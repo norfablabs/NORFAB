@@ -5,7 +5,6 @@ PICLE Shell CLient
 Client that implements interactive shell to work with NorFab.
 """
 
-import builtins
 import json
 import logging
 from typing import Any, Union
@@ -20,7 +19,7 @@ from rich.console import Console
 
 from norfab.workers.netbox_worker.netbox_models import GraphqlInput, NetboxCommonArgs
 
-from ..common import log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_check_sync import CheckSyncCommands
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -76,7 +75,6 @@ class GrapQLCommands(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         nowait = kwargs.pop("nowait", False)
@@ -91,7 +89,7 @@ class GrapQLCommands(
         if isinstance(kwargs.get("queries"), str):
             kwargs["queries"] = json.loads(kwargs["queries"])
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "graphql",
             workers=workers,
@@ -157,11 +155,10 @@ class NetboxShowCommandsModel(
 
     @staticmethod
     def get_inventory(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "all")
         verbose_result = kwargs.pop("verbose_result", False)
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox", "get_inventory", workers=workers, nowait=nowait
         )
         result = log_error_or_result(result, verbose_result=verbose_result)
@@ -169,23 +166,19 @@ class NetboxShowCommandsModel(
 
     @staticmethod
     def get_version(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "all")
         verbose_result = kwargs.pop("verbose_result", False)
-        result = NFCLIENT.run_job(
-            "netbox", "get_version", workers=workers, nowait=nowait
-        )
+        result = run_future_job("netbox", "get_version", workers=workers, nowait=nowait)
         result = log_error_or_result(result, verbose_result=verbose_result)
         return result
 
     @staticmethod
     def get_netbox_status(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "any")
         verbose_result = kwargs.pop("verbose_result", False)
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox", "get_netbox_status", workers=workers, kwargs=kwargs, nowait=nowait
         )
         result = log_error_or_result(result, verbose_result=verbose_result)
@@ -193,11 +186,10 @@ class NetboxShowCommandsModel(
 
     @staticmethod
     def get_compatibility(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "any")
         verbose_result = kwargs.pop("verbose_result", False)
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox", "get_compatibility", workers=workers, kwargs=kwargs, nowait=nowait
         )
         result = log_error_or_result(result, verbose_result=verbose_result)

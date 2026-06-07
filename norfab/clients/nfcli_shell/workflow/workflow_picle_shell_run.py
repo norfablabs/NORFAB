@@ -1,4 +1,3 @@
-import builtins
 from typing import Union
 
 from picle.models import Outputters
@@ -9,7 +8,7 @@ from pydantic import (
 
 from norfab.workers.workflow_worker.workflow_models import RunInput
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 
 
 class WorkflowRunShell(
@@ -30,21 +29,18 @@ class WorkflowRunShell(
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "workflow",
             "run",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )

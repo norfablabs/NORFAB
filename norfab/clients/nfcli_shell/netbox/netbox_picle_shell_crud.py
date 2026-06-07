@@ -1,4 +1,3 @@
-import builtins
 import json
 import logging
 from typing import List, Union
@@ -16,7 +15,7 @@ from norfab.workers.netbox_worker.netbox_models import (
     CrudUpdateArgs,
 )
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -29,9 +28,7 @@ class CrudListObjectsShell(
     populate_by_name=True,
 ):
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -41,14 +38,13 @@ class CrudListObjectsShell(
         if isinstance(app_filter, str) and "," in app_filter:
             kwargs["app_filter"] = [s.strip() for s in app_filter.split(",")]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "crud_list_objects",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -79,9 +75,7 @@ class CrudSearchShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -95,14 +89,13 @@ class CrudSearchShell(
         if isinstance(fields, str):
             kwargs["fields"] = [s.strip() for s in fields.split(",")]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "crud_search",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -132,9 +125,7 @@ class CrudReadShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -150,14 +141,13 @@ class CrudReadShell(
         if isinstance(ordering, str):
             kwargs["ordering"] = [ordering]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "crud_read",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -183,9 +173,7 @@ class CrudCreateShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -193,14 +181,13 @@ class CrudCreateShell(
 
         kwargs["data"] = json.loads(kwargs["data"])
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "crud_create",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -226,9 +213,7 @@ class CrudUpdateShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -236,14 +221,13 @@ class CrudUpdateShell(
 
         kwargs["data"] = json.loads(kwargs["data"])
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "crud_update",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -270,9 +254,7 @@ class CrudDeleteShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -284,14 +266,13 @@ class CrudDeleteShell(
             ids = [int(p) for p in parts]
             kwargs["object_id"] = ids[0] if len(ids) == 1 else ids
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "crud_delete",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -321,9 +302,7 @@ class CrudGetChangelogsShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -337,14 +316,13 @@ class CrudGetChangelogsShell(
         if isinstance(fields, str):
             kwargs["fields"] = [s.strip() for s in fields.split(",")]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "crud_get_changelogs",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

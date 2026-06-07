@@ -1,4 +1,3 @@
-import builtins
 from typing import Any
 
 from picle.models import Outputters, PipeFunctionsModel
@@ -16,7 +15,7 @@ from norfab.workers.fakenos_worker.fakenos_models import (
     GetNornirInventoryInput,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 
 # ---------------------------------------------------------------------------------------------
 # FAKENOS SERVICE SHELL SHOW COMMANDS MODELS
@@ -29,13 +28,12 @@ class FakeNOSShowInventoryModel(BaseModel):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fakenos",
             "get_inventory",
             kwargs=kwargs,
@@ -61,21 +59,19 @@ class FakeNOSShowNetworksCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        NFCLIENT = builtins.NFCLIENT
-        response = NFCLIENT.run_job("fakenos", "inspect_networks")
+        response = run_future_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fakenos",
             "inspect_networks",
             kwargs=kwargs,
@@ -109,10 +105,9 @@ class FakeNOSShowCommands(BaseModel):
 
     @staticmethod
     def get_version(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fakenos", "get_version", workers=workers, nowait=nowait
         )
         if nowait:
@@ -137,22 +132,19 @@ class FakeNOSStartCommand(
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fakenos",
             "start",
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
             nowait=nowait,
-            uuid=uuid,
         )
         if nowait:
             return result, Outputters.outputter_nested
@@ -170,28 +162,24 @@ class FakeNOSStopCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        NFCLIENT = builtins.NFCLIENT
-        response = NFCLIENT.run_job("fakenos", "inspect_networks")
+        response = run_future_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fakenos",
             "stop",
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
         if nowait:
@@ -210,28 +198,24 @@ class FakeNOSRestartCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        NFCLIENT = builtins.NFCLIENT
-        response = NFCLIENT.run_job("fakenos", "inspect_networks")
+        response = run_future_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fakenos",
             "restart",
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
         if nowait:
@@ -254,16 +238,13 @@ class GetFakeNOSNornirInventoryCommand(
     @staticmethod
     def source_network() -> list:
         ret = []
-        NFCLIENT = builtins.NFCLIENT
-        response = NFCLIENT.run_job("fakenos", "inspect_networks")
+        response = run_future_job("fakenos", "inspect_networks")
         for wname, wres in response.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -276,7 +257,7 @@ class GetFakeNOSNornirInventoryCommand(
                 groups = [groups]
             kwargs["groups"] = groups
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fakenos",
             "get_nornir_inventory",
             workers=workers,
@@ -284,7 +265,6 @@ class GetFakeNOSNornirInventoryCommand(
             args=args,
             timeout=timeout,
             nowait=nowait,
-            uuid=uuid,
         )
 
         if nowait:

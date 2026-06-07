@@ -1,4 +1,3 @@
-import builtins
 import copy
 import logging
 import os
@@ -15,7 +14,7 @@ from pydantic import (
     StrictStr,
 )
 
-from ..common import ClientRunJobArgs, listen_events
+from ..common import ClientRunJobArgs, run_future_job
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     NornirCommonArgs,
@@ -278,8 +277,7 @@ class NornirDiagramShell(ClientRunJobArgs):
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object) -> str | None:
+    def run(*args: object, **kwargs: object) -> str | None:
         if not (HAS_N2G and HAS_TTP):
             return "Failed importing N2G and TTP modules, are they installed?"
 
@@ -342,13 +340,11 @@ class NornirDiagramShell(ClientRunJobArgs):
                 for input_name, input_params in inputs.items():
                     cli_kwargs["commands"] = input_params["commands"]
             # collect commands output from devices
-            NFCLIENT = builtins.NFCLIENT
-            job_results = NFCLIENT.run_job(
+            job_results = run_future_job(
                 "nornir",
                 "cli",
                 workers=workers,
                 kwargs=cli_kwargs,
-                uuid=f"{uuid}-{index}",
                 timeout=timeout,
                 nowait=False,
             )

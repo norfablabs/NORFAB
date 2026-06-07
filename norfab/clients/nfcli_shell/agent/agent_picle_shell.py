@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import Any, Optional
 
@@ -11,7 +10,7 @@ from pydantic import (
 )
 from rich.console import Console
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 
 RICHCONSOLE = Console()
 SERVICE = "agent"
@@ -50,25 +49,22 @@ class AgentShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_inventory(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("agent", "get_inventory", workers=workers)
+        result = run_future_job("agent", "get_inventory", workers=workers)
         result = log_error_or_result(result)
         return result
 
     @staticmethod
     def get_version(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("agent", "get_version", workers=workers)
+        result = run_future_job("agent", "get_version", workers=workers)
         result = log_error_or_result(result)
         return result
 
     @staticmethod
     def get_status(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
-        result = NFCLIENT.run_job("agent", "get_status", workers=workers, kwargs=kwargs)
+        result = run_future_job("agent", "get_status", workers=workers, kwargs=kwargs)
         result = log_error_or_result(result)
         return result
 
@@ -96,23 +92,20 @@ class AgentInvoke(ClientRunJobArgs):
         return ["NorFab"] + ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         nowait = kwargs.pop("nowait", False)
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.get("verbose_result", False)
 
         # run the job
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "agent",
             "invoke",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
         if nowait:

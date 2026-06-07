@@ -11,7 +11,7 @@ from pydantic import (
     StrictStr,
 )
 
-from ..common import ClientRunJobArgs, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 
 
 class NornirTaskEnum(str, Enum):
@@ -64,7 +64,7 @@ class ListJobsModel(ClientRunJobArgs):
         if kwargs.get("client") == "self":
             kwargs["client"] = NFCLIENT.zmq_name
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "job_list",
             workers=workers,
@@ -113,13 +113,12 @@ class JobDetailsModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "job_details",
             workers=workers,

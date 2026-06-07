@@ -9049,6 +9049,7 @@ class TestCreateBgpPeering:
                     "remote_as": _TEST_REMOTE_AS,
                     "rir": "lab",
                     "vrf": vrf_name,
+                    "create_reverse": False
                 },
             )
             pprint.pprint(ret)

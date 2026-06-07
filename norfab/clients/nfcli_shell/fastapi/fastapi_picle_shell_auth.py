@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import Union
 from uuid import uuid4  # random uuid
@@ -17,7 +16,7 @@ from norfab.workers.fastapi_worker.fastapi_models import (
     BearerTokenStoreInput,
 )
 
-from ..common import ClientRunJobArgs, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +33,6 @@ class CreateAuthToken(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -43,7 +41,7 @@ class CreateAuthToken(
         if "token" not in kwargs:
             kwargs["token"] = uuid4().hex
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastapi",
             "bearer_token_store",
             kwargs=kwargs,
@@ -69,13 +67,12 @@ class ListAuthToken(
 ):
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastapi",
             "bearer_token_list",
             kwargs=kwargs,
@@ -108,13 +105,12 @@ class DeleteAuthToken(
 ):
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastapi",
             "bearer_token_delete",
             kwargs=kwargs,
@@ -140,13 +136,12 @@ class CheckAuthToken(
 ):
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastapi",
             "bearer_token_check",
             kwargs=kwargs,

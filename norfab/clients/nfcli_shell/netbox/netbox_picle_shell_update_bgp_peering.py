@@ -1,4 +1,3 @@
-import builtins
 import json
 import logging
 
@@ -6,7 +5,7 @@ from picle.models import Outputters, PipeFunctionsModel
 
 from norfab.workers.netbox_worker.netbox_models import UpdateBgpPeeringInput
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -20,9 +19,7 @@ class UpdateBgpPeeringShell(
 ):
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -44,14 +41,13 @@ class UpdateBgpPeeringShell(
         if isinstance(kwargs.get("prefix_list_out"), str):
             kwargs["prefix_list_out"] = [kwargs["prefix_list_out"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "update_bgp_peering",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

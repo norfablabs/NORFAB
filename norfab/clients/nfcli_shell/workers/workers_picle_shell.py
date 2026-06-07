@@ -12,7 +12,7 @@ from pydantic import (
     StrictStr,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 
 log = logging.getLogger(__name__)
 
@@ -52,13 +52,12 @@ class ShowWorkersStatistics(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "all",
             "get_watchdog_stats",
             workers=workers,
@@ -92,13 +91,12 @@ class ShowWorkersVersion(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "all",
             "get_version",
             workers=workers,
@@ -175,9 +173,7 @@ class WorkersPingCommand(ClientRunJobArgs):
         return ["all", "any"] + workers
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(**kwargs: object):
         workers = kwargs.pop("workers", "all")
         service = kwargs.pop("service", "all")
         timeout = kwargs.pop("timeout", 600)
@@ -185,13 +181,12 @@ class WorkersPingCommand(ClientRunJobArgs):
         nowait = kwargs.pop("nowait", False)
         kwargs["ping"] = "pong"
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             service,
             "echo",
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -230,9 +225,7 @@ class WorkersShellCommand(ClientRunJobArgs):
         return ["all", "any"] + workers
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(**kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
@@ -242,13 +235,12 @@ class WorkersShellCommand(ClientRunJobArgs):
         if command_timeout is not None:
             kwargs["timeout"] = command_timeout
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "all",
             "run_shell_cmd",
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

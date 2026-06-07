@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import List, Union
 
@@ -13,7 +12,7 @@ from norfab.workers.netbox_worker.netbox_models import (
     UpdateInterfacesDescriptionInput,
 )
 
-from ..common import log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -31,7 +30,6 @@ class UpdateInterfacesDescription(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -40,7 +38,7 @@ class UpdateInterfacesDescription(
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "update_interfaces_description",
             workers=workers,

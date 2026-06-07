@@ -1,5 +1,3 @@
-﻿import builtins
-
 from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
@@ -15,7 +13,7 @@ from norfab.workers.nornir_worker.nornir_models import (
     NrFileCopyPluginNetmiko as TaskNrFileCopyPluginNetmiko,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
@@ -56,9 +54,7 @@ class NornirFileCopyShell(
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -75,13 +71,12 @@ class NornirFileCopyShell(
             kwargs["add_details"] = True
             kwargs["to_dict"] = False
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "file_copy",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )

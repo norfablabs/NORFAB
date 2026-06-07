@@ -19,6 +19,7 @@ import orjson
 import zmq
 
 from norfab.core.inventory import NorFabInventory
+from norfab.models import InputResponseModel
 from norfab.utils.markdown_results import markdown_results
 
 from . import NFP
@@ -37,6 +38,9 @@ class JobStatus:
     SUBMITTING = "SUBMITTING"  # POST sent, waiting for broker ACK
     DISPATCHED = "DISPATCHED"  # Broker dispatched to workers
     STARTED = "STARTED"  # At least one worker started processing
+    WAITING_CLIENT_INPUT = (
+        "WAITING_CLIENT_INPUT"  # Worker is waiting for client response
+    )
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     STALE = "STALE"  # Job exceeded deadline without completion
@@ -333,7 +337,7 @@ class ClientJobDatabase:
                        completed_timestamp, created_at, last_poll_timestamp
                 FROM jobs
                 WHERE {where_clause}
-                ORDER BY created_at {order_direction}
+                ORDER BY created_at {order_direction}, rowid {order_direction}
                 LIMIT ?
                 """,
                 (*params, result_limit),
@@ -571,6 +575,113 @@ class ClientJobDatabase:
         return stats
 
 
+class NFPJobFuture:
+    """Blocking handle for one submitted NorFab job."""
+
+    terminal_marker = object()
+
+    def __init__(
+        self,
+        client: object,
+        uuid: str,
+        service: str,
+        task: str,
+        workers: Union[str, list],
+        timeout: int,
+        kwargs: dict,
+    ) -> None:
+        self.client = client
+        self.uuid = uuid
+        self.service = service
+        self.task = task
+        self.workers = workers
+        self.timeout = timeout
+        self.kwargs = kwargs or {}
+        self.events_buffer = queue.Queue(maxsize=0)
+        self.done_event = threading.Event()
+        self.terminal_job = None
+        self.input_request_ids = set()
+
+    def add_event(self, event: dict) -> bool:
+        input_request = (event.get("extras") or {}).get("input_request")
+
+        if event.get("event_type") == "input_request" and input_request:
+            input_id = input_request.get("id")
+            if input_id in self.input_request_ids:
+                return False
+            self.input_request_ids.add(input_id)
+
+        self.events_buffer.put(event)
+        return True
+
+    def mark_done(self, job: dict | None = None) -> None:
+        self.terminal_job = job
+        if not self.done_event.is_set():
+            self.done_event.set()
+            self.events_buffer.put(self.terminal_marker)
+
+    def events(self, timeout: int | float | None = None):
+        while True:
+            try:
+                event = self.events_buffer.get(block=True, timeout=timeout)
+            except queue.Empty:
+                break
+
+            if event is self.terminal_marker:
+                break
+
+            yield event
+
+    def result(self, timeout: int | float | None = None, markdown: bool = False) -> Any:
+        wait_started = time.time()
+        while not self.done_event.is_set():
+            if self.client.exit_event.is_set() or self.client.destroy_event.is_set():
+                return None
+
+            wait_time = 0.2
+            if timeout is not None:
+                remaining_time = timeout - (time.time() - wait_started)
+                if remaining_time <= 0:
+                    return None
+                wait_time = min(wait_time, remaining_time)
+
+            self.done_event.wait(wait_time)
+
+        job = self.client.job_db.get_job(self.uuid) or self.terminal_job
+        result = None
+        if job and job["status"] == JobStatus.COMPLETED:
+            result = job.get("result_data")
+
+        if markdown and job:
+            return markdown_results(job, self.service, self.task, self.kwargs)
+
+        return result
+
+    def send_response(
+        self,
+        input_id: str,
+        value: Any,
+        worker: str | None = None,
+        cancel: bool = False,
+        metadata: dict | None = None,
+    ) -> None:
+        job = self.client.job_db.get_job(self.uuid) or {}
+        target_worker = worker or job.get("workers_dispatched") or self.workers
+        payload = InputResponseModel(
+            input_id=input_id,
+            value=value,
+            cancel=cancel,
+            metadata=metadata or {},
+        ).model_dump()
+        self.client.send_to_broker(
+            NFP.PUT,
+            self.client.ensure_bytes(self.service),
+            self.client.ensure_bytes(target_worker),
+            self.client.ensure_bytes(self.uuid),
+            self.client.ensure_bytes(payload),
+        )
+
+
 def recv(client) -> None:
     """
     Receiver thread: processes all incoming messages from the broker and updates the database.
@@ -656,8 +767,11 @@ def handle_event(client: object, juuid: str, payload: dict, msg: list) -> None:
         payload: Event payload dictionary
         msg: Original message multipart for queue
     """
-    client.event_queue.put(msg)
     client.stats_recv_event_from_broker += 1
+    future = client.job_futures.get(juuid)
+    if future and not future.add_event(payload):
+        return
+
     client.job_db.add_event(
         job_uuid=juuid,
         message=payload.get("message", ""),
@@ -739,18 +853,62 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
         if is_complete:
             log.info(f"{client.name} - Job {juuid} completed")
             log.debug(f"{client.name} - job {juuid} completed")
+            future = client.job_futures.get(juuid)
+            if future:
+                future.mark_done(client.job_db.get_job(juuid))
+        return
+
+    # Handle 102 Processing - worker is waiting for client input
+    if status == "102":
+        worker = payload.get("worker")
+        workers_started = set(job.get("workers_started", []))
+        if worker:
+            workers_started.add(worker)
+        client.job_db.update_job(
+            juuid,
+            status=JobStatus.WAITING_CLIENT_INPUT,
+            workers_started=list(workers_started),
+        )
+
+        input_request = payload.get("input_request")
+        if input_request:
+            event = {
+                "event_type": "input_request",
+                "worker": worker,
+                "service": payload.get("service", job["service"]),
+                "uuid": juuid,
+                "task": job["task"],
+                "timestamp": time.strftime("%d-%b-%Y %H:%M:%S"),
+                "message": input_request.get(
+                    "question", "Worker is waiting for client input"
+                ),
+                "severity": "INFO",
+                "status": "waiting_client_input",
+                "resource": [],
+                "extras": {"input_request": input_request},
+            }
+            future = client.job_futures.get(juuid)
+            if not future or future.add_event(event):
+                client.job_db.add_event(
+                    job_uuid=juuid,
+                    message=event["message"],
+                    severity=event["severity"],
+                    task=event["task"],
+                    event_data=event,
+                )
         return
 
     # Handle 300 Pending - job still in progress
     if status == "300":
         worker = payload.get("worker")
-        if worker and worker not in job["workers_started"]:
-            job["workers_started"].append(worker)
-            client.job_db.update_job(
-                juuid,
-                status=JobStatus.STARTED,
-                workers_started=job["workers_started"],
-            )
+        workers_started = list(job.get("workers_started", []))
+        if worker and worker not in workers_started:
+            workers_started.append(worker)
+        client.job_db.update_job(
+            juuid,
+            status=JobStatus.STARTED,
+            workers_started=workers_started,
+        )
         return
 
     # Handle error statuses (4xx, 5xx)
@@ -762,6 +920,9 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
             append_errors=[error_msg],
             completed_ts=time.ctime(),
         )
+        future = client.job_futures.get(juuid)
+        if future:
+            future.mark_done(client.job_db.get_job(juuid))
         log.error(
             f"{client.name} - Job {juuid} failed with status {status}: {error_msg}"
         )
@@ -804,6 +965,9 @@ def handle_stream(client, juuid: str, status: str, payload: bytes) -> None:
             log.error(
                 f"{client.name} - file download failed, MD5 hash mismatch, job '{juuid}', filename '{destination.name}'"
             )
+            future = client.job_futures.get(juuid)
+            if future:
+                future.mark_done(client.job_db.get_job(juuid))
 
         log.debug(
             f"{client.name} - finished file download, job '{juuid}', filename '{destination.name}'"
@@ -837,6 +1001,8 @@ def dispatch_new_jobs(client) -> None:
         [JobStatus.NEW], limit=client.dispatch_batch_size
     ):
         juuid = job["uuid"]
+        if juuid not in client.job_futures:
+            continue
 
         try:
             # Send POST request (non-blocking)
@@ -870,6 +1036,9 @@ def dispatch_new_jobs(client) -> None:
                 errors=[msg],
                 completed_ts=time.ctime(),
             )
+            future = client.job_futures.get(juuid)
+            if future:
+                future.mark_done(client.job_db.get_job(juuid))
 
 
 def poll_active_jobs(client) -> None:
@@ -878,7 +1047,11 @@ def poll_active_jobs(client) -> None:
     Non-blocking: sends request with 5-second throttling via last_poll_timestamp.
     """
     # Jobs that are ready for GET polling (dispatched or started)
-    active_statuses = [JobStatus.DISPATCHED, JobStatus.STARTED]
+    active_statuses = [
+        JobStatus.DISPATCHED,
+        JobStatus.STARTED,
+        JobStatus.WAITING_CLIENT_INPUT,
+    ]
 
     # fetch_jobs filters by min_poll_age to enforce polling throttle
     for job in client.job_db.fetch_jobs(
@@ -887,6 +1060,8 @@ def poll_active_jobs(client) -> None:
         min_poll_age=client.poll_interval,
     ):
         juuid = job["uuid"]
+        if juuid not in client.job_futures:
+            continue
         deadline = job["deadline"]
         now = time.time()
 
@@ -898,6 +1073,9 @@ def poll_active_jobs(client) -> None:
                 errors=["Job deadline reached without completion"],
                 completed_ts=time.ctime(),
             )
+            future = client.job_futures.get(juuid)
+            if future:
+                future.mark_done(client.job_db.get_job(juuid))
             continue
 
         try:
@@ -969,7 +1147,7 @@ class NFPClient(object):
         broker_public_key_file (str): Path to the broker's public key file.
 
     Methods:
-        __init__(inventory, broker, name, exit_event=None, event_queue=None):
+        __init__(inventory, broker, name, exit_event=None):
             Initializes the NFPClient instance with the given parameters.
         ensure_bytes(workers) -> bytes:
             Helper function to convert workers target to bytes.
@@ -999,7 +1177,6 @@ class NFPClient(object):
         broker: The broker object for communication.
         name (str): The name of the client.
         exit_event (threading.Event, optional): An event to signal client exit. Defaults to None.
-        event_queue (queue.Queue, optional): A queue for handling events. Defaults to None.
     """
 
     broker = None
@@ -1023,11 +1200,10 @@ class NFPClient(object):
         broker: str,
         name: str,
         exit_event: Optional[threading.Event] = None,
-        event_queue: Optional[queue.Queue] = None,
     ) -> None:
         self.inventory = inventory
         self.name = name
-        self.zmq_name = f"{self.name}-{uuid4().hex}"
+        self.zmq_name = self.name
         self.broker = broker
         self.base_dir = os.path.join(
             self.inventory.base_dir, "__norfab__", "files", "client", self.name
@@ -1071,11 +1247,12 @@ class NFPClient(object):
             threading.Event()
         )  # destroy event, used by worker to stop its client
         self.mmi_queue = queue.Queue(maxsize=0)
-        self.event_queue = event_queue or queue.Queue(maxsize=1000)
+        self.job_futures = {}
 
         # Configuration for dispatcher
         self.poll_interval = 0.5  # Seconds between GET polls for same job (throttling)
         self.dispatch_batch_size = 10  # Max jobs to process per dispatch cycle
+        self.recover_job_futures()
 
         # start receiver thread - handles all incoming messages
         self.recv_thread = threading.Thread(
@@ -1502,6 +1679,71 @@ class NFPClient(object):
 
         return result
 
+    def recover_job_futures(self) -> None:
+        active_statuses = [
+            JobStatus.NEW,
+            JobStatus.SUBMITTING,
+            JobStatus.DISPATCHED,
+            JobStatus.STARTED,
+            JobStatus.WAITING_CLIENT_INPUT,
+        ]
+        for job in self.job_db.fetch_jobs(active_statuses, limit=10000):
+            if job["deadline"] and time.time() >= job["deadline"]:
+                self.job_db.update_job(
+                    job["uuid"],
+                    status=JobStatus.STALE,
+                    errors=["Job deadline reached while client was offline"],
+                    completed_ts=time.ctime(),
+                )
+                continue
+
+            if job["status"] == JobStatus.SUBMITTING:
+                self.job_db.update_job(job["uuid"], status=JobStatus.NEW)
+
+            self.job_futures[job["uuid"]] = NFPJobFuture(
+                client=self,
+                uuid=job["uuid"],
+                service=job["service"],
+                task=job["task"],
+                workers=job["workers_requested"],
+                timeout=job["timeout"],
+                kwargs=job["kwargs"],
+            )
+
+    def submit_job(
+        self,
+        service: str,
+        task: str,
+        uuid: str = None,
+        args: list = None,
+        kwargs: dict = None,
+        workers: Union[str, list] = "all",
+        timeout: int = 600,
+    ) -> NFPJobFuture:
+        uuid = uuid or uuid4().hex
+        args = args or []
+        kwargs = kwargs or {}
+        deadline = time.time() + timeout
+
+        self.job_db.add_job(
+            uuid, service, task, workers, args, kwargs, timeout, deadline
+        )
+        future = NFPJobFuture(
+            client=self,
+            uuid=uuid,
+            service=service,
+            task=task,
+            workers=workers,
+            timeout=timeout,
+            kwargs=kwargs,
+        )
+        self.job_futures[uuid] = future
+        log.info(
+            f"{self.name} - Submitted job {uuid} to service '{service}', task '{task}', workers '{workers}'"
+        )
+
+        return future
+
     def run_job(
         self,
         service: str,
@@ -1535,49 +1777,23 @@ class NFPClient(object):
         Returns:
             Any: The result of the job if successful, or None if the job failed, timed out, or became stale.
         """
-        uuid = uuid or uuid4().hex
-        args = args or []
-        kwargs = kwargs or {}
-        result = None
-        job = None
-        deadline = time.time() + timeout
-
-        self.job_db.add_job(
-            uuid, service, task, workers, args, kwargs, timeout, deadline
-        )
-        log.info(
-            f"{self.name} - Submitted job {uuid} to service '{service}', task '{task}', workers '{workers}'"
+        future = self.submit_job(
+            service=service,
+            task=task,
+            uuid=uuid,
+            args=args,
+            kwargs=kwargs,
+            workers=workers,
+            timeout=timeout,
         )
 
-        if nowait:
+        if nowait is True:
             return {
-                "uuid": uuid,
+                "uuid": future.uuid,
                 "service": service,
             }
-        else:
-            while time.time() < deadline:
-                if self.exit_event.is_set() or self.destroy_event.is_set():
-                    break
-                job = self.job_db.get_job(uuid)
-                if not job:
-                    break
-                if job["status"] == JobStatus.COMPLETED:
-                    result = job.get("result_data")
-                    log.info(f"{self.name} - Job {uuid} completed")
-                    break
-                if job["status"] == JobStatus.FAILED:
-                    log.warning(
-                        f"{self.name} - job {uuid} failed: {job.get('errors', [])}"
-                    )
-                    break
-                if job["status"] == JobStatus.STALE:
-                    log.warning(
-                        f"{self.name} - job {uuid} became stale: {job.get('errors', [])}"
-                    )
-                    break
-                time.sleep(0.2)
 
-            return markdown_results(job, service, task, kwargs) if markdown else result
+        return future.result(timeout=timeout, markdown=markdown)
 
     def get_agent(self, profile: str = "default") -> "NFAgent":
         """
@@ -1627,6 +1843,8 @@ class NFPClient(object):
         """
         log.info(f"{self.name} - client interrupt received, killing client")
         self.destroy_event.set()
+        for future in self.job_futures.values():
+            future.mark_done(self.job_db.get_job(future.uuid))
         # Wait for background threads to exit before destroying the ZMQ context.
         # Without this, the dispatcher/receiver threads may still be executing
         # between their destroy_event check and a socket call, causing

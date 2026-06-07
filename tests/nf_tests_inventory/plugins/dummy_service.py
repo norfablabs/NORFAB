@@ -1,3 +1,4 @@
+import builtins
 import importlib.metadata
 import logging
 import sys
@@ -102,6 +103,44 @@ class DummyServiceWorker(NFPWorker):
         """
         return Result(result="dummy")
 
+    @Task(fastapi={"methods": ["POST"]})
+    def input_request_task(self, job=None) -> Dict:
+        """
+        Dummy task that waits for client input before completing.
+        """
+        response = job.request_input(
+            question="approve dummy task?",
+            default="no",
+            timeout=10,
+            metadata={"task": "input_request_task"},
+        )
+        return Result(result={"response": response})
+
+    @Task(fastapi={"methods": ["POST"]})
+    def input_request_timeout_task(self, job=None) -> Dict:
+        """
+        Dummy task with a short client input timeout.
+        """
+        response = job.request_input(
+            question="timeout dummy task?",
+            default="no",
+            timeout=1,
+            metadata={"task": "input_request_timeout_task"},
+        )
+        return Result(result={"response": response})
+
+    @Task(fastapi={"methods": ["POST"]})
+    def event_task(self, job=None) -> Dict:
+        """
+        Dummy task that emits a custom progress event.
+        """
+        job.event(
+            "dummy progress event",
+            status="running",
+            resource=["dummy-resource"],
+        )
+        return Result(result="event done")
+
 
 # ---------------------------------------------------------------------------------------------
 # DUMMY SERVICE SHELL SHOW COMMANDS MODELS
@@ -126,13 +165,17 @@ class DummyServiceShowCommandsModel(BaseModel):
     @staticmethod
     def get_inventory(**kwargs):
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("DummyService", "get_inventory", workers=workers)
+        result = builtins.NFCLIENT.run_job(
+            "DummyService", "get_inventory", workers=workers
+        )
         return result
 
     @staticmethod
     def get_version(**kwargs):
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("DummyService", "get_version", workers=workers)
+        result = builtins.NFCLIENT.run_job(
+            "DummyService", "get_version", workers=workers
+        )
         return result
 
 

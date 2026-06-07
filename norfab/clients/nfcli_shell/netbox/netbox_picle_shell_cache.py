@@ -16,7 +16,7 @@ from norfab.workers.netbox_worker.netbox_models import (
     CacheListInput,
 )
 
-from ..common import BoolEnum, log_error_or_result
+from ..common import BoolEnum, log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -52,7 +52,6 @@ class CacheList(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         details = kwargs.get("details", False)
@@ -60,7 +59,7 @@ class CacheList(
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "cache_list",
             workers=workers,
@@ -120,13 +119,12 @@ class CacheClear(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "cache_clear",
             workers=workers,
@@ -163,13 +161,12 @@ class CacheGet(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "cache_get",
             workers=workers,

@@ -17,7 +17,7 @@ from norfab.workers.nornir_worker.nornir_models import (
     RuntimeUpdateHostInput,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_common import NorniHostsFilters
 
 
@@ -32,9 +32,7 @@ class CreateHostModel(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "create_host"
@@ -48,13 +46,12 @@ class CreateHostModel(
         if kwargs.get("groups") and isinstance(kwargs["groups"], str):
             kwargs["groups"] = [kwargs["groups"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "runtime_inventory",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )
@@ -83,9 +80,7 @@ class UpdateHostModel(
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "update_host"
@@ -99,13 +94,12 @@ class UpdateHostModel(
         if kwargs.get("groups") and isinstance(kwargs["groups"], str):
             kwargs["groups"] = [kwargs["groups"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "runtime_inventory",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )
@@ -127,22 +121,19 @@ class DeleteHostModel(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "delete_host"
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "runtime_inventory",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )
@@ -168,9 +159,7 @@ class ReadHostDataKeyModel(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         kwargs["action"] = "read_host_data"
@@ -180,13 +169,12 @@ class ReadHostDataKeyModel(
         if isinstance(kwargs["keys"], str):
             kwargs["keys"] = [kwargs["keys"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "runtime_inventory",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )
@@ -241,9 +229,8 @@ class InventoryLoadContainerlabModel(
 
     @staticmethod
     def source_lab_name() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = []
-        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        result = run_future_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
@@ -259,9 +246,7 @@ class InventoryLoadContainerlabModel(
         return ["all", "any"] + workers
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(**kwargs: object):
         workers = kwargs.pop("workers")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
@@ -270,13 +255,12 @@ class InventoryLoadContainerlabModel(
         if isinstance(kwargs.get("groups"), str):
             kwargs["groups"] = [kwargs["groups"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "nornir",
             "nornir_inventory_load_containerlab",
             kwargs=kwargs,
             workers=workers,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

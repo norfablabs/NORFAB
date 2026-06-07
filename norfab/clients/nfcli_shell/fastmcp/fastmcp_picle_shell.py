@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import Any
 
@@ -10,7 +9,7 @@ from pydantic import (
 
 from norfab.workers.fastmcp_worker.fastmcp_models import GetToolsInput
 
-from ..common import ClientRunJobArgs, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .fastmcp_picle_shell_auth import FastMCPAuthCommandsModel
 from .fastmcp_picle_shell_discover import Discover
 
@@ -29,13 +28,12 @@ class FastMCPShowInventoryModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastmcp",
             "get_inventory",
             kwargs=kwargs,
@@ -56,13 +54,12 @@ class FastMCPShowStatusModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastmcp",
             "get_status",
             kwargs=kwargs,
@@ -85,13 +82,12 @@ class FastMCPShowToolsModel(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastmcp",
             "get_tools",
             kwargs=kwargs,
@@ -134,9 +130,8 @@ class FastMCPShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_version(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("fastmcp", "get_version", workers=workers)
+        result = run_future_job("fastmcp", "get_version", workers=workers)
         return log_error_or_result(result)
 
 

@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import List, Union
 
@@ -14,7 +13,7 @@ from norfab.workers.netbox_worker.netbox_models import (
     GetContainerlabInventoryInput,
 )
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -110,9 +109,7 @@ class GetContainerlabInventoryCommand(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
@@ -129,13 +126,12 @@ class GetContainerlabInventoryCommand(
             if not isinstance(kwargs.get("devices"), list):
                 kwargs["devices"] = [kwargs["devices"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "get_containerlab_inventory",
             workers=workers,
             kwargs=kwargs,
             args=args,
-            uuid=uuid,
             nowait=nowait,
         )
 

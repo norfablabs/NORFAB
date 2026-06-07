@@ -1,4 +1,3 @@
-import builtins
 import logging
 
 from picle.models import Outputters, PipeFunctionsModel
@@ -7,7 +6,7 @@ from pydantic import (
     Field,
 )
 
-from ..common import ClientRunJobArgs, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .workflow_picle_shell_run import WorkflowRunShell
 
 SERVICE = "workflow"
@@ -25,13 +24,12 @@ class WorkflowShowInventoryModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "workflow",
             "get_inventory",
             kwargs=kwargs,
@@ -53,13 +51,12 @@ class WorkflowShowVersionModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "workflow",
             "get_version",
             kwargs=kwargs,

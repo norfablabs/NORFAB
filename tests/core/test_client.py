@@ -83,6 +83,18 @@ class TestClientApi:
 
 
 class TestClientRunJob:
+    def collect_events_until(self, future, event_type, timeout=15):
+        events = []
+        matched_event = None
+        deadline = time.time() + timeout
+        while time.time() < deadline and matched_event is None:
+            for event in future.events(timeout=1):
+                events.append(event)
+                if event.get("event_type") == event_type:
+                    matched_event = event
+                    break
+
+        return events, matched_event
 
     def test_generic_markdown_output(self, nfclient):
         ret = nfclient.run_job(
@@ -94,6 +106,118 @@ class TestClientRunJob:
         assert "Overall Summary" in ret
         assert "Worker:" in ret
         assert "Results" in ret
+
+    def test_future_input_request_response(self, nfclient):
+        future = nfclient.submit_job(
+            "DummyService",
+            "input_request_task",
+            workers="dummy-worker-1",
+            timeout=30,
+        )
+
+        events, input_event = self.collect_events_until(future, "input_request")
+
+        assert input_event is not None
+        input_request = input_event["extras"]["input_request"]
+
+        assert input_request["question"] == "approve dummy task?"
+        assert input_request["default"] == "no"
+        assert input_request["metadata"] == {"task": "input_request_task"}
+
+        future.send_response(
+            input_id=input_request["id"],
+            value="yes",
+            worker=input_event["worker"],
+        )
+
+        result = future.result(timeout=30)
+        events.extend(list(future.events(timeout=1)))
+
+        assert result["dummy-worker-1"]["failed"] is False
+        assert result["dummy-worker-1"]["result"] == {"response": "yes"}
+
+        response_events = [
+            event for event in events if event.get("event_type") == "input_response"
+        ]
+        assert response_events
+        assert response_events[-1]["status"] == "received"
+
+        job = nfclient.job_db.get_job(future.uuid)
+        assert job["status"] == JobStatus.COMPLETED
+
+    def test_future_progress_event(self, nfclient):
+        future = nfclient.submit_job(
+            "DummyService",
+            "event_task",
+            workers="dummy-worker-1",
+            timeout=30,
+        )
+
+        events, progress_event = self.collect_events_until(future, "progress")
+        result = future.result(timeout=30)
+        events.extend(list(future.events(timeout=1)))
+
+        assert progress_event is not None
+        assert any(
+            event.get("message") == "dummy progress event"
+            and event.get("event_type") == "progress"
+            and event.get("resource") == ["dummy-resource"]
+            for event in events
+        )
+        assert result["dummy-worker-1"]["failed"] is False
+        assert result["dummy-worker-1"]["result"] == "event done"
+
+    def test_future_input_request_cancel(self, nfclient):
+        future = nfclient.submit_job(
+            "DummyService",
+            "input_request_task",
+            workers="dummy-worker-1",
+            timeout=30,
+        )
+        events, input_event = self.collect_events_until(future, "input_request")
+
+        assert input_event is not None
+        input_request = input_event["extras"]["input_request"]
+
+        future.send_response(
+            input_id=input_request["id"],
+            value=None,
+            worker=input_event["worker"],
+            cancel=True,
+        )
+
+        result = future.result(timeout=30)
+        events.extend(list(future.events(timeout=1)))
+
+        assert result["dummy-worker-1"]["failed"] is True
+        assert "Client cancelled input" in result["dummy-worker-1"]["messages"][0]
+        assert any(
+            event.get("event_type") == "input_response"
+            and event.get("status") == "cancelled"
+            for event in events
+        )
+
+    def test_future_input_request_timeout(self, nfclient):
+        future = nfclient.submit_job(
+            "DummyService",
+            "input_request_timeout_task",
+            workers="dummy-worker-1",
+            timeout=30,
+        )
+        events, input_event = self.collect_events_until(future, "input_request")
+
+        assert input_event is not None
+
+        result = future.result(timeout=30)
+        events.extend(list(future.events(timeout=1)))
+
+        assert result["dummy-worker-1"]["failed"] is True
+        assert "Client input timed out" in result["dummy-worker-1"]["messages"][0]
+        assert any(
+            event.get("event_type") == "input_response"
+            and event.get("status") == "timeout"
+            for event in events
+        )
 
 
 class TestAddJobDb:

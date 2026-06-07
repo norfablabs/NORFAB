@@ -1,4 +1,3 @@
-import builtins
 import json
 import logging
 from enum import Enum
@@ -13,7 +12,7 @@ from pydantic import (
 
 from norfab.workers.netbox_worker.netbox_models import CreateIpBulkInput
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -53,9 +52,7 @@ class CreateIpBulk(
     status: IpStatusEnum = Field(None, description="IP address status")
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -74,14 +71,13 @@ class CreateIpBulk(
         if isinstance(kwargs.get("tags"), str):
             kwargs["tags"] = [kwargs["tags"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "create_ip_bulk",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

@@ -1,4 +1,3 @@
-import builtins
 import logging
 import os
 from typing import Any
@@ -20,7 +19,7 @@ from norfab.workers.containerlab_worker.containerlab_models import (
     SaveInput,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .containerlab_deploy_netbox import DeployNetboxCommand
 
 RICHCONSOLE = Console()
@@ -41,20 +40,17 @@ class DeployCommand(
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "deploy",
             workers=workers,
             kwargs=kwargs,
             args=args,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -80,28 +76,24 @@ class DestroyCommand(
 ):
     @staticmethod
     def source_lab_name() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = []
-        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        result = run_future_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "destroy_lab",
             workers=workers,
             kwargs=kwargs,
             args=args,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -127,28 +119,24 @@ class RestartCommand(
 ):
     @staticmethod
     def source_lab_name() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = []
-        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        result = run_future_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "restart_lab",
             workers=workers,
             kwargs=kwargs,
             args=args,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -174,28 +162,24 @@ class SaveCommand(
 ):
     @staticmethod
     def source_lab_name() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = []
-        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        result = run_future_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "save",
             workers=workers,
             kwargs=kwargs,
             args=args,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -224,17 +208,14 @@ class GetNornirInventoryCommand(
 ):
     @staticmethod
     def source_lab_name() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = []
-        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        result = run_future_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
@@ -246,13 +227,12 @@ class GetNornirInventoryCommand(
                 groups = [groups]
             kwargs["groups"] = groups
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "get_nornir_inventory",
             workers=workers,
             kwargs=kwargs,
             args=args,
-            uuid=uuid,
             nowait=nowait,
         )
 
@@ -278,21 +258,19 @@ class ShowContainers(
 ):
     @staticmethod
     def source_lab_name() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = []
-        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        result = run_future_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "inspect",
             workers=workers,
@@ -329,12 +307,11 @@ class ShowRunningLabs(
 ):
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "get_running_labs",
             workers=workers,
@@ -393,25 +370,22 @@ class ContainerlabShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_inventory(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("containerlab", "get_inventory", workers=workers)
+        result = run_future_job("containerlab", "get_inventory", workers=workers)
         result = log_error_or_result(result)
         return result
 
     @staticmethod
     def get_version(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("containerlab", "get_version", workers=workers)
+        result = run_future_job("containerlab", "get_version", workers=workers)
         result = log_error_or_result(result)
         return result
 
     @staticmethod
     def get_containerlab_status(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab", "get_containerlab_status", workers=workers, kwargs=kwargs
         )
         result = log_error_or_result(result)

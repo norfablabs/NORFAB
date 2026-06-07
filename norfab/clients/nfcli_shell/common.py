@@ -3,16 +3,11 @@ Common Pydantic Models for PICLE Client Shells
 """
 
 import builtins
-import functools
-import json
 import logging
-import queue
-import threading
 import time
 from datetime import datetime
 from enum import Enum
-from typing import Callable, List, Optional, Union
-from uuid import uuid4  # random uuid
+from typing import Any, List, Optional, Union
 
 from pydantic import (
     BaseModel,
@@ -22,6 +17,7 @@ from pydantic import (
     StrictStr,
 )
 from rich.console import Console
+from rich.prompt import Confirm, Prompt
 
 log = logging.getLogger(__name__)
 
@@ -30,106 +26,120 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 
 
-def listen_events_thread(uuid: str, stop, NFCLIENT) -> None:
-    """Helper function to pretty print events to command line"""
+def print_event(event: dict, richconsole: Console = None) -> None:
+    """Print one job event to terminal."""
+    richconsole = richconsole or Console()
+    service = event.get("service", "")
+    worker = event.get("worker", "")
+    task = event.get("task", "")
+    timestamp = event.get("timestamp", "")
+    message = event.get("message", "")
+    severity = event.get("severity", "INFO")
+    severity = severity.replace("DEBUG", "[cyan]DEBUG[/cyan]")
+    severity = severity.replace("INFO", "[green]INFO[/green]")
+    severity = severity.replace("WARNING", "[yellow]WARNING[/yellow]")
+    severity = severity.replace("CRITICAL", "[red]CRITICAL[/red]")
+    status = event.get("status", "")
+    status = status.replace("started", "[cyan]started[/cyan]")
+    status = status.replace("running", "[cyan]running[/cyan]")
+    status = status.replace(
+        "waiting_client_input", "[yellow]waiting_client_input[/yellow]"
+    )
+    status = status.replace("received", "[green]received[/green]")
+    status = status.replace("completed", "[green]completed[/green]")
+    status = status.replace("failed", "[red]failed[/red]")
+    status = status.replace("timeout", "[red]timeout[/red]")
+    status = status.replace("cancelled", "[red]cancelled[/red]")
+    resource = event.get("resource", "")
+    if isinstance(resource, list):
+        resource = ", ".join(resource)
+    richconsole.print(
+        f"{timestamp} {severity} {worker} {status} {service}.{task} {resource} - {message}"
+    )
+
+
+def collect_input_request(
+    future: Any, event: dict, richconsole: Console = None
+) -> None:
+    """Prompt user for one input request event and send the response."""
+    if event.get("event_type") != "input_request":
+        return
+
+    input_request = (event.get("extras") or {}).get("input_request")
+    if not input_request:
+        return
+
+    richconsole = richconsole or Console()
+    question = input_request.get("question", "Worker asks for input")
+    default = input_request.get("default")
+    choices = input_request.get("choices")
+
+    if isinstance(default, bool):
+        response = Confirm.ask(question, default=default, console=richconsole)
+    else:
+        prompt_kwargs = {}
+        if default is not None:
+            prompt_kwargs["default"] = str(default)
+        if choices:
+            prompt_kwargs["choices"] = [str(choice) for choice in choices]
+        response = Prompt.ask(question, console=richconsole, **prompt_kwargs)
+
+    future.send_response(
+        input_id=input_request["id"],
+        value=response,
+        worker=event.get("worker"),
+    )
+
+
+def run_future_job(
+    service: str,
+    task: str,
+    uuid: str = None,
+    args: list = None,
+    kwargs: dict = None,
+    workers: Union[str, list] = "all",
+    timeout: int = 600,
+    markdown: bool = False,
+    nowait: bool = False,
+) -> Any:
+    """Submit a job, handle events and input requests, then return job result."""
+    NFCLIENT = builtins.NFCLIENT
+    future = NFCLIENT.submit_job(
+        service=service,
+        task=task,
+        uuid=uuid,
+        args=args,
+        kwargs=kwargs,
+        workers=workers,
+        timeout=timeout,
+    )
+
+    if nowait is True:
+        return {"uuid": future.uuid, "service": service}
+
     richconsole = Console()
     start_time = time.time()
-    time_fmt = "%d-%b-%Y %H:%M:%S.%f"
+    time_format = "%d-%b-%Y %H:%M:%S.%f"
+
     richconsole.print(
         "-" * 45 + " Job Events " + "-" * 47 + "\n\n"
-        f"{datetime.now().strftime(time_fmt)[:-3]} {uuid} job started"
+        f"{datetime.now().strftime(time_format)[:-3]} {future.uuid} job started"
     )
-    while not (stop.is_set() or NFCLIENT.exit_event.is_set()):
-        try:
-            event = NFCLIENT.event_queue.get(block=True, timeout=0.1)
-            NFCLIENT.event_queue.task_done()
-        except queue.Empty:
-            continue
-        (
-            empty,
-            header,
-            command,
-            service,
-            job_uuid,
-            status,
-            data,
-        ) = event
-        if not job_uuid.decode("utf-8").startswith(uuid):
-            NFCLIENT.event_queue.put(event)
-            continue
 
-        # extract event parameters
-        data = json.loads(data)
-        service = data["service"]
-        worker = data["worker"]
-        task = data["task"]
-        timestamp = data["timestamp"]
-        message = data["message"]
-        # color severity
-        severity = data["severity"]
-        severity = severity.replace("DEBUG", "[cyan]DEBUG[/cyan]")
-        severity = severity.replace("INFO", "[green]INFO[/green]")
-        severity = severity.replace("WARNING", "[yellow]WARNING[/yellow]")
-        severity = severity.replace("CRITICAL", "[red]CRITICAL[/red]")
-        # color status
-        status = data["status"]
-        status = status.replace("started", "[cyan]started[/cyan]")
-        status = status.replace("completed", "[green]completed[/green]")
-        status = status.replace("failed", "[red]failed[/red]")
-        resource = data["resource"]
-        if isinstance(resource, list):
-            resource = ", ".join(resource)
-        # log event message
-        richconsole.print(
-            f"{timestamp} {severity} {worker} {status} {service}.{task} {resource} - {message}"
-        )
+    for event in future.events():
+        collect_input_request(future, event, richconsole)
+        print_event(event, richconsole)
 
     elapsed = round(time.time() - start_time, 3)
     richconsole.print(
-        f"{datetime.now().strftime(time_fmt)[:-3]} {uuid} job completed in {elapsed} seconds\n\n"
+        f"{datetime.now().strftime(time_format)[:-3]} {future.uuid} job completed in {elapsed} seconds\n\n"
         + "-" * 45
         + " Job Results "
         + "-" * 44
         + "\n"
     )
 
-
-def listen_events(fun: Callable) -> Callable:
-    """Decorator to listen for events and print them to console"""
-
-    @functools.wraps(fun)
-    def wrapper(*args: object, **kwargs: object) -> object:
-        NFCLIENT = builtins.NFCLIENT
-        events_thread_stop = threading.Event()
-        uuid = uuid4().hex
-        progress = kwargs.get("progress", True)
-        nowait = kwargs.get("nowait", False)
-
-        # start events thread to handle job events printing
-        if progress and nowait is False:
-            events_thread = threading.Thread(
-                target=listen_events_thread,
-                name="NornirCliShell_events_listen_thread",
-                args=(
-                    uuid,
-                    events_thread_stop,
-                    NFCLIENT,
-                ),
-            )
-            events_thread.start()
-
-        # run decorated function
-        try:
-            res = fun(uuid, *args, **kwargs)
-        finally:
-            # stop events thread
-            if NFCLIENT and progress and nowait is False:
-                events_thread_stop.set()
-                events_thread.join()
-
-        return res
-
-    return wrapper
+    return future.result(markdown=markdown)
 
 
 def log_error_or_result(
@@ -206,11 +216,6 @@ class ClientRunJobArgs(BaseModel):
         json_schema_extra={"presence": True},
         alias="verbose-result",
     )
-    progress: Optional[StrictBool] = Field(
-        True,
-        description="Display progress events",
-        json_schema_extra={"presence": True},
-    )
     nowait: Optional[StrictBool] = Field(
         False,
         description="Do not wait for job to complete",
@@ -219,7 +224,6 @@ class ClientRunJobArgs(BaseModel):
 
     @staticmethod
     def walk_norfab_files():
-        NFCLIENT = builtins.NFCLIENT
-        response = NFCLIENT.run_job("filesharing", "walk", kwargs={"url": "nf://"})
+        response = run_future_job("filesharing", "walk", kwargs={"url": "nf://"})
         wname, wres = next(iter(response.items()))
         return wres["result"]

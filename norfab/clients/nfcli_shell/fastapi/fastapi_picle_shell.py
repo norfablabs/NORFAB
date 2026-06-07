@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import Any
 
@@ -10,7 +9,7 @@ from pydantic import (
 
 from norfab.workers.fastapi_worker.fastapi_models import GetOpenapiSchemaInput
 
-from ..common import ClientRunJobArgs, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .fastapi_picle_shell_auth import FastAPIAuthCommandsModel
 from .fastapi_picle_shell_discover import Discover
 
@@ -34,13 +33,12 @@ class FastAPIShowOpenAPISchema(
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastapi",
             "get_openapi_schema",
             kwargs=kwargs,
@@ -62,13 +60,12 @@ class FastAPIShowInventoryModel(ClientRunJobArgs):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "fastapi",
             "get_inventory",
             kwargs=kwargs,
@@ -106,9 +103,8 @@ class FastAPIShowCommandsModel(BaseModel):
 
     @staticmethod
     def get_version(**kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
         workers = kwargs.pop("workers", "all")
-        result = NFCLIENT.run_job("fastapi", "get_version", workers=workers)
+        result = run_future_job("fastapi", "get_version", workers=workers)
         return log_error_or_result(result)
 
 

@@ -1,4 +1,3 @@
-﻿import builtins
 import json
 from enum import Enum
 from typing import List, Optional, Union
@@ -25,7 +24,7 @@ from norfab.workers.nornir_worker.nornir_models import (
     NrCliPluginScrapli as TaskNrCliPluginScrapli,
 )
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
@@ -110,9 +109,7 @@ class NornirCliShell(
         return ClientRunJobArgs.walk_norfab_files()
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result")
@@ -138,13 +135,12 @@ class NornirCliShell(
             kwargs["to_dict"] = False
 
         # run the job
-        result = NFCLIENT.run_job(
-            "nornir",
-            "cli",
+        result = run_future_job(
+            service="nornir",
+            task="cli",
             workers=workers,
             args=args,
             kwargs=kwargs,
-            uuid=uuid,
             timeout=timeout,
             nowait=nowait,
         )

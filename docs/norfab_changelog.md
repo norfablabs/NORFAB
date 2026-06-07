@@ -8,6 +8,7 @@
 4. Adding `run_shell_cmd` task to workers to run arbitrary shell command on the host, adding picle shell `workers run-shell-command ..` command too
 5. Adding `ignore_peer_ranges` argument to sync bgp peerings task
 6. Adding bearer token authentication support for fastmcp service, together with related task and nfcli shell commands
+7. Adding `NFPClient.submit_job()` API returning a blocking job future object with `events()`, `result()` and `send_response()` methods for event-aware and interactive client workflows
 
 ## ENHANCEMENTS
 
@@ -30,6 +31,7 @@
 
 1. Adding Pydantic task input and output models for all services, refactoring NFCLI shells to use these models. 
 2. Moving pydantic models to dedicated per-worker files.
+3. Refactoring core client and worker job handling to use future-based job tracking, normalized job events and client input request/response flow; `run_job()` remains available for synchronous job execution
 
 ---
 

@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import List, Union
 
@@ -7,7 +6,7 @@ from pydantic import Field, StrictStr
 
 from norfab.workers.netbox_worker.netbox_models import GetInterfacesInput
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -30,9 +29,7 @@ class GetInterfaces(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -41,14 +38,13 @@ class GetInterfaces(
             kwargs["devices"] = [kwargs["devices"]]
         if isinstance(kwargs.get("interface_list"), str):
             kwargs["interface_list"] = [kwargs["interface_list"]]
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "get_interfaces",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

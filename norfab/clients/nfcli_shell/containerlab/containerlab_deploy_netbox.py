@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import List, Union
 
@@ -12,7 +11,7 @@ from rich.console import Console
 
 from norfab.workers.containerlab_worker.containerlab_models import DeployNetboxInput
 
-from ..common import ClientRunJobArgs, listen_events, log_error_or_result
+from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from ..netbox.netbox_picle_shell_get_containerlab_inventory import (
     NetboxDeviceFilters,
 )
@@ -82,17 +81,14 @@ class DeployNetboxCommand(
 
     @staticmethod
     def source_lab_name() -> list:
-        NFCLIENT = builtins.NFCLIENT
         ret = []
-        result = NFCLIENT.run_job("containerlab", "get_running_labs")
+        result = run_future_job("containerlab", "get_running_labs")
         for wname, wres in result.items():
             ret.extend(wres["result"])
         return ret
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         verbose_result = kwargs.pop("verbose_result")
         workers = kwargs.pop("workers", "any")
         nowait = kwargs.pop("nowait", False)
@@ -109,13 +105,12 @@ class DeployNetboxCommand(
             if not isinstance(kwargs.get("devices"), list):
                 kwargs["devices"] = [kwargs["devices"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "containerlab",
             "deploy_netbox",
             workers=workers,
             kwargs=kwargs,
             args=args,
-            uuid=uuid,
             nowait=nowait,
         )
 

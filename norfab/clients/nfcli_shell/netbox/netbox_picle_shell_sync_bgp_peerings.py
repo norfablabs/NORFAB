@@ -1,4 +1,3 @@
-import builtins
 import logging
 from typing import List, Union
 
@@ -7,7 +6,7 @@ from pydantic import Field
 
 from norfab.workers.netbox_worker.netbox_models import SyncBgpPeeringsInput
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
@@ -27,9 +26,7 @@ class SyncBgpPeeringsShell(
     )
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 60)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -40,14 +37,13 @@ class SyncBgpPeeringsShell(
         if isinstance(kwargs.get("ignore_peer_ranges"), str):
             kwargs["ignore_peer_ranges"] = [kwargs["ignore_peer_ranges"]]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "sync_bgp_peerings",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 

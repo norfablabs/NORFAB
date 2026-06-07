@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+from uuid import uuid4
 
 from pydantic import (
     BaseModel,
@@ -34,10 +35,35 @@ class EventStatusValues(str, Enum):
     running = "running"
     completed = "completed"
     failed = "failed"
+    waiting_client_input = "waiting_client_input"
+    received = "received"
+    cancelled = "cancelled"
+    timeout = "timeout"
     unknown = "unknown"
 
 
+class EventTypes(str, Enum):
+    progress = "progress"
+    input_request = "input_request"
+    input_response = "input_response"
+
+
+class InputRequestModel(BaseModel):
+    id: StrictStr = Field(default_factory=lambda: uuid4().hex)
+    question: StrictStr = Field(...)
+    default: Any = Field(default=False)
+    metadata: Dict = Field(default_factory=dict)
+
+
+class InputResponseModel(BaseModel):
+    input_id: StrictStr = Field(...)
+    value: Any = Field(default=None)
+    cancel: StrictBool = Field(default=False)
+    metadata: Dict = Field(default_factory=dict)
+
+
 class NorFabEvent(BaseModel):
+    event_type: EventTypes = Field(default=EventTypes.progress)
     message: StrictStr = Field(...)
     client_address: StrictStr = Field(...)
     juuid: StrictStr = Field(...)

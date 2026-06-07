@@ -1,4 +1,3 @@
-import builtins
 import json
 import logging
 
@@ -8,7 +7,7 @@ from norfab.workers.netbox_worker.netbox_models import (
     CreateBgpPeeringInput,
 )
 
-from ..common import listen_events, log_error_or_result
+from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 log = logging.getLogger(__name__)
@@ -22,9 +21,7 @@ class CreateBgpPeeringShell(
 ):
 
     @staticmethod
-    @listen_events
-    def run(uuid: str, *args: object, **kwargs: object):
-        NFCLIENT = builtins.NFCLIENT
+    def run(*args: object, **kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -48,14 +45,13 @@ class CreateBgpPeeringShell(
                 p.strip() for p in kwargs["export_policies"].split(",") if p.strip()
             ]
 
-        result = NFCLIENT.run_job(
+        result = run_future_job(
             "netbox",
             "create_bgp_peering",
             workers=workers,
             args=args,
             kwargs=kwargs,
             timeout=timeout,
-            uuid=uuid,
             nowait=nowait,
         )
 
