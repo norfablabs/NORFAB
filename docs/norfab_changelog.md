@@ -32,6 +32,34 @@
 1. Adding Pydantic task input and output models for all services, refactoring NFCLI shells to use these models. 
 2. Moving pydantic models to dedicated per-worker files.
 3. Refactoring core client and worker job handling to use future-based job tracking, normalized job events and client input request/response flow; `run_job()` remains available for synchronous job execution
+4. Dependencies updates:
+
+  - tornado 6.5.5 -> 6.5.7
+  - pydantic 2.12.5 -> 2.13.4
+  - orjson 3.11.7 -> 3.11.9
+  - picle 0.12.0 -> 0.12.2
+  - rich 14.3.3 -> 15.0.0
+  - pyreadline3 3.5.4 -> 3.5.6
+  - netmiko 4.6.0 -> 4.7.0
+  - nornir-scrapli 2025.01.30 -> 2025.1.30
+  - ntc-templates 9.0.0 -> 9.1.0
+  - requests 2.32.5 -> 2.34.2
+  - scrapli-community 2025.01.30 -> 2025.1.30
+  - lxml 6.0.2 -> 6.1.1
+  - textual 8.1.1 -> 8.2.7
+  - mcp 1.27.1 -> 1.27.2
+  - langchain 1.2.12 -> 1.3.4
+  - langchain-community 0.4.1 -> 0.4.2
+  - langchain-ollama 1.0.1 -> 1.1.0
+  - ollama 0.6.1 -> 0.6.2
+  - datamodel-code-generator 0.55.0 -> 0.61.0
+  - langgraph-checkpoint-sqlite 3.0.3 -> 3.1.0
+  - pynetbox 7.6.1 -> 7.7.0
+  - deepdiff 9.0.0 -> 9.1.0
+  - fastapi 0.135.1 -> 0.136.3
+  - uvicorn 0.42.0 -> 0.49.0
+  - python-multipart 0.0.22 -> 0.0.32
+
 
 ---
 
