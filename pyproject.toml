@@ -3,7 +3,7 @@ name = "norfab"
 
 [tool.poetry]
 name = "norfab"
-version = "0.18.1"
+version = "0.19.0"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
 authors = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
 maintainers = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
@@ -63,7 +63,7 @@ scrapli = { version = "2026.2.20", optional = true }
 scrapli-community = { version = "2025.1.30", optional = true }
 scrapli-netconf = { version = "2026.1.12", optional = true }
 ttp = { version = "0.10.1", optional = true }
-ttp-templates = { version = "0.5.*", optional = true }
+ttp-templates = { version = ">=0.5.8", optional = true }
 xmltodict = { version = "1.0.4", optional = true }
 lxml = { version = "6.1.1", optional = true }
 textfsm = { version = "2.1.0", optional = true }
