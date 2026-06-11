@@ -1,0 +1,7 @@
+hosts:
+  fakenos-iosxr1:
+    username: admin
+    password: admin
+    port: 7101
+    nos:
+      plugin: NFIOSXR

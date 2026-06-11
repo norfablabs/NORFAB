@@ -259,7 +259,8 @@ full = [
     "fastapi",
     "uvicorn",
     "python-multipart",
-    "mcp"
+    "mcp",
+    "deepdiff"
 ]
 tui = [
     "textual"

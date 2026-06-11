@@ -5,6 +5,7 @@ from typing import Any, Union
 from norfab.core.exceptions import UnsupportedServiceError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
+from norfab.utils.text import slugify
 
 from .netbox_models import (
     CheckDeviceSyncInput,
@@ -16,9 +17,326 @@ from .netbox_models import (
     SyncAllResult,
     SyncDeviceFactsInput,
     SyncDeviceFactsResult,
+    SyncDeviceInventoryInput,
+    SyncDeviceInventoryResult,
 )
 
 log = logging.getLogger(__name__)
+
+
+def normalise_inventory_serial(value: Any) -> str:
+    """Normalise serial values and treat BUILTIN as unusable."""
+    serial = str(value or "").strip()
+    if serial.upper() == "BUILTIN":
+        return ""
+    return serial
+
+
+def is_chassis_inventory_record(record: dict) -> bool:
+    """Return True when a parser inventory record represents chassis hardware."""
+    slot = str(record.get("slot") or record.get("name") or "").strip().lower()
+    role = str(
+        record.get("inventory_type") or record.get("type") or record.get("role") or ""
+    ).strip().lower()
+
+    return role == "chassis" or slot == "chassis" or slot.startswith("chassis ")
+
+
+def is_real_module_identity(module_name: Any) -> bool:
+    """Return True when the parser value can identify a real module type."""
+    module_name = str(module_name or "").strip()
+    return bool(module_name) and module_name.upper() not in {"N/A", "NA", "NONE"}
+
+
+def flatten_inventory_records(data: Any) -> list[dict]:
+    """Flatten common TTP result shapes into a list of inventory dictionaries."""
+    records = []
+
+    if isinstance(data, dict):
+        has_inventory_fields = False
+        for key in ("slot", "module", "serial", "description"):
+            if key in data:
+                has_inventory_fields = True
+                break
+        if has_inventory_fields:
+            return [data]
+        for value in data.values():
+            records.extend(flatten_inventory_records(value))
+    elif isinstance(data, list):
+        for item in data:
+            records.extend(flatten_inventory_records(item))
+
+    return records
+
+
+def get_device_manufacturer_name(nb: object, device: object) -> tuple[str, str]:
+    """Resolve device type manufacturer name and slug for module type fallback."""
+    device_type = device.device_type
+    manufacturer = None
+    if hasattr(device_type, "manufacturer"):
+        manufacturer = device_type.manufacturer
+    manufacturer_name = ""
+    manufacturer_slug = ""
+    if manufacturer:
+        manufacturer_name = manufacturer.name
+        manufacturer_slug = manufacturer.slug
+
+    if manufacturer_name:
+        return manufacturer_name, manufacturer_slug or slugify(manufacturer_name)
+
+    if device_type.id:
+        device_type = nb.dcim.device_types.get(id=device_type.id)
+        manufacturer = None
+        if device_type:
+            manufacturer = device_type.manufacturer
+        manufacturer_name = ""
+        manufacturer_slug = ""
+        if manufacturer:
+            manufacturer_name = manufacturer.name
+            manufacturer_slug = manufacturer.slug
+
+    return manufacturer_name, manufacturer_slug or slugify(manufacturer_name or "")
+
+
+def normalise_live_inventory_records(
+    records: list[dict],
+    fallback_manufacturer: str,
+) -> tuple[dict, list[dict], set[str], str]:
+    """Build desired inventory state for one device from parser records."""
+    live_state = {}
+    ignored = []
+    skipped_slots = set()
+    chassis_candidates = []
+
+    for record in records:
+        slot = str(record.get("slot") or record.get("name") or "").strip()
+        module_name = str(
+            record.get("module")
+            or record.get("model")
+            or record.get("part_number")
+            or record.get("pid")
+            or ""
+        ).strip()
+        serial = normalise_inventory_serial(
+            record.get("serial") or record.get("serial_number") or record.get("sn")
+        )
+        description = str(record.get("description") or record.get("descr") or "")
+        manufacturer = str(record.get("manufacturer") or fallback_manufacturer or "")
+
+        if is_chassis_inventory_record(record):
+            if serial:
+                chassis_candidates.append({"slot": slot, "serial": serial})
+            else:
+                ignored.append(
+                    {
+                        "slot": slot or "chassis",
+                        "reason": "chassis serial is empty",
+                        "record": record,
+                    }
+                )
+            continue
+
+        if not slot:
+            ignored.append(
+                {
+                    "slot": slot,
+                    "reason": "slot is empty",
+                    "record": record,
+                }
+            )
+            continue
+
+        if not is_real_module_identity(module_name):
+            ignored.append(
+                {
+                    "slot": slot,
+                    "reason": "module identity is empty or N/A",
+                    "record": record,
+                }
+            )
+            skipped_slots.add(slot)
+            continue
+
+        if not serial:
+            ignored.append(
+                {
+                    "slot": slot,
+                    "reason": "serial is empty or BUILTIN",
+                    "record": record,
+                }
+            )
+            skipped_slots.add(slot)
+            continue
+
+        live_state[slot] = {
+            "slot": slot,
+            "inventory_type": "module",
+            "manufacturer": manufacturer,
+            "module_type": module_name,
+            "part_number": str(record.get("part_number") or module_name),
+            "serial": serial,
+            "description": description,
+            "status": str(record.get("status") or "active"),
+        }
+
+    chassis_serials = {candidate["serial"] for candidate in chassis_candidates}
+    if len(chassis_serials) > 1:
+        return live_state, ignored, skipped_slots, "multiple chassis records found"
+    if chassis_candidates:
+        live_state["chassis"] = {
+            "slot": "chassis",
+            "inventory_type": "chassis",
+            "serial": chassis_candidates[0]["serial"],
+        }
+
+    return live_state, ignored, skipped_slots, ""
+
+
+def normalise_netbox_module(module: object, nb: object) -> dict:
+    """Build comparable state for a NetBox installed module."""
+    module_type = module.module_type
+    module_type_id = None
+    manufacturer = None
+    manufacturer_name = ""
+    part_number = ""
+    model = ""
+    if module_type:
+        module_type_id = module_type.id
+        if hasattr(module_type, "manufacturer"):
+            manufacturer = module_type.manufacturer
+        if manufacturer:
+            manufacturer_name = manufacturer.name
+        part_number = module_type.part_number
+        model = module_type.model
+
+    if module_type_id and (not manufacturer_name or part_number is None or not model):
+        module_type = nb.dcim.module_types.get(id=module_type_id)
+        manufacturer = None
+        manufacturer_name = ""
+        part_number = ""
+        model = ""
+        if module_type:
+            manufacturer = module_type.manufacturer
+            if manufacturer:
+                manufacturer_name = manufacturer.name
+            part_number = module_type.part_number
+            model = module_type.model
+
+    slot = str(module.module_bay.name or "").strip()
+
+    return {
+        "slot": slot,
+        "inventory_type": "module",
+        "manufacturer": str(manufacturer_name or ""),
+        "module_type": str(model or ""),
+        "part_number": str(part_number or model or ""),
+        "serial": str(module.serial or ""),
+        "description": str(module.description or ""),
+        "status": str(module.status.value or ""),
+    }
+
+
+def find_module_type_id(
+    nb: object,
+    manufacturer_name: str,
+    manufacturer_slug: str,
+    model: str,
+    part_number: str,
+    lookup_cache: dict,
+) -> Union[int, None]:
+    """Resolve a NetBox module type ID using manufacturer/model/part number."""
+    cache_key = (manufacturer_slug or manufacturer_name or "", model, part_number)
+    if cache_key in lookup_cache:
+        return lookup_cache[cache_key]
+
+    candidates = []
+    filter_attempts = []
+    if manufacturer_slug and model:
+        filter_attempts.append({"manufacturer": manufacturer_slug, "model": model})
+    if manufacturer_slug and part_number:
+        filter_attempts.append(
+            {"manufacturer": manufacturer_slug, "part_number": part_number}
+        )
+
+    for filters in filter_attempts:
+        try:
+            candidates = list(nb.dcim.module_types.filter(**filters))
+        except Exception:
+            candidates = []
+        if candidates:
+            break
+
+    if not candidates and model:
+        candidates = list(nb.dcim.module_types.filter(model=model))
+        if len(candidates) != 1:
+            candidates = []
+
+    module_type_id = None
+    if candidates:
+        module_type_id = int(candidates[0].id)
+    lookup_cache[cache_key] = module_type_id
+    return module_type_id
+
+
+def get_or_create_module_type_id(
+    nb: object,
+    job: Job,
+    ret: Result,
+    device_name: str,
+    slot: str,
+    desired: dict,
+    create_module_types: bool,
+    lookup_cache: dict,
+) -> tuple[Union[int, None], Union[str, None]]:
+    """Resolve or create the module type needed for a module create/update."""
+    manufacturer_name = desired.get("manufacturer") or ""
+    manufacturer_slug = slugify(manufacturer_name)
+    model = desired.get("module_type") or desired.get("part_number")
+    part_number = desired.get("part_number") or model
+    module_type_id = find_module_type_id(
+        nb,
+        manufacturer_name=manufacturer_name,
+        manufacturer_slug=manufacturer_slug,
+        model=model,
+        part_number=part_number,
+        lookup_cache=lookup_cache,
+    )
+    if module_type_id:
+        return module_type_id, None
+
+    module_type_label = f"{manufacturer_name} {model}".strip()
+    if not create_module_types:
+        msg = f"{device_name}:{slot} - module type '{module_type_label}' not found"
+        ret.errors.append(msg)
+        log.error(msg)
+        job.event(msg, severity="ERROR")
+        return None, module_type_label
+
+    manufacturer = None
+    if manufacturer_slug:
+        manufacturer = nb.dcim.manufacturers.get(slug=manufacturer_slug)
+    if not manufacturer and manufacturer_name:
+        manufacturer = nb.dcim.manufacturers.get(name=manufacturer_name)
+    if not manufacturer:
+        msg = (
+            f"{device_name}:{slot} - manufacturer '{manufacturer_name}' not found, "
+            f"cannot create module type '{model}'"
+        )
+        ret.errors.append(msg)
+        log.error(msg)
+        job.event(msg, severity="ERROR")
+        return None, module_type_label
+
+    created = nb.dcim.module_types.create(
+        manufacturer=int(manufacturer.id),
+        model=model,
+        part_number=part_number,
+    )
+    module_type_id = int(created.id)
+    lookup_cache[(manufacturer_slug, model, part_number)] = module_type_id
+    job.event(f"created module type '{module_type_label}'")
+    log.info(f"Created module type '{module_type_label}'")
+    return module_type_id, module_type_label
 
 
 class NetboxDevicesTasks:
@@ -356,6 +674,520 @@ class NetboxDevicesTasks:
             )
 
         job.event("device facts sync complete")
+        return ret
+
+    @Task(
+        input=SyncDeviceInventoryInput,
+        output=SyncDeviceInventoryResult,
+        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Sync Device Inventory",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def sync_device_inventory(
+        self,
+        job: Job,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        timeout: int = 60,
+        devices: Union[None, list] = None,
+        branch: str = None,
+        process_deletions: bool = False,
+        create_module_types: bool = False,
+        create_module_bays: bool = False,
+        message: Union[None, str] = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Synchronize chassis serial and installed module inventory into NetBox.
+
+        Live inventory is collected from the Nornir service using
+        ``parse_ttp(get="inventory")``. The chassis record updates the NetBox
+        device serial. All non-chassis records with a usable module identity
+        and serial are reconciled as NetBox modules installed in device-level
+        module bays.
+
+        Module deletions are disabled by default. Missing module bays and
+        module types are reported unless explicitly created with
+        ``create_module_bays`` or ``create_module_types``.
+
+        Args:
+            job: NorFab job object used for progress events.
+            instance: NetBox instance name to target. Defaults to the worker's
+                default NetBox instance.
+            dry_run: Return the planned inventory diff without writing changes
+                to NetBox.
+            timeout: Timeout in seconds for the Nornir ``parse_ttp`` job.
+            devices: NetBox device names to synchronize.
+            branch: NetBox Branching plugin branch name.
+            process_deletions: Delete stale NetBox modules when they are absent
+                from live inventory.
+            create_module_types: Create missing NetBox module types from live
+                module model data.
+            create_module_bays: Create missing NetBox module bays from live
+                inventory slot names.
+            message: NetBox changelog message to attach to write operations.
+            **kwargs: Additional Nornir filters and execution options forwarded
+                to ``parse_ttp``.
+
+        Returns:
+            Result object containing the normalized diff, per-device sync
+            outcome, and any partial errors.
+        """
+        devices = devices or []
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:sync_device_inventory",
+            result={},
+            resources=[instance],
+            dry_run=dry_run,
+            diff={},
+        )
+        nb = self._get_pynetbox(instance, branch=branch)
+
+        if message:
+            job.event("setting NetBox changelog message for inventory sync")
+            nb.http_session.headers["X-Changelog-Message"] = message
+
+        if kwargs:
+            job.event("resolving devices from Nornir filters")
+            nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
+            for host in nornir_hosts:
+                if host not in devices:
+                    devices.append(host)
+            job.event(
+                f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
+                f"{len(devices)} total device(s) selected"
+            )
+
+        if not devices:
+            msg = "no devices specified"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
+            ret.failed = True
+            return ret
+
+        devices = sorted(set(devices))
+        log.info(
+            f"{self.name} - Sync device inventory for {len(devices)} device(s) in '{instance}', dry_run={dry_run}"
+        )
+        job.event(
+            f"syncing device inventory for {len(devices)} device(s), dry_run={dry_run}"
+        )
+
+        # Fetch and validate NetBox devices.
+        job.event(f"validating {len(devices)} device(s) exist in NetBox")
+        nb_devices_data = {}
+        for device in self.bulk_filter(nb.dcim.devices, "name", devices):
+            manufacturer_name, manufacturer_slug = get_device_manufacturer_name(
+                nb, device
+            )
+            nb_devices_data[device.name] = {
+                "id": int(device.id),
+                "name": device.name,
+                "serial": str(device.serial or ""),
+                "manufacturer": manufacturer_name or "",
+                "manufacturer_slug": manufacturer_slug or "",
+            }
+
+        for device_name in list(devices):
+            if device_name not in nb_devices_data:
+                msg = f"{device_name} - device not found in Netbox"
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+                devices.remove(device_name)
+
+        if not devices:
+            job.event(
+                "no valid NetBox devices remain after validation", severity="ERROR"
+            )
+            ret.failed = True
+            return ret
+        job.event(f"validated {len(devices)} device(s) in NetBox")
+
+        # Fetch current module bays and installed modules.
+        job.event("fetching current module bay data from NetBox")
+        nb_module_bays = {device_name: {} for device_name in devices}
+        for module_bay in self.bulk_filter(nb.dcim.module_bays, "device", devices):
+            device_name = module_bay.device.name
+            bay_name = str(module_bay.name or "").strip()
+            if device_name in nb_module_bays and bay_name:
+                nb_module_bays[device_name][bay_name] = {
+                    "id": int(module_bay.id),
+                    "name": bay_name,
+                }
+
+        job.event("fetching installed module data from NetBox")
+        nb_modules = {device_name: {} for device_name in devices}
+        nb_module_ids = {device_name: {} for device_name in devices}
+        for module in self.bulk_filter(nb.dcim.modules, "device", devices):
+            device_name = ""
+            if module.device:
+                device_name = module.device.name
+            if not device_name and module.module_bay.device:
+                device_name = module.module_bay.device.name
+            bay_name = str(module.module_bay.name or "").strip()
+            if device_name in nb_modules and bay_name:
+                nb_modules[device_name][bay_name] = normalise_netbox_module(module, nb)
+                nb_module_ids[device_name][bay_name] = int(module.id)
+
+        # Collect live inventory from Nornir.
+        job.event(f"retrieving live inventory for {len(devices)} device(s)")
+        nornir_kwargs = dict(kwargs)
+        nornir_kwargs["get"] = "inventory"
+        nornir_kwargs["strict"] = False
+        if devices:
+            nornir_kwargs["FL"] = devices
+        parse_data = self.client.run_job(
+            "nornir",
+            "parse_ttp",
+            workers="all",
+            timeout=timeout,
+            kwargs=nornir_kwargs,
+        )
+        if parse_data is None:
+            msg = "nornir parse_ttp inventory returned no data"
+            ret.errors.append(msg)
+            ret.failed = True
+            job.event(msg, severity="ERROR")
+            return ret
+
+        live_records_by_device = {device_name: [] for device_name in devices}
+        parse_worker_errors = []
+        for worker_name, worker_data in parse_data.items():
+            if worker_data.get("failed"):
+                msg = f"{worker_name} - failed to parse inventory data from devices"
+                parse_worker_errors.append(msg)
+                log.warning(f"{msg}: {worker_data.get('errors')}")
+                job.event(msg, severity="WARNING")
+                continue
+            for device_name, host_inventory in (worker_data.get("result") or {}).items():
+                if device_name not in live_records_by_device:
+                    continue
+                records = flatten_inventory_records(host_inventory)
+                if records:
+                    live_records_by_device[device_name].extend(records)
+
+        # Normalize live and NetBox state.
+        job.event("normalising live and NetBox inventory data")
+        normalised_live_all = {}
+        normalised_nb_all = {}
+        ignored_by_device = {}
+        skipped_slots_by_device = {}
+        devices_with_live_data = []
+
+        for device_name in devices:
+            records = live_records_by_device.get(device_name) or []
+            if not records:
+                msg = f"{device_name} - parsing returned no inventory data, skipping device"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+                continue
+
+            live_state, ignored, skipped_slots, device_error = (
+                normalise_live_inventory_records(
+                    records,
+                    fallback_manufacturer=nb_devices_data[device_name][
+                        "manufacturer"
+                    ],
+                )
+            )
+            ignored_by_device[device_name] = ignored
+            skipped_slots_by_device[device_name] = skipped_slots
+
+            if device_error:
+                msg = f"{device_name} - {device_error}, skipping device"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+                continue
+
+            if "chassis" not in live_state:
+                msg = f"{device_name} - no chassis serial found"
+                ret.errors.append(msg)
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+
+            normalised_live_all[device_name] = live_state
+            normalised_nb_all[device_name] = dict(nb_modules.get(device_name, {}))
+            if "chassis" in live_state:
+                normalised_nb_all[device_name]["chassis"] = {
+                    "slot": "chassis",
+                    "inventory_type": "chassis",
+                    "serial": nb_devices_data[device_name]["serial"],
+                }
+            devices_with_live_data.append(device_name)
+
+        if not devices_with_live_data:
+            msg = "no inventory parsing results collected for devices"
+            ret.errors.append(msg)
+            ret.errors.extend(parse_worker_errors)
+            ret.failed = True
+            job.event(msg, severity="ERROR")
+            return ret
+        ret.messages.extend(parse_worker_errors)
+
+        ignored_error_messages = set()
+        for device_name, ignored_records in ignored_by_device.items():
+            for ignored_record in ignored_records:
+                slot = ignored_record.get("slot") or "unknown"
+                reason = ignored_record.get("reason") or "ignored"
+                msg = f"{device_name}:{slot} - ignored inventory record, {reason}"
+                if msg in ignored_error_messages:
+                    continue
+                ignored_error_messages.add(msg)
+                ret.errors.append(msg)
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+
+        # Diff desired live state against current NetBox state.
+        job.event("calculating inventory sync diff")
+        full_diff = self.make_diff(normalised_live_all, normalised_nb_all)
+
+        # Suppress deletes for slots where live inventory existed but was incomplete.
+        for device_name, skipped_slots in skipped_slots_by_device.items():
+            if device_name not in full_diff:
+                continue
+
+            safe_delete_slots = []
+            for slot in full_diff[device_name]["delete"]:
+                if slot in skipped_slots:
+                    continue
+                safe_delete_slots.append(slot)
+            full_diff[device_name]["delete"] = safe_delete_slots
+
+        create_count = 0
+        update_count = 0
+        delete_count = 0
+        in_sync_count = 0
+        for actions in full_diff.values():
+            create_count += len(actions["create"])
+            update_count += len(actions["update"])
+            delete_count += len(actions["delete"])
+            in_sync_count += len(actions["in_sync"])
+        job.event(
+            "inventory sync diff complete: "
+            f"{create_count} create, {update_count} update, "
+            f"{delete_count} delete, {in_sync_count} in sync"
+        )
+
+        if dry_run is True:
+            job.event(
+                "dry-run requested, returning inventory sync diff without changes"
+            )
+            ret.result = full_diff
+            ret.dry_run = True
+            return ret
+        else:
+            ret.diff = full_diff
+
+        module_type_lookup_cache = {}
+
+        device_results = {}
+        for device_name, actions in full_diff.items():
+            device_results[device_name] = {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": actions["in_sync"],
+            }
+        ret.result = device_results
+
+        # Device serial updates from the synthetic chassis slot.
+        job.event("applying chassis serial updates")
+        for device_name, actions in full_diff.items():
+            chassis_diff = actions["update"].get("chassis", {})
+            if "serial" not in chassis_diff:
+                continue
+            new_serial = chassis_diff["serial"]["new_value"]
+            if not new_serial:
+                continue
+            try:
+                nb.dcim.devices.update(
+                    [{"id": nb_devices_data[device_name]["id"], "serial": new_serial}]
+                )
+                device_results[device_name]["updated"].append("chassis")
+                job.event(f"{device_name} chassis serial updated")
+            except Exception as exc:
+                msg = f"{device_name} - failed to update chassis serial: {exc}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+
+        # Optional module bay creation.
+        if create_module_bays:
+            job.event("creating missing module bays")
+            for device_name, actions in full_diff.items():
+                for slot in actions["create"]:
+                    if slot == "chassis":
+                        continue
+                    if slot in nb_module_bays.get(device_name, {}):
+                        continue
+                    desired = normalised_live_all[device_name].get(slot)
+                    if not desired:
+                        continue
+                    try:
+                        created = nb.dcim.module_bays.create(
+                            device=nb_devices_data[device_name]["id"],
+                            name=slot,
+                            label=slot,
+                        )
+                        nb_module_bays[device_name][slot] = {
+                            "id": int(created.id),
+                            "name": slot,
+                        }
+                        device_results[device_name]["created"].append(slot)
+                        job.event(f"{device_name}:{slot} module bay created")
+                    except Exception as exc:
+                        msg = f"{device_name}:{slot} - failed to create module bay: {exc}"
+                        ret.errors.append(msg)
+                        log.error(msg)
+                        job.event(msg, severity="ERROR")
+
+        # Module creates.
+        job.event("creating missing modules")
+        for device_name, actions in full_diff.items():
+            for slot in actions["create"]:
+                if slot == "chassis":
+                    continue
+                desired = normalised_live_all[device_name][slot]
+                if slot not in nb_module_bays.get(device_name, {}):
+                    msg = f"{device_name}:{slot} - module bay not found"
+                    ret.errors.append(msg)
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    continue
+
+                module_type_id, module_type_label = get_or_create_module_type_id(
+                    nb,
+                    job,
+                    ret,
+                    device_name,
+                    slot,
+                    desired,
+                    create_module_types,
+                    module_type_lookup_cache,
+                )
+                if not module_type_id:
+                    continue
+                if module_type_label and create_module_types:
+                    device_results[device_name]["created"].append(module_type_label)
+
+                payload = {
+                    "device": nb_devices_data[device_name]["id"],
+                    "module_bay": nb_module_bays[device_name][slot]["id"],
+                    "module_type": module_type_id,
+                    "status": desired["status"],
+                    "serial": desired["serial"],
+                }
+                if desired.get("description"):
+                    payload["description"] = desired["description"]
+
+                try:
+                    created = nb.dcim.modules.create(**payload)
+                    nb_module_ids[device_name][slot] = int(created.id)
+                    device_results[device_name]["created"].append(slot)
+                    job.event(f"{device_name}:{slot} module created")
+                except Exception as exc:
+                    msg = f"{device_name}:{slot} - failed to create module: {exc}"
+                    ret.errors.append(msg)
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+
+        # Module updates.
+        job.event("updating changed modules")
+        for device_name, actions in full_diff.items():
+            for slot, changes in actions["update"].items():
+                if slot == "chassis":
+                    continue
+                desired = normalised_live_all[device_name][slot]
+                module_id = nb_module_ids.get(device_name, {}).get(slot)
+                if not module_id:
+                    continue
+
+                payload = {"id": module_id}
+                if "serial" in changes:
+                    payload["serial"] = desired["serial"]
+                if "status" in changes:
+                    payload["status"] = desired["status"]
+                if "description" in changes:
+                    payload["description"] = desired["description"]
+                module_identity_changed = (
+                    "module_type" in changes
+                    or "part_number" in changes
+                    or "manufacturer" in changes
+                )
+                if module_identity_changed:
+                    module_type_id, module_type_label = get_or_create_module_type_id(
+                        nb,
+                        job,
+                        ret,
+                        device_name,
+                        slot,
+                        desired,
+                        create_module_types,
+                        module_type_lookup_cache,
+                    )
+                    if not module_type_id:
+                        continue
+                    if module_type_label and create_module_types:
+                        device_results[device_name]["created"].append(
+                            module_type_label
+                        )
+                    payload["module_type"] = module_type_id
+
+                module_update_has_changes = len(payload) > 1
+                if not module_update_has_changes:
+                    continue
+
+                try:
+                    nb.dcim.modules.update([payload])
+                    device_results[device_name]["updated"].append(slot)
+                    job.event(f"{device_name}:{slot} module updated")
+                except Exception as exc:
+                    msg = f"{device_name}:{slot} - failed to update module: {exc}"
+                    ret.errors.append(msg)
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+
+        # Optional module deletions.
+        if process_deletions:
+            job.event("deleting stale modules")
+            for device_name, actions in full_diff.items():
+                for slot in actions["delete"]:
+                    if slot == "chassis":
+                        continue
+                    module_id = nb_module_ids.get(device_name, {}).get(slot)
+                    if not module_id:
+                        continue
+                    try:
+                        module = nb.dcim.modules.get(id=module_id)
+                        module.delete()
+                        device_results[device_name]["deleted"].append(slot)
+                        job.event(f"{device_name}:{slot} module deleted")
+                    except Exception as exc:
+                        msg = f"{device_name}:{slot} - failed to delete module: {exc}"
+                        ret.errors.append(msg)
+                        log.error(msg)
+                        job.event(msg, severity="ERROR")
+        elif delete_count:
+            job.event(
+                f"skipping {delete_count} module deletion(s), process_deletions=False"
+            )
+
+        # Keep result lists deterministic and unique.
+        for device_result in device_results.values():
+            for key in ("created", "updated", "deleted", "in_sync"):
+                device_result[key] = sorted(set(device_result[key]))
+
+        job.event("device inventory sync complete")
         return ret
 
     @Task(

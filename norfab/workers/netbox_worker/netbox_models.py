@@ -718,6 +718,44 @@ class SyncDeviceFactsInput(
     )
 
 
+class SyncDeviceInventoryInput(
+    NetboxNornirHostsFilters,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox devices to sync inventory for",
+    )
+    timeout: StrictInt = Field(
+        60,
+        description="Timeout in seconds for Nornir parse_ttp inventory job",
+    )
+    process_deletions: StrictBool = Field(
+        False,
+        description="Delete NetBox modules present in module bays but absent from live inventory",
+        alias="process-deletions",
+        json_schema_extra={"presence": True},
+    )
+    create_module_types: StrictBool = Field(
+        False,
+        description="Create missing NetBox module types from live inventory model data",
+        alias="create-module-types",
+        json_schema_extra={"presence": True},
+    )
+    create_module_bays: StrictBool = Field(
+        False,
+        description="Create missing NetBox module bays using the live inventory slot names",
+        alias="create-module-bays",
+        json_schema_extra={"presence": True},
+    )
+    message: Union[None, StrictStr] = Field(
+        None,
+        description="Changelog message recorded on NetBox writes",
+    )
+
+
 class CheckDeviceSyncInput(
     NetboxCommonArgs, use_enum_values=True, populate_by_name=True
 ):
@@ -906,6 +944,13 @@ class SyncDeviceFactsResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
         description="Device fact sync result keyed by device name",
+    )
+
+
+class SyncDeviceInventoryResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Device inventory sync result keyed by device name",
     )
 
 

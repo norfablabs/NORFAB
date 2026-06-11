@@ -3116,6 +3116,356 @@ class TestSyncDeviceFacts:
             assert len(res["result"]) == 1, "Should only process one device"
 
 
+class TestSyncDeviceInventory:
+    DEVICE = "fakenos-iosxr1"
+    NETWORK = "netbox-inventory-sync"
+    FAKENOS_INVENTORY = "nf://fakenos/netbox_inventory.yaml"
+    NORNIR_WORKER = "nornir-worker-4"
+    CHASSIS_SERIAL = "JCY98XR393D"
+    RSP_SLOT = "module 0/RSP0/CPU0"
+    RSP_SERIAL = "M9YXCZV9QF"
+    RSP_DESCRIPTION = "ASR9K Route Switch Processor with 440G/slot Fabric and 6GB"
+    OPTIC_SLOT = "module mau 0/1/0/0"
+    OPTIC_SERIAL = "QMXQLS9GKS"
+    TEST_MODULE_MODELS = [
+        "A9K-RSP440-TR",
+        "ASR-9006-FAN-V2",
+        "A9K-MOD160-TR",
+        "A9K-MPA-8X10GE",
+        "SFP-10G-LR",
+        "PWR-3KW-AC-V2",
+        "TEST-STALE-MOD",
+        "TEST-FAN-MOD",
+    ]
+
+    @pytest.fixture(autouse=True)
+    def sync_inventory_fixture(self, nfclient):
+        self._ensure_netbox_device()
+        self._cleanup_netbox()
+        self._ensure_netbox_device()
+        self._start_fakenos_network(nfclient)
+        yield
+        self._stop_fakenos_network(nfclient)
+        self._cleanup_netbox()
+
+    @staticmethod
+    def _value(record, *path):
+        value = record
+        for key in path:
+            if value is None:
+                return None
+            if isinstance(value, dict):
+                value = value.get(key)
+            else:
+                value = getattr(value, key, None)
+        return value
+
+    @classmethod
+    def _sync(cls, nfclient, **kwargs):
+        return nfclient.run_job(
+            "netbox",
+            "sync_device_inventory",
+            workers="any",
+            kwargs={"devices": [cls.DEVICE], "timeout": 120, **kwargs},
+            timeout=180,
+        )
+
+    @classmethod
+    def _start_fakenos_network(cls, nfclient):
+        nfclient.run_job("fakenos", "stop", kwargs={"network": cls.NETWORK})
+        started = nfclient.run_job(
+            "fakenos",
+            "start",
+            kwargs={"network": cls.NETWORK, "inventory": cls.FAKENOS_INVENTORY},
+        )
+        for worker, res in started.items():
+            assert not res["failed"], f"{worker} failed to start FakeNOS: {res}"
+
+        inventory = nfclient.run_job(
+            "fakenos",
+            "get_nornir_inventory",
+            kwargs={"network": cls.NETWORK},
+        )
+        hosts = {}
+        for worker, res in inventory.items():
+            assert not res["failed"], f"{worker} failed to export Nornir inventory"
+            hosts.update(res["result"]["hosts"])
+        assert cls.DEVICE in hosts, f"{cls.DEVICE} missing from FakeNOS inventory"
+        hosts[cls.DEVICE]["platform"] = "cisco_xr"
+
+        runtime = nfclient.run_job(
+            "nornir",
+            "runtime_inventory",
+            workers=[cls.NORNIR_WORKER],
+            kwargs={"action": "create_host", "name": cls.DEVICE, **hosts[cls.DEVICE]},
+        )
+        for worker, res in runtime.items():
+            assert not res["failed"], f"{worker} failed to load FakeNOS host: {res}"
+
+    @classmethod
+    def _stop_fakenos_network(cls, nfclient):
+        nfclient.run_job(
+            "nornir",
+            "runtime_inventory",
+            workers=[cls.NORNIR_WORKER],
+            kwargs={"action": "delete_host", "name": cls.DEVICE},
+        )
+        nfclient.run_job("fakenos", "stop", kwargs={"network": cls.NETWORK})
+
+    @classmethod
+    def _ensure_netbox_device(cls):
+        nb = get_pynetbox(None)
+        device = nb.dcim.devices.get(name=cls.DEVICE)
+        if device:
+            device.update({"serial": "OLD-FAKENOS-CHASSIS"})
+            return
+
+        device_type = nb.dcim.device_types.get(slug="xvr9000")
+        role = nb.dcim.device_roles.get(name="VirtualRouter")
+        tenant = nb.tenancy.tenants.get(name="SALTNORNIR")
+        site = nb.dcim.sites.get(name="SALTNORNIR-LAB")
+        rack = nb.dcim.racks.get(name="R201")
+        platform = nb.dcim.platforms.get(name="cisco_xr")
+        nb.dcim.devices.create(
+            name=cls.DEVICE,
+            device_type=device_type.id,
+            role=role.id,
+            tenant=tenant.id,
+            site=site.id,
+            rack=rack.id,
+            position=32,
+            face="front",
+            platform=platform.id,
+            serial="OLD-FAKENOS-CHASSIS",
+        )
+
+    @classmethod
+    def _cleanup_netbox(cls):
+        nb = get_pynetbox(None)
+        for module in list(nb.dcim.modules.filter(device=cls.DEVICE)):
+            try:
+                module.delete()
+            except Exception:
+                pass
+
+        for module_bay in list(nb.dcim.module_bays.filter(device=cls.DEVICE)):
+            try:
+                module_bay.delete()
+            except Exception:
+                pass
+
+        for model in cls.TEST_MODULE_MODELS:
+            for module_type in list(nb.dcim.module_types.filter(model=model)):
+                try:
+                    if cls._value(module_type, "manufacturer", "name") == "Cisco":
+                        module_type.delete()
+                except Exception:
+                    pass
+
+        device = nb.dcim.devices.get(name=cls.DEVICE)
+        if device:
+            device.update({"serial": "OLD-FAKENOS-CHASSIS"})
+
+    @classmethod
+    def _ensure_module_type(cls, model):
+        nb = get_pynetbox(None)
+        for module_type in nb.dcim.module_types.filter(model=model):
+            if cls._value(module_type, "manufacturer", "name") == "Cisco":
+                return module_type
+        manufacturer = nb.dcim.manufacturers.get(name="Cisco")
+        return nb.dcim.module_types.create(
+            manufacturer=manufacturer.id,
+            model=model,
+            part_number=model,
+        )
+
+    @classmethod
+    def _ensure_module_bay(cls, slot):
+        nb = get_pynetbox(None)
+        module_bay = nb.dcim.module_bays.get(device=cls.DEVICE, name=slot)
+        if module_bay:
+            return module_bay
+        device = nb.dcim.devices.get(name=cls.DEVICE)
+        return nb.dcim.module_bays.create(device=device.id, name=slot, label=slot)
+
+    @classmethod
+    def _ensure_module(cls, slot, model, serial, description=""):
+        nb = get_pynetbox(None)
+        module_bay = cls._ensure_module_bay(slot)
+        module_type = cls._ensure_module_type(model)
+        device = nb.dcim.devices.get(name=cls.DEVICE)
+        for module in list(nb.dcim.modules.filter(device=cls.DEVICE)):
+            if cls._value(module, "module_bay", "name") == slot:
+                module.delete()
+        return nb.dcim.modules.create(
+            device=device.id,
+            module_bay=module_bay.id,
+            module_type=module_type.id,
+            status="active",
+            serial=serial,
+            description=description,
+        )
+
+    @classmethod
+    def _get_module(cls, slot):
+        nb = get_pynetbox(None)
+        for module in nb.dcim.modules.filter(device=cls.DEVICE):
+            if cls._value(module, "module_bay", "name") == slot:
+                return module
+        return None
+
+    @staticmethod
+    def _unexpected_inventory_errors(errors):
+        return [error for error in errors if "ignored inventory record" not in error]
+
+    def test_sync_device_inventory_dry_run_reports_raw_diff(self, nfclient):
+        ret = self._sync(nfclient, dry_run=True)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert res["dry_run"] is True
+            inventory = res["result"][self.DEVICE]
+            assert "chassis" in inventory["update"]
+            assert (
+                inventory["update"]["chassis"]["serial"]["new_value"]
+                == self.CHASSIS_SERIAL
+            )
+            assert self.RSP_SLOT in inventory["create"]
+
+    def test_sync_device_inventory_creates_modules_and_updates_chassis_serial(
+        self, nfclient
+    ):
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            inventory = res["result"][self.DEVICE]
+            assert set(inventory) == {"created", "updated", "deleted", "in_sync"}
+            assert "chassis" in inventory["updated"]
+            assert self.RSP_SLOT in inventory["created"]
+            assert self.OPTIC_SLOT in inventory["created"]
+
+        nb = get_pynetbox(None)
+        device = nb.dcim.devices.get(name=self.DEVICE)
+        assert device.serial == self.CHASSIS_SERIAL
+        rsp_module = self._get_module(self.RSP_SLOT)
+        optic_module = self._get_module(self.OPTIC_SLOT)
+        assert rsp_module is not None
+        assert rsp_module.serial == self.RSP_SERIAL
+        assert optic_module is not None
+        assert optic_module.serial == self.OPTIC_SERIAL
+
+    def test_sync_device_inventory_second_run_is_in_sync(self, nfclient):
+        first = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+        )
+        for worker, res in first.items():
+            assert not res["failed"], f"{worker} first sync failed - {res}"
+
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            inventory = res["result"][self.DEVICE]
+            assert not inventory["created"]
+            assert not inventory["updated"]
+            assert "chassis" in inventory["in_sync"]
+            assert self.RSP_SLOT in inventory["in_sync"]
+            assert self.OPTIC_SLOT in inventory["in_sync"]
+
+    def test_sync_device_inventory_updates_existing_module(self, nfclient):
+        self._ensure_module(
+            self.RSP_SLOT,
+            "A9K-RSP440-TR",
+            serial="OLD-RSP-SERIAL",
+            description="old description",
+        )
+
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            assert self.RSP_SLOT in res["result"][self.DEVICE]["updated"]
+
+        module = self._get_module(self.RSP_SLOT)
+        assert module.serial == self.RSP_SERIAL
+        assert module.description == self.RSP_DESCRIPTION
+
+    def test_sync_device_inventory_deletion_controls(self, nfclient):
+        stale_slot = "module stale"
+        self._ensure_module(stale_slot, "TEST-STALE-MOD", serial="STALE123")
+
+        first = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+        )
+        for worker, res in first.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            assert stale_slot in res["diff"][self.DEVICE]["delete"]
+            assert stale_slot not in res["result"][self.DEVICE]["deleted"]
+        assert self._get_module(stale_slot) is not None
+
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+            process_deletions=True,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            assert stale_slot in res["result"][self.DEVICE]["deleted"]
+        assert self._get_module(stale_slot) is None
+
+    def test_sync_device_inventory_incomplete_live_record_suppresses_delete(
+        self, nfclient
+    ):
+        fan_slot = "fan0 0/FT0/SP"
+        self._ensure_module(fan_slot, "TEST-FAN-MOD", serial="FAN123")
+
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+            process_deletions=True,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            inventory = res["result"][self.DEVICE]
+            assert fan_slot not in inventory["deleted"]
+            expected_error = f"{self.DEVICE}:{fan_slot} - ignored inventory record"
+            assert any(error.startswith(expected_error) for error in res["errors"])
+        assert self._get_module(fan_slot) is not None
+
+
 class TestSyncDeviceInterfaces:
     # Parse data provides these TEST_SYNC_ interfaces on all ceos devices.
     # Live state comes from interfaces_parse_data.json served by the Nornir parse_ttp mock.

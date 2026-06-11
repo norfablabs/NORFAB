@@ -1590,6 +1590,18 @@ devices = [
         },
     },
     {
+        "name": "fakenos-iosxr1",
+        "device_type": {"slug": slugify("XVR9000")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "SALTNORNIR"},
+        "site": {"name": "SALTNORNIR-LAB"},
+        "rack": {"name": "R201"},
+        "position": 32,
+        "face": "front",
+        "platform": {"name": "cisco_xr"},
+        "serial": "OLD-FAKENOS-CHASSIS",
+    },
+    {
         "name": "PatchPanel-1",
         "device_type": {"slug": slugify("24-port-lc-patch-panel")},
         "device_role": {"name": "PatchPanel"},

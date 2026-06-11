@@ -8,7 +8,7 @@ from pydantic import (
     StrictStr,
 )
 
-from norfab.workers.netbox_worker.netbox_models import SyncDeviceFactsInput
+from norfab.workers.netbox_worker.netbox_models import SyncDeviceInventoryInput
 
 from ..common import log_error_or_result, run_future_job
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters, NornirCommonArgs
@@ -25,7 +25,6 @@ class SyncDeviceInventoryDatasourcesNornir(
 ):
     @staticmethod
     def run(*args: object, **kwargs: object):
-        kwargs["datasource"] = "nornir"
         return SyncDeviceInventoryShell.run(*args, **kwargs)
 
     class PicleConfig:
@@ -41,7 +40,7 @@ class UpdateDeviceInventoryDatasources(BaseModel):
 
 class SyncDeviceInventoryShell(
     NetboxClientRunJobArgs,
-    SyncDeviceFactsInput,
+    SyncDeviceInventoryInput,
     use_enum_values=True,
     populate_by_name=True,
 ):
@@ -58,16 +57,16 @@ class SyncDeviceInventoryShell(
     def run(**kwargs: object):
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
-        kwargs["timeout"] = timeout * 0.9
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
+        kwargs.pop("datasource", None)
 
         result = run_future_job(
             "netbox",
-            "sync_device_facts",
+            "sync_device_inventory",
             workers=workers,
             kwargs=kwargs,
             timeout=timeout,
