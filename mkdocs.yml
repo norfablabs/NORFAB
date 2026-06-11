@@ -246,6 +246,10 @@ nav:
     - Netbox BGP Create/Update Tasks Plan: development/adr_netbox_bgp_create_update_tasks_plan.md
     - Netbox Sync devices interfaces Task plan: development/adr_netbox_sync_device_interfaces_plan.md
     - Netbox Device Check Sync Task Plan: development/adr_netbox_check_sync_plan.md
+    - FastMCP Bearer Auth plan: development\adr_fastmcp_bearer_authentication.md
+    - MCP Tools Annotations plan: development\adr_mcp_tool_annotations_plan.md
+    - Netbox Sync Devices Inventory plan: development\adr_netbox_sync_device_inventory_plan.md
+    - Norfab Interactive Client Plan: development\adr_norfab_interactive_client.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
     - Netbox Service Tests: testing/netbox_service_tests.md
