@@ -113,6 +113,8 @@ def sync_device_inventory(
     process_deletions=False,
     create_module_types=False,
     create_module_bays=False,
+    inventory_map: InventoryPatternMap = None,
+    inventory_transform=None,
     message=None,
     **kwargs,
 ):
@@ -128,6 +130,12 @@ Notes:
 - `create_module_types` and `create_module_bays` default to `False`. They are
   explicit opt-ins so inventory sync can report missing NetBox modeling objects
   without creating them accidentally.
+- `inventory_map` contains pattern-based replacement rules for translating live
+  module and slot names to existing NetBox module type and module bay names. Its
+  value is validated by `InventoryPatternMap`.
+- `inventory_transform` is an `nf://` reference to a trusted Python file
+  containing a `transform` function. The function processes one device's parsed
+  inventory data before pattern replacement and built-in normalization.
 - `message` should be kept in the task interface. NetBox write helpers should
   be extended where needed so pynetbox operations can pass the message through
   to NetBox changelog support.
@@ -143,6 +151,8 @@ inventory is normalized, because the required models come from live inventory.
 Required NetBox data:
 
 - devices keyed by device name;
+- device manufacturer name and device type model for selecting pattern mapping
+  scopes;
 - module bays keyed by device name and bay name;
 - installed modules keyed by device name and module bay name;
 - module type lookup cache keyed by manufacturer and model or part number.
@@ -387,8 +397,12 @@ Normalization rules:
   no manufacturer, use the NetBox device type manufacturer.
 - Preserve prefixed slot names such as `module 0/RSP0/CPU0`,
   `fantray 0/FT0/SP`, `module mau 0/1/0/0`, and
-  `power-module 0/PS0/M0/SP` as the primary module bay key. Do not remap or
-  shorten parser slot names in the first implementation.
+  `power-module 0/PS0/M0/SP` as the default module bay key when no
+  user-supplied mapping is provided.
+- Apply user-supplied inventory mappings before building the normalized live
+  state. The normalized slot key should become the NetBox module bay name, and
+  the normalized module type should become the matched NetBox module type
+  model.
 - Treat `module mau ...` records as transceiver or optic module candidates.
   They should use the same module bay and module type flow as chassis-installed
   cards, fan trays, and power modules.
@@ -408,6 +422,438 @@ Normalization rules:
 - Flatten nested hardware for the first implementation. Line cards, MPAs,
   power modules, fan trays, and transceivers should all be modeled as modules
   installed in device-level module bays using their normalized slot names.
+
+## User-Supplied Inventory Mapping
+
+Live inventory names frequently do not match NetBox modeling names. Examples:
+
+- a live slot such as `module 0/RSP0/CPU0` may map to an existing NetBox module
+  bay named `0/RSP0`;
+- a live optic slot such as `module mau TenGigE0/2/CPU0/0` may map to a bay
+  named `TenGigE0/2/CPU0/0`;
+- a live module value such as `A9K-RSP440-TR` may map to a NetBox module type
+  whose model is `ASR 9000 RSP440`;
+- the same live module value may match a NetBox module type part number rather
+  than its model.
+
+NorFab should not embed vendor, platform, or operator-specific aliases. The
+operator should supply pattern mappings at task run time or supply an `nf://`
+Python transformer file. Raw parser names remain the default behavior when
+neither option is provided.
+
+### Mapping Goals
+
+- Keep mapping policy in user space.
+- Support pattern-based replacement using glob, regex, and trusted Python
+  `eval` conditions.
+- Scope module type patterns by NetBox manufacturer.
+- Scope module bay patterns by NetBox manufacturer and device type.
+- Support a custom Python transformer for cases that cannot be expressed with
+  pattern conditions.
+- Keep dry-run useful by showing missing mapped names before any write happens.
+- Preserve raw live values in error messages so operators can fix mappings.
+- Avoid adding hardcoded platform-specific transforms to the worker.
+
+### Option 1 - Pattern-Based Replacements
+
+Pattern replacement maps are keyed by the desired NetBox object name. Each
+target contains a list of conditions that can match the live value. When a live
+value matches one target, it is renamed to that target before normalization and
+diff calculation.
+
+Required shape:
+
+```yaml
+module_types:
+  <manufacturer>:
+    <netbox_module_type_name>:
+      - glob: <glob pattern matching live module name>
+      - regex: <regex pattern matching live module name>
+      - eval: <Python expression with a "value" variable>
+
+module_bays:
+  <manufacturer>:
+    <netbox_device_type>:
+      <netbox_module_bay_name>:
+        - glob: <glob pattern matching live slot name>
+        - regex: <regex pattern matching live slot name>
+        - eval: <Python expression with a "value" variable>
+```
+
+This is the value supplied to the task's `inventory_map` argument. It must not
+contain another nested `inventory_map` key.
+
+Example:
+
+```yaml
+module_types:
+  Cisco:
+    "ASR 9000 RSP440":
+      - glob: "A9K-RSP440-*"
+      - regex: "^A9K-RSP440-(TR|SE)$"
+      - eval: "value.upper() == 'A9K-RSP440-TR'"
+    "10GBASE-LR SFP+":
+      - glob: "SFP-10G-LR*"
+      - regex: "^SFP-10G-LR(=)?$"
+
+module_bays:
+  Cisco:
+    "ASR-9006":
+      "0/RSP0":
+        - glob: "module 0/RSP0/*"
+        - regex: "^module 0/RSP0(/CPU0)?$"
+      "0/1":
+        - glob: "module 0/1/CPU*"
+      "TenGigE0/2/CPU0/0":
+        - eval: "value == 'module mau TenGigE0/2/CPU0/0'"
+```
+
+Scoping rules:
+
+- `module_types` first key is the NetBox manufacturer name from
+  `device.device_type.manufacturer.name`;
+- each module type target key is the existing NetBox module type `model`;
+- conditions match the live record `module` value;
+- `module_bays` first key is the NetBox manufacturer name from
+  `device.device_type.manufacturer.name`;
+- `module_bays` second key is the NetBox device type model from
+  `device.device_type.model`;
+- each module bay target key is the existing NetBox module bay `name`;
+- conditions match the live record `slot` value;
+- manufacturer and device type keys are exact, case-sensitive values from
+  NetBox;
+- if no manufacturer or device type scope exists in the mapping, no pattern
+  replacement is attempted for that category and the raw live value remains
+  unchanged;
+- chassis records do not participate in module type or module bay replacement.
+
+Condition rules:
+
+- the condition list for one target uses OR logic;
+- each condition item must contain exactly one of `glob`, `regex`, or `eval`;
+- `glob` uses case-sensitive `fnmatch.fnmatchcase(value, pattern)`;
+- `regex` uses `re.fullmatch(pattern, value)`, so partial matching must be
+  written explicitly with `.*`;
+- `eval` evaluates an expression with only `value` supplied as a local
+  variable, and its result is converted to `bool`;
+- condition order within a target does not change the outcome;
+- all module type targets in the selected manufacturer scope are evaluated;
+- all module bay targets in the selected manufacturer and device type scope are
+  evaluated.
+
+Resolution behavior:
+
+1. Read device manufacturer and device type directly from the selected NetBox
+   device.
+2. Select `module_types[manufacturer]` for module type matching.
+3. Select `module_bays[manufacturer][device_type]` for module bay matching.
+4. Evaluate the live module name against every module type target.
+5. Evaluate the live slot name against every module bay target.
+6. If exactly one target matches, replace the live value with the target key.
+7. If no target matches, leave the live value unchanged.
+8. If multiple targets match, add an ambiguity error to `ret.errors` and skip
+   that live record.
+9. Preserve the raw live module and slot values for error and event messages.
+
+All patterns should be validated once before processing live records:
+
+- verify the top-level and scoped values are dictionaries;
+- verify every target contains a non-empty list of conditions;
+- reject condition dictionaries containing zero or multiple condition types;
+- compile all regex conditions;
+- compile all `eval` expressions;
+- fail task input validation before NetBox writes when the mapping shape,
+  regex, or expression syntax is invalid.
+
+### Pattern Mapping Pydantic Models
+
+Add the mapping models to
+`norfab/workers/netbox_worker/netbox_models.py`. The task input should use the
+model directly:
+
+```python
+class InventoryPatternCondition(BaseModel):
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    glob: Union[StrictStr, None] = None
+    regex: Union[StrictStr, None] = None
+    eval_expression: Union[StrictStr, None] = Field(None, alias="eval")
+
+    @model_validator(mode="after")
+    def validate_condition(self):
+        conditions = [self.glob, self.regex, self.eval_expression]
+        if sum(value is not None for value in conditions) != 1:
+            raise ValueError("exactly one of glob, regex, or eval is required")
+        return self
+
+
+InventoryPatternTargets = dict[
+    StrictStr,
+    list[InventoryPatternCondition],
+]
+
+
+class InventoryPatternMap(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    module_types: dict[
+        StrictStr,  # NetBox manufacturer name
+        InventoryPatternTargets,
+    ] = Field(default_factory=dict)
+    module_bays: dict[
+        StrictStr,  # NetBox manufacturer name
+        dict[
+            StrictStr,  # NetBox device type model
+            InventoryPatternTargets,
+        ],
+    ] = Field(default_factory=dict)
+```
+
+`SyncDeviceInventoryInput.inventory_map` should be declared as:
+
+```python
+inventory_map: Union[InventoryPatternMap, None] = None
+```
+
+Additional model validation should:
+
+- reject empty manufacturer and device type keys;
+- reject empty NetBox module type and module bay target names;
+- reject empty condition lists;
+- compile each regex with `re.compile`;
+- compile each `eval` expression with `compile(expression, "<inventory-map>",
+  "eval")`;
+- report the full nested Pydantic location so the operator can identify the
+  invalid manufacturer, device type, target, and condition index.
+
+Pydantic validates the payload beginning directly with `module_types` and
+`module_bays`. Passing `{"inventory_map": {...}}` as the value of the
+`inventory_map` field is rejected because `extra="forbid"` does not allow that
+additional wrapper.
+
+The `eval` condition is trusted executable configuration. A minimal execution
+form is:
+
+```python
+matched = bool(
+    eval(
+        compiled_expression,
+        {"__builtins__": {}},
+        {"value": value},
+    )
+)
+```
+
+Removing builtins reduces accidental access but is not a complete security
+sandbox. `eval` mappings must only be accepted from trusted operators and
+should not be exposed to untrusted API users.
+
+Application order:
+
+- apply module type and module bay replacements after optional Python
+  transformation;
+- apply replacements before building `live_state`;
+- use the replaced slot as the normalized key and NetBox module bay lookup
+  value;
+- use the replaced module name as the normalized module type model and NetBox
+  module type lookup value;
+- use mapped values when creating missing module bays or module types;
+- include raw and mapped values in errors when they differ.
+
+Pros:
+
+- NetBox object names remain authoritative because they are dictionary keys;
+- supports simple glob matching, precise regex matching, and custom boolean
+  expressions in one shape;
+- easy to inspect in dry-run output;
+- avoids hardcoded vendor mappings in NorFab.
+
+Cons:
+
+- `eval` is trusted code and must be treated accordingly;
+- broad conditions can create ambiguous matches;
+- matching cannot restructure the entire parsed record;
+- mappings are scoped to manufacturer and device type, so shared patterns may
+  be repeated.
+
+### Option 2 - Custom Python Parsed Data Transformer
+
+The second option is a trusted Python file referenced with an `nf://` URL. The
+worker downloads the file from the NorFab File Service and executes a function
+named `transform`.
+
+Example task input:
+
+```yaml
+inventory_transform: "nf://netbox/inventory_transformers/iosxr.py"
+```
+
+Required function contract:
+
+```python
+def transform(device_name, parsed_data, worker):
+    """Return normalized parsed inventory data for one device."""
+    transformed_data = []
+
+    for record in parsed_data:
+        item = dict(record)
+
+        if item["slot"].startswith("module mau "):
+            item["slot"] = item["slot"].replace("module mau ", "", 1)
+
+        if item["module"] == "A9K-RSP440-TR":
+            item["module"] = "ASR 9000 RSP440"
+
+        transformed_data.append(item)
+
+    return transformed_data
+```
+
+Arguments:
+
+- `device_name`: current NetBox/Nornir device name;
+- `parsed_data`: list of parsed inventory dictionaries for that device;
+- `worker`: the active NetBox worker object.
+
+The worker argument intentionally gives trusted user code access to worker
+configuration and existing worker helpers. It also means the transformer is
+fully trusted code and must only come from a controlled File Service location.
+
+Loading flow:
+
+Reuse the existing custom Python loading implementation from
+`norfab/workers/nornir_worker/task_task.py`. Do not introduce another loader,
+temporary module, `importlib` flow, compile wrapper, or sandbox.
+
+The existing Nornir implementation:
+
+1. verifies the reference starts with `nf://`;
+2. downloads source text using `self.fetch_file`;
+3. raises `FileNotFoundError` when `fetch_file` returns `None`;
+4. executes the source with the same dictionary for globals and locals;
+5. retrieves the expected function from that dictionary.
+
+The inventory transformer should use the same code pattern, changing only the
+argument name, error description, and exported function name:
+
+```python
+if inventory_transform.startswith("nf://"):
+    function_text = self.fetch_file(inventory_transform)
+    if function_text is None:
+        raise FileNotFoundError(
+            f"{self.name} - '{inventory_transform}' "
+            "inventory transformer download failed"
+        )
+
+    globals_dict = {}
+    exec(function_text, globals_dict, globals_dict)
+    transform_function = globals_dict["transform"]
+else:
+    raise RuntimeError(
+        f"{self.name} - '{inventory_transform}' inventory transformer "
+        "should be an nf:// file reference"
+    )
+```
+
+Load `transform_function` once per task, then call it once for each device after
+parsed data is collected. Missing `transform` follows the same dictionary-key
+failure behavior as a missing `task` function in the existing Nornir loader.
+
+Return contract:
+
+- return a `list[dict]`;
+- each dictionary must contain `description`, `slot`, `module`, and `serial`;
+- each value must be a string or `None`;
+- returning an empty list means the device has no usable parsed inventory;
+- the function may rename, remove, add, split, or combine records;
+- the function must not perform NetBox writes; reconciliation remains owned by
+  `sync_device_inventory`.
+
+Execution order:
+
+```text
+parse_ttp per-device records
+  -> optional Python transform(device_name, parsed_data, worker)
+  -> optional pattern-based replacements
+  -> built-in normalization and validation
+  -> make_diff
+  -> NetBox preflight validation and writes
+```
+
+If both options are supplied, the transformer runs first and pattern
+replacements run against the transformed `module` and `slot` values.
+
+Error handling:
+
+- invalid URL, download, source execution, or missing `transform` errors fail
+  the task before any NetBox writes;
+- a transformer exception for one device adds an error and skips that device;
+- an invalid return type adds an error and skips that device;
+- invalid returned records add errors and are skipped;
+- raw parser data should remain available for logging when transformed data
+  fails validation.
+
+Security:
+
+- the transformer is arbitrary Python code;
+- passing the worker object provides broad access to worker state and methods;
+- only trusted users should be allowed to select transformer files;
+- File Service permissions and task authorization are the security boundary;
+- this option should not attempt to sandbox Python execution.
+
+Pros:
+
+- can implement any platform-specific normalization logic;
+- has access to the complete per-device record list;
+- can use worker configuration and helpers when necessary;
+- keeps custom policy outside NorFab source code.
+
+Cons:
+
+- executes arbitrary trusted Python;
+- behavior is less visible than declarative patterns;
+- malformed code can affect the worker process;
+- requires separate unit testing of the transformer file.
+
+### Recommended Implementation
+
+Implement only the two options described above:
+
+1. `inventory_map` for manufacturer-scoped module type patterns and
+   manufacturer/device-type scoped module bay patterns;
+2. `inventory_transform` for an `nf://` Python file with a `transform`
+   function.
+
+Recommended processing order:
+
+1. Validate `inventory_map` with `InventoryPatternMap`, then compile regex and
+   `eval` conditions.
+2. Download and load `inventory_transform` once using the exact
+   `task_task.py` `self.fetch_file` and `exec` pattern.
+3. Collect per-device parsed inventory through Nornir `parse_ttp`.
+4. Call `transform(device_name, parsed_data, worker)` when supplied.
+5. Validate transformed records.
+6. Apply module type and module bay pattern replacements.
+7. Build normalized live state.
+8. Calculate the diff and perform existing NetBox preflight/write logic.
+
+The two options can be used independently or together. When both are supplied,
+the Python transformer runs first and pattern replacements run second.
+
+The implementation should remain linear:
+
+- one block to prepare pattern conditions;
+- one block to download and load the transformer;
+- one transformer call per device;
+- one module type matcher and one module bay matcher while iterating records;
+- no additional extension framework.
+
+Dry-run and errors should expose mappings clearly:
+
+- use mapped names in the normalized diff;
+- include raw and mapped names in ambiguity and missing-object errors;
+- report transformer URL, download, source execution, and return-shape errors;
+- perform no NetBox writes if input preparation fails.
 
 ## Chassis Detection
 
@@ -719,6 +1165,8 @@ Fatal errors:
 
 Future implementation should add:
 
+- `InventoryPatternCondition`;
+- `InventoryPatternMap`;
 - `SyncDeviceInventoryInput`;
 - `SyncDeviceInventoryResult`;
 - FastAPI task registration for `sync_device_inventory`;
@@ -796,6 +1244,32 @@ Suggested tests:
 26. message argument is passed to pynetbox write operations;
 27. CLI command calls `sync_device_inventory`;
 28. `sync_device_facts` remains unchanged.
+29. module type glob condition maps a live module name to a NetBox module type;
+30. module type regex condition maps a live module name to a NetBox module type;
+31. module type `eval` condition maps a live module name to a NetBox module
+    type;
+32. module bay glob condition maps a live slot name to a NetBox module bay;
+33. module bay regex condition maps a live slot name to a NetBox module bay;
+34. module bay `eval` condition maps a live slot name to a NetBox module bay;
+35. module type conditions use the NetBox device manufacturer scope;
+36. module bay conditions use the NetBox device manufacturer and device type
+    scope;
+37. multiple matching targets produce an ambiguity error and skip the record;
+38. unmatched values remain unchanged;
+39. invalid mapping shape, regex, or `eval` syntax fails before NetBox writes;
+40. a nested `inventory_map` wrapper is rejected by Pydantic validation;
+41. mapped module bay names are used when `create_module_bays=True`;
+42. mapped module type names are used when `create_module_types=True`;
+43. errors include both raw and mapped values when they differ;
+44. transformer file downloads through `self.fetch_file`;
+45. transformer file must contain a callable named `transform`;
+46. transformer receives device name, per-device parsed data, and worker;
+47. transformer output is validated as a list of parser-shaped dictionaries;
+48. transformer can rename, split, remove, or add records;
+49. transformer failure skips only the affected device after preparation;
+50. transformer URL, download, source execution, or missing function failure
+    occurs before NetBox writes;
+51. when both options are used, transformer runs before pattern replacement.
 
 Test fixtures should mirror the interface sync tests by mocking Nornir
 `parse_ttp` inventory results.
@@ -844,7 +1318,8 @@ This ADR file is the only file created during planning.
 10. Module types created by the task use the NetBox device manufacturer when
     live inventory does not provide manufacturer.
 11. Transceiver module bay names use raw parser slot names such as
-    `module mau 0/1/0/0`.
+    `module mau 0/1/0/0` by default, or mapped names when `inventory_map` or
+    `inventory_transform` is supplied.
 12. Nested hardware is flattened into device-level module bays.
 13. Serial value `BUILTIN` is ignored.
 14. Live module records with no usable serial are skipped.
@@ -858,8 +1333,27 @@ This ADR file is the only file created during planning.
    `self.make_diff`.
 21. Deletions are disabled by default.
 22. Dry-run should return a complete action plan.
+23. Raw live names are used by default when no user mapping is supplied.
+24. Naming mismatches between live inventory and NetBox should be solved with
+    user-supplied mapping input, not hardcoded NorFab platform alias tables.
+25. Only two user-space normalization options are supported: pattern-based
+    replacement and a custom Python parsed-data transformer.
+26. Pattern replacement is scoped by NetBox manufacturer for module types and
+    by NetBox manufacturer plus device type for module bays.
+27. Pattern conditions support `glob`, `regex`, and trusted Python `eval`.
+28. Pattern target keys are the NetBox module type model or module bay name to
+    assign when a condition matches.
+29. The custom transformer is loaded from an `nf://` file using
+    `self.fetch_file`.
+30. The transformer file must expose
+    `transform(device_name, parsed_data, worker)`.
+31. When both options are supplied, the transformer runs before pattern
+    replacement.
+32. `InventoryPatternMap` validates the pattern mapping input.
+33. The value of `inventory_map` begins directly with `module_types` and
+    `module_bays`; an additional nested `inventory_map` key is invalid.
 
 ## Review Questions
 
-No open policy questions remain after review. Implementation should follow the
-resolved decisions above.
+No open mapping design questions remain. Implementation should follow the two
+options and execution order documented above.

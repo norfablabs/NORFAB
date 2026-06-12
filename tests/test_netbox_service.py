@@ -3127,6 +3127,7 @@ class TestSyncDeviceInventory:
     RSP_DESCRIPTION = "ASR9K Route Switch Processor with 440G/slot Fabric and 6GB"
     OPTIC_SLOT = "module mau 0/1/0/0"
     OPTIC_SERIAL = "QMXQLS9GKS"
+    PART_NUMBER_MATCH_MODEL = "TEST-RSP-PARTNUMBER-MATCH"
     TEST_MODULE_MODELS = [
         "A9K-RSP440-TR",
         "ASR-9006-FAN-V2",
@@ -3136,6 +3137,7 @@ class TestSyncDeviceInventory:
         "PWR-3KW-AC-V2",
         "TEST-STALE-MOD",
         "TEST-FAN-MOD",
+        PART_NUMBER_MATCH_MODEL,
     ]
 
     @pytest.fixture(autouse=True)
@@ -3361,6 +3363,56 @@ class TestSyncDeviceInventory:
         assert rsp_module.serial == self.RSP_SERIAL
         assert optic_module is not None
         assert optic_module.serial == self.OPTIC_SERIAL
+
+    def test_sync_device_inventory_reports_missing_module_bays(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            create_module_bays=False,
+            create_module_types=True,
+        )
+        pprint.pprint(ret, width=200)
+
+        expected_error = f"{self.DEVICE}:{self.RSP_SLOT} - module bay not found"
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert res["errors"].count(expected_error) == 1
+            inventory = res["result"][self.DEVICE]
+            assert self.RSP_SLOT not in inventory["created"]
+
+        assert self._get_module(self.RSP_SLOT) is None
+
+    def test_sync_device_inventory_matches_module_type_by_part_number(self, nfclient):
+        nb = get_pynetbox(None)
+        manufacturer = nb.dcim.manufacturers.get(name="Cisco")
+        nb.dcim.module_types.create(
+            manufacturer=manufacturer.id,
+            model=self.PART_NUMBER_MATCH_MODEL,
+            part_number="A9K-RSP440-TR",
+        )
+
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=False,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            inventory = res["result"][self.DEVICE]
+            assert self.RSP_SLOT in inventory["created"]
+
+            missing_rsp_type = (
+                f"{self.DEVICE}:{self.RSP_SLOT} - module type 'Cisco "
+                "A9K-RSP440-TR' not found"
+            )
+            assert missing_rsp_type not in res["errors"]
+
+        rsp_module = self._get_module(self.RSP_SLOT)
+        assert rsp_module is not None
+        assert self._value(rsp_module, "module_type", "model") == (
+            self.PART_NUMBER_MATCH_MODEL
+        )
 
     def test_sync_device_inventory_second_run_is_in_sync(self, nfclient):
         first = self._sync(

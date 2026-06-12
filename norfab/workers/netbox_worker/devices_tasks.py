@@ -24,258 +24,20 @@ from .netbox_models import (
 log = logging.getLogger(__name__)
 
 
-def normalise_inventory_serial(value: Any) -> str:
-    """Normalise serial values and treat BUILTIN as unusable."""
-    serial = str(value or "").strip()
-    if serial.upper() == "BUILTIN":
-        return ""
-    return serial
-
-
-def is_chassis_inventory_record(record: dict) -> bool:
-    """Return True when a parser inventory record represents chassis hardware."""
-    slot = str(record.get("slot") or record.get("name") or "").strip().lower()
-    role = str(
-        record.get("inventory_type") or record.get("type") or record.get("role") or ""
-    ).strip().lower()
-
-    return role == "chassis" or slot == "chassis" or slot.startswith("chassis ")
-
-
-def is_real_module_identity(module_name: Any) -> bool:
-    """Return True when the parser value can identify a real module type."""
-    module_name = str(module_name or "").strip()
-    return bool(module_name) and module_name.upper() not in {"N/A", "NA", "NONE"}
-
-
-def flatten_inventory_records(data: Any) -> list[dict]:
-    """Flatten common TTP result shapes into a list of inventory dictionaries."""
-    records = []
-
-    if isinstance(data, dict):
-        has_inventory_fields = False
-        for key in ("slot", "module", "serial", "description"):
-            if key in data:
-                has_inventory_fields = True
-                break
-        if has_inventory_fields:
-            return [data]
-        for value in data.values():
-            records.extend(flatten_inventory_records(value))
-    elif isinstance(data, list):
-        for item in data:
-            records.extend(flatten_inventory_records(item))
-
-    return records
-
-
-def get_device_manufacturer_name(nb: object, device: object) -> tuple[str, str]:
-    """Resolve device type manufacturer name and slug for module type fallback."""
-    device_type = device.device_type
-    manufacturer = None
-    if hasattr(device_type, "manufacturer"):
-        manufacturer = device_type.manufacturer
-    manufacturer_name = ""
-    manufacturer_slug = ""
-    if manufacturer:
-        manufacturer_name = manufacturer.name
-        manufacturer_slug = manufacturer.slug
-
-    if manufacturer_name:
-        return manufacturer_name, manufacturer_slug or slugify(manufacturer_name)
-
-    if device_type.id:
-        device_type = nb.dcim.device_types.get(id=device_type.id)
-        manufacturer = None
-        if device_type:
-            manufacturer = device_type.manufacturer
-        manufacturer_name = ""
-        manufacturer_slug = ""
-        if manufacturer:
-            manufacturer_name = manufacturer.name
-            manufacturer_slug = manufacturer.slug
-
-    return manufacturer_name, manufacturer_slug or slugify(manufacturer_name or "")
-
-
-def normalise_live_inventory_records(
-    records: list[dict],
-    fallback_manufacturer: str,
-) -> tuple[dict, list[dict], set[str], str]:
-    """Build desired inventory state for one device from parser records."""
-    live_state = {}
-    ignored = []
-    skipped_slots = set()
-    chassis_candidates = []
-
-    for record in records:
-        slot = str(record.get("slot") or record.get("name") or "").strip()
-        module_name = str(
-            record.get("module")
-            or record.get("model")
-            or record.get("part_number")
-            or record.get("pid")
-            or ""
-        ).strip()
-        serial = normalise_inventory_serial(
-            record.get("serial") or record.get("serial_number") or record.get("sn")
-        )
-        description = str(record.get("description") or record.get("descr") or "")
-        manufacturer = str(record.get("manufacturer") or fallback_manufacturer or "")
-
-        if is_chassis_inventory_record(record):
-            if serial:
-                chassis_candidates.append({"slot": slot, "serial": serial})
-            else:
-                ignored.append(
-                    {
-                        "slot": slot or "chassis",
-                        "reason": "chassis serial is empty",
-                        "record": record,
-                    }
-                )
-            continue
-
-        if not slot:
-            ignored.append(
-                {
-                    "slot": slot,
-                    "reason": "slot is empty",
-                    "record": record,
-                }
-            )
-            continue
-
-        if not is_real_module_identity(module_name):
-            ignored.append(
-                {
-                    "slot": slot,
-                    "reason": "module identity is empty or N/A",
-                    "record": record,
-                }
-            )
-            skipped_slots.add(slot)
-            continue
-
-        if not serial:
-            ignored.append(
-                {
-                    "slot": slot,
-                    "reason": "serial is empty or BUILTIN",
-                    "record": record,
-                }
-            )
-            skipped_slots.add(slot)
-            continue
-
-        live_state[slot] = {
-            "slot": slot,
-            "inventory_type": "module",
-            "manufacturer": manufacturer,
-            "module_type": module_name,
-            "part_number": str(record.get("part_number") or module_name),
-            "serial": serial,
-            "description": description,
-            "status": str(record.get("status") or "active"),
-        }
-
-    chassis_serials = {candidate["serial"] for candidate in chassis_candidates}
-    if len(chassis_serials) > 1:
-        return live_state, ignored, skipped_slots, "multiple chassis records found"
-    if chassis_candidates:
-        live_state["chassis"] = {
-            "slot": "chassis",
-            "inventory_type": "chassis",
-            "serial": chassis_candidates[0]["serial"],
-        }
-
-    return live_state, ignored, skipped_slots, ""
-
-
-def normalise_netbox_module(module: object, nb: object) -> dict:
+def normalise_netbox_module(module: object) -> dict:
     """Build comparable state for a NetBox installed module."""
     module_type = module.module_type
-    module_type_id = None
-    manufacturer = None
-    manufacturer_name = ""
-    part_number = ""
-    model = ""
-    if module_type:
-        module_type_id = module_type.id
-        if hasattr(module_type, "manufacturer"):
-            manufacturer = module_type.manufacturer
-        if manufacturer:
-            manufacturer_name = manufacturer.name
-        part_number = module_type.part_number
-        model = module_type.model
-
-    if module_type_id and (not manufacturer_name or part_number is None or not model):
-        module_type = nb.dcim.module_types.get(id=module_type_id)
-        manufacturer = None
-        manufacturer_name = ""
-        part_number = ""
-        model = ""
-        if module_type:
-            manufacturer = module_type.manufacturer
-            if manufacturer:
-                manufacturer_name = manufacturer.name
-            part_number = module_type.part_number
-            model = module_type.model
-
     slot = str(module.module_bay.name or "").strip()
 
     return {
         "slot": slot,
         "inventory_type": "module",
-        "manufacturer": str(manufacturer_name or ""),
-        "module_type": str(model or ""),
-        "part_number": str(part_number or model or ""),
+        "manufacturer": module_type.manufacturer.name,
+        "module_type": module_type.model,
         "serial": str(module.serial or ""),
         "description": str(module.description or ""),
-        "status": str(module.status.value or ""),
+        "status": module.status.value,
     }
-
-
-def find_module_type_id(
-    nb: object,
-    manufacturer_name: str,
-    manufacturer_slug: str,
-    model: str,
-    part_number: str,
-    lookup_cache: dict,
-) -> Union[int, None]:
-    """Resolve a NetBox module type ID using manufacturer/model/part number."""
-    cache_key = (manufacturer_slug or manufacturer_name or "", model, part_number)
-    if cache_key in lookup_cache:
-        return lookup_cache[cache_key]
-
-    candidates = []
-    filter_attempts = []
-    if manufacturer_slug and model:
-        filter_attempts.append({"manufacturer": manufacturer_slug, "model": model})
-    if manufacturer_slug and part_number:
-        filter_attempts.append(
-            {"manufacturer": manufacturer_slug, "part_number": part_number}
-        )
-
-    for filters in filter_attempts:
-        try:
-            candidates = list(nb.dcim.module_types.filter(**filters))
-        except Exception:
-            candidates = []
-        if candidates:
-            break
-
-    if not candidates and model:
-        candidates = list(nb.dcim.module_types.filter(model=model))
-        if len(candidates) != 1:
-            candidates = []
-
-    module_type_id = None
-    if candidates:
-        module_type_id = int(candidates[0].id)
-    lookup_cache[cache_key] = module_type_id
-    return module_type_id
 
 
 def get_or_create_module_type_id(
@@ -289,18 +51,24 @@ def get_or_create_module_type_id(
     lookup_cache: dict,
 ) -> tuple[Union[int, None], Union[str, None]]:
     """Resolve or create the module type needed for a module create/update."""
-    manufacturer_name = desired.get("manufacturer") or ""
+    manufacturer_name = desired["manufacturer"]
     manufacturer_slug = slugify(manufacturer_name)
-    model = desired.get("module_type") or desired.get("part_number")
-    part_number = desired.get("part_number") or model
-    module_type_id = find_module_type_id(
-        nb,
-        manufacturer_name=manufacturer_name,
-        manufacturer_slug=manufacturer_slug,
-        model=model,
-        part_number=part_number,
-        lookup_cache=lookup_cache,
-    )
+    model = desired["module_type"]
+    lookup_cache_key = (manufacturer_slug, model)
+    if lookup_cache_key in lookup_cache:
+        module_type_id = lookup_cache[lookup_cache_key]
+    else:
+        module_type = nb.dcim.module_types.get(
+            manufacturer=manufacturer_slug,
+            model=model,
+        )
+        if not module_type:
+            module_type = nb.dcim.module_types.get(
+                manufacturer=manufacturer_slug,
+                part_number=model,
+            )
+        module_type_id = int(module_type.id) if module_type else None
+        lookup_cache[lookup_cache_key] = module_type_id
     if module_type_id:
         return module_type_id, None
 
@@ -312,11 +80,7 @@ def get_or_create_module_type_id(
         job.event(msg, severity="ERROR")
         return None, module_type_label
 
-    manufacturer = None
-    if manufacturer_slug:
-        manufacturer = nb.dcim.manufacturers.get(slug=manufacturer_slug)
-    if not manufacturer and manufacturer_name:
-        manufacturer = nb.dcim.manufacturers.get(name=manufacturer_name)
+    manufacturer = nb.dcim.manufacturers.get(slug=manufacturer_slug)
     if not manufacturer:
         msg = (
             f"{device_name}:{slot} - manufacturer '{manufacturer_name}' not found, "
@@ -330,10 +94,10 @@ def get_or_create_module_type_id(
     created = nb.dcim.module_types.create(
         manufacturer=int(manufacturer.id),
         model=model,
-        part_number=part_number,
+        part_number=model,
     )
     module_type_id = int(created.id)
-    lookup_cache[(manufacturer_slug, model, part_number)] = module_type_id
+    lookup_cache[lookup_cache_key] = module_type_id
     job.event(f"created module type '{module_type_label}'")
     log.info(f"Created module type '{module_type_label}'")
     return module_type_id, module_type_label
@@ -784,15 +548,12 @@ class NetboxDevicesTasks:
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {}
         for device in self.bulk_filter(nb.dcim.devices, "name", devices):
-            manufacturer_name, manufacturer_slug = get_device_manufacturer_name(
-                nb, device
-            )
+            manufacturer = device.device_type.manufacturer
             nb_devices_data[device.name] = {
                 "id": int(device.id),
                 "name": device.name,
                 "serial": str(device.serial or ""),
-                "manufacturer": manufacturer_name or "",
-                "manufacturer_slug": manufacturer_slug or "",
+                "manufacturer": manufacturer.name,
             }
 
         for device_name in list(devices):
@@ -816,26 +577,20 @@ class NetboxDevicesTasks:
         nb_module_bays = {device_name: {} for device_name in devices}
         for module_bay in self.bulk_filter(nb.dcim.module_bays, "device", devices):
             device_name = module_bay.device.name
-            bay_name = str(module_bay.name or "").strip()
-            if device_name in nb_module_bays and bay_name:
-                nb_module_bays[device_name][bay_name] = {
-                    "id": int(module_bay.id),
-                    "name": bay_name,
-                }
+            bay_name = module_bay.name
+            nb_module_bays[device_name][bay_name] = {
+                "id": int(module_bay.id),
+                "name": bay_name,
+            }
 
         job.event("fetching installed module data from NetBox")
         nb_modules = {device_name: {} for device_name in devices}
         nb_module_ids = {device_name: {} for device_name in devices}
         for module in self.bulk_filter(nb.dcim.modules, "device", devices):
-            device_name = ""
-            if module.device:
-                device_name = module.device.name
-            if not device_name and module.module_bay.device:
-                device_name = module.module_bay.device.name
-            bay_name = str(module.module_bay.name or "").strip()
-            if device_name in nb_modules and bay_name:
-                nb_modules[device_name][bay_name] = normalise_netbox_module(module, nb)
-                nb_module_ids[device_name][bay_name] = int(module.id)
+            device_name = module.device.name
+            bay_name = module.module_bay.name
+            nb_modules[device_name][bay_name] = normalise_netbox_module(module)
+            nb_module_ids[device_name][bay_name] = int(module.id)
 
         # Collect live inventory from Nornir.
         job.event(f"retrieving live inventory for {len(devices)} device(s)")
@@ -861,29 +616,26 @@ class NetboxDevicesTasks:
         live_records_by_device = {device_name: [] for device_name in devices}
         parse_worker_errors = []
         for worker_name, worker_data in parse_data.items():
-            if worker_data.get("failed"):
+            if worker_data["failed"]:
                 msg = f"{worker_name} - failed to parse inventory data from devices"
                 parse_worker_errors.append(msg)
-                log.warning(f"{msg}: {worker_data.get('errors')}")
+                log.warning(f"{msg}: {worker_data['errors']}")
                 job.event(msg, severity="WARNING")
                 continue
-            for device_name, host_inventory in (worker_data.get("result") or {}).items():
+            for device_name, host_inventory in worker_data["result"].items():
                 if device_name not in live_records_by_device:
                     continue
-                records = flatten_inventory_records(host_inventory)
-                if records:
-                    live_records_by_device[device_name].extend(records)
+                live_records_by_device[device_name].extend(host_inventory)
 
         # Normalize live and NetBox state.
         job.event("normalising live and NetBox inventory data")
         normalised_live_all = {}
         normalised_nb_all = {}
-        ignored_by_device = {}
         skipped_slots_by_device = {}
-        devices_with_live_data = []
+        ignored_error_messages = set()
 
         for device_name in devices:
-            records = live_records_by_device.get(device_name) or []
+            records = live_records_by_device[device_name]
             if not records:
                 msg = f"{device_name} - parsing returned no inventory data, skipping device"
                 ret.errors.append(msg)
@@ -891,23 +643,77 @@ class NetboxDevicesTasks:
                 job.event(msg, severity="ERROR")
                 continue
 
-            live_state, ignored, skipped_slots, device_error = (
-                normalise_live_inventory_records(
-                    records,
-                    fallback_manufacturer=nb_devices_data[device_name][
-                        "manufacturer"
-                    ],
-                )
-            )
-            ignored_by_device[device_name] = ignored
+            live_state = {}
+            skipped_slots = set()
+            chassis_serials = set()
+            manufacturer = nb_devices_data[device_name]["manufacturer"]
+
+            for record in records:
+                slot = str(record["slot"] or "").strip()
+                module_name = str(record["module"] or "").strip()
+                serial = str(record["serial"] or "").strip()
+                description = str(record["description"] or "")
+                slot_lower = slot.lower()
+                ignored_slot = slot
+                ignored_reason = ""
+
+                if serial.upper() == "BUILTIN":
+                    serial = ""
+
+                if slot_lower == "chassis" or slot_lower.startswith("chassis "):
+                    if serial:
+                        chassis_serials.add(serial)
+                    else:
+                        ignored_slot = slot or "chassis"
+                        ignored_reason = "chassis serial is empty"
+                elif not slot:
+                    ignored_reason = "slot is empty"
+                elif not module_name or module_name.upper() in {"N/A", "NA", "NONE"}:
+                    ignored_reason = "module identity is empty or N/A"
+                    skipped_slots.add(slot)
+                elif not serial:
+                    ignored_reason = "serial is empty or BUILTIN"
+                    skipped_slots.add(slot)
+
+                if ignored_reason:
+                    msg = (
+                        f"{device_name}:{ignored_slot or 'unknown'} - "
+                        f"ignored inventory record, {ignored_reason}"
+                    )
+                    if msg not in ignored_error_messages:
+                        ignored_error_messages.add(msg)
+                        ret.errors.append(msg)
+                        log.warning(msg)
+                        job.event(msg, severity="WARNING")
+                    continue
+
+                if slot_lower == "chassis" or slot_lower.startswith("chassis "):
+                    continue
+
+                live_state[slot] = {
+                    "slot": slot,
+                    "inventory_type": "module",
+                    "manufacturer": manufacturer,
+                    "module_type": module_name,
+                    "serial": serial,
+                    "description": description,
+                    "status": "active",
+                }
+
             skipped_slots_by_device[device_name] = skipped_slots
 
-            if device_error:
-                msg = f"{device_name} - {device_error}, skipping device"
+            if len(chassis_serials) > 1:
+                msg = f"{device_name} - multiple chassis records found, skipping device"
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
                 continue
+            if chassis_serials:
+                live_state["chassis"] = {
+                    "slot": "chassis",
+                    "inventory_type": "chassis",
+                    "serial": next(iter(chassis_serials)),
+                }
 
             if "chassis" not in live_state:
                 msg = f"{device_name} - no chassis serial found"
@@ -916,16 +722,15 @@ class NetboxDevicesTasks:
                 job.event(msg, severity="WARNING")
 
             normalised_live_all[device_name] = live_state
-            normalised_nb_all[device_name] = dict(nb_modules.get(device_name, {}))
+            normalised_nb_all[device_name] = dict(nb_modules[device_name])
             if "chassis" in live_state:
                 normalised_nb_all[device_name]["chassis"] = {
                     "slot": "chassis",
                     "inventory_type": "chassis",
                     "serial": nb_devices_data[device_name]["serial"],
                 }
-            devices_with_live_data.append(device_name)
 
-        if not devices_with_live_data:
+        if not normalised_live_all:
             msg = "no inventory parsing results collected for devices"
             ret.errors.append(msg)
             ret.errors.extend(parse_worker_errors)
@@ -933,19 +738,6 @@ class NetboxDevicesTasks:
             job.event(msg, severity="ERROR")
             return ret
         ret.messages.extend(parse_worker_errors)
-
-        ignored_error_messages = set()
-        for device_name, ignored_records in ignored_by_device.items():
-            for ignored_record in ignored_records:
-                slot = ignored_record.get("slot") or "unknown"
-                reason = ignored_record.get("reason") or "ignored"
-                msg = f"{device_name}:{slot} - ignored inventory record, {reason}"
-                if msg in ignored_error_messages:
-                    continue
-                ignored_error_messages.add(msg)
-                ret.errors.append(msg)
-                log.warning(msg)
-                job.event(msg, severity="WARNING")
 
         # Diff desired live state against current NetBox state.
         job.event("calculating inventory sync diff")
@@ -988,7 +780,96 @@ class NetboxDevicesTasks:
         else:
             ret.diff = full_diff
 
+        missing_module_bay_keys = set()
+        if not create_module_bays:
+            job.event("validating module bays before module writes")
+            for device_name, actions in full_diff.items():
+                for slot in actions["create"]:
+                    if slot == "chassis":
+                        continue
+                    if slot in nb_module_bays[device_name]:
+                        continue
+                    missing_module_bay_keys.add((device_name, slot))
+                    msg = f"{device_name}:{slot} - module bay not found"
+                    ret.errors.append(msg)
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+
         module_type_lookup_cache = {}
+        missing_module_type_keys = set()
+        required_module_types = {}
+        for device_name, actions in full_diff.items():
+            required_slots = set(actions["create"])
+            for slot, changes in actions["update"].items():
+                if "module_type" in changes or "manufacturer" in changes:
+                    required_slots.add(slot)
+
+            for slot in required_slots:
+                if slot == "chassis":
+                    continue
+                desired = normalised_live_all[device_name][slot]
+                lookup_key = (slugify(desired["manufacturer"]), desired["module_type"])
+                module_type_data = required_module_types.setdefault(
+                    lookup_key,
+                    {
+                        "manufacturer": desired["manufacturer"],
+                        "model": desired["module_type"],
+                        "locations": set(),
+                    },
+                )
+                module_type_data["locations"].add(f"{device_name}:{slot}")
+
+        module_type_names = sorted(
+            module_type_data["model"]
+            for module_type_data in required_module_types.values()
+        )
+        if module_type_names:
+            job.event(
+                "validating module types by model and part number before module writes"
+            )
+            for module_type in self.bulk_filter(
+                nb.dcim.module_types,
+                "model",
+                module_type_names,
+            ):
+                module_type_id = int(module_type.id)
+                manufacturer_slug = module_type.manufacturer.slug
+                module_type_lookup_cache[
+                    (manufacturer_slug, module_type.model)
+                ] = module_type_id
+                if module_type.part_number:
+                    module_type_lookup_cache[
+                        (manufacturer_slug, module_type.part_number)
+                    ] = module_type_id
+
+            for module_type in self.bulk_filter(
+                nb.dcim.module_types,
+                "part_number",
+                module_type_names,
+            ):
+                module_type_id = int(module_type.id)
+                manufacturer_slug = module_type.manufacturer.slug
+                module_type_lookup_cache[
+                    (manufacturer_slug, module_type.model)
+                ] = module_type_id
+                if module_type.part_number:
+                    module_type_lookup_cache[
+                        (manufacturer_slug, module_type.part_number)
+                    ] = module_type_id
+
+        if not create_module_types:
+            for lookup_key, module_type_data in required_module_types.items():
+                if module_type_lookup_cache.get(lookup_key):
+                    continue
+                missing_module_type_keys.add(lookup_key)
+                locations = ", ".join(sorted(module_type_data["locations"]))
+                module_type_label = (
+                    f"{module_type_data['manufacturer']} {module_type_data['model']}"
+                )
+                msg = f"{locations} - module type '{module_type_label}' not found"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
 
         device_results = {}
         for device_name, actions in full_diff.items():
@@ -1028,10 +909,7 @@ class NetboxDevicesTasks:
                 for slot in actions["create"]:
                     if slot == "chassis":
                         continue
-                    if slot in nb_module_bays.get(device_name, {}):
-                        continue
-                    desired = normalised_live_all[device_name].get(slot)
-                    if not desired:
+                    if slot in nb_module_bays[device_name]:
                         continue
                     try:
                         created = nb.dcim.module_bays.create(
@@ -1058,11 +936,16 @@ class NetboxDevicesTasks:
                 if slot == "chassis":
                     continue
                 desired = normalised_live_all[device_name][slot]
-                if slot not in nb_module_bays.get(device_name, {}):
+                if (device_name, slot) in missing_module_bay_keys:
+                    continue
+                if slot not in nb_module_bays[device_name]:
                     msg = f"{device_name}:{slot} - module bay not found"
                     ret.errors.append(msg)
                     log.error(msg)
                     job.event(msg, severity="ERROR")
+                    continue
+                lookup_key = (slugify(desired["manufacturer"]), desired["module_type"])
+                if lookup_key in missing_module_type_keys:
                     continue
 
                 module_type_id, module_type_label = get_or_create_module_type_id(
@@ -1108,7 +991,7 @@ class NetboxDevicesTasks:
                 if slot == "chassis":
                     continue
                 desired = normalised_live_all[device_name][slot]
-                module_id = nb_module_ids.get(device_name, {}).get(slot)
+                module_id = nb_module_ids[device_name].get(slot)
                 if not module_id:
                     continue
 
@@ -1120,11 +1003,15 @@ class NetboxDevicesTasks:
                 if "description" in changes:
                     payload["description"] = desired["description"]
                 module_identity_changed = (
-                    "module_type" in changes
-                    or "part_number" in changes
-                    or "manufacturer" in changes
+                    "module_type" in changes or "manufacturer" in changes
                 )
                 if module_identity_changed:
+                    lookup_key = (
+                        slugify(desired["manufacturer"]),
+                        desired["module_type"],
+                    )
+                    if lookup_key in missing_module_type_keys:
+                        continue
                     module_type_id, module_type_label = get_or_create_module_type_id(
                         nb,
                         job,
@@ -1164,7 +1051,7 @@ class NetboxDevicesTasks:
                 for slot in actions["delete"]:
                     if slot == "chassis":
                         continue
-                    module_id = nb_module_ids.get(device_name, {}).get(slot)
+                    module_id = nb_module_ids[device_name].get(slot)
                     if not module_id:
                         continue
                     try:
