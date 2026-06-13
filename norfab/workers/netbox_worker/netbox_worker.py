@@ -478,7 +478,7 @@ class NetboxWorker(
         """
         name = name or self.default_instance
         params = self.netbox_inventory["instances"][name]
-        params['url'] = params['url'].rstrip("/") # normilise URL
+        params["url"] = params["url"].rstrip("/")  # normilise URL
 
         # check if need to disable SSL warnings
         if params.get("ssl_verify") == False:

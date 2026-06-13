@@ -54,6 +54,31 @@ class GetToolsResult(Result):
     )
 
 
+class GetPromptsInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    brief: StrictBool = Field(
+        False,
+        description="Return only prompt names",
+        json_schema_extra={"presence": True},
+    )
+    service: StrictStr = Field(
+        "all",
+        description="Service name to filter prompts by",
+    )
+    name: StrictStr = Field(
+        "*",
+        description="Glob pattern to filter prompt names",
+    )
+
+
+class GetPromptsResult(Result):
+    result: Union[list[StrictStr], dict[StrictStr, dict[StrictStr, Any]]] = Field(
+        {},
+        description=(
+            "Prompt names or definitions with message templates keyed by prompt name"
+        ),
+    )
+
+
 class DiscoverInput(BaseModel, use_enum_values=True, populate_by_name=True):
     service: StrictStr = Field(
         "all",
@@ -81,6 +106,7 @@ class GetStatusPayload(BaseModel):
     name: StrictStr = Field(None, description="MCP server name")
     url: StrictStr = Field(None, description="MCP server URL")
     tools_count: StrictInt = Field(None, description="Number of registered tools")
+    prompts_count: StrictInt = Field(None, description="Number of registered prompts")
 
 
 class GetStatusResult(Result):

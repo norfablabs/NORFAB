@@ -171,10 +171,12 @@ client jobs and are not exposed as MCP tools.
 
 ---
 
-## Tools Section
+## Tools And Prompts Policy
 
 The optional `tools` section controls which NorFab service tasks are
-exposed as MCP tools.
+exposed as MCP tools. The same policy also controls prompts associated with
+those tasks. Rejecting a task hides both its tool and every prompt declared by
+that task.
 
 **tools.policy**
 
@@ -188,7 +190,8 @@ An ordered list of rule dictionaries. Each rule has three keys:
 
 Rules are evaluated **in order**; the **first matching rule wins**. A task must
 match both `service` and at least one pattern in `tasks` for a rule to apply.
-If no rule matches, the tool is **allowed** (default-allow policy).
+If no rule matches, the task's MCP tool and prompts are **allowed**
+(default-allow policy).
 
 ```yaml
 tools:
@@ -206,10 +209,11 @@ tools:
 
 | Example rule | Effect |
 |---|---|
-| `service: "*", tasks: ["*"], action: allow` | Allow every tool (same as no rules) |
-| `service: "nornir", tasks: ["*"], action: allow` + catch-all reject | Expose only Nornir tools |
-| `service: "nornir", tasks: ["cfg_*"], action: reject` | Block all Nornir `cfg_*` tasks, allow the rest |
+| `service: "*", tasks: ["*"], action: allow` | Allow every task tool and its prompts (same as no rules) |
+| `service: "nornir", tasks: ["*"], action: allow` + catch-all reject | Expose only Nornir task tools and prompts |
+| `service: "nornir", tasks: ["cfg_*"], action: reject` | Block matching Nornir tools and their prompts, allow the rest |
 
 !!! tip
     Task names can be inspected at runtime with the `show fastmcp tools` CLI
-    command or the `get_tools` API call.
+    command or the `get_tools` API call. Published prompts can be inspected
+    with `show fastmcp prompts` or `get_prompts`.

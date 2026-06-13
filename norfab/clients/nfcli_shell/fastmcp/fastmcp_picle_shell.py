@@ -7,7 +7,10 @@ from pydantic import (
     Field,
 )
 
-from norfab.workers.fastmcp_worker.fastmcp_models import GetToolsInput
+from norfab.workers.fastmcp_worker.fastmcp_models import (
+    GetPromptsInput,
+    GetToolsInput,
+)
 
 from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .fastmcp_picle_shell_auth import FastMCPAuthCommandsModel
@@ -101,6 +104,34 @@ class FastMCPShowToolsModel(
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
+class FastMCPShowPromptsModel(
+    ClientRunJobArgs, GetPromptsInput, use_enum_values=True, populate_by_name=True
+):
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        workers = kwargs.pop("workers", "any")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+
+        result = run_future_job(
+            "fastmcp",
+            "get_prompts",
+            kwargs=kwargs,
+            workers=workers,
+            timeout=timeout,
+            nowait=nowait,
+        )
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+
 class FastMCPShowCommandsModel(BaseModel):
     inventory: FastMCPShowInventoryModel = Field(
         None,
@@ -123,6 +154,10 @@ class FastMCPShowCommandsModel(BaseModel):
         None,
         description="show FastMCP server tools",
     )
+    prompts: FastMCPShowPromptsModel = Field(
+        None,
+        description="show FastMCP server prompts",
+    )
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
@@ -143,7 +178,7 @@ class FastMCPShowCommandsModel(BaseModel):
 class FastMCPServiceCommands(BaseModel):
     auth: FastMCPAuthCommandsModel = Field(None, description="Manage auth tokens")
     discover: Discover = Field(
-        None, description="Discover NorFab services tasks and create tools"
+        None, description="Discover NorFab services tasks, tools, and prompts"
     )
 
     class PicleConfig:

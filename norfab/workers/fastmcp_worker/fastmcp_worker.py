@@ -14,7 +14,14 @@ from mcp import types
 from mcp.server.auth.provider import AccessToken
 from mcp.server.auth.settings import AuthSettings
 from mcp.server.fastmcp import FastMCP
-from pydantic import AnyHttpUrl
+from mcp.shared.exceptions import McpError
+from pydantic import (
+    AnyHttpUrl,
+    ConfigDict,
+    StrictStr,
+    ValidationError,
+    create_model,
+)
 
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
@@ -30,6 +37,8 @@ from .fastmcp_models import (
     DiscoverResult,
     GetInventoryInput,
     GetInventoryResult,
+    GetPromptsInput,
+    GetPromptsResult,
     GetStatusInput,
     GetStatusResult,
     GetToolsInput,
@@ -41,7 +50,6 @@ from .fastmcp_models import (
 SERVICE = "fastmcp"
 
 log = logging.getLogger(__name__)
-
 
 # --------------------------------------------------------------------------
 # FASTMCP TASKS MODELS
@@ -93,12 +101,50 @@ def is_task_allowed_by_policy(
     return action != "reject"
 
 
+def make_task_prompt(
+    task: dict[str, Any], prompt_metadata: dict[str, Any]
+) -> dict[str, Any]:
+    """
+    Build MCP prompt data from Task-validated metadata.
+    """
+    prompt_arguments = [
+        types.PromptArgument(**argument) for argument in prompt_metadata["arguments"]
+    ]
+    argument_fields = {
+        argument["name"]: (
+            StrictStr,
+            ... if argument["required"] else "",
+        )
+        for argument in prompt_metadata["arguments"]
+    }
+    arguments_model = create_model(
+        f"{task['service']}_{task['name']}_{prompt_metadata['name']}_arguments",
+        __config__=ConfigDict(extra="forbid"),
+        **argument_fields,
+    )
+    published_name = (
+        f"service_{task['service']}__task_{task['name']}"
+        f"__prompt_{prompt_metadata['name']}"
+    )
+    return {
+        "prompt": types.Prompt(
+            name=published_name,
+            title=prompt_metadata["title"],
+            description=prompt_metadata["description"],
+            arguments=prompt_arguments,
+        ),
+        "metadata": prompt_metadata,
+        "arguments_model": arguments_model,
+        "task": task,
+    }
+
+
 def service_tasks_discovery(
     worker: Any, cycles: int = 5, discover_service: str = "all"
 ) -> dict:
     """
     Discovers available tasks from NorFab services and registers them
-    as tools for the worker. This function periodically queries the
+    as tools and prompts for the worker. This function periodically queries the
     broker for available services and their tasks, and registers each
     discovered task as a tool in the worker's `norfab_services_tasks`
     dictionary. It continues this process for a specified number of
@@ -113,6 +159,7 @@ def service_tasks_discovery(
             are discovered. Defaults to "all".
     """
     result = {}
+    prompts_result = {}
     while not worker.exit_event.is_set() and cycles > 0:
         tasks = []
         services = []
@@ -144,40 +191,61 @@ def service_tasks_discovery(
                         t["service"] = service
                     tasks.extend(wres["result"])
 
-            # create tools for discovered tasks
+            # create tools and prompts for discovered tasks
             policy = worker.fastmcp_inventory.get("tools", {}).get("policy", [])
             for task in tasks:
-                # skip task tool creation if set to false
+                # skip MCP capability creation if set to false
                 if task["mcp"] is False:
-                    continue
-                # save service to results
-                result.setdefault(task["service"], {})
-                # continue with creating tool for task
-                task_tool = {
-                    "name": task["name"],
-                    "description": task["description"],
-                    "inputSchema": task["inputSchema"],
-                    "outputSchema": task["outputSchema"],
-                    **task["mcp"],
-                }
-                task_tool["name"] = (
-                    f"service_{task['service']}__task_{task_tool['name']}"
-                )
-                # skip already discovered tasks
-                if task_tool["name"] in result[task["service"]]:
                     continue
                 # evaluate policy entries; first match wins, default is allow
                 if policy and not is_task_allowed_by_policy(
                     policy, task["service"], task["name"]
                 ):
                     continue
-                # save discovered task to return results
-                result[task["service"]][task_tool["name"]] = {
-                    "tool": types.Tool(**task_tool),
-                    "task": task,
+                tool_metadata = dict(task["mcp"])
+                prompts_metadata = tool_metadata.pop("prompts", [])
+
+                result.setdefault(task["service"], {})
+                prompts_result.setdefault(task["service"], {})
+                task_tool = {
+                    "name": task["name"],
+                    "description": task["description"],
+                    "inputSchema": task["inputSchema"],
+                    "outputSchema": task["outputSchema"],
+                    **tool_metadata,
                 }
-            # save tools to worker tasks dictionary
+                task_tool["name"] = (
+                    f"service_{task['service']}__task_{task_tool['name']}"
+                )
+                if task_tool["name"] not in result[task["service"]]:
+                    try:
+                        result[task["service"]][task_tool["name"]] = {
+                            "tool": types.Tool(**task_tool),
+                            "task": task,
+                        }
+                    except Exception as exc:
+                        log.error(
+                            f"Failed to discover MCP tool '{task_tool['name']}', "
+                            f"error: {exc}"
+                        )
+
+                for prompt_metadata in prompts_metadata:
+                    prompt_data = make_task_prompt(task, prompt_metadata)
+                    published_name = prompt_data["prompt"].name
+                    existing_prompt = prompts_result[task["service"]].get(
+                        published_name
+                    )
+                    if existing_prompt is None:
+                        prompts_result[task["service"]][published_name] = prompt_data
+                    elif existing_prompt["metadata"] != prompt_data["metadata"]:
+                        log.warning(
+                            f"Prompt '{published_name}' metadata differs "
+                            "between workers, keeping the first definition"
+                        )
+
+            # save tools and prompts to worker dictionaries
             worker.norfab_services_tasks.update(result)
+            worker.norfab_services_prompts.update(prompts_result)
         except Exception as e:
             log.exception(f"Failed to discover services tasks, error: {e}")
 
@@ -205,6 +273,7 @@ class FastMCPWorker(NFPWorker):
         self.init_done_event = init_done_event
         self.exit_event = exit_event
         self.norfab_services_tasks = {}
+        self.norfab_services_prompts = {}
         self.mcp_server_name = "NorFab MCP Server"
 
         # get inventory from broker
@@ -418,6 +487,42 @@ class FastMCPWorker(NFPWorker):
 
         return ret
 
+    @Task(
+        input=GetPromptsInput,
+        output=GetPromptsResult,
+        fastapi={"methods": ["GET"]},
+        mcp={
+            "annotations": {
+                "title": "Get MCP Prompts",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
+    def get_prompts(
+        self, brief: bool = False, service: str = "all", name: str = "*"
+    ) -> Result:
+        """
+        Retrieve prompts published by NorFab services.
+        """
+        ret = Result(result={} if not brief else [], task=f"{self.name}:get_prompts")
+        for service_name, prompts in self.norfab_services_prompts.items():
+            if service != "all" and service_name != service:
+                continue
+            for prompt_name, prompt_data in prompts.items():
+                if not fnmatch(prompt_name, name):
+                    continue
+                if brief:
+                    ret.result.append(prompt_name)
+                else:
+                    prompt_definition = prompt_data["prompt"].model_dump()
+                    prompt_definition["messages"] = prompt_data["metadata"]["messages"]
+                    ret.result[prompt_name] = prompt_definition
+
+        return ret
+
     @Task(input=BearerTokenStoreInput, output=BoolResult, fastapi=False, mcp=False)
     def bearer_token_store(
         self, job: Job, username: str, token: str, expire: int = None
@@ -544,7 +649,7 @@ class FastMCPWorker(NFPWorker):
     )
     def discover(self, job, service: str = "all", progress: bool = True) -> Result:
         """
-        Discovers available services tasks and auto-generate tools for them.
+        Discovers available service tasks and generates MCP tools and prompts.
 
         Args:
             service (str, optional): The name of the service to discover. Defaults to "all".
@@ -575,19 +680,21 @@ class FastMCPWorker(NFPWorker):
     def get_status(self) -> Result:
         """
         Retrieves the current status of the application, including its name,
-        URL, and the count of available tools.
+        URL, and the counts of available tools and prompts.
 
         Returns:
             Result: An object containing a dictionary with the application's name,
-                URL, and the number of tools, as well as the task identifier.
+                URL, tool and prompt counts, and the task identifier.
         """
         tools = self.get_tools(brief=True).result
+        prompts = self.get_prompts(brief=True).result
 
         return Result(
             result={
                 "name": self.app.name,
                 "url": f"http://{self.fastmcp_inventory['host']}:{self.fastmcp_inventory['port']}/mcp/",
                 "tools_count": len(tools),
+                "prompts_count": len(prompts),
             },
             task=f"{self.name}:get_status",
         )
@@ -628,6 +735,65 @@ class FastMCPWorker(NFPWorker):
 
         return service, task_name
 
+    def get_prompt_data(self, name: str) -> dict:
+        """
+        Resolve a published MCP prompt name to its registry data.
+        """
+        for prompts in self.norfab_services_prompts.values():
+            if name in prompts:
+                return prompts[name]
+        raise McpError(
+            types.ErrorData(
+                code=types.INVALID_PARAMS,
+                message=f"NorFab MCP prompt '{name}' is not registered",
+            )
+        )
+
+    def render_task_prompt(
+        self,
+        prompt_data: dict[str, Any],
+        arguments: dict[str, str] | None,
+    ) -> types.GetPromptResult:
+        """
+        Validate client arguments and render a task prompt.
+        """
+        prompt = prompt_data["prompt"]
+        try:
+            context = (
+                prompt_data["arguments_model"]
+                .model_validate(arguments or {})
+                .model_dump()
+            )
+        except ValidationError as exc:
+            errors = "; ".join(
+                f"{'.'.join(str(item) for item in error['loc'])}: " f"{error['msg']}"
+                for error in exc.errors(include_input=False)
+            )
+            raise McpError(
+                types.ErrorData(
+                    code=types.INVALID_PARAMS,
+                    message=f"Invalid arguments for prompt '{prompt.name}': {errors}",
+                )
+            ) from exc
+
+        messages = [
+            types.PromptMessage(
+                role=message["role"],
+                content=types.TextContent(
+                    type="text",
+                    text=self.jinja2_render_templates(
+                        [message["content"]["text"]],
+                        context=context,
+                    ),
+                ),
+            )
+            for message in prompt_data["metadata"]["messages"]
+        ]
+        return types.GetPromptResult(
+            description=prompt.description,
+            messages=messages,
+        )
+
     def fastmcp_start(self) -> None:
         """
         Starts the FastMCP server for the NorFab MCP application.
@@ -635,7 +801,7 @@ class FastMCPWorker(NFPWorker):
         This method initializes a FastMCP application instance with
         the specified host and port from `self.fastmcp_inventory`.
 
-        It registers two MCP server endpoints:
+        It registers four MCP server endpoints:
 
           - `list_tools`: Asynchronously returns a list of available
             tools by aggregating all tools from `self.norfab_services_tasks`,
@@ -644,6 +810,9 @@ class FastMCPWorker(NFPWorker):
             parsing the tool name, checking it against the ``tools.allow``
             inventory patterns, extracting the corresponding service and
             task, and running the job using `self.client.run_job`.
+          - `list_prompts`: Returns prompts discovered from task MCP metadata.
+          - `get_prompt`: Validates prompt arguments and renders prompt messages
+            without dispatching a NorFab job.
 
         The FastMCP server is started in a separate thread using the
         "streamable-http" transport.
@@ -688,6 +857,22 @@ class FastMCPWorker(NFPWorker):
                 kwargs=arguments,
                 workers="all",
             )
+
+        @self.app._mcp_server.list_prompts()
+        async def list_prompts() -> list[types.Prompt]:
+            ret = []
+            for prompts in self.norfab_services_prompts.values():
+                for prompt_data in prompts.values():
+                    ret.append(prompt_data["prompt"])
+            return ret
+
+        @self.app._mcp_server.get_prompt()
+        async def get_prompt(
+            name: str, arguments: dict[str, str] | None
+        ) -> types.GetPromptResult:
+            log.info(f"Retrieving MCP prompt '{name}'")
+            prompt_data = self.get_prompt_data(name)
+            return self.render_task_prompt(prompt_data, arguments)
 
         self.app_server_thread = threading.Thread(
             target=self.app.run, kwargs={"transport": "streamable-http"}

@@ -1,6 +1,8 @@
 # VSCode MCP integration (NORFAB)
 
-This tutorial shows a minimal, end-to-end setup: start NORFAB with the FastMCP worker, connect it as an MCP server in VS Code, and create a small Copilot agent that can run NORFAB tools.
+This tutorial shows a minimal, end-to-end setup: start NORFAB with the FastMCP
+worker, connect it as an MCP server in VS Code, and use NORFAB tools and
+task-authored prompts.
 
 ## Prerequisites
 
@@ -32,7 +34,8 @@ Start NORFAB from the same folder:
 nfcli
 ```
 
-By default, the MCP endpoint is available at `http://127.0.0.1:8001/mcp`. To verify the worker is up and serving tools:
+By default, the MCP endpoint is available at `http://127.0.0.1:8001/mcp`. To
+verify the worker is up and serving tools and prompts:
 
 ```
 nf#show workers
@@ -44,6 +47,7 @@ nf#show fastmcp status
 
     ```bash
     nf#show fastmcp tools service nornir brief
+    nf#show fastmcp prompts service nornir brief
     ```
 
 ## 2) Configure the MCP server in VS Code
@@ -84,7 +88,25 @@ Use 'norfab/service_nornir__task_cli' to run show commands.
 When passing tool arguments, replace hyphens with underscores (example: add-details -> add_details).
 ```
 
-## 4) Use the agent
+## 4) Use task prompts
+
+The Nornir `cli` task publishes prompts for operational data collection and
+troubleshooting:
+
+```
+service_nornir__task_cli__prompt_collect_operational_data
+service_nornir__task_cli__prompt_troubleshoot
+```
+
+Open the MCP server's prompt picker in VS Code and select one of these prompts.
+Supply the requested values, such as the operational request and target
+devices. The prompt gives Copilot a workflow for using the CLI tool, but
+selecting it does not run any command by itself.
+
+Prompt availability and the exact VS Code prompt-picker UI depend on the VS
+Code and GitHub Copilot versions installed.
+
+## 5) Use the agent
 
 Open Copilot Chat, select your agent, then try prompts like:
 
@@ -100,7 +122,9 @@ If VS Code cannot connect, confirm the FastMCP worker is running (nfcli `show wo
 
 If the agent does not show up, double-check the file ends with `.agent.md`, then restart VS Code.
 
-If a tool is missing, confirm the exact tool name (use nfcli `show fastmcp tools ...`) and that the required service worker is present in your inventory.
+If a tool or prompt is missing, confirm its exact name with
+`show fastmcp tools ...` or `show fastmcp prompts ...` and check that the
+required service worker is present in your inventory.
 
 ## Security note
 

@@ -1,9 +1,79 @@
+import copy
 import pprint
 import sys
 import time
 
+import pytest
+from pydantic import ValidationError
+
+from norfab.core.worker import Task
+
+
+def make_task_prompt():
+    return {
+        "name": "collect",
+        "title": "Collect",
+        "description": "Collect operational data",
+        "arguments": [
+            {
+                "name": "request",
+                "description": "Collection request",
+                "required": True,
+            }
+        ],
+        "messages": [
+            {
+                "role": "user",
+                "content": {
+                    "type": "text",
+                    "text": "{{ request }}",
+                },
+            }
+        ],
+    }
+
 
 class TestWorkersListTasks:
+    def test_task_validates_mcp_prompts(self):
+        prompt = make_task_prompt()
+
+        task = Task(mcp={"prompts": [prompt]})
+
+        assert task.mcp["prompts"] == [prompt]
+
+    @pytest.mark.parametrize(
+        "prompts",
+        [None, False, {"name": "collect"}, ()],
+    )
+    def test_task_rejects_invalid_prompts_container(self, prompts):
+        with pytest.raises(ValidationError):
+            Task(mcp={"prompts": prompts})
+
+    def test_task_rejects_invalid_prompt_templates(self):
+        prompt = make_task_prompt()
+        prompt["messages"][0]["content"]["text"] = "{{ undeclared }}"
+
+        with pytest.raises(ValidationError, match="undeclared arguments"):
+            Task(mcp={"prompts": [prompt]})
+
+        prompt = make_task_prompt()
+        prompt["messages"][0]["content"]["text"] = "{{ request | unknown_filter }}"
+
+        with pytest.raises(ValidationError, match="Invalid prompt Jinja2 template"):
+            Task(mcp={"prompts": [prompt]})
+
+    def test_task_rejects_duplicate_prompt_and_argument_names(self):
+        duplicate_argument_prompt = make_task_prompt()
+        duplicate_argument_prompt["arguments"].append(
+            copy.deepcopy(duplicate_argument_prompt["arguments"][0])
+        )
+        with pytest.raises(ValidationError, match="duplicate arguments"):
+            Task(mcp={"prompts": [duplicate_argument_prompt]})
+
+        prompt = make_task_prompt()
+        with pytest.raises(ValidationError, match="duplicate MCP prompt names"):
+            Task(mcp={"prompts": [prompt, copy.deepcopy(prompt)]})
+
     def test_list_tasks(self, nfclient):
         ret = nfclient.run_job("nornir", "list_tasks", workers="any")
 
@@ -50,6 +120,19 @@ class TestWorkersListTasks:
             assert (
                 res["result"][0]["name"] == "get_version"
             ), f"{worker} did not return get_version task"
+
+    def test_list_tasks_cli_prompts(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir", "list_tasks", workers="any", kwargs={"name": "cli"}
+        )
+
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed to list CLI task"
+            prompts = res["result"][0]["mcp"]["prompts"]
+            assert [prompt["name"] for prompt in prompts] == [
+                "collect_operational_data",
+                "troubleshoot",
+            ]
 
 
 class TestWorkersEcho:

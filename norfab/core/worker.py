@@ -13,14 +13,22 @@ import time
 import traceback
 import zlib
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
 import orjson
 import psutil
 import zmq
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, meta
 from jinja2.nodes import Include
-from pydantic import BaseModel, create_model
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictStr,
+    create_model,
+    model_validator,
+)
 
 from norfab import models
 from norfab.core.inventory import NorFabInventory
@@ -236,6 +244,102 @@ class Job:
 NORFAB_WORKER_TASKS = {}
 
 
+class TaskMCPPromptArgument(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: StrictStr = Field(
+        ...,
+        min_length=1,
+        pattern=r"^[a-zA-Z_][a-zA-Z0-9_]*$",
+    )
+    description: StrictStr = Field(..., min_length=1)
+    required: StrictBool = False
+
+
+class TaskMCPPromptContent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    type: Literal["text"]
+    text: StrictStr = Field(..., min_length=1)
+
+
+class TaskMCPPromptMessage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    role: Literal["user", "assistant"]
+    content: TaskMCPPromptContent
+
+
+class TaskMCPPrompt(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: StrictStr = Field(
+        ...,
+        min_length=1,
+        pattern=r"^[a-z][a-z0-9_]*$",
+    )
+    title: StrictStr = Field(..., min_length=1)
+    description: StrictStr = Field(..., min_length=1)
+    arguments: list[TaskMCPPromptArgument] = Field(
+        default_factory=list,
+        strict=True,
+    )
+    messages: list[TaskMCPPromptMessage] = Field(
+        ...,
+        min_length=1,
+        strict=True,
+    )
+
+    @model_validator(mode="after")
+    def validate_prompt_template(self) -> "TaskMCPPrompt":
+        argument_names = [argument.name for argument in self.arguments]
+        duplicate_arguments = {
+            name for name in argument_names if argument_names.count(name) > 1
+        }
+        if duplicate_arguments:
+            raise ValueError(
+                "Prompt contains duplicate arguments: "
+                f"{', '.join(sorted(duplicate_arguments))}"
+            )
+
+        environment = Environment(loader="BaseLoader")
+        for message in self.messages:
+            try:
+                parsed_template = environment.parse(message.content.text)
+                environment.from_string(message.content.text)
+            except Exception as exc:
+                raise ValueError(f"Invalid prompt Jinja2 template: {exc}") from exc
+            undeclared_variables = meta.find_undeclared_variables(parsed_template)
+            unknown_variables = sorted(undeclared_variables - set(argument_names))
+            if unknown_variables:
+                raise ValueError(
+                    "Prompt message uses undeclared arguments: "
+                    f"{', '.join(unknown_variables)}"
+                )
+
+        return self
+
+
+class TaskMCPPrompts(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    prompts: list[TaskMCPPrompt] = Field(..., strict=True)
+
+    @model_validator(mode="after")
+    def validate_prompt_names(self) -> "TaskMCPPrompts":
+        prompt_names = [prompt.name for prompt in self.prompts]
+        duplicate_names = {
+            name for name in prompt_names if prompt_names.count(name) > 1
+        }
+        if duplicate_names:
+            raise ValueError(
+                "Task contains duplicate MCP prompt names: "
+                f"{', '.join(sorted(duplicate_names))}"
+            )
+
+        return self
+
+
 class Task:
     """
     Validate is a class-based decorator that accept arguments, designed to validate the
@@ -248,7 +352,11 @@ class Task:
             set equal to the name of decorated function.
         result_model (BaseModel): A Pydantic model used to validate the function's return value.
         fastapi (dict): Dictionary with parameters for FastAPI `app.add_api_route` method
-        mcp (dict): Dictionary with parameters for MCP `mcp.types.Tool` class
+        mcp (dict): Dictionary with parameters for MCP `mcp.types.Tool` class.
+            The optional `prompts` key is a NorFab extension containing a list
+            of MCP prompt definitions associated with the task. Task validates
+            and normalizes these definitions before registration. FastMCP
+            removes this key before constructing the MCP Tool object.
 
     Methods:
         __call__(function: Callable) -> Callable:
@@ -293,7 +401,10 @@ class Task:
         if mcp is False:
             self.mcp = False
         else:
-            self.mcp = mcp or {}
+            self.mcp = dict(mcp or {})
+            if "prompts" in self.mcp:
+                validated_prompts = TaskMCPPrompts(prompts=self.mcp["prompts"])
+                self.mcp["prompts"] = validated_prompts.model_dump()["prompts"]
         if agent is False:
             self.agent = False
         else:

@@ -6,8 +6,9 @@ tags:
 
 # FastMCP Service
 
-FastMCP Service exposes NorFab service tasks as MCP tools via an HTTP endpoint.
-It is designed to integrate NorFab with MCP-capable clients (e.g. VS Code MCP).
+FastMCP Service exposes NorFab service tasks as MCP tools and task-authored
+prompts via an HTTP endpoint. It is designed to integrate NorFab with
+MCP-capable clients such as VS Code.
 
 FastMCP worker periodically discovers NorFab services and their tasks, and auto-generates
 MCP tools following this naming convention:
@@ -15,6 +16,17 @@ MCP tools following this naming convention:
 ```
 service_<service_name>__task_<task_name>
 ```
+
+Tasks can also declare one or more named prompts in their `Task` decorator
+under `mcp["prompts"]`. Published prompt names include the service, task, and
+task-local prompt name:
+
+```
+service_<service_name>__task_<task_name>__prompt_<prompt_name>
+```
+
+Prompts provide parameterized instructions for using a task. Retrieving a
+prompt returns messages only and does not run the related NorFab task.
 
 By default, FastMCP server listens on `0.0.0.0:8001` and serves MCP at `/mcp/`.
 
@@ -36,6 +48,7 @@ FastMCP Service supports a small set of tasks to manage MCP exposure.
 | Task | Description | Use Cases |
 |------|-------------|-----------|
 | **[get_tools](services_fastmcp_service_task_get_tools.md)** | Return tools exposed by FastMCP worker (optionally filtered). | Tool discovery, debugging integrations, building MCP allow-lists. |
+| **[get_prompts](services_fastmcp_service_task_get_prompts.md)** | Return prompts exposed by FastMCP worker (optionally filtered). | Prompt discovery, inspecting prompt arguments, debugging integrations. |
 | **[auth](services_fastmcp_service_task_auth.md)** | Store, list, delete, and check bearer tokens for optional MCP authentication. | Securing MCP access, rotating client tokens, auditing active tokens. |
 
 ## FastMCP Service Show Commands
@@ -54,12 +67,18 @@ root
         ├── status:    show FastMCP server status
         │   ├── timeout:    Job timeout
         │   └── workers:    Filter worker to target, default 'all'
-        └── tools:    show FastMCP server tools
+        ├── tools:    show FastMCP server tools
+        │   ├── timeout:    Job timeout
+        │   ├── workers:    Filter worker to target, default 'any'
+        │   ├── brief:    show tools names only
+        │   ├── service:    filter tools by service name
+        │   └── name:    filter tools by name using glob pattern
+        └── prompts:    show FastMCP server prompts
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
-            ├── brief:    show tools names only
-            ├── service:    filter tools by service name
-            └── name:    filter tools by name using glob pattern
+            ├── brief:    show prompt names only
+            ├── service:    filter prompts by service name
+            └── name:    filter prompts by name using glob pattern
 nf#
 ```
 
