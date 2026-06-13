@@ -239,6 +239,7 @@ nav:
     - Events: reference_norfab_events_subsystem.md
 
 - Development:
+  - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md
   - Task Pydantic Models Guide: development/adr_tasks_pydantic_models_guide.md
   - File Streaming (fetch_file): development/file_streaming_fetch_file.md

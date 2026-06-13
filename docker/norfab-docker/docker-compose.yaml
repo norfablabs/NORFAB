@@ -11,3 +11,5 @@ services:
         target: /etc/norfab/
     ports:
       - "8000:8000" # FastAPI ports
+      - "8001:8001" # FastMCP ports
+      - "5555:5555" # Broker ports

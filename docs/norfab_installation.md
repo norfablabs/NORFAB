@@ -126,6 +126,25 @@ will be noted in service deployment details.
     source norfab-env/bin/activate && pip install --upgrade norfab
     ```
 
+=== "Docker"
+
+    Run the published all-in-one NorFab image with the Compose files included
+    in the repository:
+
+    ```bash
+    git clone https://github.com/norfablabs/NORFAB.git
+    cd NORFAB/docker/norfab-docker
+    docker compose up -d
+    ```
+
+    This starts the broker and inventory-defined workers in one container and
+    publishes the FastAPI service on port `8000`.
+
+    See the [Docker deployment tutorial](tutorials/norfab_docker_deployment.md)
+    for configuration, verification, and shutdown steps. Contributors should
+    use the [Docker development guide](development/norfab_docker_development.md)
+    to run containers against their local source tree.
+
 ## Operating Systems Support
 
 | Component      | Windows      | Linux        | MacOS        |
