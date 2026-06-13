@@ -1,8 +1,10 @@
-import copy
+import fnmatch
 import logging
+import re
 from typing import Any, Union
 
-from norfab.core.exceptions import UnsupportedServiceError
+import yaml
+
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import slugify
@@ -10,18 +12,88 @@ from norfab.utils.text import slugify
 from .netbox_models import (
     CheckDeviceSyncInput,
     CheckDeviceSyncResult,
+    DeviceInventoryRecords,
     GetDevicesInput,
     GetDevicesResult,
+    InventoryPatternMap,
+    InventoryPatternTargets,
     NetboxFastApiArgs,
     SyncAllInput,
     SyncAllResult,
-    SyncDeviceFactsInput,
-    SyncDeviceFactsResult,
     SyncDeviceInventoryInput,
     SyncDeviceInventoryResult,
 )
 
 log = logging.getLogger(__name__)
+
+
+def find_inventory_pattern_matches(
+    value: str,
+    targets: InventoryPatternTargets,
+) -> list[str]:
+    """Return NetBox target names whose conditions match a live value."""
+    matches = []
+
+    for target_name, conditions in targets.items():
+        for condition in conditions:
+            matched = False
+            if condition.glob is not None:
+                matched = fnmatch.fnmatchcase(value, condition.glob)
+            elif condition.regex is not None:
+                matched = re.fullmatch(condition.regex, value) is not None
+            elif condition.eval_expression is not None:
+                try:
+                    matched = bool(
+                        eval(  # nosec B307 - trusted operator configuration
+                            condition.eval_expression,
+                            {"__builtins__": {}},
+                            {"value": value},
+                        )
+                    )
+                except Exception as exc:
+                    raise ValueError(
+                        f"failed evaluating pattern for '{target_name}': {exc}"
+                    ) from exc
+
+            if matched:
+                matches.append(target_name)
+                break
+
+    return matches
+
+
+def inventory_record_matches_filters(
+    record: dict,
+    filter_by_module: Union[None, list] = None,
+    filter_by_slot: Union[None, list] = None,
+    ignore_modules: Union[None, list] = None,
+    ignore_slots: Union[None, list] = None,
+) -> bool:
+    """Return True when a normalised inventory record matches sync filters."""
+    if record["inventory_type"] == "chassis":
+        return True
+
+    module_type = record["module_type"]
+    slot = record["slot"]
+
+    if filter_by_module and not any(
+        fnmatch.fnmatchcase(module_type, pattern) for pattern in filter_by_module
+    ):
+        return False
+    if filter_by_slot and not any(
+        fnmatch.fnmatchcase(slot, pattern) for pattern in filter_by_slot
+    ):
+        return False
+    if ignore_modules and any(
+        fnmatch.fnmatchcase(module_type, pattern) for pattern in ignore_modules
+    ):
+        return False
+    if ignore_slots and any(
+        fnmatch.fnmatchcase(slot, pattern) for pattern in ignore_slots
+    ):
+        return False
+
+    return True
 
 
 def normalise_netbox_module(module: object) -> dict:
@@ -244,203 +316,6 @@ class NetboxDevicesTasks:
         return ret
 
     @Task(
-        input=SyncDeviceFactsInput,
-        output=SyncDeviceFactsResult,
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
-        mcp={
-            "annotations": {
-                "title": "Sync Device Facts",
-                "readOnlyHint": False,
-                "destructiveHint": True,
-                "idempotentHint": True,
-                "openWorldHint": True,
-            }
-        },
-    )
-    def sync_device_facts(
-        self,
-        job: Job,
-        instance: Union[None, str] = None,
-        dry_run: bool = False,
-        datasource: str = "nornir",
-        timeout: int = 60,
-        devices: Union[None, list] = None,
-        batch_size: int = 10,
-        branch: str = None,
-        **kwargs: Any,
-    ) -> Result:
-        """
-        Updates device facts in NetBox, this task updates this device attributes:
-
-        - serial number
-
-        Args:
-            job: NorFab Job object containing relevant metadata
-            instance (str, optional): The NetBox instance to use.
-            dry_run (bool, optional): If True, no changes will be made to NetBox.
-            datasource (str, optional): The data source to use. Supported datasources:
-
-                - **nornir** - uses Nornir Service parse task to retrieve devices' data
-                    using NAPALM `get_facts` getter
-
-            timeout (int, optional): The timeout for the job execution. Defaults to 60.
-            devices (list, optional): The list of devices to update.
-            batch_size (int, optional): The number of devices to process in each batch.
-            branch (str, optional): Branch name to use, need to have branching plugin installed,
-                automatically creates branch if it does not exist in Netbox.
-            **kwargs: Additional keyword arguments to pass to the datasource job.
-
-        Returns:
-            dict: A dictionary containing the results of the update operation.
-
-        Raises:
-            Exception: If a device does not exist in NetBox.
-            UnsupportedServiceError: If the specified datasource is not supported.
-        """
-        devices = devices or []
-        instance = instance or self.default_instance
-        ret = Result(
-            task=f"{self.name}:sync_device_facts",
-            resources=[instance],
-            dry_run=dry_run,
-            diff={},
-            result={},
-        )
-        nb = self._get_pynetbox(instance, branch=branch)
-        kwargs["add_details"] = True
-
-        if datasource == "nornir":
-            # source hosts list from Nornir
-            if kwargs:
-                job.event("resolving devices from Nornir filters")
-                nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
-                devices.extend(nornir_hosts)
-                devices = list(set(devices))
-                job.event(
-                    f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
-                    f"{len(devices)} total device(s) selected"
-                )
-                job.event(
-                    f"syncing device facts for {len(devices)} devices, dry_run={dry_run}"
-                )
-                log.info(
-                    f"{self.name} - sync_device_facts starting for {len(devices)} device(s): {', '.join(devices)}"
-                )
-            # fetch devices data from Netbox
-            job.event(f"fetching current device data from NetBox instance '{instance}'")
-            nb_devices = self.get_devices(
-                job=job,
-                instance=instance,
-                devices=copy.copy(devices),
-                cache="refresh",
-            ).result
-            # remove devices that does not exist in Netbox
-            for d in list(devices):
-                if d not in nb_devices:
-                    msg = f"'{d}' device does not exist in Netbox"
-                    ret.errors.append(msg)
-                    log.error(msg)
-                    job.event(msg, severity="ERROR")
-                    devices.remove(d)
-            if not devices:
-                job.event(
-                    "no valid NetBox devices remain after validation", severity="ERROR"
-                )
-                ret.failed = True
-                return ret
-            # iterate over devices in batches
-            for i in range(0, len(devices), batch_size):
-                kwargs["FL"] = devices[i : i + batch_size]
-                kwargs["getters"] = "get_facts"
-                job.event(f"retrieving facts for devices {', '.join(kwargs['FL'])}")
-                data = self.client.run_job(
-                    "nornir",
-                    "parse_napalm",
-                    kwargs=kwargs,
-                    workers="all",
-                    timeout=timeout,
-                )
-
-                # Collect devices to update in bulk
-                devices_to_update = []
-                job.event(f"processing facts for {len(kwargs['FL'])} device(s)")
-
-                for worker, results in data.items():
-                    if results["failed"]:
-                        msg = f"{worker} get_facts failed, errors: {'; '.join(results['errors'])}"
-                        ret.errors.append(msg)
-                        log.error(msg)
-                        job.event(msg, severity="ERROR")
-                        continue
-                    for host, host_data in results["result"].items():
-                        if host_data["napalm_get"]["failed"]:
-                            msg = f"{host} facts update failed: '{host_data['napalm_get']['exception']}'"
-                            ret.errors.append(msg)
-                            log.error(msg)
-                            job.event(msg, severity="ERROR")
-                            continue
-
-                        nb_device = nb_devices[host]
-
-                        facts = host_data["napalm_get"]["result"]["get_facts"]
-                        desired_state = {
-                            "serial": facts["serial_number"],
-                        }
-                        current_state = {
-                            "serial": nb_device["serial"],
-                        }
-                        # Compare and get fields that need updating
-                        updates, diff = self.compare_netbox_object_state(
-                            desired_state=desired_state,
-                            current_state=current_state,
-                        )
-
-                        # Only update if there are changes
-                        if updates:
-                            updates["id"] = int(nb_device["id"])
-                            devices_to_update.append(updates)
-                            ret.diff[host] = diff
-                            log.debug(f"{self.name} - '{host}' facts differ: {diff}")
-
-                        ret.result[host] = {
-                            (
-                                "sync_device_facts_dry_run"
-                                if dry_run
-                                else "sync_device_facts"
-                            ): (updates if updates else "Device facts in sync")
-                        }
-                        if branch is not None:
-                            ret.result[host]["branch"] = branch
-
-                # Perform bulk update
-                if devices_to_update and not dry_run:
-                    try:
-                        nb.dcim.devices.update(devices_to_update)
-                        job.event(
-                            f"bulk updated facts for {len(devices_to_update)} device(s)"
-                        )
-                        log.info(
-                            f"{self.name} - Bulk updated facts for {len(devices_to_update)} device(s)"
-                        )
-                    except Exception as e:
-                        msg = f"Bulk update failed: {e}"
-                        ret.errors.append(msg)
-                        log.error(f"{self.name} - {msg}")
-                elif devices_to_update and dry_run:
-                    job.event(
-                        f"dry-run, would update facts for {len(devices_to_update)} device(s)"
-                    )
-                else:
-                    job.event("all device facts are already in sync, no updates needed")
-        else:
-            raise UnsupportedServiceError(
-                f"'{datasource}' datasource service not supported"
-            )
-
-        job.event("device facts sync complete")
-        return ret
-
-    @Task(
         input=SyncDeviceInventoryInput,
         output=SyncDeviceInventoryResult,
         fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
@@ -465,6 +340,12 @@ class NetboxDevicesTasks:
         process_deletions: bool = False,
         create_module_types: bool = False,
         create_module_bays: bool = False,
+        inventory_map: Union[None, str, dict, InventoryPatternMap] = None,
+        inventory_transform: Union[None, str] = None,
+        filter_by_module: Union[None, list] = None,
+        filter_by_slot: Union[None, list] = None,
+        ignore_modules: Union[None, list] = None,
+        ignore_slots: Union[None, list] = None,
         message: Union[None, str] = None,
         **kwargs: Any,
     ) -> Result:
@@ -495,6 +376,17 @@ class NetboxDevicesTasks:
                 module model data.
             create_module_bays: Create missing NetBox module bays from live
                 inventory slot names.
+            inventory_map: Manufacturer and device type scoped pattern mappings,
+                or an ``nf://`` YAML file containing them.
+            inventory_transform: ``nf://`` Python file containing
+                ``transform(device_name, parsed_data, worker)``.
+            filter_by_module: Glob patterns selecting normalized module type
+                names.
+            filter_by_slot: Glob patterns selecting normalized module bay
+                names.
+            ignore_modules: Glob patterns excluding normalized module type
+                names.
+            ignore_slots: Glob patterns excluding normalized module bay names.
             message: NetBox changelog message to attach to write operations.
             **kwargs: Additional Nornir filters and execution options forwarded
                 to ``parse_ttp``.
@@ -512,6 +404,18 @@ class NetboxDevicesTasks:
             dry_run=dry_run,
             diff={},
         )
+        if self.is_url(inventory_map):
+            inventory_map = yaml.safe_load(
+                self.fetch_file(inventory_map, raise_on_fail=True)
+            )
+        inventory_patterns = InventoryPatternMap.model_validate(inventory_map or {})
+        transform_function = None
+        if self.is_url(inventory_transform):
+            function_text = self.fetch_file(inventory_transform, raise_on_fail=True)
+            globals_dict = {}
+            exec(function_text, globals_dict, globals_dict)  # nosec B102
+            transform_function = globals_dict["transform"]
+
         nb = self._get_pynetbox(instance, branch=branch)
 
         if message:
@@ -548,12 +452,14 @@ class NetboxDevicesTasks:
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {}
         for device in self.bulk_filter(nb.dcim.devices, "name", devices):
-            manufacturer = device.device_type.manufacturer
+            device_type = device.device_type
+            manufacturer = device_type.manufacturer
             nb_devices_data[device.name] = {
                 "id": int(device.id),
                 "name": device.name,
                 "serial": str(device.serial or ""),
                 "manufacturer": manufacturer.name,
+                "device_type": device_type.model,
             }
 
         for device_name in list(devices):
@@ -592,7 +498,7 @@ class NetboxDevicesTasks:
             nb_modules[device_name][bay_name] = normalise_netbox_module(module)
             nb_module_ids[device_name][bay_name] = int(module.id)
 
-        # Collect live inventory from Nornir.
+        # Collect live inventory data from Network.
         job.event(f"retrieving live inventory for {len(devices)} device(s)")
         nornir_kwargs = dict(kwargs)
         nornir_kwargs["get"] = "inventory"
@@ -636,6 +542,21 @@ class NetboxDevicesTasks:
 
         for device_name in devices:
             records = live_records_by_device[device_name]
+            if transform_function:
+                try:
+                    records = DeviceInventoryRecords.model_validate(
+                        transform_function(device_name, records, self)
+                    ).model_dump()
+                except Exception as exc:
+                    msg = (
+                        f"{device_name} - inventory transformer failed, "
+                        f"skipping device: {exc}"
+                    )
+                    ret.errors.append(msg)
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    continue
+
             if not records:
                 msg = f"{device_name} - parsing returned no inventory data, skipping device"
                 ret.errors.append(msg)
@@ -647,20 +568,85 @@ class NetboxDevicesTasks:
             skipped_slots = set()
             chassis_serials = set()
             manufacturer = nb_devices_data[device_name]["manufacturer"]
+            device_type = nb_devices_data[device_name]["device_type"]
+            module_type_targets = inventory_patterns.module_types.get(
+                manufacturer,
+                {},
+            )
+            module_bay_targets = inventory_patterns.module_bays.get(
+                manufacturer, {}
+            ).get(
+                device_type,
+                {},
+            )
 
             for record in records:
-                slot = str(record["slot"] or "").strip()
-                module_name = str(record["module"] or "").strip()
+                raw_slot = str(record["slot"] or "").strip()
+                raw_module_name = str(record["module"] or "").strip()
+                slot = raw_slot
+                module_name = raw_module_name
                 serial = str(record["serial"] or "").strip()
                 description = str(record["description"] or "")
                 slot_lower = slot.lower()
-                ignored_slot = slot
+                is_chassis = slot_lower == "chassis"
+
+                if not is_chassis:
+                    try:
+                        module_type_matches = find_inventory_pattern_matches(
+                            module_name,
+                            module_type_targets,
+                        )
+                        module_bay_matches = find_inventory_pattern_matches(
+                            slot,
+                            module_bay_targets,
+                        )
+                    except ValueError as exc:
+                        skipped_slots.add(slot)
+                        msg = (
+                            f"{device_name}:{slot or 'unknown'} - "
+                            f"inventory mapping failed: {exc}"
+                        )
+                        ret.errors.append(msg)
+                        log.error(msg)
+                        job.event(msg, severity="ERROR")
+                        continue
+
+                    if len(module_bay_matches) > 1:
+                        skipped_slots.add(slot)
+                        skipped_slots.update(module_bay_matches)
+                        msg = (
+                            f"{device_name}:{slot or 'unknown'} - live slot "
+                            f"matches multiple NetBox module bays: "
+                            f"{sorted(module_bay_matches)}"
+                        )
+                        ret.errors.append(msg)
+                        log.error(msg)
+                        job.event(msg, severity="ERROR")
+                        continue
+                    if module_bay_matches:
+                        slot = module_bay_matches[0]
+
+                    if len(module_type_matches) > 1:
+                        skipped_slots.add(slot)
+                        msg = (
+                            f"{device_name}:{raw_slot or 'unknown'} - live module "
+                            f"'{module_name}' matches multiple NetBox module types: "
+                            f"{sorted(module_type_matches)}"
+                        )
+                        ret.errors.append(msg)
+                        log.error(msg)
+                        job.event(msg, severity="ERROR")
+                        continue
+                    if module_type_matches:
+                        module_name = module_type_matches[0]
+
+                ignored_slot = f"{raw_slot} -> {slot}" if raw_slot != slot else slot
                 ignored_reason = ""
 
                 if serial.upper() == "BUILTIN":
                     serial = ""
 
-                if slot_lower == "chassis" or slot_lower.startswith("chassis "):
+                if is_chassis:
                     if serial:
                         chassis_serials.add(serial)
                     else:
@@ -687,7 +673,7 @@ class NetboxDevicesTasks:
                         job.event(msg, severity="WARNING")
                     continue
 
-                if slot_lower == "chassis" or slot_lower.startswith("chassis "):
+                if is_chassis:
                     continue
 
                 live_state[slot] = {
@@ -729,6 +715,41 @@ class NetboxDevicesTasks:
                     "inventory_type": "chassis",
                     "serial": nb_devices_data[device_name]["serial"],
                 }
+
+        for device_name, live_state in normalised_live_all.items():
+            excluded_live_slots = {
+                slot
+                for slot, record in live_state.items()
+                if not inventory_record_matches_filters(
+                    record,
+                    filter_by_module=filter_by_module,
+                    filter_by_slot=filter_by_slot,
+                    ignore_modules=ignore_modules,
+                    ignore_slots=ignore_slots,
+                )
+            }
+            selected_live_slots = set(live_state) - excluded_live_slots
+
+            normalised_live_all[device_name] = {
+                slot: record
+                for slot, record in live_state.items()
+                if slot in selected_live_slots
+            }
+            normalised_nb_all[device_name] = {
+                slot: record
+                for slot, record in normalised_nb_all[device_name].items()
+                if slot not in excluded_live_slots
+                and (
+                    slot in selected_live_slots
+                    or inventory_record_matches_filters(
+                        record,
+                        filter_by_module=filter_by_module,
+                        filter_by_slot=filter_by_slot,
+                        ignore_modules=ignore_modules,
+                        ignore_slots=ignore_slots,
+                    )
+                )
+            }
 
         if not normalised_live_all:
             msg = "no inventory parsing results collected for devices"
@@ -834,9 +855,9 @@ class NetboxDevicesTasks:
             ):
                 module_type_id = int(module_type.id)
                 manufacturer_slug = module_type.manufacturer.slug
-                module_type_lookup_cache[
-                    (manufacturer_slug, module_type.model)
-                ] = module_type_id
+                module_type_lookup_cache[(manufacturer_slug, module_type.model)] = (
+                    module_type_id
+                )
                 if module_type.part_number:
                     module_type_lookup_cache[
                         (manufacturer_slug, module_type.part_number)
@@ -849,9 +870,9 @@ class NetboxDevicesTasks:
             ):
                 module_type_id = int(module_type.id)
                 manufacturer_slug = module_type.manufacturer.slug
-                module_type_lookup_cache[
-                    (manufacturer_slug, module_type.model)
-                ] = module_type_id
+                module_type_lookup_cache[(manufacturer_slug, module_type.model)] = (
+                    module_type_id
+                )
                 if module_type.part_number:
                     module_type_lookup_cache[
                         (manufacturer_slug, module_type.part_number)
@@ -924,7 +945,9 @@ class NetboxDevicesTasks:
                         device_results[device_name]["created"].append(slot)
                         job.event(f"{device_name}:{slot} module bay created")
                     except Exception as exc:
-                        msg = f"{device_name}:{slot} - failed to create module bay: {exc}"
+                        msg = (
+                            f"{device_name}:{slot} - failed to create module bay: {exc}"
+                        )
                         ret.errors.append(msg)
                         log.error(msg)
                         job.event(msg, severity="ERROR")
@@ -1025,9 +1048,7 @@ class NetboxDevicesTasks:
                     if not module_type_id:
                         continue
                     if module_type_label and create_module_types:
-                        device_results[device_name]["created"].append(
-                            module_type_label
-                        )
+                        device_results[device_name]["created"].append(module_type_label)
                     payload["module_type"] = module_type_id
 
                 module_update_has_changes = len(payload) > 1
@@ -1298,6 +1319,15 @@ class NetboxDevicesTasks:
         branch: str = None,
         dry_run: bool = False,
         process_deletions: bool = False,
+        message: Union[None, str] = None,
+        inventory_create_module_types: bool = False,
+        inventory_create_module_bays: bool = False,
+        inventory_map: Union[None, str, dict, InventoryPatternMap] = None,
+        inventory_transform: Union[None, str] = None,
+        inventory_filter_by_module: Union[None, list] = None,
+        inventory_filter_by_slot: Union[None, list] = None,
+        inventory_ignore_modules: Union[None, list] = None,
+        inventory_ignore_slots: Union[None, list] = None,
         interfaces_filter_by_name: Union[None, str] = None,
         interfaces_filter_by_description: Union[None, str] = None,
         interfaces_update_type: Union[None, bool] = False,
@@ -1314,7 +1344,6 @@ class NetboxDevicesTasks:
         ip_filter_by_ip: Union[None, str] = None,
         bgp_status: str = "active",
         bgp_rir: Union[None, str] = None,
-        bgp_message: Union[None, str] = None,
         bgp_name_template: str = "{device}_{name}",
         bgp_filter_by_remote_as: Union[None, list] = None,
         bgp_filter_by_peer_group: Union[None, list] = None,
@@ -1325,7 +1354,7 @@ class NetboxDevicesTasks:
     ) -> Result:
         """
         Synchronize all device data from live devices into NetBox in sequence:
-        interfaces → MAC addresses → IP addresses → BGP peerings.
+        inventory → interfaces → MAC addresses → IP addresses → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
 
@@ -1333,6 +1362,7 @@ class NetboxDevicesTasks:
 
             {
                 "<device>": {
+                    "inventory":     {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
                     "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
                     "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
                     "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
@@ -1347,7 +1377,18 @@ class NetboxDevicesTasks:
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
-            process_deletions (bool): Process deletions for interfaces and BGP peerings. Defaults to False.
+            process_deletions (bool): Process deletions for inventory,
+                interfaces, and BGP peerings. Defaults to False.
+            message (str, optional): Changelog message for inventory and BGP
+                operations.
+            inventory_create_module_types (bool): Create missing module types.
+            inventory_create_module_bays (bool): Create missing module bays.
+            inventory_map: Inventory mappings or ``nf://`` YAML file reference.
+            inventory_transform (str, optional): ``nf://`` Python transformer.
+            inventory_filter_by_module (list, optional): Module type glob filters.
+            inventory_filter_by_slot (list, optional): Module bay glob filters.
+            inventory_ignore_modules (list, optional): Module type ignore globs.
+            inventory_ignore_slots (list, optional): Module bay ignore globs.
             interfaces_filter_by_name (str, optional): Glob pattern to filter interfaces by name.
             interfaces_filter_by_description (str, optional): Glob pattern to filter interfaces by description.
             interfaces_update_type (bool, optional): Update existing NetBox interface types.
@@ -1364,7 +1405,6 @@ class NetboxDevicesTasks:
             ip_filter_by_ip (str, optional): Glob pattern to restrict synced IP addresses.
             bgp_status (str): Status to set on created/updated BGP sessions.
             bgp_rir (str, optional): RIR name to use when creating new ASNs.
-            bgp_message (str, optional): Changelog message for BGP operations.
             bgp_name_template (str): Template string for BGP session names.
             bgp_filter_by_remote_as (list, optional): Only sync sessions matching remote AS numbers.
             bgp_filter_by_peer_group (list, optional): Only sync sessions matching peer groups.
@@ -1405,6 +1445,32 @@ class NetboxDevicesTasks:
         # initialize per-device result structure
         for device in devices:
             ret.result[device] = {}
+
+        # --- sync device inventory ---
+        job.event("SYNCING device inventory")
+        inventory_result = self.sync_device_inventory(
+            job=job,
+            instance=instance,
+            dry_run=dry_run,
+            timeout=timeout,
+            devices=list(devices),
+            branch=branch,
+            process_deletions=process_deletions,
+            create_module_types=inventory_create_module_types,
+            create_module_bays=inventory_create_module_bays,
+            inventory_map=inventory_map,
+            inventory_transform=inventory_transform,
+            filter_by_module=inventory_filter_by_module,
+            filter_by_slot=inventory_filter_by_slot,
+            ignore_modules=inventory_ignore_modules,
+            ignore_slots=inventory_ignore_slots,
+            message=message,
+        )
+        if inventory_result.errors:
+            job.event("inventory sync completed with errors", severity="WARNING")
+            ret.errors.extend(inventory_result.errors)
+        for device, data in inventory_result.result.items():
+            ret.result.setdefault(device, {})["inventory"] = data
 
         # --- sync interfaces ---
         job.event("SYNCING interfaces")
@@ -1481,7 +1547,7 @@ class NetboxDevicesTasks:
             branch=branch,
             process_deletions=process_deletions,
             rir=bgp_rir,
-            message=bgp_message,
+            message=message,
             name_template=bgp_name_template,
             filter_by_remote_as=bgp_filter_by_remote_as,
             filter_by_peer_group=bgp_filter_by_peer_group,

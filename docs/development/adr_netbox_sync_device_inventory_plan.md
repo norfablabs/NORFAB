@@ -5,12 +5,10 @@
 Add a new NetBox worker task named `sync_device_inventory` in
 `norfab/workers/netbox_worker/devices_tasks.py`.
 
-The task is intended to become the richer inventory-sync path while leaving the
-existing `sync_device_facts` task unchanged. The old task only reads NAPALM
-`get_facts` data and updates the NetBox device serial number. The new task
-should use the Nornir service with the TTP `inventory` getter, reconcile
-chassis serial numbers and installed modules, and follow the same sync pattern
-used by `sync_device_interfaces` and `sync_bgp_peerings`.
+The task is the device inventory-sync path. It uses the Nornir service with the
+TTP `inventory` getter, reconciles chassis serial numbers and installed
+modules, and follows the same sync pattern used by `sync_device_interfaces`
+and `sync_bgp_peerings`.
 
 The task should:
 
@@ -163,7 +161,7 @@ Proposed calls and behavior:
 2. Resolve the target devices:
    - if `devices` is provided, use it directly;
    - if Nornir filters are provided in `kwargs`, resolve hosts from Nornir in
-     the same way as `sync_device_facts` and `sync_device_interfaces`;
+     the same way as `sync_device_interfaces`;
    - otherwise raise an error because callers must provide either `devices` or
      Nornir filters, matching the other sync tasks.
 3. Fetch NetBox devices with `get_devices(..., cache="refresh")`.
@@ -1068,8 +1066,7 @@ Do not update the NetBox device serial when:
 - multiple chassis records exist. This is a per-device error.
 
 The task should report skipped serial updates clearly, because chassis serial
-sync is one of the main behaviors this new inventory task adds alongside the
-unchanged `sync_device_facts` task.
+sync is one of its main behaviors.
 
 The `chassis` slot is synthetic comparison data. It must not trigger module bay
 creation, module type resolution, module creation, module update, or module
@@ -1173,16 +1170,8 @@ Future implementation should add:
 - CLI shell update in
   `norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_device.py`.
 
-The existing CLI path already uses the name `netbox sync device-inventory`, but
-currently imports `SyncDeviceFactsInput` and calls `sync_device_facts`. The
-implementation should switch that shell command to the new model and task.
-
-Compatibility decision:
-
-- Keep `sync_device_facts` unchanged and leave it as-is.
-- Add `sync_device_inventory` as a new task and update the existing
-  `netbox sync device-inventory` CLI path to call the new task.
-- Do not make `sync_device_facts` a wrapper around `sync_device_inventory`.
+The CLI path uses the name `netbox sync device-inventory` and calls
+`sync_device_inventory` with `SyncDeviceInventoryInput`.
 
 ## Dry-run Behavior
 
@@ -1243,7 +1232,8 @@ Suggested tests:
 25. branch argument is passed through to NetBox access;
 26. message argument is passed to pynetbox write operations;
 27. CLI command calls `sync_device_inventory`;
-28. `sync_device_facts` remains unchanged.
+28. `sync_device_inventory` is the only device inventory synchronization task
+    exposed;
 29. module type glob condition maps a live module name to a NetBox module type;
 30. module type regex condition maps a live module name to a NetBox module type;
 31. module type `eval` condition maps a live module name to a NetBox module
@@ -1278,9 +1268,7 @@ Test fixtures should mirror the interface sync tests by mocking Nornir
 
 Future implementation should update:
 
-- `docs/workers/netbox/services_netbox_service_tasks_sync_device_facts.md`;
-- or replace it with
-  `docs/workers/netbox/services_netbox_service_tasks_sync_device_inventory.md`;
+- `docs/workers/netbox/services_netbox_service_tasks_sync_device_inventory.md`;
 - `mkdocs.yml`;
 - CLI command examples for `netbox sync device-inventory`.
 
@@ -1325,7 +1313,7 @@ This ADR file is the only file created during planning.
 14. Live module records with no usable serial are skipped.
 15. Module descriptions are updated from live inventory.
 16. Multiple chassis records produce a per-device error.
-17. `sync_device_facts` remains unchanged.
+17. Device serial synchronization is handled by `sync_device_inventory`.
 18. Callers must provide `devices` or Nornir filters.
 19. `message` remains in the task interface and should be implemented for the
     pynetbox write operations used by this task.

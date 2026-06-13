@@ -1,0 +1,5 @@
+module_types:
+  Cisco:
+    TEST-INVALID-MAPPING:
+      - glob: "A9K-*"
+        regex: "^A9K-.*$"

@@ -1,10 +1,12 @@
 import builtins
+import re
 from enum import Enum
 from typing import Any, Dict, List, Literal, Union
 
 from pydantic import (
     BaseModel,
     Field,
+    RootModel,
     StrictBool,
     StrictInt,
     StrictStr,
@@ -696,26 +698,121 @@ class GetDevicesInput(BaseModel, use_enum_values=True, populate_by_name=True):
     )
 
 
-class SyncDeviceFactsInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+class InventoryPatternCondition(
+    BaseModel,
+    extra="forbid",
+    populate_by_name=True,
 ):
-    datasource: StrictStr = Field(
-        "nornir",
-        description="Service to use as source for device facts",
-    )
-    timeout: StrictInt = Field(
-        60,
-        description="Timeout in seconds for datasource jobs",
-    )
-    devices: Union[None, List[StrictStr]] = Field(
+    """Condition used to map a live inventory value to a NetBox name."""
+
+    glob: Union[None, StrictStr] = Field(
         None,
-        description="List of NetBox devices to sync facts for",
+        description="Case-sensitive glob pattern matched against the live value",
     )
-    batch_size: StrictInt = Field(
-        10,
-        description="Number of devices to process per batch",
-        alias="batch-size",
+    regex: Union[None, StrictStr] = Field(
+        None,
+        description="Regular expression full-matched against the live value",
     )
+    eval_expression: Union[None, StrictStr] = Field(
+        None,
+        alias="eval",
+        description="Trusted Python expression evaluated with the live value in 'value'",
+    )
+
+    @model_validator(mode="after")
+    def validate_condition(self) -> "InventoryPatternCondition":
+        conditions = [self.glob, self.regex, self.eval_expression]
+        if sum(value is not None for value in conditions) != 1:
+            raise ValueError("exactly one of glob, regex, or eval is required")
+
+        condition = next(value for value in conditions if value is not None)
+        if not condition.strip():
+            raise ValueError("inventory pattern condition cannot be empty")
+
+        if self.regex is not None:
+            try:
+                re.compile(self.regex)
+            except re.error as exc:
+                raise ValueError(f"invalid regex pattern: {exc}") from exc
+
+        if self.eval_expression is not None:
+            try:
+                compile(self.eval_expression, "<inventory-map>", "eval")
+            except SyntaxError as exc:
+                raise ValueError(f"invalid eval expression: {exc}") from exc
+
+        return self
+
+
+InventoryPatternTargets = Dict[
+    StrictStr,
+    List[InventoryPatternCondition],
+]
+
+
+class InventoryPatternMap(BaseModel, extra="forbid"):
+    """Pattern mappings from live inventory names to NetBox object names."""
+
+    module_types: Dict[
+        StrictStr,
+        InventoryPatternTargets,
+    ] = Field(
+        default_factory=dict,
+        description="Module type mappings keyed by NetBox manufacturer name",
+    )
+    module_bays: Dict[
+        StrictStr,
+        Dict[
+            StrictStr,
+            InventoryPatternTargets,
+        ],
+    ] = Field(
+        default_factory=dict,
+        description="Module bay mappings keyed by NetBox manufacturer and device type",
+    )
+
+    @model_validator(mode="after")
+    def validate_mapping_keys(self) -> "InventoryPatternMap":
+        for manufacturer, targets in self.module_types.items():
+            if not manufacturer.strip():
+                raise ValueError("module type manufacturer name cannot be empty")
+            self.validate_targets(targets, "module type")
+
+        for manufacturer, device_types in self.module_bays.items():
+            if not manufacturer.strip():
+                raise ValueError("module bay manufacturer name cannot be empty")
+            for device_type, targets in device_types.items():
+                if not device_type.strip():
+                    raise ValueError("module bay device type cannot be empty")
+                self.validate_targets(targets, "module bay")
+
+        return self
+
+    @staticmethod
+    def validate_targets(
+        targets: InventoryPatternTargets,
+        target_type: str,
+    ) -> None:
+        for target_name, conditions in targets.items():
+            if not target_name.strip():
+                raise ValueError(f"{target_type} target name cannot be empty")
+            if not conditions:
+                raise ValueError(
+                    f"{target_type} target '{target_name}' requires conditions"
+                )
+
+
+class DeviceInventoryRecord(BaseModel, extra="forbid"):
+    """Parsed live device inventory record."""
+
+    description: Union[None, StrictStr]
+    slot: Union[None, StrictStr]
+    module: Union[None, StrictStr]
+    serial: Union[None, StrictStr]
+
+
+class DeviceInventoryRecords(RootModel[List[DeviceInventoryRecord]]):
+    """List of parsed live device inventory records."""
 
 
 class SyncDeviceInventoryInput(
@@ -749,6 +846,36 @@ class SyncDeviceInventoryInput(
         description="Create missing NetBox module bays using the live inventory slot names",
         alias="create-module-bays",
         json_schema_extra={"presence": True},
+    )
+    inventory_map: Union[None, StrictStr, InventoryPatternMap] = Field(
+        None,
+        description="Pattern mappings or nf:// YAML file reference",
+        alias="inventory-map",
+    )
+    inventory_transform: Union[None, StrictStr] = Field(
+        None,
+        description="nf:// Python transformer file containing a transform function",
+        alias="inventory-transform",
+    )
+    filter_by_module: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns selecting normalized module type names",
+        alias="filter-by-module",
+    )
+    filter_by_slot: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns selecting normalized module bay names",
+        alias="filter-by-slot",
+    )
+    ignore_modules: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns excluding normalized module type names",
+        alias="ignore-modules",
+    )
+    ignore_slots: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns excluding normalized module bay names",
+        alias="ignore-slots",
     )
     message: Union[None, StrictStr] = Field(
         None,
@@ -810,9 +937,55 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
     )
     process_deletions: StrictBool = Field(
         False,
-        description="Process deletions for interfaces and BGP peerings",
+        description="Process deletions for inventory, interfaces, and BGP peerings",
         json_schema_extra={"presence": True},
         alias="process-deletions",
+    )
+    message: Union[None, StrictStr] = Field(
+        None,
+        description="Changelog message for inventory and BGP operations",
+    )
+    inventory_create_module_types: StrictBool = Field(
+        False,
+        description="Create missing module types during inventory sync",
+        json_schema_extra={"presence": True},
+        alias="inventory-create-module-types",
+    )
+    inventory_create_module_bays: StrictBool = Field(
+        False,
+        description="Create missing module bays during inventory sync",
+        json_schema_extra={"presence": True},
+        alias="inventory-create-module-bays",
+    )
+    inventory_map: Union[None, StrictStr, InventoryPatternMap] = Field(
+        None,
+        description="Inventory pattern mappings or nf:// YAML file reference",
+        alias="inventory-map",
+    )
+    inventory_transform: Union[None, StrictStr] = Field(
+        None,
+        description="nf:// Python inventory transformer file",
+        alias="inventory-transform",
+    )
+    inventory_filter_by_module: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns selecting normalized module type names",
+        alias="inventory-filter-by-module",
+    )
+    inventory_filter_by_slot: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns selecting normalized module bay names",
+        alias="inventory-filter-by-slot",
+    )
+    inventory_ignore_modules: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns excluding normalized module type names",
+        alias="inventory-ignore-modules",
+    )
+    inventory_ignore_slots: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns excluding normalized module bay names",
+        alias="inventory-ignore-slots",
     )
     interfaces_filter_by_name: Union[None, StrictStr] = Field(
         None,
@@ -896,11 +1069,6 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         description="RIR name to use when creating new ASNs",
         alias="bgp-rir",
     )
-    bgp_message: Union[None, StrictStr] = Field(
-        None,
-        description="Changelog message for BGP operations",
-        alias="bgp-message",
-    )
     bgp_name_template: StrictStr = Field(
         "{{device}}_{{name}}",
         description="Jinja2 template string for BGP session names",
@@ -937,13 +1105,6 @@ class GetDevicesResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
         description="Device data keyed by device name",
-    )
-
-
-class SyncDeviceFactsResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
-        description="Device fact sync result keyed by device name",
     )
 
 

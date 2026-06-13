@@ -4,6 +4,17 @@ from time import perf_counter
 
 import pynetbox
 import pytest
+from pydantic import ValidationError
+
+from norfab.workers.netbox_worker.devices_tasks import (
+    inventory_record_matches_filters,
+)
+from norfab.workers.netbox_worker.netbox_models import (
+    DeviceInventoryRecords,
+    InventoryPatternMap,
+    SyncAllInput,
+    SyncDeviceInventoryInput,
+)
 
 from .netbox_data import NB_API_TOKEN, NB_URL
 
@@ -2780,340 +2791,163 @@ class TestGetBgpPeerings:
             ), f"{worker} should not have cached data when cache=False"
 
 
-class TestSyncDeviceFacts:
-    """Comprehensive test suite for sync_device_facts function"""
+class TestInventoryPatternMap:
+    def test_rejects_nested_inventory_map_wrapper(self):
+        with pytest.raises(ValidationError):
+            InventoryPatternMap.model_validate(
+                {
+                    "inventory_map": {
+                        "module_types": {},
+                        "module_bays": {},
+                    }
+                }
+            )
 
-    def test_sync_device_facts_basic_update(self, nfclient):
-        """Test basic sync with devices list - updates serial numbers"""
-        # Setup: update serial for spine to force a change
-        pynb = get_pynetbox(nfclient)
-        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
-        nb_device.serial = "123456"
-        nb_device.save()
+    def test_rejects_condition_with_multiple_matchers(self):
+        with pytest.raises(ValidationError):
+            InventoryPatternMap.model_validate(
+                {
+                    "module_types": {
+                        "Cisco": {
+                            "TEST": [
+                                {
+                                    "glob": "TEST*",
+                                    "regex": "^TEST$",
+                                }
+                            ]
+                        }
+                    }
+                }
+            )
 
-        # Execute sync job
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1", "ceos-spine-2"],
-            },
-        )
-        pprint.pprint(ret, width=200)
 
-        # Verify results
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            assert (
-                "ceos-spine-1" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-1"
-            assert (
-                "ceos-spine-2" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-2"
-
-            # ceos-spine-1 should have been updated
-            assert res["result"]["ceos-spine-1"][
-                "sync_device_facts"
-            ], "ceos-spine-1 no data returned"
-            assert res["result"]["ceos-spine-1"]["sync_device_facts"][
-                "serial"
-            ], "ceos-spine-1 serial not synced"
-
-            # ceos-spine-2 should be in sync or updated
-            assert res["result"]["ceos-spine-2"][
-                "sync_device_facts"
-            ], "ceos-spine-2 no data returned"
-
-    def test_sync_device_facts_already_in_sync(self, nfclient):
-        """Test when device facts are already synchronized"""
-        # First sync to ensure devices are up to date
-        nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1"],
-            },
+class TestDeviceInventoryRecords:
+    def test_validates_inventory_records(self):
+        records = DeviceInventoryRecords.model_validate(
+            [
+                {
+                    "description": None,
+                    "slot": "module 0/RSP0/CPU0",
+                    "module": "A9K-RSP440-TR",
+                    "serial": "M9YXCZV9QF",
+                }
+            ]
         )
 
-        # Second sync should show devices in sync
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1"],
-            },
+        assert records.model_dump() == [
+            {
+                "description": None,
+                "slot": "module 0/RSP0/CPU0",
+                "module": "A9K-RSP440-TR",
+                "serial": "M9YXCZV9QF",
+            }
+        ]
+
+    @pytest.mark.parametrize(
+        "records",
+        [
+            {},
+            [{"slot": "module 0/RSP0/CPU0"}],
+            [
+                {
+                    "description": None,
+                    "slot": "module 0/RSP0/CPU0",
+                    "module": 123,
+                    "serial": None,
+                }
+            ],
+        ],
+    )
+    def test_rejects_invalid_inventory_records(self, records):
+        with pytest.raises(ValidationError):
+            DeviceInventoryRecords.model_validate(records)
+
+
+class TestSyncDeviceInventoryInput:
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "filter_by_module",
+            "filter_by_slot",
+            "ignore_modules",
+            "ignore_slots",
+        ],
+    )
+    def test_inventory_filters_require_pattern_lists(self, field):
+        with pytest.raises(ValidationError):
+            SyncDeviceInventoryInput.model_validate({field: "A9K-*"})
+
+
+class TestSyncAllInput:
+    def test_validates_inventory_arguments(self):
+        data = SyncAllInput.model_validate(
+            {
+                "inventory-create-module-types": True,
+                "inventory-create-module-bays": True,
+                "inventory-map": "nf://netbox/inventory_map.yaml",
+                "inventory-transform": "nf://netbox/inventory_transform.py",
+                "inventory-filter-by-module": ["A9K-*"],
+                "inventory-filter-by-slot": ["module 0/*"],
+                "inventory-ignore-modules": ["SFP-*"],
+                "inventory-ignore-slots": ["power-module *"],
+                "message": "sync all changes",
+            }
         )
-        pprint.pprint(ret, width=200)
 
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed"
-            assert (
-                res["result"]["ceos-spine-1"]["sync_device_facts"]
-                == "Device facts in sync"
-            ), "Expected device to be in sync"
+        assert data.inventory_create_module_types is True
+        assert data.inventory_create_module_bays is True
+        assert data.inventory_filter_by_module == ["A9K-*"]
+        assert data.inventory_ignore_slots == ["power-module *"]
+        assert data.message == "sync all changes"
 
-    def test_sync_device_facts_with_filters(self, nfclient):
-        """Test sync using Nornir filters instead of device list"""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "FC": "spine",
-            },
+    def test_rejects_inventory_filter_string(self):
+        with pytest.raises(ValidationError):
+            SyncAllInput.model_validate({"inventory-filter-by-module": "A9K-*"})
+
+
+class TestInventoryRecordFilters:
+    MODULE = {
+        "slot": "module 0/RSP0/CPU0",
+        "inventory_type": "module",
+        "module_type": "A9K-RSP440-TR",
+    }
+
+    def test_matches_module_and_slot_filters(self):
+        assert inventory_record_matches_filters(
+            self.MODULE,
+            filter_by_module=["A9K-RSP*", "SFP-*"],
+            filter_by_slot=["module 0/*"],
         )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            assert (
-                "ceos-spine-1" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-1"
-            assert (
-                "ceos-spine-2" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-2"
-
-            for device, device_data in res["result"].items():
-                assert (
-                    "sync_device_facts" in device_data
-                ), f"{worker}:{device} no sync data"
-
-    def test_sync_device_facts_dry_run(self, nfclient):
-        """Test dry run mode - should not modify NetBox"""
-        # Setup: change serial to create a difference
-        pynb = get_pynetbox(nfclient)
-        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
-        original_serial = nb_device.serial
-        nb_device.serial = "DRY-RUN-TEST-123"
-        nb_device.save()
-
-        # Execute dry run
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1", "ceos-spine-2"],
-                "dry_run": True,
-            },
+        assert not inventory_record_matches_filters(
+            self.MODULE,
+            filter_by_module=["SFP-*"],
+            filter_by_slot=["module 0/*"],
         )
-        pprint.pprint(ret, width=200)
 
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed"
-            assert res["dry_run"] is True, "dry_run flag not set in result"
-            assert (
-                "ceos-spine-1" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-1"
-            assert (
-                "ceos-spine-2" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-2"
-
-            for device, device_data in res["result"].items():
-                assert (
-                    "sync_device_facts_dry_run" in device_data
-                ), f"{worker}:{device} no dry run data"
-
-        # Verify NetBox was not modified
-        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
-        assert (
-            nb_device.serial == "DRY-RUN-TEST-123"
-        ), "NetBox was modified during dry run"
-
-        # Cleanup
-        nb_device.serial = original_serial
-        nb_device.save()
-
-    def test_sync_device_facts_with_diff(self, nfclient):
-        """Test that diff is properly populated when changes are made"""
-        # Setup: force a change
-        pynb = get_pynetbox(nfclient)
-        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
-        nb_device.serial = "OLD-SERIAL-123"
-        nb_device.save()
-
-        # Execute sync
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1"],
-            },
+    def test_ignore_filters_take_precedence(self):
+        assert not inventory_record_matches_filters(
+            self.MODULE,
+            filter_by_module=["A9K-*"],
+            ignore_slots=["module 0/RSP*"],
         )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed"
-            if (
-                res["result"]["ceos-spine-1"]["sync_device_facts"]
-                != "Device facts in sync"
-            ):
-                assert (
-                    "ceos-spine-1" in res["diff"]
-                ), "diff not populated for changed device"
-                assert (
-                    "serial" in res["diff"]["ceos-spine-1"]
-                ), "serial field not in diff"
-                assert (
-                    "-" in res["diff"]["ceos-spine-1"]["serial"]
-                ), "old value (-) not in diff"
-                assert (
-                    "+" in res["diff"]["ceos-spine-1"]["serial"]
-                ), "new value (+) not in diff"
-
-    def test_sync_device_facts_with_branch(self, nfclient):
-        """Test sync with NetBox branching plugin"""
-        delete_branch("sync_facts_test_branch", nfclient)
-
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1", "ceos-spine-2"],
-                "branch": "sync_facts_test_branch",
-            },
+        assert not inventory_record_matches_filters(
+            self.MODULE,
+            filter_by_slot=["module 0/*"],
+            ignore_modules=["A9K-RSP*"],
         )
-        pprint.pprint(ret, width=200)
 
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            assert (
-                "ceos-spine-1" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-1"
-            assert (
-                "ceos-spine-2" in res["result"]
-            ), f"{worker} returned no results for ceos-spine-2"
-
-            for device, device_data in res["result"].items():
-                assert "branch" in device_data, f"{worker}:{device} no branch info"
-                assert (
-                    device_data["branch"] == "sync_facts_test_branch"
-                ), "Wrong branch name"
-
-        # Cleanup
-        delete_branch("sync_facts_test_branch", nfclient)
-
-    def test_sync_device_facts_with_custom_instance(self, nfclient):
-        """Test sync with explicit NetBox instance"""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1"],
-                "instance": "prod",
+    def test_chassis_always_matches(self):
+        assert inventory_record_matches_filters(
+            {
+                "slot": "chassis",
+                "inventory_type": "chassis",
+                "serial": "JCY98XR393D",
             },
+            filter_by_module=["NO-MATCH"],
+            filter_by_slot=["NO-MATCH"],
+            ignore_modules=["*"],
+            ignore_slots=["*"],
         )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed"
-            assert "prod" in res["resources"], "instance not in resources"
-
-    def test_sync_device_facts_with_batch_size(self, nfclient):
-        """Test sync with custom batch size"""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1", "ceos-spine-2"],
-                "batch_size": 1,  # Process one device at a time
-            },
-        )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed"
-            assert "ceos-spine-1" in res["result"], "ceos-spine-1 not processed"
-            assert "ceos-spine-2" in res["result"], "ceos-spine-2 not processed"
-
-    def test_sync_device_facts_with_timeout(self, nfclient):
-        """Test sync with custom timeout"""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1"],
-                "timeout": 120,
-            },
-        )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed"
-            assert "ceos-spine-1" in res["result"], "ceos-spine-1 not processed"
-
-    def test_sync_device_facts_non_existing_device(self, nfclient):
-        """Test error handling when device doesn't exist in NetBox"""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["nonexistent-device-12345"],
-            },
-        )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            # Should fail or report error
-            assert res["errors"], "Should report error for non-existent device"
-
-    def test_sync_device_facts_empty_device_list(self, nfclient):
-        """Test sync with empty device list and no filters"""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": [],
-            },
-        )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            # Should complete with error
-            assert res["failed"], f"{worker} not failed"
-            assert (
-                res["result"] == {} or len(res["result"]) == 0
-            ), "Should have empty result"
-
-    def test_sync_device_facts_single_device(self, nfclient):
-        """Test sync with a single device"""
-        ret = nfclient.run_job(
-            "netbox",
-            "sync_device_facts",
-            workers="any",
-            kwargs={
-                "datasource": "nornir",
-                "devices": ["ceos-spine-1"],
-            },
-        )
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed"
-            assert "ceos-spine-1" in res["result"], "Device not in result"
-            assert len(res["result"]) == 1, "Should only process one device"
 
 
 class TestSyncDeviceInventory:
@@ -3128,6 +2962,22 @@ class TestSyncDeviceInventory:
     OPTIC_SLOT = "module mau 0/1/0/0"
     OPTIC_SERIAL = "QMXQLS9GKS"
     PART_NUMBER_MATCH_MODEL = "TEST-RSP-PARTNUMBER-MATCH"
+    PATTERN_RSP_MODEL = "TEST-PATTERN-RSP"
+    PATTERN_OPTIC_MODEL = "TEST-PATTERN-OPTIC"
+    PATTERN_FAN_MODEL = "TEST-PATTERN-FAN"
+    PATTERN_RSP_SLOT = "mapped pattern RSP bay"
+    PATTERN_OPTIC_SLOT = "mapped pattern optic bay"
+    PATTERN_FAN_SLOT = "mapped pattern fan bay"
+    TRANSFORM_RSP_MODEL = "TEST-TRANSFORMED-RSP"
+    TRANSFORM_RSP_SLOT = "mapped transformer RSP bay"
+    FILE_MAP_RSP_MODEL = "TEST-FILE-MAPPED-RSP"
+    FILE_MAP_RSP_SLOT = "mapped file RSP bay"
+    INVENTORY_MAP = "nf://netbox/inventory_map.yaml"
+    INVALID_INVENTORY_MAP = "nf://netbox/inventory_map_invalid.yaml"
+    INVENTORY_TRANSFORM = "nf://netbox/inventory_transform.py"
+    MISSING_INVENTORY_TRANSFORM = "nf://netbox/inventory_transform_missing.py"
+    RAISING_INVENTORY_TRANSFORM = "nf://netbox/inventory_transform_raises.py"
+    INVALID_INVENTORY_TRANSFORM = "nf://netbox/inventory_transform_invalid.py"
     TEST_MODULE_MODELS = [
         "A9K-RSP440-TR",
         "ASR-9006-FAN-V2",
@@ -3138,6 +2988,11 @@ class TestSyncDeviceInventory:
         "TEST-STALE-MOD",
         "TEST-FAN-MOD",
         PART_NUMBER_MATCH_MODEL,
+        PATTERN_RSP_MODEL,
+        PATTERN_OPTIC_MODEL,
+        PATTERN_FAN_MODEL,
+        TRANSFORM_RSP_MODEL,
+        FILE_MAP_RSP_MODEL,
     ]
 
     @pytest.fixture(autouse=True)
@@ -3320,6 +3175,10 @@ class TestSyncDeviceInventory:
     def _unexpected_inventory_errors(errors):
         return [error for error in errors if "ignored inventory record" not in error]
 
+    @staticmethod
+    def _result_text(result):
+        return "\n".join(result["errors"] + result["messages"])
+
     def test_sync_device_inventory_dry_run_reports_raw_diff(self, nfclient):
         ret = self._sync(nfclient, dry_run=True)
         pprint.pprint(ret, width=200)
@@ -3413,6 +3272,212 @@ class TestSyncDeviceInventory:
         assert self._value(rsp_module, "module_type", "model") == (
             self.PART_NUMBER_MATCH_MODEL
         )
+
+    def test_sync_device_inventory_pattern_mapping(self, nfclient):
+        nb = get_pynetbox(None)
+        device = nb.dcim.devices.get(name=self.DEVICE)
+        manufacturer = device.device_type.manufacturer.name
+        device_type = device.device_type.model
+        inventory_map = {
+            "module_types": {
+                manufacturer: {
+                    self.PATTERN_RSP_MODEL: [{"glob": "A9K-RSP440-*"}],
+                    self.PATTERN_OPTIC_MODEL: [{"regex": "^SFP-10G-LR$"}],
+                    self.PATTERN_FAN_MODEL: [{"eval": "value == 'ASR-9006-FAN-V2'"}],
+                }
+            },
+            "module_bays": {
+                manufacturer: {
+                    device_type: {
+                        self.PATTERN_RSP_SLOT: [{"glob": "module 0/RSP0/*"}],
+                        self.PATTERN_OPTIC_SLOT: [{"regex": "^module mau 0/1/0/0$"}],
+                        self.PATTERN_FAN_SLOT: [
+                            {"eval": "value == 'fantray 0/FT0/SP'"}
+                        ],
+                    }
+                }
+            },
+        }
+
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+            inventory_map=inventory_map,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            created = res["result"][self.DEVICE]["created"]
+            assert self.PATTERN_RSP_SLOT in created
+            assert self.PATTERN_OPTIC_SLOT in created
+            assert self.PATTERN_FAN_SLOT in created
+
+        expected_modules = {
+            self.PATTERN_RSP_SLOT: self.PATTERN_RSP_MODEL,
+            self.PATTERN_OPTIC_SLOT: self.PATTERN_OPTIC_MODEL,
+            self.PATTERN_FAN_SLOT: self.PATTERN_FAN_MODEL,
+        }
+        for slot, model in expected_modules.items():
+            module = self._get_module(slot)
+            assert module is not None
+            assert self._value(module, "module_type", "model") == model
+
+        assert self._get_module(self.RSP_SLOT) is None
+        assert self._get_module(self.OPTIC_SLOT) is None
+
+    def test_sync_device_inventory_filters_normalized_module_and_slot(self, nfclient):
+        nb = get_pynetbox(None)
+        device = nb.dcim.devices.get(name=self.DEVICE)
+        manufacturer = device.device_type.manufacturer.name
+        device_type = device.device_type.model
+        inventory_map = {
+            "module_types": {
+                manufacturer: {
+                    self.PATTERN_RSP_MODEL: [{"glob": "A9K-RSP440-*"}],
+                    self.PATTERN_OPTIC_MODEL: [{"glob": "SFP-10G-LR"}],
+                }
+            },
+            "module_bays": {
+                manufacturer: {
+                    device_type: {
+                        self.PATTERN_RSP_SLOT: [{"glob": "module 0/RSP0/*"}],
+                        self.PATTERN_OPTIC_SLOT: [{"glob": "module mau 0/1/0/0"}],
+                    }
+                }
+            },
+        }
+
+        ret = self._sync(
+            nfclient,
+            dry_run=True,
+            inventory_map=inventory_map,
+            filter_by_module=["TEST-PATTERN-*"],
+            filter_by_slot=["mapped pattern RSP *"],
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            inventory = res["result"][self.DEVICE]
+            assert self.PATTERN_RSP_SLOT in inventory["create"]
+            assert self.PATTERN_OPTIC_SLOT not in inventory["create"]
+            assert self.RSP_SLOT not in inventory["create"]
+            assert self.OPTIC_SLOT not in inventory["create"]
+
+    def test_sync_device_inventory_ignores_modules_and_slots(self, nfclient):
+        self._ensure_module(
+            self.OPTIC_SLOT,
+            "SFP-10G-LR",
+            serial=self.OPTIC_SERIAL,
+        )
+
+        ret = self._sync(
+            nfclient,
+            dry_run=True,
+            process_deletions=True,
+            ignore_modules=["SFP-*"],
+            ignore_slots=["fantray *"],
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            inventory = res["result"][self.DEVICE]
+            assert self.RSP_SLOT in inventory["create"]
+            assert self.OPTIC_SLOT not in inventory["create"]
+            assert self.OPTIC_SLOT not in inventory["update"]
+            assert self.OPTIC_SLOT not in inventory["delete"]
+            assert "fantray 0/FT0/SP" not in inventory["create"]
+
+    def test_sync_device_inventory_loads_mapping_from_file(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+            inventory_map=self.INVENTORY_MAP,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            assert self.FILE_MAP_RSP_SLOT in res["result"][self.DEVICE]["created"]
+
+        module = self._get_module(self.FILE_MAP_RSP_SLOT)
+        assert module is not None
+        assert self._value(module, "module_type", "model") == self.FILE_MAP_RSP_MODEL
+        assert self._get_module(self.RSP_SLOT) is None
+
+    def test_sync_device_inventory_rejects_invalid_mapping_file(self, nfclient):
+        ret = self._sync(nfclient, inventory_map=self.INVALID_INVENTORY_MAP)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["failed"], f"{worker} accepted invalid inventory mapping"
+            assert "exactly one of glob, regex, or eval is required" in (
+                self._result_text(res)
+            )
+
+    def test_sync_device_inventory_python_transformer(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            create_module_bays=True,
+            create_module_types=True,
+            inventory_transform=self.INVENTORY_TRANSFORM,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert not self._unexpected_inventory_errors(res["errors"])
+            created = res["result"][self.DEVICE]["created"]
+            assert self.TRANSFORM_RSP_SLOT in created
+
+        module = self._get_module(self.TRANSFORM_RSP_SLOT)
+        assert module is not None
+        assert self._value(module, "module_type", "model") == (self.TRANSFORM_RSP_MODEL)
+        assert self._get_module(self.RSP_SLOT) is None
+
+    def test_sync_device_inventory_rejects_missing_transform_function(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            inventory_transform=self.MISSING_INVENTORY_TRANSFORM,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["failed"], f"{worker} accepted transformer without transform"
+            assert "KeyError: 'transform'" in self._result_text(res)
+
+    def test_sync_device_inventory_handles_transformer_exception(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            inventory_transform=self.RAISING_INVENTORY_TRANSFORM,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["failed"], f"{worker} did not fail after transformer exception"
+            result_text = self._result_text(res)
+            assert "inventory transformer failed" in result_text
+            assert f"{self.DEVICE} transformer failure" in result_text
+
+    def test_sync_device_inventory_rejects_invalid_transformer_data(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            inventory_transform=self.INVALID_INVENTORY_TRANSFORM,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert res["failed"], f"{worker} accepted invalid transformer data"
+            result_text = self._result_text(res)
+            assert "inventory transformer failed" in result_text
+            assert "DeviceInventoryRecords" in result_text
+            assert "Field required" in result_text
 
     def test_sync_device_inventory_second_run_is_in_sync(self, nfclient):
         first = self._sync(
@@ -9451,7 +9516,7 @@ class TestCreateBgpPeering:
                     "remote_as": _TEST_REMOTE_AS,
                     "rir": "lab",
                     "vrf": vrf_name,
-                    "create_reverse": False
+                    "create_reverse": False,
                 },
             )
             pprint.pprint(ret)
@@ -10893,16 +10958,28 @@ class TestCheckDeviceSync:
 
 
 class TestSyncAll:
-    """Test suite for sync_all task — verifies that sync_all calls all four sync
-    sub-tasks in sequence (interfaces → MAC addresses → IP addresses → BGP peerings)
-    and produces idempotent, correct NetBox state.
+    """Verify sync_all calls all five sync tasks in sequence.
 
     Each test performs a full cleanup before and after via setup_method/teardown_method
     and uses out-of-band pynetbox queries to verify NetBox state directly.
     """
 
     SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
-    ALL_CATEGORIES = {"interfaces", "mac_addresses", "ip_addresses", "bgp_peerings"}
+    ALL_CATEGORIES = {
+        "inventory",
+        "interfaces",
+        "mac_addresses",
+        "ip_addresses",
+        "bgp_peerings",
+    }
+    NETBOX_SERIALS = {
+        "ceos-spine-1": "FNS12345678",
+        "ceos-spine-2": "FNS123456789",
+    }
+    LIVE_SERIALS = {
+        "ceos-spine-1": "C4889628D19280228439023C4F0C3EE4",
+        "ceos-spine-2": "F8B8101D77067B49C0437B3711AA1719",
+    }
 
     # Known TEST_SYNC items from interfaces_parse_data.json for spine devices
     SPINE1_TEST_INTF = (
@@ -10933,6 +11010,9 @@ class TestSyncAll:
         for device in devices:
             for session in list(nb.plugins.bgp.session.filter(device=device)):
                 session.delete()
+            nb.dcim.devices.get(name=device).update(
+                {"serial": TestSyncAll.NETBOX_SERIALS[device]}
+            )
         # TEST_SYNC IP addresses
         for parent_prefix in ["10.3.0.0/16", "2001:beef::/32"]:
             for ip in nb.ipam.ip_addresses.filter(parent=parent_prefix):
@@ -10999,7 +11079,7 @@ class TestSyncAll:
     # ------------------------------------------------------------------ #
 
     def test_sync_all_result_structure(self, nfclient):
-        """All four categories present per device in dry_run mode; each value is a dict."""
+        """All five categories are present per device in dry-run mode."""
         ret = self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
         pprint.pprint(ret, width=200)
 
@@ -11019,10 +11099,12 @@ class TestSyncAll:
                     )
 
     def test_sync_all_dry_run_no_writes(self, nfclient):
-        """dry_run=True must not write any interfaces, MACs, or IPs to NetBox."""
+        """dry_run=True must not write inventory, interfaces, MACs, or IPs."""
         self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
 
         nb = get_pynetbox(None)
+        for device, serial in self.NETBOX_SERIALS.items():
+            assert nb.dcim.devices.get(name=device).serial == serial
         # Interface must not exist
         intf = nb.dcim.interfaces.get(device="ceos-spine-1", name=self.SPINE1_TEST_INTF)
         assert (
@@ -11046,6 +11128,21 @@ class TestSyncAll:
     # ------------------------------------------------------------------ #
     # Live run — creates in NetBox                                         #
     # ------------------------------------------------------------------ #
+
+    def test_sync_all_updates_device_inventory_in_netbox(self, nfclient):
+        """sync_all updates device serials through sync_device_inventory."""
+        ret = self._sync(nfclient, self.SPINE_DEVICES)
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            for device in self.SPINE_DEVICES:
+                inventory = res["result"][device]["inventory"]
+                assert "chassis" in inventory["updated"]
+
+        nb = get_pynetbox(None)
+        for device, serial in self.LIVE_SERIALS.items():
+            assert nb.dcim.devices.get(name=device).serial == serial
 
     def test_sync_all_creates_interfaces_in_netbox(self, nfclient):
         """After cleanup, sync_all must create TEST_SYNC interfaces in NetBox;
@@ -11121,8 +11218,7 @@ class TestSyncAll:
     # ------------------------------------------------------------------ #
 
     def test_sync_all_idempotent(self, nfclient):
-        """Second sync_all run must report nothing created for interfaces, MACs, or IPs,
-        and all of them in_sync."""
+        """Second sync_all run reports all managed data in sync."""
         # First run — creates everything
         first = self._sync(nfclient, self.SPINE_DEVICES)
         for worker, res in first.items():
@@ -11140,6 +11236,10 @@ class TestSyncAll:
                 intf_data = res["result"][device].get("interfaces", {})
                 mac_data = res["result"][device].get("mac_addresses", {})
                 ip_data = res["result"][device].get("ip_addresses", {})
+                inventory_data = res["result"][device].get("inventory", {})
+                assert not inventory_data.get("created")
+                assert not inventory_data.get("updated")
+                assert "chassis" in inventory_data.get("in_sync", [])
                 assert not intf_data.get("created"), (
                     f"{worker}:{device} unexpected interface creates on 2nd run: "
                     f"{intf_data.get('created')}"

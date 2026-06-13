@@ -1,3 +1,16 @@
+# 0.20.0
+
+## FEATURES
+
+1. Added Netbox `sync_device_inventory` task to synchronize device chassis serial numbers and installed modules from live Nornir inventory. The task supports module type and module bay creation, pattern-based inventory mappings, custom Python transformers, filtering, deletion controls, and dry-run previews.
+
+## CHANGES
+
+1. Removed the Netbox `sync_device_facts` task. Device serial number synchronization is now handled by `sync_device_inventory` using the live inventory record whose slot is `chassis`.
+2. Extended Netbox `sync_all` to run device inventory synchronization before interfaces, MAC addresses, IP addresses, and BGP peerings. Added `inventory_*` mapping, transformer, filtering, and module creation arguments; `process_deletions` and `message` are shared across the applicable synchronization stages.
+
+---
+
 # 0.19.0
 
 ## FEATURES

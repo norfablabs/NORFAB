@@ -158,7 +158,6 @@ from MCP and are documented here as not applicable.
 | `netbox_worker/containerlab_inventory_tasks.py` | `get_containerlab_inventory` | Get Containerlab Inventory | true | false | true | true | Reads NetBox data to generate inventory. |
 | `netbox_worker/design_tasks.py` | `create_design` | Create Design | false | false | false | true | Creates NetBox design data. |
 | `netbox_worker/devices_tasks.py` | `get_devices` | Get Devices | true | false | true | true | Reads NetBox device data. |
-| `netbox_worker/devices_tasks.py` | `sync_device_facts` | Sync Device Facts | false | true | true | true | Updates NetBox from live device facts. |
 | `netbox_worker/devices_tasks.py` | `check_device_sync` | Check Device Sync | true | false | true | true | Runs sync checks in dry-run mode. |
 | `netbox_worker/devices_tasks.py` | `sync_all` | Sync All Device Data | false | true | true | true | Updates multiple NetBox object classes. |
 | `netbox_worker/graphql_tasks.py` | `netbox_graphql` | Query NetBox GraphQL | true | false | true | true | Reads external NetBox GraphQL API. |
@@ -228,4 +227,3 @@ from MCP and are documented here as not applicable.
 5. Add or update tests around `list_tasks` or FastMCP discovery to assert that a
    representative read-only tool, destructive tool, idempotent mutating tool,
    and `mcp=False` task behave as expected.
-

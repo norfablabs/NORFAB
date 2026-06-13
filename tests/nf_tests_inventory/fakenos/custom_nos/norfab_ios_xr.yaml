@@ -316,7 +316,7 @@ commands:
       NAME: "power-module 0/PS0/M0/SP", DESCR: "3kW AC V2 Power Module"
       PID: PWR-3KW-AC-V2     , VID: V04, SN: ZP7K5XBV9KE
 
-      NAME: "chassis ASR-9006", DESCR: "ASR 9006 4 Line Card Slot Chassis with V2 AC PEM"
+      NAME: "chassis", DESCR: "ASR 9006 4 Line Card Slot Chassis with V2 AC PEM"
       PID: ASR-9006          , VID: V09, SN: JCY98XR393D
   _default_:
     output: "% Invalid input detected at '^' marker."

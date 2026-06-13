@@ -1,0 +1,10 @@
+module_types:
+  Cisco:
+    TEST-FILE-MAPPED-RSP:
+      - glob: "A9K-RSP440-*"
+
+module_bays:
+  Cisco:
+    XVR9000:
+      mapped file RSP bay:
+        - glob: "module 0/RSP0/*"

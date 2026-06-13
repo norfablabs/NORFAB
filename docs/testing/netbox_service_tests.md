@@ -6,7 +6,7 @@ The Netbox Service Tests (`test_netbox_service.py`) provide comprehensive testin
 
 ## Test Summary
 
-The test suite is organized into 17 test classes:
+The documented test classes are:
 
 | Test Class | Purpose | Documentation |
 |-----------|---------|---------------|
@@ -18,7 +18,6 @@ The test suite is organized into 17 test classes:
 | TestGetNornirInventory | Nornir inventory generation from Netbox | [Details](#testgetnornirinventory) |
 | TestGetCircuits | Circuit information retrieval | [Details](#testgetcircuits) |
 | TestGetBgpPeerings | BGP peering data | [Details](#testgetbgppeerings) |
-| TestSyncDeviceFacts | Device fact synchronization | [Details](#testsyncdevicefacts) |
 | TestSyncDeviceInterfaces | Device interface synchronization | [Details](#testsyncdeviceinterfaces) |
 | TestCreateDeviceInterfaces | Device interface creation | [Details](#testcreatedeviceinterfaces) |
 | TestSyncDeviceIP | IP address synchronization | [Details](#testsyncdeviceip) |
@@ -257,60 +256,6 @@ BGP peering information retrieval.
 #### Test Get Bgp Peerings Cache False
 
 ::: tests.test_netbox_service.TestGetBgpPeerings.test_get_bgp_peerings_cache_false
-
-### TestSyncDeviceFacts
-
-Device fact synchronization from external sources to Netbox.
-
-**Purpose**: Validate pushing collected device facts (from Nornir) back to Netbox.
-
-#### Test Sync Device Facts Basic Update
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_basic_update
-
-#### Test Sync Device Facts Already In Sync
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_already_in_sync
-
-#### Test Sync Device Facts With Filters
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_with_filters
-
-#### Test Sync Device Facts Dry Run
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_dry_run
-
-#### Test Sync Device Facts With Diff
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_with_diff
-
-#### Test Sync Device Facts With Branch
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_with_branch
-
-#### Test Sync Device Facts With Custom Instance
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_with_custom_instance
-
-#### Test Sync Device Facts With Batch Size
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_with_batch_size
-
-#### Test Sync Device Facts With Timeout
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_with_timeout
-
-#### Test Sync Device Facts Non Existing Device
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_non_existing_device
-
-#### Test Sync Device Facts Empty Device List
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_empty_device_list
-
-#### Test Sync Device Facts Single Device
-
-::: tests.test_netbox_service.TestSyncDeviceFacts.test_sync_device_facts_single_device
 
 ### TestSyncDeviceInterfaces
 
