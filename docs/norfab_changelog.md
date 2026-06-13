@@ -3,6 +3,7 @@
 ## FEATURES
 
 1. Added Netbox `sync_device_inventory` task to synchronize device chassis serial numbers and installed modules from live Nornir inventory. The task supports module type and module bay creation, pattern-based inventory mappings, custom Python transformers, filtering, deletion controls, and dry-run previews.
+2. Added support for prompts to mcp service, added two prompts to Nornir cli task.
 
 ## CHANGES
 

@@ -15,20 +15,25 @@ workers:
     - fastapi/fastapi.common.yaml
   workflow*:
     - workflow/workflow.common.yaml
-    
+  fastmcp*:
+    - fastmcp/fastmcp.common.yaml
+
 # you can also source variables from the environment using Jinja2 syntax
-# logging:
-#   handlers:
-#     terminal:
-#       level: {{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}
-#     file: 
-#       level: {{ env.get("FILE_LOGGING_LEVEL", "INFO") }}
+logging:
+  handlers:
+    terminal:
+      level: {{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}
+    file: 
+      level: {{ env.get("FILE_LOGGING_LEVEL", "INFO") }}
 
 # list what entities we want to start on this node
 topology:
   broker: True
   workers:
-    - nornir-worker-1
     - netbox-worker-1
     - fastapi-worker-1
     - workflow-worker-1
+    - fastmcp-worker-1
+    - nornir-worker-1:
+        depends_on:
+          - netbox-worker-1

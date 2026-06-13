@@ -1,0 +1,16 @@
+service: fastmcp
+
+# Allow specific services
+tools:
+  policy:
+    - service: *
+      tasks: ["*"]
+      action: allow
+
+# Optional bearer authentication for MCP streamable HTTP
+authentication_enabled: false
+auth_bearer:
+  token_ttl: null
+
+fastmcp: {}
+uvicorn: {}
