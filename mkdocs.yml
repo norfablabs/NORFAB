@@ -133,6 +133,7 @@ nav:
       - Diagram: workers/nornir/services_nornir_service_tasks_diagram.md
       - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
       - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
+      - SNMP: workers/nornir/services_nornir_service_tasks_snmp.md
     - Jinja2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md
   - Netbox:
     - Overview: workers/netbox/services_netbox_service.md

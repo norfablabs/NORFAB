@@ -44,6 +44,7 @@ from .nornir_models import (
     RefreshNornirResult,
 )
 from .parse_task import ParseTask
+from .snmp_task import SnmpTask
 from .task_task import TaskTask
 from .test_task import TestTask
 
@@ -300,6 +301,7 @@ class NornirWorker(
     ParseTask,
     FileCopyTask,
     NetconfTask,
+    SnmpTask,
 ):
     """
     NornirWorker class for managing Nornir Service tasks.

@@ -17,6 +17,8 @@ hosts:
             port: 4402
       ncclient:
         port: 8302
+      puresnmp:
+        port: 11612
   ceos-leaf-2:
     hostname: 192.168.1.130
     platform: arista_eos
@@ -35,6 +37,8 @@ hosts:
             port: 4403
       ncclient:
         port: 8303
+      puresnmp:
+        port: 11613
   ceos-leaf-3:
     hostname: 192.168.1.130
     platform: arista_eos
@@ -53,6 +57,8 @@ hosts:
             port: 4404
       ncclient:
         port: 8304
+      puresnmp:
+        port: 11614
 groups: 
   foo:
     port: 22

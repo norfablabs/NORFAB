@@ -30,6 +30,8 @@ hosts:
         extras:
           allow_agent: False
           hostkey_verify: False
+      puresnmp:
+        port: 11610
 
   ceos-spine-2:
     hostname: 192.168.1.130
@@ -61,6 +63,8 @@ hosts:
         extras:
           allow_agent: False
           hostkey_verify: False
+      puresnmp:
+        port: 11611
         
 groups: {}
 defaults: {}

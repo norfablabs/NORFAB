@@ -12,6 +12,8 @@ topology:
         - 2200:22
         - 8800:80
         - 8300:830
+        - 4400:443
+        - 11610:161/udp
     ceos-spine-2: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -20,6 +22,8 @@ topology:
         - 2201:22
         - 8801:80
         - 8301:830
+        - 4401:443
+        - 11611:161/udp
     ceos-leaf-1: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -28,6 +32,8 @@ topology:
         - 2202:22
         - 8802:80
         - 8302:830
+        - 4402:443
+        - 11612:161/udp
     ceos-leaf-2: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -36,6 +42,8 @@ topology:
         - 2203:22
         - 8803:80
         - 8303:830
+        - 4403:443
+        - 11613:161/udp
     ceos-leaf-3: 
       kind: ceos
       image: ceosimage:4.35.2F  
@@ -44,14 +52,18 @@ topology:
         - 2204:22
         - 8804:80
         - 8304:830
+        - 4404:443
+        - 11614:161/udp
     vmx-1:
       kind: juniper_vmx
-      image: juniper_vmx:23.2R2-S1.3
+      image: vrnetlab/juniper_vmx:23.2R2-S1.3
       mgmt-ipv4: 172.100.100.15
       ports:
         - 2205:22
         - 8805:80
         - 8305:830
+        - 4405:443
+        - 11615:161/udp
         
   links:
     - endpoints: ["ceos-spine-1:eth1", "ceos-spine-2:eth1"]

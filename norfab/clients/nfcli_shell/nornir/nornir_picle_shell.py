@@ -30,6 +30,7 @@ from .nornir_picle_shell_jobs import NornirJobsShell
 from .nornir_picle_shell_netconf import NornirNetconfShell
 from .nornir_picle_shell_network import NornirNetworkShell
 from .nornir_picle_shell_parse import NornirParseShell
+from .nornir_picle_shell_snmp import NornirSnmpShell
 from .nornir_picle_shell_task import NornirTaskShell
 from .nornir_picle_shell_test import NornirTestShell
 
@@ -292,6 +293,7 @@ class NornirServiceCommands(BaseModel):
     netconf: NornirNetconfShell = Field(
         None, description="Manage devices using NETCONF"
     )
+    snmp: NornirSnmpShell = Field(None, description="Interact with devices using SNMP")
 
     class PicleConfig:
         subshell = True

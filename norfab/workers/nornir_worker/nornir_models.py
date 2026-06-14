@@ -1445,3 +1445,226 @@ class TestResult(Result):
         {},
         description="Test results keyed by host, serialized as records, or including rendered suites",
     )
+
+
+# --------------------------------------------------------------------------
+# SNMP TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class SnmpErrors(str, Enum):
+    strict = "strict"
+    warn = "warn"
+
+
+class SnmpCommonArgs(
+    NornirCommonArgs, extra="allow", use_enum_values=True, populate_by_name=True
+):
+    """Common arguments shared by all SNMP tasks."""
+
+    pass
+
+
+class SnmpGetInput(SnmpCommonArgs):
+    oid: StrictStr = Field(
+        ...,
+        description="Numeric OID to retrieve via SNMP GET",
+        examples=["1.3.6.1.2.1.1.5.0"],
+    )
+
+
+class SnmpGetResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP GET results keyed by host",
+    )
+
+
+class SnmpGetNextInput(SnmpCommonArgs):
+    oid: StrictStr = Field(
+        ...,
+        description="Numeric OID from which to retrieve the next OID via SNMP GETNEXT",
+        examples=["1.3.6.1.2.1.1.5.0"],
+    )
+
+
+class SnmpGetNextResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP GETNEXT results keyed by host",
+    )
+
+
+class SnmpMultiGetInput(SnmpCommonArgs):
+    oids: list[StrictStr] = Field(
+        ...,
+        description="List of numeric OIDs to retrieve via SNMP MULTIGET",
+        examples=[["1.3.6.1.2.1.1.1.0", "1.3.6.1.2.1.1.5.0"]],
+        min_length=1,
+    )
+
+
+class SnmpMultiGetResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP MULTIGET results keyed by host",
+    )
+
+
+class SnmpWalkInput(SnmpCommonArgs):
+    oid: StrictStr = Field(
+        ...,
+        description="Numeric OID at which to start the SNMP WALK",
+        examples=["1.3.6.1.2.1.1"],
+    )
+    errors: SnmpErrors = Field(
+        SnmpErrors.strict,
+        description="Error handling mode: ``strict`` raises on error, ``warn`` continues",
+    )
+
+
+class SnmpWalkResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP WALK results keyed by host",
+    )
+
+
+class SnmpMultiWalkInput(SnmpCommonArgs):
+    oids: list[StrictStr] = Field(
+        ...,
+        description="List of numeric OIDs at which to start each SNMP MULTIWALK",
+        examples=[["1.3.6.1.2.1.1", "1.3.6.1.2.1.2.2"]],
+        min_length=1,
+    )
+
+
+class SnmpMultiWalkResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP MULTIWALK results keyed by host",
+    )
+
+
+class SnmpBulkGetInput(SnmpCommonArgs):
+    repeating_oids: list[StrictStr] = Field(
+        ...,
+        description="List of numeric OIDs for repeating (column) retrieval via SNMP BULKGET",
+        min_length=1,
+    )
+    scalar_oids: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Optional list of numeric OIDs for scalar retrieval",
+    )
+    max_list_size: StrictInt = Field(
+        10,
+        description="Maximum number of OIDs per GETBULK request",
+        gt=0,
+        alias="max-list-size",
+    )
+
+    @model_validator(mode="after")
+    def validate_at_least_one_oid(self) -> "SnmpBulkGetInput":
+        if not self.repeating_oids and not self.scalar_oids:
+            raise ValueError("At least one scalar or repeating OID must be provided")
+        return self
+
+
+class SnmpBulkGetResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP BULKGET results keyed by host",
+    )
+
+
+class SnmpBulkWalkInput(SnmpCommonArgs):
+    oids: list[StrictStr] = Field(
+        ...,
+        description="List of numeric OIDs at which to start each SNMP BULKWALK",
+        min_length=1,
+    )
+    bulk_size: StrictInt = Field(
+        10,
+        description="Maximum number of OIDs per GETBULK request",
+        gt=0,
+        alias="bulk-size",
+    )
+
+
+class SnmpBulkWalkResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP BULKWALK results keyed by host",
+    )
+
+
+class SnmpTableInput(SnmpCommonArgs):
+    oid: StrictStr = Field(
+        ...,
+        description="Numeric OID at the root of the SNMP TABLE to retrieve",
+        examples=["1.3.6.1.2.1.2.2"],
+    )
+
+
+class SnmpTableResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP TABLE results keyed by host",
+    )
+
+
+class SnmpBulkTableInput(SnmpCommonArgs):
+    oid: StrictStr = Field(
+        ...,
+        description="Numeric OID at the root of the SNMP BULKTABLE to retrieve using GETBULK",
+        examples=["1.3.6.1.2.1.2.2"],
+    )
+    bulk_size: StrictInt = Field(
+        10,
+        description="Maximum number of OIDs per GETBULK request",
+        gt=0,
+        alias="bulk-size",
+    )
+
+
+class SnmpBulkTableResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP BULKTABLE results keyed by host",
+    )
+
+
+class SnmpSetInput(SnmpCommonArgs):
+    oid: StrictStr = Field(
+        ...,
+        description="Numeric OID to write via SNMP SET",
+        examples=["1.3.6.1.2.1.1.6.0"],
+    )
+    value: StrictStr = Field(
+        ...,
+        description="String value to write at the OID",
+        examples=["Brisbane lab"],
+    )
+
+
+class SnmpSetResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP SET results keyed by host",
+    )
+
+
+class SnmpMultiSetInput(SnmpCommonArgs):
+    mappings: dict[StrictStr, Any] = Field(
+        ...,
+        description="Mapping of numeric OIDs to values for SNMP MULTISET",
+        examples=[{"1.3.6.1.2.1.1.6.0": "Brisbane lab"}],
+        min_length=1,
+    )
+
+
+class SnmpMultiSetResult(NornirSerializedResult):
+    result: Union[dict[StrictStr, Any], list[Any]] = Field(
+        {},
+        description="SNMP MULTISET results keyed by host",
+    )

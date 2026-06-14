@@ -52,6 +52,10 @@ groups:
           headers:
             Content-Type: "application/yang-data+json"
             Accept: "application/yang-data+json"
+      puresnmp:
+        extras:
+          version: v2c
+          community: norfab
   junos_params:
     connection_options:
       ncclient:

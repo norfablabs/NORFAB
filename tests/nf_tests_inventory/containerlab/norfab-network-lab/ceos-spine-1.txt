@@ -63,4 +63,6 @@ no ip routing
 !
 ip route 0.0.0.0/0 172.100.100.1
 !
+snmp-server community norfab rw
+!
 end
