@@ -18,7 +18,7 @@ services:
       # bind NorFab packages for development
       - type: bind
         source: ../../norfab/
-        target: /usr/local/lib/python3.9/site-packages/norfab/
+        target: /usr/local/lib/python3.14/site-packages/norfab/
     networks:
       net0:
         ipv4_address: 10.0.0.100
@@ -42,7 +42,7 @@ services:
       # bind NorFab packages for development
       - type: bind
         source: ../../norfab/
-        target: /usr/local/lib/python3.9/site-packages/norfab/
+        target: /usr/local/lib/python3.14/site-packages/norfab/
     networks:
       net0:
         ipv4_address: 10.0.0.101
@@ -65,7 +65,7 @@ services:
       # bind NorFab packages for development
       - type: bind
         source: ../../norfab/
-        target: /usr/local/lib/python3.9/site-packages/norfab/
+        target: /usr/local/lib/python3.14/site-packages/norfab/
     networks:
       net0:
         ipv4_address: 10.0.0.102
