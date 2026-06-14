@@ -7,7 +7,7 @@ RUN apt-get update && \
     pip install --no-cache-dir pip setuptools wheel poetry --upgrade
 
 RUN pip install --no-cache-dir norfab --upgrade && \
-    pip install --no-cache-dir norfab[fastapiservice] --upgrade
+    pip install --no-cache-dir norfab[fastmcpservice] --upgrade
 
 ENV TERMINAL_LOGGING_LEVEL=INFO
 ENV WORKERS_LIST=

@@ -5,11 +5,11 @@ broker:
   
 # workers inventory section
 workers:
-  nornir-*:
+  nornir*:
     - nornir/nornir.common.yaml  
   nornir-worker-1:
     - nornir/nornir-worker-1.yaml
-  netbox-*:
+  netbox*:
     - netbox/netbox.common.yaml
   fastapi*:
     - fastapi/fastapi.common.yaml
@@ -17,6 +17,8 @@ workers:
     - workflow/workflow.common.yaml
   fastmcp*:
     - fastmcp/fastmcp.common.yaml
+  fakenos*:
+    - fakenos/fakenos.common.yaml
 
 # you can also source variables from the environment using Jinja2 syntax
 logging:
@@ -34,6 +36,7 @@ topology:
     - fastapi-worker-1
     - workflow-worker-1
     - fastmcp-worker-1
+    - fakenos-worker-1
     - nornir-worker-1:
         depends_on:
           - netbox-worker-1

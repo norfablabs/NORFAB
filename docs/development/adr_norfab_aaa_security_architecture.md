@@ -1,4 +1,4 @@
-# ADR - Norfab AAA and End-to-End Security Architecture
+# ADR - Norfab AAA and Encrypted Transport Architecture
 
 ## Status
 
@@ -12,54 +12,59 @@ explicit compatibility mode until NFP v2 is ready.
 
 ## Decision summary
 
-Norfab will separate human authentication from ZeroMQ transport security:
+Norfab will separate durable AAA state from ZeroMQ traffic mediation:
 
 1. Keep ZeroMQ CURVE as the encrypted data-plane transport.
-2. Add an HTTPS control plane for broker discovery, OIDC login, key enrollment,
-   approvals, revocation, and administration.
+2. Add a dedicated, independently deployable `norfab-aaa` service for broker
+   discovery, OIDC login, token exchange, key enrollment, approvals, policy,
+   revocation, and accounting ingestion.
 3. Use an external OpenID Connect identity provider for human authentication.
    Okta can be used directly. LDAP and Active Directory should normally be
    connected through an identity broker such as Keycloak rather than queried
    directly by the Norfab broker.
-4. Require MFA at the identity provider. The Norfab broker consumes validated
-   `acr`, `amr`, and `auth_time` claims and can require fresh step-up
-   authentication for sensitive operations.
-5. Replace `CURVE_ALLOW_ANY` on the operational data plane with a registry-backed
-   custom ZAP authenticator.
-6. Bind each short-lived Norfab session to the authenticated CURVE client key.
+4. Require MFA at the identity provider. The AAA service validates `acr`, `amr`,
+   and `auth_time` and can require fresh step-up authentication for sensitive
+   operations.
+5. Exchange external access tokens for short-lived, signed Norfab access
+   credentials bound to a client CURVE public-key fingerprint.
+6. Let brokers validate Norfab credentials locally with cached AAA public keys
+   and signed policy material. Brokers must not own the principal, credential,
+   session, role, policy, or audit databases.
 7. Identify users by the immutable OIDC `(iss, sub)` pair. A username is a
    display attribute, not the security identifier.
 8. Add a broker-issued principal context to NFP v2 messages sent to workers.
    Clients must never be trusted to assert their own username, roles, or MFA
    state.
-9. Make the broker the primary policy enforcement point. Use default-deny RBAC
-   initially, behind an authorization provider interface. Add an OPA provider
-   for centralized or more conditional policy.
-10. Add structured, append-only audit events at the broker and execution events
-    at workers.
-11. Treat client-to-worker payload encryption, where the broker cannot decrypt
-    job content, as a separate NFP v2 phase using standardized hybrid
-    encryption. It must not be confused with the current hop-by-hop CURVE
-    encryption.
+9. Make the broker a policy enforcement point, while the AAA service owns policy
+   and acts as the policy decision authority. Brokers may evaluate signed policy
+   bundles locally or call the AAA service for decisions that require current
+   external state.
+10. Send structured authentication, authorization, routing, and execution events
+    to the dedicated accounting service. Brokers may keep only a bounded
+    temporary spool.
+11. Define the encryption requirement as authenticated encryption on every
+    network hop: client to broker and broker to worker. The broker is a trusted
+    decryption and re-encryption point. Broker-blind application encryption is
+    not required by this ADR.
 
 The recommended target architecture is therefore:
 
 ```text
-                  HTTPS + X.509
-  Client  <---------------------------->  Norfab control API
-     |          discovery, OIDC login,      |
-     |          enrollment, approvals       |
-     |                                      |
-     | CURVE + key-bound session            | OIDC / OAuth
-     v                                      v
-  ZeroMQ data socket  <---- Broker ---->  Okta / Keycloak / other IdP
-                              |
-                              | CURVE + workload identity
-                              v
-                           Workers
-                              |
-                              v
-                    Audit store / SIEM / OTel
+                         OIDC / OAuth
+  Client  <------------------------------------------>  Identity provider
+     |
+     | HTTPS: discovery, token exchange, enrollment
+     v
+  +---------------- active-active norfab-aaa ----------------+
+  | authentication | policy | credentials | accounting input |
+  +----------------------+------------------------------------+
+                         | signed keys, credentials, policy
+                         | and revocation updates
+                         v
+  Client === CURVE ===> Broker === CURVE ===> Worker pool
+                        (soft state)           (active-active)
+                            |
+                            +---- structured audit events ---->
 ```
 
 ## Context
@@ -82,6 +87,9 @@ The current implementation has several important properties:
 - NFP does not carry a broker-verified human or workload principal.
 - The broker can read all request and result payloads because CURVE terminates at
   the broker on both hops.
+- The broker owns in-memory worker and service registries used for liveness and
+  routing. This is necessary soft state, but it should not become durable AAA or
+  job state.
 - Several debug log statements include complete multipart messages or request
   data. Authentication tokens and secrets must not pass through these log
   statements.
@@ -114,8 +122,10 @@ Kerberos realm, or signed discovery authority", but trust cannot be removed.
 - Produce useful accounting records for authentication, authorization, job
   execution, administrative changes, and denied operations.
 - Encrypt every network hop.
-- Provide a path to client-to-worker encrypted payloads when the broker is not
-  permitted to read job arguments or results.
+- Keep the broker free of durable principal, credential, session, policy, and
+  accounting databases.
+- Support active-active worker pools and broker failover without requiring
+  durable job state in the broker.
 - Preserve a practical migration path from NFP v1.
 
 ## Non-goals
@@ -124,6 +134,8 @@ Kerberos realm, or signed discovery authority", but trust cannot be removed.
 - A username supplied by a client will not be treated as authenticated.
 - The ZeroMQ routing identity will not be treated as a human identity.
 - The first AAA release will not hide routing metadata from the broker.
+- Job payloads will not be hidden from the broker. The broker is a trusted
+  decryption and re-encryption point.
 - The first AAA release will not encrypt all SQLite databases at the field
   level. Data-at-rest protection is a separate requirement.
 - RBAC will not be implemented independently in every worker.
@@ -136,26 +148,144 @@ The initial AAA design protects against:
 
 - Network eavesdropping and message modification.
 - Clients impersonating other users by changing a username or routing identity.
-- Unknown CURVE keys accessing the operational data plane.
-- Stolen Norfab session tokens used without the bound CURVE private key.
+- Unknown CURVE keys executing operational NFP commands.
+- Stolen Norfab access credentials used without the bound CURVE private key.
 - Unauthorized access to services, tasks, workers, and management operations.
 - Replay of expired or previously consumed authentication operations.
 - Accidental disclosure of credentials in logs and audit records.
-- Continued access after key or session revocation, subject to bounded cache and
-  disconnect delays.
-
-The optional payload encryption phase additionally protects job payloads from
-an honest-but-curious broker.
+- Continued access after key or access-credential revocation, subject to bounded
+  cache and disconnect delays.
 
 It does not, by itself, protect against:
 
 - A compromised client or worker host.
 - A compromised identity provider.
-- A broker that controls both worker key discovery and the signing authority
-  used to certify those keys.
+- A compromised broker, because the broker is explicitly trusted to decrypt
+  mediated traffic.
+- A compromised AAA signing key or AAA durable store.
 - Traffic analysis based on endpoints, message size, timing, service, task, or
   worker selection.
 - Secrets intentionally returned by a task and then logged by application code.
+
+## State ownership and availability
+
+### Broker state boundary
+
+The broker should be operationally stateless, not literally stateless.
+
+The following soft state is inherent to a ZeroMQ ROUTER broker and remains in
+memory:
+
+- Open client and worker connections.
+- ZeroMQ routing identities.
+- Worker heartbeats and liveness deadlines.
+- The currently connected worker set for each service.
+- Bounded token, policy, key, and authorization caches.
+- In-flight routing correlation needed to forward a response.
+
+This state may be discarded when a broker restarts. It must not be the system of
+record.
+
+The broker must not own durable:
+
+- Users or workload principals.
+- CURVE credential approvals.
+- OIDC refresh tokens.
+- Norfab access credential records.
+- Roles, role bindings, or policy source.
+- Audit history.
+- Job request, result, or retry state.
+
+Durable job state remains at clients and workers. Durable AAA and accounting
+state belongs to `norfab-aaa` and its backing services.
+
+### Dedicated AAA service
+
+`norfab-aaa` is a security control-plane service, not an ordinary worker reached
+only through the protected NFP data plane. Making it depend exclusively on the
+broker would create a bootstrap cycle: the broker would need AAA to authorize
+the service that provides AAA.
+
+The service exposes an authenticated HTTPS API and may also expose a Norfab
+worker adapter for administration after the core security path is established.
+It owns:
+
+- Identity-provider integration and token validation.
+- Token exchange and Norfab access credential issuance.
+- Principal and workload credential enrollment.
+- Manual and automatic approvals.
+- Role mappings and authorization policy.
+- Credential, principal, and policy revocation.
+- Broker discovery metadata and AAA public signing keys.
+- Accounting event ingestion and export.
+
+The service should run as multiple active-active instances behind a load
+balancer. Replicas share a durable database and signing-key service or KMS.
+Requests must be idempotent, and every administrative mutation must use an
+immutable event or version number so replicas and brokers can reject stale
+updates.
+
+### Broker and AAA interaction
+
+Normal data-plane routing must not require a synchronous AAA network call for
+every message. The preferred fast path is:
+
+1. AAA issues a short-lived signed credential bound to the client CURVE key.
+2. The broker validates the signature and claims locally.
+3. The broker evaluates a signed, versioned policy bundle locally.
+4. The broker emits an accounting event asynchronously.
+
+The broker may call AAA synchronously for:
+
+- High-risk authorization requiring immediately current external state.
+- Token introspection when policy requires immediate revocation.
+- Refreshing a missing or expired signed policy or revocation bundle.
+
+Clients perform token exchange, step-up completion, enrollment, and
+administrative changes directly against AAA.
+
+Short token lifetimes and signed revocation or policy updates bound the period
+during which a disconnected broker can use cached information.
+
+### Active-active worker pools
+
+Each worker replica has a unique workload identity and credential while sharing
+a service name. For example:
+
+```text
+service: nornir
+workers:
+  - workload:worker:nornir-1
+  - workload:worker:nornir-2
+  - workload:worker:nornir-3
+```
+
+All healthy replicas may accept work concurrently.
+
+- `workers="any"` means dispatch once to one healthy, authorized replica.
+- `workers="all"` means intentional fan-out and may execute the task multiple
+  times. It is not the default resilience mechanism.
+- Explicit worker lists target the named workload identities.
+
+Resilient retries require an idempotency contract. `request_uuid` is the natural
+idempotency key. A single worker can reject or return the stored result for a
+duplicate job UUID from its local job database. Deduplication across different
+worker replicas requires a shared service-level idempotency store or an
+idempotent target operation.
+
+Broker failover therefore provides at-least-once rather than exactly-once
+delivery after an ambiguous failure. Tasks with side effects must declare their
+retry behavior. The broker must not persist a retry ledger.
+
+Workers should eventually support connections to more than one broker instance.
+This allows a client that reconnects through another broker to reach the same
+worker-held job state. Broker discovery must list multiple broker endpoints, and
+clients must retry with the same request UUID after an ambiguous failure.
+
+Sharing one CURVE private key among broker replicas simplifies load balancing
+but increases key exposure. Unique broker keys and endpoint-specific discovery
+are preferred. A shared broker key should require KMS-backed distribution,
+rotation, and an explicit acceptance of the larger blast radius.
 
 ## Identity model
 
@@ -237,14 +367,13 @@ unknown and unauthenticated. The trust must be anchored somewhere.
 
 ### Chosen bootstrap
 
-The broker, or a companion `norfab-authd` service, exposes an HTTPS control
-endpoint with an X.509 certificate issued by a public or enterprise CA trusted
-by clients.
+The `norfab-aaa` service exposes an HTTPS control endpoint with an X.509
+certificate issued by a public or enterprise CA trusted by clients.
 
 An authenticated discovery document is available at a well-known path such as:
 
 ```text
-https://broker.example.com/.well-known/norfab
+https://aaa.example.com/.well-known/norfab
 ```
 
 Example:
@@ -252,15 +381,27 @@ Example:
 ```json
 {
   "version": 1,
-  "broker_id": "brisbane-prod-1",
-  "nfp_endpoints": ["tcp://broker.example.com:5555"],
-  "curve_keys": [
+  "fabric_id": "brisbane-prod",
+  "brokers": [
     {
-      "kid": "curve-2026-06",
-      "public_key": "Z85_ENCODED_KEY",
-      "not_before": "2026-06-01T00:00:00Z",
-      "not_after": "2026-09-01T00:00:00Z",
-      "status": "current"
+      "broker_id": "brisbane-prod-1",
+      "endpoint": "tcp://broker-1.example.com:5555",
+      "curve_key": {
+        "kid": "broker-1-curve-2026-06",
+        "public_key": "Z85_ENCODED_KEY_1",
+        "not_before": "2026-06-01T00:00:00Z",
+        "not_after": "2026-09-01T00:00:00Z"
+      }
+    },
+    {
+      "broker_id": "brisbane-prod-2",
+      "endpoint": "tcp://broker-2.example.com:5555",
+      "curve_key": {
+        "kid": "broker-2-curve-2026-06",
+        "public_key": "Z85_ENCODED_KEY_2",
+        "not_before": "2026-06-01T00:00:00Z",
+        "not_after": "2026-09-01T00:00:00Z"
+      }
     }
   ],
   "oidc_issuers": [
@@ -269,14 +410,16 @@ Example:
       "audience": "api://norfab"
     }
   ],
-  "control_api": "https://broker.example.com/api/v1",
+  "aaa_api": "https://aaa.example.com/api/v1",
+  "aaa_jwks_uri": "https://aaa.example.com/.well-known/jwks.json",
   "expires_at": "2026-06-14T12:00:00Z"
 }
 ```
 
-The client validates HTTPS through its CA trust store, caches the descriptor for
-a bounded time, and then configures `curve_serverkey` with the discovered key.
-Broker key rotation uses an overlap period with current and next keys.
+The client validates HTTPS through its CA trust store, caches the signed
+descriptor for a bounded time, chooses a broker endpoint, and configures
+`curve_serverkey` with that broker's key. Broker key rotation uses an overlap
+period with current and next keys.
 
 This removes per-client distribution of the exact broker CURVE key. It does not
 remove the requirement to trust the HTTPS CA.
@@ -291,8 +434,9 @@ remove the requirement to trust the HTTPS CA.
 - Trust on first use can be offered for development only. A changed key must
   require explicit approval.
 
-An OIDC token must never be sent to a broker before the broker endpoint has been
-authenticated by one of these methods.
+An OIDC token is sent only to the authenticated AAA HTTPS endpoint. Brokers
+receive a short-lived Norfab credential, not the user's reusable OIDC refresh
+token or password.
 
 ## Authentication control plane
 
@@ -306,8 +450,8 @@ CLI and desktop clients should use one of:
 The identity provider performs password, passkey, WebAuthn, OTP, push, or other
 MFA. Norfab does not collect the user's password or OTP.
 
-The control API validates an access token, not an arbitrary username and
-password. Validation includes:
+The AAA API validates an access token, not an arbitrary username and password.
+Validation includes:
 
 - HTTPS issuer discovery from an allowlisted issuer.
 - Signature against cached and rotated JWKS keys, or token introspection for an
@@ -318,38 +462,59 @@ password. Validation includes:
 - Required scope.
 - Subject presence.
 - Authorized client ID where applicable.
-- Allowed algorithms configured by the broker, never selected freely from the
-  token header.
+- Allowed algorithms configured by AAA, never selected freely from the token
+  header.
 
-ID tokens are intended for the OIDC client. The broker resource server should
-normally consume an access token minted for the Norfab audience.
+ID tokens are intended for the OIDC client. The AAA service should normally
+consume an access token minted for the Norfab audience.
 
-After validation, the control API creates a short-lived Norfab session:
+After validation and approval checks, AAA performs a token exchange and issues
+a short-lived signed Norfab access credential. The credential is audience
+restricted to the intended Norfab fabric and bound to the client's CURVE public
+key through a confirmation claim.
 
 ```json
 {
-  "session_id": "random-opaque-identifier",
+  "iss": "https://aaa.example.com",
+  "sub": "oidc:https://id.example.com#abc",
+  "aud": "norfab:brisbane-prod",
+  "jti": "01J...",
+  "iat": 1781399025,
+  "exp": 1781399925,
   "principal_id": "oidc:https://id.example.com#abc",
-  "curve_key_fingerprint": "sha256:...",
+  "principal_type": "human",
+  "username": "alice",
+  "scope": "norfab:connect nornir:execute",
+  "roles": ["network-operator"],
+  "cnf": {
+    "norfab_curve_key_sha256": "base64url..."
+  },
   "auth_time": "2026-06-14T01:23:45Z",
   "acr": "urn:example:aal2",
   "amr": ["pwd", "otp"],
-  "expires_at": "2026-06-14T01:38:45Z"
+  "policy_version": "sha256:..."
 }
 ```
 
-The client receives a random opaque session token. The broker stores only a
-hash of that token. On the data plane the token is accepted only when:
+The exact confirmation-claim profile must be specified and tested. It should
+follow the proof-of-possession semantics of RFC 7800 while defining an
+unambiguous representation of the ZeroMQ CURVE public key.
 
-- It is active and unexpired.
+The broker stores no durable session record. On the data plane the credential
+is accepted only when:
+
+- Its signature, issuer, audience, time, and required claims are valid.
 - It is presented over a CURVE connection using the bound key.
-- The principal and key are still active.
+- Its policy version is accepted by the broker.
+- It is not present in the broker's bounded revocation cache.
 - The request is not a replay where one-time semantics apply.
 
-Opaque sessions are preferred for the first implementation because immediate
-revocation and server-side policy updates are simpler. A signed session token
-can be considered for a broker cluster, but it still needs revocation and key
-binding.
+The broker may cache the validation result until the credential expires. This
+cache is disposable soft state.
+
+Revocation is handled by short credential lifetimes plus signed revocation
+updates. Operations requiring immediate revocation semantics use AAA
+introspection or a fresh authorization decision.
 
 ### MFA and step-up
 
@@ -371,17 +536,17 @@ Examples of operations that may require fresh step-up authentication:
 - Reading stored secrets.
 - Disabling audit export.
 
-If the session lacks sufficient assurance, the broker returns a distinct
+If the credential lacks sufficient assurance, the broker returns a distinct
 `STEP_UP_REQUIRED` response. The client obtains a new OIDC authorization with
 the requested `acr_values` or reauthentication requirement and exchanges it
-for a refreshed Norfab session.
+for a new Norfab access credential.
 
 Policies should prefer `acr` assurance classes over hard-coding individual
 authentication methods. `amr` remains useful for audit detail.
 
 ### Key enrollment
 
-The key registry is separate from the user directory:
+The AAA credential registry is separate from the user directory:
 
 ```text
 principals
@@ -391,29 +556,31 @@ credentials
   credential_id, principal_id, curve_public_key, fingerprint, status,
   created_at, approved_at, approved_by, expires_at, last_seen_at
 
-sessions
-  token_hash, principal_id, credential_id, auth_time, acr, amr,
-  created_at, expires_at, revoked_at
+credential_events
+  event_id, credential_id, action, actor_id, reason, version, created_at
 ```
 
 Enrollment sequence:
 
-1. The client validates the HTTPS control endpoint.
+1. The client validates the AAA HTTPS endpoint.
 2. The client authenticates to the configured OIDC provider.
 3. The client generates or loads its local CURVE key pair.
 4. The client submits the public key and access token to `/enroll`.
-5. The broker validates the token and enrollment policy.
+5. AAA validates the token and enrollment policy.
 6. The credential becomes `active` automatically or `pending` for approval.
 7. The client receives the broker discovery descriptor and credential status.
-8. The data-plane ZAP authenticator accepts only active, unexpired keys.
+8. AAA exchanges a valid external token for a key-bound Norfab credential.
+9. A broker validates that credential and its key binding before accepting any
+   application command.
 
 Auto-enrollment policy can require an issuer, audience, group, device posture,
 or minimum authentication assurance. A successful IdP login alone does not have
 to imply access to every Norfab deployment.
 
-Manual approval records the approving principal and reason. Revocation must
-invalidate new ZAP handshakes, active Norfab sessions, and existing routing
-connections as quickly as the transport permits.
+Manual approval records the approving principal and reason. Revocation prevents
+AAA from issuing new credentials and is distributed to brokers. Existing
+credentials remain valid only within the configured short expiry or until a
+broker receives the revocation update.
 
 ### Worker enrollment
 
@@ -434,33 +601,49 @@ Recommended worker bootstrap options:
 2. OAuth client credentials for managed service accounts.
 3. A workload identity provider in larger deployments.
 
+AAA issues each worker a short-lived signed workload credential bound to that
+worker's CURVE key. The credential lists the worker names and services it may
+register. Every active-active replica has its own credential and identity.
+
 ## ZAP and CURVE changes
 
-The operational data socket must stop using:
+The current configuration:
 
 ```python
 self.auth.allow_any = True
 self.auth.configure_curve(location=zmq.auth.CURVE_ALLOW_ANY)
 ```
 
-Use a custom ZAP authenticator backed by the credential registry. It must:
+provides encrypted transport but does not authenticate a Norfab principal. In
+the stateless-broker design, ZAP and NFP authentication have distinct jobs:
 
-- Reject unknown, pending, revoked, or expired keys.
-- Return a stable ZAP `User-Id` derived from the credential or principal.
-- Keep the public key fingerprint available for session binding.
-- Reload changes without restarting the broker.
+- ZAP establishes CURVE encryption and exposes the connecting key fingerprint.
+- The signed Norfab credential authenticates and authorizes the principal.
+
+Use a custom ZAP authenticator that:
+
+- Returns a stable `User-Id` derived from the CURVE public-key fingerprint.
+- Makes that fingerprint available for credential binding.
 - Rate-limit repeated failures.
-- Emit authentication audit events.
+- Optionally rejects fingerprints in a signed in-memory revocation set.
+- Emits transport-authentication audit events.
 
-PyZMQ provides `configure_curve_callback()` for database-backed key validation
-and `curve_user_id()` for mapping an accepted public key to a user ID. A custom
-authenticator may be needed to return all required metadata and to support
-efficient revocation.
+The ZAP handler does not need a durable credential database and does not need to
+call AAA for every handshake. A connection authenticated only by CURVE is
+quarantined: the broker rejects `POST`, `GET`, `PUT`, `MMI`, `READY`, and other
+application commands until a valid key-bound Norfab credential is present.
+
+An optional stricter mode can distribute a signed active-key snapshot from AAA
+to each broker and reject unknown keys during ZAP. The snapshot is disposable
+broker cache, not broker-owned state.
+
+PyZMQ provides `configure_curve_callback()` and `curve_user_id()` for custom key
+handling. A custom authenticator may be needed to return all required metadata.
 
 Before implementation, create a small compatibility spike proving that the
 broker can retrieve the ZAP `User-Id` from received ROUTER message metadata
 using the pinned PyZMQ and libzmq versions. If this is not reliable, keep an
-explicit connection registry populated by a custom ZAP handler.
+ephemeral connection-to-key map populated by a custom ZAP handler.
 
 ## NFP v2 security header
 
@@ -481,7 +664,7 @@ One possible NFP v2 request envelope is:
   empty,
   NFPC02,
   command,
-  session_token,
+  access_credential,
   service,
   workers,
   request_uuid,
@@ -498,14 +681,41 @@ One possible NFP v2 request envelope is:
   "task": "cli",
   "created_at": "2026-06-14T01:25:00Z",
   "content_type": "application/json",
-  "payload_encryption": "none",
   "trace_id": "..."
 }
 ```
 
-The client does not send authoritative roles, username, `acr`, or `amr`.
+The client presents the signed AAA credential but cannot add or override
+authoritative roles, username, `acr`, or `amr` outside that credential.
 
-The broker must redact `session_token` and payload data from logs.
+The broker must redact `access_credential` and payload data from logs.
+
+### Worker-to-broker message
+
+Workers use the same credential pattern. A v2 registration message may be:
+
+```text
+[
+  empty,
+  NFPW02,
+  READY,
+  workload_credential,
+  service,
+  worker_metadata
+]
+```
+
+The broker validates that:
+
+- The credential is issued to a workload principal.
+- Its confirmation claim matches the worker CURVE key.
+- Its audience includes the fabric.
+- Its permissions allow the claimed worker name and service.
+- The credential, principal, and key are not revoked.
+
+Subsequent worker messages either carry the credential or refer to an
+authenticated connection context cached until credential expiry. The latter is
+soft state and is rebuilt after reconnect.
 
 ### Broker-to-worker message
 
@@ -535,7 +745,7 @@ Example `principal_context`:
   "principal_id": "oidc:https://id.example.com#abc",
   "principal_type": "human",
   "username": "alice",
-  "session_id": "8d9f...",
+  "access_jti": "01J...",
   "credential_id": "curve-key-17",
   "auth_time": "2026-06-14T01:23:45Z",
   "acr": "urn:example:aal2",
@@ -546,17 +756,18 @@ Example `principal_context`:
 }
 ```
 
-The context should be signed by a broker signing key when it is stored,
-forwarded across broker boundaries, or used as evidence outside the live CURVE
-connection. The CURVE broker-to-worker connection already protects it in
-transit, but a signature gives durable provenance.
+The CURVE broker-to-worker connection authenticates and protects the context in
+transit. If the context is used as durable evidence outside that connection, it
+should include the AAA credential `jti`, policy version, decision ID, and broker
+ID. An optional detached broker signature can provide durable provenance without
+requiring a broker database.
 
 Workers must store at least:
 
 - `principal_id`
 - `username`
 - `principal_type`
-- `session_id`
+- `access_jti`
 - `decision_id`
 - `client_address`
 - `request_uuid`
@@ -578,6 +789,7 @@ The `Job` object should expose a read-only principal context to tasks.
 
 The broker is the primary policy enforcement point because it sees the actor,
 requested service, worker target, command, task, and routing decision.
+`norfab-aaa` is the policy administration and decision authority.
 
 Workers perform defense-in-depth checks:
 
@@ -650,8 +862,8 @@ nornir/cli:execute
 nornir/cfg:execute
 netbox/get_devices:execute
 broker/workers:read
-broker/credentials:approve
-broker/policy:update
+aaa/credentials:approve
+aaa/policy:update
 worker/run_shell_cmd:execute
 ```
 
@@ -662,7 +874,7 @@ Role bindings can map:
 - Workload subjects to narrow service permissions.
 
 IdP groups are inputs to role mapping, not automatically Norfab administrator
-roles. Local policy controls the mapping.
+roles. AAA policy controls the mapping.
 
 ### Policy implementation
 
@@ -675,22 +887,26 @@ class AuthorizationProvider:
         ...
 ```
 
-Recommended providers:
+Recommended evaluation modes:
 
-- `LocalRbacAuthorizationProvider`: built-in, versioned YAML policy for
-  standalone deployments and tests.
-- `OpaAuthorizationProvider`: recommended for centralized enterprise policy,
-  conditional rules, policy-as-code tests, and cross-service consistency.
+- `SignedBundleAuthorizationProvider`: broker evaluates a versioned policy
+  bundle signed and distributed by AAA. This is the normal low-latency path.
+- `RemoteAaaAuthorizationProvider`: broker asks AAA for decisions that require
+  immediately current external state.
+- `OpaAuthorizationProvider`: AAA uses Open Policy Agent for centralized
+  enterprise policy, conditional rules, and policy-as-code tests.
+- `LocalDevelopmentAuthorizationProvider`: local YAML for tests and isolated
+  development only. It is not the production system of record.
 
 PyCasbin is a reasonable embedded alternative for deployments that need role
 hierarchy and adapters without running OPA. It should not become a hard core
 dependency until its policy model and operational behavior are evaluated
 against Norfab's service/task/worker requirements.
 
-All providers must default to deny on errors, timeouts, missing policy, and
-unknown resources. A narrowly scoped, cached last-known-good policy can be
-allowed during a policy service outage if the deployment explicitly enables
-that behavior.
+All providers must default to deny on errors, timeouts, invalid signatures,
+missing policy, and unknown resources. A narrowly scoped, cached
+last-known-good signed policy can be allowed during an AAA service outage if the
+deployment explicitly enables that behavior.
 
 ### Task declarations
 
@@ -720,7 +936,7 @@ Authentication:
 
 - Login started, succeeded, failed, refreshed, and logged out.
 - Key enrollment requested, approved, rejected, rotated, expired, and revoked.
-- Session created, expired, and revoked.
+- Norfab access credential issued, expired, and revoked.
 - Step-up requested and completed.
 
 Authorization:
@@ -753,7 +969,7 @@ broker_id
 principal_id
 username
 principal_type
-session_id
+access_jti
 credential_id
 source_ip
 request_uuid
@@ -773,17 +989,18 @@ previous_event_hash
 
 Do not record:
 
-- Passwords, OTP values, WebAuthn assertions, access tokens, refresh tokens, or
-  Norfab session tokens.
+- Passwords, OTP values, WebAuthn assertions, external access tokens, refresh
+  tokens, or complete Norfab access credentials.
 - Full job payloads by default.
 - Secret interactive input.
 - Private keys.
 
 ### Storage and export
 
-The first implementation can append to a broker SQLite audit database with WAL
-enabled and strict file permissions. Production deployments should support an
-external durable store and export to a SIEM or log platform.
+The broker must not be the durable audit store. Brokers and workers emit events
+to the active-active AAA accounting endpoint or to a durable event transport
+consumed by that endpoint. The accounting service stores and exports them to a
+SIEM or log platform.
 
 Use structured JSON events and OpenTelemetry-compatible trace and correlation
 identifiers. Audit records should be separate from ordinary debug logs.
@@ -797,114 +1014,65 @@ event_hash = SHA-256(canonical_event || previous_event_hash)
 This does not replace operating-system permissions, append-only storage, backup,
 retention, or an external protected audit sink.
 
-If the remote sink is unavailable, the broker should spool locally. Policy may
-require privileged operations to fail closed when no durable audit path exists.
+The broker may keep a bounded memory queue or local spool during a short
+accounting outage. This is delivery buffering, not the audit system of record.
+Policy may require privileged operations to fail closed when no durable audit
+path exists.
 
-## Encryption layers
+## Encrypted transport
 
-### Layer 1: authenticated transport encryption
+### Required trust model
+
+The encryption requirement is continuous encryption in transit across the
+mediated path:
+
+```text
+client == CURVE encrypted ==> broker == CURVE encrypted ==> worker
+```
+
+The broker terminates the client CURVE connection, decrypts the NFP message,
+performs authentication, authorization, accounting, and routing, then sends the
+message over a separately encrypted CURVE connection to the worker.
+
+This is hop-by-hop authenticated encryption with a trusted broker. It is often
+described operationally as encrypted client-to-worker communication because no
+network segment carries plaintext. It is not cryptographic end-to-end
+encryption in the narrower sense where only the client and worker can decrypt.
+
+This ADR does not require broker-blind payload encryption or an additional
+application encryption layer.
+
+### CURVE requirements
 
 CURVE remains suitable for the ZeroMQ data plane when:
 
-- The broker key is obtained through authenticated discovery.
-- Client and worker keys are registered and checked by ZAP.
-- Keys are rotated and revocable.
+- Every client-to-broker and worker-to-broker connection enables CURVE.
+- The broker public key is obtained through authenticated AAA discovery.
+- Client and worker access credentials are bound to their CURVE keys.
+- Broker, client, and worker keys are rotated and revocable.
 - Private key files have strict permissions.
-- Sessions are bound to the accepted CURVE key.
+- The broker refuses application commands without a valid AAA credential.
+- Plain ZeroMQ endpoints are disabled in secure mode.
 
-This protects:
+An L4 load balancer, TCP proxy, router, firewall, or other middle component sees
+only CURVE ciphertext. It must not terminate the ZeroMQ security mechanism.
 
-```text
-client <-> broker
-worker <-> broker
-```
+If a TLS proxy or service mesh terminates encryption before the broker, that
+proxy becomes part of the trusted computing base. CURVE should normally remain
+enabled through the proxy so TLS is an additional layer rather than the only
+data-plane protection.
 
-It does not protect job payloads from the broker.
-
-### Layer 2: client-to-worker payload encryption
-
-If the broker must not read arguments, results, events, streams, or interactive
-input, add application-layer envelope encryption above CURVE.
-
-This is a protocol change because the broker currently selects workers after
-receiving one plaintext payload. The proposed flow is:
-
-1. Client sends an authorized `RESOLVE` request containing visible service,
-   task, target selector, and request metadata.
-2. Broker selects workers and returns a short-lived assignment token plus each
-   worker's certified encryption public key.
-3. Client generates a random content-encryption key.
-4. Client encrypts the payload once with an AEAD.
-5. Client wraps the content key separately to every selected worker using HPKE.
-6. Client submits the encrypted envelope with the broker assignment token.
-7. Broker validates the visible metadata and assignment, then routes ciphertext.
-8. Workers decrypt and encrypt responses to a client response key.
-
-Example envelope:
-
-```json
-{
-  "version": 1,
-  "suite": "HPKE-X25519-HKDF-SHA256-CHACHA20POLY1305",
-  "assignment_id": "assign-01J...",
-  "aad_hash": "sha256:...",
-  "recipients": [
-    {
-      "worker_id": "nornir-worker-1",
-      "kid": "worker-key-7",
-      "encapsulated_key": "base64..."
-    }
-  ],
-  "nonce": "base64...",
-  "ciphertext": "base64..."
-}
-```
-
-The visible metadata must be authenticated as AEAD additional data. It includes
-the command, service, task, request UUID, assignment, selected workers, content
-type, deadline, and protocol version.
-
-For `workers="any"`, worker selection must happen before encryption. For
-`workers="all"`, one content key can be wrapped independently for each worker.
-
-HPKE is preferred as the design standard. Implementation must use a maintained,
-reviewed library and published test vectors. PyNaCl `Box` can support a simpler
-prototype, but `SealedBox` alone does not prove the sender's identity. Do not
-create a custom collection of raw X25519, HKDF, nonce, and AEAD operations
-without a complete protocol review.
-
-The payload-encryption design must define:
-
-- Sender authentication.
-- Worker key certification and rotation.
-- Replay protection.
-- Multi-recipient behavior.
-- Large payload and stream framing.
-- Bidirectional job keys.
-- Cancellation and interactive input.
-- Algorithm negotiation and downgrade prevention.
-- Key erasure and retention.
-- How workers validate broker authorization context.
-
-### Authorization consequence of encrypted payloads
-
-The broker cannot authorize fields it cannot read.
-
-Task, service, worker target, and any policy-relevant attributes must therefore
-remain visible in authenticated metadata. Sensitive arguments stay encrypted.
-If policy depends on an argument, the protocol must expose a specifically
-declared, non-secret projection of that argument or defer that check to the
-worker.
-
-Accounting can store metadata and ciphertext hashes, but not plaintext details.
+The HTTPS link between clients and `norfab-aaa` uses TLS and X.509. Connections
+from brokers and workers to AAA also use TLS, with mTLS recommended for service
+identity.
 
 ### Encryption at rest
 
-Transport and payload encryption do not protect:
+Encrypted transport does not protect:
 
 - Worker job SQLite databases.
 - Client job SQLite databases.
-- Broker audit databases.
+- AAA databases and accounting stores.
 - Inventory files.
 - Crash dumps.
 - Debug logs.
@@ -919,19 +1087,19 @@ These choices should be pinned and reviewed when implementation begins.
 
 | Need | Recommended option | Notes |
 | --- | --- | --- |
-| ZeroMQ transport | Existing `pyzmq` CURVE | Keep, but replace allow-any with registry-backed ZAP |
-| HTTPS control API | FastAPI/Starlette plus Uvicorn | Already familiar in the repository; run as a separate component or carefully isolated broker service |
+| ZeroMQ transport | Existing `pyzmq` CURVE | Keep CURVE on both data-plane hops; use custom ZAP to expose key fingerprints |
+| Dedicated AAA API | FastAPI/Starlette plus Uvicorn | Run as an independent active-active service, not inside the broker |
 | OAuth/OIDC client flow | Authlib plus `httpx` | Device Authorization and Authorization Code with PKCE |
 | JWT/JWKS validation | `joserfc` plus `httpx` | Pin allowed algorithms and validate issuer, audience, time, and required claims |
-| Opaque token validation | OAuth token introspection over `httpx` | Cache only within token lifetime and revocation requirements |
-| X.509 and signing | `cryptography` | Discovery signing, broker context signing, and certificate validation |
-| Local policy | Pydantic models plus versioned YAML | Small, auditable standalone baseline |
-| Enterprise policy | Open Policy Agent | Broker is PEP; OPA is PDP |
+| Token exchange | OAuth 2.0 Token Exchange profile | AAA exchanges IdP tokens for short-lived key-bound Norfab credentials |
+| X.509 and signing | `cryptography` | Discovery signing, AAA credential signing, and certificate validation |
+| AAA durable state | PostgreSQL or equivalent HA database | Principals, credentials, approvals, role bindings, policy metadata, and audit |
+| Policy distribution | Signed versioned bundles | Brokers evaluate locally without durable policy state |
+| Enterprise policy | Open Policy Agent | AAA is policy authority; brokers are PEPs |
 | Embedded RBAC alternative | PyCasbin | Evaluate before making it a hard dependency |
 | Human MFA | Okta, Keycloak, or another OIDC IdP | Norfab consumes assurance claims; it does not implement MFA |
 | LDAP/AD | Keycloak user federation or existing enterprise IdP | Avoid direct password collection in Norfab |
-| Payload encryption | Reviewed HPKE implementation | Prototype only after protocol and threat-model review |
-| Simple crypto prototype | PyNaCl | `Box` authenticates peers; `SealedBox` does not authenticate sender |
+| Accounting transport | Durable event stream or active-active HTTPS ingestion | Broker keeps only a bounded delivery buffer |
 | Audit correlation | OpenTelemetry conventions | Keep security audit storage separate from diagnostic logs |
 
 ## Alternatives considered
@@ -1015,8 +1183,8 @@ Disadvantages:
 - Extra deployment component and failure mode.
 - The broker may see only the proxy connection unless identity is propagated
   securely.
-- It still needs OIDC sessions and RBAC.
-- It does not provide client-to-worker payload encryption.
+- It still needs key-bound Norfab credentials and RBAC.
+- Termination at the proxy makes the proxy part of the trusted computing base.
 
 Decision: supported deployment option, especially where enterprise PKI and
 service mesh are already present. It does not replace the AAA protocol.
@@ -1054,7 +1222,7 @@ Decision: development mode only.
 
 ### Phase 0 - Immediate hardening
 
-- Stop logging complete multipart messages, session credentials, and payloads.
+- Stop logging complete multipart messages, access credentials, and payloads.
 - Add redaction helpers and security-focused log tests.
 - Document private key file permission requirements.
 - Add broker key fingerprints to status output.
@@ -1062,47 +1230,50 @@ Decision: development mode only.
 - Add security configuration validation that warns loudly about
   `CURVE_ALLOW_ANY`.
 
-### Phase 1 - Security domain models
+### Phase 1 - Dedicated AAA service foundation
 
-- Add Pydantic models for principals, credentials, sessions, issuers,
+- Add Pydantic models for principals, credentials, access claims, issuers,
   authorization requests, decisions, and audit events.
-- Add a broker security database with migrations.
+- Add the independent `norfab-aaa` service and durable database migrations.
+- Keep broker security storage limited to in-memory caches.
 - Add unit tests for expiry, revocation, role mapping, and default deny.
 - Define stable reason codes and avoid exposing sensitive validation detail to
   unauthenticated clients.
 
-### Phase 2 - HTTPS discovery and enrollment
+### Phase 2 - Active-active discovery, enrollment, and token exchange
 
 - Add the well-known discovery document.
 - Add OIDC issuer configuration and JWKS caching.
 - Implement Device Authorization in `nfcli`.
 - Add enrollment, approval, list, rotate, and revoke APIs.
+- Issue short-lived signed Norfab credentials bound to CURVE keys.
+- Run multiple AAA replicas against shared durable state and signing keys.
 - Add worker one-time enrollment.
 - Test broker CURVE key rotation with overlapping keys.
 
-### Phase 3 - Registry-backed ZAP
+### Phase 3 - Key-aware ZAP and NFP authentication gate
 
-- Replace `CURVE_ALLOW_ANY` on the secure data socket.
-- Map accepted CURVE keys to stable ZAP user IDs.
-- Bind sessions to key fingerprints.
-- Revoke active sessions when credentials are revoked.
+- Map CURVE keys to stable fingerprint-based ZAP user IDs.
+- Reject all application commands without a valid signed Norfab credential.
+- Bind credentials to the current connection key fingerprint.
+- Add optional signed active-key and revocation snapshots.
 - Add rate limits and authentication audit events.
 
 ### Phase 4 - NFP v2 identity context
 
 - Add `NFPC02`, `NFPB02`, and `NFPW02`.
-- Add the session security frame and broker-issued principal context.
+- Add the access-credential frame and broker-issued principal context.
 - Store principal and decision fields in worker job databases.
 - Expose read-only actor context on `Job`.
 - Add downgrade and malformed-context tests.
 
-### Phase 5 - RBAC and accounting
+### Phase 5 - Distributed policy and accounting
 
-- Implement default-deny local RBAC.
+- Implement default-deny AAA policy and signed policy bundles.
 - Enforce policy before MMI, inventory, dispatch, and worker registration.
 - Add task permission declarations for dangerous built-in tasks.
-- Add append-only audit events and export.
-- Add OPA provider and policy contract tests.
+- Add active-active accounting ingestion and durable export.
+- Add broker delivery buffers, OPA provider, and policy contract tests.
 
 ### Phase 6 - MFA step-up and assurance policy
 
@@ -1112,20 +1283,20 @@ Decision: development mode only.
 - Add `STEP_UP_REQUIRED` protocol responses.
 - Test Okta and a Keycloak-to-LDAP deployment.
 
-### Phase 7 - Optional client-to-worker payload encryption
+### Phase 7 - Active-active workers and broker failover
 
-- Write a dedicated cryptographic protocol specification.
-- Complete an external security review.
-- Implement `RESOLVE`, worker encryption-key discovery, assignments, HPKE
-  envelopes, response keys, streams, and rotation.
-- Keep the feature opt-in until interoperability, failure, replay, and recovery
-  tests are complete.
+- Give every worker replica a unique workload identity.
+- Test `any`, `all`, and explicit worker selection semantics.
+- Add duplicate request UUID handling and task idempotency declarations.
+- Support workers connected to multiple broker instances.
+- Test broker restart and client failover without a broker-owned job database.
 
 ## Required tests
 
-- Unknown, pending, revoked, and expired CURVE keys are rejected.
+- A CURVE connection without a valid AAA credential cannot execute any command.
+- Strict ZAP mode rejects unknown, pending, revoked, and expired CURVE keys.
 - An approved key cannot claim another principal by changing routing identity.
-- A stolen session token fails when used with a different CURVE key.
+- A stolen access credential fails when used with a different CURVE key.
 - Tokens with wrong issuer, audience, signature, algorithm, time, or scope fail.
 - Username changes do not change the principal or permissions.
 - Group-to-role changes take effect within the configured cache limit.
@@ -1133,14 +1304,21 @@ Decision: development mode only.
 - MMI and inventory services are authorized, not bypassed.
 - Worker `READY` cannot register an unauthorized name or service.
 - Sensitive tasks require the expected permission and assurance.
-- Revocation stops new requests and terminates or expires existing sessions.
+- Revocation stops new credential issuance and reaches brokers within the
+  configured bound.
 - Audit events exist for allow, deny, login failure, approval, revocation, and
   execution outcome.
 - Tokens, passwords, private keys, and secret payloads never appear in logs.
 - Broker key rotation works without disabling broker authentication.
 - NFP v2 cannot silently downgrade to unauthenticated NFP v1.
-- Payload encryption test vectors cover tampering, wrong recipient, replay,
-  worker rotation, multi-recipient jobs, streaming, and cancellation.
+- Both client-to-broker and broker-to-worker links reject plain transport in
+  secure mode.
+- Loss of one AAA replica does not interrupt token exchange or administration.
+- Broker restart does not lose durable AAA, accounting, or job state.
+- `workers="any"` executes once on one healthy replica.
+- `workers="all"` intentionally executes on every selected healthy replica.
+- Idempotent tasks or shared service-level deduplication prevent unintended
+  repeated side effects for duplicate request UUIDs across worker replicas.
 
 ## Consequences
 
@@ -1153,26 +1331,25 @@ Positive:
 - Broker CURVE keys can rotate without copying a new key to every client by
   hand.
 - Workers receive a durable principal and authorization decision for accounting.
-- The architecture supports standalone and enterprise policy backends.
-- True payload privacy from the broker remains possible without discarding
-  ZeroMQ.
+- Brokers do not require a durable security or audit database.
+- Active-active AAA and worker pools remove individual service instances as
+  single points of failure.
+- All mediated traffic remains encrypted on every network segment.
 
 Negative:
 
-- An HTTPS control-plane endpoint and CA trust must be operated.
-- AAA introduces databases, migrations, session expiry, revocation, and policy
-  lifecycle concerns.
+- An active-active HTTPS AAA service, CA trust, shared database, and signing-key
+  lifecycle must be operated.
 - Existing clients and workers need an NFP v2 migration.
 - Secure token validation requires careful caching, rotation, timeout, and
   algorithm configuration.
-- Payload encryption substantially complicates worker selection, streaming,
-  retries, interactive input, and audit visibility.
-- Highly available brokers require shared or replicated security state.
+- Short-lived credentials reduce but do not eliminate revocation delay.
+- Broker failover still loses live ZeroMQ connections and in-flight soft state;
+  clients and workers must reconnect and retry idempotently.
+- Active-active worker retries require clear task idempotency semantics.
 
 ## Open questions
 
-- Will the HTTPS control API run inside the broker process or as a separate
-  `norfab-authd` component?
 - Which CA model is expected for standalone installations?
 - Which OIDC providers must be in the first interoperability test matrix?
 - Is Okta Device Authorization available under the expected tenant policies?
@@ -1180,14 +1357,17 @@ Negative:
   direct compatibility provider?
 - What are the initial roles, protected tasks, and environment boundaries?
 - How quickly must role changes and revocations take effect?
-- Is the broker trusted to read job payloads, or is broker-blind encryption a
-  mandatory launch requirement?
 - What audit retention, privacy, and external export requirements apply?
-- Does broker HA require a shared session database from the first release?
+- What durable database, event transport, and KMS will back active-active AAA?
+- What access-credential lifetime balances failover, revocation, and login load?
+- Which operations require synchronous AAA decisions instead of signed bundles?
+- Should production use permissive fingerprint-only ZAP plus NFP authentication,
+  or require signed active-key snapshots at ZAP?
+- How will workers connect to multiple brokers without duplicate dispatch?
+- Are broker endpoints individually discovered, or placed behind an L4 load
+  balancer with a shared broker CURVE key?
 - Can the pinned PyZMQ/libzmq combination expose ZAP `User-Id` metadata on
   ROUTER messages as required?
-- How are worker encryption keys certified if the payload encryption threat
-  model includes a malicious broker?
 
 ## References
 
@@ -1197,7 +1377,10 @@ Negative:
 - [ZMTP GSSAPI draft](https://rfc.zeromq.org/spec/38/)
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
 - [OAuth 2.0 Device Authorization Grant, RFC 8628](https://datatracker.ietf.org/doc/html/rfc8628)
+- [OAuth 2.0 Token Exchange, RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693)
 - [OAuth 2.0 Security Best Current Practice, RFC 9700](https://datatracker.ietf.org/doc/html/rfc9700)
+- [Proof-of-Possession Key Semantics for JWTs, RFC 7800](https://datatracker.ietf.org/doc/html/rfc7800)
+- [JWT Profile for OAuth 2.0 Access Tokens, RFC 9068](https://datatracker.ietf.org/doc/html/rfc9068)
 - [Authentication Method Reference Values, RFC 8176](https://datatracker.ietf.org/doc/html/rfc8176)
 - [Okta Device Authorization Grant](https://developer.okta.com/docs/guides/device-authorization-grant/main/)
 - [Keycloak Server Administration Guide](https://www.keycloak.org/docs/latest/server_admin/)
@@ -1205,5 +1388,3 @@ Negative:
 - [joserfc JWT documentation](https://jose.authlib.org/en/guide/jwt/)
 - [Open Policy Agent documentation](https://www.openpolicyagent.org/docs)
 - [Apache Casbin RBAC documentation](https://casbin.apache.org/docs/rbac/)
-- [Hybrid Public Key Encryption, RFC 9180](https://datatracker.ietf.org/doc/html/rfc9180)
-- [PyNaCl public-key encryption](https://pynacl.readthedocs.io/en/latest/public/)

@@ -1,4 +1,6 @@
-FROM python:3.14-slim-trixie
+ARG PYTHON_VERSION=3.12
+
+FROM python:${PYTHON_VERSION}-slim-trixie
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y openssh-client procps && \
@@ -8,6 +10,6 @@ RUN apt-get update && \
 RUN pip install --no-cache-dir norfab --upgrade && \
     pip install --no-cache-dir norfab[full]
 
-ENV LOG_LEVEL=INFO
+ENV TERMINAL_LOGGING_LEVEL=INFO
 
-ENTRYPOINT cd /etc/norfab/ && nfcli -w -b -l $LOG_LEVEL
+ENTRYPOINT cd /etc/norfab/ && nfcli -w -b -l $TERMINAL_LOGGING_LEVEL

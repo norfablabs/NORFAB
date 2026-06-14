@@ -1,0 +1,17 @@
+service: netbox
+netbox_connect_timeout: 10
+netbox_read_timeout: 300
+instances:
+  prod:
+    default: True
+    url: {{ env.get("NETBOX_PROD_URL") }}
+    token: {{ env.get("NETBOX_PROD_TOKEN") }}
+    ssl_verify: False
+  dev:
+    url: {{ env.get("NETBOX_DEV_URL") }}
+    token: {{ env.get("NETBOX_DEV_TOKEN") }}
+    ssl_verify: False
+  preprod:
+    url: {{ env.get("NETBOX_PREPROD_URL") }}
+    token: {{ env.get("NETBOX_PREPROD_TOKEN") }}
+    ssl_verify: False

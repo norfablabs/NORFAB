@@ -9,12 +9,14 @@
 
 1. Removed the Netbox `sync_device_facts` task. Device serial number synchronization is now handled by `sync_device_inventory` using the live inventory record whose slot is `chassis`.
 2. Extended Netbox `sync_all` to run device inventory synchronization before interfaces, MAC addresses, IP addresses, and BGP peerings. Added `inventory_*` mapping, transformer, filtering, and module creation arguments; `process_deletions` and `message` are shared across the applicable synchronization stages.
+3. Updating docker deployment files
 
 ## BUGS
 
 1. Adding deepdiff package to `full` installation extras, Netbox worker would fail to start if not installed.
 2. Changing `mcp` package python dependencies to remove python version specification of `<3.14` as it failed to get installed for Py3.14
-3. FIxing Netbox Inventory URL handling when it ends with forward slash 
+3. Fixing Netbox Inventory URL handling when it ends with forward slash 
+4. Fixing `full` extras to enlist all dependencies
 
 ---
 

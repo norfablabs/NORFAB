@@ -3,8 +3,6 @@ services:
     container_name: "norfab"
     hostname: 'norfab'
     image: docker.io/dmulyalin/norfab:aio-latest
-    environment:
-      LOG_LEVEL: INFO
     volumes:
       - type: bind
         source: ./norfab/
