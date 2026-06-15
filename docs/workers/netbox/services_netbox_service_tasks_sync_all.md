@@ -18,6 +18,11 @@ fixed sequence:
 
 Pass `dry_run=True` to preview all changes without writing to NetBox.
 
+Pass `approval=True` to use the interactive NFCLI workflow. The task first runs
+all five stages with `dry_run=True`, displays the combined preview, and waits
+for approval. Approval repeats all stages with writes enabled; declining
+returns the dry-run result without changing NetBox.
+
 ## Inventory Arguments
 
 Inventory-specific options use an `inventory_` prefix in the Python API and an
@@ -94,6 +99,12 @@ When `dry_run=True` the same structure is returned but no changes are written to
     nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
     ```
 
+    Preview, prompt for approval, and apply the changes:
+
+    ```
+    nf#netbox sync all devices ceos-spine-1 ceos-spine-2 approval
+    ```
+
     Create missing module bays and module types during inventory sync:
 
     ```
@@ -161,6 +172,7 @@ root
             ├── branch:    Branching plugin branch name to use
             ├── devices:    List of NetBox devices to sync all data for
             ├── dry-run:    Return diff without writing to NetBox, default 'False'
+            ├── approval:    Preview changes and ask for approval before writing to NetBox
             ├── process-deletions:    Process deletions for inventory, interfaces and BGP peerings
             ├── message:    Changelog message for inventory and BGP operations
             ├── inventory-create-module-types:    Create missing module types during inventory sync

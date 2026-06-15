@@ -935,6 +935,11 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         json_schema_extra={"presence": True},
         alias="dry-run",
     )
+    approval: StrictBool = Field(
+        False,
+        description="Preview changes and ask for approval before writing to NetBox",
+        json_schema_extra={"presence": True},
+    )
     process_deletions: StrictBool = Field(
         False,
         description="Process deletions for inventory, interfaces, and BGP peerings",

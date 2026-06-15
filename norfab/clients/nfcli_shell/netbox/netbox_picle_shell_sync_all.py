@@ -40,6 +40,9 @@ class SyncAllDevicesShell(
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
+        if nowait and kwargs.get("approval"):
+            raise ValueError("'approval' cannot be combined with 'nowait'")
+
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
 
@@ -50,6 +53,7 @@ class SyncAllDevicesShell(
             kwargs=kwargs,
             timeout=timeout,
             nowait=nowait,
+            outputter=Outputters.outputter_nested,
         )
 
         if nowait:

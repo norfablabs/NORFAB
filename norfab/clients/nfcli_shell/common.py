@@ -39,6 +39,7 @@ def print_event(event: dict, richconsole: Console = None) -> None:
     severity = severity.replace("INFO", "[green]INFO[/green]")
     severity = severity.replace("WARNING", "[yellow]WARNING[/yellow]")
     severity = severity.replace("CRITICAL", "[red]CRITICAL[/red]")
+    severity = severity.replace("ERROR", "[red]ERROR[/red]")
     status = event.get("status", "")
     status = status.replace("started", "[cyan]started[/cyan]")
     status = status.replace("running", "[cyan]running[/cyan]")
@@ -59,7 +60,7 @@ def print_event(event: dict, richconsole: Console = None) -> None:
 
 
 def collect_input_request(
-    future: Any, event: dict, richconsole: Console = None
+    future: Any, event: dict, richconsole: Console = None, outputter: callable = None
 ) -> None:
     """Prompt user for one input request event and send the response."""
     if event.get("event_type") != "input_request":
@@ -73,6 +74,15 @@ def collect_input_request(
     question = input_request.get("question", "Worker asks for input")
     default = input_request.get("default")
     choices = input_request.get("choices")
+    preview = (input_request.get("metadata") or {}).get("preview")
+
+    if preview is not None:
+        richconsole.print("\n[bold]Dry-run preview:[/bold]")
+        if outputter:
+            richconsole.print(outputter(preview))
+        else:
+            richconsole.print(preview)
+        richconsole.print()
 
     if isinstance(default, bool):
         response = Confirm.ask(question, default=default, console=richconsole)
@@ -101,6 +111,7 @@ def run_future_job(
     timeout: int = 600,
     markdown: bool = False,
     nowait: bool = False,
+    outputter: callable = None,
 ) -> Any:
     """Submit a job, handle events and input requests, then return job result."""
     NFCLIENT = builtins.NFCLIENT
@@ -123,16 +134,16 @@ def run_future_job(
 
     richconsole.print(
         "-" * 45 + " Job Events " + "-" * 47 + "\n\n"
-        f"{datetime.now().strftime(time_format)[:-3]} {future.uuid} job started"
+        f"{datetime.now().strftime(time_format)[:-3]} [green]INFO[/green] {future.uuid} job started"
     )
 
     for event in future.events():
-        collect_input_request(future, event, richconsole)
+        collect_input_request(future, event, richconsole, outputter)
         print_event(event, richconsole)
 
     elapsed = round(time.time() - start_time, 3)
     richconsole.print(
-        f"{datetime.now().strftime(time_format)[:-3]} {future.uuid} job completed in {elapsed} seconds\n\n"
+        f"{datetime.now().strftime(time_format)[:-3]} [green]INFO[/green] {future.uuid} job completed in {elapsed} seconds\n\n"
         + "-" * 45
         + " Job Results "
         + "-" * 44

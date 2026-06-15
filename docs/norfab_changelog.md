@@ -1,3 +1,13 @@
+# 0.20.1
+
+## ENHANCEMENTS
+
+1. Improved NFCLI ERROR status highlighting to make it red color
+2. Added interactive approval to Netbox `sync_all`; `approval=True` runs a
+   full dry-run preview before prompting and only applies changes after approval.
+
+---
+
 # 0.20.0
 
 ## FEATURES

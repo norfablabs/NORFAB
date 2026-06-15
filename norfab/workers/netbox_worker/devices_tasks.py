@@ -1318,6 +1318,7 @@ class NetboxDevicesTasks:
         devices: Union[None, list] = None,
         branch: str = None,
         dry_run: bool = False,
+        approval: bool = False,
         process_deletions: bool = False,
         message: Union[None, str] = None,
         inventory_create_module_types: bool = False,
@@ -1357,6 +1358,8 @@ class NetboxDevicesTasks:
         inventory → interfaces → MAC addresses → IP addresses → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
+        Pass ``approval=True`` to run that preview first, ask the interactive
+        client for approval, and only then repeat the sync with writes enabled.
 
         ``Result.result`` is keyed by device name, then by category::
 
@@ -1377,6 +1380,8 @@ class NetboxDevicesTasks:
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
+            approval (bool): Preview and ask for approval before applying
+                changes. Defaults to False.
             process_deletions (bool): Process deletions for inventory,
                 interfaces, and BGP peerings. Defaults to False.
             message (str, optional): Changelog message for inventory and BGP
@@ -1416,6 +1421,47 @@ class NetboxDevicesTasks:
         Returns:
             Result: Per-device sync results keyed by device name and category.
         """
+        recursive_kwargs = dict(locals())
+        recursive_kwargs.pop("self")
+        recursive_kwargs.pop("job")
+        nornir_kwargs = recursive_kwargs.pop("kwargs")
+        recursive_kwargs.update(nornir_kwargs)
+
+        if approval and not dry_run:
+            job.event("running sync all dry-run preview before approval")
+            preview_kwargs = {
+                **recursive_kwargs,
+                "dry_run": True,
+                "approval": False,
+            }
+            preview = self.sync_all(job=job, **preview_kwargs)
+            if preview.failed or preview.errors:
+                job.event(
+                    "sync all dry-run preview completed with errors; "
+                    "changes will not be applied",
+                    severity="ERROR",
+                )
+                return preview
+
+            approved = job.request_input(
+                question="Apply the sync all dry-run changes to NetBox?",
+                default=False,
+                metadata={"preview": preview.result},
+            )
+            if not approved:
+                job.event(
+                    "sync all changes were not approved; returning dry-run result"
+                )
+                return preview
+
+            job.event("sync all changes approved; applying changes")
+            apply_kwargs = {
+                **recursive_kwargs,
+                "dry_run": False,
+                "approval": False,
+            }
+            return self.sync_all(job=job, **apply_kwargs)
+
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
@@ -1423,6 +1469,7 @@ class NetboxDevicesTasks:
             result={},
             resources=[instance],
             diff={},
+            dry_run=dry_run,
         )
 
         # resolve devices from Nornir filters
