@@ -272,7 +272,28 @@ class ClientRunJobArgs(BaseModel):
     )
 
     @staticmethod
-    def walk_norfab_files():
-        response = run_future_job("filesharing", "walk", kwargs={"url": "nf://"})
+    def walk_norfab_files(choice: str = None):
+        NFCLIENT = builtins.NFCLIENT
+        response = NFCLIENT.run_job("filesharing", "walk", kwargs={"url": "nf://"})
         wname, wres = next(iter(response.items()))
-        return wres["result"]
+        files = wres["result"]
+        choice = choice or "nf://"
+        parent = choice if choice.endswith("/") else choice.rsplit("/", 1)[0] + "/"
+        ret = []
+        seen = set()
+
+        for file in files:
+            if not file.startswith(choice):
+                continue
+
+            relative_path = file.removeprefix(parent)
+            if "/" in relative_path:
+                top_level = f"{parent}{relative_path.split('/', 1)[0]}/"
+            else:
+                top_level = file
+
+            if top_level not in seen:
+                ret.append(top_level.strip())
+                seen.add(top_level.strip())
+
+        return ret

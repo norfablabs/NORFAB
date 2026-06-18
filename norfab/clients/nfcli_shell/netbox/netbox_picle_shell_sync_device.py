@@ -10,7 +10,7 @@ from pydantic import (
 
 from norfab.workers.netbox_worker.netbox_models import SyncDeviceInventoryInput
 
-from ..common import log_error_or_result, run_future_job
+from ..common import log_error_or_result, run_future_job, ClientRunJobArgs
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters, NornirCommonArgs
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
@@ -52,6 +52,16 @@ class SyncDeviceInventoryShell(
         "nornir",
         description="Service to use to retrieve device data",
     )
+
+    @staticmethod
+    def source_inventory_map(choice: str) -> list:
+        completions = ClientRunJobArgs.walk_norfab_files(choice)
+        return completions
+
+    @staticmethod
+    def source_inventory_transform(choice: str) -> list:
+        completions = ClientRunJobArgs.walk_norfab_files(choice)
+        return completions
 
     @staticmethod
     def run(**kwargs: object):
