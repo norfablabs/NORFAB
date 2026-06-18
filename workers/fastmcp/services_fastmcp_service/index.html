@@ -1790,6 +1790,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SNMP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2383,14 +2411,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_device_facts/" class="md-nav__link">
+      <a href="../../netbox/services_netbox_service_tasks_sync_device_inventory/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Sync Device Facts
+    Sync Device Inventory
   
 
     
@@ -3293,6 +3321,34 @@
     
   
     Get Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_fastmcp_service_task_get_prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Prompts
   
 
     
@@ -5298,6 +5354,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/norfab_docker_development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/documentation_style_guide/" class="md-nav__link">
         
   
@@ -5390,10 +5474,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
         
           
-          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
             
   
   
@@ -5411,8 +5495,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -5618,6 +5702,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_mcp_task_prompts_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Task Prompt Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_norfab_aaa_security_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab AAA Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_nornir_snmp_tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5641,10 +5809,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -5662,8 +5830,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -5828,12 +5996,20 @@
 
 
 <h1 id="fastmcp-service">FastMCP Service<a class="headerlink" href="#fastmcp-service" title="Permanent link">¤</a></h1>
-<p>FastMCP Service exposes NorFab service tasks as MCP tools via an HTTP endpoint.
-It is designed to integrate NorFab with MCP-capable clients (e.g. VS Code MCP).</p>
+<p>FastMCP Service exposes NorFab service tasks as MCP tools and task-authored
+prompts via an HTTP endpoint. It is designed to integrate NorFab with
+MCP-capable clients such as VS Code.</p>
 <p>FastMCP worker periodically discovers NorFab services and their tasks, and auto-generates
 MCP tools following this naming convention:</p>
 <div class="highlight"><pre><span></span><code>service_&lt;service_name&gt;__task_&lt;task_name&gt;
 </code></pre></div>
+<p>Tasks can also declare one or more named prompts in their <code>Task</code> decorator
+under <code>mcp["prompts"]</code>. Published prompt names include the service, task, and
+task-local prompt name:</p>
+<div class="highlight"><pre><span></span><code>service_&lt;service_name&gt;__task_&lt;task_name&gt;__prompt_&lt;prompt_name&gt;
+</code></pre></div>
+<p>Prompts provide parameterized instructions for using a task. Retrieving a
+prompt returns messages only and does not run the related NorFab task.</p>
 <p>By default, FastMCP server listens on <code>0.0.0.0:8001</code> and serves MCP at <code>/mcp/</code>.</p>
 <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">¤</a></h1>
 <p>FastMCP uses <a href="https://github.com/modelcontextprotocol/python-sdk">Python SDK MCP</a> library. Required dependencies can be installed using <code>fastmcpservice</code> extras:</p>
@@ -5860,6 +6036,11 @@ There is no dependency on name-twin <a href="https://github.com/PrefectHQ/fastmc
 <td>Tool discovery, debugging integrations, building MCP allow-lists.</td>
 </tr>
 <tr>
+<td><strong><a href="../services_fastmcp_service_task_get_prompts/">get_prompts</a></strong></td>
+<td>Return prompts exposed by FastMCP worker (optionally filtered).</td>
+<td>Prompt discovery, inspecting prompt arguments, debugging integrations.</td>
+</tr>
+<tr>
 <td><strong><a href="../services_fastmcp_service_task_auth/">auth</a></strong></td>
 <td>Store, list, delete, and check bearer tokens for optional MCP authentication.</td>
 <td>Securing MCP access, rotating client tokens, auditing active tokens.</td>
@@ -5879,12 +6060,18 @@ root
         ├── status:    show FastMCP server status
         │   ├── timeout:    Job timeout
         │   └── workers:    Filter worker to target, default &#39;all&#39;
-        └── tools:    show FastMCP server tools
+        ├── tools:    show FastMCP server tools
+        │   ├── timeout:    Job timeout
+        │   ├── workers:    Filter worker to target, default &#39;any&#39;
+        │   ├── brief:    show tools names only
+        │   ├── service:    filter tools by service name
+        │   └── name:    filter tools by name using glob pattern
+        └── prompts:    show FastMCP server prompts
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── brief:    show tools names only
-            ├── service:    filter tools by service name
-            └── name:    filter tools by name using glob pattern
+            ├── brief:    show prompt names only
+            ├── service:    filter prompts by service name
+            └── name:    filter prompts by name using glob pattern
 nf#
 </code></pre></div>
 <h2 id="fastmcp-service-auth-commands">FastMCP Service Auth Commands<a class="headerlink" href="#fastmcp-service-auth-commands" title="Permanent link">¤</a></h2>
