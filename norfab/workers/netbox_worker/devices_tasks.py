@@ -379,7 +379,9 @@ class NetboxDevicesTasks:
             inventory_map: Manufacturer and device type scoped pattern mappings,
                 or an ``nf://`` YAML file containing them.
             inventory_transform: ``nf://`` Python file containing
-                ``transform(device_name, parsed_data, worker)``.
+                ``transform(device_name, parsed_data, worker, **context)``.
+                Supported context keyword arguments are ``device_platform``,
+                ``device_manufacturer``, and ``device_type`` from NetBox.
             filter_by_module: Glob patterns selecting normalized module type
                 names.
             filter_by_slot: Glob patterns selecting normalized module bay
@@ -451,7 +453,12 @@ class NetboxDevicesTasks:
         # Fetch and validate NetBox devices.
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {}
-        for device in self.bulk_filter(nb.dcim.devices, "name", devices):
+        for device in self.bulk_filter(
+            nb.dcim.devices,
+            "name",
+            devices,
+            fields="id,name,serial,device_type,platform",
+        ):
             device_type = device.device_type
             manufacturer = device_type.manufacturer
             nb_devices_data[device.name] = {
@@ -460,6 +467,7 @@ class NetboxDevicesTasks:
                 "serial": str(device.serial or ""),
                 "manufacturer": manufacturer.name,
                 "device_type": device_type.model,
+                "platform": device.platform.name if device.platform else None,
             }
 
         for device_name in list(devices):
@@ -544,8 +552,16 @@ class NetboxDevicesTasks:
             records = live_records_by_device[device_name]
             if transform_function:
                 try:
+                    device_data = nb_devices_data[device_name]
                     records = DeviceInventoryRecords.model_validate(
-                        transform_function(device_name, records, self)
+                        transform_function(
+                            device_name=device_name,
+                            parsed_data=records,
+                            worker=self,
+                            device_platform=device_data["platform"],
+                            device_manufacturer=device_data["manufacturer"],
+                            device_type=device_data["device_type"],
+                        )
                     ).model_dump()
                 except Exception as exc:
                     msg = (

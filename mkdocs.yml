@@ -180,6 +180,7 @@ nav:
     - Tasks:
       - Auth: workers/fastmcp/services_fastmcp_service_task_auth.md
       - Get Tools: workers/fastmcp/services_fastmcp_service_task_get_tools.md
+      - Get Prompts: workers\fastmcp\services_fastmcp_service_task_get_prompts.md
   - Workflow:
     - Overview: workers/workflow/services_workflow_service.md
     - Inventory: workers/workflow/services_workflow_service_inventory.md
@@ -252,6 +253,9 @@ nav:
     - MCP Tools Annotations plan: development\adr_mcp_tool_annotations_plan.md
     - Netbox Sync Devices Inventory plan: development\adr_netbox_sync_device_inventory_plan.md
     - Norfab Interactive Client Plan: development\adr_norfab_interactive_client.md
+    - MCP Task Prompt Plan: development\adr_mcp_task_prompts_plan.md
+    - Norfab AAA Security Architecture: development\adr_norfab_aaa_security_architecture.md
+    - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
     - Netbox Service Tests: testing/netbox_service_tests.md

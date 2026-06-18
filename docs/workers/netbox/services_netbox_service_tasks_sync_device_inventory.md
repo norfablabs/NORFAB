@@ -190,21 +190,27 @@ def transform(
     device_name: str,
     parsed_data: list,
     worker: object,
+    device_platform: str | None = None,
+    device_manufacturer: str | None = None,
+    device_type: str | None = None,
 ) -> list[dict]:
     """Normalize parsed inventory records for one device."""
     transformed_data = []
 
     for record in parsed_data:
-        item = dict(record)
-        slot = item["slot"] or ""
+        slot = record["slot"]
 
         if slot.startswith("module mau "):
-            item["slot"] = slot.removeprefix("module mau ")
+            record["slot"] = slot.removeprefix("module mau ")
 
-        if item["module"] == "A9K-RSP440-TR":
-            item["module"] = "ASR 9000 RSP440"
+        if (
+            device_manufacturer == "Cisco"
+            and device_type == "ASR-9006"
+            and record["module"] == "A9K-RSP440-TR"
+        ):
+            record["module"] = "ASR 9000 RSP440"
 
-        transformed_data.append(item)
+        transformed_data.append(record)
 
     return transformed_data
 ```
@@ -215,6 +221,10 @@ The arguments are:
 - `parsed_data`: parsed records for that device, list of dictionaries with `slot`, `serial`, `description`, `module` keys.
 - `worker`: active NetBox worker object, including its configuration and
   all worker helper methods.
+- `device_platform`: NetBox device platform `name`, or `None` when no platform
+  is assigned.
+- `device_manufacturer`: NetBox device type manufacturer `name`.
+- `device_type`: NetBox device type `model`.
 
 The return value must be a list of dictionaries. Every dictionary must contain
 exactly `description`, `slot`, `module`, and `serial`, with each value set to a
@@ -224,7 +234,9 @@ the validation or execution error in result's `errors`.
 
 The transformer is loaded once per task and called once per device. It runs
 before `inventory_map`, so pattern conditions test the transformed `module`
-and `slot` values.
+and `slot` values. The device metadata arguments are read from NetBox before
+the transformer runs, so they describe the current NetBox device, not the live
+inventory record.
 
 !!! warning
     Transformer files are executed as trusted Python code. Store them only in
