@@ -35,12 +35,25 @@ def print_event(event: dict, richconsole: Console = None) -> None:
     timestamp = event.get("timestamp", "")
     message = event.get("message", "")
     severity = event.get("severity", "INFO")
+    status = event.get("status", "")
+    resource = event.get("resource", "")
+    timestamp = str(timestamp)
+    timestamp_parts = timestamp.split()
+    if len(timestamp_parts) >= 2 and "-" in timestamp_parts[0]:
+        timestamp = timestamp_parts[1]
+    elif len(timestamp_parts) >= 5:
+        timestamp = timestamp_parts[3]
+    if "." in timestamp:
+        seconds, milliseconds = timestamp.split(".", 1)
+        timestamp = f"{seconds}.{milliseconds[:3]}"
+    message = " ".join(str(message).split())
+    severity = f"{severity:<5}"
     severity = severity.replace("DEBUG", "[cyan]DEBUG[/cyan]")
     severity = severity.replace("INFO", "[green]INFO[/green]")
     severity = severity.replace("WARNING", "[yellow]WARNING[/yellow]")
     severity = severity.replace("CRITICAL", "[red]CRITICAL[/red]")
     severity = severity.replace("ERROR", "[red]ERROR[/red]")
-    status = event.get("status", "")
+    status = f"{status:<10}"
     status = status.replace("started", "[cyan]started[/cyan]")
     status = status.replace("running", "[cyan]running[/cyan]")
     status = status.replace(
@@ -51,11 +64,14 @@ def print_event(event: dict, richconsole: Console = None) -> None:
     status = status.replace("failed", "[red]failed[/red]")
     status = status.replace("timeout", "[red]timeout[/red]")
     status = status.replace("cancelled", "[red]cancelled[/red]")
-    resource = event.get("resource", "")
     if isinstance(resource, list):
         resource = ", ".join(resource)
+    resource = f" {resource}" if resource else ""
     richconsole.print(
-        f"{timestamp} {severity} {worker} {status} {service}.{task} {resource} - {message}"
+        f"{timestamp:<12} {severity} {worker:<16} {status} "
+        f"{service}.{task}{resource} {message}",
+        no_wrap=True,
+        overflow="ellipsis",
     )
 
 
@@ -131,26 +147,48 @@ def run_future_job(
     richconsole = Console()
     start_time = time.time()
     time_format = "%d-%b-%Y %H:%M:%S.%f"
+    started_at = datetime.now().strftime(time_format)[:-3]
+    workers_text = workers if isinstance(workers, str) else ", ".join(workers)
+    stats = {"events": 0, "warnings": 0, "errors": 0, "workers": set()}
 
     richconsole.print(
-        "-" * 45 + " Job Events " + "-" * 47 + "\n\n"
-        f"{datetime.now().strftime(time_format)[:-3]} [green]INFO[/green] {future.uuid} job started"
+        "────────────────────────────────────────── Job ──────────────────────────────────────────\n"
+        f"UUID     {future.uuid}\n"
+        f"Task     {service}.{task}\n"
+        f"Workers  {workers_text}\n"
+        f"Timeout  {timeout}s\n"
+        f"Started  {started_at}\n"
+        "──────────────────────────────────────── Events ────────────────────────────────────────"
     )
 
     for event in future.events():
         collect_input_request(future, event, richconsole, outputter)
         print_event(event, richconsole)
+        stats["events"] += 1
+        severity = event.get("severity", "INFO")
+        if isinstance(severity, Enum):
+            severity = severity.value
+        severity = str(severity).strip().upper()
+        if severity == "WARNING":
+            stats["warnings"] += 1
+        elif severity in {"ERROR", "CRITICAL"}:
+            stats["errors"] += 1
+        worker = event.get("worker")
+        worker = "" if worker is None else str(worker).strip()
+        if worker:
+            stats["workers"].add(worker)
 
     elapsed = round(time.time() - start_time, 3)
+    result = future.result(markdown=markdown)
+    worker_count = len(result) if isinstance(result, dict) else len(stats["workers"])
     richconsole.print(
-        f"{datetime.now().strftime(time_format)[:-3]} [green]INFO[/green] {future.uuid} job completed in {elapsed} seconds\n\n"
-        + "-" * 45
-        + " Job Results "
-        + "-" * 44
-        + "\n"
+        f"\nCompleted in {elapsed:.2f}s | workers: {worker_count} | "
+        f"events: {stats['events']} | warnings: {stats['warnings']} | "
+        f"errors: {stats['errors']}\n\n"
+        "────────────────────────────────────── Job Results ─────────────────────────────────────\n"
     )
 
-    return future.result(markdown=markdown)
+    return result
 
 
 def log_error_or_result(
