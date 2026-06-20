@@ -16,13 +16,23 @@ fixed sequence:
 4. **ip_addresses** — calls `sync_device_ip`
 5. **bgp_peerings** — calls `sync_bgp_peerings`
 
-Pass `dry_run=True` to preview all changes without writing to NetBox.
+## How It Works
 
-Pass `with_review=True` to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops `sync_all` at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.
+The `sync_all` task orchestrates five subordinate sync tasks in sequence. Each task collects live device data,
+compares it against NetBox state, and applies reconciliation operations. When `dry_run=True`, all tasks preview changes
+without writing. When `with_review=True`, each stage waits for user confirmation before applying changes.
+
+## Execution Modes
+
+**Dry-run mode** (`dry_run=True`) previews all changes without writing to NetBox.
+
+**With Review** — Pass `with_review=True` to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops `sync_all` at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.
 
 !!! note
     
     When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
+
+**Live-run mode** (`dry_run=False`, default) applies all changes to NetBox.
 
 ## Inventory Arguments
 
@@ -46,7 +56,9 @@ inventory, interfaces, and BGP peerings.
 The shared `message` argument is used as the NetBox changelog message for both
 inventory and BGP write operations.
 
-## Result Format
+## Result Structure
+
+The result structure aggregates the outcomes of all five subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox.
 
 ```python
 {

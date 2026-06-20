@@ -9,7 +9,7 @@ tags:
 
 Synchronises BGP sessions between live network devices and the NetBox BGP plugin. Supports idempotent create, update, and optional deletion of stale sessions.
 
-## How it Works
+## How It Works
 
 **Data collection** — NetBox worker fetches existing BGP sessions from NetBox BGP plugin. In parallel, Nornir service parses BGP neighbor data from devices using `parse_ttp` with `get="bgp_neighbors"`.
 
@@ -36,10 +36,6 @@ Synchronises BGP sessions between live network devices and the NetBox BGP plugin
 
 - **NetBox BGP plugin** (`netbox-bgp`) must be installed and enabled on the NetBox instance.
 - **Nornir service** must have a TTP getter that handles `get="bgp_neighbors"`.
-
-## Branching Support
-
-`sync_bgp_peerings` is branch-aware. Pass `branch=<name>` to write all changes into a [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching) branch instead of main.
 
 ## Session Naming Convention
 
@@ -77,24 +73,9 @@ name_template="{device}_BGP_{name}"
 # ceos-leaf-1_BGP_to-spine-1
 ```
 
-## Filtering Sessions
+## Execution Modes
 
-Three optional filters narrow which sessions are considered during sync. Filters apply to **both** the NetBox dataset and the live device dataset before the diff is computed. Sessions that do not match are silently excluded from creates, updates, and deletes.
-
-| Parameter | Match logic | Applied to |
-|---|---|---|
-| `filter_by_remote_as` | Exact match — session's remote AS must equal one of the provided integer values | NetBox & live |
-| `filter_by_peer_group` | Exact match — session's peer group name must equal one of the provided values | NetBox & live |
-| `filter_by_description` | Glob match — session's description must match the provided glob pattern (e.g. `*uplink*`) | NetBox & live |
-
-Multiple filters may be combined; all must pass (AND logic). `filter_by_description` uses Python `fnmatch` glob syntax — `*` matches any sequence of characters, `?` matches a single character.
-
-!!! note
-    When `process_deletions=True`, only sessions that pass the filters are candidates for deletion. Sessions excluded by a filter are never deleted.
-
-## Dry Run Mode
-
-`dry_run=True` returns the diff without any NetBox writes:
+**Dry-run mode** (`dry_run=True`) returns the diff without any NetBox writes:
 
 ```python
 {
@@ -111,7 +92,36 @@ Multiple filters may be combined; all must pass (AND logic). `filter_by_descript
 }
 ```
 
-## Deletion Behaviour
+**With Review** — Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+
+!!! note
+    
+    When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
+
+**Live-run mode** (`dry_run=False`, default) applies changes and returns the same structure.
+
+## Result Structure
+
+**Dry-run mode** returns what *would* happen without writing to NetBox.
+
+**Live-run mode** applies changes and returns the same structure showing what was done.
+
+## Filtering
+
+Three optional filters narrow which sessions are considered during sync. Filters apply to **both** the NetBox dataset and the live device dataset before the diff is computed. Sessions that do not match are silently excluded from creates, updates, and deletes.
+
+| Parameter | Match logic | Applied to |
+|---|---|---|
+| `filter_by_remote_as` | Exact match — session's remote AS must equal one of the provided integer values | NetBox & live |
+| `filter_by_peer_group` | Exact match — session's peer group name must equal one of the provided values | NetBox & live |
+| `filter_by_description` | Glob match — session's description must match the provided glob pattern (e.g. `*uplink*`) | NetBox & live |
+
+Multiple filters may be combined; all must pass (AND logic). `filter_by_description` uses Python `fnmatch` glob syntax — `*` matches any sequence of characters, `?` matches a single character.
+
+!!! note
+    When `process_deletions=True`, only sessions that pass the filters are candidates for deletion. Sessions excluded by a filter are never deleted.
+
+## Deletion Behavior
 
 Default `process_deletions=False` — sessions present in NetBox but absent on the device are left untouched.
 
@@ -119,6 +129,10 @@ Set `process_deletions=True` to delete stale sessions. Only sessions for the exp
 
 !!! warning
     Anything the TTP getter does not return (parser gap, unreachable device) will be deleted when `process_deletions=True`. Use dry-run to check before break.
+
+## Branching Support
+
+`sync_bgp_peerings` is branch-aware. Pass `branch=<name>` to write all changes into a [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching) branch instead of main.
 
 ## Examples
 

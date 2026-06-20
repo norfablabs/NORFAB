@@ -37,7 +37,7 @@ Both dry-run and live-run return the same structure, keyed by device name:
 
 In **dry-run mode** (`dry_run=True`) the lists reflect what *would* happen — no changes are written to NetBox.
 
-**With Review Mode** - Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+**With Review** — Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
 
 !!! note
     
@@ -57,11 +57,9 @@ MAC address collection can be scoped using glob patterns so that only a subset o
 
 All filters are applied before the reconciliation step. Interfaces or MACs that do not match are completely ignored — they are neither created nor updated.
 
-## Branching Support
+## Special Handling
 
-The task is branch-aware and can push changes into a NetBox branch. The [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) must be installed. Specify the `branch` parameter; the branch is created automatically if it does not already exist.
-
-## Duplicate MAC Handling
+### Duplicate MAC Handling
 
 NetBox permits multiple MAC address records with the same MAC value. The task handles this safely:
 
@@ -69,6 +67,14 @@ NetBox permits multiple MAC address records with the same MAC value. The task ha
 - If a MAC exists in NetBox with an assigned interface that **differs** from the live data — reported as a conflict error; the record is not modified.
 - If a MAC exists in NetBox but is **unassigned** — the record is updated to point at the correct interface.
 - If both an assigned (conflicting) and an unassigned copy of the same MAC exist in NetBox, the assigned (conflicting) entry takes precedence and a conflict error is raised.
+
+## Deletion Behavior
+
+By default, all discovered live MAC addresses are managed by this task. MACs present in NetBox but absent from live devices are left untouched. There is no explicit deletion mechanism — instead, unused MAC records are managed through standard NetBox administrative procedures.
+
+## Branching Support
+
+The task is branch-aware and can push changes into a NetBox branch. The [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) must be installed. Specify the `branch` parameter; the branch is created automatically if it does not already exist.
 
 ## Examples
 

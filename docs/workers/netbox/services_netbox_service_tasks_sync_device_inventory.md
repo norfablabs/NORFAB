@@ -52,16 +52,16 @@ serial comparison. An empty or `BUILTIN` chassis serial is ignored. Multiple
 chassis records with different non-empty serial numbers produce a per-device
 error and that device is skipped.
 
-## Safety Controls
+## Creation and Deletion Behavior
 
-Module deletions are disabled by default. Set `process_deletions=True` to
-delete NetBox modules that are absent from live network inventory.
-
-Missing module bays and module types are reported by default. Set
+**Module creation** — Missing module bays and module types are reported by default. Set
 `create_module_bays=True` or `create_module_types=True` when the task should
 extend NetBox modeling from live inventory.
 
-Live records with empty module identity, empty serial numbers, or `BUILTIN`
+**Module deletions** — Module deletions are disabled by default. Set `process_deletions=True` to
+delete NetBox modules that are absent from live network inventory.
+
+**Invalid records** — Live records with empty module identity, empty serial numbers, or `BUILTIN`
 serial numbers are skipped and reported in `res["errors"]`. Skipped slots
 suppress deletion so incomplete live data does not remove existing NetBox
 modules.
@@ -242,12 +242,6 @@ inventory record.
     Transformer files are executed as trusted Python code. Store them only in
     controlled File Service locations.
 
-## Branching Support
-
-This task is branch aware and can push updates to a NetBox branch when the
-NetBox Branching plugin is installed. Use the `branch` argument to target a
-branch.
-
 ## Result Structure
 
 **Dry-run mode** (`dry_run=True`) returns the raw diff without writing to
@@ -268,14 +262,13 @@ NetBox:
 }
 ```
 
-**With Review Mode** - Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+**With Review** — Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
 
 !!! note
     
     When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
 
-**Live-run mode** (`dry_run=False`, default) applies changes and returns a
-per-device action summary:
+**Live-run mode** (`dry_run=False`, default) applies changes and returns a per-device action summary:
 
 ```json
 {
@@ -297,6 +290,12 @@ The `created` list includes created module bays, module types, and installed
 modules. In live-run mode `res["diff"]` is also populated with the raw diff.
 Missing module bays, missing module types, failed writes, and ignored live
 records are reported in `res["errors"]`.
+
+## Branching Support
+
+This task is branch aware and can push updates to a NetBox branch when the
+NetBox Branching plugin is installed. Use the `branch` argument to target a
+branch.
 
 ## Examples
 

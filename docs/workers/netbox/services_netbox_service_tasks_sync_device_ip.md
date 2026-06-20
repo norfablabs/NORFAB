@@ -50,7 +50,7 @@ Both dry-run and live-run modes return the same per-device structure keyed by de
 
 **Dry-run mode** (`dry_run=True`) returns what *would* be created or updated without making any changes to NetBox.
 
-**With Review Mode** - Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+**With Review** — Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
 
 !!! note
     
@@ -69,7 +69,9 @@ IP addresses and interfaces can be scoped before reconciliation. All filters are
 
 Multiple filters combine as intersection — all specified conditions must be satisfied for an IP to be included.
 
-## Anycast Support
+## Special Features
+
+### Anycast Support
 
 IP addresses in one or more `anycast_ranges` prefixes are assigned the `anycast` role. NetBox allows multiple IP address records with the same value when the role is `anycast`, so each device gets its own record. Without `anycast_ranges`, a second device trying to use the same IP address triggers a duplicate-conflict error.
 
@@ -80,17 +82,21 @@ anycast_ranges = "10.0.250.0/24"
 anycast_ranges = ["10.0.250.0/24", "2001:db8:ffff::/48"]
 ```
 
-## Process Prefixes
+### Process Prefixes
 
 When `create_prefixes=True` the task also creates a NetBox prefix record for the network of each discovered IP address (e.g. `10.0.1.0/31` for `10.0.1.1/31`). Existing prefixes are never updated or deleted — this is a create-only, idempotent operation. Site and VRF are propagated from the device and interface context.
+
+### Duplicate IP Guard
+
+Before executing bulk writes the task checks that no non-anycast IP address appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.
+
+## Deletion Behavior
+
+By default, all discovered live IP addresses are managed by this task. Addresses present in NetBox but absent from live devices are left untouched. There is no explicit deletion mechanism — instead, unused addresses are managed through standard NetBox administrative procedures.
 
 ## Branching Support
 
 The task is branch-aware and can push changes into a NetBox branch. The [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) must be installed. Specify the `branch` parameter; the branch is created automatically if it does not already exist.
-
-## Duplicate IP Guard
-
-Before executing bulk writes the task checks that no non-anycast IP address appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.
 
 ## Examples
 

@@ -49,7 +49,8 @@ The task follows a four-step pipeline:
     }
 }
 ```
-**Review Mode** Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+
+**With Review** — Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
 
 !!! note
     
@@ -79,13 +80,13 @@ Interfaces can be scoped using glob patterns so that only a subset is considered
 
 Both filters are applied before the diff, so interfaces that do not match are completely ignored by the sync — they are neither created, updated, nor deleted.
 
+## Deletion Behavior
+
+By default `process_deletions=False` — interfaces present in NetBox but absent in live data are left untouched. Set `process_deletions=True` to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.
+
 ## Branching Support
 
 The task is branch-aware and can push changes into a NetBox branch. The [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) must be installed. Specify the `branch` parameter; the branch is created automatically if it does not already exist.
-
-## Deletions
-
-By default `process_deletions=False` — interfaces present in NetBox but absent in live data are left untouched. Set `process_deletions=True` to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.
 
 ## Examples
 
