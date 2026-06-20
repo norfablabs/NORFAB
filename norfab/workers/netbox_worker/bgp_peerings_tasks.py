@@ -20,7 +20,7 @@ from .netbox_models import (
     UpdateBgpPeeringInput,
     UpdateBgpPeeringResult,
 )
-from .netbox_worker_utilities import resolve_ip, resolve_vrf
+from .netbox_worker_utilities import resolve_ip, resolve_vrf, review_sync_task_result
 
 log = logging.getLogger(__name__)
 
@@ -1873,6 +1873,7 @@ class NetboxBgpPeeringsTasks:
         devices: Union[None, list] = None,
         status: str = "active",
         dry_run: bool = False,
+        with_review: bool = False,
         process_deletions: bool = False,
         timeout: int = 60,
         branch: str = None,
@@ -1899,6 +1900,7 @@ class NetboxBgpPeeringsTasks:
             devices (list, optional): List of device names to process.
             status (str): Status to assign to created/updated sessions when not ``established`` on device.
             dry_run (bool): If True, return diff report without writing to NetBox.
+            with_review (bool): Preview changes, ask for review, then apply them.
             process_deletions (bool): If True, delete NetBox sessions not found on device.
             timeout (int): Timeout in seconds for Nornir ``parse_ttp`` job.
             branch (str, optional): NetBox branching plugin branch name.
@@ -2211,8 +2213,16 @@ class NetboxBgpPeeringsTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
+        if with_review and not review_sync_task_result(
+            job, "BGP peerings sync", full_diff
+        ):
+            ret.status = "skipped"
+            ret.result = full_diff
+            ret.dry_run = True
+            ret.messages.append("review declined; changes were not applied")
+            return ret
         # Return dry-run results per device
-        if dry_run is True:
+        elif dry_run is True:
             job.event(
                 "dry-run requested, returning BGP session sync diff without changes"
             )

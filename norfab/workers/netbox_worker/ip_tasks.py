@@ -1,6 +1,7 @@
 import fnmatch
 import ipaddress
 import logging
+import copy
 from typing import Any, Union
 
 from norfab.core.worker import Job, Task
@@ -16,7 +17,7 @@ from .netbox_models import (
     SyncDeviceIpInput,
     SyncDeviceIpResult,
 )
-from .netbox_worker_utilities import resolve_vrf
+from .netbox_worker_utilities import resolve_vrf, review_sync_task_result
 
 log = logging.getLogger(__name__)
 
@@ -607,6 +608,7 @@ class NetboxIpTasks:
         job: Job,
         instance: Union[None, str] = None,
         dry_run: bool = False,
+        with_review: bool = False,
         timeout: int = 60,
         devices: Union[None, list] = None,
         branch: str = None,
@@ -655,6 +657,7 @@ class NetboxIpTasks:
             job: NorFab Job object containing relevant metadata.
             instance (str, optional): The NetBox instance name to use.
             dry_run (bool, optional): If True, no changes will be made to NetBox.
+            with_review (bool, optional): Preview changes, ask for review, then apply them.
             timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branch name to use.
@@ -1046,19 +1049,6 @@ class NetboxIpTasks:
                 },
             )
 
-        if dry_run is True:
-            job.event(
-                "dry-run requested, returning IP address sync plan without changes"
-            )
-            for key in bulk_create_ip:
-                device_name = key[0]
-                device_results[device_name]["created"].append(key[2])
-            for key in bulk_update_ip:
-                device_name = key[0]
-                device_results[device_name]["updated"].append(key[2])
-            ret.dry_run = True
-            return ret
-
         # check that update and create payloads have no non-anycast duplicate IPs
         # Netbox has a bug allowing to create duplicate IPs in single create request
         job.event("checking IP address payloads for duplicate non-anycast addresses")
@@ -1081,6 +1071,33 @@ class NetboxIpTasks:
                     job.event(msg, severity="ERROR")
                     bulk_create_ip.pop(key, None)
                     bulk_update_ip.pop(key, None)
+
+        if with_review:
+            ip_preview_result = copy.deepcopy(device_results)
+            for key in bulk_create_ip:
+                device_name = key[0]
+                ip_preview_result[device_name]["created"].append(key[2])
+            for key in bulk_update_ip:
+                device_name = key[0]
+                ip_preview_result[device_name]["updated"].append(key[2])
+            if not review_sync_task_result(job, "IP address sync", ip_preview_result):
+                ret.status = "skipped"
+                ret.result = ip_preview_result
+                ret.dry_run = True
+                ret.messages.append("review declined; changes were not applied")
+                return ret
+        elif dry_run is True:
+            job.event(
+                "dry-run requested, returning IP address sync plan without changes"
+            )
+            for key in bulk_create_ip:
+                device_name = key[0]
+                device_results[device_name]["created"].append(key[2])
+            for key in bulk_update_ip:
+                device_name = key[0]
+                device_results[device_name]["updated"].append(key[2])
+            ret.dry_run = True
+            return ret
 
         # update first, since existing IPs might change role to anycast
         if bulk_update_ip:

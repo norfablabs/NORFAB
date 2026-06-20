@@ -93,7 +93,9 @@ def collect_input_request(
     preview = (input_request.get("metadata") or {}).get("preview")
 
     if preview is not None:
-        richconsole.print("\n[bold]Dry-run preview:[/bold]")
+        richconsole.print(
+            "\n─────────────────────────────────── [bold]Dry-run preview[/bold] ─────────────────────────────────────"
+        )
         if outputter:
             richconsole.print(outputter(preview))
         else:
@@ -109,6 +111,10 @@ def collect_input_request(
         if choices:
             prompt_kwargs["choices"] = [str(choice) for choice in choices]
         response = Prompt.ask(question, console=richconsole, **prompt_kwargs)
+
+    richconsole.print(
+        "\n─────────────────────────────────────── [bold]Continue[/bold] ────────────────────────────────────────\n"
+    )
 
     future.send_response(
         input_id=input_request["id"],
@@ -152,13 +158,13 @@ def run_future_job(
     stats = {"events": 0, "warnings": 0, "errors": 0, "workers": set()}
 
     richconsole.print(
-        "────────────────────────────────────────── Job ──────────────────────────────────────────\n"
+        "────────────────────────────────────────── [bold]Job[/bold] ──────────────────────────────────────────\n"
         f"UUID     {future.uuid}\n"
         f"Task     {service}.{task}\n"
         f"Workers  {workers_text}\n"
         f"Timeout  {timeout}s\n"
         f"Started  {started_at}\n"
-        "──────────────────────────────────────── Events ────────────────────────────────────────"
+        "\n───────────────────────────────────────── [bold]Events[/bold] ────────────────────────────────────────"
     )
 
     for event in future.events():
@@ -182,10 +188,10 @@ def run_future_job(
     result = future.result(markdown=markdown)
     worker_count = len(result) if isinstance(result, dict) else len(stats["workers"])
     richconsole.print(
+        "\n────────────────────────────────────── [bold]Job Results[/bold] ─────────────────────────────────────"
         f"\nCompleted in {elapsed:.2f}s | workers: {worker_count} | "
         f"events: {stats['events']} | warnings: {stats['warnings']} | "
-        f"errors: {stats['errors']}\n\n"
-        "────────────────────────────────────── Job Results ─────────────────────────────────────\n"
+        f"errors: {stats['errors']}\n"
     )
 
     return result

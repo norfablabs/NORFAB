@@ -3,8 +3,8 @@
 ## ENHANCEMENTS
 
 1. Improved NFCLI ERROR status highlighting to make it red color
-2. Added interactive approval to Netbox `sync_all`; `approval=True` runs a
-   full dry-run preview before prompting and only applies changes after approval.
+2. Added interactive review to Netbox sync tasks; `with_review=True` runs a
+   dry-run preview before prompting and only applies changes after review.
 3. Enhancing nfcli terminal event output, added header, footer job info, shortened timestamps, removed uuid from every event, its only in header, additional summary info displayed in footer now.
 4. Improving file tab completion choice handling by returning top folders only not all files in the tree
 5. Added device manufacturer, platform and type to Netbox inventory transform function

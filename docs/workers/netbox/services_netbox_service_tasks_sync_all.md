@@ -18,10 +18,11 @@ fixed sequence:
 
 Pass `dry_run=True` to preview all changes without writing to NetBox.
 
-Pass `approval=True` to use the interactive NFCLI workflow. The task first runs
-all five stages with `dry_run=True`, displays the combined preview, and waits
-for approval. Approval repeats all stages with writes enabled; declining
-returns the dry-run result without changing NetBox.
+Pass `with_review=True` to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops `sync_all` at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.
+
+!!! note
+    
+    When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
 
 ## Inventory Arguments
 
@@ -99,10 +100,10 @@ When `dry_run=True` the same structure is returned but no changes are written to
     nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
     ```
 
-    Preview, prompt for approval, and apply the changes:
+    Preview, prompt for review, and apply the changes:
 
     ```
-    nf#netbox sync all devices ceos-spine-1 ceos-spine-2 approval
+    nf#netbox sync all devices ceos-spine-1 ceos-spine-2 with-review
     ```
 
     Create missing module bays and module types during inventory sync:
@@ -172,7 +173,7 @@ root
             ├── branch:    Branching plugin branch name to use
             ├── devices:    List of NetBox devices to sync all data for
             ├── dry-run:    Return diff without writing to NetBox, default 'False'
-            ├── approval:    Preview changes and ask for approval before writing to NetBox
+            ├── with-review:    Preview each sync stage and ask for review before writing to NetBox
             ├── process-deletions:    Process deletions for inventory, interfaces and BGP peerings
             ├── message:    Changelog message for inventory and BGP operations
             ├── inventory-create-module-types:    Create missing module types during inventory sync

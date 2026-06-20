@@ -7,6 +7,25 @@ from norfab.models import Result
 log = logging.getLogger(__name__)
 
 
+def review_sync_task_result(
+    job: Job,
+    task_name: str,
+    preview: Any,
+) -> bool:
+    """Request review for a prepared sync dry-run result."""
+    approved = job.request_input(
+        question=f"Apply {task_name} dry-run changes to NetBox?",
+        default=False,
+        metadata={"preview": preview},
+    )
+    if not approved:
+        job.event(f"{task_name} changes were not approved; returning dry-run result")
+        return False
+
+    job.event(f"{task_name} changes approved; applying changes")
+    return True
+
+
 def resolve_vrf(
     name: Union[None, str], nb: Any, job: Job, ret: Result, worker_name: str
 ) -> Union[int, None]:

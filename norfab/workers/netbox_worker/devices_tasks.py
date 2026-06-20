@@ -23,6 +23,7 @@ from .netbox_models import (
     SyncDeviceInventoryInput,
     SyncDeviceInventoryResult,
 )
+from .netbox_worker_utilities import review_sync_task_result
 
 log = logging.getLogger(__name__)
 
@@ -334,6 +335,7 @@ class NetboxDevicesTasks:
         job: Job,
         instance: Union[None, str] = None,
         dry_run: bool = False,
+        with_review: bool = False,
         timeout: int = 60,
         devices: Union[None, list] = None,
         branch: str = None,
@@ -367,6 +369,7 @@ class NetboxDevicesTasks:
                 default NetBox instance.
             dry_run: Return the planned inventory diff without writing changes
                 to NetBox.
+            with_review: Preview changes, ask for review, then apply them.
             timeout: Timeout in seconds for the Nornir ``parse_ttp`` job.
             devices: NetBox device names to synchronize.
             branch: NetBox Branching plugin branch name.
@@ -807,7 +810,15 @@ class NetboxDevicesTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
-        if dry_run is True:
+        if with_review and not review_sync_task_result(
+            job, "device inventory sync", full_diff
+        ):
+            ret.status = "skipped"
+            ret.result = full_diff
+            ret.dry_run = True
+            ret.messages.append("review declined; changes were not applied")
+            return ret
+        elif dry_run is True:
             job.event(
                 "dry-run requested, returning inventory sync diff without changes"
             )
@@ -1334,7 +1345,7 @@ class NetboxDevicesTasks:
         devices: Union[None, list] = None,
         branch: str = None,
         dry_run: bool = False,
-        approval: bool = False,
+        with_review: bool = False,
         process_deletions: bool = False,
         message: Union[None, str] = None,
         inventory_create_module_types: bool = False,
@@ -1374,8 +1385,8 @@ class NetboxDevicesTasks:
         inventory → interfaces → MAC addresses → IP addresses → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
-        Pass ``approval=True`` to run that preview first, ask the interactive
-        client for approval, and only then repeat the sync with writes enabled.
+        Pass ``with_review=True`` to have each sync stage run a dry-run preview,
+        ask the interactive client for review, and only then apply that stage.
 
         ``Result.result`` is keyed by device name, then by category::
 
@@ -1396,8 +1407,8 @@ class NetboxDevicesTasks:
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
-            approval (bool): Preview and ask for approval before applying
-                changes. Defaults to False.
+            with_review (bool): Preview and ask for review before applying
+                each sync stage. Defaults to False.
             process_deletions (bool): Process deletions for inventory,
                 interfaces, and BGP peerings. Defaults to False.
             message (str, optional): Changelog message for inventory and BGP
@@ -1437,47 +1448,6 @@ class NetboxDevicesTasks:
         Returns:
             Result: Per-device sync results keyed by device name and category.
         """
-        recursive_kwargs = dict(locals())
-        recursive_kwargs.pop("self")
-        recursive_kwargs.pop("job")
-        nornir_kwargs = recursive_kwargs.pop("kwargs")
-        recursive_kwargs.update(nornir_kwargs)
-
-        if approval and not dry_run:
-            job.event("running sync all dry-run preview before approval")
-            preview_kwargs = {
-                **recursive_kwargs,
-                "dry_run": True,
-                "approval": False,
-            }
-            preview = self.sync_all(job=job, **preview_kwargs)
-            if preview.failed or preview.errors:
-                job.event(
-                    "sync all dry-run preview completed with errors; "
-                    "changes will not be applied",
-                    severity="ERROR",
-                )
-                return preview
-
-            approved = job.request_input(
-                question="Apply the sync all dry-run changes to NetBox?",
-                default=False,
-                metadata={"preview": preview.result},
-            )
-            if not approved:
-                job.event(
-                    "sync all changes were not approved; returning dry-run result"
-                )
-                return preview
-
-            job.event("sync all changes approved; applying changes")
-            apply_kwargs = {
-                **recursive_kwargs,
-                "dry_run": False,
-                "approval": False,
-            }
-            return self.sync_all(job=job, **apply_kwargs)
-
         devices = devices or []
         instance = instance or self.default_instance
         ret = Result(
@@ -1518,6 +1488,7 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
+            with_review=with_review,
             process_deletions=process_deletions,
             create_module_types=inventory_create_module_types,
             create_module_bays=inventory_create_module_bays,
@@ -1534,6 +1505,11 @@ class NetboxDevicesTasks:
             ret.errors.extend(inventory_result.errors)
         for device, data in inventory_result.result.items():
             ret.result.setdefault(device, {})["inventory"] = data
+        if inventory_result.status == "skipped" and inventory_result.dry_run:
+            ret.status = "skipped"
+            ret.dry_run = True
+            job.event("sync all stopped because device inventory review was declined")
+            return ret
 
         # --- sync interfaces ---
         job.event("SYNCING interfaces")
@@ -1545,6 +1521,7 @@ class NetboxDevicesTasks:
             devices=list(devices),
             branch=branch,
             process_deletions=process_deletions,
+            with_review=with_review,
             filter_by_name=interfaces_filter_by_name,
             filter_by_description=interfaces_filter_by_description,
             update_type=interfaces_update_type,
@@ -1555,6 +1532,11 @@ class NetboxDevicesTasks:
             ret.errors.extend(intf_result.errors)
         for device, data in intf_result.result.items():
             ret.result.setdefault(device, {})["interfaces"] = data
+        if intf_result.status == "skipped" and intf_result.dry_run:
+            ret.status = "skipped"
+            ret.dry_run = True
+            job.event("sync all stopped because interface review was declined")
+            return ret
 
         # --- sync MAC addresses ---
         job.event("SYNCING MAC addresses")
@@ -1565,6 +1547,7 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
+            with_review=with_review,
             filter_by_name=mac_filter_by_name,
             filter_by_description=mac_filter_by_description,
             filter_by_mac=mac_filter_by_mac,
@@ -1574,6 +1557,11 @@ class NetboxDevicesTasks:
             ret.errors.extend(mac_result.errors)
         for device, data in mac_result.result.items():
             ret.result.setdefault(device, {})["mac_addresses"] = data
+        if mac_result.status == "skipped" and mac_result.dry_run:
+            ret.status = "skipped"
+            ret.dry_run = True
+            job.event("sync all stopped because MAC address review was declined")
+            return ret
 
         # --- sync IP addresses ---
         job.event("SYNCING IP addresses")
@@ -1584,6 +1572,7 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
+            with_review=with_review,
             anycast_ranges=ip_anycast_ranges,
             ignore_ranges=ip_ignore_ranges,
             create_prefixes=ip_create_prefixes,
@@ -1597,6 +1586,11 @@ class NetboxDevicesTasks:
             ret.errors.extend(ip_result.errors)
         for device, data in ip_result.result.items():
             ret.result.setdefault(device, {})["ip_addresses"] = data
+        if ip_result.status == "skipped" and ip_result.dry_run:
+            ret.status = "skipped"
+            ret.dry_run = True
+            job.event("sync all stopped because IP address review was declined")
+            return ret
 
         # --- sync BGP peerings ---
         job.event("SYNCING BGP peerings")
@@ -1609,6 +1603,7 @@ class NetboxDevicesTasks:
             devices=list(devices),
             branch=branch,
             process_deletions=process_deletions,
+            with_review=with_review,
             rir=bgp_rir,
             message=message,
             name_template=bgp_name_template,
@@ -1623,6 +1618,11 @@ class NetboxDevicesTasks:
             ret.errors.extend(bgp_result.errors)
         for device, data in bgp_result.result.items():
             ret.result.setdefault(device, {})["bgp_peerings"] = data
+        if bgp_result.status == "skipped" and bgp_result.dry_run:
+            ret.status = "skipped"
+            ret.dry_run = True
+            job.event("sync all stopped because BGP peerings review was declined")
+            return ret
 
         log.info(f"{self.name} - Sync all complete for {len(ret.result)} device(s)")
         job.event(f"sync all complete for {len(ret.result)} device(s)")

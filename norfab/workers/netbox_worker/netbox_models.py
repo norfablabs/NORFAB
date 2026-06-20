@@ -173,6 +173,12 @@ class SyncBgpPeeringsInput(
         "active",
         description="Status to set on created/updated BGP sessions",
     )
+    with_review: StrictBool = Field(
+        False,
+        description="Preview changes and ask for review before writing to NetBox",
+        alias="with-review",
+        json_schema_extra={"presence": True},
+    )
     process_deletions: bool = Field(
         False,
         description="Delete BGP sessions present in NetBox but not found on the device",
@@ -829,6 +835,12 @@ class SyncDeviceInventoryInput(
         60,
         description="Timeout in seconds for Nornir parse_ttp inventory job",
     )
+    with_review: StrictBool = Field(
+        False,
+        description="Preview changes and ask for review before writing to NetBox",
+        alias="with-review",
+        json_schema_extra={"presence": True},
+    )
     process_deletions: StrictBool = Field(
         False,
         description="Delete NetBox modules present in module bays but absent from live inventory",
@@ -935,9 +947,10 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         json_schema_extra={"presence": True},
         alias="dry-run",
     )
-    approval: StrictBool = Field(
+    with_review: StrictBool = Field(
         False,
-        description="Preview changes and ask for approval before writing to NetBox",
+        description="Preview each sync stage and ask for review before writing to NetBox",
+        alias="with-review",
         json_schema_extra={"presence": True},
     )
     process_deletions: StrictBool = Field(
@@ -1471,6 +1484,12 @@ class SyncDeviceInterfacesInput(
         60,
         description="Timeout in seconds for Nornir parse_ttp job",
     )
+    with_review: StrictBool = Field(
+        False,
+        description="Preview changes and ask for review before writing to NetBox",
+        alias="with-review",
+        json_schema_extra={"presence": True},
+    )
     process_deletions: StrictBool = Field(
         False,
         description="Delete interfaces present in NetBox but absent in live data",
@@ -1510,6 +1529,12 @@ class SyncMacAddressesInput(
     timeout: StrictInt = Field(
         60,
         description="Timeout in seconds for Nornir parse_ttp job",
+    )
+    with_review: StrictBool = Field(
+        False,
+        description="Preview changes and ask for review before writing to NetBox",
+        alias="with-review",
+        json_schema_extra={"presence": True},
     )
     filter_by_name: Union[None, StrictStr] = Field(
         None,
@@ -1576,6 +1601,12 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
     timeout: StrictInt = Field(
         60,
         description="Timeout in seconds for Nornir parse_ttp job",
+    )
+    with_review: StrictBool = Field(
+        False,
+        description="Preview changes and ask for review before writing to NetBox",
+        alias="with-review",
+        json_schema_extra={"presence": True},
     )
     anycast_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
         None,

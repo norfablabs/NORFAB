@@ -50,6 +50,12 @@ Both dry-run and live-run modes return the same per-device structure keyed by de
 
 **Dry-run mode** (`dry_run=True`) returns what *would* be created or updated without making any changes to NetBox.
 
+**With Review Mode** - Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+
+!!! note
+    
+    When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
+
 **Live-run mode** (`dry_run=False`, default) applies changes and returns the same structure showing what was done.
 
 ## Filtering

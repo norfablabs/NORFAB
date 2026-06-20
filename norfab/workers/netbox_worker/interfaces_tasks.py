@@ -19,7 +19,11 @@ from .netbox_models import (
     UpdateInterfacesDescriptionInput,
     UpdateInterfacesDescriptionResult,
 )
-from .netbox_worker_utilities import resolve_vlan, resolve_vrf
+from .netbox_worker_utilities import (
+    review_sync_task_result,
+    resolve_vlan,
+    resolve_vrf,
+)
 
 log = logging.getLogger(__name__)
 
@@ -779,6 +783,7 @@ class NetboxInterfacesTasks:
         job: Job,
         instance: Union[None, str] = None,
         dry_run: bool = False,
+        with_review: bool = False,
         timeout: int = 60,
         devices: Union[None, list] = None,
         process_deletions: bool = False,
@@ -857,6 +862,7 @@ class NetboxInterfacesTasks:
             job: NorFab Job object containing relevant metadata.
             instance (str, optional): The NetBox instance name to use.
             dry_run (bool, optional): If True, no changes will be made to NetBox.
+            with_review (bool, optional): Preview changes, ask for review, then apply them.
             timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
             devices (list, optional): List of device names to sync.
             process_deletions (bool, optional): If True, delete interfaces present in
@@ -1109,7 +1115,15 @@ class NetboxInterfacesTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
-        if dry_run is True:
+        if with_review and not review_sync_task_result(
+            job, "interface sync", full_diff
+        ):
+            ret.status = "skipped"
+            ret.result = full_diff
+            ret.dry_run = True
+            ret.messages.append("review declined; changes were not applied")
+            return ret
+        elif dry_run is True:
             job.event(
                 "dry-run requested, returning interface sync diff without changes"
             )
@@ -1398,6 +1412,7 @@ class NetboxInterfacesTasks:
         job: Job,
         instance: Union[None, str] = None,
         dry_run: bool = False,
+        with_review: bool = False,
         timeout: int = 60,
         devices: Union[None, list] = None,
         branch: str = None,
@@ -1437,6 +1452,7 @@ class NetboxInterfacesTasks:
             job: NorFab Job object containing relevant metadata.
             instance (str, optional): The NetBox instance name to use.
             dry_run (bool, optional): If True, no changes will be made to NetBox.
+            with_review (bool, optional): Preview changes, ask for review, then apply them.
             timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branch name to use.
@@ -1686,7 +1702,29 @@ class NetboxInterfacesTasks:
             f"{len(bulk_update_mac)} update"
         )
 
-        if dry_run is True:
+        if with_review:
+            mac_preview_result = {
+                device_name: {
+                    "created": list(device_result["created"]),
+                    "updated": list(device_result["updated"]),
+                    "in_sync": list(device_result["in_sync"]),
+                }
+                for device_name, device_result in device_results.items()
+            }
+            for m in bulk_create_mac:
+                device_name = all_mac_live[m["mac_address"]]["device"]
+                mac_preview_result[device_name]["created"].append(m["mac_address"])
+            for m in bulk_update_mac:
+                device_name = all_mac_live[m["mac_address"]]["device"]
+                mac_preview_result[device_name]["updated"].append(m["mac_address"])
+            # request confirmation from user
+            if not review_sync_task_result(job, "MAC address sync", mac_preview_result):
+                ret.status = "skipped"
+                ret.result = mac_preview_result
+                ret.dry_run = True
+                ret.messages.append("review declined; changes were not applied")
+                return ret
+        elif dry_run is True:
             job.event(
                 "dry-run requested, returning MAC address sync plan without changes"
             )

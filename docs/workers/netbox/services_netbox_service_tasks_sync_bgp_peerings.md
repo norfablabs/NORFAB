@@ -26,6 +26,12 @@ Synchronises BGP sessions between live network devices and the NetBox BGP plugin
 5. Nornir returns parsed BGP session data to NetBox worker
 6. NetBox worker computes diff, then writes creates/updates/deletes to NetBox
 
+**With Review** - Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+
+!!! note
+    
+    When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
+
 ## Prerequisites
 
 - **NetBox BGP plugin** (`netbox-bgp`) must be installed and enabled on the NetBox instance.

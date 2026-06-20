@@ -70,6 +70,9 @@ class SyncDeviceInventoryShell(
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
+        if nowait and kwargs.get("with_review"):
+            raise ValueError("'with-review' cannot be combined with 'nowait'")
+
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
         kwargs.pop("datasource", None)
