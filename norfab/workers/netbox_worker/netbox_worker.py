@@ -12,7 +12,9 @@ import pynetbox
 import requests
 from deepdiff import DeepDiff
 from diskcache import FanoutCache
+from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from urllib3.util.retry import Retry
 
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
@@ -137,6 +139,22 @@ class NetboxWorker(
             "netbox_connect_timeout", 10
         )
         self.netbox_read_timeout = self.netbox_inventory.get("netbox_read_timeout", 300)
+        self.netbox_retry = Retry(
+            total=self.netbox_inventory.get("netbox_retries", 3),
+            connect=self.netbox_inventory.get("netbox_retries", 3),
+            read=self.netbox_inventory.get("netbox_retries", 3),
+            status=self.netbox_inventory.get("netbox_retries", 3),
+            backoff_factor=self.netbox_inventory.get("netbox_retry_backoff", 0.5),
+            status_forcelist=(429, 500, 502, 503, 504),
+            allowed_methods=None,
+        )
+        self.netbox_http_session = requests.Session()
+        self.netbox_http_session.mount(
+            "http://", HTTPAdapter(max_retries=self.netbox_retry)
+        )
+        self.netbox_http_session.mount(
+            "https://", HTTPAdapter(max_retries=self.netbox_retry)
+        )
         self.cache_use = self.netbox_inventory.get("cache_use", True)
         self.cache_ttl = self.netbox_inventory.get("cache_ttl", 31557600)  # 1 Year
         self.branch_create_timeout = self.netbox_inventory.get(
@@ -175,6 +193,8 @@ class NetboxWorker(
         """
         if self.cache:
             self.cache.close()
+        if getattr(self, "netbox_http_session", None):
+            self.netbox_http_session.close()
 
     # ----------------------------------------------------------------------
     # Netbox Service Functions that exposed for calling
@@ -436,7 +456,7 @@ class NetboxWorker(
         }
 
         try:
-            response = requests.get(
+            response = self.netbox_http_session.get(
                 f"{params['url']}/api/status",
                 verify=params.get("ssl_verify", True),
                 timeout=(self.netbox_connect_timeout, self.netbox_read_timeout),
@@ -508,6 +528,9 @@ class NetboxWorker(
         """
         params = self._get_instance_params(instance)
         nb = pynetbox.api(url=params["url"], token=params["token"], threading=True)
+        adapter = HTTPAdapter(max_retries=self.netbox_retry)
+        nb.http_session.mount("http://", adapter)
+        nb.http_session.mount("https://", adapter)
 
         if params.get("ssl_verify") == False:
             nb.http_session.verify = False
@@ -975,9 +998,12 @@ class NetboxWorker(
         api = api.strip("/")
 
         log.info(f"{self.name} - REST {method.upper()} '{nb_params['url']}/api/{api}/'")
+        kwargs.setdefault(
+            "timeout", (self.netbox_connect_timeout, self.netbox_read_timeout)
+        )
 
         # send request to Netbox REST API
-        response = getattr(requests, method)(
+        response = getattr(self.netbox_http_session, method)(
             url=f"{nb_params['url']}/api/{api}/",
             headers={
                 "Content-Type": "application/json",

@@ -9,6 +9,10 @@
 4. Improving file tab completion choice handling by returning top folders only not all files in the tree
 5. Added device manufacturer, platform and type to Netbox inventory transform function
 
+## BUGS
+
+1. Fixed Netbox worker API calls to use retry-enabled sessions for status, REST, GraphQL, and `pynetbox` requests to reduce intermittent failures from transient Netbox gateway errors.
+
 ---
 
 # 0.20.0

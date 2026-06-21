@@ -395,7 +395,7 @@ class NetboxGraphqlTasks:
             f"{self.name} - sending GraphQL query '{payload}' to URL '{nb_params['url']}/graphql/'"
         )
         job.event(f"executing GraphQL query against '{instance}'")
-        req = requests.post(
+        req = self.netbox_http_session.post(
             url=f"{nb_params['url']}/graphql/",
             headers={
                 "Content-Type": "application/json",
