@@ -8,6 +8,7 @@
 3. Enhancing nfcli terminal event output, added header, footer job info, shortened timestamps, removed uuid from every event, its only in header, additional summary info displayed in footer now.
 4. Improving file tab completion choice handling by returning top folders only not all files in the tree
 5. Added device manufacturer, platform and type to Netbox inventory transform function
+6. Updated Nornir NFCLI table rendering to use PICLE table outputter and removed `nornir-salt` from `nfcli` installation extras.
 
 ## BUGS
 

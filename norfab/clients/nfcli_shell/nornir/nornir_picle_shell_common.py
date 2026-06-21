@@ -2,6 +2,7 @@ import builtins
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
+from picle.models import Outputters
 from pydantic import (
     BaseModel,
     Field,
@@ -11,6 +12,88 @@ from pydantic import (
 )
 
 from ..common import log_error_or_result, run_future_job
+
+# ---------------------------------------------------------------------------------------------
+# COMMON FUNCTIONS
+# ---------------------------------------------------------------------------------------------
+
+
+def tabulate_worker_results(
+    result: dict,
+    table: Union[dict, str, bool],
+    headers: Union[str, list] = "keys",
+    headers_exclude: Union[str, list] = None,
+    sortby: str = "host",
+    reverse: bool = False,
+):
+    """Return tabulated list-of-dicts worker results or raw result if shape differs."""
+    if not isinstance(result, dict):
+        return result
+
+    table_data = []
+
+    for w_name, w_res in result.items():
+        if not isinstance(w_res, list):
+            return result
+
+        for item in w_res:
+            if not isinstance(item, dict):
+                return result
+
+            table_data.append({**item, "worker": w_name})
+
+    table_kwargs = {
+        "headers_exclude": headers_exclude or [],
+        "sortby": sortby,
+        "reverse": reverse,
+    }
+
+    if table in ["brief", "terse"]:
+        table_kwargs.update(
+            {
+                "tablefmt": "grid" if table == "brief" else "simple",
+                "showindex": True,
+                "headers": (
+                    ["host", "name", "result", "exception"]
+                    if headers == "keys"
+                    else headers
+                ),
+            }
+        )
+    elif table is True:
+        table_kwargs.update(
+            {"tablefmt": "simple", "showindex": False, "headers": headers}
+        )
+    elif table == "extend":
+        extended_table_data = []
+        for row in table_data:
+            row_result = row.get("result")
+            if isinstance(row_result, list):
+                for item in row_result:
+                    if isinstance(item, dict):
+                        extended_table_data.append({**row, **item})
+                    else:
+                        extended_table_data.append({**row, "result": item})
+            else:
+                extended_table_data.append(row)
+        table_data = extended_table_data
+        table_kwargs.update(
+            {"tablefmt": "simple", "showindex": False, "headers": headers}
+        )
+    elif isinstance(table, dict):
+        table_kwargs.update(table)
+        table_kwargs.setdefault("headers", headers)
+        table_kwargs.setdefault("showindex", False)
+    elif table is False:
+        return table_data
+    else:
+        return table_data
+
+    if table_kwargs.get("headers") == "keys":
+        table_kwargs["headers"] = None
+
+    return Outputters.outputter_tabulate_table(list(table_data), **table_kwargs)
+
 
 # ---------------------------------------------------------------------------------------------
 # COMMON MODELS

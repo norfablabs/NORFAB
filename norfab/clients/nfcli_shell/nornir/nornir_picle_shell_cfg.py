@@ -1,7 +1,6 @@
 import json
 from typing import List, Optional, Union
 
-from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
@@ -26,6 +25,7 @@ from ..common import ClientRunJobArgs, log_error_or_result, run_future_job
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
+    tabulate_worker_results,
 )
 
 
@@ -153,14 +153,9 @@ class NornirCfgShell(
 
         # form table results
         if table:
-            table_data = []
-            for w_name, w_res in result.items():
-                for item in w_res:
-                    item["worker"] = w_name
-                    table_data.append(item)
-            ret = TabulateFormatter(
-                table_data,
-                tabulate=table,
+            ret = tabulate_worker_results(
+                result=result,
+                table=table,
                 headers=headers,
                 headers_exclude=headers_exclude,
                 sortby=sortby,

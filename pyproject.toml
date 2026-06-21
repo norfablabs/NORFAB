@@ -139,7 +139,6 @@ nfcli = [
     "rich",
     "tabulate",
     "pydantic",
-    "nornir-salt",
     "pyreadline3"
 ]
 nornirservice = [

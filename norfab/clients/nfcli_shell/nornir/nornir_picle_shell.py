@@ -2,7 +2,6 @@ import builtins
 import logging
 from typing import Any, List, Union
 
-from nornir_salt.plugins.functions import TabulateFormatter
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import (
     BaseModel,
@@ -22,6 +21,7 @@ from .nornir_picle_shell_cli import NornirCliShell
 from .nornir_picle_shell_common import (
     NorniHostsFilters,
     TabulateTableModel,
+    tabulate_worker_results,
 )
 from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
@@ -75,19 +75,19 @@ class NornirShowHostsModel(
         if table:
             if table is True or table == "brief":
                 table = {"tablefmt": "grid"}
-            table_data = []
+            table_result = {}
             for w_name, w_res in result.items():
                 if isinstance(w_res, list):
-                    for item in w_res:
-                        table_data.append({"worker": w_name, "host": item})
+                    table_result[w_name] = [{"host": item} for item in w_res]
                 elif isinstance(w_res, dict):
-                    for host, host_data in w_res.items():
-                        table_data.append({"worker": w_name, "host": host, **host_data})
+                    table_result[w_name] = [
+                        {"host": host, **host_data} for host, host_data in w_res.items()
+                    ]
                 else:
                     return result
-            ret = TabulateFormatter(  # tuple to return outputter reference
-                table_data,
-                tabulate=table,
+            ret = tabulate_worker_results(
+                result=table_result,
+                table=table,
                 headers=headers,
                 headers_exclude=headers_exclude,
                 sortby=sortby,

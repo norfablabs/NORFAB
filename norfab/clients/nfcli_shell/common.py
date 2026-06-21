@@ -188,10 +188,10 @@ def run_future_job(
     result = future.result(markdown=markdown)
     worker_count = len(result) if isinstance(result, dict) else len(stats["workers"])
     richconsole.print(
-        "\n────────────────────────────────────── [bold]Job Results[/bold] ─────────────────────────────────────"
         f"\nCompleted in {elapsed:.2f}s | workers: {worker_count} | "
         f"events: {stats['events']} | warnings: {stats['warnings']} | "
         f"errors: {stats['errors']}\n"
+        "\n────────────────────────────────────── [bold]Job Results[/bold] ─────────────────────────────────────\n"
     )
 
     return result
