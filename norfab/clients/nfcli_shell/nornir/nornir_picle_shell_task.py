@@ -34,8 +34,8 @@ class NornirTaskShell(
     )
 
     @staticmethod
-    def source_plugin() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_plugin(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

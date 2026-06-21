@@ -48,12 +48,12 @@ class NornirTestShell(
     )
 
     @staticmethod
-    def source_suite() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_suite(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
-    def source_job_data() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_job_data(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

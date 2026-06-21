@@ -95,18 +95,18 @@ class NornirCliShell(
     )
 
     @staticmethod
-    def source_commands() -> list:
-        completions = ClientRunJobArgs.walk_norfab_files()
+    def source_commands(choice: str = None) -> list:
+        completions = ClientRunJobArgs.walk_norfab_files(choice)
         completions.append("load-terminal")
         return completions
 
     @staticmethod
-    def source_run_ttp() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_run_ttp(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
-    def source_job_data() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_job_data(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

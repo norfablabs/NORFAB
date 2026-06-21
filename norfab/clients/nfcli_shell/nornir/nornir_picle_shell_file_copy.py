@@ -50,8 +50,8 @@ class NornirFileCopyShell(
     plugin: NrFileCopyPlugins = Field(None, description="Connection plugin parameters")
 
     @staticmethod
-    def source_source_file() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_source_file(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

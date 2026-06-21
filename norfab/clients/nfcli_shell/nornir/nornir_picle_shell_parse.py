@@ -123,7 +123,7 @@ class TTPParseModel(
     @staticmethod
     def source_template(choice) -> list:
         if choice and choice.startswith("nf://"):
-            return ClientRunJobArgs.walk_norfab_files()
+            return ClientRunJobArgs.walk_norfab_files(choice)
         elif choice and choice.startswith("ttp://") and HAS_TTP_TEMPLATES:
             return list_templates_refs()
         else:
@@ -177,7 +177,7 @@ class TextFSMParseModel(
 
     @staticmethod
     def source_template(choice) -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

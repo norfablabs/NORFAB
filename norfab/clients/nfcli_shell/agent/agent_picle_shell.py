@@ -88,8 +88,8 @@ class AgentInvoke(ClientRunJobArgs):
         outputter = Outputters.outputter_rich_markdown
 
     @staticmethod
-    def source_name() -> list:
-        return ["NorFab"] + ClientRunJobArgs.walk_norfab_files()
+    def source_name(choice: str = None) -> list:
+        return ["NorFab"] + ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

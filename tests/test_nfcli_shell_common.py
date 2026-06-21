@@ -1,6 +1,7 @@
 import builtins
 
 from norfab.clients.nfcli_shell.common import ClientRunJobArgs
+from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_cfg import NornirCfgShell
 
 
 class FakeNFClient:
@@ -60,4 +61,25 @@ def test_walk_norfab_files_returns_entries_matching_choice(monkeypatch):
     assert ClientRunJobArgs.walk_norfab_files("nf://agents/") == [
         "nf://agents/client_agent_interface_health_checker.yaml",
         "nf://agents/nested/",
+    ]
+
+
+def test_nornir_cfg_config_source_returns_entries_matching_choice(monkeypatch):
+    monkeypatch.setattr(
+        builtins,
+        "NFCLIENT",
+        FakeNFClient(
+            [
+                "nf://cfg/base.txt",
+                "nf://cfg/templates/hostname.txt",
+                "nf://cli/interfaces_status.txt",
+            ]
+        ),
+        raising=False,
+    )
+
+    assert NornirCfgShell.source_config("nf://cfg/") == [
+        "nf://cfg/base.txt",
+        "nf://cfg/templates/",
+        "load-terminal",
     ]

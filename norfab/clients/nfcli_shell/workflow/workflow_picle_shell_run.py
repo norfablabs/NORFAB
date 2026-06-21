@@ -25,8 +25,8 @@ class WorkflowRunShell(
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def source_workflow() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_workflow(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

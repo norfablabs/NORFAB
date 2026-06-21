@@ -36,8 +36,8 @@ class DeployCommand(
     ClientRunJobArgs, DeployInput, use_enum_values=True, populate_by_name=True
 ):
     @staticmethod
-    def source_topology() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_topology(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):

@@ -128,8 +128,8 @@ class FakeNOSStartCommand(
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def source_inventory() -> list:
-        return ClientRunJobArgs.walk_norfab_files()
+    def source_inventory(choice: str = None) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
 
     @staticmethod
     def run(*args: object, **kwargs: object):
