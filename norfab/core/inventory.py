@@ -467,7 +467,7 @@ class NorFabInventory:
         self.plugins = {}
 
         if data:
-            self.base_dir = base_dir or os.path.split(os.getcwd())[0]
+            self.base_dir = os.path.abspath(base_dir or os.getcwd())
             self.load_data(data)
         elif path:
             path = os.path.abspath(path)
