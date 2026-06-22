@@ -9,10 +9,12 @@
 4. Improving file tab completion choice handling by returning top folders only not all files in the tree
 5. Added device manufacturer, platform and type to Netbox inventory transform function
 6. Updated Nornir NFCLI table rendering to use PICLE table outputter and removed `nornir-salt` from `nfcli` installation extras.
+7. Added `name` argument to NFAPI `make_client()` and deterministic default client names using the entry script and current folder hash to reduce client identity and local job database collisions.
 
 ## BUGS
 
 1. Fixed Netbox worker API calls to use retry-enabled sessions for status, REST, GraphQL, and `pynetbox` requests to reduce intermittent failures from transient Netbox gateway errors.
+2. Inventory loading fixed to correctly calculate `base_dir` when `inventory_data used`
 
 ---
 

@@ -1,7 +1,9 @@
+import hashlib
 import logging
 import logging.config
 import os
 import signal
+import sys
 import time
 from importlib.metadata import EntryPoint, entry_points
 from multiprocessing import Event, Process, Queue
@@ -582,13 +584,16 @@ class NorFab:
             # stop logging thread
             log.info("NorFab is exiting, stopping logging queue listener")
 
-    def make_client(self, broker_endpoint: str = None) -> NFPClient:
+    def make_client(self, broker_endpoint: str = None, name: str = None) -> NFPClient:
         """
         Creates and returns an NFPClient instance.
 
         Args:
             broker_endpoint (str, optional): The broker endpoint to connect to.
                 If not provided, the instance's broker_endpoint attribute will be used.
+            name (str, optional): Client name to use as the broker identity and
+                local job database folder. If not provided, defaults to
+                '<entry script filename>_<current folder hash>_NFPClient'.
 
         Returns:
             NFPClient: The created client instance if a broker endpoint is defined.
@@ -599,10 +604,20 @@ class NorFab:
             instance's client attribute.
         """
         if broker_endpoint or self.broker_endpoint:
+            if name is None:
+                filename = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+                cwd_hash = hashlib.sha256(
+                    os.path.abspath(os.getcwd()).encode("utf-8")
+                ).hexdigest()[:6]
+                name = (
+                    f"{filename}_{cwd_hash}_NFPClient"
+                    if filename
+                    else f"{cwd_hash}_NFPClient"
+                )
             client = NFPClient(
                 self.inventory,
                 broker_endpoint or self.broker_endpoint,
-                "NFPClient",
+                name,
                 self.clients_exit_event,
             )
             if self.client is None:  # own the first client

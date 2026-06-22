@@ -64,6 +64,50 @@ All interaction with NorFab happens via client, to create a client need to call 
 
 Calling `destroy` method will kill all the clients as well.
 
+## Client Names
+
+Each NorFab client has a name. The name is used as the client identity when
+communicating with the broker and is also used for the client's local job
+database and files under `__norfab__/files/client/`.
+
+By default, `make_client()` derives the name from the Python entry script and
+adds a short hash of the current folder path:
+
+```
+client = nf.make_client()
+```
+
+For example, running `python lab.py` creates a client name similar to
+`lab_a1b2c3_NFPClient`. The folder hash keeps default names deterministic
+while avoiding collisions between projects that run scripts with the same file
+name. If Python cannot determine the entry script name, the default uses
+`<folder-hash>_NFPClient`.
+
+You can also provide an explicit name:
+
+```
+client = nf.make_client(name="lab_client_1")
+```
+
+Use explicit names when running multiple clients from the same script, shell,
+notebook, test runner, or application directory:
+
+```
+client_1 = nf.make_client(name="lab_client_1")
+client_2 = nf.make_client(name="lab_client_2")
+```
+
+Unique client names prevent clients from sharing the same broker identity and
+local job database. This helps avoid cases where replies or events for one
+client are delivered to another client, or where multiple clients read and
+write the same local job state while fetching results.
+
+Think of the client name as a network address, not just a display label. The
+broker uses this name to route replies and events back to the client. Two active
+clients with the same name are competing for the same broker route, so a later
+connection can disrupt an earlier one. If two clients need to be active at the
+same time, give them different names.
+
 ## Running Jobs
 
 NorFab client supports two ways to run worker tasks:
