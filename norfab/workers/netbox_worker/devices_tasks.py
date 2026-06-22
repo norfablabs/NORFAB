@@ -286,8 +286,18 @@ class NetboxDevicesTasks:
             all_devices_raw = {}
 
             for filter_item in filters_to_fetch:
-                for device in nb.dcim.devices.filter(**filter_item):
-                    all_devices_raw.setdefault(device.name, device)
+                # use bulk filter if only single list-like filter criteria given
+                if len(filter_item) == 1:
+                    filter_key, filter_value = next(iter(filter_item.items()))
+                    if isinstance(filter_value, list):
+                        for device in self.bulk_filter(
+                            nb.dcim.devices, filter_key, filter_value
+                        ):
+                            all_devices_raw.setdefault(device.name, device)
+                # filter as is in case multiple filtering criteria or scalar value given
+                else:
+                    for device in nb.dcim.devices.filter(**filter_item):
+                        all_devices_raw.setdefault(device.name, device)
 
             job.event(f"retrieved {len(all_devices_raw)} device(s) from NetBox")
 

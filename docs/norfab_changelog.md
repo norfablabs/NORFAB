@@ -15,6 +15,7 @@
 
 1. Fixed Netbox worker API calls to use retry-enabled sessions for status, REST, GraphQL, and `pynetbox` requests to reduce intermittent failures from transient Netbox gateway errors.
 2. Inventory loading fixed to correctly calculate `base_dir` when `inventory_data used`
+3. Fixed Netbox `get_devices` filtering with large single-key list filters to avoid URI length errors.
 
 ---
 
