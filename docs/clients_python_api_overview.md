@@ -102,11 +102,13 @@ local job database. This helps avoid cases where replies or events for one
 client are delivered to another client, or where multiple clients read and
 write the same local job state while fetching results.
 
-Think of the client name as a network address, not just a display label. The
-broker uses this name to route replies and events back to the client. Two active
-clients with the same name are competing for the same broker route, so a later
-connection can disrupt an earlier one. If two clients need to be active at the
-same time, give them different names.
+!!! note:
+
+    Think of the client name as a network address, not just a display label. The
+    broker uses this name to route replies and events back to the client. Two active
+    clients with the same name are competing for the same broker route, so a later
+    connection can disrupt an earlier one. If two clients need to be active at the
+    same time, give them different names.
 
 ## Running Jobs
 
