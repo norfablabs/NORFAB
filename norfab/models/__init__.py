@@ -48,20 +48,6 @@ class EventTypes(str, Enum):
     input_response = "input_response"
 
 
-class InputRequestModel(BaseModel):
-    id: StrictStr = Field(default_factory=lambda: uuid4().hex)
-    question: StrictStr = Field(...)
-    default: Any = Field(default=False)
-    metadata: Dict = Field(default_factory=dict)
-
-
-class InputResponseModel(BaseModel):
-    input_id: StrictStr = Field(...)
-    value: Any = Field(default=None)
-    cancel: StrictBool = Field(default=False)
-    metadata: Dict = Field(default_factory=dict)
-
-
 class NorFabEvent(BaseModel):
     event_type: EventTypes = Field(default=EventTypes.progress)
     message: StrictStr = Field(...)
@@ -83,6 +69,20 @@ class NorFabEvent(BaseModel):
         return self
 
 
+class InputRequestModel(BaseModel):
+    id: StrictStr = Field(default_factory=lambda: uuid4().hex)
+    question: StrictStr = Field(...)
+    default: Any = Field(default=False)
+    metadata: Dict = Field(default_factory=dict)
+
+
+class InputResponseModel(BaseModel):
+    input_id: StrictStr = Field(...)
+    value: Any = Field(default=None)
+    cancel: StrictBool = Field(default=False)
+    metadata: Dict = Field(default_factory=dict)
+
+    
 # ------------------------------------------------------
 # NorFab worker result models
 # ------------------------------------------------------
