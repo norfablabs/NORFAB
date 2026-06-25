@@ -112,7 +112,7 @@ class NetboxTopologyTasks:
         sites: Union[None, list] = None,
         dry_run: bool = False,
         branch: Union[None, str] = None,
-        timeout: int = 60,
+        timeout: int = 600,
         **kwargs: dict,
     ) -> Result:
         """

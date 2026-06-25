@@ -10,12 +10,20 @@
 5. Added device manufacturer, platform and type to Netbox inventory transform function
 6. Updated Nornir NFCLI table rendering to use PICLE table outputter and removed `nornir-salt` from `nfcli` installation extras.
 7. Added `name` argument to NFAPI `make_client()` and deterministic default client names using the entry script and current folder hash to reduce client identity and local job database collisions.
+8. Added support to pass on job object to RetryRunner for connection events logging
 
 ## BUGS
 
 1. Fixed Netbox worker API calls to use retry-enabled sessions for status, REST, GraphQL, and `pynetbox` requests to reduce intermittent failures from transient Netbox gateway errors.
 2. Inventory loading fixed to correctly calculate `base_dir` when `inventory_data used`
 3. Fixed Netbox `get_devices` filtering with large single-key list filters to avoid URI length errors.
+4. Fixing Nornir parse TTP to not exit the job if have some hosts failed.
+5. Fixing Netbox inventory sync to not exit on devices that failed collecting live data, skip and continue processing the rest instead.
+
+## CHANGES
+
+1. Changed nornir parse ttp default mode to non-strict
+3. Changed netbox sync tasks default timeout to 600
 
 ---
 

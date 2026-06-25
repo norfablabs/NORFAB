@@ -1,4 +1,4 @@
-# ADR - NorFab Logging Isolation and Multi-Process Log Files
+# ADR - NorFab Library Logging and Per-Process Log Files
 
 ## Status
 
@@ -6,423 +6,504 @@ Proposed.
 
 ## Date
 
-2026-06-22.
+2026-06-24.
+
+## Decision
+
+Normalize NorFab logging around the standard Python boundary:
+
+- `norfab.core.nfapi.NorFab` behaves as a library API.
+- Applications that use NFAPI own logging setup.
+- `nfcli` is the NorFab application and sets up NorFab default logging before
+  constructing `NorFab`.
+- Parent scripts that import NFAPI keep ownership of their own logging.
+
+`NorFab.__init__()` should no longer call `logging.config.dictConfig()` or
+construct application log handlers as an implicit side effect. NFAPI should emit
+records through normal module loggers such as `norfab.core.nfapi`,
+`norfab.core.client`, `norfab.core.broker`, and worker module loggers.
+
+Abandon `__norfab__/logs/norfab.log` as the primary shared runtime log file.
+Each NorFab process writes to its own log file under `__norfab__/logs`.
+
+Default application logging should use a small NorFab logging helper called by
+`nfcli` and by NorFab-owned broker/worker process entrypoints. The helper should
+use only the Python standard library and a custom JSON formatter for the default
+file sink.
+
+The inventory `logging` section remains based on Python's
+`logging.config.dictConfig` schema. Per-process JSONL files are the default
+NorFab file destination, not the only supported logging destination. Inventory
+logging can still configure additional or replacement handlers such as
+`SysLogHandler`, journald handlers supplied by optional packages, Windows Event
+Log handlers, SMTP handlers, socket handlers, stream handlers, filters, and
+formatters.
 
 ## Context
 
-NorFab currently treats `NorFab(...)` construction as application startup for
-logging. `NorFab.__init__()` loads inventory, creates the log queue, creates the
-`__norfab__/logs` directory, and calls `setup_logging()`.
-
-`NorFab.make_client()` does not directly configure logging, but normal
-client-only usage still constructs a `NorFab` object first:
+Current NFAPI construction configures process logging:
 
 ```python
 nf = NorFab(inventory="inventory.yaml")
 client = nf.make_client()
 ```
 
-That means a script that only wants a client still receives the side effects of
-`NorFab.setup_logging()`. The current setup calls:
+Even if the caller only wants a client, `NorFab.__init__()` calls
+`setup_logging()`, which applies inventory logging with:
 
 ```python
 logging.config.dictConfig(self.inventory["logging"])
 ```
 
-The default listener config defines `root.handlers = ["terminal", "file"]`, so
-the parent application's root handlers are replaced by NorFab's handlers. The
-inventory uses `disable_existing_loggers: False`, but that only preserves named
-loggers. It does not preserve root handlers when the `root` section is supplied
-in the `dictConfig`.
+The default logging config contains a `root` section and handlers for terminal
+and `__norfab__/logs/norfab.log`. This replaces the parent application's root
+handlers. `disable_existing_loggers: False` keeps named loggers alive, but it
+does not preserve the root handlers once `dictConfig()` configures `root`.
 
-NorFab also uses the same default file for all NFAPI processes started from the
-same base directory:
+The current queue logging model is useful inside one NorFab-owned process tree:
 
-```text
-__norfab__/logs/norfab.log
-```
+- parent NFAPI process owns terminal/file handlers;
+- broker and workers send records to the parent with `QueueHandler`;
+- one parent `QueueListener` writes the shared log file.
 
-The listener uses Python's standard `logging.handlers.RotatingFileHandler`.
-That handler is safe enough for one process that owns the file, including child
-broker and worker processes that send records through that one process' queue.
-It is not safe when two independent NFAPI parent processes both open and rotate
-the same log file. On Windows this is especially visible because one process can
-hold the file while the other tries to write, rename, or rotate it.
+That model stops being safe when two independent NFAPI parent processes run
+from the same folder. Each process owns a different queue listener and both can
+open the same `__norfab__/logs/norfab.log`, causing file access and rotation
+collisions, especially on Windows.
 
-These are two separate problems:
+The cleaner split is:
 
-- Embedded/client-only NFAPI should not take ownership of the parent script's
-  logging configuration.
-- Multiple independent NFAPI processes should not write to the same rotating
-  log file unless there is a single writer or a multi-process-safe handler.
+- NFAPI does not decide application logging.
+- `nfcli` configures logs because it is an application.
+- every process writes its own log file, avoiding shared file ownership.
 
 ## Goals
 
-- Let parent applications keep their own logging configuration when they use
-  NorFab as a client library.
-- Keep NorFab broker and worker logs working when NorFab is used as the owning
-  application process.
-- Avoid collisions when several NFAPI processes run from the same folder.
-- Preserve a simple default for `nfcli` and standalone NorFab runs.
-- Keep the implementation compatible with the current queue-based broker and
-  worker logging model.
+- Keep code changes surgical and close to current logging paths.
+- Preserve simple `nfcli` behavior: users still get NorFab logs without extra
+  CLI flags or logging concepts.
+- Stop NFAPI from overriding parent application logging.
+- Avoid multi-process writes to the same rotating log file.
+- Keep broker, worker, and client logs discoverable under `__norfab__/logs`.
+- Use JSON lines so logs can later be queried and merged in a uniform order.
+- Avoid adding a logging dependency.
+- Preserve the existing inventory-driven logging flexibility based on Python
+  `dictConfig`.
 
 ## Non-Goals
 
-- Do not redesign the event bus or job event logging.
-- Do not require every user script to define a logging config.
-- Do not rely on operating-system-specific log file behavior.
-- Do not make independent Python processes share a `multiprocessing.Queue`.
-  That queue only works for processes created by the same parent.
+- Do not add user-facing `logging_mode`, `log_file_strategy`, or similar knobs.
+- Do not add a socket log receiver in this change.
+- Do not introduce a multi-process-safe third-party file handler.
+- Do not redesign task event handling or job event storage.
+- Do not implement the full log query CLI in the first minimal change.
 
-## Current Behavior
+## Proposed Minimal Implementation
 
-The current logging topology has two modes inside one NorFab-owned process tree:
+### Add A Small Logging Helper
 
-- The parent NFAPI process is the log listener. It applies inventory logging
-  configuration and owns terminal/file handlers.
-- Broker and worker child processes are log producers. They apply a producer
-  config with a `QueueHandler` on the root logger and send records to the
-  parent's queue.
-
-That model is good for `nf.start(run_broker=True, run_workers=True)` because
-there is one file owner.
-
-It is awkward for embedded usage because the parent application's root logger is
-reconfigured even when the script only wants a client.
-
-It is unsafe for two independent NFAPI parent processes because both become log
-listeners and both open `__norfab__/logs/norfab.log`.
-
-## Options
-
-### Option 1 - Add a `configure_logging` Flag
-
-Add a constructor flag:
-
-```python
-NorFab(..., configure_logging=True)
-```
-
-When `False`, NorFab does not call `setup_logging()` and does not start a
-`QueueListener`.
-
-This is the smallest change. It gives embedded applications a direct escape
-hatch:
-
-```python
-nf = NorFab(inventory="inventory.yaml", run_broker=False, run_workers=False, configure_logging=False)
-client = nf.make_client()
-```
-
-Drawbacks:
-
-- Users must know to pass the flag.
-- If they later call `start(run_broker=True)` with logging disabled, broker and
-  worker logs need either a delayed setup step or a clear warning.
-- It does not by itself solve shared `norfab.log` collisions for standalone
-  processes.
-
-### Option 2 - Add Logging Ownership Modes
-
-Add an explicit logging ownership argument:
-
-```python
-NorFab(..., logging_mode="auto")
-```
-
-Suggested values:
-
-- `auto`: choose based on requested role.
-- `standalone`: NorFab owns its logging pipeline.
-- `embedded`: NorFab does not configure global logging and leaves the parent
-  application in charge.
-- `disabled`: suppress NorFab logging except critical fallback output.
-
-Suggested `auto` behavior:
-
-- If `run_broker=True` or `run_workers=True`, use `standalone`.
-- If `run_broker=False` and `run_workers=False`, use `embedded`.
-
-This matches how the object is normally used:
-
-- `nfcli`, broker, and worker orchestration remain standalone.
-- Client-only scripts become embedded and stop overriding parent logging.
-
-An explicit mode still lets advanced users override the default:
-
-```python
-nf = NorFab(..., run_broker=False, run_workers=False, logging_mode="standalone")
-```
-
-### Option 3 - Configure the `norfab` Logger Instead of Root
-
-Move NorFab's application logging from the root logger to a named logger:
+Add a focused helper module, for example:
 
 ```text
-norfab
+norfab/core/logging.py
 ```
 
-The listener configuration would attach terminal/file handlers to
-`logging.getLogger("norfab")` and set `propagate=False` for that logger.
-NorFab modules already use names like `norfab.core.nfapi`, so they naturally
-sit below the `norfab` logger.
-
-Benefits:
-
-- Parent root handlers are not replaced.
-- Parent application logs and NorFab logs can be configured independently.
-- NorFab can still have its own terminal/file output in standalone mode.
-
-Important detail:
-
-Broker and worker subprocesses currently attach `QueueHandler` to root. To keep
-isolation, their producer config should also target the `norfab` logger when
-NorFab-owned logging is enabled. If NorFab intentionally wants to capture
-third-party logs from worker code, this should be a separate explicit option,
-for example `capture_root_logs=True`.
-
-Drawbacks:
-
-- Third-party library logs emitted from workers will not automatically go into
-  NorFab logs unless they propagate through `norfab` or root capture is enabled.
-- Inventory examples that configure `root` need a migration path or
-  compatibility adapter.
-
-### Option 4 - Snapshot and Restore Parent Root Handlers
-
-Before calling `dictConfig`, store the existing root handlers and restore them
-after NorFab client construction.
-
-This is not recommended as the main design. It is brittle because `dictConfig`
-can also change levels, filters, formatter objects, propagation, named loggers,
-and handler lifetimes. It may also close handlers that the parent application
-expects to keep.
-
-This can be useful only as a temporary compatibility measure.
-
-### Option 5 - Unique Log File Per NFAPI Process
-
-Keep the current handler type but stop independent processes from sharing the
-same file. For example:
-
-```text
-__norfab__/logs/norfab.log
-__norfab__/logs/norfab-client-<client-name>-<pid>.log
-__norfab__/logs/norfab-<role>-<pid>.log
-```
-
-Suggested policy:
-
-- A standalone process that starts the broker/workers owns
-  `__norfab__/logs/norfab.log`.
-- Client-only standalone logging uses a client-specific or pid-specific file.
-- Embedded client-only mode does not create a NorFab file handler unless
-  explicitly requested.
-
-Benefits:
-
-- Simple and uses only the standard library.
-- No cross-process rotation conflict.
-- Keeps each independent process' logs available.
-
-Drawbacks:
-
-- Logs are split across files.
-- Operators need a clear naming convention.
-
-### Option 6 - Single External Log Writer
-
-Keep one logical `norfab.log`, but route all independent processes to one log
-writer. Possible transports:
-
-- `logging.handlers.SocketHandler` to a local TCP log receiver.
-- A small NorFab log collector process.
-- OS logging such as journald, syslog, Windows Event Log, or container stdout.
-
-Benefits:
-
-- One consolidated log file.
-- Correct single-writer semantics.
-
-Drawbacks:
-
-- More moving parts.
-- Needs lifecycle management.
-- More complex than necessary for local client-only scripts.
-
-### Option 7 - Use a Multi-Process-Safe Rotating Handler
-
-Replace standard `RotatingFileHandler` with a handler that uses inter-process
-file locking, such as `concurrent-log-handler`'s
-`ConcurrentRotatingFileHandler`.
-
-Benefits:
-
-- Keeps the single-file behavior.
-- Minimal conceptual change for users.
-
-Drawbacks:
-
-- Adds a dependency.
-- Locking and rotation behavior must be tested on Windows, Linux, and network
-  or synced folders.
-- It still couples independent processes to one file, which can be noisy for
-  client-only use.
-
-## Recommended Direction
-
-Use a combination of Options 2, 3, and 5.
-
-1. Add an explicit logging ownership mode, with `auto` as the default.
-2. In embedded mode, do not call `logging.config.dictConfig()` and do not start
-   a `QueueListener`.
-3. In standalone mode, configure NorFab's named `norfab` logger instead of
-   replacing root handlers.
-4. Keep broker and worker child processes using queue logging, but attach the
-   producer `QueueHandler` to the `norfab` logger by default.
-5. Use one shared `norfab.log` only for the process tree that owns broker and
-   worker subprocesses.
-6. Use per-process log files, or no NorFab file logging, for independent
-   client-only processes.
-
-This separates the two concerns:
-
-- Logging ownership is controlled by `logging_mode`.
-- Log file collision avoidance is controlled by the file naming strategy for
-  independent NFAPI processes.
-
-## Proposed API
+The helper should expose simple functions such as:
 
 ```python
-NorFab(
-    inventory="./inventory.yaml",
-    inventory_data=None,
-    base_dir=None,
+setup_process_logging(
+    base_dir,
+    role,
+    name=None,
     log_level=None,
-    run_broker=True,
-    run_workers=True,
-    logging_mode="auto",
-    log_file_strategy="auto",
-    capture_root_logs=False,
+    inventory_logging=None,
 )
 ```
 
-`logging_mode`:
+The helper creates `__norfab__/logs` if needed and configures logging for the
+current process only.
 
-- `auto`: use `standalone` when broker/workers are requested, otherwise
-  `embedded`.
-- `standalone`: NorFab configures its own named logger and starts the log queue
-  listener.
-- `embedded`: NorFab leaves existing application logging alone.
-- `disabled`: NorFab suppresses its own logging setup.
+The helper should treat inventory logging as a per-process template:
 
-`log_file_strategy`:
+- copy the inventory `logging` dictionary before modifying it;
+- inject process metadata such as role, process name, worker name, client name,
+  and PID;
+- provide a safe per-process file handler when the inventory does not replace
+  the default file sink;
+- preserve custom inventory handlers where practical;
+- apply the resulting config in the current process only.
 
-- `auto`: use `shared` for broker/worker owner processes and `none` or
-  `per_process` for client-only processes.
-- `shared`: write to `__norfab__/logs/norfab.log`.
-- `per_process`: write to a pid/client-specific file.
-- `none`: do not add a NorFab file handler.
+No broad rewrite is required. Existing `setup_logging()` methods in NFAPI,
+broker, and worker can be reduced to thin calls into this helper, or NFAPI
+logging setup can be removed while broker/worker process entrypoints call the
+helper directly.
 
-`capture_root_logs`:
+### Move Default Log Construction To NFCLI
 
-- `False`: only NorFab's named logger is sent to the NorFab queue.
-- `True`: broker/worker producer processes also attach a queue handler to root
-  to capture third-party logs from worker code.
+`nfcli` should call the helper before creating `NorFab`.
 
-## Behavioral Examples
+Example shape:
 
-Embedded parent application:
+```python
+setup_process_logging(
+    base_dir=resolved_base_dir,
+    role="nfcli",
+    name="nfcli",
+    log_level=LOGLEVEL,
+    inventory_logging=inventory_logging,
+)
+
+nf = NorFab(
+    inventory=INVENTORY,
+    log_level=LOGLEVEL,
+    run_broker=...,
+    run_workers=...,
+)
+```
+
+`nfcli -c`, `nfcli -b`, `nfcli -w`, and default interactive shell usage should
+still produce logs automatically. The difference is ownership: `nfcli` chooses
+to configure logs because it is the application.
+
+Parent Python scripts that use NFAPI directly do not get NorFab application
+logging unless they configure logging themselves.
+
+### Per-Process Log Files
+
+Each process gets a safe default file named from its role and process identity.
+
+Suggested names:
+
+```text
+__norfab__/logs/nfcli-nfcli-<pid>.jsonl
+__norfab__/logs/broker-NFPBroker-<pid>.jsonl
+__norfab__/logs/worker-nornir-worker-1-<pid>.jsonl
+__norfab__/logs/client-<client-name>-<pid>.jsonl
+```
+
+Include the worker name for workers and the client name for clients. Include
+the PID to avoid collisions when the same worker or client name is started more
+than once. A process start timestamp may also be included if needed for stale
+file clarity:
+
+```text
+worker-nornir-worker-1-12345-20260624T101530.jsonl
+```
+
+The old shared file:
+
+```text
+__norfab__/logs/norfab.log
+```
+
+is no longer the primary runtime log destination.
+
+This does not remove other handler types. For example, an inventory can still
+send the same process records to syslog or another configured sink while the
+default NorFab file handler writes JSONL locally.
+
+### Rotation
+
+Use standard `logging.handlers.RotatingFileHandler` per process.
+
+Default rotation policy:
+
+```text
+backupCount: 30
+```
+
+Keep the existing `maxBytes` default unless there is a separate reason to
+change it. The important change is that rotation is per process, not shared
+across independent processes.
+
+### Custom JSON Formatter
+
+Use a small custom formatter instead of adding `python-json-logger` for the
+default NorFab JSONL file handler.
+
+Each line should be one JSON object. Required fields:
+
+```json
+{
+  "ts": "2026-06-24T10:15:30.123456+10:00",
+  "level": "INFO",
+  "logger": "norfab.core.worker",
+  "message": "worker started",
+  "pid": 12345,
+  "processName": "Process-2",
+  "threadName": "MainThread",
+  "role": "worker",
+  "name": "nornir-worker-1",
+  "module": "worker",
+  "line": 123
+}
+```
+
+Optional fields should be emitted when present on the log record:
+
+```text
+service
+worker
+client
+task
+job_uuid
+event_type
+exception
+```
+
+The formatter should preserve normal logging behavior by using
+`record.getMessage()` and `formatException()` for exceptions.
+
+Inventory may still define and use non-JSON formatters for terminal, syslog,
+Event Log, SMTP, or custom handlers. JSON formatting is required only for the
+default per-process file sink intended for future NorFab log querying.
+
+### Log Ordering Metadata
+
+To support future NFCLI interactive shell `show logging ...` commands or
+equivalent log query code, JSON records should include enough metadata for
+stable ordering:
+
+- timestamp with timezone;
+- PID;
+- process role;
+- process name;
+- optional per-process sequence number.
+
+Uniform ordering across processes will be timestamp-based. Exact sub-millisecond
+global ordering cannot be guaranteed, but timestamp plus PID plus sequence is
+stable and good enough for operational log review.
+
+## Behavior
+
+### NFCLI
+
+`nfcli` configures NorFab application logging.
+
+Examples:
+
+```bash
+nfcli -c
+nfcli -b
+nfcli -w
+nfcli
+```
+
+Expected behavior:
+
+- Logs are written under `__norfab__/logs`.
+- `nfcli -c` writes a client/nfcli process log.
+- broker and workers write their own process logs.
+- no process competes for `norfab.log`.
+
+### NFAPI As A Library
+
+Parent application:
 
 ```python
 import logging
 from norfab.core.nfapi import NorFab
 
-logging.basicConfig(filename="my_app.log", level=logging.INFO)
+logging.basicConfig(filename="parent.log", level=logging.INFO)
 
-nf = NorFab(
-    inventory="inventory.yaml",
-    run_broker=False,
-    run_workers=False,
-    logging_mode="embedded",
-)
+nf = NorFab(inventory="inventory.yaml", run_broker=True, run_workers=True)
+nf.start()
 client = nf.make_client()
 ```
 
 Expected behavior:
 
-- Parent script keeps `my_app.log`.
-- NorFab does not replace root handlers.
-- NorFab messages follow normal Python logging propagation and can be captured
-  by the parent if the parent wants them.
+- NFAPI does not replace parent root handlers.
+- NorFab log records propagate according to the parent's logging config unless
+  the parent config chooses otherwise.
+- If the parent wants NorFab-style JSON process files, it can call the same
+  helper that `nfcli` uses.
 
-Standalone NorFab process:
+### Broker And Workers
 
-```python
-nf = NorFab(inventory="inventory.yaml", logging_mode="standalone")
-nf.start(run_broker=True, run_workers=True)
+Broker and worker process entrypoints should configure their own process log
+file with the helper and apply the inventory logging template in that process.
+
+This removes the need for broker/worker child processes to share a log file
+through the parent NFAPI process. Existing queue logging can be removed or kept
+temporarily as compatibility during migration, but the target design is direct
+per-process logging setup.
+
+If the inventory configures external handlers, each broker or worker process
+uses those handlers independently. For example, a `SysLogHandler` configured in
+inventory sends records from every process to syslog, while the default file
+handler still writes a process-specific JSONL file.
+
+## Log Query Architecture
+
+Per-process log files make writes safe, but users still need a single view from
+the interactive shell. Log retrieval should follow NorFab ownership boundaries.
+
+### Worker Logs
+
+Workers should expose a task that reads their local process log files and
+returns matching JSON records to the client.
+
+Suggested task shape:
+
+```text
+service: workers
+task: logging_read
 ```
 
-Expected behavior:
+or a service-specific built-in worker task exposed consistently across worker
+types.
 
-- NorFab owns `__norfab__/logs/norfab.log`.
-- Broker and worker children send records to the parent listener queue.
-- Parent application logging is not relevant because NorFab is the application.
+The task should support filters such as:
 
-Second client-only process from the same folder:
-
-```python
-nf = NorFab(
-    inventory="inventory.yaml",
-    run_broker=False,
-    run_workers=False,
-    logging_mode="standalone",
-    log_file_strategy="per_process",
-)
-client = nf.make_client()
+```text
+since
+until
+level
+logger
+task
+job_uuid
+limit
+tail
+follow
 ```
 
-Expected behavior:
+The first implementation can support bounded reads only. Follow/streaming can
+be added later through the interactive shell or task streaming path.
 
-- The process does not open the broker owner's `norfab.log`.
-- Its file is unique, for example
-  `__norfab__/logs/norfab-client-myclient-12345.log`.
-- No standard-library rotating handler is shared between independent processes.
+### Broker Logs
 
-## Migration Notes
+The broker should expose an MMI command to read broker-local logs:
 
-The least surprising migration path is:
+```text
+mmi.service.broker logging_read
+```
 
-1. Add `logging_mode` and keep the old behavior behind `standalone`.
-2. Make `auto` the default.
-3. Treat `run_broker=False` and `run_workers=False` as embedded client-only
-   usage.
-4. Keep inventory `logging.root` support for compatibility, but internally map
-   it to the `norfab` logger when NorFab owns logging.
-5. Document that independent NFAPI processes must not share the standard
-   `RotatingFileHandler` file. Use `per_process`, `none`, a central log
-   collector, or a multi-process-safe handler.
+The broker MMI should use the same filter names and return the same JSON record
+shape as worker log tasks.
+
+### Client-Side Merge
+
+`norfab.core.client.NFPClient` should gain a small log merge helper that accepts
+record iterables from broker MMI and worker tasks, normalizes records, and
+returns a single ordered stream.
+
+Ordering should use:
+
+```text
+ts, pid, sequence
+```
+
+where `sequence` is optional. If a record is malformed, the client should keep
+the error local to the log query result instead of failing the entire query.
+
+NFCLI interactive shell `show logging ...` commands should use this client-side
+merge capability rather than duplicating merge logic in the shell models.
+
+## Inventory Compatibility
+
+Keep inventory logging support compatible with current behavior:
+
+- Continue accepting existing inventory `logging.handlers.terminal.level` and
+  `logging.handlers.file.level` values where practical.
+- Treat inventory logging as Python `dictConfig` and preserve user-defined
+  handlers, formatters, filters, loggers, and root settings where practical.
+- Map the old/default `file` handler settings to the per-process JSON file
+  handler.
+- Change default `backupCount` to 30 for the per-process file handler.
+- Treat `filename` from the default `file` handler carefully. The NorFab default
+  file sink should use a process-specific filename to avoid collisions.
+- Preserve clearly custom non-file handlers such as syslog, journald handlers,
+  Windows Event Log handlers, SMTP handlers, socket handlers, and stream
+  handlers.
+- Preserve custom file handlers where practical, but document that a custom
+  file handler pointing multiple processes at one normal rotating file is the
+  user's responsibility and can reintroduce file contention.
+
+The first implementation should avoid a large schema redesign. Existing logging
+inventory can be partially honored by the helper while the new default behavior
+stops using a shared `norfab.log`.
+
+Example inventory remains valid:
+
+```yaml
+logging:
+  handlers:
+    file:
+      level: DEBUG
+      maxBytes: 1024000
+      backupCount: 30
+    syslog:
+      class: logging.handlers.SysLogHandler
+      address: /dev/log
+      level: INFO
+  root:
+    handlers: [file, syslog]
+    level: INFO
+```
+
+In the new model, each process receives its own resolved `file.filename`, while
+the `syslog` handler is preserved.
+
+## Migration Plan
+
+Keep code changes small:
+
+1. Add the custom JSON formatter and process logging helper.
+2. Make `nfcli` call the helper before constructing `NorFab`.
+3. Stop `NorFab.__init__()` from applying global logging configuration.
+4. Update broker and worker process startup to call the helper with their role
+   and name.
+5. Update client creation paths used by `nfcli` to configure a client/nfcli log
+   file through the helper.
+6. Leave unrelated logging calls unchanged. Existing `log =
+   logging.getLogger(__name__)` usage remains correct.
+
+Do not refactor worker task logging, job events, CLI command behavior, or
+inventory loading as part of this change.
 
 ## Consequences
 
-- Parent scripts can call `NorFab(...).make_client()` without losing their
-  logging handlers.
-- Standalone NorFab still has a complete logging pipeline for broker and worker
-  subprocesses.
-- Independent client processes stop competing for `norfab.log`.
-- Users who want one combined log from many independent NFAPI processes need a
-  central writer or a multi-process-safe handler.
-- A small compatibility layer is needed for existing inventory files that only
-  configure `root`.
+- NFAPI behaves like a normal Python library.
+- Parent scripts keep their logging configuration.
+- `nfcli` still gives users NorFab logs by default.
+- Independent processes no longer compete for one rotating file.
+- Opening one static `norfab.log` is replaced by reading per-process JSONL log
+  files.
+- Inventory logging remains extensible through Python `dictConfig`; JSONL is
+  the default NorFab file sink, not a restriction on all logging destinations.
+- Future log query tooling can merge JSON records across files.
+- The first implementation is intentionally surgical: add helper, call helper
+  from app/process entrypoints, remove NFAPI global logging setup.
 
-## Open Questions
+## Follow-Up Work
 
-- Should `auto` embedded mode be selected only when both `run_broker=False` and
-  `run_workers=False`, or should there also be a `client_only=True` shortcut?
-- Should client-only `auto` use `log_file_strategy="none"` or
-  `log_file_strategy="per_process"` by default?
-- Should NorFab keep capturing third-party worker logs by default, or should
-  that require `capture_root_logs=True`?
-- Is adding `concurrent-log-handler` acceptable as an optional extra for users
-  who require one shared file across independent processes?
+- Write a NorFab logging tutorial that explains the new logging model from a
+  user's point of view:
+  - NFAPI behaves as a library and does not configure parent application
+    logging.
+  - `nfcli` configures NorFab logging as the NorFab application.
+  - The inventory `logging` section remains Python `dictConfig` compatible.
+  - Default file logs are per-process JSONL files under `__norfab__/logs`.
+  - Worker and broker names are used in log filenames.
+  - Rotation defaults to `backupCount: 30`.
+  - Examples show changing terminal/file levels, disabling terminal output,
+    adding syslog or journald/Event Log handlers, and using environment
+    variables with Jinja2.
+  - Troubleshooting explains why a shared `norfab.log` is no longer the default
+    and how to inspect or merge logs through the interactive shell.
+- Add NFCLI interactive shell `show logging ...` commands to read all
+  `__norfab__/logs/*.jsonl`, sort by timestamp, and filter by role, name,
+  level, logger, task, or job UUID.
+- Add worker log-reading task support so workers can return their local
+  per-process JSONL records to clients.
+- Add broker MMI log-reading support so broker-local JSONL records can be
+  queried through the same client flow.
+- Add client-side log merge utilities in `client.py` so NFCLI and other clients
+  can combine broker and worker log records in uniform timestamp order.
+- Add interactive shell support to follow multiple process logs.
+- Add interactive shell support to export logs to a combined human-readable
+  file when needed.
+- Document the new per-process log file naming convention.
+- Consider whether to keep a human-readable formatter for terminal output while
+  retaining JSONL for files.

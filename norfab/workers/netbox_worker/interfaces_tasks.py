@@ -625,7 +625,7 @@ class NetboxInterfacesTasks:
         interface_regex: Union[None, str] = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
-        timeout: int = 60,
+        timeout: int = 600,
         branch: str = None,
     ) -> Result:
         """
@@ -784,7 +784,7 @@ class NetboxInterfacesTasks:
         instance: Union[None, str] = None,
         dry_run: bool = False,
         with_review: bool = False,
-        timeout: int = 60,
+        timeout: int = 600,
         devices: Union[None, list] = None,
         process_deletions: bool = False,
         branch: str = None,
@@ -1413,7 +1413,7 @@ class NetboxInterfacesTasks:
         instance: Union[None, str] = None,
         dry_run: bool = False,
         with_review: bool = False,
-        timeout: int = 60,
+        timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
         filter_by_name: Union[None, str] = None,

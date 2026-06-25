@@ -82,7 +82,7 @@ class InputResponseModel(BaseModel):
     cancel: StrictBool = Field(default=False)
     metadata: Dict = Field(default_factory=dict)
 
-    
+
 # ------------------------------------------------------
 # NorFab worker result models
 # ------------------------------------------------------

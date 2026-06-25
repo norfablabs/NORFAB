@@ -495,8 +495,8 @@ class NornirWorker(
 
         # pass on job to runner for logging events
         if hasattr(nr.runner, "job"):
-            nr.runner.job = job 
-            
+            nr.runner.job = job
+
         # add processors if any
         if dp:
             processors.append(DataProcessor(dp))

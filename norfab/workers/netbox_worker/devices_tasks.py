@@ -346,7 +346,7 @@ class NetboxDevicesTasks:
         instance: Union[None, str] = None,
         dry_run: bool = False,
         with_review: bool = False,
-        timeout: int = 60,
+        timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
         process_deletions: bool = False,
@@ -544,15 +544,17 @@ class NetboxDevicesTasks:
         parse_worker_errors = []
         for worker_name, worker_data in parse_data.items():
             if worker_data["failed"]:
-                msg = f"{worker_name} - failed to parse inventory data from devices"
-                parse_worker_errors.append(msg)
-                log.warning(f"{msg}: {worker_data['errors']}")
-                job.event(msg, severity="WARNING")
-                continue
+                if not worker_data["result"]:
+                    msg = f"{worker_name} - failed to parse inventory data from devices"
+                    parse_worker_errors.append(msg)
+                    log.warning(f"{msg}: {worker_data['errors']}")
+                    job.event(msg, severity="WARNING")
+                    continue
             for device_name, host_inventory in worker_data["result"].items():
                 if device_name not in live_records_by_device:
                     continue
-                live_records_by_device[device_name].extend(host_inventory)
+                if host_inventory and isinstance(host_inventory, list):
+                    live_records_by_device[device_name].extend(host_inventory)
 
         # Normalize live and NetBox state.
         job.event("normalising live and NetBox inventory data")
@@ -1153,7 +1155,7 @@ class NetboxDevicesTasks:
         self,
         job: Job,
         instance: Union[None, str] = None,
-        timeout: int = 60,
+        timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
         check_interfaces: bool = True,
@@ -1351,7 +1353,7 @@ class NetboxDevicesTasks:
         self,
         job: Job,
         instance: Union[None, str] = None,
-        timeout: int = 60,
+        timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
         dry_run: bool = False,

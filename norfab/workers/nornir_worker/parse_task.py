@@ -166,7 +166,7 @@ class ParseTask:
         self,
         job: Job,
         template: Union[str, None] = None,
-        strict: bool = True,
+        strict: bool = False,
         structure: str = "flat_list",
         commands: Union[str, list[str], None] = None,
         get: Union[str, None] = None,
@@ -251,11 +251,14 @@ class ParseTask:
             )
             if result.failed:
                 ret.failed = True
-                log.error(f"Failed collecting commands output, errors: {result.errors}")
+                log.error(
+                    f"Failed collecting commands output, errors: {result.errors or result.messages}"
+                )
                 job.event("failed collecting commands output", severity="ERROR")
                 ret.errors.extend(result.errors)
                 ret.messages.extend(result.messages)
-                continue
+                if not result.result or not isinstance(result.result, dict):
+                    continue
             # parse commands output for each host
             for hname, hres in result.result.items():
                 input_data = []

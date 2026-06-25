@@ -609,7 +609,7 @@ class NetboxIpTasks:
         instance: Union[None, str] = None,
         dry_run: bool = False,
         with_review: bool = False,
-        timeout: int = 60,
+        timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
         anycast_ranges: Union[None, list] = None,

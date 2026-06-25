@@ -1875,7 +1875,7 @@ class NetboxBgpPeeringsTasks:
         dry_run: bool = False,
         with_review: bool = False,
         process_deletions: bool = False,
-        timeout: int = 60,
+        timeout: int = 600,
         branch: str = None,
         rir: str = None,
         message: str = None,
