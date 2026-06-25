@@ -373,6 +373,22 @@ class NetboxDevicesTasks:
         module types are reported unless explicitly created with
         ``create_module_bays`` or ``create_module_types``.
 
+        How it works:
+            1. Resolve the target device list from explicit ``devices`` and any
+               Nornir filter arguments.
+            2. Fetch the current NetBox device, module bay, and installed
+               module state for those devices.
+            3. Collect live inventory from Nornir using
+               ``parse_ttp(get="inventory")`` and optionally transform it.
+            4. Normalize live inventory and NetBox inventory into comparable
+               per-device dictionaries, including a synthetic ``chassis`` item
+               for device serial reconciliation.
+            5. Apply inventory include/exclude filters, calculate the diff, and
+               suppress unsafe deletes for slots that had incomplete live data.
+            6. Validate or create required module bays and module types, then
+               apply chassis serial updates, module creates, module updates,
+               and optional stale module deletions.
+
         Args:
             job: NorFab job object used for progress events.
             instance: NetBox instance name to target. Defaults to the worker's
@@ -410,7 +426,7 @@ class NetboxDevicesTasks:
             Result object containing the normalized diff, per-device sync
             outcome, and any partial errors.
         """
-        devices = devices or []
+        devices = list(devices or [])
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_inventory",
@@ -419,12 +435,53 @@ class NetboxDevicesTasks:
             dry_run=dry_run,
             diff={},
         )
+
+        # Pattern maps, transform function, and filter options used while
+        # normalising live inventory records.
+        inventory_patterns = None
+        transform_function = None
+        inventory_filter_options = {
+            "filter_by_module": filter_by_module,
+            "filter_by_slot": filter_by_slot,
+            "ignore_modules": ignore_modules,
+            "ignore_slots": ignore_slots,
+        }
+
+        # NetBox client and state keyed by device name. Module bays are
+        # slot -> bay ID; modules are split into comparable state and
+        # slot -> module ID.
+        nb = None
+        nb_devices_data = {}
+        nb_module_bays = {}
+        nb_modules = {}
+        nb_module_ids = {}
+
+        # Live parser results and normalized data prepared for diffing.
+        nornir_kwargs = {}
+        parse_data = None
+        live_records_by_device = {}
+        parse_worker_errors = []
+        normalised_live_all = {}
+        normalised_nb_all = {}
+        skipped_slots_by_device = {}
+        ignored_error_messages = set()
+        full_diff = {}
+
+        # Pre-write validation state and lookup caches.
+        missing_module_bay_keys = set()
+        module_type_lookup_cache = {}
+        missing_module_type_keys = set()
+        required_module_types = {}
+
+        # Per-device result tracking and bulk write payloads.
+        device_results = {}
+        bulk_update_modules = {}
+
         if self.is_url(inventory_map):
             inventory_map = yaml.safe_load(
                 self.fetch_file(inventory_map, raise_on_fail=True)
             )
         inventory_patterns = InventoryPatternMap.model_validate(inventory_map or {})
-        transform_function = None
         if self.is_url(inventory_transform):
             function_text = self.fetch_file(inventory_transform, raise_on_fail=True)
             globals_dict = {}
@@ -440,9 +497,7 @@ class NetboxDevicesTasks:
         if kwargs:
             job.event("resolving devices from Nornir filters")
             nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
-            for host in nornir_hosts:
-                if host not in devices:
-                    devices.append(host)
+            devices = list(set(devices) | set(nornir_hosts))
             job.event(
                 f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
                 f"{len(devices)} total device(s) selected"
@@ -465,7 +520,6 @@ class NetboxDevicesTasks:
 
         # Fetch and validate NetBox devices.
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
-        nb_devices_data = {}
         for device in self.bulk_filter(
             nb.dcim.devices,
             "name",
@@ -476,7 +530,6 @@ class NetboxDevicesTasks:
             manufacturer = device_type.manufacturer
             nb_devices_data[device.name] = {
                 "id": int(device.id),
-                "name": device.name,
                 "serial": str(device.serial or ""),
                 "manufacturer": manufacturer.name,
                 "device_type": device_type.model,
@@ -505,10 +558,7 @@ class NetboxDevicesTasks:
         for module_bay in self.bulk_filter(nb.dcim.module_bays, "device", devices):
             device_name = module_bay.device.name
             bay_name = module_bay.name
-            nb_module_bays[device_name][bay_name] = {
-                "id": int(module_bay.id),
-                "name": bay_name,
-            }
+            nb_module_bays[device_name][bay_name] = int(module_bay.id)
 
         job.event("fetching installed module data from NetBox")
         nb_modules = {device_name: {} for device_name in devices}
@@ -524,8 +574,7 @@ class NetboxDevicesTasks:
         nornir_kwargs = dict(kwargs)
         nornir_kwargs["get"] = "inventory"
         nornir_kwargs["strict"] = False
-        if devices:
-            nornir_kwargs["FL"] = devices
+        nornir_kwargs["FL"] = devices
         parse_data = self.client.run_job(
             "nornir",
             "parse_ttp",
@@ -541,7 +590,6 @@ class NetboxDevicesTasks:
             return ret
 
         live_records_by_device = {device_name: [] for device_name in devices}
-        parse_worker_errors = []
         for worker_name, worker_data in parse_data.items():
             if worker_data["failed"]:
                 if not worker_data["result"]:
@@ -558,11 +606,6 @@ class NetboxDevicesTasks:
 
         # Normalize live and NetBox state.
         job.event("normalising live and NetBox inventory data")
-        normalised_live_all = {}
-        normalised_nb_all = {}
-        skipped_slots_by_device = {}
-        ignored_error_messages = set()
-
         for device_name in devices:
             records = live_records_by_device[device_name]
             if transform_function:
@@ -618,8 +661,7 @@ class NetboxDevicesTasks:
                 module_name = raw_module_name
                 serial = str(record["serial"] or "").strip()
                 description = str(record["description"] or "")
-                slot_lower = slot.lower()
-                is_chassis = slot_lower == "chassis"
+                is_chassis = slot.lower() == "chassis"
 
                 if not is_chassis:
                     try:
@@ -752,32 +794,23 @@ class NetboxDevicesTasks:
                 slot
                 for slot, record in live_state.items()
                 if not inventory_record_matches_filters(
-                    record,
-                    filter_by_module=filter_by_module,
-                    filter_by_slot=filter_by_slot,
-                    ignore_modules=ignore_modules,
-                    ignore_slots=ignore_slots,
+                    record, **inventory_filter_options
                 )
             }
-            selected_live_slots = set(live_state) - excluded_live_slots
 
             normalised_live_all[device_name] = {
                 slot: record
                 for slot, record in live_state.items()
-                if slot in selected_live_slots
+                if slot not in excluded_live_slots
             }
             normalised_nb_all[device_name] = {
                 slot: record
                 for slot, record in normalised_nb_all[device_name].items()
                 if slot not in excluded_live_slots
                 and (
-                    slot in selected_live_slots
+                    slot in live_state
                     or inventory_record_matches_filters(
-                        record,
-                        filter_by_module=filter_by_module,
-                        filter_by_slot=filter_by_slot,
-                        ignore_modules=ignore_modules,
-                        ignore_slots=ignore_slots,
+                        record, **inventory_filter_options
                     )
                 )
             }
@@ -800,22 +833,16 @@ class NetboxDevicesTasks:
             if device_name not in full_diff:
                 continue
 
-            safe_delete_slots = []
-            for slot in full_diff[device_name]["delete"]:
-                if slot in skipped_slots:
-                    continue
-                safe_delete_slots.append(slot)
-            full_diff[device_name]["delete"] = safe_delete_slots
+            full_diff[device_name]["delete"] = [
+                slot
+                for slot in full_diff[device_name]["delete"]
+                if slot not in skipped_slots
+            ]
 
-        create_count = 0
-        update_count = 0
-        delete_count = 0
-        in_sync_count = 0
-        for actions in full_diff.values():
-            create_count += len(actions["create"])
-            update_count += len(actions["update"])
-            delete_count += len(actions["delete"])
-            in_sync_count += len(actions["in_sync"])
+        create_count = sum(len(actions["create"]) for actions in full_diff.values())
+        update_count = sum(len(actions["update"]) for actions in full_diff.values())
+        delete_count = sum(len(actions["delete"]) for actions in full_diff.values())
+        in_sync_count = sum(len(actions["in_sync"]) for actions in full_diff.values())
         job.event(
             "inventory sync diff complete: "
             f"{create_count} create, {update_count} update, "
@@ -840,7 +867,6 @@ class NetboxDevicesTasks:
         else:
             ret.diff = full_diff
 
-        missing_module_bay_keys = set()
         if not create_module_bays:
             job.event("validating module bays before module writes")
             for device_name, actions in full_diff.items():
@@ -855,9 +881,6 @@ class NetboxDevicesTasks:
                     log.error(msg)
                     job.event(msg, severity="ERROR")
 
-        module_type_lookup_cache = {}
-        missing_module_type_keys = set()
-        required_module_types = {}
         for device_name, actions in full_diff.items():
             required_slots = set(actions["create"])
             for slot, changes in actions["update"].items():
@@ -868,7 +891,10 @@ class NetboxDevicesTasks:
                 if slot == "chassis":
                     continue
                 desired = normalised_live_all[device_name][slot]
-                lookup_key = (slugify(desired["manufacturer"]), desired["module_type"])
+                lookup_key = (
+                    slugify(desired["manufacturer"]),
+                    desired["module_type"],
+                )
                 module_type_data = required_module_types.setdefault(
                     lookup_key,
                     {
@@ -880,42 +906,30 @@ class NetboxDevicesTasks:
                 module_type_data["locations"].add(f"{device_name}:{slot}")
 
         module_type_names = sorted(
-            module_type_data["model"]
-            for module_type_data in required_module_types.values()
+            {
+                module_type_data["model"]
+                for module_type_data in required_module_types.values()
+            }
         )
         if module_type_names:
             job.event(
                 "validating module types by model and part number before module writes"
             )
-            for module_type in self.bulk_filter(
-                nb.dcim.module_types,
-                "model",
-                module_type_names,
-            ):
-                module_type_id = int(module_type.id)
-                manufacturer_slug = module_type.manufacturer.slug
-                module_type_lookup_cache[(manufacturer_slug, module_type.model)] = (
-                    module_type_id
-                )
-                if module_type.part_number:
-                    module_type_lookup_cache[
-                        (manufacturer_slug, module_type.part_number)
-                    ] = module_type_id
-
-            for module_type in self.bulk_filter(
-                nb.dcim.module_types,
-                "part_number",
-                module_type_names,
-            ):
-                module_type_id = int(module_type.id)
-                manufacturer_slug = module_type.manufacturer.slug
-                module_type_lookup_cache[(manufacturer_slug, module_type.model)] = (
-                    module_type_id
-                )
-                if module_type.part_number:
-                    module_type_lookup_cache[
-                        (manufacturer_slug, module_type.part_number)
-                    ] = module_type_id
+            for lookup_field in ("model", "part_number"):
+                for module_type in self.bulk_filter(
+                    nb.dcim.module_types,
+                    lookup_field,
+                    module_type_names,
+                ):
+                    module_type_id = int(module_type.id)
+                    manufacturer_slug = module_type.manufacturer.slug
+                    module_type_lookup_cache[(manufacturer_slug, module_type.model)] = (
+                        module_type_id
+                    )
+                    if module_type.part_number:
+                        module_type_lookup_cache[
+                            (manufacturer_slug, module_type.part_number)
+                        ] = module_type_id
 
         if not create_module_types:
             for lookup_key, module_type_data in required_module_types.items():
@@ -931,14 +945,15 @@ class NetboxDevicesTasks:
                 log.error(msg)
                 job.event(msg, severity="ERROR")
 
-        device_results = {}
-        for device_name, actions in full_diff.items():
-            device_results[device_name] = {
+        device_results = {
+            device_name: {
                 "created": [],
                 "updated": [],
                 "deleted": [],
                 "in_sync": actions["in_sync"],
             }
+            for device_name, actions in full_diff.items()
+        }
         ret.result = device_results
 
         # Device serial updates from the synthetic chassis slot.
@@ -977,10 +992,7 @@ class NetboxDevicesTasks:
                             name=slot,
                             label=slot,
                         )
-                        nb_module_bays[device_name][slot] = {
-                            "id": int(created.id),
-                            "name": slot,
-                        }
+                        nb_module_bays[device_name][slot] = int(created.id)
                         device_results[device_name]["created"].append(slot)
                         job.event(f"{device_name}:{slot} module bay created")
                     except Exception as exc:
@@ -1006,7 +1018,10 @@ class NetboxDevicesTasks:
                     log.error(msg)
                     job.event(msg, severity="ERROR")
                     continue
-                lookup_key = (slugify(desired["manufacturer"]), desired["module_type"])
+                lookup_key = (
+                    slugify(desired["manufacturer"]),
+                    desired["module_type"],
+                )
                 if lookup_key in missing_module_type_keys:
                     continue
 
@@ -1023,11 +1038,13 @@ class NetboxDevicesTasks:
                 if not module_type_id:
                     continue
                 if module_type_label and create_module_types:
-                    device_results[device_name]["created"].append(module_type_label)
+                    device_results[device_name]["created"].append(
+                        module_type_label
+                    )
 
                 payload = {
                     "device": nb_devices_data[device_name]["id"],
-                    "module_bay": nb_module_bays[device_name][slot]["id"],
+                    "module_bay": nb_module_bays[device_name][slot],
                     "module_type": module_type_id,
                     "status": desired["status"],
                     "serial": desired["serial"],
@@ -1047,7 +1064,7 @@ class NetboxDevicesTasks:
                     job.event(msg, severity="ERROR")
 
         # Module updates.
-        job.event("updating changed modules")
+        job.event("preparing module update payloads")
         for device_name, actions in full_diff.items():
             for slot, changes in actions["update"].items():
                 if slot == "chassis":
@@ -1087,22 +1104,29 @@ class NetboxDevicesTasks:
                     if not module_type_id:
                         continue
                     if module_type_label and create_module_types:
-                        device_results[device_name]["created"].append(module_type_label)
+                        device_results[device_name]["created"].append(
+                            module_type_label
+                        )
                     payload["module_type"] = module_type_id
 
-                module_update_has_changes = len(payload) > 1
-                if not module_update_has_changes:
+                if len(payload) == 1:
                     continue
 
-                try:
-                    nb.dcim.modules.update([payload])
+                bulk_update_modules[(device_name, slot)] = payload
+
+        job.event(f"prepared {len(bulk_update_modules)} module update payload(s)")
+        if bulk_update_modules:
+            job.event(f"updating {len(bulk_update_modules)} module(s)")
+            try:
+                nb.dcim.modules.update(list(bulk_update_modules.values()))
+                job.event(f"updated {len(bulk_update_modules)} module(s)")
+                for device_name, slot in bulk_update_modules:
                     device_results[device_name]["updated"].append(slot)
-                    job.event(f"{device_name}:{slot} module updated")
-                except Exception as exc:
-                    msg = f"{device_name}:{slot} - failed to update module: {exc}"
-                    ret.errors.append(msg)
-                    log.error(msg)
-                    job.event(msg, severity="ERROR")
+            except Exception as exc:
+                msg = f"failed to bulk update modules: {exc}"
+                ret.errors.append(msg)
+                log.error(msg)
+                job.event(msg, severity="ERROR")
 
         # Optional module deletions.
         if process_deletions:
