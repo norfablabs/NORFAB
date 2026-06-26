@@ -6687,7 +6687,7 @@ Raises a KeyError if no inventory data is found for the given name.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">base_dir</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">path</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>

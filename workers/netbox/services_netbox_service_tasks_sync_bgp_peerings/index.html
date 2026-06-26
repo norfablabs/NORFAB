@@ -2590,7 +2590,7 @@
   <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How it Works
+        How It Works
       
     </span>
   </a>
@@ -2609,17 +2609,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Branching Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#session-naming-convention" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2631,10 +2620,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#filtering-sessions" class="md-nav__link">
+  <a href="#execution-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Filtering Sessions
+        Execution Modes
       
     </span>
   </a>
@@ -2642,10 +2631,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dry-run-mode" class="md-nav__link">
+  <a href="#result-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Dry Run Mode
+        Result Structure
       
     </span>
   </a>
@@ -2653,10 +2642,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#deletion-behaviour" class="md-nav__link">
+  <a href="#filtering" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Deletion Behaviour
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deletion-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deletion Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#branching-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branching Support
       
     </span>
   </a>
@@ -6129,7 +6140,7 @@
   <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How it Works
+        How It Works
       
     </span>
   </a>
@@ -6148,17 +6159,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Branching Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#session-naming-convention" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6170,10 +6170,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#filtering-sessions" class="md-nav__link">
+  <a href="#execution-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Filtering Sessions
+        Execution Modes
       
     </span>
   </a>
@@ -6181,10 +6181,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dry-run-mode" class="md-nav__link">
+  <a href="#result-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Dry Run Mode
+        Result Structure
       
     </span>
   </a>
@@ -6192,10 +6192,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#deletion-behaviour" class="md-nav__link">
+  <a href="#filtering" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Deletion Behaviour
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deletion-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deletion Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#branching-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branching Support
       
     </span>
   </a>
@@ -6282,7 +6304,7 @@
 <p>task api name: <code>sync_bgp_peerings</code></p>
 </blockquote>
 <p>Synchronises BGP sessions between live network devices and the NetBox BGP plugin. Supports idempotent create, update, and optional deletion of stale sessions.</p>
-<h2 id="how-it-works">How it Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <p><strong>Data collection</strong> — NetBox worker fetches existing BGP sessions from NetBox BGP plugin. In parallel, Nornir service parses BGP neighbor data from devices using <code>parse_ttp</code> with <code>get="bgp_neighbors"</code>.</p>
 <p><strong>Normalisation and diff</strong> — Both datasets are normalised to flat comparable dicts keyed by session name convention <code>{device_name}_{session_name}</code>. <code>DeepDiff</code> classifies each session as <code>create</code>, <code>update</code>, <code>delete</code>, or <code>in_sync</code>.</p>
 <p><strong>NetBox writes</strong> — Sessions are created, updated, or (when <code>process_deletions=True</code>) deleted in NetBox. IP addresses and ASNs are resolved from IPAM or created on-demand. On create, all related objects (peer groups, routing policies, prefix lists) are resolved or created by name.</p>
@@ -6295,13 +6317,16 @@
 <li>Nornir returns parsed BGP session data to NetBox worker</li>
 <li>NetBox worker computes diff, then writes creates/updates/deletes to NetBox</li>
 </ol>
+<p><strong>With Review</strong> - Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+</div>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¤</a></h2>
 <ul>
 <li><strong>NetBox BGP plugin</strong> (<code>netbox-bgp</code>) must be installed and enabled on the NetBox instance.</li>
 <li><strong>Nornir service</strong> must have a TTP getter that handles <code>get="bgp_neighbors"</code>.</li>
 </ul>
-<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
-<p><code>sync_bgp_peerings</code> is branch-aware. Pass <code>branch=&lt;name&gt;</code> to write all changes into a <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a> branch instead of main.</p>
 <h2 id="session-naming-convention">Session Naming Convention<a class="headerlink" href="#session-naming-convention" title="Permanent link">¤</a></h2>
 <p>By default, NetBox session names follow:</p>
 <div class="highlight"><pre><span></span><code>{device}_{name}
@@ -6378,7 +6403,31 @@
 <div class="highlight"><pre><span></span><code>name_template=&quot;{device}_BGP_{name}&quot;
 # ceos-leaf-1_BGP_to-spine-1
 </code></pre></div>
-<h2 id="filtering-sessions">Filtering Sessions<a class="headerlink" href="#filtering-sessions" title="Permanent link">¤</a></h2>
+<h2 id="execution-modes">Execution Modes<a class="headerlink" href="#execution-modes" title="Permanent link">¤</a></h2>
+<p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) returns the diff without any NetBox writes:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;&lt;device&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;create&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="s2">&quot;delete&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="s2">&quot;update&quot;</span><span class="p">:</span>  <span class="p">{</span>
+            <span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;&lt;field&gt;&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">},</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+</div>
+<p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns the same structure.</p>
+<h2 id="result-structure">Result Structure<a class="headerlink" href="#result-structure" title="Permanent link">¤</a></h2>
+<p><strong>Dry-run mode</strong> returns what <em>would</em> happen without writing to NetBox.</p>
+<p><strong>Live-run mode</strong> applies changes and returns the same structure showing what was done.</p>
+<h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
 <p>Three optional filters narrow which sessions are considered during sync. Filters apply to <strong>both</strong> the NetBox dataset and the live device dataset before the diff is computed. Sessions that do not match are silently excluded from creates, updates, and deletes.</p>
 <table>
 <thead>
@@ -6411,28 +6460,15 @@
 <p class="admonition-title">Note</p>
 <p>When <code>process_deletions=True</code>, only sessions that pass the filters are candidates for deletion. Sessions excluded by a filter are never deleted.</p>
 </div>
-<h2 id="dry-run-mode">Dry Run Mode<a class="headerlink" href="#dry-run-mode" title="Permanent link">¤</a></h2>
-<p><code>dry_run=True</code> returns the diff without any NetBox writes:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;&lt;device&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;create&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
-        <span class="s2">&quot;delete&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
-        <span class="s2">&quot;update&quot;</span><span class="p">:</span>  <span class="p">{</span>
-            <span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;&lt;field&gt;&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">},</span>
-            <span class="p">},</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="deletion-behaviour">Deletion Behaviour<a class="headerlink" href="#deletion-behaviour" title="Permanent link">¤</a></h2>
+<h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
 <p>Default <code>process_deletions=False</code> — sessions present in NetBox but absent on the device are left untouched.</p>
 <p>Set <code>process_deletions=True</code> to delete stale sessions. Only sessions for the explicitly targeted devices are considered.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Anything the TTP getter does not return (parser gap, unreachable device) will be deleted when <code>process_deletions=True</code>. Use dry-run to check before break.</p>
 </div>
+<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
+<p><code>sync_bgp_peerings</code> is branch-aware. Pass <code>branch=&lt;name&gt;</code> to write all changes into a <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a> branch instead of main.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
@@ -6746,6 +6782,22 @@ creates, updates, or (optionally) deletes sessions in NetBox accordingly.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>with_review</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Preview changes, ask for review, then apply them.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>process_deletions</code>
             </td>
             <td>
@@ -6773,7 +6825,7 @@ creates, updates, or (optionally) deletes sessions in NetBox accordingly.</p>
               </div>
             </td>
             <td>
-                  <code>60</code>
+                  <code>600</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7529,7 +7581,17 @@ VRF object reference read from and written into
 <span class="normal">2367</span>
 <span class="normal">2368</span>
 <span class="normal">2369</span>
-<span class="normal">2370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2370</span>
+<span class="normal">2371</span>
+<span class="normal">2372</span>
+<span class="normal">2373</span>
+<span class="normal">2374</span>
+<span class="normal">2375</span>
+<span class="normal">2376</span>
+<span class="normal">2377</span>
+<span class="normal">2378</span>
+<span class="normal">2379</span>
+<span class="normal">2380</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpPeeringsResult</span><span class="p">,</span>
@@ -7550,8 +7612,9 @@ VRF object reference read from and written into
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">rir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7576,6 +7639,7 @@ VRF object reference read from and written into
 <span class="sd">        devices (list, optional): List of device names to process.</span>
 <span class="sd">        status (str): Status to assign to created/updated sessions when not ``established`` on device.</span>
 <span class="sd">        dry_run (bool): If True, return diff report without writing to NetBox.</span>
+<span class="sd">        with_review (bool): Preview changes, ask for review, then apply them.</span>
 <span class="sd">        process_deletions (bool): If True, delete NetBox sessions not found on device.</span>
 <span class="sd">        timeout (int): Timeout in seconds for Nornir ``parse_ttp`` job.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name.</span>
@@ -7888,8 +7952,16 @@ VRF object reference read from and written into
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> delete, </span><span class="si">{</span><span class="n">in_sync_count</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
     <span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">with_review</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
+        <span class="n">job</span><span class="p">,</span> <span class="s2">&quot;BGP peerings sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span>
+    <span class="p">):</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
     <span class="c1"># Return dry-run results per device</span>
-    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="s2">&quot;dry-run requested, returning BGP session sync diff without changes&quot;</span>
         <span class="p">)</span>

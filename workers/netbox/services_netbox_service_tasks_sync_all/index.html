@@ -2643,6 +2643,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#inventory-arguments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2654,10 +2676,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-format" class="md-nav__link">
+  <a href="#result-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Format
+        Result Structure
       
     </span>
   </a>
@@ -6060,6 +6082,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#inventory-arguments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6071,10 +6115,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-format" class="md-nav__link">
+  <a href="#result-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Format
+        Result Structure
       
     </span>
   </a>
@@ -6158,11 +6202,18 @@ fixed sequence:</p>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip</code></li>
 <li><strong>bgp_peerings</strong> — calls <code>sync_bgp_peerings</code></li>
 </ol>
-<p>Pass <code>dry_run=True</code> to preview all changes without writing to NetBox.</p>
-<p>Pass <code>approval=True</code> to use the interactive NFCLI workflow. The task first runs
-all five stages with <code>dry_run=True</code>, displays the combined preview, and waits
-for approval. Approval repeats all stages with writes enabled; declining
-returns the dry-run result without changing NetBox.</p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<p>The <code>sync_all</code> task orchestrates five subordinate sync tasks in sequence. Each task collects live device data,
+compares it against NetBox state, and applies reconciliation operations. When <code>dry_run=True</code>, all tasks preview changes
+without writing. When <code>with_review=True</code>, each stage waits for user confirmation before applying changes.</p>
+<h2 id="execution-modes">Execution Modes<a class="headerlink" href="#execution-modes" title="Permanent link">¤</a></h2>
+<p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) previews all changes without writing to NetBox.</p>
+<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops <code>sync_all</code> at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+</div>
+<p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies all changes to NetBox.</p>
 <h2 id="inventory-arguments">Inventory Arguments<a class="headerlink" href="#inventory-arguments" title="Permanent link">¤</a></h2>
 <p>Inventory-specific options use an <code>inventory_</code> prefix in the Python API and an
 <code>inventory-</code> prefix in NFCLI:</p>
@@ -6212,7 +6263,8 @@ returns the dry-run result without changing NetBox.</p>
 inventory, interfaces, and BGP peerings.</p>
 <p>The shared <code>message</code> argument is used as the NetBox changelog message for both
 inventory and BGP write operations.</p>
-<h2 id="result-format">Result Format<a class="headerlink" href="#result-format" title="Permanent link">¤</a></h2>
+<h2 id="result-structure">Result Structure<a class="headerlink" href="#result-structure" title="Permanent link">¤</a></h2>
+<p>The result structure aggregates the outcomes of all five subordinate sync tasks. When <code>dry_run=True</code> the same structure is returned but no changes are written to NetBox.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="c1"># per-device results — one entry per resolved device</span>
     <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -6259,8 +6311,8 @@ inventory and BGP write operations.</p>
 <p>Preview all five sync categories:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
 </code></pre></div>
-<p>Preview, prompt for approval, and apply the changes:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 approval
+<p>Preview, prompt for review, and apply the changes:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 with-review
 </code></pre></div>
 <p>Create missing module bays and module types during inventory sync:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync all devices iosxr1 inventory-create-module-bays inventory-create-module-types
@@ -6315,7 +6367,7 @@ root
             ├── branch:    Branching plugin branch name to use
             ├── devices:    List of NetBox devices to sync all data for
             ├── dry-run:    Return diff without writing to NetBox, default &#39;False&#39;
-            ├── approval:    Preview changes and ask for approval before writing to NetBox
+            ├── with-review:    Preview each sync stage and ask for review before writing to NetBox
             ├── process-deletions:    Process deletions for inventory, interfaces and BGP peerings
             ├── message:    Changelog message for inventory and BGP operations
             ├── inventory-create-module-types:    Create missing module types during inventory sync
@@ -6351,8 +6403,8 @@ nf#
         <p>Synchronize all device data from live devices into NetBox in sequence:
 inventory → interfaces → MAC addresses → IP addresses → BGP peerings.</p>
 <p>Pass <code>dry_run=True</code> to preview changes without writing to NetBox.
-Pass <code>approval=True</code> to run that preview first, ask the interactive
-client for approval, and only then repeat the sync with writes enabled.</p>
+Pass <code>with_review=True</code> to have each sync stage run a dry-run preview,
+ask the interactive client for review, and only then apply that stage.</p>
 <p><code>Result.result</code> is keyed by device name, then by category::</p>
 <pre><code>{
     "&lt;device&gt;": {
@@ -6422,7 +6474,7 @@ client for approval, and only then repeat the sync with writes enabled.</p>
               </div>
             </td>
             <td>
-                  <code>60</code>
+                  <code>600</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6475,15 +6527,15 @@ client for approval, and only then repeat the sync with writes enabled.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>approval</code>
+                <code>with_review</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Preview and ask for approval before applying
-changes. Defaults to False.</p>
+                <p>Preview and ask for review before applying
+each sync stage. Defaults to False.</p>
               </div>
             </td>
             <td>
@@ -7049,54 +7101,7 @@ operations.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1315</span>
-<span class="normal">1316</span>
-<span class="normal">1317</span>
-<span class="normal">1318</span>
-<span class="normal">1319</span>
-<span class="normal">1320</span>
-<span class="normal">1321</span>
-<span class="normal">1322</span>
-<span class="normal">1323</span>
-<span class="normal">1324</span>
-<span class="normal">1325</span>
-<span class="normal">1326</span>
-<span class="normal">1327</span>
-<span class="normal">1328</span>
-<span class="normal">1329</span>
-<span class="normal">1330</span>
-<span class="normal">1331</span>
-<span class="normal">1332</span>
-<span class="normal">1333</span>
-<span class="normal">1334</span>
-<span class="normal">1335</span>
-<span class="normal">1336</span>
-<span class="normal">1337</span>
-<span class="normal">1338</span>
-<span class="normal">1339</span>
-<span class="normal">1340</span>
-<span class="normal">1341</span>
-<span class="normal">1342</span>
-<span class="normal">1343</span>
-<span class="normal">1344</span>
-<span class="normal">1345</span>
-<span class="normal">1346</span>
-<span class="normal">1347</span>
-<span class="normal">1348</span>
-<span class="normal">1349</span>
-<span class="normal">1350</span>
-<span class="normal">1351</span>
-<span class="normal">1352</span>
-<span class="normal">1353</span>
-<span class="normal">1354</span>
-<span class="normal">1355</span>
-<span class="normal">1356</span>
-<span class="normal">1357</span>
-<span class="normal">1358</span>
-<span class="normal">1359</span>
-<span class="normal">1360</span>
-<span class="normal">1361</span>
-<span class="normal">1362</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1362</span>
 <span class="normal">1363</span>
 <span class="normal">1364</span>
 <span class="normal">1365</span>
@@ -7363,7 +7368,43 @@ operations.</p>
 <span class="normal">1626</span>
 <span class="normal">1627</span>
 <span class="normal">1628</span>
-<span class="normal">1629</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
+<span class="normal">1660</span>
+<span class="normal">1661</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncAllInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncAllResult</span><span class="p">,</span>
@@ -7381,11 +7422,11 @@ operations.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">approval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">message</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inventory_create_module_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -7425,8 +7466,8 @@ operations.</p>
 <span class="sd">    inventory → interfaces → MAC addresses → IP addresses → BGP peerings.</span>
 
 <span class="sd">    Pass ``dry_run=True`` to preview changes without writing to NetBox.</span>
-<span class="sd">    Pass ``approval=True`` to run that preview first, ask the interactive</span>
-<span class="sd">    client for approval, and only then repeat the sync with writes enabled.</span>
+<span class="sd">    Pass ``with_review=True`` to have each sync stage run a dry-run preview,</span>
+<span class="sd">    ask the interactive client for review, and only then apply that stage.</span>
 
 <span class="sd">    ``Result.result`` is keyed by device name, then by category::</span>
 
@@ -7447,8 +7488,8 @@ operations.</p>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name.</span>
 <span class="sd">        dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.</span>
-<span class="sd">        approval (bool): Preview and ask for approval before applying</span>
-<span class="sd">            changes. Defaults to False.</span>
+<span class="sd">        with_review (bool): Preview and ask for review before applying</span>
+<span class="sd">            each sync stage. Defaults to False.</span>
 <span class="sd">        process_deletions (bool): Process deletions for inventory,</span>
 <span class="sd">            interfaces, and BGP peerings. Defaults to False.</span>
 <span class="sd">        message (str, optional): Changelog message for inventory and BGP</span>
@@ -7488,47 +7529,6 @@ operations.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: Per-device sync results keyed by device name and category.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">recursive_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
-    <span class="n">recursive_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;self&quot;</span><span class="p">)</span>
-    <span class="n">recursive_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;job&quot;</span><span class="p">)</span>
-    <span class="n">nornir_kwargs</span> <span class="o">=</span> <span class="n">recursive_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">)</span>
-    <span class="n">recursive_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nornir_kwargs</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;running sync all dry-run preview before approval&quot;</span><span class="p">)</span>
-        <span class="n">preview_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="o">**</span><span class="n">recursive_kwargs</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;approval&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="n">preview</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_all</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="o">**</span><span class="n">preview_kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">preview</span><span class="o">.</span><span class="n">failed</span> <span class="ow">or</span> <span class="n">preview</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">&quot;sync all dry-run preview completed with errors; &quot;</span>
-                <span class="s2">&quot;changes will not be applied&quot;</span><span class="p">,</span>
-                <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">preview</span>
-
-        <span class="n">approved</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">request_input</span><span class="p">(</span>
-            <span class="n">question</span><span class="o">=</span><span class="s2">&quot;Apply the sync all dry-run changes to NetBox?&quot;</span><span class="p">,</span>
-            <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;preview&quot;</span><span class="p">:</span> <span class="n">preview</span><span class="o">.</span><span class="n">result</span><span class="p">},</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">approved</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">&quot;sync all changes were not approved; returning dry-run result&quot;</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">preview</span>
-
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all changes approved; applying changes&quot;</span><span class="p">)</span>
-        <span class="n">apply_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="o">**</span><span class="n">recursive_kwargs</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;approval&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_all</span><span class="p">(</span><span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="o">**</span><span class="n">apply_kwargs</span><span class="p">)</span>
-
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
@@ -7569,6 +7569,7 @@ operations.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
         <span class="n">process_deletions</span><span class="o">=</span><span class="n">process_deletions</span><span class="p">,</span>
         <span class="n">create_module_types</span><span class="o">=</span><span class="n">inventory_create_module_types</span><span class="p">,</span>
         <span class="n">create_module_bays</span><span class="o">=</span><span class="n">inventory_create_module_bays</span><span class="p">,</span>
@@ -7585,6 +7586,11 @@ operations.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because device inventory review was declined&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- sync interfaces ---</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;SYNCING interfaces&quot;</span><span class="p">)</span>
@@ -7596,6 +7602,7 @@ operations.</p>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">process_deletions</span><span class="o">=</span><span class="n">process_deletions</span><span class="p">,</span>
+        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
         <span class="n">filter_by_name</span><span class="o">=</span><span class="n">interfaces_filter_by_name</span><span class="p">,</span>
         <span class="n">filter_by_description</span><span class="o">=</span><span class="n">interfaces_filter_by_description</span><span class="p">,</span>
         <span class="n">update_type</span><span class="o">=</span><span class="n">interfaces_update_type</span><span class="p">,</span>
@@ -7606,6 +7613,11 @@ operations.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">intf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because interface review was declined&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- sync MAC addresses ---</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;SYNCING MAC addresses&quot;</span><span class="p">)</span>
@@ -7616,6 +7628,7 @@ operations.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
         <span class="n">filter_by_name</span><span class="o">=</span><span class="n">mac_filter_by_name</span><span class="p">,</span>
         <span class="n">filter_by_description</span><span class="o">=</span><span class="n">mac_filter_by_description</span><span class="p">,</span>
         <span class="n">filter_by_mac</span><span class="o">=</span><span class="n">mac_filter_by_mac</span><span class="p">,</span>
@@ -7625,6 +7638,11 @@ operations.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mac_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;mac_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because MAC address review was declined&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- sync IP addresses ---</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;SYNCING IP addresses&quot;</span><span class="p">)</span>
@@ -7635,6 +7653,7 @@ operations.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
         <span class="n">anycast_ranges</span><span class="o">=</span><span class="n">ip_anycast_ranges</span><span class="p">,</span>
         <span class="n">ignore_ranges</span><span class="o">=</span><span class="n">ip_ignore_ranges</span><span class="p">,</span>
         <span class="n">create_prefixes</span><span class="o">=</span><span class="n">ip_create_prefixes</span><span class="p">,</span>
@@ -7648,6 +7667,11 @@ operations.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ip_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because IP address review was declined&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- sync BGP peerings ---</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;SYNCING BGP peerings&quot;</span><span class="p">)</span>
@@ -7660,6 +7684,7 @@ operations.</p>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">process_deletions</span><span class="o">=</span><span class="n">process_deletions</span><span class="p">,</span>
+        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
         <span class="n">rir</span><span class="o">=</span><span class="n">bgp_rir</span><span class="p">,</span>
         <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
         <span class="n">name_template</span><span class="o">=</span><span class="n">bgp_name_template</span><span class="p">,</span>
@@ -7674,6 +7699,11 @@ operations.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bgp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because BGP peerings review was declined&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync all complete for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sync all complete for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>

@@ -2503,10 +2503,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#safety-controls" class="md-nav__link">
+  <a href="#creation-and-deletion-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Safety Controls
+        Creation and Deletion Behavior
       
     </span>
   </a>
@@ -2564,10 +2564,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#result-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Result Structure
       
     </span>
   </a>
@@ -2575,10 +2575,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-structure" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Structure
+        Branching Support
       
     </span>
   </a>
@@ -6177,10 +6177,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#safety-controls" class="md-nav__link">
+  <a href="#creation-and-deletion-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Safety Controls
+        Creation and Deletion Behavior
       
     </span>
   </a>
@@ -6238,10 +6238,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#result-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Result Structure
       
     </span>
   </a>
@@ -6249,10 +6249,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-structure" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Structure
+        Branching Support
       
     </span>
   </a>
@@ -6360,13 +6360,13 @@ list of records per device. Every record has exactly these fields:</p>
 serial comparison. An empty or <code>BUILTIN</code> chassis serial is ignored. Multiple
 chassis records with different non-empty serial numbers produce a per-device
 error and that device is skipped.</p>
-<h2 id="safety-controls">Safety Controls<a class="headerlink" href="#safety-controls" title="Permanent link">¤</a></h2>
-<p>Module deletions are disabled by default. Set <code>process_deletions=True</code> to
-delete NetBox modules that are absent from live network inventory.</p>
-<p>Missing module bays and module types are reported by default. Set
+<h2 id="creation-and-deletion-behavior">Creation and Deletion Behavior<a class="headerlink" href="#creation-and-deletion-behavior" title="Permanent link">¤</a></h2>
+<p><strong>Module creation</strong> — Missing module bays and module types are reported by default. Set
 <code>create_module_bays=True</code> or <code>create_module_types=True</code> when the task should
 extend NetBox modeling from live inventory.</p>
-<p>Live records with empty module identity, empty serial numbers, or <code>BUILTIN</code>
+<p><strong>Module deletions</strong> — Module deletions are disabled by default. Set <code>process_deletions=True</code> to
+delete NetBox modules that are absent from live network inventory.</p>
+<p><strong>Invalid records</strong> — Live records with empty module identity, empty serial numbers, or <code>BUILTIN</code>
 serial numbers are skipped and reported in <code>res["errors"]</code>. Skipped slots
 suppress deletion so incomplete live data does not remove existing NetBox
 modules.</p>
@@ -6522,10 +6522,6 @@ inventory record.</p>
 <p>Transformer files are executed as trusted Python code. Store them only in
 controlled File Service locations.</p>
 </div>
-<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
-<p>This task is branch aware and can push updates to a NetBox branch when the
-NetBox Branching plugin is installed. Use the <code>branch</code> argument to target a
-branch.</p>
 <h2 id="result-structure">Result Structure<a class="headerlink" href="#result-structure" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) returns the raw diff without writing to
 NetBox:</p>
@@ -6542,8 +6538,12 @@ NetBox:</p>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns a
-per-device action summary:</p>
+<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+</div>
+<p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns a per-device action summary:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;&lt;device&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -6562,6 +6562,10 @@ per-device action summary:</p>
 modules. In live-run mode <code>res["diff"]</code> is also populated with the raw diff.
 Missing module bays, missing module types, failed writes, and ignored live
 records are reported in <code>res["errors"]</code>.</p>
+<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
+<p>This task is branch aware and can push updates to a NetBox branch when the
+NetBox Branching plugin is installed. Use the <code>branch</code> argument to target a
+branch.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">NFCLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
@@ -6863,6 +6867,26 @@ module types are reported unless explicitly created with
 <code>create_module_bays</code> or <code>create_module_types</code>.</p>
 
 
+<details class="how-it-works" open>
+  <summary>How it works</summary>
+  <ol>
+<li>Resolve the target device list from explicit <code>devices</code> and any
+   Nornir filter arguments.</li>
+<li>Fetch the current NetBox device, module bay, and installed
+   module state for those devices.</li>
+<li>Collect live inventory from Nornir using
+   <code>parse_ttp(get="inventory")</code> and optionally transform it.</li>
+<li>Normalize live inventory and NetBox inventory into comparable
+   per-device dictionaries, including a synthetic <code>chassis</code> item
+   for device serial reconciliation.</li>
+<li>Apply inventory include/exclude filters, calculate the diff, and
+   suppress unsafe deletes for slots that had incomplete live data.</li>
+<li>Validate or create required module bays and module types, then
+   apply chassis serial updates, module creates, module updates,
+   and optional stale module deletions.</li>
+</ol>
+</details>
+
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
       <thead>
@@ -6926,6 +6950,22 @@ to NetBox.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>with_review</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Preview changes, ask for review, then apply them.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>timeout</code>
             </td>
             <td>
@@ -6937,7 +6977,7 @@ to NetBox.</p>
               </div>
             </td>
             <td>
-                  <code>60</code>
+                  <code>600</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7198,18 +7238,7 @@ to <code>parse_ttp</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 318</span>
-<span class="normal"> 319</span>
-<span class="normal"> 320</span>
-<span class="normal"> 321</span>
-<span class="normal"> 322</span>
-<span class="normal"> 323</span>
-<span class="normal"> 324</span>
-<span class="normal"> 325</span>
-<span class="normal"> 326</span>
-<span class="normal"> 327</span>
-<span class="normal"> 328</span>
-<span class="normal"> 329</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 329</span>
 <span class="normal"> 330</span>
 <span class="normal"> 331</span>
 <span class="normal"> 332</span>
@@ -7995,7 +8024,54 @@ to <code>parse_ttp</code>.</p>
 <span class="normal">1112</span>
 <span class="normal">1113</span>
 <span class="normal">1114</span>
-<span class="normal">1115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1115</span>
+<span class="normal">1116</span>
+<span class="normal">1117</span>
+<span class="normal">1118</span>
+<span class="normal">1119</span>
+<span class="normal">1120</span>
+<span class="normal">1121</span>
+<span class="normal">1122</span>
+<span class="normal">1123</span>
+<span class="normal">1124</span>
+<span class="normal">1125</span>
+<span class="normal">1126</span>
+<span class="normal">1127</span>
+<span class="normal">1128</span>
+<span class="normal">1129</span>
+<span class="normal">1130</span>
+<span class="normal">1131</span>
+<span class="normal">1132</span>
+<span class="normal">1133</span>
+<span class="normal">1134</span>
+<span class="normal">1135</span>
+<span class="normal">1136</span>
+<span class="normal">1137</span>
+<span class="normal">1138</span>
+<span class="normal">1139</span>
+<span class="normal">1140</span>
+<span class="normal">1141</span>
+<span class="normal">1142</span>
+<span class="normal">1143</span>
+<span class="normal">1144</span>
+<span class="normal">1145</span>
+<span class="normal">1146</span>
+<span class="normal">1147</span>
+<span class="normal">1148</span>
+<span class="normal">1149</span>
+<span class="normal">1150</span>
+<span class="normal">1151</span>
+<span class="normal">1152</span>
+<span class="normal">1153</span>
+<span class="normal">1154</span>
+<span class="normal">1155</span>
+<span class="normal">1156</span>
+<span class="normal">1157</span>
+<span class="normal">1158</span>
+<span class="normal">1159</span>
+<span class="normal">1160</span>
+<span class="normal">1161</span>
+<span class="normal">1162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInventoryResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -8014,7 +8090,8 @@ to <code>parse_ttp</code>.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -8041,12 +8118,29 @@ to <code>parse_ttp</code>.</p>
 <span class="sd">    module types are reported unless explicitly created with</span>
 <span class="sd">    ``create_module_bays`` or ``create_module_types``.</span>
 
+<span class="sd">    How it works:</span>
+<span class="sd">        1. Resolve the target device list from explicit ``devices`` and any</span>
+<span class="sd">           Nornir filter arguments.</span>
+<span class="sd">        2. Fetch the current NetBox device, module bay, and installed</span>
+<span class="sd">           module state for those devices.</span>
+<span class="sd">        3. Collect live inventory from Nornir using</span>
+<span class="sd">           ``parse_ttp(get=&quot;inventory&quot;)`` and optionally transform it.</span>
+<span class="sd">        4. Normalize live inventory and NetBox inventory into comparable</span>
+<span class="sd">           per-device dictionaries, including a synthetic ``chassis`` item</span>
+<span class="sd">           for device serial reconciliation.</span>
+<span class="sd">        5. Apply inventory include/exclude filters, calculate the diff, and</span>
+<span class="sd">           suppress unsafe deletes for slots that had incomplete live data.</span>
+<span class="sd">        6. Validate or create required module bays and module types, then</span>
+<span class="sd">           apply chassis serial updates, module creates, module updates,</span>
+<span class="sd">           and optional stale module deletions.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab job object used for progress events.</span>
 <span class="sd">        instance: NetBox instance name to target. Defaults to the worker&#39;s</span>
 <span class="sd">            default NetBox instance.</span>
 <span class="sd">        dry_run: Return the planned inventory diff without writing changes</span>
 <span class="sd">            to NetBox.</span>
+<span class="sd">        with_review: Preview changes, ask for review, then apply them.</span>
 <span class="sd">        timeout: Timeout in seconds for the Nornir ``parse_ttp`` job.</span>
 <span class="sd">        devices: NetBox device names to synchronize.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
@@ -8077,7 +8171,7 @@ to <code>parse_ttp</code>.</p>
 <span class="sd">        Result object containing the normalized diff, per-device sync</span>
 <span class="sd">        outcome, and any partial errors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_inventory&quot;</span><span class="p">,</span>
@@ -8086,12 +8180,53 @@ to <code>parse_ttp</code>.</p>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
         <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
     <span class="p">)</span>
+
+    <span class="c1"># Pattern maps, transform function, and filter options used while</span>
+    <span class="c1"># normalising live inventory records.</span>
+    <span class="n">inventory_patterns</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">transform_function</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">inventory_filter_options</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;filter_by_module&quot;</span><span class="p">:</span> <span class="n">filter_by_module</span><span class="p">,</span>
+        <span class="s2">&quot;filter_by_slot&quot;</span><span class="p">:</span> <span class="n">filter_by_slot</span><span class="p">,</span>
+        <span class="s2">&quot;ignore_modules&quot;</span><span class="p">:</span> <span class="n">ignore_modules</span><span class="p">,</span>
+        <span class="s2">&quot;ignore_slots&quot;</span><span class="p">:</span> <span class="n">ignore_slots</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># NetBox client and state keyed by device name. Module bays are</span>
+    <span class="c1"># slot -&gt; bay ID; modules are split into comparable state and</span>
+    <span class="c1"># slot -&gt; module ID.</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">nb_module_bays</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">nb_modules</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">nb_module_ids</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Live parser results and normalized data prepared for diffing.</span>
+    <span class="n">nornir_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">parse_data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">live_records_by_device</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">parse_worker_errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">normalised_live_all</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">normalised_nb_all</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">skipped_slots_by_device</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ignored_error_messages</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">full_diff</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Pre-write validation state and lookup caches.</span>
+    <span class="n">missing_module_bay_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">module_type_lookup_cache</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">missing_module_type_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">required_module_types</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Per-device result tracking and bulk write payloads.</span>
+    <span class="n">device_results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">bulk_update_modules</span> <span class="o">=</span> <span class="p">{}</span>
+
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">inventory_map</span><span class="p">):</span>
         <span class="n">inventory_map</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">inventory_map</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="n">inventory_patterns</span> <span class="o">=</span> <span class="n">InventoryPatternMap</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">inventory_map</span> <span class="ow">or</span> <span class="p">{})</span>
-    <span class="n">transform_function</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">inventory_transform</span><span class="p">):</span>
         <span class="n">function_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">inventory_transform</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">globals_dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -8107,9 +8242,7 @@ to <code>parse_ttp</code>.</p>
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;resolving devices from Nornir filters&quot;</span><span class="p">)</span>
         <span class="n">nornir_hosts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">nornir_hosts</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-                <span class="n">devices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="n">devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">))</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nornir_hosts</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from Nornir filters, &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> total device(s) selected&quot;</span>
@@ -8132,7 +8265,6 @@ to <code>parse_ttp</code>.</p>
 
     <span class="c1"># Fetch and validate NetBox devices.</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox&quot;</span><span class="p">)</span>
-    <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
         <span class="s2">&quot;name&quot;</span><span class="p">,</span>
@@ -8143,7 +8275,6 @@ to <code>parse_ttp</code>.</p>
         <span class="n">manufacturer</span> <span class="o">=</span> <span class="n">device_type</span><span class="o">.</span><span class="n">manufacturer</span>
         <span class="n">nb_devices_data</span><span class="p">[</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">serial</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
             <span class="s2">&quot;manufacturer&quot;</span><span class="p">:</span> <span class="n">manufacturer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="s2">&quot;device_type&quot;</span><span class="p">:</span> <span class="n">device_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
@@ -8172,10 +8303,7 @@ to <code>parse_ttp</code>.</p>
     <span class="k">for</span> <span class="n">module_bay</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">module_bays</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
         <span class="n">device_name</span> <span class="o">=</span> <span class="n">module_bay</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
         <span class="n">bay_name</span> <span class="o">=</span> <span class="n">module_bay</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">nb_module_bays</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">bay_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">module_bay</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">bay_name</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="n">nb_module_bays</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">bay_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">module_bay</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching installed module data from NetBox&quot;</span><span class="p">)</span>
     <span class="n">nb_modules</span> <span class="o">=</span> <span class="p">{</span><span class="n">device_name</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
@@ -8191,8 +8319,7 @@ to <code>parse_ttp</code>.</p>
     <span class="n">nornir_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;get&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;inventory&quot;</span>
     <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;FL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
+    <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;FL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
     <span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
         <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
@@ -8208,26 +8335,22 @@ to <code>parse_ttp</code>.</p>
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="n">live_records_by_device</span> <span class="o">=</span> <span class="p">{</span><span class="n">device_name</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
-    <span class="n">parse_worker_errors</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_data</span> <span class="ow">in</span> <span class="n">parse_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> - failed to parse inventory data from devices&quot;</span>
-            <span class="n">parse_worker_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">worker_data</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-            <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2"> - failed to parse inventory data from devices&quot;</span>
+                <span class="n">parse_worker_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">worker_data</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_inventory</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">live_records_by_device</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="n">live_records_by_device</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">host_inventory</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">host_inventory</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">host_inventory</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">live_records_by_device</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">host_inventory</span><span class="p">)</span>
 
     <span class="c1"># Normalize live and NetBox state.</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;normalising live and NetBox inventory data&quot;</span><span class="p">)</span>
-    <span class="n">normalised_live_all</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">normalised_nb_all</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">skipped_slots_by_device</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">ignored_error_messages</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">records</span> <span class="o">=</span> <span class="n">live_records_by_device</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">transform_function</span><span class="p">:</span>
@@ -8283,8 +8406,7 @@ to <code>parse_ttp</code>.</p>
             <span class="n">module_name</span> <span class="o">=</span> <span class="n">raw_module_name</span>
             <span class="n">serial</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;serial&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">slot_lower</span> <span class="o">=</span> <span class="n">slot</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="n">is_chassis</span> <span class="o">=</span> <span class="n">slot_lower</span> <span class="o">==</span> <span class="s2">&quot;chassis&quot;</span>
+            <span class="n">is_chassis</span> <span class="o">=</span> <span class="n">slot</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;chassis&quot;</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_chassis</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -8417,32 +8539,23 @@ to <code>parse_ttp</code>.</p>
             <span class="n">slot</span>
             <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">live_state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">inventory_record_matches_filters</span><span class="p">(</span>
-                <span class="n">record</span><span class="p">,</span>
-                <span class="n">filter_by_module</span><span class="o">=</span><span class="n">filter_by_module</span><span class="p">,</span>
-                <span class="n">filter_by_slot</span><span class="o">=</span><span class="n">filter_by_slot</span><span class="p">,</span>
-                <span class="n">ignore_modules</span><span class="o">=</span><span class="n">ignore_modules</span><span class="p">,</span>
-                <span class="n">ignore_slots</span><span class="o">=</span><span class="n">ignore_slots</span><span class="p">,</span>
+                <span class="n">record</span><span class="p">,</span> <span class="o">**</span><span class="n">inventory_filter_options</span>
             <span class="p">)</span>
         <span class="p">}</span>
-        <span class="n">selected_live_slots</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">live_state</span><span class="p">)</span> <span class="o">-</span> <span class="n">excluded_live_slots</span>
 
         <span class="n">normalised_live_all</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">slot</span><span class="p">:</span> <span class="n">record</span>
             <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">live_state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">selected_live_slots</span>
+            <span class="k">if</span> <span class="n">slot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded_live_slots</span>
         <span class="p">}</span>
         <span class="n">normalised_nb_all</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">slot</span><span class="p">:</span> <span class="n">record</span>
             <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">normalised_nb_all</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">slot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded_live_slots</span>
             <span class="ow">and</span> <span class="p">(</span>
-                <span class="n">slot</span> <span class="ow">in</span> <span class="n">selected_live_slots</span>
+                <span class="n">slot</span> <span class="ow">in</span> <span class="n">live_state</span>
                 <span class="ow">or</span> <span class="n">inventory_record_matches_filters</span><span class="p">(</span>
-                    <span class="n">record</span><span class="p">,</span>
-                    <span class="n">filter_by_module</span><span class="o">=</span><span class="n">filter_by_module</span><span class="p">,</span>
-                    <span class="n">filter_by_slot</span><span class="o">=</span><span class="n">filter_by_slot</span><span class="p">,</span>
-                    <span class="n">ignore_modules</span><span class="o">=</span><span class="n">ignore_modules</span><span class="p">,</span>
-                    <span class="n">ignore_slots</span><span class="o">=</span><span class="n">ignore_slots</span><span class="p">,</span>
+                    <span class="n">record</span><span class="p">,</span> <span class="o">**</span><span class="n">inventory_filter_options</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="p">}</span>
@@ -8465,29 +8578,31 @@ to <code>parse_ttp</code>.</p>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">safe_delete_slots</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">skipped_slots</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">safe_delete_slots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
-        <span class="n">full_diff</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">safe_delete_slots</span>
+        <span class="n">full_diff</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">slot</span>
+            <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">slot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skipped_slots</span>
+        <span class="p">]</span>
 
-    <span class="n">create_count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">update_count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">delete_count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">in_sync_count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">create_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">])</span>
-        <span class="n">update_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">])</span>
-        <span class="n">delete_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">])</span>
-        <span class="n">in_sync_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])</span>
+    <span class="n">create_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">update_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">delete_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">in_sync_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
         <span class="s2">&quot;inventory sync diff complete: &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">create_count</span><span class="si">}</span><span class="s2"> create, </span><span class="si">{</span><span class="n">update_count</span><span class="si">}</span><span class="s2"> update, &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> delete, </span><span class="si">{</span><span class="n">in_sync_count</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">with_review</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
+        <span class="n">job</span><span class="p">,</span> <span class="s2">&quot;device inventory sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span>
+    <span class="p">):</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">elif</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="s2">&quot;dry-run requested, returning inventory sync diff without changes&quot;</span>
         <span class="p">)</span>
@@ -8497,7 +8612,6 @@ to <code>parse_ttp</code>.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">full_diff</span>
 
-    <span class="n">missing_module_bay_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">create_module_bays</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;validating module bays before module writes&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -8512,9 +8626,6 @@ to <code>parse_ttp</code>.</p>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
 
-    <span class="n">module_type_lookup_cache</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">missing_module_type_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="n">required_module_types</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">required_slots</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -8525,7 +8636,10 @@ to <code>parse_ttp</code>.</p>
             <span class="k">if</span> <span class="n">slot</span> <span class="o">==</span> <span class="s2">&quot;chassis&quot;</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">desired</span> <span class="o">=</span> <span class="n">normalised_live_all</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">slot</span><span class="p">]</span>
-            <span class="n">lookup_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">slugify</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;manufacturer&quot;</span><span class="p">]),</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;module_type&quot;</span><span class="p">])</span>
+            <span class="n">lookup_key</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">slugify</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;manufacturer&quot;</span><span class="p">]),</span>
+                <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;module_type&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
             <span class="n">module_type_data</span> <span class="o">=</span> <span class="n">required_module_types</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
                 <span class="n">lookup_key</span><span class="p">,</span>
                 <span class="p">{</span>
@@ -8537,42 +8651,30 @@ to <code>parse_ttp</code>.</p>
             <span class="n">module_type_data</span><span class="p">[</span><span class="s2">&quot;locations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">slot</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">module_type_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-        <span class="n">module_type_data</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">module_type_data</span> <span class="ow">in</span> <span class="n">required_module_types</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">{</span>
+            <span class="n">module_type_data</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">module_type_data</span> <span class="ow">in</span> <span class="n">required_module_types</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">module_type_names</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="s2">&quot;validating module types by model and part number before module writes&quot;</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">module_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">module_types</span><span class="p">,</span>
-            <span class="s2">&quot;model&quot;</span><span class="p">,</span>
-            <span class="n">module_type_names</span><span class="p">,</span>
-        <span class="p">):</span>
-            <span class="n">module_type_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">module_type</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-            <span class="n">manufacturer_slug</span> <span class="o">=</span> <span class="n">module_type</span><span class="o">.</span><span class="n">manufacturer</span><span class="o">.</span><span class="n">slug</span>
-            <span class="n">module_type_lookup_cache</span><span class="p">[(</span><span class="n">manufacturer_slug</span><span class="p">,</span> <span class="n">module_type</span><span class="o">.</span><span class="n">model</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">module_type_id</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">module_type</span><span class="o">.</span><span class="n">part_number</span><span class="p">:</span>
-                <span class="n">module_type_lookup_cache</span><span class="p">[</span>
-                    <span class="p">(</span><span class="n">manufacturer_slug</span><span class="p">,</span> <span class="n">module_type</span><span class="o">.</span><span class="n">part_number</span><span class="p">)</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="n">module_type_id</span>
-
-        <span class="k">for</span> <span class="n">module_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">module_types</span><span class="p">,</span>
-            <span class="s2">&quot;part_number&quot;</span><span class="p">,</span>
-            <span class="n">module_type_names</span><span class="p">,</span>
-        <span class="p">):</span>
-            <span class="n">module_type_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">module_type</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-            <span class="n">manufacturer_slug</span> <span class="o">=</span> <span class="n">module_type</span><span class="o">.</span><span class="n">manufacturer</span><span class="o">.</span><span class="n">slug</span>
-            <span class="n">module_type_lookup_cache</span><span class="p">[(</span><span class="n">manufacturer_slug</span><span class="p">,</span> <span class="n">module_type</span><span class="o">.</span><span class="n">model</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">module_type_id</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">module_type</span><span class="o">.</span><span class="n">part_number</span><span class="p">:</span>
-                <span class="n">module_type_lookup_cache</span><span class="p">[</span>
-                    <span class="p">(</span><span class="n">manufacturer_slug</span><span class="p">,</span> <span class="n">module_type</span><span class="o">.</span><span class="n">part_number</span><span class="p">)</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="n">module_type_id</span>
+        <span class="k">for</span> <span class="n">lookup_field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;part_number&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">module_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">module_types</span><span class="p">,</span>
+                <span class="n">lookup_field</span><span class="p">,</span>
+                <span class="n">module_type_names</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="n">module_type_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">module_type</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="n">manufacturer_slug</span> <span class="o">=</span> <span class="n">module_type</span><span class="o">.</span><span class="n">manufacturer</span><span class="o">.</span><span class="n">slug</span>
+                <span class="n">module_type_lookup_cache</span><span class="p">[(</span><span class="n">manufacturer_slug</span><span class="p">,</span> <span class="n">module_type</span><span class="o">.</span><span class="n">model</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">module_type_id</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">module_type</span><span class="o">.</span><span class="n">part_number</span><span class="p">:</span>
+                    <span class="n">module_type_lookup_cache</span><span class="p">[</span>
+                        <span class="p">(</span><span class="n">manufacturer_slug</span><span class="p">,</span> <span class="n">module_type</span><span class="o">.</span><span class="n">part_number</span><span class="p">)</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">module_type_id</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">create_module_types</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">lookup_key</span><span class="p">,</span> <span class="n">module_type_data</span> <span class="ow">in</span> <span class="n">required_module_types</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -8588,14 +8690,15 @@ to <code>parse_ttp</code>.</p>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
 
-    <span class="n">device_results</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">device_results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span>
             <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span>
             <span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">[],</span>
             <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">],</span>
         <span class="p">}</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">device_results</span>
 
     <span class="c1"># Device serial updates from the synthetic chassis slot.</span>
@@ -8634,10 +8737,7 @@ to <code>parse_ttp</code>.</p>
                         <span class="n">name</span><span class="o">=</span><span class="n">slot</span><span class="p">,</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">slot</span><span class="p">,</span>
                     <span class="p">)</span>
-                    <span class="n">nb_module_bays</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">slot</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">created</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">slot</span><span class="p">,</span>
-                    <span class="p">}</span>
+                    <span class="n">nb_module_bays</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">slot</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">created</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                     <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">slot</span><span class="si">}</span><span class="s2"> module bay created&quot;</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -8663,7 +8763,10 @@ to <code>parse_ttp</code>.</p>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="n">lookup_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">slugify</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;manufacturer&quot;</span><span class="p">]),</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;module_type&quot;</span><span class="p">])</span>
+            <span class="n">lookup_key</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">slugify</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;manufacturer&quot;</span><span class="p">]),</span>
+                <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;module_type&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">lookup_key</span> <span class="ow">in</span> <span class="n">missing_module_type_keys</span><span class="p">:</span>
                 <span class="k">continue</span>
 
@@ -8680,11 +8783,13 @@ to <code>parse_ttp</code>.</p>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">module_type_id</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">module_type_label</span> <span class="ow">and</span> <span class="n">create_module_types</span><span class="p">:</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_type_label</span><span class="p">)</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">module_type_label</span>
+                <span class="p">)</span>
 
             <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">nb_devices_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;module_bay&quot;</span><span class="p">:</span> <span class="n">nb_module_bays</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">slot</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;module_bay&quot;</span><span class="p">:</span> <span class="n">nb_module_bays</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">slot</span><span class="p">],</span>
                 <span class="s2">&quot;module_type&quot;</span><span class="p">:</span> <span class="n">module_type_id</span><span class="p">,</span>
                 <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;serial&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;serial&quot;</span><span class="p">],</span>
@@ -8704,7 +8809,7 @@ to <code>parse_ttp</code>.</p>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
 
     <span class="c1"># Module updates.</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;updating changed modules&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;preparing module update payloads&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">slot</span> <span class="o">==</span> <span class="s2">&quot;chassis&quot;</span><span class="p">:</span>
@@ -8744,22 +8849,29 @@ to <code>parse_ttp</code>.</p>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">module_type_id</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="n">module_type_label</span> <span class="ow">and</span> <span class="n">create_module_types</span><span class="p">:</span>
-                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_type_label</span><span class="p">)</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">module_type_label</span>
+                    <span class="p">)</span>
                 <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;module_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">module_type_id</span>
 
-            <span class="n">module_update_has_changes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">module_update_has_changes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span><span class="p">])</span>
+            <span class="n">bulk_update_modules</span><span class="p">[(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">slot</span><span class="p">)]</span> <span class="o">=</span> <span class="n">payload</span>
+
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_modules</span><span class="p">)</span><span class="si">}</span><span class="s2"> module update payload(s)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bulk_update_modules</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_modules</span><span class="p">)</span><span class="si">}</span><span class="s2"> module(s)&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">bulk_update_modules</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_modules</span><span class="p">)</span><span class="si">}</span><span class="s2"> module(s)&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">bulk_update_modules</span><span class="p">:</span>
                 <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">slot</span><span class="si">}</span><span class="s2"> module updated&quot;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">slot</span><span class="si">}</span><span class="s2"> - failed to update module: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to bulk update modules: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
 
     <span class="c1"># Optional module deletions.</span>
     <span class="k">if</span> <span class="n">process_deletions</span><span class="p">:</span>

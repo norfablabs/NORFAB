@@ -2564,10 +2564,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#special-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Special Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-mac-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate MAC Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deletion-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deletion Behavior
       
     </span>
   </a>
@@ -2575,10 +2603,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#duplicate-mac-handling" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Duplicate MAC Handling
+        Branching Support
       
     </span>
   </a>
@@ -6126,10 +6154,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#special-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Special Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-mac-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate MAC Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deletion-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deletion Behavior
       
     </span>
   </a>
@@ -6137,10 +6193,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#duplicate-mac-handling" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Duplicate MAC Handling
+        Branching Support
       
     </span>
   </a>
@@ -6240,6 +6296,11 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>In <strong>dry-run mode</strong> (<code>dry_run=True</code>) the lists reflect what <em>would</em> happen — no changes are written to NetBox.</p>
+<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+</div>
 <p>In <strong>live-run mode</strong> (<code>dry_run=False</code>, default) the lists reflect what was actually done.</p>
 <p>Conflict errors (MAC assigned to a different interface) are reported in <code>res["errors"]</code> and do not appear in any action list.</p>
 <h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
@@ -6250,9 +6311,8 @@
 <li><code>filter_by_mac</code> — match MAC address strings, e.g. <code>"aa:bb:cc:*"</code></li>
 </ul>
 <p>All filters are applied before the reconciliation step. Interfaces or MACs that do not match are completely ignored — they are neither created nor updated.</p>
-<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
-<p>The task is branch-aware and can push changes into a NetBox branch. The <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> must be installed. Specify the <code>branch</code> parameter; the branch is created automatically if it does not already exist.</p>
-<h2 id="duplicate-mac-handling">Duplicate MAC Handling<a class="headerlink" href="#duplicate-mac-handling" title="Permanent link">¤</a></h2>
+<h2 id="special-handling">Special Handling<a class="headerlink" href="#special-handling" title="Permanent link">¤</a></h2>
+<h3 id="duplicate-mac-handling">Duplicate MAC Handling<a class="headerlink" href="#duplicate-mac-handling" title="Permanent link">¤</a></h3>
 <p>NetBox permits multiple MAC address records with the same MAC value. The task handles this safely:</p>
 <ul>
 <li>If a MAC exists in NetBox with an assigned interface that <strong>matches</strong> the live data — reported as <code>in_sync</code>.</li>
@@ -6260,6 +6320,10 @@
 <li>If a MAC exists in NetBox but is <strong>unassigned</strong> — the record is updated to point at the correct interface.</li>
 <li>If both an assigned (conflicting) and an unassigned copy of the same MAC exist in NetBox, the assigned (conflicting) entry takes precedence and a conflict error is raised.</li>
 </ul>
+<h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
+<p>By default, all discovered live MAC addresses are managed by this task. MACs present in NetBox but absent from live devices are left untouched. There is no explicit deletion mechanism — instead, unused MAC records are managed through standard NetBox administrative procedures.</p>
+<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
+<p>The task is branch-aware and can push changes into a NetBox branch. The <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> must be installed. Specify the <code>branch</code> parameter; the branch is created automatically if it does not already exist.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
@@ -6497,6 +6561,22 @@ the same structure showing what was done.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>with_review</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Preview changes, ask for review, then apply them.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>timeout</code>
             </td>
             <td>
@@ -6508,7 +6588,7 @@ the same structure showing what was done.</p>
               </div>
             </td>
             <td>
-                  <code>60</code>
+                  <code>600</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6641,21 +6721,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1382</span>
-<span class="normal">1383</span>
-<span class="normal">1384</span>
-<span class="normal">1385</span>
-<span class="normal">1386</span>
-<span class="normal">1387</span>
-<span class="normal">1388</span>
-<span class="normal">1389</span>
-<span class="normal">1390</span>
-<span class="normal">1391</span>
-<span class="normal">1392</span>
-<span class="normal">1393</span>
-<span class="normal">1394</span>
-<span class="normal">1395</span>
-<span class="normal">1396</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1396</span>
 <span class="normal">1397</span>
 <span class="normal">1398</span>
 <span class="normal">1399</span>
@@ -6987,7 +7053,45 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 <span class="normal">1725</span>
 <span class="normal">1726</span>
 <span class="normal">1727</span>
-<span class="normal">1728</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1728</span>
+<span class="normal">1729</span>
+<span class="normal">1730</span>
+<span class="normal">1731</span>
+<span class="normal">1732</span>
+<span class="normal">1733</span>
+<span class="normal">1734</span>
+<span class="normal">1735</span>
+<span class="normal">1736</span>
+<span class="normal">1737</span>
+<span class="normal">1738</span>
+<span class="normal">1739</span>
+<span class="normal">1740</span>
+<span class="normal">1741</span>
+<span class="normal">1742</span>
+<span class="normal">1743</span>
+<span class="normal">1744</span>
+<span class="normal">1745</span>
+<span class="normal">1746</span>
+<span class="normal">1747</span>
+<span class="normal">1748</span>
+<span class="normal">1749</span>
+<span class="normal">1750</span>
+<span class="normal">1751</span>
+<span class="normal">1752</span>
+<span class="normal">1753</span>
+<span class="normal">1754</span>
+<span class="normal">1755</span>
+<span class="normal">1756</span>
+<span class="normal">1757</span>
+<span class="normal">1758</span>
+<span class="normal">1759</span>
+<span class="normal">1760</span>
+<span class="normal">1761</span>
+<span class="normal">1762</span>
+<span class="normal">1763</span>
+<span class="normal">1764</span>
+<span class="normal">1765</span>
+<span class="normal">1766</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncMacAddressesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncMacAddressesResult</span><span class="p">,</span>
@@ -7006,7 +7110,8 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7045,6 +7150,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 <span class="sd">        job: NorFab Job object containing relevant metadata.</span>
 <span class="sd">        instance (str, optional): The NetBox instance name to use.</span>
 <span class="sd">        dry_run (bool, optional): If True, no changes will be made to NetBox.</span>
+<span class="sd">        with_review (bool, optional): Preview changes, ask for review, then apply them.</span>
 <span class="sd">        timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.</span>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branch name to use.</span>
@@ -7294,7 +7400,29 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> update&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">with_review</span><span class="p">:</span>
+        <span class="n">mac_preview_result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">&quot;updated&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]),</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device_result</span> <span class="ow">in</span> <span class="n">device_results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bulk_create_mac</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+            <span class="n">mac_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">bulk_update_mac</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">all_mac_live</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">]][</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+            <span class="n">mac_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;mac_address&quot;</span><span class="p">])</span>
+        <span class="c1"># request confirmation from user</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">&quot;MAC address sync&quot;</span><span class="p">,</span> <span class="n">mac_preview_result</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">mac_preview_result</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">elif</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="s2">&quot;dry-run requested, returning MAC address sync plan without changes&quot;</span>
         <span class="p">)</span>

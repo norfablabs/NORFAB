@@ -6292,8 +6292,7 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
-<span class="normal">181</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
@@ -6428,7 +6427,18 @@ nf#
 <span class="normal">313</span>
 <span class="normal">314</span>
 <span class="normal">315</span>
-<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetDevicesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetDevicesResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -6536,8 +6546,18 @@ nf#
         <span class="n">all_devices_raw</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">filter_item</span> <span class="ow">in</span> <span class="n">filters_to_fetch</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">filter_item</span><span class="p">):</span>
-                <span class="n">all_devices_raw</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+            <span class="c1"># use bulk filter if only single list-like filter criteria given</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_item</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">filter_key</span><span class="p">,</span> <span class="n">filter_value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">filter_item</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filter_value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">filter_key</span><span class="p">,</span> <span class="n">filter_value</span>
+                    <span class="p">):</span>
+                        <span class="n">all_devices_raw</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+            <span class="c1"># filter as is in case multiple filtering criteria or scalar value given</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">filter_item</span><span class="p">):</span>
+                    <span class="n">all_devices_raw</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
 
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_devices_raw</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from NetBox&quot;</span><span class="p">)</span>
 

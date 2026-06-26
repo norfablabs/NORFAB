@@ -4015,6 +4015,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#client-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client Names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6062,6 +6073,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#client-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client Names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-jobs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6199,6 +6221,38 @@ pprint.pprint(result)
 </div>
 </div>
 <p>Calling <code>destroy</code> method will kill all the clients as well.</p>
+<h2 id="client-names">Client Names<a class="headerlink" href="#client-names" title="Permanent link">¤</a></h2>
+<p>Each NorFab client has a name. The name is used as the client identity when
+communicating with the broker and is also used for the client's local job
+database and files under <code>__norfab__/files/client/</code>.</p>
+<p>By default, <code>make_client()</code> derives the name from the Python entry script and
+adds a short hash of the current folder path:</p>
+<div class="highlight"><pre><span></span><code>client = nf.make_client()
+</code></pre></div>
+<p>For example, running <code>python lab.py</code> creates a client name similar to
+<code>lab_a1b2c3_NFPClient</code>. The folder hash keeps default names deterministic
+while avoiding collisions between projects that run scripts with the same file
+name. If Python cannot determine the entry script name, the default uses
+<code>&lt;folder-hash&gt;_NFPClient</code>.</p>
+<p>You can also provide an explicit name:</p>
+<div class="highlight"><pre><span></span><code>client = nf.make_client(name=&quot;lab_client_1&quot;)
+</code></pre></div>
+<p>Use explicit names when running multiple clients from the same script, shell,
+notebook, test runner, or application directory:</p>
+<div class="highlight"><pre><span></span><code>client_1 = nf.make_client(name=&quot;lab_client_1&quot;)
+client_2 = nf.make_client(name=&quot;lab_client_2&quot;)
+</code></pre></div>
+<p>Unique client names prevent clients from sharing the same broker identity and
+local job database. This helps avoid cases where replies or events for one
+client are delivered to another client, or where multiple clients read and
+write the same local job state while fetching results.</p>
+<p>!!! note:</p>
+<pre><code>Think of the client name as a network address, not just a display label. The
+broker uses this name to route replies and events back to the client. Two active
+clients with the same name are competing for the same broker route, so a later
+connection can disrupt an earlier one. If two clients need to be active at the
+same time, give them different names.
+</code></pre>
 <h2 id="running-jobs">Running Jobs<a class="headerlink" href="#running-jobs" title="Permanent link">¤</a></h2>
 <p>NorFab client supports two ways to run worker tasks:</p>
 <ol>

@@ -6505,8 +6505,7 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">456</span>
-<span class="normal">457</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
 <span class="normal">460</span>
@@ -6638,7 +6637,8 @@ of this length within the parent prefix. Ignored when <code>dry_run=True</code>.
 <span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">589</span>
+<span class="normal">590</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpBulkInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpBulkResult</span><span class="p">,</span>

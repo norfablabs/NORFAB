@@ -1955,6 +1955,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1971,6 +1989,47 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#netbox-worker-inventory-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Netbox Worker Inventory Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#netbox-instance-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Netbox Instance Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -5959,6 +6018,36 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#netbox-worker-inventory-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Netbox Worker Inventory Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#netbox-instance-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Netbox Instance Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -6001,6 +6090,8 @@ nfcli --show-broker-shared-key
 <span class="nt">cache_ttl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">31557600</span>
 <span class="nt">netbox_connect_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="nt">netbox_read_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+<span class="nt">netbox_retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="nt">netbox_retry_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
 <span class="nt">branch_create_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
 <span class="nt">grapqhl_max_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="nt">instances</span><span class="p">:</span>
@@ -6018,6 +6109,100 @@ nfcli --show-broker-shared-key
 <span class="w">    </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0123456789abcdef0123456789abcdef01234567&quot;</span>
 <span class="w">    </span><span class="nt">ssl_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 </code></pre></div>
+<h2 id="netbox-worker-inventory-parameters">Netbox Worker Inventory Parameters<a class="headerlink" href="#netbox-worker-inventory-parameters" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>service</code></td>
+<td><code>netbox</code></td>
+<td>Worker service type. Must be set to <code>netbox</code> for Netbox workers.</td>
+</tr>
+<tr>
+<td><code>cache_use</code></td>
+<td><code>True</code></td>
+<td>Controls whether Netbox query results are cached. Supports <code>True</code>, <code>False</code>, <code>refresh</code>, and <code>force</code>.</td>
+</tr>
+<tr>
+<td><code>cache_ttl</code></td>
+<td><code>31557600</code></td>
+<td>Cache entry TTL in seconds. Default is one year.</td>
+</tr>
+<tr>
+<td><code>netbox_connect_timeout</code></td>
+<td><code>10</code></td>
+<td>Netbox API connection timeout in seconds.</td>
+</tr>
+<tr>
+<td><code>netbox_read_timeout</code></td>
+<td><code>300</code></td>
+<td>Netbox API read timeout in seconds.</td>
+</tr>
+<tr>
+<td><code>netbox_retries</code></td>
+<td><code>3</code></td>
+<td>Number of retries for Netbox API requests made through <code>requests</code> sessions and <code>pynetbox</code> sessions.</td>
+</tr>
+<tr>
+<td><code>netbox_retry_backoff</code></td>
+<td><code>0.5</code></td>
+<td>Retry backoff factor for Netbox API requests.</td>
+</tr>
+<tr>
+<td><code>branch_create_timeout</code></td>
+<td><code>120</code></td>
+<td>Maximum wait time in seconds for a Netbox branching plugin branch to become ready.</td>
+</tr>
+<tr>
+<td><code>grapqhl_max_workers</code></td>
+<td><code>4</code></td>
+<td>Maximum number of parallel workers used by paginated Netbox GraphQL queries.</td>
+</tr>
+<tr>
+<td><code>instances</code></td>
+<td>required</td>
+<td>Mapping of Netbox instance names to connection parameters. At least one instance is required.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="netbox-instance-parameters">Netbox Instance Parameters<a class="headerlink" href="#netbox-instance-parameters" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td><code>False</code></td>
+<td>Marks this instance as the default Netbox instance. If no instance has <code>default: True</code>, the last configured instance is used.</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>required</td>
+<td>Base URL for the Netbox instance. Trailing slashes are removed automatically.</td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td>required</td>
+<td>Netbox API token used for REST, GraphQL, and <code>pynetbox</code> requests.</td>
+</tr>
+<tr>
+<td><code>ssl_verify</code></td>
+<td><code>True</code></td>
+<td>Controls TLS certificate verification. Set to <code>False</code> for lab systems with self-signed certificates.</td>
+</tr>
+</tbody>
+</table>
 
 
 

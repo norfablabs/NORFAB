@@ -12,31 +12,27 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_get_interfaces/">
+        <link rel="canonical" href="https://docs.norfablabs.com/development/adr_norfab_logging_isolation/">
       
       
-        <link rel="prev" href="../services_netbox_service_tasks_get_devices/">
-      
-      
-        <link rel="next" href="../services_netbox_service_tasks_get_connections/">
       
       
         
       
       
-      <link rel="icon" href="../../../images/logo.jpg">
+      <link rel="icon" href="../../images/logo.jpg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
-        <title>Get Interfaces - Network Automations Fabric [NORFAB]</title>
+        <title>ADR - NorFab Library Logging and Per-Process Log Files - Network Automations Fabric [NORFAB]</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,11 +51,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -84,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#netbox-get-interfaces-task" class="md-skip">
+        <a href="#adr-norfab-library-logging-and-per-process-log-files" class="md-skip">
           Skip to content
         </a>
       
@@ -100,9 +96,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -119,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Get Interfaces
+              ADR - NorFab Library Logging and Per-Process Log Files
             
           </span>
         </div>
@@ -235,9 +231,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     Network Automations Fabric [NORFAB]
@@ -311,7 +307,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -339,7 +335,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
+      <a href="../../norfab_why_use_norfab/" class="md-nav__link">
         
   
   
@@ -421,7 +417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_installation/" class="md-nav__link">
+      <a href="../../norfab_installation/" class="md-nav__link">
         
   
   
@@ -449,7 +445,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_getting_started/" class="md-nav__link">
+      <a href="../../norfab_getting_started/" class="md-nav__link">
         
   
   
@@ -477,7 +473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_inventory/" class="md-nav__link">
+      <a href="../../reference_norfab_inventory/" class="md-nav__link">
         
   
   
@@ -559,7 +555,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorials/norfab_docker_deployment/" class="md-nav__link">
+      <a href="../../tutorials/norfab_docker_deployment/" class="md-nav__link">
         
   
   
@@ -587,7 +583,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
+      <a href="../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
         
   
   
@@ -615,7 +611,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+      <a href="../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
         
   
   
@@ -647,20 +643,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -681,7 +675,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -699,7 +693,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_overview/" class="md-nav__link">
+      <a href="../../services_overview/" class="md-nav__link">
         
   
   
@@ -774,7 +768,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service/" class="md-nav__link">
         
   
   
@@ -802,7 +796,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
         
   
   
@@ -877,7 +871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
         
   
   
@@ -905,7 +899,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
         
   
   
@@ -933,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
         
   
   
@@ -961,7 +955,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
         
   
   
@@ -989,7 +983,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
         
   
   
@@ -1017,7 +1011,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
         
   
   
@@ -1045,7 +1039,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1136,7 +1130,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service/" class="md-nav__link">
         
   
   
@@ -1164,7 +1158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_inventory/" class="md-nav__link">
         
   
   
@@ -1239,7 +1233,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_start/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_start/" class="md-nav__link">
         
   
   
@@ -1267,7 +1261,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_stop/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_stop/" class="md-nav__link">
         
   
   
@@ -1295,7 +1289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_restart/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_restart/" class="md-nav__link">
         
   
   
@@ -1323,7 +1317,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_inspect_networks/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_inspect_networks/" class="md-nav__link">
         
   
   
@@ -1351,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_get_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_get_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1442,7 +1436,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service/" class="md-nav__link">
         
   
   
@@ -1470,7 +1464,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
         
   
   
@@ -1545,7 +1539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_task/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
         
   
   
@@ -1573,7 +1567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
         
   
   
@@ -1601,7 +1595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
         
   
   
@@ -1629,7 +1623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_test/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
         
   
   
@@ -1657,7 +1651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_network/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
         
   
   
@@ -1685,7 +1679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
         
   
   
@@ -1713,7 +1707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
         
   
   
@@ -1741,7 +1735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
         
   
   
@@ -1769,7 +1763,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
         
   
   
@@ -1797,7 +1791,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
         
   
   
@@ -1833,7 +1827,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
         
   
   
@@ -1866,20 +1860,18 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
         
           
           <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
@@ -1900,7 +1892,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1918,7 +1910,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service/" class="md-nav__link">
         
   
   
@@ -1946,7 +1938,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
         
   
   
@@ -1971,20 +1963,18 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_3" >
         
           
           <label class="md-nav__link" for="__nav_4_5_3" id="__nav_4_5_3_label" tabindex="0">
@@ -2005,7 +1995,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_5_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2023,7 +2013,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_graphql/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
         
   
   
@@ -2051,7 +2041,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_rest/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
         
   
   
@@ -2079,7 +2069,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_devices/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
         
   
   
@@ -2104,37 +2094,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Get Interfaces
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
         
   
   
@@ -2150,59 +2113,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#get-interfaces-sample-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Get Interfaces Sample Usage
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#norfab-netbox-get-interfaces-command-shell-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        NORFAB Netbox Get Interfaces Command Shell Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#python-api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2215,7 +2125,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_connections/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
         
   
   
@@ -2243,7 +2153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_circuits/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
         
   
   
@@ -2271,7 +2181,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
         
   
   
@@ -2299,7 +2209,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -2327,7 +2237,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
         
   
   
@@ -2355,7 +2265,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_get_topology/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_topology/" class="md-nav__link">
         
   
   
@@ -2383,7 +2293,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_create_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
@@ -2411,7 +2321,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
         
   
   
@@ -2439,7 +2349,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
         
   
   
@@ -2467,7 +2377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2495,7 +2405,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_sync_device_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_inventory/" class="md-nav__link">
         
   
   
@@ -2523,7 +2433,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2551,7 +2461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
   
@@ -2579,7 +2489,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
   
@@ -2607,7 +2517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_sync_bgp_peerings/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/" class="md-nav__link">
         
   
   
@@ -2635,7 +2545,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_check_device_sync/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_check_device_sync/" class="md-nav__link">
         
   
   
@@ -2663,7 +2573,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_sync_all/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_all/" class="md-nav__link">
         
   
   
@@ -2691,7 +2601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_create_bgp_peering/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_bgp_peering/" class="md-nav__link">
         
   
   
@@ -2719,7 +2629,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_update_bgp_peering/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_bgp_peering/" class="md-nav__link">
         
   
   
@@ -2747,7 +2657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
         
   
   
@@ -2775,7 +2685,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_netbox_service_tasks_crud/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_crud/" class="md-nav__link">
         
   
   
@@ -2866,7 +2776,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service/" class="md-nav__link">
         
   
   
@@ -2894,7 +2804,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service_inventory/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_inventory/" class="md-nav__link">
         
   
   
@@ -2969,7 +2879,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service_tasks_chat/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
         
   
   
@@ -3060,7 +2970,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service/" class="md-nav__link">
         
   
   
@@ -3088,7 +2998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
         
   
   
@@ -3163,7 +3073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
         
   
   
@@ -3254,7 +3164,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
         
   
   
@@ -3282,7 +3192,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
         
   
   
@@ -3357,7 +3267,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service_task_auth/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_auth/" class="md-nav__link">
         
   
   
@@ -3385,7 +3295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
         
   
   
@@ -3413,7 +3323,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/services_fastmcp_service_task_get_prompts/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_prompts/" class="md-nav__link">
         
   
   
@@ -3504,7 +3414,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service/" class="md-nav__link">
         
   
   
@@ -3532,7 +3442,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
         
   
   
@@ -3607,7 +3517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
         
   
   
@@ -3698,7 +3608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service/" class="md-nav__link">
         
   
   
@@ -3726,7 +3636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_inventory/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_inventory/" class="md-nav__link">
         
   
   
@@ -3801,7 +3711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
         
   
   
@@ -3829,7 +3739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
         
   
   
@@ -3857,7 +3767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
         
   
   
@@ -3885,7 +3795,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
         
   
   
@@ -3983,7 +3893,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_overview/" class="md-nav__link">
+      <a href="../../clients_overview/" class="md-nav__link">
         
   
   
@@ -4011,7 +3921,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_nfcli_overview/" class="md-nav__link">
+      <a href="../../clients_nfcli_overview/" class="md-nav__link">
         
   
   
@@ -4039,7 +3949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_python_api_overview/" class="md-nav__link">
+      <a href="../../clients_python_api_overview/" class="md-nav__link">
         
   
   
@@ -4067,7 +3977,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_robot_client_overview/" class="md-nav__link">
+      <a href="../../clients_robot_client_overview/" class="md-nav__link">
         
   
   
@@ -4149,7 +4059,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/norfab_hooks/" class="md-nav__link">
+      <a href="../../customization/norfab_hooks/" class="md-nav__link">
         
   
   
@@ -4224,7 +4134,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_overview/" class="md-nav__link">
+      <a href="../../customization/service_plugin_overview/" class="md-nav__link">
         
   
   
@@ -4252,7 +4162,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_local/" class="md-nav__link">
+      <a href="../../customization/service_plugin_local/" class="md-nav__link">
         
   
   
@@ -4280,7 +4190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_module/" class="md-nav__link">
+      <a href="../../customization/service_plugin_module/" class="md-nav__link">
         
   
   
@@ -4370,7 +4280,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tags/" class="md-nav__link">
+      <a href="../../tags/" class="md-nav__link">
         
   
   
@@ -4398,7 +4308,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_changelog/" class="md-nav__link">
+      <a href="../../norfab_changelog/" class="md-nav__link">
         
   
   
@@ -4473,7 +4383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_norfab/" class="md-nav__link">
+      <a href="../../reference_architecture_norfab/" class="md-nav__link">
         
   
   
@@ -4501,7 +4411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_nfp/" class="md-nav__link">
+      <a href="../../reference_architecture_nfp/" class="md-nav__link">
         
   
   
@@ -4631,7 +4541,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_nfapi/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_nfapi/" class="md-nav__link">
         
   
   
@@ -4659,7 +4569,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_broker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_broker/" class="md-nav__link">
         
   
   
@@ -4687,7 +4597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_worker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_worker/" class="md-nav__link">
         
   
   
@@ -4715,7 +4625,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_client/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_client/" class="md-nav__link">
         
   
   
@@ -4743,7 +4653,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
         
   
   
@@ -4771,7 +4681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_exceptions/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_exceptions/" class="md-nav__link">
         
   
   
@@ -4854,7 +4764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
+      <a href="../../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
         
   
   
@@ -4882,7 +4792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/api_reference_workers_fakenos_worker/" class="md-nav__link">
+      <a href="../../workers/fakenos/api_reference_workers_fakenos_worker/" class="md-nav__link">
         
   
   
@@ -4910,7 +4820,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
+      <a href="../../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
         
   
   
@@ -4938,7 +4848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_workers_netbox_worker/" class="md-nav__link">
+      <a href="../../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
         
   
   
@@ -4966,7 +4876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
+      <a href="../../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
         
   
   
@@ -4994,7 +4904,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
+      <a href="../../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
         
   
   
@@ -5022,7 +4932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/api_reference_workers_agent_worker/" class="md-nav__link">
+      <a href="../../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
         
   
   
@@ -5050,7 +4960,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+      <a href="../../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
         
   
   
@@ -5078,7 +4988,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
+      <a href="../../workers/filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
         
   
   
@@ -5161,7 +5071,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_clients_nfcli_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_nfcli_client/" class="md-nav__link">
         
   
   
@@ -5189,7 +5099,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_clients_robot_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_robot_client/" class="md-nav__link">
         
   
   
@@ -5280,7 +5190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_mmi_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_mmi_subsystem/" class="md-nav__link">
         
   
   
@@ -5308,7 +5218,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_jobs_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_jobs_subsystem/" class="md-nav__link">
         
   
   
@@ -5336,7 +5246,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_events_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_events_subsystem/" class="md-nav__link">
         
   
   
@@ -5426,7 +5336,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/norfab_docker_development/" class="md-nav__link">
+      <a href="../norfab_docker_development/" class="md-nav__link">
         
   
   
@@ -5454,7 +5364,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/documentation_style_guide/" class="md-nav__link">
+      <a href="../documentation_style_guide/" class="md-nav__link">
         
   
   
@@ -5482,7 +5392,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
+      <a href="../adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
   
@@ -5510,7 +5420,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/file_streaming_fetch_file/" class="md-nav__link">
+      <a href="../file_streaming_fetch_file/" class="md-nav__link">
         
   
   
@@ -5585,7 +5495,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
+      <a href="../adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
   
@@ -5613,7 +5523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
+      <a href="../adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
         
   
   
@@ -5641,7 +5551,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_check_sync_plan/" class="md-nav__link">
+      <a href="../adr_netbox_check_sync_plan/" class="md-nav__link">
         
   
   
@@ -5669,7 +5579,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_fastmcp_bearer_authentication/" class="md-nav__link">
+      <a href="../adr_fastmcp_bearer_authentication/" class="md-nav__link">
         
   
   
@@ -5697,7 +5607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_mcp_tool_annotations_plan/" class="md-nav__link">
+      <a href="../adr_mcp_tool_annotations_plan/" class="md-nav__link">
         
   
   
@@ -5725,7 +5635,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
+      <a href="../adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
   
@@ -5753,7 +5663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_norfab_interactive_client/" class="md-nav__link">
+      <a href="../adr_norfab_interactive_client/" class="md-nav__link">
         
   
   
@@ -5781,7 +5691,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_mcp_task_prompts_plan/" class="md-nav__link">
+      <a href="../adr_mcp_task_prompts_plan/" class="md-nav__link">
         
   
   
@@ -5809,7 +5719,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_norfab_aaa_security_architecture/" class="md-nav__link">
+      <a href="../adr_norfab_aaa_security_architecture/" class="md-nav__link">
         
   
   
@@ -5837,7 +5747,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_nornir_snmp_tasks/" class="md-nav__link">
+      <a href="../adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
   
@@ -5920,7 +5830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../testing/norfab_testing_framework/" class="md-nav__link">
+      <a href="../../testing/norfab_testing_framework/" class="md-nav__link">
         
   
   
@@ -5948,7 +5858,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../testing/netbox_service_tests/" class="md-nav__link">
+      <a href="../../testing/netbox_service_tests/" class="md-nav__link">
         
   
   
@@ -5991,7 +5901,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_help_with_norfab/" class="md-nav__link">
+      <a href="../../norfab_help_with_norfab/" class="md-nav__link">
         
   
   
@@ -6038,10 +5948,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-interfaces-sample-usage" class="md-nav__link">
+  <a href="#status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Interfaces Sample Usage
+        Status
       
     </span>
   </a>
@@ -6049,10 +5959,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-get-interfaces-command-shell-reference" class="md-nav__link">
+  <a href="#date" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Get Interfaces Command Shell Reference
+        Date
       
     </span>
   </a>
@@ -6060,10 +5970,270 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#python-api-reference" class="md-nav__link">
+  <a href="#decision" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python API Reference
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proposed-minimal-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposed Minimal Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposed Minimal Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-a-small-logging-helper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add A Small Logging Helper
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#move-default-log-construction-to-nfcli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Move Default Log Construction To NFCLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-process-log-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Process Log Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rotation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-json-formatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom JSON Formatter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-ordering-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Ordering Metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Behavior">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nfcli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFCLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nfapi-as-a-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFAPI As A Library
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#broker-and-workers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Broker And Workers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#log-query-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Query Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Log Query Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worker-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worker Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#broker-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Broker Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-side-merge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client-Side Merge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inventory-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inventory Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#follow-up-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-Up Work
       
     </span>
   </a>
@@ -6085,743 +6255,414 @@
                 
                   
 
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <a href="../../../tags/#tag:netbox" class="md-tag">netbox</a>
-      
-    
-  </nav>
-
 
   
   
 
 
-<h1 id="netbox-get-interfaces-task">Netbox Get Interfaces Task<a class="headerlink" href="#netbox-get-interfaces-task" title="Permanent link">¤</a></h1>
-<blockquote>
-<p>task api name: <code>get_interfaces</code></p>
-</blockquote>
-<h2 id="get-interfaces-sample-usage">Get Interfaces Sample Usage<a class="headerlink" href="#get-interfaces-sample-usage" title="Permanent link">¤</a></h2>
-<h2 id="norfab-netbox-get-interfaces-command-shell-reference">NORFAB Netbox Get Interfaces Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-interfaces-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>get_interfaces</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.interfaces
-root
-└── netbox:    Netbox service
-    └── get:    Query data from Netbox
-        └── interfaces:    Query Netbox device interfaces data
-            ├── instance:    Netbox instance name to target
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── timeout:    Job timeout
-            ├── *devices:    Devices to retrieve interface for
-            ├── ip-addresses:    Retrieves interface IP addresses
-            ├── inventory-items:    Retrieves interface inventory items
-            └── dry-run:    Only return query content, do not run it
-nf#
+<h1 id="adr-norfab-library-logging-and-per-process-log-files">ADR - NorFab Library Logging and Per-Process Log Files<a class="headerlink" href="#adr-norfab-library-logging-and-per-process-log-files" title="Permanent link">¤</a></h1>
+<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">¤</a></h2>
+<p>Proposed.</p>
+<h2 id="date">Date<a class="headerlink" href="#date" title="Permanent link">¤</a></h2>
+<p>2026-06-24.</p>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">¤</a></h2>
+<p>Normalize NorFab logging around the standard Python boundary:</p>
+<ul>
+<li><code>norfab.core.nfapi.NorFab</code> behaves as a library API.</li>
+<li>Applications that use NFAPI own logging setup.</li>
+<li><code>nfcli</code> is the NorFab application and sets up NorFab default logging before
+  constructing <code>NorFab</code>.</li>
+<li>Parent scripts that import NFAPI keep ownership of their own logging.</li>
+</ul>
+<p><code>NorFab.__init__()</code> should no longer call <code>logging.config.dictConfig()</code> or
+construct application log handlers as an implicit side effect. NFAPI should emit
+records through normal module loggers such as <code>norfab.core.nfapi</code>,
+<code>norfab.core.client</code>, <code>norfab.core.broker</code>, and worker module loggers.</p>
+<p>Abandon <code>__norfab__/logs/norfab.log</code> as the primary shared runtime log file.
+Each NorFab process writes to its own log file under <code>__norfab__/logs</code>.</p>
+<p>Default application logging should use a small NorFab logging helper called by
+<code>nfcli</code> and by NorFab-owned broker/worker process entrypoints. The helper should
+use only the Python standard library and a custom JSON formatter for the default
+file sink.</p>
+<p>The inventory <code>logging</code> section remains based on Python's
+<code>logging.config.dictConfig</code> schema. Per-process JSONL files are the default
+NorFab file destination, not the only supported logging destination. Inventory
+logging can still configure additional or replacement handlers such as
+<code>SysLogHandler</code>, journald handlers supplied by optional packages, Windows Event
+Log handlers, SMTP handlers, socket handlers, stream handlers, filters, and
+formatters.</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">¤</a></h2>
+<p>Current NFAPI construction configures process logging:</p>
+<div class="highlight"><pre><span></span><code><span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 </code></pre></div>
-<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-
-    <div class="doc doc-contents first">
-
-        <p>Retrieve device interfaces from Netbox using Pynetbox REST API.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>job</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="Job(worker: object = None, juuid: str = None, client_address: str = None, timeout: int = None, args: list = None, kwargs: dict = None, task: str = None, client_input_queue: object = None) (norfab.core.worker.Job)" href="../../../api_reference_core_norfab_worker/#norfab.core.worker.Job">Job</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>NorFab Job object containing relevant metadata</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>instance</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Netbox instance name.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>devices</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of devices to retrieve interfaces for.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>interface_list</code>
-            </td>
-            <td>
-                  <code><span title="list">list</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List of interface names to retrieve.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>interface_regex</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Regex pattern to match interfaces by name.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ip_addresses</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If True, retrieves interface IPs. Defaults to False.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>inventory_items</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If True, retrieves interface inventory items. Defaults to False.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>dry_run</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If True, only return REST filter params, do not run. Defaults to False.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>cache</code>
-            </td>
-            <td>
-                  <code><span title="typing.Union">Union</span>[None, <span title="bool">bool</span>, <span title="str">str</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p><code>True</code> - use cache if up to date; <code>False</code> - skip cache;
-<code>"refresh"</code> - fetch and overwrite cache; <code>"force"</code> - use cache without staleness check</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>brief</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If True, return stripped-down interface data for MCP/LLM context
-window optimization. Full data is still fetched; brief mode only affects what is returned.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>dict</code></td>            <td>
-                  <code><span title="norfab.models.Result">Result</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Dictionary keyed by device name with interface details.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-        <p>This task performs no filtering of data returned by <code>pynetbox.dcim.interfaces.filter</code>,
-as a result use netbox REST API explorer to understand resulting data structure, REST
-API browser available at <code>http://&lt;netbox url&gt;/api/dcim/interfaces/</code>. In addition
-use nfcli to explore interfaces data:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox get interfaces devices fceos4 interface-list eth201 | kv
-
-netbox-worker-1.1.fceos4.eth201.display: eth201
-netbox-worker-1.1.fceos4.eth201.device.name: fceos4
-...
+<p>Even if the caller only wants a client, <code>NorFab.__init__()</code> calls
+<code>setup_logging()</code>, which applies inventory logging with:</p>
+<div class="highlight"><pre><span></span><code><span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inventory</span><span class="p">[</span><span class="s2">&quot;logging&quot;</span><span class="p">])</span>
 </code></pre></div>
-<p>Can also pipe results through <code>json</code>, <code>yaml</code>, <code>nested</code> or <code>pprint</code>  formatters to output
-results in  certain format.</p>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
-    <span class="nb">input</span><span class="o">=</span><span class="n">GetInterfacesInput</span><span class="p">,</span>
-    <span class="n">output</span><span class="o">=</span><span class="n">GetInterfacesResult</span><span class="p">,</span>
-    <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Get Interfaces&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="p">}</span>
-    <span class="p">},</span>
+<p>The default logging config contains a <code>root</code> section and handlers for terminal
+and <code>__norfab__/logs/norfab.log</code>. This replaces the parent application's root
+handlers. <code>disable_existing_loggers: False</code> keeps named loggers alive, but it
+does not preserve the root handlers once <code>dictConfig()</code> configures <code>root</code>.</p>
+<p>The current queue logging model is useful inside one NorFab-owned process tree:</p>
+<ul>
+<li>parent NFAPI process owns terminal/file handlers;</li>
+<li>broker and workers send records to the parent with <code>QueueHandler</code>;</li>
+<li>one parent <code>QueueListener</code> writes the shared log file.</li>
+</ul>
+<p>That model stops being safe when two independent NFAPI parent processes run
+from the same folder. Each process owns a different queue listener and both can
+open the same <code>__norfab__/logs/norfab.log</code>, causing file access and rotation
+collisions, especially on Windows.</p>
+<p>The cleaner split is:</p>
+<ul>
+<li>NFAPI does not decide application logging.</li>
+<li><code>nfcli</code> configures logs because it is an application.</li>
+<li>every process writes its own log file, avoiding shared file ownership.</li>
+</ul>
+<h2 id="goals">Goals<a class="headerlink" href="#goals" title="Permanent link">¤</a></h2>
+<ul>
+<li>Keep code changes surgical and close to current logging paths.</li>
+<li>Preserve simple <code>nfcli</code> behavior: users still get NorFab logs without extra
+  CLI flags or logging concepts.</li>
+<li>Stop NFAPI from overriding parent application logging.</li>
+<li>Avoid multi-process writes to the same rotating log file.</li>
+<li>Keep broker, worker, and client logs discoverable under <code>__norfab__/logs</code>.</li>
+<li>Use JSON lines so logs can later be queried and merged in a uniform order.</li>
+<li>Avoid adding a logging dependency.</li>
+<li>Preserve the existing inventory-driven logging flexibility based on Python
+  <code>dictConfig</code>.</li>
+</ul>
+<h2 id="non-goals">Non-Goals<a class="headerlink" href="#non-goals" title="Permanent link">¤</a></h2>
+<ul>
+<li>Do not add user-facing <code>logging_mode</code>, <code>log_file_strategy</code>, or similar knobs.</li>
+<li>Do not add a socket log receiver in this change.</li>
+<li>Do not introduce a multi-process-safe third-party file handler.</li>
+<li>Do not redesign task event handling or job event storage.</li>
+<li>Do not implement the full log query CLI in the first minimal change.</li>
+</ul>
+<h2 id="proposed-minimal-implementation">Proposed Minimal Implementation<a class="headerlink" href="#proposed-minimal-implementation" title="Permanent link">¤</a></h2>
+<h3 id="add-a-small-logging-helper">Add A Small Logging Helper<a class="headerlink" href="#add-a-small-logging-helper" title="Permanent link">¤</a></h3>
+<p>Add a focused helper module, for example:</p>
+<div class="highlight"><pre><span></span><code>norfab/core/logging.py
+</code></pre></div>
+<p>The helper should expose simple functions such as:</p>
+<div class="highlight"><pre><span></span><code><span class="n">setup_process_logging</span><span class="p">(</span>
+    <span class="n">base_dir</span><span class="p">,</span>
+    <span class="n">role</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">inventory_logging</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_interfaces</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
-    <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">interface_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">interface_regex</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ip_addresses</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">inventory_items</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">brief</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retrieve device interfaces from Netbox using Pynetbox REST API.</span>
+</code></pre></div>
+<p>The helper creates <code>__norfab__/logs</code> if needed and configures logging for the
+current process only.</p>
+<p>The helper should treat inventory logging as a per-process template:</p>
+<ul>
+<li>copy the inventory <code>logging</code> dictionary before modifying it;</li>
+<li>inject process metadata such as role, process name, worker name, client name,
+  and PID;</li>
+<li>provide a safe per-process file handler when the inventory does not replace
+  the default file sink;</li>
+<li>preserve custom inventory handlers where practical;</li>
+<li>apply the resulting config in the current process only.</li>
+</ul>
+<p>No broad rewrite is required. Existing <code>setup_logging()</code> methods in NFAPI,
+broker, and worker can be reduced to thin calls into this helper, or NFAPI
+logging setup can be removed while broker/worker process entrypoints call the
+helper directly.</p>
+<h3 id="move-default-log-construction-to-nfcli">Move Default Log Construction To NFCLI<a class="headerlink" href="#move-default-log-construction-to-nfcli" title="Permanent link">¤</a></h3>
+<p><code>nfcli</code> should call the helper before creating <code>NorFab</code>.</p>
+<p>Example shape:</p>
+<div class="highlight"><pre><span></span><code><span class="n">setup_process_logging</span><span class="p">(</span>
+    <span class="n">base_dir</span><span class="o">=</span><span class="n">resolved_base_dir</span><span class="p">,</span>
+    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;nfcli&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;nfcli&quot;</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="o">=</span><span class="n">LOGLEVEL</span><span class="p">,</span>
+    <span class="n">inventory_logging</span><span class="o">=</span><span class="n">inventory_logging</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        job: NorFab Job object containing relevant metadata</span>
-<span class="sd">        instance (str, optional): Netbox instance name.</span>
-<span class="sd">        devices (list, optional): List of devices to retrieve interfaces for.</span>
-<span class="sd">        interface_list (list, optional): List of interface names to retrieve.</span>
-<span class="sd">        interface_regex (str, optional): Regex pattern to match interfaces by name.</span>
-<span class="sd">        ip_addresses (bool, optional): If True, retrieves interface IPs. Defaults to False.</span>
-<span class="sd">        inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.</span>
-<span class="sd">        dry_run (bool, optional): If True, only return REST filter params, do not run. Defaults to False.</span>
-<span class="sd">        cache: ``True`` - use cache if up to date; ``False`` - skip cache;</span>
-<span class="sd">            ``&quot;refresh&quot;`` - fetch and overwrite cache; ``&quot;force&quot;`` - use cache without staleness check</span>
-<span class="sd">        brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context</span>
-<span class="sd">            window optimization. Full data is still fetched; brief mode only affects what is returned.</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span>
+    <span class="n">inventory</span><span class="o">=</span><span class="n">INVENTORY</span><span class="p">,</span>
+    <span class="n">log_level</span><span class="o">=</span><span class="n">LOGLEVEL</span><span class="p">,</span>
+    <span class="n">run_broker</span><span class="o">=...</span><span class="p">,</span>
+    <span class="n">run_workers</span><span class="o">=...</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><code>nfcli -c</code>, <code>nfcli -b</code>, <code>nfcli -w</code>, and default interactive shell usage should
+still produce logs automatically. The difference is ownership: <code>nfcli</code> chooses
+to configure logs because it is the application.</p>
+<p>Parent Python scripts that use NFAPI directly do not get NorFab application
+logging unless they configure logging themselves.</p>
+<h3 id="per-process-log-files">Per-Process Log Files<a class="headerlink" href="#per-process-log-files" title="Permanent link">¤</a></h3>
+<p>Each process gets a safe default file named from its role and process identity.</p>
+<p>Suggested names:</p>
+<div class="highlight"><pre><span></span><code>__norfab__/logs/nfcli-nfcli-&lt;pid&gt;.jsonl
+__norfab__/logs/broker-NFPBroker-&lt;pid&gt;.jsonl
+__norfab__/logs/worker-nornir-worker-1-&lt;pid&gt;.jsonl
+__norfab__/logs/client-&lt;client-name&gt;-&lt;pid&gt;.jsonl
+</code></pre></div>
+<p>Include the worker name for workers and the client name for clients. Include
+the PID to avoid collisions when the same worker or client name is started more
+than once. A process start timestamp may also be included if needed for stale
+file clarity:</p>
+<div class="highlight"><pre><span></span><code>worker-nornir-worker-1-12345-20260624T101530.jsonl
+</code></pre></div>
+<p>The old shared file:</p>
+<div class="highlight"><pre><span></span><code>__norfab__/logs/norfab.log
+</code></pre></div>
+<p>is no longer the primary runtime log destination.</p>
+<p>This does not remove other handler types. For example, an inventory can still
+send the same process records to syslog or another configured sink while the
+default NorFab file handler writes JSONL locally.</p>
+<h3 id="rotation">Rotation<a class="headerlink" href="#rotation" title="Permanent link">¤</a></h3>
+<p>Use standard <code>logging.handlers.RotatingFileHandler</code> per process.</p>
+<p>Default rotation policy:</p>
+<div class="highlight"><pre><span></span><code>backupCount: 30
+</code></pre></div>
+<p>Keep the existing <code>maxBytes</code> default unless there is a separate reason to
+change it. The important change is that rotation is per process, not shared
+across independent processes.</p>
+<h3 id="custom-json-formatter">Custom JSON Formatter<a class="headerlink" href="#custom-json-formatter" title="Permanent link">¤</a></h3>
+<p>Use a small custom formatter instead of adding <code>python-json-logger</code> for the
+default NorFab JSONL file handler.</p>
+<p>Each line should be one JSON object. Required fields:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;ts&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-24T10:15:30.123456+10:00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;logger&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;norfab.core.worker&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;worker started&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;processName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Process-2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;threadName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MainThread&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;worker&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;worker&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;line&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Optional fields should be emitted when present on the log record:</p>
+<div class="highlight"><pre><span></span><code>service
+worker
+client
+task
+job_uuid
+event_type
+exception
+</code></pre></div>
+<p>The formatter should preserve normal logging behavior by using
+<code>record.getMessage()</code> and <code>formatException()</code> for exceptions.</p>
+<p>Inventory may still define and use non-JSON formatters for terminal, syslog,
+Event Log, SMTP, or custom handlers. JSON formatting is required only for the
+default per-process file sink intended for future NorFab log querying.</p>
+<h3 id="log-ordering-metadata">Log Ordering Metadata<a class="headerlink" href="#log-ordering-metadata" title="Permanent link">¤</a></h3>
+<p>To support future NFCLI interactive shell <code>show logging ...</code> commands or
+equivalent log query code, JSON records should include enough metadata for
+stable ordering:</p>
+<ul>
+<li>timestamp with timezone;</li>
+<li>PID;</li>
+<li>process role;</li>
+<li>process name;</li>
+<li>optional per-process sequence number.</li>
+</ul>
+<p>Uniform ordering across processes will be timestamp-based. Exact sub-millisecond
+global ordering cannot be guaranteed, but timestamp plus PID plus sequence is
+stable and good enough for operational log review.</p>
+<h2 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">¤</a></h2>
+<h3 id="nfcli">NFCLI<a class="headerlink" href="#nfcli" title="Permanent link">¤</a></h3>
+<p><code>nfcli</code> configures NorFab application logging.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code>nfcli<span class="w"> </span>-c
+nfcli<span class="w"> </span>-b
+nfcli<span class="w"> </span>-w
+nfcli
+</code></pre></div>
+<p>Expected behavior:</p>
+<ul>
+<li>Logs are written under <code>__norfab__/logs</code>.</li>
+<li><code>nfcli -c</code> writes a client/nfcli process log.</li>
+<li>broker and workers write their own process logs.</li>
+<li>no process competes for <code>norfab.log</code>.</li>
+</ul>
+<h3 id="nfapi-as-a-library">NFAPI As A Library<a class="headerlink" href="#nfapi-as-a-library" title="Permanent link">¤</a></h3>
+<p>Parent application:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary keyed by device name with interface details.</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;parent.log&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 
-<span class="sd">    This task performs no filtering of data returned by `pynetbox.dcim.interfaces.filter`,</span>
-<span class="sd">    as a result use netbox REST API explorer to understand resulting data structure, REST</span>
-<span class="sd">    API browser available at `http://&lt;netbox url&gt;/api/dcim/interfaces/`. In addition</span>
-<span class="sd">    use nfcli to explore interfaces data:</span>
-
-<span class="sd">    ```</span>
-<span class="sd">    nf#netbox get interfaces devices fceos4 interface-list eth201 | kv</span>
-
-<span class="sd">    netbox-worker-1.1.fceos4.eth201.display: eth201</span>
-<span class="sd">    netbox-worker-1.1.fceos4.eth201.device.name: fceos4</span>
-<span class="sd">    ...</span>
-<span class="sd">    ```</span>
-
-<span class="sd">    Can also pipe results through `json`, `yaml`, `nested` or `pprint`  formatters to output</span>
-<span class="sd">    results in  certain format.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
-    <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
-    <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_use</span> <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cache</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Get interfaces: Fetching interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) from &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
-    <span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-        <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:get_interfaces_pynetbox&quot;</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">},</span>
-        <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
-    <span class="p">)</span>
-    <span class="n">filter_params</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">all_interfaces</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">children_by_parent_id</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># parent_id -&gt; [child intf, ...]</span>
-    <span class="n">member_intf_by_lag_id</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># lag_id    -&gt; [member intf, ...]</span>
-    <span class="n">ip_by_intf_id</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">inv_by_intf_id</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">last_updated_by_device</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="c1"># build REST filter params</span>
-    <span class="k">if</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">filter_params</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
-    <span class="k">if</span> <span class="n">interface_list</span><span class="p">:</span>
-        <span class="n">filter_params</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_list</span>
-    <span class="k">if</span> <span class="n">interface_regex</span><span class="p">:</span>
-        <span class="n">filter_params</span><span class="p">[</span><span class="s2">&quot;name__regex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_regex</span>
-
-    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filter_params&quot;</span><span class="p">:</span> <span class="n">filter_params</span><span class="p">}</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="n">ret</span>
-
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving interfaces for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-
-    <span class="n">devices_to_fetch</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checking cache for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-        <span class="c1"># quick REST call to get current last_updated for all matching interfaces</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-            <span class="o">**</span><span class="n">filter_params</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,last_updated,device&quot;</span>
-        <span class="p">)</span>
-        <span class="c1"># build per-device last_updated map</span>
-        <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-            <span class="n">last_updated_by_device</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{})[</span>
-                <span class="n">intf</span><span class="o">.</span><span class="n">name</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">last_updated</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">expire</span><span class="p">()</span>  <span class="c1"># remove expired items from cache</span>
-        <span class="n">devices_to_fetch</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">intf_last_updated</span> <span class="ow">in</span> <span class="n">last_updated_by_device</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">device_cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_interfaces::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">if</span> <span class="n">device_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="ow">and</span> <span class="p">(</span>
-                <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;force&quot;</span>
-                <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">device_cache_key</span><span class="p">]</span>
-                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf_name</span><span class="p">,</span> <span class="p">{})</span>
-                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_updated&quot;</span><span class="p">)</span>
-                    <span class="o">==</span> <span class="n">lu</span>
-                    <span class="k">for</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">lu</span> <span class="ow">in</span> <span class="n">intf_last_updated</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                <span class="p">)</span>
-            <span class="p">):</span>
-                <span class="c1"># serve requested interfaces from cache</span>
-                <span class="k">for</span> <span class="n">intf_name</span> <span class="ow">in</span> <span class="n">intf_last_updated</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">intf_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span>
-                        <span class="n">device_cache_key</span>
-                    <span class="p">][</span><span class="n">intf_name</span><span class="p">]</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;serving &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; interfaces from cache (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">intf_last_updated</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s))&quot;</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">devices_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; cache miss or stale, fetching fresh data&quot;</span>
-                <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">cache</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span><span class="p">:</span>
-        <span class="k">pass</span>  <span class="c1"># fetch all devices fresh</span>
-
-    <span class="c1"># build fetch filter params restricted to devices needing fresh data</span>
-    <span class="k">if</span> <span class="n">devices</span> <span class="ow">and</span> <span class="n">cache</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;force&quot;</span><span class="p">):</span>
-        <span class="n">fetch_filter_params</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">filter_params</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices_to_fetch</span><span class="p">}</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">fetch_filter_params</span> <span class="o">=</span> <span class="n">filter_params</span>
-
-    <span class="c1"># fetch all matching interfaces in one call</span>
-    <span class="k">if</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;fetching interfaces from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
-        <span class="p">)</span>
-        <span class="n">all_interfaces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">fetch_filter_params</span><span class="p">))</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) from NetBox&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_interfaces</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - no interfaces data returned by &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;for devices </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-
-    <span class="c1"># build relationship lookup maps from fetched data</span>
-    <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="n">all_interfaces</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">intf</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
-            <span class="n">children_by_parent_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">intf</span><span class="o">.</span><span class="n">lag</span><span class="p">:</span>
-            <span class="n">member_intf_by_lag_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">lag</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf</span><span class="p">)</span>
-
-    <span class="c1"># fetch IP addresses if requested (one bulk call keyed by assigned_object_id)</span>
-    <span class="k">if</span> <span class="n">ip_addresses</span> <span class="ow">and</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching IP addresses for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="n">devices_to_fetch</span>
-        <span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span>
-                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
-            <span class="p">):</span>
-                <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
-
-    <span class="c1"># fetch inventory items if requested (one bulk call keyed by component_id)</span>
-    <span class="k">if</span> <span class="n">inventory_items</span> <span class="ow">and</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching inventory items for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">inventory_items</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="n">devices_to_fetch</span>
-        <span class="p">):</span>
-            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">component_id</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">component_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">:</span>
-                <span class="n">inv_by_intf_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">component_id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
-
-    <span class="c1"># transform pynetbox records into result dict keyed by device / interface name</span>
-    <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="n">all_interfaces</span><span class="p">:</span>
-        <span class="n">device_name</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>  <span class="c1"># Netbox issue #16299</span>
-            <span class="k">continue</span>
-
-        <span class="n">intf_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">intf</span><span class="p">)</span>
-        <span class="c1"># add extra fields</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;child_interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[]),</span>
-            <span class="p">}</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children_by_parent_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
-        <span class="p">]</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;member_interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">member_intf_by_lag_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
-        <span class="p">]</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
-        <span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;inventory_items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inv_by_intf_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">intf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_data</span>
-
-    <span class="c1"># cache freshly fetched interfaces per device</span>
-    <span class="k">if</span> <span class="n">cache</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;caching interfaces data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices_to_fetch</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices_to_fetch</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
-                <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;get_interfaces::</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-                    <span class="n">cache_key</span><span class="p">,</span>
-                    <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">],</span>
-                    <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span><span class="p">,</span>
-                <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">brief</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">make_interfaces_brief</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ret</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">,</span> <span class="n">run_broker</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">run_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+</code></pre></div>
+<p>Expected behavior:</p>
+<ul>
+<li>NFAPI does not replace parent root handlers.</li>
+<li>NorFab log records propagate according to the parent's logging config unless
+  the parent config chooses otherwise.</li>
+<li>If the parent wants NorFab-style JSON process files, it can call the same
+  helper that <code>nfcli</code> uses.</li>
+</ul>
+<h3 id="broker-and-workers">Broker And Workers<a class="headerlink" href="#broker-and-workers" title="Permanent link">¤</a></h3>
+<p>Broker and worker process entrypoints should configure their own process log
+file with the helper and apply the inventory logging template in that process.</p>
+<p>This removes the need for broker/worker child processes to share a log file
+through the parent NFAPI process. Existing queue logging can be removed or kept
+temporarily as compatibility during migration, but the target design is direct
+per-process logging setup.</p>
+<p>If the inventory configures external handlers, each broker or worker process
+uses those handlers independently. For example, a <code>SysLogHandler</code> configured in
+inventory sends records from every process to syslog, while the default file
+handler still writes a process-specific JSONL file.</p>
+<h2 id="log-query-architecture">Log Query Architecture<a class="headerlink" href="#log-query-architecture" title="Permanent link">¤</a></h2>
+<p>Per-process log files make writes safe, but users still need a single view from
+the interactive shell. Log retrieval should follow NorFab ownership boundaries.</p>
+<h3 id="worker-logs">Worker Logs<a class="headerlink" href="#worker-logs" title="Permanent link">¤</a></h3>
+<p>Workers should expose a task that reads their local process log files and
+returns matching JSON records to the client.</p>
+<p>Suggested task shape:</p>
+<div class="highlight"><pre><span></span><code>service: workers
+task: logging_read
+</code></pre></div>
+<p>or a service-specific built-in worker task exposed consistently across worker
+types.</p>
+<p>The task should support filters such as:</p>
+<div class="highlight"><pre><span></span><code>since
+until
+level
+logger
+task
+job_uuid
+limit
+tail
+follow
+</code></pre></div>
+<p>The first implementation can support bounded reads only. Follow/streaming can
+be added later through the interactive shell or task streaming path.</p>
+<h3 id="broker-logs">Broker Logs<a class="headerlink" href="#broker-logs" title="Permanent link">¤</a></h3>
+<p>The broker should expose an MMI command to read broker-local logs:</p>
+<div class="highlight"><pre><span></span><code>mmi.service.broker logging_read
+</code></pre></div>
+<p>The broker MMI should use the same filter names and return the same JSON record
+shape as worker log tasks.</p>
+<h3 id="client-side-merge">Client-Side Merge<a class="headerlink" href="#client-side-merge" title="Permanent link">¤</a></h3>
+<p><code>norfab.core.client.NFPClient</code> should gain a small log merge helper that accepts
+record iterables from broker MMI and worker tasks, normalizes records, and
+returns a single ordered stream.</p>
+<p>Ordering should use:</p>
+<div class="highlight"><pre><span></span><code>ts, pid, sequence
+</code></pre></div>
+<p>where <code>sequence</code> is optional. If a record is malformed, the client should keep
+the error local to the log query result instead of failing the entire query.</p>
+<p>NFCLI interactive shell <code>show logging ...</code> commands should use this client-side
+merge capability rather than duplicating merge logic in the shell models.</p>
+<h2 id="inventory-compatibility">Inventory Compatibility<a class="headerlink" href="#inventory-compatibility" title="Permanent link">¤</a></h2>
+<p>Keep inventory logging support compatible with current behavior:</p>
+<ul>
+<li>Continue accepting existing inventory <code>logging.handlers.terminal.level</code> and
+  <code>logging.handlers.file.level</code> values where practical.</li>
+<li>Treat inventory logging as Python <code>dictConfig</code> and preserve user-defined
+  handlers, formatters, filters, loggers, and root settings where practical.</li>
+<li>Map the old/default <code>file</code> handler settings to the per-process JSON file
+  handler.</li>
+<li>Change default <code>backupCount</code> to 30 for the per-process file handler.</li>
+<li>Treat <code>filename</code> from the default <code>file</code> handler carefully. The NorFab default
+  file sink should use a process-specific filename to avoid collisions.</li>
+<li>Preserve clearly custom non-file handlers such as syslog, journald handlers,
+  Windows Event Log handlers, SMTP handlers, socket handlers, and stream
+  handlers.</li>
+<li>Preserve custom file handlers where practical, but document that a custom
+  file handler pointing multiple processes at one normal rotating file is the
+  user's responsibility and can reintroduce file contention.</li>
+</ul>
+<p>The first implementation should avoid a large schema redesign. Existing logging
+inventory can be partially honored by the helper while the new default behavior
+stops using a shared <code>norfab.log</code>.</p>
+<p>Example inventory remains valid:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">handlers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">file</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEBUG</span>
+<span class="w">      </span><span class="nt">maxBytes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024000</span>
+<span class="w">      </span><span class="nt">backupCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">syslog</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">logging.handlers.SysLogHandler</span>
+<span class="w">      </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/dev/log</span>
+<span class="w">      </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
+<span class="w">  </span><span class="nt">root</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">handlers</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">file</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">syslog</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
+</code></pre></div>
+<p>In the new model, each process receives its own resolved <code>file.filename</code>, while
+the <code>syslog</code> handler is preserved.</p>
+<h2 id="migration-plan">Migration Plan<a class="headerlink" href="#migration-plan" title="Permanent link">¤</a></h2>
+<p>Keep code changes small:</p>
+<ol>
+<li>Add the custom JSON formatter and process logging helper.</li>
+<li>Make <code>nfcli</code> call the helper before constructing <code>NorFab</code>.</li>
+<li>Stop <code>NorFab.__init__()</code> from applying global logging configuration.</li>
+<li>Update broker and worker process startup to call the helper with their role
+   and name.</li>
+<li>Update client creation paths used by <code>nfcli</code> to configure a client/nfcli log
+   file through the helper.</li>
+<li>Leave unrelated logging calls unchanged. Existing <code>log =
+   logging.getLogger(__name__)</code> usage remains correct.</li>
+</ol>
+<p>Do not refactor worker task logging, job events, CLI command behavior, or
+inventory loading as part of this change.</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">¤</a></h2>
+<ul>
+<li>NFAPI behaves like a normal Python library.</li>
+<li>Parent scripts keep their logging configuration.</li>
+<li><code>nfcli</code> still gives users NorFab logs by default.</li>
+<li>Independent processes no longer compete for one rotating file.</li>
+<li>Opening one static <code>norfab.log</code> is replaced by reading per-process JSONL log
+  files.</li>
+<li>Inventory logging remains extensible through Python <code>dictConfig</code>; JSONL is
+  the default NorFab file sink, not a restriction on all logging destinations.</li>
+<li>Future log query tooling can merge JSON records across files.</li>
+<li>The first implementation is intentionally surgical: add helper, call helper
+  from app/process entrypoints, remove NFAPI global logging setup.</li>
+</ul>
+<h2 id="follow-up-work">Follow-Up Work<a class="headerlink" href="#follow-up-work" title="Permanent link">¤</a></h2>
+<ul>
+<li>Write a NorFab logging tutorial that explains the new logging model from a
+  user's point of view:</li>
+<li>NFAPI behaves as a library and does not configure parent application
+    logging.</li>
+<li><code>nfcli</code> configures NorFab logging as the NorFab application.</li>
+<li>The inventory <code>logging</code> section remains Python <code>dictConfig</code> compatible.</li>
+<li>Default file logs are per-process JSONL files under <code>__norfab__/logs</code>.</li>
+<li>Worker and broker names are used in log filenames.</li>
+<li>Rotation defaults to <code>backupCount: 30</code>.</li>
+<li>Examples show changing terminal/file levels, disabling terminal output,
+    adding syslog or journald/Event Log handlers, and using environment
+    variables with Jinja2.</li>
+<li>Troubleshooting explains why a shared <code>norfab.log</code> is no longer the default
+    and how to inspect or merge logs through the interactive shell.</li>
+<li>Add NFCLI interactive shell <code>show logging ...</code> commands to read all
+  <code>__norfab__/logs/*.jsonl</code>, sort by timestamp, and filter by role, name,
+  level, logger, task, or job UUID.</li>
+<li>Add worker log-reading task support so workers can return their local
+  per-process JSONL records to clients.</li>
+<li>Add broker MMI log-reading support so broker-local JSONL records can be
+  queried through the same client flow.</li>
+<li>Add client-side log merge utilities in <code>client.py</code> so NFCLI and other clients
+  can combine broker and worker log records in uniform timestamp order.</li>
+<li>Add interactive shell support to follow multiple process logs.</li>
+<li>Add interactive shell support to export logs to a combined human-readable
+  file when needed.</li>
+<li>Document the new per-process log file naming convention.</li>
+<li>Consider whether to keep a human-readable formatter for terminal output while
+  retaining JSONL for files.</li>
+</ul>
 
 
 
 
 
 
-
-  
-  
 
 
 
@@ -6840,44 +6681,6 @@ results in  certain format.</p>
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../services_netbox_service_tasks_get_devices/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Get Devices">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Get Devices
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../services_netbox_service_tasks_get_connections/" class="md-footer__link md-footer__link--next" aria-label="Next: Get Connections">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Get Connections
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -6934,14 +6737,14 @@ results in  certain format.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
-        <script src="../../../javascripts/mermaid.js"></script>
+        <script src="../../javascripts/mermaid.js"></script>
       
     
   </body>

@@ -2536,10 +2536,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#deletion-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Deletion Behavior
       
     </span>
   </a>
@@ -2547,10 +2547,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#deletions" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Deletions
+        Branching Support
       
     </span>
   </a>
@@ -6126,10 +6126,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#deletion-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Deletion Behavior
       
     </span>
   </a>
@@ -6137,10 +6137,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#deletions" class="md-nav__link">
+  <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Deletions
+        Branching Support
       
     </span>
   </a>
@@ -6254,6 +6254,11 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+</div>
 <p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns a summary of actions taken:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;&lt;device&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -6272,10 +6277,10 @@
 <li><code>filter_by_description</code> — match interface descriptions, e.g. <code>"uplink*"</code> or <code>"TEST_SYNC_*"</code></li>
 </ul>
 <p>Both filters are applied before the diff, so interfaces that do not match are completely ignored by the sync — they are neither created, updated, nor deleted.</p>
+<h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
+<p>By default <code>process_deletions=False</code> — interfaces present in NetBox but absent in live data are left untouched. Set <code>process_deletions=True</code> to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.</p>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
 <p>The task is branch-aware and can push changes into a NetBox branch. The <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> must be installed. Specify the <code>branch</code> parameter; the branch is created automatically if it does not already exist.</p>
-<h2 id="deletions">Deletions<a class="headerlink" href="#deletions" title="Permanent link">¤</a></h2>
-<p>By default <code>process_deletions=False</code> — interfaces present in NetBox but absent in live data are left untouched. Set <code>process_deletions=True</code> to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
@@ -6548,6 +6553,22 @@ for interfaces that were (or would be) created/updated/deleted.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>with_review</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Preview changes, ask for review, then apply them.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>timeout</code>
             </td>
             <td>
@@ -6559,7 +6580,7 @@ for interfaces that were (or would be) created/updated/deleted.</p>
               </div>
             </td>
             <td>
-                  <code>60</code>
+                  <code>600</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6732,11 +6753,7 @@ dry-run mode.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 763</span>
-<span class="normal"> 764</span>
-<span class="normal"> 765</span>
-<span class="normal"> 766</span>
-<span class="normal"> 767</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 767</span>
 <span class="normal"> 768</span>
 <span class="normal"> 769</span>
 <span class="normal"> 770</span>
@@ -7349,7 +7366,21 @@ dry-run mode.</p>
 <span class="normal">1377</span>
 <span class="normal">1378</span>
 <span class="normal">1379</span>
-<span class="normal">1380</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1380</span>
+<span class="normal">1381</span>
+<span class="normal">1382</span>
+<span class="normal">1383</span>
+<span class="normal">1384</span>
+<span class="normal">1385</span>
+<span class="normal">1386</span>
+<span class="normal">1387</span>
+<span class="normal">1388</span>
+<span class="normal">1389</span>
+<span class="normal">1390</span>
+<span class="normal">1391</span>
+<span class="normal">1392</span>
+<span class="normal">1393</span>
+<span class="normal">1394</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -7368,7 +7399,8 @@ dry-run mode.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7446,6 +7478,7 @@ dry-run mode.</p>
 <span class="sd">        job: NorFab Job object containing relevant metadata.</span>
 <span class="sd">        instance (str, optional): The NetBox instance name to use.</span>
 <span class="sd">        dry_run (bool, optional): If True, no changes will be made to NetBox.</span>
+<span class="sd">        with_review (bool, optional): Preview changes, ask for review, then apply them.</span>
 <span class="sd">        timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.</span>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        process_deletions (bool, optional): If True, delete interfaces present in</span>
@@ -7698,7 +7731,15 @@ dry-run mode.</p>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> delete, </span><span class="si">{</span><span class="n">in_sync_count</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">with_review</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
+        <span class="n">job</span><span class="p">,</span> <span class="s2">&quot;interface sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span>
+    <span class="p">):</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">elif</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="s2">&quot;dry-run requested, returning interface sync diff without changes&quot;</span>
         <span class="p">)</span>

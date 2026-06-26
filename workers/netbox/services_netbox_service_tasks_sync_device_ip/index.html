@@ -2592,6 +2592,18 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#special-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Special Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#anycast-support" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2601,12 +2613,39 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#process-prefixes" class="md-nav__link">
     <span class="md-ellipsis">
       
         Process Prefixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-ip-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate IP Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deletion-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deletion Behavior
       
     </span>
   </a>
@@ -2618,17 +2657,6 @@
     <span class="md-ellipsis">
       
         Branching Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#duplicate-ip-guard" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Duplicate IP Guard
       
     </span>
   </a>
@@ -6148,6 +6176,18 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#special-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Special Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#anycast-support" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6157,12 +6197,39 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#process-prefixes" class="md-nav__link">
     <span class="md-ellipsis">
       
         Process Prefixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-ip-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate IP Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deletion-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deletion Behavior
       
     </span>
   </a>
@@ -6174,17 +6241,6 @@
     <span class="md-ellipsis">
       
         Branching Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#duplicate-ip-guard" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Duplicate IP Guard
       
     </span>
   </a>
@@ -6297,6 +6353,11 @@
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) returns what <em>would</em> be created or updated without making any changes to NetBox.</p>
+<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+</div>
 <p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns the same structure showing what was done.</p>
 <h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
 <p>IP addresses and interfaces can be scoped before reconciliation. All filters are applied at the live-data collection phase, so excluded addresses are completely ignored — they are neither created nor updated.</p>
@@ -6307,18 +6368,21 @@
 <li><code>filter_by_ip</code> — glob pattern matched against the host portion of the IP address (without prefix length), e.g. <code>"10.0.1.*"</code>. Only matching addresses are included.</li>
 </ul>
 <p>Multiple filters combine as intersection — all specified conditions must be satisfied for an IP to be included.</p>
-<h2 id="anycast-support">Anycast Support<a class="headerlink" href="#anycast-support" title="Permanent link">¤</a></h2>
+<h2 id="special-features">Special Features<a class="headerlink" href="#special-features" title="Permanent link">¤</a></h2>
+<h3 id="anycast-support">Anycast Support<a class="headerlink" href="#anycast-support" title="Permanent link">¤</a></h3>
 <p>IP addresses in one or more <code>anycast_ranges</code> prefixes are assigned the <code>anycast</code> role. NetBox allows multiple IP address records with the same value when the role is <code>anycast</code>, so each device gets its own record. Without <code>anycast_ranges</code>, a second device trying to use the same IP address triggers a duplicate-conflict error.</p>
 <p>Set <code>anycast_ranges</code> to a prefix string or list of prefixes:</p>
 <div class="highlight"><pre><span></span><code>anycast_ranges = &quot;10.0.250.0/24&quot;
 anycast_ranges = [&quot;10.0.250.0/24&quot;, &quot;2001:db8:ffff::/48&quot;]
 </code></pre></div>
-<h2 id="process-prefixes">Process Prefixes<a class="headerlink" href="#process-prefixes" title="Permanent link">¤</a></h2>
+<h3 id="process-prefixes">Process Prefixes<a class="headerlink" href="#process-prefixes" title="Permanent link">¤</a></h3>
 <p>When <code>create_prefixes=True</code> the task also creates a NetBox prefix record for the network of each discovered IP address (e.g. <code>10.0.1.0/31</code> for <code>10.0.1.1/31</code>). Existing prefixes are never updated or deleted — this is a create-only, idempotent operation. Site and VRF are propagated from the device and interface context.</p>
+<h3 id="duplicate-ip-guard">Duplicate IP Guard<a class="headerlink" href="#duplicate-ip-guard" title="Permanent link">¤</a></h3>
+<p>Before executing bulk writes the task checks that no non-anycast IP address appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.</p>
+<h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
+<p>By default, all discovered live IP addresses are managed by this task. Addresses present in NetBox but absent from live devices are left untouched. There is no explicit deletion mechanism — instead, unused addresses are managed through standard NetBox administrative procedures.</p>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
 <p>The task is branch-aware and can push changes into a NetBox branch. The <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> must be installed. Specify the <code>branch</code> parameter; the branch is created automatically if it does not already exist.</p>
-<h2 id="duplicate-ip-guard">Duplicate IP Guard<a class="headerlink" href="#duplicate-ip-guard" title="Permanent link">¤</a></h2>
-<p>Before executing bulk writes the task checks that no non-anycast IP address appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
@@ -6624,6 +6688,22 @@ the same structure showing what was done.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>with_review</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Preview changes, ask for review, then apply them.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>timeout</code>
             </td>
             <td>
@@ -6635,7 +6715,7 @@ the same structure showing what was done.</p>
               </div>
             </td>
             <td>
-                  <code>60</code>
+                  <code>600</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6836,8 +6916,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 591</span>
-<span class="normal"> 592</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 592</span>
 <span class="normal"> 593</span>
 <span class="normal"> 594</span>
 <span class="normal"> 595</span>
@@ -7411,7 +7490,24 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="normal">1163</span>
 <span class="normal">1164</span>
 <span class="normal">1165</span>
-<span class="normal">1166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1166</span>
+<span class="normal">1167</span>
+<span class="normal">1168</span>
+<span class="normal">1169</span>
+<span class="normal">1170</span>
+<span class="normal">1171</span>
+<span class="normal">1172</span>
+<span class="normal">1173</span>
+<span class="normal">1174</span>
+<span class="normal">1175</span>
+<span class="normal">1176</span>
+<span class="normal">1177</span>
+<span class="normal">1178</span>
+<span class="normal">1179</span>
+<span class="normal">1180</span>
+<span class="normal">1181</span>
+<span class="normal">1182</span>
+<span class="normal">1183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -7430,7 +7526,8 @@ are included, e.g. <code>'10.0.*'</code>.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">anycast_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7478,6 +7575,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="sd">        job: NorFab Job object containing relevant metadata.</span>
 <span class="sd">        instance (str, optional): The NetBox instance name to use.</span>
 <span class="sd">        dry_run (bool, optional): If True, no changes will be made to NetBox.</span>
+<span class="sd">        with_review (bool, optional): Preview changes, ask for review, then apply them.</span>
 <span class="sd">        timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.</span>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branch name to use.</span>
@@ -7869,19 +7967,6 @@ are included, e.g. <code>'10.0.*'</code>.</p>
             <span class="p">},</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="s2">&quot;dry-run requested, returning IP address sync plan without changes&quot;</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
-            <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_update_ip</span><span class="p">:</span>
-            <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="n">ret</span>
-
     <span class="c1"># check that update and create payloads have no non-anycast duplicate IPs</span>
     <span class="c1"># Netbox has a bug allowing to create duplicate IPs in single create request</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking IP address payloads for duplicate non-anycast addresses&quot;</span><span class="p">)</span>
@@ -7904,6 +7989,33 @@ are included, e.g. <code>'10.0.*'</code>.</p>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
                 <span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="n">bulk_update_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">with_review</span><span class="p">:</span>
+        <span class="n">ip_preview_result</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">device_results</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ip_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_update_ip</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ip_preview_result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">&quot;IP address sync&quot;</span><span class="p">,</span> <span class="n">ip_preview_result</span><span class="p">):</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ip_preview_result</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">elif</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+            <span class="s2">&quot;dry-run requested, returning IP address sync plan without changes&quot;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_update_ip</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># update first, since existing IPs might change role to anycast</span>
     <span class="k">if</span> <span class="n">bulk_update_ip</span><span class="p">:</span>

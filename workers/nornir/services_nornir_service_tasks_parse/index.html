@@ -6534,7 +6534,7 @@ definitions, then parses the collected output with TTP.</p>
               </div>
             </td>
             <td>
-                  <code>True</code>
+                  <code>False</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6814,7 +6814,10 @@ definitions, then parses the collected output with TTP.</p>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
-<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">ParseTTPInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">ParseTTPResult</span><span class="p">,</span>
@@ -6832,7 +6835,7 @@ definitions, then parses the collected output with TTP.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">structure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flat_list&quot;</span><span class="p">,</span>
     <span class="n">commands</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">get</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6917,11 +6920,14 @@ definitions, then parses the collected output with TTP.</p>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed collecting commands output, errors: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed collecting commands output, errors: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">result</span><span class="o">.</span><span class="n">messages</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed collecting commands output&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">messages</span><span class="p">)</span>
-            <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">continue</span>
         <span class="c1"># parse commands output for each host</span>
         <span class="k">for</span> <span class="n">hname</span><span class="p">,</span> <span class="n">hres</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">input_data</span> <span class="o">=</span> <span class="p">[]</span>
