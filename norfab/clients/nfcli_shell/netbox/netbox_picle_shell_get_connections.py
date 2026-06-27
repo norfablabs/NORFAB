@@ -1,7 +1,8 @@
 import logging
+from typing import List, Union
 
 from picle.models import Outputters, PipeFunctionsModel
-from pydantic import Field
+from pydantic import Field, StrictStr
 
 from norfab.workers.netbox_worker.netbox_models import GetConnectionsInput
 
@@ -19,6 +20,10 @@ class GetConnections(
     populate_by_name=True,
 ):
     cache: CacheEnum = Field(True, description="How to use cache")
+    interfaces: Union[StrictStr, List[StrictStr]] = Field(
+        None,
+        description="List of interface and port names to retrieve connections for",
+    )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -29,6 +34,8 @@ class GetConnections(
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
+        if isinstance(kwargs.get("interfaces"), str):
+            kwargs["interfaces"] = [kwargs["interfaces"]]
 
         result = run_future_job(
             "netbox",

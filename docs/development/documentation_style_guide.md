@@ -18,11 +18,25 @@ For most service task pages, prefer this order:
 1. **Purpose** (1–2 paragraphs)
 2. **Inputs** (kwargs, required vs optional, defaults)
 3. **Outputs** (what the result looks like)
-4. **Examples**
-   - CLI example
-   - Python example
+4. **Examples** (in tabbed format)
+   - CLI example in the `=== "CLI"` tab
+   - Python example in the `=== "Python"` tab
 5. **Notes / Gotchas** (timeouts, filters, permissions)
 6. **Troubleshooting**
+7. **Task Command Shell Reference** in tree format
+8. **Python API Reference**
+
+## Agent workflow for service task docs
+
+When updating a service task page:
+
+1. Read the task implementation, input/output Pydantic models, and NFCLI/PICLE command model before editing.
+2. Derive Inputs from the Pydantic model and task signature.
+3. Derive CLI examples from NFCLI aliases and command structure.
+4. Derive Python examples from `client.run_job(...)` using the task API name and Python kwargs.
+5. Do not document exposed-but-unused parameters as active behavior. Mention them in Notes / Gotchas if they appear in the command model.
+6. Keep examples safe, realistic, and runnable-looking.
+7. Verify Markdown structure, code fence languages, links, command references, and API references after editing.
 
 ## Writing style
 
@@ -53,8 +67,27 @@ print("nested")
 ## Examples
 
 - Provide both **CLI** and **Python** examples for user-facing tasks.
+- Use exact tab labels: `=== "CLI"` and `=== "Python"`.
+- In the CLI tab, show NFCLI shell commands with the `nf#` prompt.
 - Use real-looking but safe sample values (avoid private endpoints/keys).
 - If a task supports `markdown=True`, include one example showing how to render or store the markdown output.
+
+## Command shell references
+
+- Use a `bash` code block for command tree output.
+- Use `nf# man tree ...` with a space after `nf#`.
+- Keep command shell references near the end of the page.
+- Keep the tree in sync with the NFCLI/PICLE command model.
+
+## Python API references
+
+- End service task pages with the autodoc reference for the task method:
+
+```markdown
+::: package.module.Class.task_method
+```
+
+- Prefer the concrete task mixin/class that defines the method over a broad worker class when possible.
 
 ## Links
 
@@ -79,3 +112,14 @@ Create a new page when:
 - A task page exceeds ~2–3 screens and includes multiple distinct workflows.
 
 Otherwise, keep content in the closest existing page and add anchors.
+
+## Verification checklist
+
+Before finishing a documentation change:
+
+- Confirm every code block has a language.
+- Confirm user-facing tasks have both CLI and Python examples.
+- Confirm common behavior such as `dry_run`, `branch`, filters, and task modes are covered when supported.
+- Confirm examples use real task names, aliases, and Python kwargs.
+- Confirm notes call out exposed-but-unused options or version restrictions.
+- Run Markdown, docs build, or diff checks when practical.

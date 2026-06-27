@@ -548,6 +548,10 @@ class GetConnectionsInput(BaseModel, use_enum_values=True, populate_by_name=True
         ...,
         description="Device names to retrieve connections for",
     )
+    interfaces: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Interface and port names to retrieve connections for",
+    )
     interface_regex: Union[None, StrictStr] = Field(
         None,
         description="Regex pattern to match interfaces and ports",

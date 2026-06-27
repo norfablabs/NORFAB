@@ -4,6 +4,7 @@
 
 1. Updated NFCLI shells to accept single values for task arguments backed by worker list inputs, normalizing them before dispatch for NetBox and Nornir commands.
 2. Enhanced Netbox `update_interfaces_description` task to render description templates for virtual, LAG, and disconnected interfaces that have no connection data, with clearer dry-run wording and expanded test coverage for static, dry-run, connected, and unconnected interface updates.
+3. Enhanced Netbox `get_connections` task with an `interfaces` argument to filter by exact interface or port names using optional GraphQL variables; `update_interfaces_description` now passes selected interfaces through when rendering connection-aware descriptions, and `create_ip` now uses exact interface matching for peer lookups.
 
 ## BUGS
 

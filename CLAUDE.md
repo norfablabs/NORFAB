@@ -148,8 +148,8 @@ poetry run ruff check . --fix
 
 ### Important formatting Rules
 
-1. Workers `job.event` calls messages must start with lowercase letter, `job.event` call support setting event seveiryt through `severity=WARNING/INFO/ERROR`  
-2. Logging calls e.f. `log.info` messages us tstart with uppercase letters
+1. Workers `job.event` call messages must start with lowercase letters; `job.event` calls support setting event severity through `severity=WARNING/INFO/ERROR`
+2. Logging calls, e.g. `log.info`, must start with uppercase letters
 3. Any spelling mistakes in docstrings, comments or variable names must be fixed
 
 ### Documentation
@@ -161,16 +161,6 @@ poetry run mkdocs serve
 # Build docs
 poetry run mkdocs build
 ```
-
-### Reference Guides
-
-- Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
-- Documentation style: `docs/development/documentation_style_guide.md`
-
-## References
-
-- Testing framework: `docs/testing/norfab_testing_framework.md`
-- NetBox service tests and refactoring guidance: `docs/testing/netbox_service_tests.md`
 
 ## Inventory File Structure
 
@@ -271,3 +261,10 @@ Selected rule sets: `E`, `F`, `I`, `ANN`
 
 - Slack: Networktocode `#norfab` channel / NetDev Community
 - GitHub Discussions: https://github.com/norfablabs/NORFAB/discussions
+
+## References
+
+- Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
+- Documentation style guide for docs changes: `docs/development/documentation_style_guide.md`
+- Testing framework: `docs/testing/norfab_testing_framework.md`
+- NetBox service tests and refactoring guidance: `docs/testing/netbox_service_tests.md`

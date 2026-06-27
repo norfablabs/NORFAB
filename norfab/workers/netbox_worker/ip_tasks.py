@@ -237,7 +237,7 @@ class NetboxIpTasks:
                 connection = self.get_connections(
                     job=job,
                     devices=[device],
-                    interface_regex=interface,
+                    interfaces=[interface],
                     instance=instance,
                 )
                 if interface in connection.result[device]:

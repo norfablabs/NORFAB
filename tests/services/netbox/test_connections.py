@@ -1,3 +1,4 @@
+import json
 import pprint
 from time import perf_counter
 
@@ -265,6 +266,56 @@ class TestGetConnections:
                         "eth10"
                     ), f"{worker}:{device}:{intf_name} not matching regex"
 
+    def test_get_connections_interfaces_filter(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+                "interfaces": ["eth101", "eth103"],
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
+            assert "fceos5" in res["result"], f"{worker} returned no results for fceos5"
+            for device, interfaces in res["result"].items():
+                assert interfaces, f"{worker}:{device} no connections data returned"
+                assert set(interfaces).issubset(
+                    {"eth101", "eth103"}
+                ), f"{worker}:{device} returned unexpected interfaces"
+
+    def test_get_connections_interfaces_filter_dry_run(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+                "interfaces": ["eth101", "eth103"],
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            dry_run_payload = res["result"]
+            data = json.loads(dry_run_payload["data"])
+            assert data["variables"]["interfaces"] == [
+                "eth101",
+                "eth103",
+            ], f"{worker} did not pass interfaces variable"
+            assert (
+                "$interfaces: [String!]" in data["query"]
+            ), f"{worker} did not declare interfaces variable"
+            assert (
+                "in_list: $interfaces" in data["query"]
+            ), f"{worker} did not add interfaces filter"
+
     def test_get_connections_virtual_interface_regex(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
@@ -289,6 +340,35 @@ class TestGetConnections:
                 == "Port-Channel1.101"
             ), "Unexpected interface name"
 
+    def test_get_connections_interfaces_and_regex_dry_run(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+                "interfaces": ["eth101", "eth103"],
+                "interface_regex": "eth10.*",
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            data = json.loads(res["result"]["data"])
+            assert data["variables"]["interfaces"] == [
+                "eth101",
+                "eth103",
+            ], f"{worker} did not pass interfaces variable"
+            assert (
+                data["variables"]["interface_regex"] == "eth10.*"
+            ), f"{worker} did not pass interface_regex variable"
+            assert (
+                "name: {in_list: $interfaces, i_regex: $interface_regex}"
+                in data["query"]
+            ), f"{worker} did not combine interface filters"
+
     def test_get_connections_dry_run(self, nfclient):
         ret = nfclient.run_job(
             "netbox",
@@ -304,6 +384,13 @@ class TestGetConnections:
             assert all(
                 k in dry_run_payload for k in ["headers", "data", "verify", "url"]
             ), f"{worker} - not all dry run data returned"
+            data = json.loads(dry_run_payload["data"])
+            assert (
+                "interfaces" not in data["variables"]
+            ), f"{worker} passed interfaces variable without interfaces argument"
+            assert (
+                data["variables"]["interface_regex"] == ".*"
+            ), f"{worker} did not default interface_regex variable"
 
     def test_get_connections_and_cables(self, nfclient):
         ret = nfclient.run_job(

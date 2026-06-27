@@ -90,25 +90,37 @@ descriptions = {
 
     Update interface descriptions using a Jinja2 template:
 
-    ```
+    ```bash
     nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}"
+    ```
+
+    Update only selected interfaces:
+
+    ```bash
+    nf#netbox update interfaces description devices ceos-leaf-1 interfaces Ethernet1 Ethernet2 description-template "{{ remote_device }}:{{ remote_interface }}"
     ```
 
     Filter interfaces by regex pattern:
 
-    ```
+    ```bash
     nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" interface-regex "Ethernet.*"
     ```
 
     Dry run — preview changes without writing:
 
-    ```
+    ```bash
     nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" dry-run
+    ```
+
+    Apply static descriptions to matching interface names:
+
+    ```bash
+    nf#netbox update interfaces description devices ceos-leaf-1 descriptions {"Ethernet1":"uplink to spine-1","Ethernet2":"uplink to spine-2"}
     ```
 
     Update descriptions in a NetBox branch:
 
-    ```
+    ```bash
     nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" branch my-branch
     ```
 
@@ -128,6 +140,18 @@ descriptions = {
         workers="any",
         kwargs={
             "devices": ["ceos-leaf-1", "ceos-leaf-2"],
+            "description_template": "{{ remote_device }}:{{ remote_interface }}",
+        },
+    )
+
+    # update only selected interfaces
+    result = client.run_job(
+        "netbox",
+        "update_interfaces_description",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-leaf-1"],
+            "interfaces": ["Ethernet1", "Ethernet2"],
             "description_template": "{{ remote_device }}:{{ remote_interface }}",
         },
     )
@@ -205,6 +229,8 @@ root
                 ├── dry-run:    Return diff without writing to NetBox
                 ├── devices:    Device names to update interfaces for
                 ├── description-template:    Jinja2 template to render descriptions
+                ├── descriptions:    Dict keyed by interface name with description string values
+                ├── interfaces:    Specific interface names to update
                 └── interface-regex:    Regex pattern to match interfaces and ports
 nf#
 ```

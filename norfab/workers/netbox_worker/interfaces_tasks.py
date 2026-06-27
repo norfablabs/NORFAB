@@ -737,6 +737,7 @@ class NetboxInterfacesTasks:
             nb_connections = self.get_connections(
                 job=job,
                 devices=devices,
+                interfaces=interfaces,
                 interface_regex=interface_regex,
                 instance=instance,
             )

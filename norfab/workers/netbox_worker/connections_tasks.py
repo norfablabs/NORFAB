@@ -17,12 +17,13 @@ log = logging.getLogger(__name__)
 CONNECTIONS_QUERY = """
 query ConnectionsQuery(
     $devices: [String!]!
+    $interfaces: [String!]
     $interface_regex: String!
     $offset: Int!
     $limit: Int!
 ) {
     interface: interface_list(
-        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        filters: {device: {name: {in_list: $devices}}, name: {in_list: $interfaces, i_regex: $interface_regex}}
         pagination: { offset: $offset, limit: $limit }
     ) {
         name
@@ -93,7 +94,7 @@ query ConnectionsQuery(
         }
     }
     consoleport: console_port_list(
-        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        filters: {device: {name: {in_list: $devices}}, name: {in_list: $interfaces, i_regex: $interface_regex}}
         pagination: { offset: $offset, limit: $limit }
     ) {
         name
@@ -121,7 +122,7 @@ query ConnectionsQuery(
         }
     }
     consoleserverport: console_server_port_list(
-        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        filters: {device: {name: {in_list: $devices}}, name: {in_list: $interfaces, i_regex: $interface_regex}}
         pagination: { offset: $offset, limit: $limit }
     ) {
         name
@@ -149,7 +150,7 @@ query ConnectionsQuery(
         }
     }
     poweroutlet: power_outlet_list(
-        filters: {device: {name: {in_list: $devices}}, name: {i_regex: $interface_regex}}
+        filters: {device: {name: {in_list: $devices}}, name: {in_list: $interfaces, i_regex: $interface_regex}}
         pagination: { offset: $offset, limit: $limit }
     ) {
         name
@@ -197,6 +198,7 @@ class NetboxConnectionsTasks:
         self,
         job: Job,
         devices: list[str],
+        interfaces: Union[None, list[str]] = None,
         interface_regex: Union[None, str] = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
@@ -220,6 +222,8 @@ class NetboxConnectionsTasks:
         Args:
             job: NorFab Job object containing relevant metadata
             devices (list): List of device names to retrieve connections for.
+            interfaces (list, optional): List of interface, console port, console server
+                port, or power outlet names to retrieve connections for.
             instance (str, optional): Netbox instance name for the GraphQL query.
             dry_run (bool, optional): If True, perform a dry run without making actual changes.
             interface_regex (str, optional): Regex pattern to match interfaces, console ports and
@@ -276,7 +280,7 @@ class NetboxConnectionsTasks:
             resources=[instance],
         )
 
-        # query uses inline filters with variables for devices and interface regex
+        # query uses optional GraphQL variables for interface name and regex filters
         if not self.nb_version[instance] >= (4, 4, 0):
             raise UnsupportedNetboxVersion(
                 f"{self.name} - Netbox version {self.nb_version[instance]} is not supported, "
@@ -289,6 +293,8 @@ class NetboxConnectionsTasks:
             "offset": 0,
             "limit": 50,
         }
+        if interfaces:
+            variables["interfaces"] = interfaces
 
         # retrieve full list of ports and process client-side to map connections
         query_result = self.netbox_graphql(
