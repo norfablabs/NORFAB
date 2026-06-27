@@ -62,6 +62,8 @@ class GetTopology(
             kwargs["manufacturers"] = [kwargs["manufacturers"]]
         if isinstance(kwargs.get("status"), str):
             kwargs["status"] = [kwargs["status"]]
+        if isinstance(kwargs.get("sites"), str):
+            kwargs["sites"] = [kwargs["sites"]]
 
         result = run_future_job(
             "netbox",

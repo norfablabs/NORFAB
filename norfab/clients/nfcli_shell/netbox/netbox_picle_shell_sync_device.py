@@ -48,6 +48,26 @@ class SyncDeviceInventoryShell(
         None,
         description="List of Netbox devices to sync",
     )
+    filter_by_module: Union[List[StrictStr], StrictStr] = Field(
+        None,
+        description="Glob patterns selecting normalized module type names",
+        alias="filter-by-module",
+    )
+    filter_by_slot: Union[List[StrictStr], StrictStr] = Field(
+        None,
+        description="Glob patterns selecting normalized module bay names",
+        alias="filter-by-slot",
+    )
+    ignore_modules: Union[List[StrictStr], StrictStr] = Field(
+        None,
+        description="Glob patterns excluding normalized module type names",
+        alias="ignore-modules",
+    )
+    ignore_slots: Union[List[StrictStr], StrictStr] = Field(
+        None,
+        description="Glob patterns excluding normalized module bay names",
+        alias="ignore-slots",
+    )
     datasource: UpdateDeviceInventoryDatasources = Field(
         "nornir",
         description="Service to use to retrieve device data",
@@ -75,6 +95,14 @@ class SyncDeviceInventoryShell(
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
+        if isinstance(kwargs.get("filter_by_module"), str):
+            kwargs["filter_by_module"] = [kwargs["filter_by_module"]]
+        if isinstance(kwargs.get("filter_by_slot"), str):
+            kwargs["filter_by_slot"] = [kwargs["filter_by_slot"]]
+        if isinstance(kwargs.get("ignore_modules"), str):
+            kwargs["ignore_modules"] = [kwargs["ignore_modules"]]
+        if isinstance(kwargs.get("ignore_slots"), str):
+            kwargs["ignore_slots"] = [kwargs["ignore_slots"]]
         kwargs.pop("datasource", None)
 
         result = run_future_job(

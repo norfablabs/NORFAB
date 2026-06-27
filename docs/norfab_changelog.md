@@ -1,3 +1,14 @@
+# 0.20.2
+
+## ENHANCEMENTS
+
+1. Updated NFCLI shells to accept single values for task arguments backed by worker list inputs, normalizing them before dispatch for NetBox and Nornir commands.
+
+## BUGS
+
+
+---
+
 # 0.20.1
 
 ## ENHANCEMENTS

@@ -27,6 +27,9 @@ class UpdateInterfacesDescription(
     devices: Union[StrictStr, List[StrictStr]] = Field(
         None, description="Device names to query data for"
     )
+    interfaces: Union[StrictStr, List[StrictStr]] = Field(
+        None, description="Specific interface names to update"
+    )
 
     @staticmethod
     def run(*args: object, **kwargs: object):
@@ -37,6 +40,8 @@ class UpdateInterfacesDescription(
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
+        if isinstance(kwargs.get("interfaces"), str):
+            kwargs["interfaces"] = [kwargs["interfaces"]]
 
         result = run_future_job(
             "netbox",

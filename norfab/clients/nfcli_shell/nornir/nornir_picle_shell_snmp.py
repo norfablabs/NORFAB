@@ -33,6 +33,12 @@ from .nornir_picle_shell_common import (
 SERVICE = "nornir"
 
 
+def _ensure_list(kwargs: dict, *keys: str) -> None:
+    for key in keys:
+        if isinstance(kwargs.get(key), str):
+            kwargs[key] = [kwargs[key]]
+
+
 class SnmpGetShell(
     SnmpGetInput,
     NorniHostsFilters,
@@ -110,7 +116,7 @@ class SnmpMultiGetShell(
     use_enum_values=True,
     populate_by_name=True,
 ):
-    oids: List[StrictStr] = Field(
+    oids: Union[StrictStr, List[StrictStr]] = Field(
         ...,
         description="List of numeric OIDs to retrieve via SNMP MULTIGET",
     )
@@ -125,6 +131,8 @@ class SnmpMultiGetShell(
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
+
+        _ensure_list(kwargs, "oids")
 
         result = run_future_job(
             "nornir",
@@ -184,7 +192,7 @@ class SnmpMultiWalkShell(
     use_enum_values=True,
     populate_by_name=True,
 ):
-    oids: List[StrictStr] = Field(
+    oids: Union[StrictStr, List[StrictStr]] = Field(
         ...,
         description="List of numeric OIDs at which to start each SNMP MULTIWALK",
     )
@@ -199,6 +207,8 @@ class SnmpMultiWalkShell(
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
+
+        _ensure_list(kwargs, "oids")
 
         result = run_future_job(
             "nornir",
@@ -223,11 +233,11 @@ class SnmpBulkGetShell(
     use_enum_values=True,
     populate_by_name=True,
 ):
-    repeating_oids: List[StrictStr] = Field(
+    repeating_oids: Union[StrictStr, List[StrictStr]] = Field(
         ...,
         description="List of numeric OIDs for repeating (column) retrieval via SNMP BULKGET",
     )
-    scalar_oids: Optional[List[StrictStr]] = Field(
+    scalar_oids: Optional[Union[StrictStr, List[StrictStr]]] = Field(
         None,
         description="Optional list of numeric OIDs for scalar retrieval",
         alias="scalar-oids",
@@ -248,6 +258,8 @@ class SnmpBulkGetShell(
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
+
+        _ensure_list(kwargs, "repeating_oids", "scalar_oids")
 
         result = run_future_job(
             "nornir",
@@ -272,7 +284,7 @@ class SnmpBulkWalkShell(
     use_enum_values=True,
     populate_by_name=True,
 ):
-    oids: List[StrictStr] = Field(
+    oids: Union[StrictStr, List[StrictStr]] = Field(
         ...,
         description="List of numeric OIDs at which to start each SNMP BULKWALK",
     )
@@ -292,6 +304,8 @@ class SnmpBulkWalkShell(
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
+
+        _ensure_list(kwargs, "oids")
 
         result = run_future_job(
             "nornir",
