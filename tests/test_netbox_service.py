@@ -1077,6 +1077,209 @@ class TestGetInterfaces:
                         assert "mac_address" in intf_data
 
 
+class TestUpdateInterfacesDescription:
+    DEVICE = "fceos4"
+    INTERFACE = "loopback0"
+    DESCRIPTION = "TEST_UPDATE_DESCRIPTION loopback0 none virtual"
+    CONNECTED_VIRTUAL_INTERFACE = "Port-Channel1.101"
+    CONNECTED_VIRTUAL_DESCRIPTION = "TEST_UPDATE_DESCRIPTION fceos5 ae5.101 virtual"
+    CONNECTED_INTERFACE = "eth11"
+    CONNECTED_INTERFACE_DESCRIPTION = "TEST_UPDATE_DESCRIPTION fceos5 eth11 interface"
+    STATIC_DESCRIPTION = "TEST_UPDATE_DESCRIPTION static loopback0"
+
+    @staticmethod
+    def _set_interface_description(nfclient, device, interface, description):
+        pynb = get_pynetbox(nfclient)
+        nb_interface = pynb.dcim.interfaces.get(device=device, name=interface)
+        assert nb_interface is not None, f"{device}:{interface} not found in NetBox"
+        nb_interface.description = description
+        nb_interface.save()
+
+    @staticmethod
+    def _get_interface(nfclient, device, interface):
+        pynb = get_pynetbox(nfclient)
+        return pynb.dcim.interfaces.get(device=device, name=interface)
+
+    @staticmethod
+    def _assert_description_result(ret, device, interface, before, after):
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            assert device in res["result"], f"{worker} missing {device}"
+            assert (
+                interface in res["result"][device]
+            ), f"{worker} missing {device}:{interface}"
+            assert res["result"][device][interface] == {
+                "-": before,
+                "+": after,
+            }
+
+    def test_update_virtual_interface_description_without_connection_data(
+        self, nfclient
+    ):
+        self._set_interface_description(nfclient, self.DEVICE, self.INTERFACE, "")
+
+        try:
+            ret = nfclient.run_job(
+                "netbox",
+                "update_interfaces_description",
+                workers="any",
+                kwargs={
+                    "devices": [self.DEVICE],
+                    "interfaces": [self.INTERFACE],
+                    "description_template": (
+                        "TEST_UPDATE_DESCRIPTION {{ interface.name }} "
+                        "{{ remote_device or 'none' }} {{ termination_type }}"
+                    ),
+                },
+            )
+            pprint.pprint(ret)
+
+            self._assert_description_result(
+                ret, self.DEVICE, self.INTERFACE, "", self.DESCRIPTION
+            )
+
+            nb_interface = self._get_interface(nfclient, self.DEVICE, self.INTERFACE)
+            assert (
+                nb_interface.description == self.DESCRIPTION
+            ), f"{self.DEVICE}:{self.INTERFACE} description was not updated"
+        finally:
+            self._set_interface_description(nfclient, self.DEVICE, self.INTERFACE, "")
+
+    def test_update_virtual_interface_description_dry_run(self, nfclient):
+        self._set_interface_description(nfclient, self.DEVICE, self.INTERFACE, "")
+
+        ret = nfclient.run_job(
+            "netbox",
+            "update_interfaces_description",
+            workers="any",
+            kwargs={
+                "devices": [self.DEVICE],
+                "interfaces": [self.INTERFACE],
+                "description_template": (
+                    "TEST_UPDATE_DESCRIPTION {{ interface.name }} "
+                    "{{ remote_device or 'none' }} {{ termination_type }}"
+                ),
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+
+        self._assert_description_result(
+            ret, self.DEVICE, self.INTERFACE, "", self.DESCRIPTION
+        )
+        nb_interface = self._get_interface(nfclient, self.DEVICE, self.INTERFACE)
+        assert (
+            nb_interface.description == ""
+        ), f"{self.DEVICE}:{self.INTERFACE} description changed during dry run"
+
+    def test_update_virtual_interface_description_static_mapping(self, nfclient):
+        self._set_interface_description(nfclient, self.DEVICE, self.INTERFACE, "")
+
+        try:
+            ret = nfclient.run_job(
+                "netbox",
+                "update_interfaces_description",
+                workers="any",
+                kwargs={
+                    "devices": [self.DEVICE],
+                    "descriptions": {self.INTERFACE: self.STATIC_DESCRIPTION},
+                },
+            )
+            pprint.pprint(ret)
+
+            self._assert_description_result(
+                ret, self.DEVICE, self.INTERFACE, "", self.STATIC_DESCRIPTION
+            )
+            nb_interface = self._get_interface(nfclient, self.DEVICE, self.INTERFACE)
+            assert (
+                nb_interface.description == self.STATIC_DESCRIPTION
+            ), f"{self.DEVICE}:{self.INTERFACE} static description was not updated"
+        finally:
+            self._set_interface_description(nfclient, self.DEVICE, self.INTERFACE, "")
+
+    def test_update_connected_virtual_interface_description_from_connection_data(
+        self, nfclient
+    ):
+        self._set_interface_description(
+            nfclient, self.DEVICE, self.CONNECTED_VIRTUAL_INTERFACE, ""
+        )
+
+        try:
+            ret = nfclient.run_job(
+                "netbox",
+                "update_interfaces_description",
+                workers="any",
+                kwargs={
+                    "devices": [self.DEVICE],
+                    "interfaces": [self.CONNECTED_VIRTUAL_INTERFACE],
+                    "description_template": (
+                        "TEST_UPDATE_DESCRIPTION {{ remote_device }} "
+                        "{{ remote_interface }} {{ termination_type }}"
+                    ),
+                },
+            )
+            pprint.pprint(ret)
+
+            self._assert_description_result(
+                ret,
+                self.DEVICE,
+                self.CONNECTED_VIRTUAL_INTERFACE,
+                "",
+                self.CONNECTED_VIRTUAL_DESCRIPTION,
+            )
+            nb_interface = self._get_interface(
+                nfclient, self.DEVICE, self.CONNECTED_VIRTUAL_INTERFACE
+            )
+            assert (
+                nb_interface.description == self.CONNECTED_VIRTUAL_DESCRIPTION
+            ), f"{self.DEVICE}:{self.CONNECTED_VIRTUAL_INTERFACE} was not updated"
+        finally:
+            self._set_interface_description(
+                nfclient, self.DEVICE, self.CONNECTED_VIRTUAL_INTERFACE, ""
+            )
+
+    def test_update_connected_interface_description_from_connection_data(
+        self, nfclient
+    ):
+        self._set_interface_description(
+            nfclient, self.DEVICE, self.CONNECTED_INTERFACE, ""
+        )
+
+        try:
+            ret = nfclient.run_job(
+                "netbox",
+                "update_interfaces_description",
+                workers="any",
+                kwargs={
+                    "devices": [self.DEVICE],
+                    "interfaces": [self.CONNECTED_INTERFACE],
+                    "description_template": (
+                        "TEST_UPDATE_DESCRIPTION {{ remote_device }} "
+                        "{{ remote_interface }} {{ termination_type }}"
+                    ),
+                },
+            )
+            pprint.pprint(ret)
+
+            self._assert_description_result(
+                ret,
+                self.DEVICE,
+                self.CONNECTED_INTERFACE,
+                "",
+                self.CONNECTED_INTERFACE_DESCRIPTION,
+            )
+            nb_interface = self._get_interface(
+                nfclient, self.DEVICE, self.CONNECTED_INTERFACE
+            )
+            assert (
+                nb_interface.description == self.CONNECTED_INTERFACE_DESCRIPTION
+            ), f"{self.DEVICE}:{self.CONNECTED_INTERFACE} was not updated"
+        finally:
+            self._set_interface_description(
+                nfclient, self.DEVICE, self.CONNECTED_INTERFACE, ""
+            )
+
+
 class TestGetDevices:
     nb_version = None
     device_data_keys = [

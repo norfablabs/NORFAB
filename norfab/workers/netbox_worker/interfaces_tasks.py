@@ -28,6 +28,41 @@ from .netbox_worker_utilities import (
 log = logging.getLogger(__name__)
 
 
+def _empty_interface_connection_context(interface: object) -> dict:
+    """Return template context fields for an interface with no connection data."""
+    raw_interface_type = getattr(interface, "type", None)
+    if isinstance(raw_interface_type, dict):
+        interface_type = raw_interface_type.get("value")
+    elif isinstance(raw_interface_type, str):
+        interface_type = raw_interface_type
+    else:
+        interface_type = getattr(raw_interface_type, "value", None)
+    if interface_type not in ("virtual", "lag"):
+        interface_type = "interface"
+
+    return {
+        "breakout": False,
+        "remote_device": None,
+        "remote_device_status": None,
+        "remote_interface": None,
+        "remote_interface_label": None,
+        "remote_termination_type": None,
+        "termination_type": interface_type,
+        "remote_mac_addresses": [],
+        "cable": {
+            "type": None,
+            "status": None,
+            "tenant": None,
+            "label": None,
+            "tags": [],
+            "custom_fields": {},
+            "peer_termination_type": None,
+            "peer_device": None,
+            "peer_interface": None,
+        },
+    }
+
+
 def make_interfaces_brief(result: dict) -> dict:
     """
     Strip full interface data down to essential fields for MCP/LLM context window optimisation.
@@ -683,32 +718,81 @@ class NetboxInterfacesTasks:
             dry_run=dry_run,
         )
         nb = self._get_pynetbox(instance, branch=branch)
+        update_action = "would update" if dry_run else "updating"
+        apply_action = "would apply" if dry_run else "applying"
         log.info(
-            f"{self.name} - Update interfaces description: Updating descriptions for {len(devices)} device(s) in '{instance}'"
+            f"{self.name} - Update interfaces description: "
+            f"{update_action.capitalize()} descriptions for "
+            f"{len(devices)} device(s) in '{instance}'"
         )
 
         job.event(
-            f"updating interface descriptions for {len(devices)} device(s), dry_run={dry_run}"
+            f"{update_action} interface descriptions for "
+            f"{len(devices)} device(s), dry_run={dry_run}"
         )
 
         if description_template:
-            job.event("rendering interface descriptions from connection data")
-            # get list of all interfaces connections
+            job.event("rendering interface descriptions from interface data")
+            # get list of all interface connections
             nb_connections = self.get_connections(
                 job=job,
                 devices=devices,
                 interface_regex=interface_regex,
                 instance=instance,
             )
-            # produce interfaces description and update it
-            while nb_connections.result:
-                device, device_connections = nb_connections.result.popitem()
+            if nb_connections.errors:
+                ret.errors.extend(nb_connections.errors)
+                ret.failed = nb_connections.failed
+                return ret
+
+            # Fetch NetBox interfaces as well so virtual/disconnected interfaces
+            # absent from get_connections still receive template-rendered descriptions.
+            interface_filter = {"device": devices}
+            if interfaces:
+                interface_filter["name"] = interfaces
+            if interface_regex:
+                interface_filter["name__regex"] = interface_regex
+            try:
+                nb_interfaces = list(nb.dcim.interfaces.filter(**interface_filter))
+            except Exception as exc:
+                msg = f"failed to fetch interfaces for description update: {exc}"
+                log.error(msg)
+                job.event(msg, severity="ERROR")
+                ret.errors.append(msg)
+                ret.failed = True
+                return ret
+            nb_interfaces_by_device = {}
+            for nb_interface in nb_interfaces:
+                nb_interfaces_by_device.setdefault(nb_interface.device.name, {})[
+                    nb_interface.name
+                ] = nb_interface
+
+            # produce interface description and update it
+            for device in devices:
+                device_connections = nb_connections.result.get(device, {})
+                device_interfaces = nb_interfaces_by_device.get(device, {})
+                interface_names = sorted(
+                    set(device_connections).union(device_interfaces)
+                )
+                if interfaces:
+                    interface_names = [
+                        interface
+                        for interface in interface_names
+                        if interface in interfaces
+                    ]
                 ret.result.setdefault(device, {})
                 job.event(
-                    f"processing {len(device_connections)} interface(s) for '{device}'"
+                    f"processing {len(interface_names)} interface(s) for '{device}'"
                 )
-                for interface, connection in device_connections.items():
-                    job.event(f"{device}:{interface} updating description")
+                nb_device = nb.dcim.devices.get(name=device)
+                for interface in interface_names:
+                    job.event(f"{device}:{interface} {update_action} description")
+                    connection = device_connections.get(interface)
+                    nb_interface = device_interfaces.get(interface)
+                    if connection is None:
+                        if not nb_interface:
+                            continue
+                        connection = _empty_interface_connection_context(nb_interface)
                     if connection["termination_type"] == "consoleport":
                         api_endpoint = nb.dcim.console_ports
                     elif connection["termination_type"] == "consoleserverport":
@@ -719,8 +803,11 @@ class NetboxInterfacesTasks:
                         api_endpoint = nb.dcim.power_outlets
                     else:
                         api_endpoint = nb.dcim.interfaces
-                    nb_interface = api_endpoint.get(device=device, name=interface)
-                    nb_device = nb.dcim.devices.get(name=device)
+                    nb_interface = nb_interface or api_endpoint.get(
+                        device=device, name=interface
+                    )
+                    if not nb_interface:
+                        continue
                     rendered_description = self.jinja2_render_templates(
                         templates=[description_template],
                         context={
@@ -739,7 +826,8 @@ class NetboxInterfacesTasks:
                         nb_interface.save()
         if descriptions:
             job.event(
-                f"applying {len(descriptions)} description(s) to {len(devices)} device(s)"
+                f"{apply_action} {len(descriptions)} description(s) "
+                f"to {len(devices)} device(s)"
             )
             for device in devices:
                 ret.result.setdefault(device, {})
@@ -756,8 +844,15 @@ class NetboxInterfacesTasks:
 
         updated_count = sum(len(interfaces) for interfaces in ret.result.values())
         if dry_run is True:
+            changed_count = sum(
+                1
+                for interfaces in ret.result.values()
+                for diff in interfaces.values()
+                if diff["-"] != diff["+"]
+            )
             job.event(
-                f"dry-run: {updated_count} interface description update(s) calculated"
+                f"dry-run: would update {updated_count} interface description(s), "
+                f"would change {changed_count}"
             )
         else:
             job.event(f"updated {updated_count} interface description(s)")

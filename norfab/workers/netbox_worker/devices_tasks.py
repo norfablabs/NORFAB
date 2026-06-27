@@ -1038,9 +1038,7 @@ class NetboxDevicesTasks:
                 if not module_type_id:
                     continue
                 if module_type_label and create_module_types:
-                    device_results[device_name]["created"].append(
-                        module_type_label
-                    )
+                    device_results[device_name]["created"].append(module_type_label)
 
                 payload = {
                     "device": nb_devices_data[device_name]["id"],
@@ -1104,9 +1102,7 @@ class NetboxDevicesTasks:
                     if not module_type_id:
                         continue
                     if module_type_label and create_module_types:
-                        device_results[device_name]["created"].append(
-                            module_type_label
-                        )
+                        device_results[device_name]["created"].append(module_type_label)
                     payload["module_type"] = module_type_id
 
                 if len(payload) == 1:

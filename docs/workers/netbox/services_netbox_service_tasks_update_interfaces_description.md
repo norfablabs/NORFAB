@@ -7,14 +7,14 @@ tags:
 
 > task api name: `update_interfaces_description`
 
-Updates the description field of interfaces, console ports, and console server ports for one or more devices in NetBox. Supports two mutually usable modes: **template mode** (`description_template`) renders descriptions dynamically using Jinja2 with live connection context, and **static mode** (`descriptions`) applies a fixed mapping of interface names to description strings.
+Updates the description field of interfaces, console ports, and console server ports for one or more devices in NetBox. Supports two mutually usable modes: **template mode** (`description_template`) renders descriptions dynamically using Jinja2 with interface and connection context where available, and **static mode** (`descriptions`) applies a fixed mapping of interface names to description strings.
 
 ## How it Works
 
 1. Client submits `update_interfaces_description` request to NetBox worker
 2. Worker resolves the target NetBox instance and optionally the branch
-3. If `description_template` is provided, the worker fetches all interface connections for the given devices via `get_connections`
-4. For each interface, the Jinja2 template is rendered with the connection context (device, interface, remote device, cable attributes, etc.)
+3. If `description_template` is provided, the worker fetches interface connections via `get_connections` and NetBox interface objects for the selected devices
+4. For each selected interface, the Jinja2 template is rendered with interface context and, when present, connection context (remote device, cable attributes, etc.)
 5. If `descriptions` dict is provided, the worker iterates over the given device list and applies the fixed description values directly
 6. In dry-run mode — the before (`-`) / after (`+`) diff is returned without writing to NetBox
 7. Otherwise, the new description is saved to NetBox
@@ -47,7 +47,7 @@ Updates the description field of interfaces, console ports, and console server p
 
 ## Template Mode
 
-When `description_template` is provided, the Jinja2 template is rendered once per interface using the full connection context. The template can be an inline string or a remote NorFab file reference (`nf://path/to/template.txt`).
+When `description_template` is provided, the Jinja2 template is rendered once per selected interface. Connected interfaces receive the full connection context. Virtual, LAG, or disconnected interfaces that have no connection data are still rendered with `device`, `interface`, and empty remote/cable fields. The template can be an inline string or a remote NorFab file reference (`nf://path/to/template.txt`).
 
 Jinja2 context variables available in the template:
 

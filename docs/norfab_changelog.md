@@ -3,6 +3,7 @@
 ## ENHANCEMENTS
 
 1. Updated NFCLI shells to accept single values for task arguments backed by worker list inputs, normalizing them before dispatch for NetBox and Nornir commands.
+2. Enhanced Netbox `update_interfaces_description` task to render description templates for virtual, LAG, and disconnected interfaces that have no connection data, with clearer dry-run wording and expanded test coverage for static, dry-run, connected, and unconnected interface updates.
 
 ## BUGS
 
