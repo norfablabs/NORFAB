@@ -14,7 +14,7 @@ from norfab.clients.nfcli_shell.nfcli_shell_client import (
 from norfab.core.nfapi import NorFab
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def nfclient():
     """
     Fixture to start NorFab and return client object,
@@ -27,7 +27,7 @@ def nfclient():
     nf.destroy()  # teardown
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def nfclient_dict_inventory():
     """
     Fixture to start NorFab and return client object,
@@ -69,7 +69,7 @@ def nfclient_dict_inventory():
     nf.destroy()  # teardown
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def picle_shell():
     mock_stdin = unittest.mock.create_autospec(sys.stdin)
     mock_stdout = unittest.mock.create_autospec(sys.stdout)

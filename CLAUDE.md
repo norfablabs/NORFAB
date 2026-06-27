@@ -68,16 +68,19 @@ norfab/
 tests/
 ├── conftest.py                      # pytest fixtures (NorFab start/teardown)
 ├── nf_tests_inventory/              # Test inventory (inventory.yaml + service configs)
-├── test_nornir_service.py
-├── test_netbox_service.py
-├── test_fastapi_service.py
-├── test_workflow_service.py
-├── test_filesharing_service.py
-├── test_fastmcp_service.py
-├── test_fakenos_service.py
-├── test_containerlab_service.py
-├── test_nfcli_shell_client.py
-└── test_dummy_service_plugin.py
+├── services/
+│   ├── containerlab/                 # Containerlab service tests by task area
+│   ├── dummy/                        # Dummy plugin service tests
+│   ├── fakenos/                      # FakeNOS service tests by task area
+│   ├── fastapi/                      # FastAPI service tests by task area
+│   ├── fastmcp/                      # FastMCP service tests by task area
+│   ├── filesharing/                  # FileSharing service tests by task area
+│   ├── netbox/                       # NetBox service tests by task area plus common.py helpers
+│   ├── nornir/                       # Nornir service tests by task area
+│   └── workflow/                     # Workflow service tests by task area
+└── nfcli/                            # Interactive CLI shell tests
+    ├── test_shell_client.py
+    └── test_shell_common.py
 docs/                  # MkDocs documentation source (Material theme)
 docker/                # Docker deployment configs
 ```
@@ -119,8 +122,12 @@ poetry run nfcli --create-env norfab
 # Run all tests (from repo root, requires a running/startable NorFab)
 cd tests && poetry run pytest
 
-# Run a specific service test
-cd tests && poetry run pytest test_nornir_service.py
+# Run a specific service test suite
+cd tests && poetry run pytest services/nornir
+
+# Run NFCLI shell tests
+cd tests && poetry run pytest nfcli
+cd tests && poetry run pytest -m nfcli
 
 # Run tests with output
 cd tests && poetry run pytest -s -v
@@ -159,6 +166,11 @@ poetry run mkdocs build
 
 - Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
 - Documentation style: `docs/development/documentation_style_guide.md`
+
+## References
+
+- Testing framework: `docs/testing/norfab_testing_framework.md`
+- NetBox service tests and refactoring guidance: `docs/testing/netbox_service_tests.md`
 
 ## Inventory File Structure
 

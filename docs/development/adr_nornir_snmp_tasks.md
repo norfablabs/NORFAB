@@ -619,8 +619,8 @@ Negative:
 | `tests/nf_tests_inventory/nornir/nornir-worker-2.yaml` | Add leaf SNMP ports |
 | `tests/nf_tests_inventory/containerlab/norfab-network-lab/norfab-network-lab.yml` | Publish UDP/161 |
 | `tests/nf_tests_inventory/containerlab/norfab-network-lab/ceos-*.txt` | Enable test SNMP community |
-| `tests/test_nornir_service.py` | Add worker and cEOS integration tests |
-| `tests/test_nfcli_shell_client.py` | Add SNMP shell tests |
+| `tests/services/nornir/test_snmp.py` | Add worker and cEOS integration tests |
+| `tests/nfcli/test_shell_client.py` | Add SNMP shell tests |
 | `docs/workers/nornir/services_nornir_service_tasks_snmp.md` | Add user documentation |
 | `mkdocs.yml` | Add SNMP task page to navigation |
 | `docs/norfab_changelog.md` | Record feature after implementation |

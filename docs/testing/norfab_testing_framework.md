@@ -2,378 +2,391 @@
 
 ## Overview
 
-NORFAB employs a comprehensive testing framework built on **pytest** to ensure code quality, functionality, and reliability across all components. The testing infrastructure includes unit tests, integration tests, and service-specific tests that validate the core framework, workers, and client implementations.
+NORFAB uses `pytest` for core, client, worker, and service integration tests. Most service tests start a real NorFab process tree through shared fixtures and exercise workers through `NFPClient.run_job()`.
 
-## Testing Architecture
+The test suite is intentionally organized by the NORFAB architecture:
 
-### Test Organization
+- Core framework behavior lives under `tests/core/`.
+- Service-worker suites live under `tests/services/<service>/`.
+- Larger service suites are split by task area; smaller services may still have only one or two files in their service folder.
+- Shared test inventories and data live under `tests/nf_tests_inventory/`.
 
-The NORFAB testing framework is organized as follows:
+## TL;DR
 
-- **Core Tests** (`tests/core/`): Tests for fundamental NORFAB components
-  - `test_nfapi.py` - NFAPI (Python API) tests
-  - `test_client.py` - Client functionality tests
-  - `test_worker.py` - Worker base class tests
-  - `test_simple_inventory_datastore.py` - Inventory datastore tests
+Run tests from the `tests/` directory through Poetry.
 
-- **Service Tests** (root `tests/` directory): Tests for service workers
-  - `test_containerlab_service.py` - Containerlab service tests
-  - `test_nornir_service.py` - Nornir service tests
-  - `test_netbox_service.py` - Netbox service tests
-  - `test_fastapi_service.py` - FastAPI service tests
-  - `test_fastmcp_service.py` - FastMCP service tests
-  - `test_workflow_service.py` - Workflow service tests
-  - `test_dummy_service_plugin.py` - Plugin service tests
-
-### Test Support Files
-
-- **`conftest.py`** - Pytest fixtures for test initialization and teardown
-- **`netbox_data.py`** - Netbox instance configuration and test data
-- **`nf_tests_inventory/`** - Test inventory files used across test suites
-
-## Testing Framework
-
-### pytest Fixtures
-
-The testing framework uses pytest fixtures to manage test lifecycle:
-
-#### NorFab Client Fixture (`nfclient`)
-
-Creates a NorFab instance with test inventory, starts all workers, and provides a client object:
-
-```python
-@pytest.fixture(scope="class")
-def nfclient():
-    """Fixture to start NorFab and return client object"""
-    nf = NorFab(inventory="./nf_tests_inventory/inventory.yaml")
-    nf.start()
-    time.sleep(3)  # wait for workers to start
-    yield nf.make_client()  # return nf client
-    nf.destroy()  # teardown
+```bash
+cd tests
+poetry run pytest
 ```
 
-**Scope**: Class-level (single instance per test class)
-**Teardown**: Automatically destroys NorFab instance after tests complete
+Run by folder or file:
 
-#### Dictionary-based Inventory Fixture (`nfclient_dict_inventory`)
+```bash
+poetry run pytest services/nornir
+poetry run pytest services/netbox/test_interfaces.py
+poetry run pytest nfcli
+```
 
-Creates a NorFab instance using a programmatically defined inventory dictionary:
+Run by service marker:
+
+```bash
+poetry run pytest -m nornir
+poetry run pytest -m netbox
+poetry run pytest -m containerlab
+poetry run pytest -m fastmcp
+poetry run pytest -m nfcli
+```
+
+Run by task or area marker:
+
+```bash
+poetry run pytest -m task_nornir_cli
+poetry run pytest -m task_get_interfaces
+poetry run pytest -m task_containerlab_deploy
+poetry run pytest -m task_fastmcp_tools_call
+poetry run pytest -m interfaces
+poetry run pytest -m bgp
+```
+
+Combine markers:
+
+```bash
+poetry run pytest -m "netbox and interfaces"
+poetry run pytest -m "nornir and not juniper"
+poetry run pytest -m "containerlab and deploy"
+poetry run pytest services/netbox -m "not crud"
+```
+
+List available markers:
+
+```bash
+poetry run pytest --markers
+```
+
+## Test Organization
+
+```text
+tests/
+  conftest.py
+  netbox_data.py
+  nf_tests_inventory/
+  nfcli/
+    test_shell_client.py
+    test_shell_common.py
+  core/
+    test_broker.py
+    test_client.py
+    test_client_agent.py
+    test_nfapi.py
+    test_simple_inventory_datastore.py
+    test_worker.py
+  services/
+    containerlab/
+      common.py
+      test_deploy.py
+      test_deploy_netbox.py
+      test_inspect.py
+      test_inventory.py
+      test_restart.py
+      test_save.py
+      test_worker.py
+    dummy/
+      test_plugin.py
+    fakenos/
+      common.py
+      test_inspect.py
+      test_inventory.py
+      test_restart.py
+      test_start.py
+      test_stop.py
+      test_worker.py
+    fastapi/
+      common.py
+      test_server.py
+      test_worker.py
+    fastmcp/
+      common.py
+      test_auth.py
+      test_prompts.py
+      test_tools.py
+      test_tools_call.py
+      test_worker.py
+    filesharing/
+      test_fetch_file.py
+      test_file_details.py
+      test_list_files.py
+      test_walk.py
+      test_worker.py
+    netbox/
+      common.py
+      test_worker.py
+      test_graphql.py
+      test_interfaces.py
+      test_devices.py
+      test_connections.py
+      test_inventory.py
+      test_circuits.py
+      test_bgp.py
+      test_ipam.py
+      test_cache.py
+      test_containerlab.py
+      test_designs.py
+      test_crud.py
+      test_sync.py
+    nornir/
+      test_cfg.py
+      test_cli.py
+      test_file_copy.py
+      test_jinja2.py
+      test_juniper_integration.py
+      test_netbox_ipam.py
+      test_network.py
+      test_parse.py
+      test_runtime_inventory.py
+      test_snmp.py
+      test_task.py
+      test_tests.py
+      test_worker.py
+    workflow/
+      test_run.py
+      test_worker.py
+```
+
+## Support Files
+
+- `tests/conftest.py` provides shared pytest fixtures.
+- `tests/nf_tests_inventory/` contains the inventory used by integration tests.
+- `tests/netbox_data.py` contains NetBox test data and NetBox population helpers.
+- `tests/services/netbox/common.py` contains shared NetBox test helpers used by NetBox and Nornir tests.
+
+Do not put generated runtime output under source control. Directories such as `__norfab__/`, `.pytest_cache/`, `.ruff_cache/`, and `__pycache__/` are runtime artifacts.
+
+## Fixtures
+
+### `nfclient`
+
+Starts NorFab from `./nf_tests_inventory/inventory.yaml`, waits for workers, yields a client, and destroys NorFab after the test session finishes.
 
 ```python
-@pytest.fixture(scope="class")
-def nfclient_dict_inventory():
-    """Fixture to start NorFab with dict inventory"""
-    data = {
-        "broker": {"endpoint": "tcp://127.0.0.1:5555", ...},
-        "topology": {"broker": True, "workers": [...]},
-        "workers": {...}
-    }
-    nf = NorFab(inventory_data=data, base_dir="./nf_tests_inventory/")
+@pytest.fixture(scope="session")
+def nfclient():
+    nf = NorFab(inventory="./nf_tests_inventory/inventory.yaml")
     nf.start()
     time.sleep(3)
     yield nf.make_client()
     nf.destroy()
 ```
 
-**Use Case**: Testing with custom worker configurations and topology definitions
+Use this fixture for service integration tests that call real workers. Because the fixture is session-scoped, tests must clean up any external or worker state they create instead of relying on a per-file NorFab restart.
 
-#### PICLE Shell Fixture (`picle_shell`)
+### `nfclient_dict_inventory`
 
-Initializes the PICLE shell client for interactive testing:
+Starts NorFab from a dictionary-based inventory for the test session. Use it when a test needs a custom topology or worker map without adding a permanent inventory file.
 
-```python
-@pytest.fixture(scope="class")
-def picle_shell():
-    """Fixture for PICLE shell testing"""
-    nf = NorFab(inventory="./nf_tests_inventory/inventory.yaml")
-    nf.start()
-    time.sleep(3)
-    NFCLIENT = nf.make_client()
-    builtins.NFCLIENT = NFCLIENT
-    shell = App(NorFabShell, stdin=mock_stdin, stdout=mock_stdout)
-    mount_shell_plugins(shell, nf.inventory)
-    yield shell, mock_stdout
-    nf.destroy()
+### `picle_shell`
+
+Starts NorFab for the test session and mounts the interactive NFCLI shell model. Use it for shell and CLI behavior tests.
+
+## Running Tests
+
+Follow the repository convention from `CLAUDE.md`: run pytest from the `tests/` directory through Poetry.
+
+```bash
+cd tests
+poetry run pytest
 ```
 
-**Use Case**: Testing NFCLI shell client functionality
+Run a split service suite:
 
-## Writing Tests
+```bash
+cd tests
+poetry run pytest services/nornir
+```
 
-### Test Structure
+Run one service area:
 
-Tests follow standard pytest conventions with class-based organization:
+```bash
+cd tests
+poetry run pytest services/netbox
+poetry run pytest services/containerlab/test_deploy.py
+```
+
+Run NFCLI shell tests:
+
+```bash
+cd tests
+poetry run pytest nfcli
+poetry run pytest -m nfcli
+```
+
+Run one file, class, or test:
+
+```bash
+cd tests
+poetry run pytest services/netbox/test_interfaces.py
+poetry run pytest services/netbox/test_interfaces.py::TestGetInterfaces
+poetry run pytest services/netbox/test_interfaces.py::TestGetInterfaces::test_get_interfaces
+```
+
+Run by marker:
+
+```bash
+cd tests
+poetry run pytest services/netbox -m netbox
+poetry run pytest services/netbox -m interfaces
+poetry run pytest services/netbox -m task_get_interfaces
+poetry run pytest services/netbox -m "netbox and not crud"
+poetry run pytest nfcli -m nfcli
+```
+
+Use verbose output when diagnosing worker behavior:
+
+```bash
+cd tests
+poetry run pytest -s -v services/netbox/test_worker.py::TestNetboxWorker
+```
+
+## Markers
+
+Markers are registered in `pyproject.toml` under `[tool.pytest.ini_options]`.
+
+Use service or area markers on whole files:
+
+```python
+pytestmark = [pytest.mark.netbox, pytest.mark.interfaces]
+```
+
+Use task markers on classes:
+
+```python
+@pytest.mark.task_get_interfaces
+class TestGetInterfaces:
+    ...
+```
+
+This gives three stable ways to run tests:
+
+- By path, such as `services/netbox/test_interfaces.py`.
+- By class, such as `::TestGetInterfaces`.
+- By task marker, such as `-m task_get_interfaces`.
+
+## Writing Service Tests
+
+Keep test classes grouped by NORFAB task or closely related behavior.
 
 ```python
 import pytest
 
-class TestServiceName:
-    def test_specific_functionality(self, nfclient):
-        # Arrange
-        # Act
-        ret = nfclient.run_job("service", "task", workers="any")
-        
-        # Assert
-        assert not ret.errors
-        assert "expected_key" in ret.result
+pytestmark = [pytest.mark.netbox, pytest.mark.interfaces]
+
+
+@pytest.mark.task_get_interfaces
+class TestGetInterfaces:
+    def test_get_interfaces(self, nfclient):
+        ret = nfclient.run_job(
+            "netbox",
+            "get_interfaces",
+            workers="any",
+            kwargs={"devices": ["ceos1"]},
+        )
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} returned errors"
+            assert "ceos1" in res["result"]
 ```
 
-### Common Testing Patterns
-
-#### Running a Job
-
-All service tests interact with NORFAB through the client's `run_job()` method:
+Prefer explicit imports. Do not use `import *` in tests. Standard library, third-party, and worker-code imports should live in the test file that uses them. Import only shared NetBox helper names from `services/netbox/common.py`.
 
 ```python
-ret = nfclient.run_job(
-    service_name,  # service name (e.g., "netbox", "nornir")
-    task_name,     # task name
-    workers="any", # worker filter
-    kwargs={...}   # task-specific parameters
-)
+import pprint
+
+import pytest
+
+try:
+    from tests.services.netbox.common import clear_nb_cache, get_nb_version
+except ModuleNotFoundError as exc:
+    if exc.name not in {"tests", "tests.services", "tests.services.netbox", "tests.services.netbox.common"}:
+        raise
+    from services.netbox.common import clear_nb_cache, get_nb_version
 ```
 
-**Response Structure**:
+The fallback supports both repo-root invocation and `cd tests` invocation.
+
+## Refactoring Guidelines
+
+Split a test file when one of these is true:
+
+- The file is difficult to navigate or review.
+- Classes already form clear task groups.
+- The file mixes independent service areas such as BGP, IPAM, CRUD, cache, and sync.
+- Targeted runs are becoming awkward.
+
+When splitting a service suite:
+
+1. Keep existing `Test...` classes when they already group behavior well.
+2. Move shared helpers into a service common module, such as `tests/services/netbox/common.py`.
+3. Keep helper imports explicit.
+4. Add a file-level service/area marker.
+5. Add a class-level task marker.
+6. Register new markers in `pyproject.toml`.
+7. Preserve `cd tests && poetry run pytest ...` compatibility.
+8. Update the related document in `docs/testing/`.
+
+Do not split small service files into tiny fragments just to make the tree symmetrical. A small service folder with one or two focused files is fine while it stays easy to scan.
+
+## Response Assertions
+
+Service tests usually receive a worker-keyed dictionary:
+
 ```python
 {
-    "worker_name": {
-        "errors": [],           # List of error messages
-        "result": {...},        # Task result data
-        "task_id": "uuid",      # Task identifier
-        "status": "done"        # Task status
+    "worker-name": {
+        "errors": [],
+        "failed": False,
+        "result": {},
+        "messages": [],
     }
 }
 ```
 
-#### Assertions
-
-Common assertion patterns in tests:
+Common assertion patterns:
 
 ```python
-# Check for no errors
-assert not res["errors"]
-
-# Validate response structure
-assert all(k in res["result"] for k in ["expected", "keys"])
-
-# Check specific values
-assert res["result"]["status"] == "success"
-assert len(res["result"]["items"]) > 0
+assert not res["errors"], f"{worker} returned errors"
+assert res["failed"] is False, f"{worker} failed"
+assert "expected_key" in res["result"]
 ```
 
-## Test Dependencies
+Use direct NetBox or service API reads only when the test must verify external state, such as object creation, deletion, or idempotency.
 
-The testing framework requires:
+## Cleanup
 
-- **pytest** - Testing framework and runner
-- **pyyaml** - Inventory file parsing
-- **pyzmq** - ZeroMQ communication for NorFab
-- **All service dependencies** - Nornir, Netbox, Containerlab, etc.
-
-Install test dependencies:
-
-```bash
-poetry install  # Install all dependencies including optional ones
-```
-
-## Running Tests
-
-### Run All Tests
-
-```bash
-pytest tests/
-```
-
-### Run Specific Test File
-
-```bash
-pytest tests/test_netbox_service.py
-```
-
-### Run Specific Test Class
-
-```bash
-pytest tests/test_netbox_service.py::TestNetboxWorker
-```
-
-### Run Specific Test Method
-
-```bash
-pytest tests/test_netbox_service.py::TestNetboxWorker::test_get_devices
-```
-
-### Run with Verbose Output
-
-```bash
-pytest tests/ -v
-```
-## Test Inventory
-
-The test inventory is located in `tests/nf_tests_inventory/` and defines:
-
-- **Broker configuration** - ZeroMQ endpoint and shared key
-- **Worker topology** - Worker names and assignments
-- **Worker configurations** - Service and plugin definitions
-- **Service inventories** - Service-specific configuration files
-
-### Inventory Files
-
-- `inventory.yaml` - Main inventory file
-- `nornir/` - Nornir service configurations
-- `nf_containerlab/` - Containerlab test environments
-
-## Test Setup and Teardown
-
-### Automatic Cleanup
-
-All fixtures use class-level scope with automatic teardown:
-
-1. **Setup Phase**: 
-   - Create NorFab instance
-   - Load inventory
-   - Start broker
-   - Start workers
-   - Wait for initialization
-
-2. **Test Phase**: 
-   - Run individual test methods
-   - Reuse same NorFab instance across tests
-
-3. **Teardown Phase**: 
-   - Destroy NorFab instance
-   - Clean up worker connections
-   - Release resources
-
-## Best Practices
-
-### 1. Use Appropriate Fixtures
-
-Choose the right fixture for your test type:
-- `nfclient` - General service testing
-- `nfclient_dict_inventory` - Custom topology testing
-- `picle_shell` - CLI client testing
-
-### 2. Wait for Worker Readiness
-
-Always allow time for workers to initialize:
-
-```python
-@pytest.fixture(scope="class")
-def nfclient():
-    nf = NorFab(...)
-    nf.start()
-    time.sleep(3)  # Critical for worker initialization
-    yield nf.make_client()
-    nf.destroy()
-```
-
-### 3. Validate Response Structure
-
-Always check for errors and expected keys:
-
-```python
-assert not res["errors"]
-assert all(k in res["result"] for k in expected_keys)
-```
-
-### 4. Use Descriptive Test Names
-
-Test method names should clearly indicate what is being tested:
-
-```python
-def test_create_device_with_valid_data(self, nfclient):
-    """Test creating a device with valid Netbox data"""
-    pass
-
-def test_handle_invalid_device_data(self, nfclient):
-    """Test error handling for invalid device data"""
-    pass
-```
-
-### 5. Clean Up Test Data
-
-Always clean up created resources to prevent test interference:
+Tests that create external state must clean it up. Prefer `try/finally` when a test creates data before assertions.
 
 ```python
 def test_create_and_cleanup(self, nfclient):
-    # Create test data
-    create_result = nfclient.run_job(...)
-    
+    branch = "test-branch"
     try:
-        # Test operations
-        assert create_result["success"]
+        ret = nfclient.run_job("netbox", "create_branch", kwargs={"branch": branch})
+        assert ret
     finally:
-        # Always cleanup
-        cleanup_result = nfclient.run_job(...)
-        assert not cleanup_result["errors"]
+        delete_branch(branch, nfclient)
 ```
 
-### 6. Mock External Dependencies
-
-For tests requiring external services (Netbox, Containerlab):
-
-```python
-import unittest.mock
-
-@unittest.mock.patch('external_service.api')
-def test_with_mocked_service(self, mock_api, nfclient):
-    mock_api.return_value = {"status": "ok"}
-    # Test with mocked service
-    pass
-```
-
-## Continuous Integration
-
-The testing framework supports CI/CD pipelines:
-
-```bash
-# Run tests with coverage report
-pytest tests/ --cov=norfab --cov-report=html
-
-# Run tests with JUnit XML output
-pytest tests/ --junit-xml=test-results.xml
-
-# Run tests with specific markers
-pytest tests/ -m "not integration"
-```
+Cleanup helpers for NetBox tests belong in `tests/services/netbox/common.py`.
 
 ## Troubleshooting
 
-### Worker Startup Timeout
-
-If workers fail to start within the 3-second wait:
-
-```python
-time.sleep(5)  # Increase wait time
-```
-
-### Import Errors
-
-Ensure all dependencies are installed:
-
-```bash
-poetry install  # Install all optional dependencies
-```
-
-### Port Conflicts
-
-Multiple test runs may conflict on ZeroMQ ports. Clear stale processes:
-
-```bash
-lsof -i :5555  # Find process using port 5555
-kill -9 <PID>  # Kill process
-```
-
-### Worker Connection Issues
-
-Check worker status using the MMI service:
-
-```python
-status = nfclient.mmi("mmi.service.broker", "show_workers")
-```
+- If imports fail, make sure Poetry installed the needed extras for the service under test.
+- If workers do not appear, inspect broker state with `nfclient.mmi("mmi.service.broker", "show_workers")`.
+- If NetBox tests fail with connection errors, check `tests/netbox_data.py` and `tests/nf_tests_inventory/netbox/common.yaml`.
+- If cache behavior looks stale, use the service cache clear task or helper before running assertions.
+- If a test run leaves runtime data behind, check `tests/nf_tests_inventory/__norfab__/` and worker logs.
 
 ## Related Documentation
 
+- [NetBox Service Tests](netbox_service_tests.md)
 - [NORFAB Getting Started](../norfab_getting_started.md)
 - [NORFAB Architecture](../reference_architecture_norfab.md)
 - [Services and Workers Documentation](../services_overview.md)
