@@ -380,11 +380,12 @@ class NorFab:
             if worker_data.get("depends_on"):
                 # check if all dependent processes are alive
                 for w in worker_data["depends_on"]:
-                    if not self.workers_processes[w]["process"].is_alive():
-                        raise RuntimeError(f"Dependent process is dead '{w}'")
+                    if self.workers_processes.get(w):
+                        if not self.workers_processes[w]["process"].is_alive():
+                            raise RuntimeError(f"Dependent process is dead '{w}'")
                 # check if all depended process fully initialized
                 if not all(
-                    self.workers_processes[w]["init_done"].is_set()
+                    self.workers_processes[w]["init_done"].is_set() if w in self.workers_processes else False
                     for w in worker_data["depends_on"]
                 ):
                     return
