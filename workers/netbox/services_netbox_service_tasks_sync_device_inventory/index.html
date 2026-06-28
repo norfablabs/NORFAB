@@ -2564,10 +2564,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-structure" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Structure
+        Output
       
     </span>
   </a>
@@ -6238,10 +6238,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#result-structure" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Structure
+        Output
       
     </span>
   </a>
@@ -6522,7 +6522,7 @@ inventory record.</p>
 <p>Transformer files are executed as trusted Python code. Store them only in
 controlled File Service locations.</p>
 </div>
-<h2 id="result-structure">Result Structure<a class="headerlink" href="#result-structure" title="Permanent link">¤</a></h2>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) returns the raw diff without writing to
 NetBox:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -6567,7 +6567,7 @@ records are reported in <code>res["errors"]</code>.</p>
 NetBox Branching plugin is installed. Use the <code>branch</code> argument to target a
 branch.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">NFCLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Preview chassis serial and module changes for one device:</p>
@@ -8067,11 +8067,7 @@ to <code>parse_ttp</code>.</p>
 <span class="normal">1155</span>
 <span class="normal">1156</span>
 <span class="normal">1157</span>
-<span class="normal">1158</span>
-<span class="normal">1159</span>
-<span class="normal">1160</span>
-<span class="normal">1161</span>
-<span class="normal">1162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInventoryResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -8783,9 +8779,7 @@ to <code>parse_ttp</code>.</p>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">module_type_id</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">module_type_label</span> <span class="ow">and</span> <span class="n">create_module_types</span><span class="p">:</span>
-                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">module_type_label</span>
-                <span class="p">)</span>
+                <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_type_label</span><span class="p">)</span>
 
             <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">nb_devices_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
@@ -8849,9 +8843,7 @@ to <code>parse_ttp</code>.</p>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">module_type_id</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="n">module_type_label</span> <span class="ow">and</span> <span class="n">create_module_types</span><span class="p">:</span>
-                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">module_type_label</span>
-                    <span class="p">)</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module_type_label</span><span class="p">)</span>
                 <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;module_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">module_type_id</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>

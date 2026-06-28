@@ -2251,6 +2251,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2262,10 +2273,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#gotchas" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gotchas
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6049,6 +6082,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6060,10 +6104,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#gotchas" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gotchas
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6123,11 +6189,48 @@
   
 
 
-<h1 id="netbox-get-bgp-peerings-task">Netbox Get BGP Peerings Task<a class="headerlink" href="#netbox-get-bgp-peerings-task" title="Permanent link">¤</a></h1>
+<h1 id="netbox-get-bgp-peerings-task">NetBox Get BGP Peerings Task<a class="headerlink" href="#netbox-get-bgp-peerings-task" title="Permanent link">¤</a></h1>
 <blockquote>
 <p>task api name: <code>get_bgp_peerings</code></p>
 </blockquote>
-<p>This task integrates with <a href="https://github.com/netbox-community/netbox-bgp">Netbox BGP Plugin</a> and allows to fetch devices' BGP peerings.</p>
+<p>This task integrates with the <a href="https://github.com/netbox-community/netbox-bgp">NetBox BGP Plugin</a> and fetches BGP peerings for devices.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Device names to retrieve BGP peerings for</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox Branching plugin branch name to read from</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return query content without running it</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td style="text-align: right;">No</td>
+<td>Cache usage mode: <code>True</code>, <code>False</code>, <code>refresh</code>, or <code>force</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <ul>
 <li>Requires NetBox BGP plugin: The worker verifies the plugin is installed on the target instance before proceeding.</li>
@@ -6137,127 +6240,105 @@
 <li>Smart caching: Per-device cache key <code>get_bgp_peerings::&lt;device&gt;</code> is used. Modes:</li>
 <li><code>True</code>: Uses cache when up-to-date; performs smart update by comparing <code>last_updated</code> and fetching only changed/new sessions.</li>
 <li><code>False</code>: Bypasses cache entirely and does not write to cache.</li>
-<li><code>refresh</code>: Forces re-fetch from NetBox and overwrites cache. </li>
+<li><code>refresh</code>: Forces re-fetch from NetBox and overwrites cache.</li>
 <li><code>force</code>: Returns cached data if present without freshness checks.</li>
 </ul>
-<p>Sample BGP session data retrieved from Netbox:</p>
-<div class="highlight"><pre><span></span><code>&quot;fceos4&quot;: {
-    &quot;fceos4-fceos5-eth105&quot;: {
-        &quot;comments&quot;: &quot;&quot;,
-        &quot;created&quot;: &quot;2025-12-31T08:17:39.168208Z&quot;,
-        &quot;custom_fields&quot;: {},
-        &quot;description&quot;: &quot;BGP peering between fceos4 and fceos5 on eth105&quot;,
-        &quot;device&quot;: {
-            &quot;description&quot;: &quot;&quot;,
-            &quot;display&quot;: &quot;fceos4 (UUID-123451)&quot;,
-            &quot;id&quot;: 111,
-            &quot;name&quot;: &quot;fceos4&quot;,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/dcim/devices/111/&quot;
-        },
-        &quot;display&quot;: &quot;fceos4 (UUID-123451):fceos4-fceos5-eth105&quot;,
-        &quot;export_policies&quot;: [],
-        &quot;id&quot;: 4,
-        &quot;import_policies&quot;: [],
-        &quot;last_updated&quot;: &quot;2025-12-31T08:17:39.168231Z&quot;,
-        &quot;local_address&quot;: {
-            &quot;address&quot;: &quot;10.0.2.1/30&quot;,
-            &quot;description&quot;: &quot;&quot;,
-            &quot;display&quot;: &quot;10.0.2.1/30&quot;,
-            &quot;family&quot;: {
-                &quot;label&quot;: &quot;IPv4&quot;,
-                &quot;value&quot;: 4
-            },
-            &quot;id&quot;: 123,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/ip-addresses/123/&quot;
-        },
-        &quot;local_as&quot;: {
-            &quot;asn&quot;: 65100,
-            &quot;description&quot;: &quot;BGP ASN for fceos4&quot;,
-            &quot;display&quot;: &quot;AS65100&quot;,
-            &quot;id&quot;: 3,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/asns/3/&quot;
-        },
-        &quot;name&quot;: &quot;fceos4-fceos5-eth105&quot;,
-        &quot;peer_group&quot;: {
-            &quot;description&quot;: &quot;Test BGP peer group 1 for standard peerings&quot;,
-            &quot;display&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,
-            &quot;id&quot;: 9,
-            &quot;name&quot;: &quot;TEST_BGP_PEER_GROUP_1&quot;,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/plugins/bgp/bgppeergroup/9/&quot;
-        },
-        &quot;prefix_list_in&quot;: null,
-        &quot;prefix_list_out&quot;: null,
-        &quot;remote_address&quot;: {
-            &quot;address&quot;: &quot;10.0.2.2/30&quot;,
-            &quot;description&quot;: &quot;&quot;,
-            &quot;display&quot;: &quot;10.0.2.2/30&quot;,
-            &quot;family&quot;: {
-                &quot;label&quot;: &quot;IPv4&quot;,
-                &quot;value&quot;: 4
-            },
-            &quot;id&quot;: 124,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/ip-addresses/124/&quot;
-        },
-        &quot;remote_as&quot;: {
-            &quot;asn&quot;: 65101,
-            &quot;description&quot;: &quot;BGP ASN for fceos5&quot;,
-            &quot;display&quot;: &quot;AS65101&quot;,
-            &quot;id&quot;: 4,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/ipam/asns/4/&quot;
-        },
-        &quot;site&quot;: {
-            &quot;description&quot;: &quot;&quot;,
-            &quot;display&quot;: &quot;SALTNORNIR-LAB&quot;,
-            &quot;id&quot;: 16,
-            &quot;name&quot;: &quot;SALTNORNIR-LAB&quot;,
-            &quot;slug&quot;: &quot;saltnornir-lab&quot;,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/dcim/sites/16/&quot;
-        },
-        &quot;status&quot;: {
-            &quot;label&quot;: &quot;Active&quot;,
-            &quot;value&quot;: &quot;active&quot;
-        },
-        &quot;tags&quot;: [],
-        &quot;tenant&quot;: {
-            &quot;description&quot;: &quot;&quot;,
-            &quot;display&quot;: &quot;SALTNORNIR&quot;,
-            &quot;id&quot;: 11,
-            &quot;name&quot;: &quot;SALTNORNIR&quot;,
-            &quot;slug&quot;: &quot;saltnornir&quot;,
-            &quot;url&quot;: &quot;http://192.168.1.210:8000/api/tenancy/tenants/11/&quot;
-        },
-        &quot;url&quot;: &quot;http://192.168.1.210:8000/api/plugins/bgp/bgpsession/4/&quot;,
-        &quot;virtualmachine&quot;: null
-    },
-    &quot;fceos4-fceos5-eth106&quot;: {
-
-        ...etc...
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns BGP session data keyed by device name and session name:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;fceos4&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;fceos4-fceos5-eth105&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fceos4-fceos5-eth105&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;BGP peering between fceos4 and fceos5 on eth105&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Active&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.2.1/30&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.2.2/30&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65100</span><span class="p">},</span>
+            <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65101</span><span class="p">},</span>
+            <span class="s2">&quot;peer_group&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;TEST_BGP_PEER_GROUP_1&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
 </code></pre></div>
-<h2 id="gotchas">Gotchas<a class="headerlink" href="#gotchas" title="Permanent link">¤</a></h2>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
 <ul>
-<li>Supported and tested Netbox version is 4.4 onwards.</li>
+<li>Supported and tested NetBox version is 4.4 and later.</li>
 <li>NetBox BGP plugin required: If missing, the task fails early with an error. Confirm plugin availability and version compatibility.</li>
 <li>Device name must exist: Unknown devices are skipped with warnings; verify names beforehand or use <code>get_devices</code> to inspect inventory.</li>
 <li>Session key uniqueness: Sessions in the result are keyed by <code>name</code>. If session names are not unique per device, later entries overwrite earlier ones.</li>
-<li>Partial-field queries: Smart update relies on <code>fields="id,last_updated,name"</code>. Older Netbox versions may not support <code>fields</code>, impacting cache comparison.</li>
+<li>Partial-field queries: Smart update relies on <code>fields="id,last_updated,name"</code>. Older NetBox versions may not support <code>fields</code>, which can affect cache comparison.</li>
 <li>Large datasets: Fetching many devices or sessions may be slow; prefer cache or limit <code>devices</code> for interactive runs.</li>
 </ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Get BGP peerings for devices:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>bgp-peerings<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>fceos5
+</code></pre></div>
+<p>Refresh cached BGP peering data:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>bgp-peerings<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>cache<span class="w"> </span>refresh
+</code></pre></div>
+<p>Preview query content:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>bgp-peerings<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_bgp_peerings&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_bgp_peerings&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="norfab-netbox-get-bgp-peerings-command-shell-reference">NORFAB Netbox Get BGP Peerings Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-bgp-peerings-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_bgp_peerings</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.bgp_peerings
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.get.bgp-peerings
 root
-└── netbox:    Netbox service
-    └── get:    Query data from Netbox
-        └── bgp-peerings:    Query Netbox BGP Peerings data
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
-            ├── instance:    Netbox instance name to target
-            ├── dry-run:    Only return query content, do not run it
-            ├── branch:    Branching plugin branch name to use
-            ├── *devices:    Device names to query data for
-            └── cache:    How to use cache, default &#39;True&#39;
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>bgp-peerings:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>BGP<span class="w"> </span>Peerings<span class="w"> </span>data
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
+<span class="w">            </span>├──<span class="w"> </span>*devices:<span class="w">    </span>Device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

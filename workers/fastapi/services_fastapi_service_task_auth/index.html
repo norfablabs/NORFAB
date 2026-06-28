@@ -3143,10 +3143,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#auth-tasks-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auth Tasks Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6088,10 +6110,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#auth-tasks-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auth Tasks Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6202,86 +6246,184 @@
 
 
 <h1 id="fastapi-auth-tasks">FastAPI Auth Tasks<a class="headerlink" href="#fastapi-auth-tasks" title="Permanent link">¤</a></h1>
+<blockquote>
+<p>task api names: <code>bearer_token_store</code>, <code>bearer_token_list</code>, <code>bearer_token_delete</code>, <code>bearer_token_check</code></p>
+</blockquote>
 <p>FastAPI service supports bearer token REST API authentication. To handle tokens lifecycle a number of FastAPI Service methods created allowing to store, delete, list and check API tokens.</p>
-<h2 id="auth-tasks-sample-usage">Auth Tasks Sample Usage<a class="headerlink" href="#auth-tasks-sample-usage" title="Permanent link">¤</a></h2>
-<p>To store authentication token in FastAPI service database:</p>
-<div class="highlight"><pre><span></span><code>nf#fastapi auth create-token username foobar token f343ff34r3fg4g5g34gf34g34g3g34g4 expire 3600
-{
-    &quot;fastapi-worker-1&quot;: true
-}
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>username</code></td>
+<td style="text-align: right;">Required for create and username-scoped delete/list</td>
+<td>User name associated with one or more bearer tokens.</td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td style="text-align: right;">Required for check and token-scoped delete</td>
+<td>Bearer token value. If omitted on create, the worker generates one.</td>
+</tr>
+<tr>
+<td><code>expire</code></td>
+<td style="text-align: right;">No</td>
+<td>Token expiration time in seconds. If omitted, the token does not expire.</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td style="text-align: right;">No</td>
+<td>FastAPI workers to target. Defaults to all workers.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Create, delete, and check tasks return booleans per worker. List tasks return stored token records with username, token, age, creation time, and expiration time.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Store authentication token in FastAPI service database:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastapi<span class="w"> </span>auth<span class="w"> </span>create-token<span class="w"> </span>username<span class="w"> </span>foobar<span class="w"> </span>token<span class="w"> </span>f343ff34r3fg4g5g34gf34g34g3g34g4<span class="w"> </span>expire<span class="w"> </span><span class="m">3600</span>
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastapi-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
-<p><code>expire</code> argument is optional and indicates token expiration time in seconds, if no <code>expire</code> argument provided token does not expire. Multiple tokens can be stored for any given user.</p>
-<p>To list stored tokens for specific user:</p>
-<div class="highlight"><pre><span></span><code>nf#fastapi auth list-tokens username foobar
- worker            username  token                             age             creation                    expires
- fastapi-worker-1  foobar    f343ff34r3fg4g5g34gf34g34g3g34g4  0:01:29.688340  2025-02-16 20:08:51.914919  2025-02-16 21:08:51.914919
- fastapi-worker-1  foobar    888945f96b824bf1b4358de790c452b6  8:08:51.548662  2025-02-16 12:01:30.054597  None
- fastapi-worker-1  foobar    04d685d203274a089c1a7df1395ed7e1  7:58:23.498734  2025-02-16 12:11:58.104525  None
- fastapi-worker-1  foobar    dfea48a8e412451cb2918fd526ab6c99  7:58:22.485560  2025-02-16 12:11:59.117699  None
+<p><code>expire</code> is optional and indicates token expiration time in seconds. If no <code>expire</code> argument is provided, the token does not expire. Multiple tokens can be stored for any given user.</p>
+<p>List stored tokens for a specific user:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastapi<span class="w"> </span>auth<span class="w"> </span>list-tokens<span class="w"> </span>username<span class="w"> </span>foobar
+<span class="w"> </span>worker<span class="w">            </span>username<span class="w">  </span>token<span class="w">                             </span>age<span class="w">             </span>creation<span class="w">                    </span>expires
+<span class="w"> </span>fastapi-worker-1<span class="w">  </span>foobar<span class="w">    </span>f343ff34r3fg4g5g34gf34g34g3g34g4<span class="w">  </span><span class="m">0</span>:01:29.688340<span class="w">  </span><span class="m">2025</span>-02-16<span class="w"> </span><span class="m">20</span>:08:51.914919<span class="w">  </span><span class="m">2025</span>-02-16<span class="w"> </span><span class="m">21</span>:08:51.914919
+<span class="w"> </span>fastapi-worker-1<span class="w">  </span>foobar<span class="w">    </span>888945f96b824bf1b4358de790c452b6<span class="w">  </span><span class="m">8</span>:08:51.548662<span class="w">  </span><span class="m">2025</span>-02-16<span class="w"> </span><span class="m">12</span>:01:30.054597<span class="w">  </span>None
 nf#
 </code></pre></div>
-<p>To list all stored tokens:</p>
-<div class="highlight"><pre><span></span><code>nf#fastapi auth list-tokens
- worker            username  token                             age             creation                    expires
- fastapi-worker-1  pytest    11111111111111111111111111111111  1:26:18.492274  2025-02-16 18:44:18.124019  None
- fastapi-worker-1  foobar    f343ff34r3fg4g5g34gf34g34g3g34g4  0:01:44.701374  2025-02-16 20:08:51.914919  2025-02-16 21:08:51.914919
- fastapi-worker-1  foobar    888945f96b824bf1b4358de790c452b6  8:09:06.561696  2025-02-16 12:01:30.054597  None
- fastapi-worker-1  foobar    04d685d203274a089c1a7df1395ed7e1  7:58:38.511768  2025-02-16 12:11:58.104525  None
- fastapi-worker-1  foobar    dfea48a8e412451cb2918fd526ab6c99  7:58:37.498594  2025-02-16 12:11:59.117699  None
- fastapi-worker-1  foo       4565t4yjn56h534gh35h543h5h45h4h4  0:00:27.641482  2025-02-16 20:10:08.974811  2025-02-16 21:10:08.974812
+<p>List all stored tokens:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastapi<span class="w"> </span>auth<span class="w"> </span>list-tokens
+<span class="w"> </span>worker<span class="w">            </span>username<span class="w">  </span>token<span class="w">                             </span>age<span class="w">             </span>creation<span class="w">                    </span>expires
+<span class="w"> </span>fastapi-worker-1<span class="w">  </span>pytest<span class="w">    </span><span class="m">11111111111111111111111111111111</span><span class="w">  </span><span class="m">1</span>:26:18.492274<span class="w">  </span><span class="m">2025</span>-02-16<span class="w"> </span><span class="m">18</span>:44:18.124019<span class="w">  </span>None
+<span class="w"> </span>fastapi-worker-1<span class="w">  </span>foobar<span class="w">    </span>f343ff34r3fg4g5g34gf34g34g3g34g4<span class="w">  </span><span class="m">0</span>:01:44.701374<span class="w">  </span><span class="m">2025</span>-02-16<span class="w"> </span><span class="m">20</span>:08:51.914919<span class="w">  </span><span class="m">2025</span>-02-16<span class="w"> </span><span class="m">21</span>:08:51.914919
 nf#
 </code></pre></div>
-<p>To delete specific token:</p>
-<div class="highlight"><pre><span></span><code>nf#fastapi auth delete-token token 888945f96b824bf1b4358de790c452b6
-{
-    &quot;fastapi-worker-1&quot;: true
-}
+<p>Delete a specific token:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastapi<span class="w"> </span>auth<span class="w"> </span>delete-token<span class="w"> </span>token<span class="w"> </span>888945f96b824bf1b4358de790c452b6
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastapi-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
-<p>To delete all tokens for given user:</p>
-<div class="highlight"><pre><span></span><code>nf#fastapi auth delete-token username foo
-{
-    &quot;fastapi-worker-1&quot;: true
-}
+<p>Delete all tokens for a given user:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastapi<span class="w"> </span>auth<span class="w"> </span>delete-token<span class="w"> </span>username<span class="w"> </span>foo
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastapi-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
-<p>To check if token is valid:</p>
-<div class="highlight"><pre><span></span><code>nf#fastapi auth check-token token 888945f96b824bf1b4358de790c452b6
-{
-    &quot;fastapi-worker-1&quot;: false
-}
-nf#fastapi auth check-token token f343ff34r3fg4g5g34gf34g34g3g34g4
-{
-    &quot;fastapi-worker-1&quot;: true
-}
+<p>Check if a token is valid:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastapi<span class="w"> </span>auth<span class="w"> </span>check-token<span class="w"> </span>token<span class="w"> </span>888945f96b824bf1b4358de790c452b6
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastapi-worker-1&quot;</span>:<span class="w"> </span><span class="nb">false</span>
+<span class="o">}</span>
+nf#<span class="w"> </span>fastapi<span class="w"> </span>auth<span class="w"> </span>check-token<span class="w"> </span>token<span class="w"> </span>f343ff34r3fg4g5g34gf34g34g3g34g4
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastapi-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - create and list tokens:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastapi&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;foobar&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;expire&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastapi&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_list&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;foobar&quot;</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - check and delete a token:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">check_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastapi&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_check&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">delete_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastapi&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_delete&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">check_result</span><span class="p">)</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">delete_result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="norfab-fastapi-service-auth-tasks-command-shell-reference">NORFAB FastAPI Service Auth Tasks Command Shell Reference<a class="headerlink" href="#norfab-fastapi-service-auth-tasks-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for FastAPI <code>auth</code> tasks:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree fastapi.auth
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>fastapi.auth
 root
-└── fastapi:    FastAPI service
-    └── auth:    Manage auth tokens
-        ├── create-token:    Create authentication token
-        │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── token:    Token string to store, autogenerate if not given
-        │   ├── *username:    Name of the user to store token for
-        │   └── expire:    Seconds before token expire
-        ├── list-tokens:    Retrieve authentication tokens
-        │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   └── username:    Name of the user to list tokens for
-        ├── delete-token:    Delete existing authentication token
-        │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── username:    Name of the user to delete tokens for
-        │   └── token:    Token string to delete
-        └── check-token:    Check if given token valid
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;all&#39;
-            └── *token:    Token string to check
+└──<span class="w"> </span>fastapi:<span class="w">    </span>FastAPI<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>auth:<span class="w">    </span>Manage<span class="w"> </span>auth<span class="w"> </span>tokens
+<span class="w">        </span>├──<span class="w"> </span>create-token:<span class="w">    </span>Create<span class="w"> </span>authentication<span class="w"> </span>token
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>token:<span class="w">    </span>Token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>store,<span class="w"> </span>autogenerate<span class="w"> </span><span class="k">if</span><span class="w"> </span>not<span class="w"> </span>given
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>*username:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>user<span class="w"> </span>to<span class="w"> </span>store<span class="w"> </span>token<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>expire:<span class="w">    </span>Seconds<span class="w"> </span>before<span class="w"> </span>token<span class="w"> </span>expire
+<span class="w">        </span>├──<span class="w"> </span>list-tokens:<span class="w">    </span>Retrieve<span class="w"> </span>authentication<span class="w"> </span>tokens
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>username:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>user<span class="w"> </span>to<span class="w"> </span>list<span class="w"> </span>tokens<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>delete-token:<span class="w">    </span>Delete<span class="w"> </span>existing<span class="w"> </span>authentication<span class="w"> </span>token
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>username:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>user<span class="w"> </span>to<span class="w"> </span>delete<span class="w"> </span>tokens<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>token:<span class="w">    </span>Token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>delete
+<span class="w">        </span>└──<span class="w"> </span>check-token:<span class="w">    </span>Check<span class="w"> </span><span class="k">if</span><span class="w"> </span>given<span class="w"> </span>token<span class="w"> </span>valid
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>*token:<span class="w">    </span>Token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>check
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

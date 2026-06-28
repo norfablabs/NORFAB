@@ -2949,10 +2949,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#agent-chat-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Agent Chat Sample Usage
+        Inputs
       
     </span>
   </a>
@@ -2960,10 +2960,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-agent-chat-shell-reference" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Agent Chat Shell Reference
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-agent-chat-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Agent Chat Command Shell Reference
       
     </span>
   </a>
@@ -6038,10 +6060,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#agent-chat-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Agent Chat Sample Usage
+        Inputs
       
     </span>
   </a>
@@ -6049,10 +6071,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-agent-chat-shell-reference" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Agent Chat Shell Reference
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-agent-chat-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Agent Chat Command Shell Reference
       
     </span>
   </a>
@@ -6102,23 +6146,110 @@
 
 
 <h1 id="agent-service-chat-task">Agent Service Chat Task<a class="headerlink" href="#agent-service-chat-task" title="Permanent link">¤</a></h1>
-<h2 id="agent-chat-sample-usage">Agent Chat Sample Usage<a class="headerlink" href="#agent-chat-sample-usage" title="Permanent link">¤</a></h2>
-<h2 id="norfab-agent-chat-shell-reference">NORFAB Agent Chat Shell Reference<a class="headerlink" href="#norfab-agent-chat-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Agent <code>chat</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree agent
+<blockquote>
+<p>task api name: <code>invoke</code></p>
+</blockquote>
+<p>Invokes an Agent worker with user instructions. The task is commonly used as an interactive chat surface, but the API task name is <code>invoke</code>.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>instructions</code></td>
+<td style="text-align: right;">Yes</td>
+<td>User instructions to send to the agent</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td style="text-align: right;">No</td>
+<td>Agent name to invoke, default <code>NorFab</code></td>
+</tr>
+<tr>
+<td><code>verbose_result</code></td>
+<td style="text-align: right;">No</td>
+<td>Return the full message payload instead of only the final response</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>By default, returns the final agent response text. With <code>verbose_result=True</code>, returns the full agent invocation payload.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Ask the default agent a question:</p>
+<div class="highlight"><pre><span></span><code>nf#agent<span class="w"> </span>invoke<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Summarize the current NorFab inventory&quot;</span>
+</code></pre></div>
+<p>Invoke a named agent:</p>
+<div class="highlight"><pre><span></span><code>nf#agent<span class="w"> </span>invoke<span class="w"> </span>name<span class="w"> </span>NorFab<span class="w"> </span>instructions<span class="w"> </span><span class="s2">&quot;Check whether any workers are unhealthy&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;agent&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;invoke&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;instructions&quot;</span><span class="p">:</span> <span class="s2">&quot;Summarize the current NorFab inventory&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle with a named agent:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;agent&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;invoke&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NorFab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;instructions&quot;</span><span class="p">:</span> <span class="s2">&quot;Check whether any workers are unhealthy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;verbose_result&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="norfab-agent-chat-command-shell-reference">NORFAB Agent Chat Command Shell Reference<a class="headerlink" href="#norfab-agent-chat-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Agent <code>invoke</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>agent
 root
-└── agent:    AI Agent service
-    ├── timeout:    Job timeout
-    ├── workers:    Filter worker to target, default &#39;all&#39;
-    ├── show:    Show Agent service parameters
-    │   ├── inventory:    show agent inventory data
-    │   ├── version:    show agent service version report
-    │   └── status:    show agent status
-    ├── chat:    Chat with the agent
-    └── progress:    Emit execution progress, default &#39;True&#39;
+└──<span class="w"> </span>agent:<span class="w">    </span>AI<span class="w"> </span>Agent<span class="w"> </span>service
+<span class="w">    </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">    </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">    </span>├──<span class="w"> </span>show:<span class="w">    </span>Show<span class="w"> </span>Agent<span class="w"> </span>service<span class="w"> </span>parameters
+<span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>inventory:<span class="w">    </span>show<span class="w"> </span>agent<span class="w"> </span>inventory<span class="w"> </span>data
+<span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>version:<span class="w">    </span>show<span class="w"> </span>agent<span class="w"> </span>service<span class="w"> </span>version<span class="w"> </span>report
+<span class="w">    </span>│<span class="w">   </span>└──<span class="w"> </span>status:<span class="w">    </span>show<span class="w"> </span>agent<span class="w"> </span>status
+<span class="w">    </span>├──<span class="w"> </span>invoke:<span class="w">    </span>Invoke<span class="w"> </span>an<span class="w"> </span>agent<span class="w"> </span>to<span class="w"> </span>chat<span class="w"> </span>or<span class="w"> </span>run<span class="w"> </span>a<span class="w"> </span>task
+<span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>instructions:<span class="w">    </span>Provide<span class="w"> </span>instructions
+<span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>name:<span class="w">    </span>Agent<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>interact<span class="w"> </span>with
+<span class="w">    </span>│<span class="w">   </span>└──<span class="w"> </span>progress:<span class="w">    </span>Emit<span class="w"> </span>execution<span class="w"> </span>progress,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">    </span>└──<span class="w"> </span>progress:<span class="w">    </span>Emit<span class="w"> </span>execution<span class="w"> </span>progress,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
-<p><code>*</code> - mandatory/required command argument</p>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 

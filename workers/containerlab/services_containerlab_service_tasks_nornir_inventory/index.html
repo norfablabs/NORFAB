@@ -1120,10 +1120,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-nornir-inventory-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Nornir Inventory Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6060,10 +6082,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-nornir-inventory-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Nornir Inventory Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6135,7 +6179,31 @@
 <li><strong>Platform Mapping</strong>: Maps containerlab node kinds to Netmiko SSH platform types.</li>
 <li><strong>Default Credentials</strong>: Optionally includes default credentials for containerlab nodes.</li>
 </ul>
-<h2 id="containerlab-nornir-inventory-task-sample-usage">Containerlab Nornir Inventory Task Sample Usage<a class="headerlink" href="#containerlab-nornir-inventory-task-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lab_name</code></td>
+<td style="text-align: right;">No</td>
+<td>Lab name to build inventory for</td>
+</tr>
+<tr>
+<td><code>groups</code></td>
+<td style="text-align: right;">No</td>
+<td>Groups to include in generated host inventory</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns a Nornir-compatible inventory dictionary keyed by host name.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Below is an example of how to use the Containerlab <code>get_nornir_inventory</code> task to generate an inventory.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
@@ -6145,79 +6213,100 @@
 <p><img alt="Containerlab Nornir Inventory Demo" src="../../../images/containerlab/containerlab_nornir_inventory_demo.gif" /></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#containerlab get-nornir-inventory lab-name three-routers-lab
---------------------------------------------- Job Events -----------------------------------------------
-05-May-2025 21:14:09.594 fc13d3b11ad54c2fb2330af20a7ceacd job started
-05-May-2025 21:14:09.926 fc13d3b11ad54c2fb2330af20a7ceacd job completed in 0.332 seconds
+<div class="highlight"><pre><span></span><code>nf#containerlab<span class="w"> </span>get-nornir-inventory<span class="w"> </span>lab-name<span class="w"> </span>three-routers-lab
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:14:09.594<span class="w"> </span>fc13d3b11ad54c2fb2330af20a7ceacd<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">21</span>:14:09.926<span class="w"> </span>fc13d3b11ad54c2fb2330af20a7ceacd<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.332<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
 containerlab-worker-1:
-    ----------
-    hosts:
-        ----------
-        r2:
-            ----------
-            hostname:
-                192.168.1.130
-            port:
-                12203
-            groups:
-            platform:
-                arista_eos
-            username:
-                admin
-            password:
-                admin
-        r3:
-            ----------
-            hostname:
-                192.168.1.130
-            port:
-                12204
-            groups:
-            platform:
-            username:
-                admin
-            password:
-                admin
-        r1:
-            ----------
-            hostname:
-                192.168.1.130
-            port:
-                12202
-            groups:
-            platform:
-                arista_eos
-            username:
-                admin
-            password:
-                admin
+<span class="w">    </span>----------
+<span class="w">    </span>hosts:
+<span class="w">        </span>----------
+<span class="w">        </span>r2:
+<span class="w">            </span>----------
+<span class="w">            </span>hostname:
+<span class="w">                </span><span class="m">192</span>.168.1.130
+<span class="w">            </span>port:
+<span class="w">                </span><span class="m">12203</span>
+<span class="w">            </span>groups:
+<span class="w">            </span>platform:
+<span class="w">                </span>arista_eos
+<span class="w">            </span>username:
+<span class="w">                </span>admin
+<span class="w">            </span>password:
+<span class="w">                </span>admin
+<span class="w">        </span>r3:
+<span class="w">            </span>----------
+<span class="w">            </span>hostname:
+<span class="w">                </span><span class="m">192</span>.168.1.130
+<span class="w">            </span>port:
+<span class="w">                </span><span class="m">12204</span>
+<span class="w">            </span>groups:
+<span class="w">            </span>platform:
+<span class="w">            </span>username:
+<span class="w">                </span>admin
+<span class="w">            </span>password:
+<span class="w">                </span>admin
+<span class="w">        </span>r1:
+<span class="w">            </span>----------
+<span class="w">            </span>hostname:
+<span class="w">                </span><span class="m">192</span>.168.1.130
+<span class="w">            </span>port:
+<span class="w">                </span><span class="m">12202</span>
+<span class="w">            </span>groups:
+<span class="w">            </span>platform:
+<span class="w">                </span>arista_eos
+<span class="w">            </span>username:
+<span class="w">                </span>admin
+<span class="w">            </span>password:
+<span class="w">                </span>admin
 nf#
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
+            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;containerlab&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
     <span class="p">)</span>
 
-    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6226,16 +6315,16 @@ nf#
 </div>
 <h2 id="norfab-containerlab-cli-shell-reference">NORFAB Containerlab CLI Shell Reference<a class="headerlink" href="#norfab-containerlab-cli-shell-reference" title="Permanent link">¤</a></h2>
 <p>Below are the commands supported by the <code>get_nornir_inventory</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree containerlab.get-nornir-inventory
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>containerlab.get-nornir-inventory
 root
-└── containerlab:    Containerlab service
-    └── get-nornir-inventory:    Get nornir inventory for a given lab
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── verbose-result:    Control output details, default &#39;False&#39;
-        ├── lab-name:    Lab name to get Nornir inventory for
-        ├── progress:    Display progress events, default &#39;True&#39;
-        └── groups:    List of groups to include in host&#39;s inventory
+└──<span class="w"> </span>containerlab:<span class="w">    </span>Containerlab<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get-nornir-inventory:<span class="w">    </span>Get<span class="w"> </span>nornir<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span><span class="w"> </span>a<span class="w"> </span>given<span class="w"> </span>lab
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Lab<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>get<span class="w"> </span>Nornir<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>└──<span class="w"> </span>groups:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>include<span class="w"> </span><span class="k">in</span><span class="w"> </span>host<span class="err">&#39;</span>s<span class="w"> </span>inventory
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

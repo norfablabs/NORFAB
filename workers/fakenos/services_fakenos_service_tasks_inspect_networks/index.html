@@ -1398,10 +1398,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-inspect-networks-task-arguments" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Inspect Networks Task Arguments
+        Inputs
       
     </span>
   </a>
@@ -1409,15 +1409,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-inspect-networks-task-return-data" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Inspect Networks Task Return Data
+        Output
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="FakeNOS Inspect Networks Task Return Data">
+    <nav class="md-nav" aria-label="Output">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1444,6 +1444,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
   
 </li>
       
@@ -6099,10 +6110,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-inspect-networks-task-arguments" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Inspect Networks Task Arguments
+        Inputs
       
     </span>
   </a>
@@ -6110,15 +6121,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-inspect-networks-task-return-data" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Inspect Networks Task Return Data
+        Output
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="FakeNOS Inspect Networks Task Return Data">
+    <nav class="md-nav" aria-label="Output">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -6145,6 +6156,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
   
 </li>
       
@@ -6213,7 +6235,7 @@
 <li><strong>Detailed View</strong>: When <code>details=True</code>, queries each child process for its host list and enriches the result with process-level metrics from <code>psutil</code> (CPU, memory, uptime, thread count).</li>
 <li><strong>Selective Query</strong>: Optionally scope the result to a single named network.</li>
 </ul>
-<h2 id="fakenos-inspect-networks-task-arguments">FakeNOS Inspect Networks Task Arguments<a class="headerlink" href="#fakenos-inspect-networks-task-arguments" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
 <table>
 <thead>
 <tr>
@@ -6238,7 +6260,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="fakenos-inspect-networks-task-return-data">FakeNOS Inspect Networks Task Return Data<a class="headerlink" href="#fakenos-inspect-networks-task-return-data" title="Permanent link">¤</a></h2>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <h3 id="detailed-mode-detailstrue">Detailed mode (<code>details=True</code>)<a class="headerlink" href="#detailed-mode-detailstrue" title="Permanent link">¤</a></h3>
 <p>Returns a dict keyed by network name. Each value is a dict with the following fields:</p>
 <table>
@@ -6308,18 +6330,71 @@
 </div>
 <h3 id="summary-mode-detailsfalse">Summary mode (<code>details=False</code>)<a class="headerlink" href="#summary-mode-detailsfalse" title="Permanent link">¤</a></h3>
 <p>Returns a list of strings — one entry per running network name.</p>
-<h2 id="fakenos-inspect-networks-command-shell-reference">FakeNOS Inspect Networks Command Shell Reference<a class="headerlink" href="#fakenos-inspect-networks-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>create_prefix</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree show.fakenos.networks
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Show all network details:</p>
+<div class="highlight"><pre><span></span><code>nf#show<span class="w"> </span>fakenos<span class="w"> </span>networks<span class="w"> </span>details
+</code></pre></div>
+<p>Show one network:</p>
+<div class="highlight"><pre><span></span><code>nf#show<span class="w"> </span>fakenos<span class="w"> </span>networks<span class="w"> </span>network<span class="w"> </span>lab1<span class="w"> </span>details
+</code></pre></div>
+<p>Show only running network names:</p>
+<div class="highlight"><pre><span></span><code>nf#show<span class="w"> </span>fakenos<span class="w"> </span>networks
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-R - required field, M - supports multiline input, D - dynamic key
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;inspect_networks&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - inspect one network:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;inspect_networks&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;lab1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="fakenos-inspect-networks-command-shell-reference">FakeNOS Inspect Networks Command Shell Reference<a class="headerlink" href="#fakenos-inspect-networks-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for FakeNOS <code>inspect_networks</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>show.fakenos.networks
+
+R<span class="w"> </span>-<span class="w"> </span>required<span class="w"> </span>field,<span class="w"> </span>M<span class="w"> </span>-<span class="w"> </span>supports<span class="w"> </span>multiline<span class="w"> </span>input,<span class="w"> </span>D<span class="w"> </span>-<span class="w"> </span>dynamic<span class="w"> </span>key
 
 root
-└── show:    NorFab show commands
-    └── fakenos:    Show FakeNOS service
-        └── networks:    show FakeNOS networks details
-            ├── network:    FakeNOS network name to show; shows all networks if omitted
-            └── details:    show network details, default &#39;False&#39;
+└──<span class="w"> </span>show:<span class="w">    </span>NorFab<span class="w"> </span>show<span class="w"> </span>commands
+<span class="w">    </span>└──<span class="w"> </span>fakenos:<span class="w">    </span>Show<span class="w"> </span>FakeNOS<span class="w"> </span>service
+<span class="w">        </span>└──<span class="w"> </span>networks:<span class="w">    </span>show<span class="w"> </span>FakeNOS<span class="w"> </span>networks<span class="w"> </span>details
+<span class="w">            </span>├──<span class="w"> </span>network:<span class="w">    </span>FakeNOS<span class="w"> </span>network<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>show<span class="p">;</span><span class="w"> </span>shows<span class="w"> </span>all<span class="w"> </span>networks<span class="w"> </span><span class="k">if</span><span class="w"> </span>omitted
+<span class="w">            </span>└──<span class="w"> </span>details:<span class="w">    </span>show<span class="w"> </span>network<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

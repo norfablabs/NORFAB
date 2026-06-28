@@ -2139,10 +2139,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-devices-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Devices Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6038,10 +6071,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-devices-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Devices Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6101,25 +6167,146 @@
   
 
 
-<h1 id="netbox-get-devices-task">Netbox Get Devices Task<a class="headerlink" href="#netbox-get-devices-task" title="Permanent link">¤</a></h1>
+<h1 id="netbox-get-devices-task">NetBox Get Devices Task<a class="headerlink" href="#netbox-get-devices-task" title="Permanent link">¤</a></h1>
 <blockquote>
 <p>task api name: <code>get_devices</code></p>
 </blockquote>
-<h2 id="get-devices-sample-usage">Get Devices Sample Usage<a class="headerlink" href="#get-devices-sample-usage" title="Permanent link">¤</a></h2>
+<p>Retrieves device records from NetBox using the REST API. Results are keyed by device name and include the full device payload returned by pynetbox, with site data expanded for each device.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filters</code></td>
+<td style="text-align: right;">No</td>
+<td>List of NetBox device filter dictionaries</td>
+</tr>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">No</td>
+<td>Device names to retrieve</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return the merged filters without querying NetBox</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td style="text-align: right;">No</td>
+<td>Cache usage mode: <code>True</code>, <code>False</code>, <code>refresh</code>, or <code>force</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Normal mode returns a dictionary keyed by device name:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Active&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;eos&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;primary_ip4&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.11/32&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li>When both <code>devices</code> and <code>filters</code> are provided, device names are merged into the filter list as a NetBox <code>name</code> filter.</li>
+<li><code>cache=True</code> uses cached device data when <code>last_updated</code> matches NetBox. <code>cache="force"</code> uses cached data without the freshness check.</li>
+<li><code>cache=False</code> skips cache reads and writes. <code>cache="refresh"</code> fetches fresh data and overwrites cache.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Get specific devices:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>ceos-leaf-2
+</code></pre></div>
+<p>Filter devices using a NetBox filter dictionary:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">&#39;[{&quot;site&quot;: &quot;lab&quot;, &quot;status&quot;: &quot;active&quot;}]&#39;</span>
+</code></pre></div>
+<p>Preview the merged filters without querying NetBox:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>dry-run
+</code></pre></div>
+<p>Refresh cached device data:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>cache<span class="w"> </span>refresh
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_devices&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_devices&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">}],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_devices&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="norfab-netbox-get-devices-command-shell-reference">NORFAB Netbox Get Devices Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-devices-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_devices</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.devices
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.get.devices
 root
-└── netbox:    Netbox service
-    └── get:    Query data from Netbox
-        └── devices:    Query Netbox devices data
-            ├── instance:    Netbox instance name to target
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── timeout:    Job timeout
-            ├── filters:    List of device filters dictionaries as a JSON string, examples: [{&quot;q&quot;: &quot;ceos1&quot;}]
-            ├── devices:    Device names to query data for
-            ├── dry-run:    Only return query content, do not run it
-            └── cache:    How to use cache, default &#39;True&#39;
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>devices:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>devices<span class="w"> </span>data
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>filters:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>filters<span class="w"> </span>dictionaries<span class="w"> </span>as<span class="w"> </span>a<span class="w"> </span>JSON<span class="w"> </span>string,<span class="w"> </span>examples:<span class="w"> </span><span class="o">[{</span><span class="s2">&quot;q&quot;</span>:<span class="w"> </span><span class="s2">&quot;ceos1&quot;</span><span class="o">}]</span>
+<span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>Device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
+<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

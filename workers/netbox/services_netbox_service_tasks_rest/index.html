@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#netbox-rest-inventory-task" class="md-skip">
+        <a href="#netbox-rest-task" class="md-skip">
           Skip to content
         </a>
       
@@ -2111,10 +2111,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#rest-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rest Task Sample Usage
+        Inputs
       
     </span>
   </a>
@@ -2122,10 +2122,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-grapql-command-shell-reference" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox GrapQL Command Shell Reference
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6038,10 +6060,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#rest-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rest Task Sample Usage
+        Inputs
       
     </span>
   </a>
@@ -6049,10 +6071,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-grapql-command-shell-reference" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox GrapQL Command Shell Reference
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6101,13 +6145,100 @@
   
 
 
-<h1 id="netbox-rest-inventory-task">Netbox Rest Inventory Task<a class="headerlink" href="#netbox-rest-inventory-task" title="Permanent link">¤</a></h1>
+<h1 id="netbox-rest-task">Netbox REST Task<a class="headerlink" href="#netbox-rest-task" title="Permanent link">¤</a></h1>
 <blockquote>
 <p>task api name: <code>rest</code></p>
 </blockquote>
-<h2 id="rest-task-sample-usage">Rest Task Sample Usage<a class="headerlink" href="#rest-task-sample-usage" title="Permanent link">¤</a></h2>
-<h2 id="norfab-netbox-grapql-command-shell-reference">NORFAB Netbox GrapQL Command Shell Reference<a class="headerlink" href="#norfab-netbox-grapql-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>rest</code> task:</p>
+<p>Sends a direct HTTP request to the configured NetBox REST API. Use this task when a dedicated NetBox worker task does not exist for the endpoint you need.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api</code></td>
+<td style="text-align: right;">Yes</td>
+<td>NetBox API path under <code>/api</code>, for example <code>dcim/devices</code></td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td style="text-align: right;">No</td>
+<td>HTTP method to use, default <code>get</code></td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>**kwargs</code></td>
+<td style="text-align: right;">No</td>
+<td>Additional request arguments passed to <code>requests</code>, such as <code>params</code>, <code>json</code>, or <code>data</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns the decoded JSON response from NetBox when possible. If the response is not JSON, the task returns response text or the HTTP status code.</p>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li><code>api</code> is joined under the configured NetBox URL as <code>/api/&lt;api&gt;/</code>.</li>
+<li>Request headers, token, SSL verification, and default timeout are set by the worker.</li>
+<li>On HTTP errors, the task returns the response status code in <code>result</code>.</li>
+<li>The current NFCLI command model does not expose <code>rest</code>, so use the Python API or other task surfaces.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rest&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;api&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim/devices&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rest&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;api&quot;</span><span class="p">:</span> <span class="s2">&quot;extras/tags&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;post&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;json&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;automation-managed&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;automation-managed&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 

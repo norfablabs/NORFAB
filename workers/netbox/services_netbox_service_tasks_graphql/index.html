@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#netbox-grapql-inventory-task" class="md-skip">
+        <a href="#netbox-graphql-task" class="md-skip">
           Skip to content
         </a>
       
@@ -2083,10 +2083,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#grapql-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GrapQL Sample Usage
+        Inputs
       
     </span>
   </a>
@@ -2094,10 +2094,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-grapql-command-shell-reference" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox GrapQL Command Shell Reference
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-graphql-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox GraphQL Command Shell Reference
       
     </span>
   </a>
@@ -6066,10 +6099,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#grapql-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GrapQL Sample Usage
+        Inputs
       
     </span>
   </a>
@@ -6077,10 +6110,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-grapql-command-shell-reference" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox GrapQL Command Shell Reference
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-graphql-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox GraphQL Command Shell Reference
       
     </span>
   </a>
@@ -6157,13 +6223,168 @@
   
 
 
-<h1 id="netbox-grapql-inventory-task">Netbox GrapQL Inventory Task<a class="headerlink" href="#netbox-grapql-inventory-task" title="Permanent link">¤</a></h1>
+<h1 id="netbox-graphql-task">Netbox GraphQL Task<a class="headerlink" href="#netbox-graphql-task" title="Permanent link">¤</a></h1>
 <blockquote>
 <p>task api name: <code>graphql</code></p>
 </blockquote>
-<h2 id="grapql-sample-usage">GrapQL Sample Usage<a class="headerlink" href="#grapql-sample-usage" title="Permanent link">¤</a></h2>
-<h2 id="norfab-netbox-grapql-command-shell-reference">NORFAB Netbox GrapQL Command Shell Reference<a class="headerlink" href="#norfab-netbox-grapql-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>Runs GraphQL queries against a NetBox instance. The task can build a query from <code>obj</code>, <code>filters</code>, and <code>fields</code>, run multiple aliased queries from <code>queries</code>, or send a complete <code>query_string</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>graphql</code> task is marked deprecated in code in favour of the lower-level <code>netbox_graphql</code> helper. Existing callers can still use <code>graphql</code>, but new internal code should prefer <code>netbox_graphql</code> where appropriate.</p>
+</div>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>obj</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>NetBox GraphQL object name, used with <code>filters</code> and <code>fields</code></td>
+</tr>
+<tr>
+<td><code>filters</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>GraphQL filters as a dictionary or raw filter string</td>
+</tr>
+<tr>
+<td><code>fields</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>GraphQL fields to return</td>
+</tr>
+<tr>
+<td><code>queries</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Dictionary of query definitions keyed by alias</td>
+</tr>
+<tr>
+<td><code>query_string</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Complete GraphQL query string to send as-is</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return the generated query payload without executing it</td>
+</tr>
+</tbody>
+</table>
+<p>Provide one of these input forms:</p>
+<ul>
+<li><code>obj</code>, <code>filters</code>, and <code>fields</code></li>
+<li><code>queries</code></li>
+<li><code>query_string</code></li>
+</ul>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Normal mode returns the GraphQL response payload from NetBox. Dry-run mode returns the HTTP payload that would be sent:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://netbox.example/graphql/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">query</span><span class="se">\&quot;</span><span class="s2">: </span><span class="se">\&quot;</span><span class="s2">query {...}</span><span class="se">\&quot;</span><span class="s2">}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Token ...123456&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;verify&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li>For generated queries, NetBox version must be <code>4.4.0</code> or newer.</li>
+<li><code>fields</code> is a comma-separated string in NFCLI and a list in the Python API.</li>
+<li>Use <code>query_string</code> when you need full control over the GraphQL document.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Query devices by generated object, filter, and fields:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>obj<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: {&quot;exact&quot;: &quot;ceos-leaf-1&quot;}}&#39;</span><span class="w"> </span>fields<span class="w"> </span>name,status,platform
+</code></pre></div>
+<p>Preview the generated GraphQL payload:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>obj<span class="w"> </span>devices<span class="w"> </span>filters<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: {&quot;exact&quot;: &quot;ceos-leaf-1&quot;}}&#39;</span><span class="w"> </span>fields<span class="w"> </span>name,status<span class="w"> </span>dry-run
+</code></pre></div>
+<p>Run multiple aliased queries:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>graphql<span class="w"> </span>queries<span class="w"> </span><span class="s1">&#39;{&quot;leafs&quot;: {&quot;obj&quot;: &quot;devices&quot;, &quot;filters&quot;: {&quot;role&quot;: {&quot;exact&quot;: &quot;leaf&quot;}}, &quot;fields&quot;: [&quot;name&quot;, &quot;status&quot;]}}&#39;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;graphql&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;exact&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">}},</span>
+            <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;platform&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;graphql&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;obj&quot;</span><span class="p">:</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;exact&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">}},</span>
+            <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;graphql&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;query_string&quot;</span><span class="p">:</span> <span class="s2">&quot;query { devices { name status } }&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="norfab-netbox-graphql-command-shell-reference">NORFAB Netbox GraphQL Command Shell Reference<a class="headerlink" href="#norfab-netbox-graphql-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>graphql</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.graphql
+root
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>graphql:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>GraphQL<span class="w"> </span>API
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Return<span class="w"> </span>query<span class="w"> </span>payload<span class="w"> </span>without<span class="w"> </span>executing<span class="w"> </span>it
+<span class="w">        </span>├──<span class="w"> </span>obj:<span class="w">    </span>NetBox<span class="w"> </span>GraphQL<span class="w"> </span>object<span class="w"> </span>name<span class="w"> </span>or<span class="w"> </span>query<span class="w"> </span>object
+<span class="w">        </span>├──<span class="w"> </span>filters:<span class="w">    </span>JSON<span class="w"> </span>dictionary<span class="w"> </span>or<span class="w"> </span>raw<span class="w"> </span>filter<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>by
+<span class="w">        </span>├──<span class="w"> </span>fields:<span class="w">    </span>Comma-separated<span class="w"> </span>GraphQL<span class="w"> </span>fields<span class="w"> </span>to<span class="w"> </span><span class="k">return</span>
+<span class="w">        </span>├──<span class="w"> </span>queries:<span class="w">    </span>JSON<span class="w"> </span>dictionary<span class="w"> </span>keyed<span class="w"> </span>by<span class="w"> </span>GraphQL<span class="w"> </span>aliases
+<span class="w">        </span>└──<span class="w"> </span>query-string:<span class="w">    </span>Complete<span class="w"> </span>GraphQL<span class="w"> </span>query<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>send<span class="w"> </span>as<span class="w"> </span>is
+nf#
+</code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 <h3 id="graphql">graphql<a class="headerlink" href="#graphql" title="Permanent link">¤</a></h3>
 

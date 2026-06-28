@@ -1008,10 +1008,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-destroy-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Destroy Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6060,10 +6082,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-destroy-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Destroy Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6134,7 +6178,26 @@
 <li><strong>Lab Cleanup</strong>: Removes all containers, networks, and other resources associated with the specified lab.</li>
 <li><strong>Error Handling</strong>: Provides detailed error messages if the lab cannot be found or destroyed.</li>
 </ul>
-<h2 id="containerlab-destroy-task-sample-usage">Containerlab Destroy Task Sample Usage<a class="headerlink" href="#containerlab-destroy-task-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lab_name</code></td>
+<td style="text-align: right;">No</td>
+<td>Lab name to destroy</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns a per-lab boolean result indicating whether the lab was destroyed.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Below is an example of how to use the Containerlab destroy task to clean up a lab.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
@@ -6144,49 +6207,69 @@
 <p><img alt="Containerlab Destroy Demo" src="../../../images/containerlab/containerlab_destroy_demo.gif" /></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#containerlab destroy lab-name three-routers-lab
---------------------------------------------- Job Events -----------------------------------------------
-05-May-2025 20:45:48.745 831d3d485489476c98159f8d4dbf7ec2 job started
-05-May-2025 20:45:48.805 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:48 INFO Parsing &amp; checking topology file=three-routers-topology.yaml
-05-May-2025 20:45:48.818 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:48 INFO Parsing &amp; checking topology file=three-routers-topology.yaml
-05-May-2025 20:45:48.831 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:48 INFO Destroying lab name=three-routers-lab
-05-May-2025 20:45:50.129 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:50 INFO Removed container name=clab-three-routers-lab-r2
-05-May-2025 20:45:50.348 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:50 INFO Removed container name=clab-three-routers-lab-r3
-05-May-2025 20:45:50.390 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:50 INFO Removed container name=clab-three-routers-lab-r1
-05-May-2025 20:45:50.401 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:50 INFO Removing host entries path=/etc/hosts
-05-May-2025 20:45:50.412 INFO containerlab-worker-1 running containerlab.destroy_lab  - 20:45:50 INFO Removing SSH config path=/etc/ssh/ssh_config.d/clab-three-routers-lab.conf
-05-May-2025 20:45:50.963 831d3d485489476c98159f8d4dbf7ec2 job completed in 2.218 seconds
+<div class="highlight"><pre><span></span><code>nf#containerlab<span class="w"> </span>destroy<span class="w"> </span>lab-name<span class="w"> </span>three-routers-lab
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:48.745<span class="w"> </span>831d3d485489476c98159f8d4dbf7ec2<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:48.805<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:48<span class="w"> </span>INFO<span class="w"> </span>Parsing<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>checking<span class="w"> </span>topology<span class="w"> </span><span class="nv">file</span><span class="o">=</span>three-routers-topology.yaml
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:48.818<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:48<span class="w"> </span>INFO<span class="w"> </span>Parsing<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>checking<span class="w"> </span>topology<span class="w"> </span><span class="nv">file</span><span class="o">=</span>three-routers-topology.yaml
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:48.831<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:48<span class="w"> </span>INFO<span class="w"> </span>Destroying<span class="w"> </span>lab<span class="w"> </span><span class="nv">name</span><span class="o">=</span>three-routers-lab
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:50.129<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:50<span class="w"> </span>INFO<span class="w"> </span>Removed<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>clab-three-routers-lab-r2
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:50.348<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:50<span class="w"> </span>INFO<span class="w"> </span>Removed<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>clab-three-routers-lab-r3
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:50.390<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:50<span class="w"> </span>INFO<span class="w"> </span>Removed<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>clab-three-routers-lab-r1
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:50.401<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:50<span class="w"> </span>INFO<span class="w"> </span>Removing<span class="w"> </span>host<span class="w"> </span>entries<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/etc/hosts
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:50.412<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.destroy_lab<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:45:50<span class="w"> </span>INFO<span class="w"> </span>Removing<span class="w"> </span>SSH<span class="w"> </span>config<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/etc/ssh/ssh_config.d/clab-three-routers-lab.conf
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:45:50.963<span class="w"> </span>831d3d485489476c98159f8d4dbf7ec2<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">2</span>.218<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
 containerlab-worker-1:
-    ----------
-    three-routers-lab:
-        True
+<span class="w">    </span>----------
+<span class="w">    </span>three-routers-lab:
+<span class="w">        </span>True
 nf#
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="s2">&quot;destroy_lab&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="p">},</span>
     <span class="p">)</span>
 
-    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;destroy_lab&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6195,15 +6278,15 @@ nf#
 </div>
 <h2 id="norfab-containerlab-cli-shell-reference">NORFAB Containerlab CLI Shell Reference<a class="headerlink" href="#norfab-containerlab-cli-shell-reference" title="Permanent link">¤</a></h2>
 <p>Below are the commands supported by the <code>destroy_lab</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree containerlab.destroy
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>containerlab.destroy
 root
-└── containerlab:    Containerlab service
-    └── destroy:    The destroy command destroys a lab referenced by its name
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── verbose-result:    Control output details, default &#39;False&#39;
-        ├── lab-name:    Lab name to destroy
-        └── progress:    Display progress events, default &#39;True&#39;
+└──<span class="w"> </span>containerlab:<span class="w">    </span>Containerlab<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>destroy:<span class="w">    </span>The<span class="w"> </span>destroy<span class="w"> </span><span class="nb">command</span><span class="w"> </span>destroys<span class="w"> </span>a<span class="w"> </span>lab<span class="w"> </span>referenced<span class="w"> </span>by<span class="w"> </span>its<span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Lab<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>destroy
+<span class="w">        </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

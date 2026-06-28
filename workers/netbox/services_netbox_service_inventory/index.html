@@ -6067,7 +6067,7 @@
 
 
 <h1 id="netbox-worker-inventory">Netbox Worker Inventory<a class="headerlink" href="#netbox-worker-inventory" title="Permanent link">¤</a></h1>
-<p>Content of <code>inventory.yaml</code> need to be updated to include Netbox worker details:</p>
+<p>Update <code>inventory.yaml</code> to include NetBox worker details:</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">broker</span><span class="p">:</span><span class="w"> </span>
 <span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span><span class="w"> </span>
 <span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5z1:yW}]n?UXhGmz+5CeHN1&gt;:S9k!eCh6JyIhJqO&quot;</span>
@@ -6122,7 +6122,7 @@ nfcli --show-broker-shared-key
 <tr>
 <td><code>service</code></td>
 <td><code>netbox</code></td>
-<td>Worker service type. Must be set to <code>netbox</code> for Netbox workers.</td>
+<td>Worker service type. Must be set to <code>netbox</code> for NetBox workers.</td>
 </tr>
 <tr>
 <td><code>cache_use</code></td>
@@ -6167,7 +6167,7 @@ nfcli --show-broker-shared-key
 <tr>
 <td><code>instances</code></td>
 <td>required</td>
-<td>Mapping of Netbox instance names to connection parameters. At least one instance is required.</td>
+<td>Mapping of NetBox instance names to connection parameters. At least one instance is required.</td>
 </tr>
 </tbody>
 </table>
@@ -6184,12 +6184,12 @@ nfcli --show-broker-shared-key
 <tr>
 <td><code>default</code></td>
 <td><code>False</code></td>
-<td>Marks this instance as the default Netbox instance. If no instance has <code>default: True</code>, the last configured instance is used.</td>
+<td>Marks this instance as the default NetBox instance. If no instance has <code>default: True</code>, the last configured instance is used.</td>
 </tr>
 <tr>
 <td><code>url</code></td>
 <td>required</td>
-<td>Base URL for the Netbox instance. Trailing slashes are removed automatically.</td>
+<td>Base URL for the NetBox instance. Trailing slashes are removed automatically.</td>
 </tr>
 <tr>
 <td><code>token</code></td>

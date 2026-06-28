@@ -2447,6 +2447,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#interface-name-range-expansion" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2519,41 +2541,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-create-device-interfaces-command-shell-reference" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Create Device Interfaces Command Shell Reference
+        Examples
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Usage Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-interface-creation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic Interface Creation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -2584,6 +2578,17 @@
     <span class="md-ellipsis">
       
         Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-create-device-interfaces-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox Create Device Interfaces Command Shell Reference
       
     </span>
   </a>
@@ -6160,6 +6165,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#interface-name-range-expansion" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6232,41 +6259,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-create-device-interfaces-command-shell-reference" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Create Device Interfaces Command Shell Reference
+        Examples
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Usage Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-interface-creation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic Interface Creation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -6297,6 +6296,17 @@
     <span class="md-ellipsis">
       
         Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#norfab-netbox-create-device-interfaces-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NORFAB Netbox Create Device Interfaces Command Shell Reference
       
     </span>
   </a>
@@ -6355,6 +6365,71 @@
 <p class="admonition-title">Tip</p>
 <p>The <code>create_device_interfaces</code> task automatically skips interfaces that already exist, preventing duplicate creation attempts and allowing for safe re-runs of automation tasks.</p>
 </div>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Device names or device objects to create interfaces for</td>
+</tr>
+<tr>
+<td><code>interface_name</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Interface name, list of names, or range pattern to create</td>
+</tr>
+<tr>
+<td><code>interfaces_data</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Per-interface payload dictionaries; each item must include <code>name</code></td>
+</tr>
+<tr>
+<td><code>interface_type</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox interface type, default <code>other</code></td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td style="text-align: right;">No</td>
+<td>Interface description</td>
+</tr>
+<tr>
+<td><code>speed</code></td>
+<td style="text-align: right;">No</td>
+<td>Interface speed in Kbit/s</td>
+</tr>
+<tr>
+<td><code>mtu</code></td>
+<td style="text-align: right;">No</td>
+<td>Interface MTU in bytes</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox Branching plugin branch name to write to</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Preview create actions without writing</td>
+</tr>
+</tbody>
+</table>
+<p>Provide either <code>interface_name</code> or <code>interfaces_data</code>.</p>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns per-device create results with created and skipped interface details. Existing interfaces are skipped rather than recreated.</p>
 <h2 id="interface-name-range-expansion">Interface Name Range Expansion<a class="headerlink" href="#interface-name-range-expansion" title="Permanent link">¤</a></h2>
 <p>The task supports powerful range expansion patterns for creating multiple interfaces:</p>
 <h3 id="numeric-ranges">Numeric Ranges<a class="headerlink" href="#numeric-ranges" title="Permanent link">¤</a></h3>
@@ -6381,7 +6456,7 @@
 </code></pre></div>
 <h3 id="multiple-interface-names">Multiple Interface Names<a class="headerlink" href="#multiple-interface-names" title="Permanent link">¤</a></h3>
 <p>Pass a list of interface names (with or without ranges):</p>
-<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span><span class="w"> </span>
+<div class="highlight"><pre><span></span><code><span class="nt">interface_name</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Loopback[1-3]&quot;</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;Management1&quot;</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;[ge,xe]-0/1/0&quot;</span>
@@ -6390,46 +6465,65 @@
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
 <p>Create Device Interfaces task is branch aware and can create interfaces within a branch. <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> needs to be installed on the Netbox instance.</p>
 <p>When using branches, interfaces are created in the specified branch and can be reviewed before merging into the main database.</p>
-<h2 id="norfab-netbox-create-device-interfaces-command-shell-reference">NORFAB Netbox Create Device Interfaces Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-device-interfaces-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>create_device_interfaces</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.create.device-interfaces
-root
-└── netbox:    Netbox service
-    └── create:    Create objects in Netbox
-        └── device-interfaces:    Create devices interfaces
-            ├── instance:    Netbox instance name to target
-            ├── dry-run:    Do not commit to database
-            ├── branch:    Branching plugin branch name to use
-            ├── *devices:    List of device names or device objects to create interfaces for
-            ├── *interface_name:    Name(s) of the interface(s) to create
-            ├── interface-type:    Name(s) of the interface(s) to create, default &#39;other&#39;
-            ├── description:    Interface description
-            ├── speed:    Interface speed in Kbps
-            ├── mtu:    Maximum transmission unit size in bytes
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            └── progress:    Display progress events, default &#39;True&#39;
-nf#
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Create loopback interfaces on two devices:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>switch-02<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">&quot;Loopback[0-5]&quot;</span><span class="w"> </span>interface-type<span class="w"> </span>virtual<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;Test interfaces&quot;</span>
 </code></pre></div>
-<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">¤</a></h2>
-<h3 id="basic-interface-creation">Basic Interface Creation<a class="headerlink" href="#basic-interface-creation" title="Permanent link">¤</a></h3>
-<p>Create a single interface on one device:</p>
+<p>Preview interface creation:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">&quot;Ethernet[1-4]&quot;</span><span class="w"> </span>interface-type<span class="w"> </span>1000base-t<span class="w"> </span>dry-run
+</code></pre></div>
+<p>Create interfaces in a NetBox branch:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>device-interfaces<span class="w"> </span>devices<span class="w"> </span>switch-01<span class="w"> </span>interface_name<span class="w"> </span><span class="s2">&quot;Ethernet[1-4]&quot;</span><span class="w"> </span>branch<span class="w"> </span>my-branch
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">()</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;create_device_interfaces&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;switch-01&quot;</span><span class="p">,</span> <span class="s2">&quot;switch-02&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;interface_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopbback[0-5]&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;interface_type&quot;</span><span class="p">:</span> <span class="s2">&quot;virtual&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Test interfaces&quot;</span>
-    <span class="p">}</span>
-<span class="p">)</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_device_interfaces&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;switch-01&quot;</span><span class="p">,</span> <span class="s2">&quot;switch-02&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;interface_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback[0-5]&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;interface_type&quot;</span><span class="p">:</span> <span class="s2">&quot;virtual&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Test interfaces&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
 </code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_device_interfaces&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;switch-01&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;interfaces_data&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;1000base-t&quot;</span><span class="p">,</span> <span class="s2">&quot;mtu&quot;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Port-Channel1&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;lag&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="interface-types">Interface Types<a class="headerlink" href="#interface-types" title="Permanent link">¤</a></h2>
 <p>Common interface types supported by NetBox:</p>
 <ul>
@@ -6446,10 +6540,10 @@ nf#
 <h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">¤</a></h2>
 <p>Task handles several error conditions gracefully:</p>
 <ol>
-<li><strong>Non-existent Device</strong>: If a device doesn't exist in NetBox, an error is logged but processing continues for other devices</li>
+<li><strong>Non-existent Device</strong>: If a device does not exist in NetBox, an error is logged but processing continues for other devices</li>
 <li><strong>Duplicate Interfaces</strong>: Existing interfaces are automatically skipped and listed in the <code>skipped</code> array</li>
 <li><strong>Invalid Interface Type</strong>: NetBox will reject invalid interface types with an error message</li>
-<li><strong>Branch Not Found</strong>: If a specified branch doesn't exist and the branching plugin is not available, the task will fail</li>
+<li><strong>Branch Not Found</strong>: If a specified branch does not exist and the branching plugin is not available, the task will fail</li>
 </ol>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">¤</a></h2>
 <ol>
@@ -6460,6 +6554,28 @@ nf#
 <li><strong>Branch Usage</strong>: Use branches for testing bulk operations before committing to the main database</li>
 <li><strong>Idempotency</strong>: The task is idempotent - running it multiple times with the same parameters is safe</li>
 </ol>
+<h2 id="norfab-netbox-create-device-interfaces-command-shell-reference">NORFAB Netbox Create Device Interfaces Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-device-interfaces-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Netbox <code>create_device_interfaces</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.create.device-interfaces
+root
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>create:<span class="w">    </span>Create<span class="w"> </span>objects<span class="w"> </span><span class="k">in</span><span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>device-interfaces:<span class="w">    </span>Create<span class="w"> </span>devices<span class="w"> </span>interfaces
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>commit<span class="w"> </span>to<span class="w"> </span>database
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
+<span class="w">            </span>├──<span class="w"> </span>*devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>names<span class="w"> </span>or<span class="w"> </span>device<span class="w"> </span>objects<span class="w"> </span>to<span class="w"> </span>create<span class="w"> </span>interfaces<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>*interface_name:<span class="w">    </span>Name<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>interface<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>to<span class="w"> </span>create
+<span class="w">            </span>├──<span class="w"> </span>interface-type:<span class="w">    </span>Interface<span class="w"> </span><span class="nb">type</span><span class="w"> </span>value,<span class="w"> </span><span class="k">for</span><span class="w"> </span>example<span class="w"> </span><span class="s1">&#39;other&#39;</span>,<span class="w"> </span><span class="s1">&#39;virtual&#39;</span>,<span class="w"> </span><span class="s1">&#39;lag&#39;</span>,<span class="w"> </span>or<span class="w"> </span><span class="s1">&#39;1000base-t&#39;</span>,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;other&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>description:<span class="w">    </span>Interface<span class="w"> </span>description
+<span class="w">            </span>├──<span class="w"> </span>speed:<span class="w">    </span>Interface<span class="w"> </span>speed<span class="w"> </span><span class="k">in</span><span class="w"> </span>Kbps
+<span class="w">            </span>├──<span class="w"> </span>mtu:<span class="w">    </span>Maximum<span class="w"> </span>transmission<span class="w"> </span>unit<span class="w"> </span>size<span class="w"> </span><span class="k">in</span><span class="w"> </span>bytes
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+nf#
+</code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 
@@ -6671,42 +6787,7 @@ The result dictionary contains status and details of interface creation operatio
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
 <span class="normal">491</span>
@@ -6820,7 +6901,42 @@ The result dictionary contains status and details of interface creation operatio
 <span class="normal">599</span>
 <span class="normal">600</span>
 <span class="normal">601</span>
-<span class="normal">602</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateDeviceInterfacesResult</span><span class="p">,</span>

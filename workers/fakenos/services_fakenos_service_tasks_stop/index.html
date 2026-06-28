@@ -1342,10 +1342,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-stop-task-arguments" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Stop Task Arguments
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6060,10 +6082,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-stop-task-arguments" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Stop Task Arguments
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6135,7 +6179,7 @@
 <li><strong>Graceful Shutdown</strong>: Sends a stop signal to the child process and waits up to one second before forcibly killing it.</li>
 <li><strong>Automatic Cleanup</strong>: Removes stopped networks from the worker's internal tracking dictionary.</li>
 </ul>
-<h2 id="fakenos-stop-task-arguments">FakeNOS Stop Task Arguments<a class="headerlink" href="#fakenos-stop-task-arguments" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
 <table>
 <thead>
 <tr>
@@ -6154,21 +6198,70 @@
 </tr>
 </tbody>
 </table>
-<h2 id="fakenos-stop-command-shell-reference">FakeNOS Stop Command Shell Reference<a class="headerlink" href="#fakenos-stop-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>create_prefix</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree fakenos.stop
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns a stop result for the requested network, or for all running networks when <code>network</code> is omitted.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Stop a single network:</p>
+<div class="highlight"><pre><span></span><code>nf#fakenos<span class="w"> </span>stop<span class="w"> </span>network<span class="w"> </span>lab1
+</code></pre></div>
+<p>Stop all running networks:</p>
+<div class="highlight"><pre><span></span><code>nf#fakenos<span class="w"> </span>stop
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-R - required field, M - supports multiline input, D - dynamic key
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;stop&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;lab1&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - stop all networks:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;stop&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="fakenos-stop-command-shell-reference">FakeNOS Stop Command Shell Reference<a class="headerlink" href="#fakenos-stop-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for FakeNOS <code>stop</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>fakenos.stop
+
+R<span class="w"> </span>-<span class="w"> </span>required<span class="w"> </span>field,<span class="w"> </span>M<span class="w"> </span>-<span class="w"> </span>supports<span class="w"> </span>multiline<span class="w"> </span>input,<span class="w"> </span>D<span class="w"> </span>-<span class="w"> </span>dynamic<span class="w"> </span>key
 
 root
-└── fakenos:    FakeNOS service
-    └── stop:    FakeNOS stop command
-        ├── network:    FakeNOS network name to stop; stops all networks if omitted
-        ├── timeout:    Job timeout
-        ├── workers:    Filter workers to target, default &#39;all&#39;
-        ├── verbose-result:    Control output details, default &#39;False&#39;
-        ├── progress:    Display progress events, default &#39;True&#39;
-        └── nowait:    Do not wait for job to complete, default &#39;False&#39;
+└──<span class="w"> </span>fakenos:<span class="w">    </span>FakeNOS<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>stop:<span class="w">    </span>FakeNOS<span class="w"> </span>stop<span class="w"> </span><span class="nb">command</span>
+<span class="w">        </span>├──<span class="w"> </span>network:<span class="w">    </span>FakeNOS<span class="w"> </span>network<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>stop<span class="p">;</span><span class="w"> </span>stops<span class="w"> </span>all<span class="w"> </span>networks<span class="w"> </span><span class="k">if</span><span class="w"> </span>omitted
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>workers<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>└──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

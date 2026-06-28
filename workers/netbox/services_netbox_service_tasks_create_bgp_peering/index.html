@@ -2674,7 +2674,7 @@
   <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How it Works
+        How It Works
       
     </span>
   </a>
@@ -2697,6 +2697,17 @@
     <span class="md-ellipsis">
       
         Branching Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
       
     </span>
   </a>
@@ -2762,7 +2773,18 @@
   <a href="#norfab-netbox-create-bgp-peering-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Create BGP Peering Command Shell Reference
+        NORFAB NetBox Create BGP Peering Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
       
     </span>
   </a>
@@ -6107,7 +6129,7 @@
   <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How it Works
+        How It Works
       
     </span>
   </a>
@@ -6130,6 +6152,17 @@
     <span class="md-ellipsis">
       
         Branching Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
       
     </span>
   </a>
@@ -6195,7 +6228,18 @@
   <a href="#norfab-netbox-create-bgp-peering-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Create BGP Peering Command Shell Reference
+        NORFAB NetBox Create BGP Peering Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
       
     </span>
   </a>
@@ -6233,12 +6277,12 @@
   
 
 
-<h1 id="netbox-create-bgp-peering-task">Netbox Create BGP Peering Task<a class="headerlink" href="#netbox-create-bgp-peering-task" title="Permanent link">¤</a></h1>
+<h1 id="netbox-create-bgp-peering-task">NetBox Create BGP Peering Task<a class="headerlink" href="#netbox-create-bgp-peering-task" title="Permanent link">¤</a></h1>
 <blockquote>
 <p>task api name: <code>create_bgp_peering</code></p>
 </blockquote>
 <p>Creates one or many BGP sessions in NetBox. Supports single-session mode (individual keyword arguments) and bulk mode (<code>bulk_create</code> list of dicts). IP addresses and ASNs are resolved from IPAM or created on-demand. When <code>local_interface</code> is provided the local address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote address is derived automatically. Optionally creates a mirror (reverse) session on the remote device.</p>
-<h2 id="how-it-works">How it Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <ol>
 <li>Client submits <code>create_bgp_peering</code> request to NetBox worker</li>
 <li>NetBox worker validates that the BGP plugin is installed</li>
@@ -6262,6 +6306,8 @@
 </ul>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
 <p><code>create_bgp_peering</code> is branch-aware. Pass <code>branch=&lt;name&gt;</code> to write all sessions into a <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a> branch instead of main.</p>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Normal mode returns the created, existing, and skipped BGP session details. In dry-run mode, the task returns the session names that would be created and the sessions that already exist.</p>
 <h2 id="dry-run-mode">Dry Run Mode<a class="headerlink" href="#dry-run-mode" title="Permanent link">¤</a></h2>
 <p><code>dry_run=True</code> returns session names without any NetBox writes:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -6316,171 +6362,245 @@ being stored as an object reference in the custom field.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Create a single BGP session:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox create bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 device ceos-spine-1 local-address 10.0.0.1 remote-address 10.0.0.2 local-as 65001 remote-as 65002 rir lab
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>bgp-peering<span class="w"> </span>name<span class="w"> </span>ceos-spine-1_10.0.0.1_10.0.0.2<span class="w"> </span>device<span class="w"> </span>ceos-spine-1<span class="w"> </span>local-address<span class="w"> </span><span class="m">10</span>.0.0.1<span class="w"> </span>remote-address<span class="w"> </span><span class="m">10</span>.0.0.2<span class="w"> </span>local-as<span class="w"> </span><span class="m">65001</span><span class="w"> </span>remote-as<span class="w"> </span><span class="m">65002</span><span class="w"> </span>rir<span class="w"> </span>lab
 </code></pre></div>
-<p>Dry run — preview what would be created:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox create bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 device ceos-spine-1 local-address 10.0.0.1 remote-address 10.0.0.2 local-as 65001 remote-as 65002 dry-run
+<p>Dry run - preview what would be created:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>bgp-peering<span class="w"> </span>name<span class="w"> </span>ceos-spine-1_10.0.0.1_10.0.0.2<span class="w"> </span>device<span class="w"> </span>ceos-spine-1<span class="w"> </span>local-address<span class="w"> </span><span class="m">10</span>.0.0.1<span class="w"> </span>remote-address<span class="w"> </span><span class="m">10</span>.0.0.2<span class="w"> </span>local-as<span class="w"> </span><span class="m">65001</span><span class="w"> </span>remote-as<span class="w"> </span><span class="m">65002</span><span class="w"> </span>dry-run
 </code></pre></div>
 <p>Create session from interface (P2P peer derived automatically):</p>
-<div class="highlight"><pre><span></span><code>nf#netbox create bgp-peering device ceos-spine-1 local-interface Ethernet1 local-as 65001 rir lab
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>bgp-peering<span class="w"> </span>device<span class="w"> </span>ceos-spine-1<span class="w"> </span>local-interface<span class="w"> </span>Ethernet1<span class="w"> </span>local-as<span class="w"> </span><span class="m">65001</span><span class="w"> </span>rir<span class="w"> </span>lab
 </code></pre></div>
 <p>Create session into a NetBox branch:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox create bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 device ceos-spine-1 local-address 10.0.0.1 remote-address 10.0.0.2 local-as 65001 remote-as 65002 rir lab branch my-bgp-branch
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>bgp-peering<span class="w"> </span>name<span class="w"> </span>ceos-spine-1_10.0.0.1_10.0.0.2<span class="w"> </span>device<span class="w"> </span>ceos-spine-1<span class="w"> </span>local-address<span class="w"> </span><span class="m">10</span>.0.0.1<span class="w"> </span>remote-address<span class="w"> </span><span class="m">10</span>.0.0.2<span class="w"> </span>local-as<span class="w"> </span><span class="m">65001</span><span class="w"> </span>remote-as<span class="w"> </span><span class="m">65002</span><span class="w"> </span>rir<span class="w"> </span>lab<span class="w"> </span>branch<span class="w"> </span>my-bgp-branch
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Context manager - create a single session:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+            <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">,</span>
+            <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Context manager - bulk create several sessions:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;bulk_create&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.2&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+                    <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">,</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;spine-1 to leaf-1&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-2_10.0.0.5_10.0.0.6&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.5&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.6&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+                    <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="mi">65003</span><span class="p">,</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;spine-2 to leaf-1&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;peer_group&quot;</span><span class="p">:</span> <span class="s2">&quot;EBGP_LEAFS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;import_policies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;IMPORT_FROM_LEAFS&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;export_policies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;EXPORT_TO_LEAFS&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;prefix_list_in&quot;</span><span class="p">:</span> <span class="s2">&quot;PL-IN-LEAFS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;prefix_list_out&quot;</span><span class="p">:</span> <span class="s2">&quot;PL-OUT-LEAFS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Create leaf BGP peerings&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Context manager - create from local interfaces:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;bulk_create&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_Ethernet1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_Ethernet2&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet2&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;create_reverse&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - dry run and then create from interface data:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
 <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
-<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-<span class="c1"># create a single BGP session</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65001&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65002&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+    <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+            <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
 
-<span class="c1"># dry run — preview without writing</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65001&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65002&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+            <span class="s2">&quot;asn_source&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_fields.asn&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-bgp-branch&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+<p>Direct lifecycle - use a custom name template and VRF custom field:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="c1"># bulk create</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;bulk_create&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.2&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65001&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65002&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-2_10.0.0.3_10.0.0.4&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-2&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.3&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.4&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65001&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65003&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-<span class="c1"># create from interface — local address resolved from IPAM, P2P remote derived</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65001&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet[1-2]&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+            <span class="s2">&quot;asn_source&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_fields.asn&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device }}_{{ vrf }}_{{ remote_address }}&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="s2">&quot;PROD&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vrf_custom_field&quot;</span><span class="p">:</span> <span class="s2">&quot;tenant_vrf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;peer_group&quot;</span><span class="p">:</span> <span class="s2">&quot;EBGP_LEAFS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;create_reverse&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Create PROD BGP peerings from interface range&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+<p>Direct lifecycle - resolve ASNs from an IPAM ASN query:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="c1"># ASN source from device custom fields</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;asn_source&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_fields.asn&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-<span class="c1"># create into a NetBox branch</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1_10.0.0.1_10.0.0.2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65001&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="s2">&quot;65002&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-bgp-branch&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
-
-<span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;create_bgp_peering&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;asn_source&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">},</span>
+            <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device }}_ASN{{ local_as }}_{{ remote_address }}&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 </div>
-<h2 id="norfab-netbox-create-bgp-peering-command-shell-reference">NORFAB Netbox Create BGP Peering Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-bgp-peering-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for the Netbox <code>create_bgp_peering</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf# man tree netbox.create.bgp-peering
+<h2 id="norfab-netbox-create-bgp-peering-command-shell-reference">NORFAB NetBox Create BGP Peering Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-bgp-peering-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for the NetBox <code>create_bgp_peering</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.create.bgp-peering
 root
-└── netbox:    Netbox service
-    └── create:    Create Netbox objects
-        └── bgp-peering:    Create BGP peering session(s)
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
-            ├── instance:    Netbox instance name to target
-            ├── branch:    Branching plugin branch name to use
-            ├── dry-run:    Return names without writing to NetBox
-            ├── name:    Session name (single mode)
-            ├── device:    Local device name (single mode)
-            ├── local-address:    Local IP address string
-            ├── remote-address:    Remote IP address string
-            ├── local-as:    Local AS number string
-            ├── remote-as:    Remote AS number string
-            ├── status:    Session status, default &#39;active&#39;
-            ├── description:    Session description
-            ├── vrf:    VRF name
-            ├── peer-group:    Peer group name
-            ├── import-policies:    Import routing policy names
-            ├── export-policies:    Export routing policy names
-            ├── prefix-list-in:    Inbound prefix list name
-            ├── prefix-list-out:    Outbound prefix list name
-            ├── local-interface:    Local interface name or bracket-range pattern
-            ├── asn-source:    Dot-path or IPAM query dict for ASN resolution
-            ├── name-template:    Format string for session names
-            ├── create-reverse:    Also create mirror session on remote device, default &#39;True&#39;
-            ├── bulk-create:    JSON list of session dicts for bulk creation
-            ├── rir:    RIR name for ASN creation
-            ├── vrf-custom-field:    BGP session field for VRF reference, default &#39;vrf&#39;
-            └── message:    Changelog message for NetBox write operations
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>create:<span class="w">    </span>Create<span class="w"> </span>Netbox<span class="w"> </span>objects
+<span class="w">        </span>└──<span class="w"> </span>bgp-peering:<span class="w">    </span>Create<span class="w"> </span>BGP<span class="w"> </span>peering<span class="w"> </span>session<span class="o">(</span>s<span class="o">)</span>
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Return<span class="w"> </span>names<span class="w"> </span>without<span class="w"> </span>writing<span class="w"> </span>to<span class="w"> </span>NetBox
+<span class="w">            </span>├──<span class="w"> </span>name:<span class="w">    </span>Session<span class="w"> </span>name<span class="w"> </span><span class="o">(</span>single<span class="w"> </span>mode<span class="o">)</span>
+<span class="w">            </span>├──<span class="w"> </span>device:<span class="w">    </span>Local<span class="w"> </span>device<span class="w"> </span>name<span class="w"> </span><span class="o">(</span>single<span class="w"> </span>mode<span class="o">)</span>
+<span class="w">            </span>├──<span class="w"> </span>local-address:<span class="w">    </span>Local<span class="w"> </span>IP<span class="w"> </span>address<span class="w"> </span>string
+<span class="w">            </span>├──<span class="w"> </span>remote-address:<span class="w">    </span>Remote<span class="w"> </span>IP<span class="w"> </span>address<span class="w"> </span>string
+<span class="w">            </span>├──<span class="w"> </span>local-as:<span class="w">    </span>Local<span class="w"> </span>AS<span class="w"> </span>number<span class="w"> </span>string
+<span class="w">            </span>├──<span class="w"> </span>remote-as:<span class="w">    </span>Remote<span class="w"> </span>AS<span class="w"> </span>number<span class="w"> </span>string
+<span class="w">            </span>├──<span class="w"> </span>status:<span class="w">    </span>Session<span class="w"> </span>status,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;active&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>description:<span class="w">    </span>Session<span class="w"> </span>description
+<span class="w">            </span>├──<span class="w"> </span>vrf:<span class="w">    </span>VRF<span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>peer-group:<span class="w">    </span>Peer<span class="w"> </span>group<span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>import-policies:<span class="w">    </span>Import<span class="w"> </span>routing<span class="w"> </span>policy<span class="w"> </span>names
+<span class="w">            </span>├──<span class="w"> </span>export-policies:<span class="w">    </span>Export<span class="w"> </span>routing<span class="w"> </span>policy<span class="w"> </span>names
+<span class="w">            </span>├──<span class="w"> </span>prefix-list-in:<span class="w">    </span>Inbound<span class="w"> </span>prefix<span class="w"> </span>list<span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>prefix-list-out:<span class="w">    </span>Outbound<span class="w"> </span>prefix<span class="w"> </span>list<span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>local-interface:<span class="w">    </span>Local<span class="w"> </span>interface<span class="w"> </span>name<span class="w"> </span>or<span class="w"> </span>bracket-range<span class="w"> </span>pattern
+<span class="w">            </span>├──<span class="w"> </span>asn-source:<span class="w">    </span>Dot-path<span class="w"> </span>or<span class="w"> </span>IPAM<span class="w"> </span>query<span class="w"> </span>dict<span class="w"> </span><span class="k">for</span><span class="w"> </span>ASN<span class="w"> </span>resolution
+<span class="w">            </span>├──<span class="w"> </span>name-template:<span class="w">    </span>Format<span class="w"> </span>string<span class="w"> </span><span class="k">for</span><span class="w"> </span>session<span class="w"> </span>names
+<span class="w">            </span>├──<span class="w"> </span>create-reverse:<span class="w">    </span>Also<span class="w"> </span>create<span class="w"> </span>mirror<span class="w"> </span>session<span class="w"> </span>on<span class="w"> </span>remote<span class="w"> </span>device,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>bulk-create:<span class="w">    </span>JSON<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>session<span class="w"> </span>dicts<span class="w"> </span><span class="k">for</span><span class="w"> </span>bulk<span class="w"> </span>creation
+<span class="w">            </span>├──<span class="w"> </span>rir:<span class="w">    </span>RIR<span class="w"> </span>name<span class="w"> </span><span class="k">for</span><span class="w"> </span>ASN<span class="w"> </span>creation
+<span class="w">            </span>├──<span class="w"> </span>vrf-custom-field:<span class="w">    </span>BGP<span class="w"> </span>session<span class="w"> </span>field<span class="w"> </span><span class="k">for</span><span class="w"> </span>VRF<span class="w"> </span>reference,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;vrf&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>message:<span class="w">    </span>Changelog<span class="w"> </span>message<span class="w"> </span><span class="k">for</span><span class="w"> </span>NetBox<span class="w"> </span>write<span class="w"> </span>operations
 nf#
 </code></pre></div>
+<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 
 <div class="doc doc-object doc-function">

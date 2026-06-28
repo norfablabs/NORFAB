@@ -1426,10 +1426,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-get-nornir-inventory-task-arguments" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Get Nornir Inventory Task Arguments
+        Inputs
       
     </span>
   </a>
@@ -1437,10 +1437,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-get-nornir-inventory-task-return-data" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Get Nornir Inventory Task Return Data
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6071,10 +6082,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-get-nornir-inventory-task-arguments" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Get Nornir Inventory Task Arguments
+        Inputs
       
     </span>
   </a>
@@ -6082,10 +6093,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fakenos-get-nornir-inventory-task-return-data" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FakeNOS Get Nornir Inventory Task Return Data
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6158,7 +6180,7 @@
 <li><strong>Group Assignment</strong>: Optionally assign one or more Nornir group names to every host in the generated inventory.</li>
 <li><strong>Network Scoping</strong>: Optionally limit inventory generation to a single named network.</li>
 </ul>
-<h2 id="fakenos-get-nornir-inventory-task-arguments">FakeNOS Get Nornir Inventory Task Arguments<a class="headerlink" href="#fakenos-get-nornir-inventory-task-arguments" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
 <table>
 <thead>
 <tr>
@@ -6183,7 +6205,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="fakenos-get-nornir-inventory-task-return-data">FakeNOS Get Nornir Inventory Task Return Data<a class="headerlink" href="#fakenos-get-nornir-inventory-task-return-data" title="Permanent link">¤</a></h2>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>The task returns a dict with a single <code>hosts</code> key. The value is a dict keyed by host name.</p>
 <table>
 <thead>
@@ -6226,22 +6248,72 @@
 </tr>
 </tbody>
 </table>
-<h2 id="fakenos-get-nornir-inventory-command-shell-reference">FakeNOS Get Nornir Inventory Command Shell Reference<a class="headerlink" href="#fakenos-get-nornir-inventory-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>create_prefix</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree fakenos.get-nornir-inventory
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Build Nornir inventory from all running FakeNOS networks:</p>
+<div class="highlight"><pre><span></span><code>nf#fakenos<span class="w"> </span>get-nornir-inventory
+</code></pre></div>
+<p>Build inventory for one network and assign groups:</p>
+<div class="highlight"><pre><span></span><code>nf#fakenos<span class="w"> </span>get-nornir-inventory<span class="w"> </span>network<span class="w"> </span>lab1<span class="w"> </span>groups<span class="w"> </span>lab<span class="w"> </span>simulated
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-R - required field, M - supports multiline input, D - dynamic key
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;lab1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;simulated&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - all networks:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fakenos&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;simulated&quot;</span><span class="p">]},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="fakenos-get-nornir-inventory-command-shell-reference">FakeNOS Get Nornir Inventory Command Shell Reference<a class="headerlink" href="#fakenos-get-nornir-inventory-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for FakeNOS <code>get_nornir_inventory</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>fakenos.get-nornir-inventory
+
+R<span class="w"> </span>-<span class="w"> </span>required<span class="w"> </span>field,<span class="w"> </span>M<span class="w"> </span>-<span class="w"> </span>supports<span class="w"> </span>multiline<span class="w"> </span>input,<span class="w"> </span>D<span class="w"> </span>-<span class="w"> </span>dynamic<span class="w"> </span>key
 
 root
-└── fakenos:    FakeNOS service
-    └── get-nornir-inventory:    Get Nornir inventory from FakeNOS networks
-        ├── network:    FakeNOS network name to get Nornir inventory for
-        ├── groups:    List of groups to include in host&#39;s inventory
-        ├── timeout:    Job timeout
-        ├── workers:    Filter workers to target, default &#39;all&#39;
-        ├── verbose-result:    Control output details, default &#39;False&#39;
-        ├── progress:    Display progress events, default &#39;True&#39;
-        └── nowait:    Do not wait for job to complete, default &#39;False&#39;
+└──<span class="w"> </span>fakenos:<span class="w">    </span>FakeNOS<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get-nornir-inventory:<span class="w">    </span>Get<span class="w"> </span>Nornir<span class="w"> </span>inventory<span class="w"> </span>from<span class="w"> </span>FakeNOS<span class="w"> </span>networks
+<span class="w">        </span>├──<span class="w"> </span>network:<span class="w">    </span>FakeNOS<span class="w"> </span>network<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>get<span class="w"> </span>Nornir<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>groups:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>include<span class="w"> </span><span class="k">in</span><span class="w"> </span>host<span class="s1">&#39;s inventory</span>
+<span class="s1">        ├── timeout:    Job timeout</span>
+<span class="s1">        ├── workers:    Filter workers to target, default &#39;</span>all<span class="s1">&#39;</span>
+<span class="s1">        ├── verbose-result:    Control output details, default &#39;</span>False<span class="s1">&#39;</span>
+<span class="s1">        ├── progress:    Display progress events, default &#39;</span>True<span class="s1">&#39;</span>
+<span class="s1">        └── nowait:    Do not wait for job to complete, default &#39;</span>False<span class="err">&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

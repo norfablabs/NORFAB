@@ -1609,10 +1609,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-tasks-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir Tasks Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6049,10 +6071,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-tasks-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir Tasks Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6140,7 +6184,51 @@
 <p><strong>Scalability and Reusability</strong>: Custom Nornir tasks can be designed to be scalable and reusable, allowing you to apply the same task logic across different network environments and scenarios. This promotes consistency and efficiency in your network automation workflows, reducing the need for repetitive coding and manual intervention.</p>
 </li>
 </ul>
-<h2 id="nornir-tasks-sample-usage">Nornir Tasks Sample Usage<a class="headerlink" href="#nornir-tasks-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>plugin</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Nornir task plugin path. Use <code>nf://</code> for a task file stored on the broker or dotted import notation for installed Python modules.</td>
+</tr>
+<tr>
+<td>Task-specific kwargs</td>
+<td style="text-align: right;">No</td>
+<td>Additional keyword arguments passed directly to the selected task plugin.</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td style="text-align: right;">No</td>
+<td>Nornir workers to target. Defaults to all workers.</td>
+</tr>
+<tr>
+<td><code>add_details</code></td>
+<td style="text-align: right;">No</td>
+<td>Include detailed Nornir task metadata in the result.</td>
+</tr>
+<tr>
+<td><code>to_dict</code></td>
+<td style="text-align: right;">No</td>
+<td>Return results as a dictionary. Defaults to <code>True</code>.</td>
+</tr>
+<tr>
+<td><code>FC</code>, <code>FB</code>, <code>FH</code>, <code>FL</code>, <code>FM</code>, <code>FG</code>, <code>FR</code>, <code>FO</code>, <code>FP</code>, <code>FX</code>, <code>FN</code>, <code>hosts</code></td>
+<td style="text-align: right;">No</td>
+<td>Host filters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>The task returns serialized Nornir task results per host. The result shape depends on the selected task plugin and whether <code>add_details</code> or <code>to_dict</code> is enabled.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Example of calling Nornir custom task function stored on NORFAB 
 broker under <code>nornir_tasks/echo.py</code> file path:</p>
 <div class="highlight"><pre><span></span><code>├───inventory.yaml
@@ -6149,31 +6237,31 @@ broker under <code>nornir_tasks/echo.py</code> file path:</p>
 </code></pre></div>
 <p>Task <code>echo.py</code> takes provided arguments and echoes them back in
 results:</p>
-<div class="highlight"><pre><span></span><code>from nornir.core.task import Result, Task
+<div class="highlight"><span class="filename">echo.py</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">nornir.core.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">Result</span><span class="p">,</span> <span class="n">Task</span>
 
 
-def task(task: Task, **kwargs) -&gt; Result:
-    task.name = &quot;echo&quot;
-    return Result(host=task.host, result=kwargs)
+<span class="k">def</span><span class="w"> </span><span class="nf">task</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;echo&quot;</span>
+    <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>C:\nf&gt;nfcli
-Welcome to NorFab Interactive Shell.
+<div class="highlight"><pre><span></span><code>C:<span class="se">\n</span>f&gt;nfcli
+Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> </span>Interactive<span class="w"> </span>Shell.
 nf#
 nf#nornir
-nf[nornir]#task
-nf[nornir-task]#plugin nf://nornir_tasks/echo.py arguments {&quot;foo&quot;: &quot;bar&quot;} FC spine
+nf<span class="o">[</span>nornir<span class="o">]</span><span class="c1">#task</span>
+nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#plugin nf://nornir_tasks/echo.py arguments {&quot;foo&quot;: &quot;bar&quot;} FC spine</span>
 ceos-spine-1:
-    echo:
-        foo: bar
+<span class="w">    </span>echo:
+<span class="w">        </span>foo:<span class="w"> </span>bar
 ceos-spine-2:
-    echo:
-        foo: bar
-nf[nornir-task]#top
+<span class="w">    </span>echo:
+<span class="w">        </span>foo:<span class="w"> </span>bar
+nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#top</span>
 nf#
 </code></pre></div>
 <p>Demo</p>
@@ -6189,38 +6277,58 @@ used. Refer to <a href="../../../norfab_getting_started/">Getting Started</a>
 section on how to construct  <code>inventory.yaml</code> file</p>
 </div>
 <div class="tabbed-block">
-<p>This code is complete and can run as is</p>
-<div class="highlight"><pre><span></span><code>import pprint
+<p>Context manager - run a custom task from the broker:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
-from norfab.core.nfapi import NorFab
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-if __name__ == &#39;__main__&#39;:
-    nf = NorFab(inventory=&quot;inventory.yaml&quot;)
-    nf.start()
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    client = nf.make_client()
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_tasks/echo.py&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
 
-    res = client.run_job(
-        service=&quot;nornir&quot;,
-        task=&quot;task&quot;,
-        kwargs={
-            &quot;plugin&quot;: &quot;nf://nornir_tasks/echo.py&quot;,
-            &quot;argument&quot;: {&quot;foo&quot;: &quot;bar&quot;},
-            &quot;FC&quot;: &quot;ceos-spine&quot;    
-        }
-    )
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - same task:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
-    pprint.pprint(res)
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-    nf.destroy()
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_tasks/echo.py&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span>    
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 <p>Once executed, above code should produce this output:</p>
 <div class="highlight"><pre><span></span><code>C:\nf&gt;python nornir_task_docs.py
 {&#39;nornir-worker-1&#39;: {&#39;errors&#39;: [],
                     &#39;failed&#39;: False,
                     &#39;messages&#39;: [],
-                    &#39;result&#39;: {&#39;ceos-spine-1&#39;: {&#39;echo&#39;: {&#39;argument&#39;: {&#39;foo&#39;: &#39;bar&#39;}}},
-                                &#39;ceos-spine-2&#39;: {&#39;echo&#39;: {&#39;argument&#39;: {&#39;foo&#39;: &#39;bar&#39;}}}},
+                    &#39;result&#39;: {&#39;ceos-spine-1&#39;: {&#39;echo&#39;: {&#39;foo&#39;: &#39;bar&#39;}},
+                                &#39;ceos-spine-2&#39;: {&#39;echo&#39;: {&#39;foo&#39;: &#39;bar&#39;}}},
                     &#39;task&#39;: &#39;nornir-worker-1:task&#39;}}
 </code></pre></div>
 <p>Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on 
@@ -6240,21 +6348,21 @@ option to provide further task parameters.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>C:\nf&gt;nfcli
-Welcome to NorFab Interactive Shell.
+<div class="highlight"><pre><span></span><code>C:<span class="se">\n</span>f&gt;nfcli
+Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> </span>Interactive<span class="w"> </span>Shell.
 nf#
 nf#nornir
-nf[nornir]#task
-nf[nornir-task]#plugin &quot;nornir_netmiko.tasks.netmiko_send_command&quot; arguments {&quot;command_string&quot;: &quot;show hostname&quot;} FC spine
+nf<span class="o">[</span>nornir<span class="o">]</span><span class="c1">#task</span>
+nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#plugin &quot;nornir_netmiko.tasks.netmiko_send_command&quot; arguments {&quot;command_string&quot;: &quot;show hostname&quot;} FC spine</span>
 ceos-spine-1:
-    netmiko_send_command:
-        Hostname: ceos-spine-1
-        FQDN:     ceos-spine-1
+<span class="w">    </span>netmiko_send_command:
+<span class="w">        </span>Hostname:<span class="w"> </span>ceos-spine-1
+<span class="w">        </span>FQDN:<span class="w">     </span>ceos-spine-1
 ceos-spine-2:
-    netmiko_send_command:
-        Hostname: ceos-spine-2
-        FQDN:     ceos-spine-2
-nf[nornir-task]#top
+<span class="w">    </span>netmiko_send_command:
+<span class="w">        </span>Hostname:<span class="w"> </span>ceos-spine-2
+<span class="w">        </span>FQDN:<span class="w">     </span>ceos-spine-2
+nf<span class="o">[</span>nornir-task<span class="o">]</span><span class="c1">#top</span>
 nf#
 </code></pre></div>
 <p>Demo</p>
@@ -6269,30 +6377,30 @@ used. Refer to <a href="../../../norfab_getting_started/">Getting Started</a>
 section on how to construct  <code>inventory.yaml</code> file</p>
 </div>
 <div class="tabbed-block">
-<p>This code is complete and can run as is</p>
-<div class="highlight"><pre><span></span><code>import pprint
+<p>Direct lifecycle - run an installed community task:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
-from norfab.core.nfapi import NorFab
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-if __name__ == &#39;__main__&#39;:
-    nf = NorFab(inventory=&quot;inventory.yaml&quot;)
-    nf.start()
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-    client = nf.make_client()
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    res = client.run_job(
-        service=&quot;nornir&quot;,
-        task=&quot;task&quot;,
-        kwargs={
-            &quot;plugin&quot;: &quot;nornir_netmiko.tasks.netmiko_send_command&quot;,
-            &quot;command_string&quot;: &quot;show hostname&quot;,
-            &quot;FC&quot;: &quot;ceos-spine&quot;    
-        }
-    )
+    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;nornir_netmiko.tasks.netmiko_send_command&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;command_string&quot;</span><span class="p">:</span> <span class="s2">&quot;show hostname&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine&quot;</span>    
+        <span class="p">}</span>
+    <span class="p">)</span>
 
-    pprint.pprint(res)
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 
-    nf.destroy()
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 <p>Notice slight difference, python api does not make use of
 <code>arguments</code> option and need to supply task parameters as is 
@@ -6319,44 +6427,44 @@ how to construct  <code>inventory.yaml</code> file.    </p>
 </div>
 <h2 id="norfab-nornir-task-shell-reference">NORFAB Nornir Task Shell Reference<a class="headerlink" href="#norfab-nornir-task-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Nornir <code>task</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree nornir.task
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>nornir.task
 root
-└── nornir:    Nornir service
-    └── task:    Run Nornir task
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── add_details:    Add task details to results
-        ├── run_num_workers:    RetryRunner number of threads for tasks execution
-        ├── run_num_connectors:    RetryRunner number of threads for device connections
-        ├── run_connect_retry:    RetryRunner number of connection attempts
-        ├── run_task_retry:    RetryRunner number of attempts to run task
-        ├── run_reconnect_on_fail:    RetryRunner perform reconnect to host on task failure
-        ├── run_connect_check:    RetryRunner test TCP connection before opening actual connection
-        ├── run_connect_timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── run_creds_retry:    RetryRunner list of connection credentials and parameters to retry
-        ├── tf:    File group name to save task results to on worker file system
-        ├── tf_skip_failed:    Save results to file for failed tasks
-        ├── diff:    File group name to run the diff for
-        ├── diff_last:    File version number to diff, default is 1 (last)
-        ├── progress:    Emit execution progress
-        ├── table:    Table format (brief, terse, extend) or parameters or True
-        ├── headers:    Table headers
-        ├── headers_exclude:    Table headers to exclude
-        ├── sortby:    Table header column to sort by
-        ├── reverse:    Table reverse the sort by order
-        ├── FB:    Filter hosts by name using Glob Patterns
-        ├── FH:    Filter hosts by hostname
-        ├── FC:    Filter hosts containment of pattern in name
-        ├── FR:    Filter hosts by name using Regular Expressions
-        ├── FG:    Filter hosts by group
-        ├── FP:    Filter hosts by hostname using IP Prefix
-        ├── FL:    Filter hosts by names list
-        ├── FM:    Filter hosts by platform
-        ├── FX:    Filter hosts excluding them by name
-        ├── FN:    Negate the match
-        ├── hosts:    Filter hosts to target
-        ├── *plugin:    Nornir task.plugin.name to import or nf://path/to/plugin/file.py
-        └── arguments:    Plugin arguments JSON formatted string
+└──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>task:<span class="w">    </span>Run<span class="w"> </span>Nornir<span class="w"> </span>task
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>add_details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results
+<span class="w">        </span>├──<span class="w"> </span>run_num_workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>├──<span class="w"> </span>run_num_connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>├──<span class="w"> </span>run_connect_retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>├──<span class="w"> </span>run_task_retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>├──<span class="w"> </span>run_reconnect_on_fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>├──<span class="w"> </span>run_connect_check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>├──<span class="w"> </span>run_connect_timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>├──<span class="w"> </span>run_creds_retry:<span class="w">    </span>RetryRunner<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>credentials<span class="w"> </span>and<span class="w"> </span>parameters<span class="w"> </span>to<span class="w"> </span>retry
+<span class="w">        </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>├──<span class="w"> </span>tf_skip_failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>diff_last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Emit<span class="w"> </span>execution<span class="w"> </span>progress
+<span class="w">        </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True
+<span class="w">        </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
+<span class="w">        </span>├──<span class="w"> </span>headers_exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
+<span class="w">        </span>├──<span class="w"> </span>sortby:<span class="w">    </span>Table<span class="w"> </span>header<span class="w"> </span>column<span class="w"> </span>to<span class="w"> </span>sort<span class="w"> </span>by
+<span class="w">        </span>├──<span class="w"> </span>reverse:<span class="w">    </span>Table<span class="w"> </span>reverse<span class="w"> </span>the<span class="w"> </span>sort<span class="w"> </span>by<span class="w"> </span>order
+<span class="w">        </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>├──<span class="w"> </span>*plugin:<span class="w">    </span>Nornir<span class="w"> </span>task.plugin.name<span class="w"> </span>to<span class="w"> </span>import<span class="w"> </span>or<span class="w"> </span>nf://path/to/plugin/file.py
+<span class="w">        </span>└──<span class="w"> </span>arguments:<span class="w">    </span>Plugin<span class="w"> </span>arguments<span class="w"> </span>JSON<span class="w"> </span>formatted<span class="w"> </span>string
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

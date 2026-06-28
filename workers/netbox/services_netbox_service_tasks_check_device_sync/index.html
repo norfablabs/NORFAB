@@ -2615,10 +2615,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#result-format" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Format
+        How It Works
       
     </span>
   </a>
@@ -2626,10 +2626,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6049,10 +6082,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#result-format" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Result Format
+        How It Works
       
     </span>
   </a>
@@ -6060,10 +6093,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6127,69 +6193,194 @@
 <blockquote>
 <p>task api name: <code>check_device_sync</code></p>
 </blockquote>
-<p>The <code>check_device_sync</code> task performs a read-only sync-check against live devices and reports
-whether the data stored in NetBox is in sync with the actual device state. It does this by
-calling four existing sync sub-tasks in <code>dry_run=True</code> mode:</p>
+<p>Checks whether NetBox data is in sync with live device state without writing to NetBox. The task runs selected sync tasks in <code>dry_run=True</code> mode and returns a per-device summary plus detailed dry-run diffs.</p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<p><code>check_device_sync</code> can run these read-only sub-checks:</p>
 <ul>
 <li><strong>interfaces</strong> — calls <code>sync_device_interfaces(dry_run=True)</code></li>
 <li><strong>mac_addresses</strong> — calls <code>sync_mac_addresses(dry_run=True)</code></li>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip(dry_run=True)</code></li>
 <li><strong>bgp_peerings</strong> — calls <code>sync_bgp_peerings(dry_run=True)</code></li>
 </ul>
-<p>No data is written to NetBox. Each sub-check can be individually enabled or disabled.</p>
-<h2 id="result-format">Result Format<a class="headerlink" href="#result-format" title="Permanent link">¤</a></h2>
+<p>Each sub-check can be enabled or disabled independently.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox device names to check</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox Branching plugin branch name to read from</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td style="text-align: right;">No</td>
+<td>Timeout in seconds for Nornir parse jobs</td>
+</tr>
+<tr>
+<td><code>check_interfaces</code></td>
+<td style="text-align: right;">No</td>
+<td>Check interface sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>check_mac_addresses</code></td>
+<td style="text-align: right;">No</td>
+<td>Check MAC address sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>check_ip_addresses</code></td>
+<td style="text-align: right;">No</td>
+<td>Check IP address sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>check_bgp_peerings</code></td>
+<td style="text-align: right;">No</td>
+<td>Check BGP peering sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td>Nornir filters</td>
+<td style="text-align: right;">No</td>
+<td>Host filters such as <code>FL</code>, <code>FB</code>, <code>FG</code>, <code>FC</code>, or <code>FN</code></td>
+</tr>
+</tbody>
+</table>
+<p>At least one explicit device or Nornir host filter must resolve to a device.</p>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="c1"># per-device summary — one entry per resolved device</span>
     <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span>       <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span>    <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span>  <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span>  <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="o">...</span>
     <span class="p">},</span>
-    <span class="c1"># per-category dry-run detail — full output from each sub-task</span>
     <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span>    <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>   <span class="c1"># dry-run result from sync_device_interfaces</span>
-        <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>   <span class="c1"># dry-run result from sync_mac_addresses</span>
-        <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span>  <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>   <span class="c1"># dry-run result from sync_device_ip</span>
-        <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span>  <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>   <span class="c1"># dry-run result from sync_bgp_peerings</span>
+        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">},</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>A category is considered <strong>in sync</strong> when the corresponding dry-run reports no pending creates,
-updates, or deletes.</p>
-<h2 id="sample-usage">Sample Usage<a class="headerlink" href="#sample-usage" title="Permanent link">¤</a></h2>
+<p>A category is considered in sync when the corresponding dry-run reports no pending creates, updates, or deletes.</p>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li>No data is written to NetBox.</li>
+<li><code>Result.diff</code> contains the raw dry-run detail from each enabled sub-task.</li>
+<li>Device names can be supplied directly or resolved from Nornir filters.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Check all sync categories for explicit devices:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>ceos-leaf-2
+</code></pre></div>
+<p>Check only interface and IP address sync:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>check-mac-addresses<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-peerings<span class="w"> </span><span class="nb">false</span>
+</code></pre></div>
+<p>Resolve devices using a Nornir group filter:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>FG<span class="w"> </span>leafs
+</code></pre></div>
+<p>Check against a NetBox branch:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>branch<span class="w"> </span>my-branch
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;check_device_sync&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;check_device_sync&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;check_mac_addresses&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;check_bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">filtered_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;check_device_sync&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;FG&quot;</span><span class="p">:</span> <span class="s2">&quot;leafs&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="norfab-netbox-check-device-sync-command-shell-reference">NORFAB Netbox Check Device Sync Command Shell Reference<a class="headerlink" href="#norfab-netbox-check-device-sync-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>check_device_sync</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf# man tree netbox.check-sync.devices
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.check-sync.devices
 root
-└── netbox:    Netbox service
-    └── check-sync:    Check if Netbox data is in sync with live device state
-        └── devices:    Check if device data in NetBox is in sync with live device state
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
-            ├── instance:    Netbox instance name to target
-            ├── branch:    Branching plugin branch name to use
-            ├── devices:    List of NetBox devices to check sync state for
-            ├── check-interfaces:    Check interfaces sync state, default &#39;True&#39;
-            ├── check-mac-addresses:    Check MAC addresses sync state, default &#39;True&#39;
-            ├── check-ip-addresses:    Check IP addresses sync state, default &#39;True&#39;
-            ├── check-bgp-peerings:    Check BGP peerings sync state, default &#39;True&#39;
-            ├── FO:    Filter hosts using Filter Object
-            ├── FB:    Filter hosts by name using Glob Patterns
-            ├── FH:    Filter hosts by hostname
-            ├── FC:    Filter hosts containment of pattern in name
-            ├── FR:    Filter hosts by name using Regular Expressions
-            ├── FG:    Filter hosts by group
-            ├── FP:    Filter hosts by hostname using IP Prefix
-            ├── FL:    Filter hosts by names list
-            ├── FX:    Filter hosts excluding them by name
-            └── FN:    Negate the match
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>check-sync:<span class="w">    </span>Check<span class="w"> </span><span class="k">if</span><span class="w"> </span>Netbox<span class="w"> </span>data<span class="w"> </span>is<span class="w"> </span><span class="k">in</span><span class="w"> </span>sync<span class="w"> </span>with<span class="w"> </span>live<span class="w"> </span>device<span class="w"> </span>state
+<span class="w">        </span>└──<span class="w"> </span>devices:<span class="w">    </span>Check<span class="w"> </span><span class="k">if</span><span class="w"> </span>device<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>NetBox<span class="w"> </span>is<span class="w"> </span><span class="k">in</span><span class="w"> </span>sync<span class="w"> </span>with<span class="w"> </span>live<span class="w"> </span>device<span class="w"> </span>state
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
+<span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>NetBox<span class="w"> </span>devices<span class="w"> </span>to<span class="w"> </span>check<span class="w"> </span>sync<span class="w"> </span>state<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>check-interfaces:<span class="w">    </span>Check<span class="w"> </span>interfaces<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>check-mac-addresses:<span class="w">    </span>Check<span class="w"> </span>MAC<span class="w"> </span>addresses<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>check-ip-addresses:<span class="w">    </span>Check<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>check-bgp-peerings:<span class="w">    </span>Check<span class="w"> </span>BGP<span class="w"> </span>peerings<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">            </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">            </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">            </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">            </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">            </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">            </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">            </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">            </span>└──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -6420,7 +6611,11 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1164</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1160</span>
+<span class="normal">1161</span>
+<span class="normal">1162</span>
+<span class="normal">1163</span>
+<span class="normal">1164</span>
 <span class="normal">1165</span>
 <span class="normal">1166</span>
 <span class="normal">1167</span>
@@ -6612,11 +6807,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 <span class="normal">1353</span>
 <span class="normal">1354</span>
 <span class="normal">1355</span>
-<span class="normal">1356</span>
-<span class="normal">1357</span>
-<span class="normal">1358</span>
-<span class="normal">1359</span>
-<span class="normal">1360</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CheckDeviceSyncInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CheckDeviceSyncResult</span><span class="p">,</span>

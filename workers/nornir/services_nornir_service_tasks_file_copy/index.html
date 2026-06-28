@@ -1805,10 +1805,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-file-copy-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir File Copy Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6038,10 +6060,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-file-copy-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir File Copy Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6105,57 +6149,170 @@
 <blockquote>
 <p>task api name: <code>file_copy</code></p>
 </blockquote>
-<p>The Nornir Service File Copy Task is a component of NorFab's Nornir service, designed to facilitate the transfer of files to and from network devices. This task provides network engineers with a reliable and efficient method for managing device configurations, firmware updates, and other critical files. By leveraging the capabilities of the Nornir service, users can automate file transfers.</p>
-<h2 id="nornir-file-copy-sample-usage">Nornir File Copy Sample Usage<a class="headerlink" href="#nornir-file-copy-sample-usage" title="Permanent link">¤</a></h2>
+<p>The Nornir service <code>file_copy</code> task transfers files to or from network devices. It is commonly used for configuration backups, file staging, image transfers, and other operational file movement workflows. The task currently exposes file transfer through the Netmiko plugin.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_file</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Local source file path on the worker.</td>
+</tr>
+<tr>
+<td><code>plugin</code></td>
+<td style="text-align: right;">No</td>
+<td>File transfer plugin parameters. Use <code>{"netmiko": {...}}</code> for Netmiko options.</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return the planned operation without copying files.</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td style="text-align: right;">No</td>
+<td>Nornir workers to target. Defaults to all workers.</td>
+</tr>
+<tr>
+<td><code>add_details</code></td>
+<td style="text-align: right;">No</td>
+<td>Include detailed Nornir task metadata in the result.</td>
+</tr>
+<tr>
+<td><code>FC</code>, <code>FB</code>, <code>FH</code>, <code>FL</code>, <code>FM</code>, <code>FG</code>, <code>FR</code>, <code>FO</code>, <code>FP</code>, <code>FX</code>, <code>FN</code>, <code>hosts</code></td>
+<td style="text-align: right;">No</td>
+<td>Host filters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>The task returns per-host file transfer results. With <code>dry_run=True</code>, the result shows what would be copied without performing the transfer.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Copy a file to devices whose hostnames contain <code>spine</code>:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>file-copy<span class="w"> </span>source-file<span class="w"> </span>./files/startup.cfg<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>destination-file<span class="w"> </span>startup.cfg<span class="w"> </span>file-system<span class="w"> </span>flash:
+</code></pre></div>
+<p>Preview the copy operation without transferring the file:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>file-copy<span class="w"> </span>source-file<span class="w"> </span>./files/startup.cfg<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - copy a file with Netmiko:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_copy&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;source_file&quot;</span><span class="p">:</span> <span class="s2">&quot;./files/startup.cfg&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;netmiko&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;destination_file&quot;</span><span class="p">:</span> <span class="s2">&quot;startup.cfg&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;file_system&quot;</span><span class="p">:</span> <span class="s2">&quot;flash:&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;put&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;overwrite_file&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;verify_file&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - dry run before copying:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_copy&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;source_file&quot;</span><span class="p">:</span> <span class="s2">&quot;./files/startup.cfg&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="norfab-nornir-file-copy-shell-reference">NORFAB Nornir File Copy Shell Reference<a class="headerlink" href="#norfab-nornir-file-copy-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Nornir <code>file-copy</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree nornir.file_copy
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>nornir.file_copy
 root
-└── nornir:    Nornir service
-    └── file-copy:    Copy files to/from devices
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── add-details:    Add task details to results, default &#39;False&#39;
-        ├── num-workers:    RetryRunner number of threads for tasks execution
-        ├── num-connectors:    RetryRunner number of threads for device connections
-        ├── connect-retry:    RetryRunner number of connection attempts
-        ├── task-retry:    RetryRunner number of attempts to run task
-        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
-        ├── tf:    File group name to save task results to on worker file system
-        ├── tf-skip-failed:    Save results to file for failed tasks
-        ├── diff:    File group name to run the diff for
-        ├── diff-last:    File version number to diff, default is 1 (last)
-        ├── progress:    Display progress events, default &#39;True&#39;
-        ├── table:    Table format (brief, terse, extend) or parameters or True
-        ├── headers:    Table headers
-        ├── headers-exclude:    Table headers to exclude
-        ├── sortby:    Table header column to sort by
-        ├── FO:    Filter hosts using Filter Object
-        ├── FB:    Filter hosts by name using Glob Patterns
-        ├── FH:    Filter hosts by hostname
-        ├── FC:    Filter hosts containment of pattern in name
-        ├── FR:    Filter hosts by name using Regular Expressions
-        ├── FG:    Filter hosts by group
-        ├── FP:    Filter hosts by hostname using IP Prefix
-        ├── FL:    Filter hosts by names list
-        ├── FM:    Filter hosts by platform
-        ├── FX:    Filter hosts excluding them by name
-        ├── FN:    Negate the match
-        ├── hosts:    Filter hosts to target
-        ├── *source-file:    Source file to copy
-        ├── plugin:    Connection plugin parameters
-        │   └── netmiko:    Use Netmiko plugin to copy files
-        │       ├── destination-file:    Destination file to copy
-        │       ├── file-system:    Destination file system
-        │       ├── direction:    Direction of file copy, default &#39;put&#39;
-        │       ├── inline-transfer:    Use inline transfer, supported by Cisco IOS, default &#39;False&#39;
-        │       ├── overwrite-file:    Overwrite destination file if it exists, default &#39;False&#39;
-        │       ├── socket-timeout:    Socket timeout in seconds, default &#39;10.0&#39;
-        │       └── verify-file:    Verify destination file hash after copy, default &#39;True&#39;
-        └── dry-run:    Do not copy files, just show what would be done, default &#39;False&#39;
+└──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>file-copy:<span class="w">    </span>Copy<span class="w"> </span>files<span class="w"> </span>to/from<span class="w"> </span>devices
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>├──<span class="w"> </span>task-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>├──<span class="w"> </span>reconnect-on-fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>├──<span class="w"> </span>connect-check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>├──<span class="w"> </span>connect-timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>├──<span class="w"> </span>creds-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>credentials<span class="w"> </span>and<span class="w"> </span>parameters<span class="w"> </span>to<span class="w"> </span>retry
+<span class="w">        </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True
+<span class="w">        </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
+<span class="w">        </span>├──<span class="w"> </span>headers-exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
+<span class="w">        </span>├──<span class="w"> </span>sortby:<span class="w">    </span>Table<span class="w"> </span>header<span class="w"> </span>column<span class="w"> </span>to<span class="w"> </span>sort<span class="w"> </span>by
+<span class="w">        </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">        </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>├──<span class="w"> </span>*source-file:<span class="w">    </span>Source<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>copy
+<span class="w">        </span>├──<span class="w"> </span>plugin:<span class="w">    </span>Connection<span class="w"> </span>plugin<span class="w"> </span>parameters
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>netmiko:<span class="w">    </span>Use<span class="w"> </span>Netmiko<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>copy<span class="w"> </span>files
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>destination-file:<span class="w">    </span>Destination<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>copy
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>file-system:<span class="w">    </span>Destination<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>direction:<span class="w">    </span>Direction<span class="w"> </span>of<span class="w"> </span>file<span class="w"> </span>copy,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;put&#39;</span>
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>inline-transfer:<span class="w">    </span>Use<span class="w"> </span>inline<span class="w"> </span>transfer,<span class="w"> </span>supported<span class="w"> </span>by<span class="w"> </span>Cisco<span class="w"> </span>IOS,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>overwrite-file:<span class="w">    </span>Overwrite<span class="w"> </span>destination<span class="w"> </span>file<span class="w"> </span><span class="k">if</span><span class="w"> </span>it<span class="w"> </span>exists,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>socket-timeout:<span class="w">    </span>Socket<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;10.0&#39;</span>
+<span class="w">        </span>│<span class="w">       </span>└──<span class="w"> </span>verify-file:<span class="w">    </span>Verify<span class="w"> </span>destination<span class="w"> </span>file<span class="w"> </span><span class="nb">hash</span><span class="w"> </span>after<span class="w"> </span>copy,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>└──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>copy<span class="w"> </span>files,<span class="w"> </span>just<span class="w"> </span>show<span class="w"> </span>what<span class="w"> </span>would<span class="w"> </span>be<span class="w"> </span><span class="k">done</span>,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

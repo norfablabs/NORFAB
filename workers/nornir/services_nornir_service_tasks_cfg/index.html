@@ -1665,10 +1665,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-cfg-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir CFG Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -1775,10 +1797,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-promptless-mode" class="md-nav__link">
+  <a href="#tuning-netmiko-read-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using Promptless Mode
+        Tuning Netmiko Read Handling
       
     </span>
   </a>
@@ -6148,10 +6170,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-cfg-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir CFG Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6258,10 +6302,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-promptless-mode" class="md-nav__link">
+  <a href="#tuning-netmiko-read-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using Promptless Mode
+        Tuning Netmiko Read Handling
       
     </span>
   </a>
@@ -6326,15 +6370,75 @@
 <p>task api name: <code>cfg</code></p>
 </blockquote>
 <p>Nornir service <code>cfg</code> task designed to send configuration to devices using SSH and Telnet. Nornir <code>cfg</code> can use Netmiko, Scrapli and NAPALM libraries to configure devices.</p>
-<h2 id="nornir-cfg-sample-usage">Nornir CFG Sample Usage<a class="headerlink" href="#nornir-cfg-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Configuration commands to send to devices.</td>
+</tr>
+<tr>
+<td><code>plugin</code></td>
+<td style="text-align: right;">No</td>
+<td>Configuration plugin parameters for Netmiko, Scrapli, or NAPALM.</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Render or validate configuration without applying changes when supported by the selected plugin.</td>
+</tr>
+<tr>
+<td><code>job_data</code></td>
+<td style="text-align: right;">No</td>
+<td>Path to YAML job data used by templates.</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td style="text-align: right;">No</td>
+<td>Nornir workers to target. Defaults to all workers.</td>
+</tr>
+<tr>
+<td><code>add_details</code></td>
+<td style="text-align: right;">No</td>
+<td>Include detailed Nornir task metadata in the result.</td>
+</tr>
+<tr>
+<td><code>FC</code>, <code>FB</code>, <code>FH</code>, <code>FL</code>, <code>FM</code>, <code>FG</code>, <code>FR</code>, <code>FO</code>, <code>FP</code>, <code>FX</code>, <code>FN</code>, <code>hosts</code></td>
+<td style="text-align: right;">No</td>
+<td>Host filters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>The task returns per-host configuration results. When supported by the plugin and <code>add_details=True</code>, output can include <code>changed</code>, <code>diff</code>, <code>failed</code>, <code>exception</code>, <code>connection_retry</code>, and <code>task_retry</code> details.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Example of sending configuration commands to devices.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>C:\nf&gt;nfcli
-Welcome to NorFab Interactive Shell.
+<div class="highlight"><pre><span></span><code>C:<span class="se">\n</span>f&gt;nfcli
+Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> </span>Interactive<span class="w"> </span>Shell.
+nf#
+nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;ntp server 10.0.0.1&quot;</span><span class="w"> </span><span class="s2">&quot;ntp server 10.0.0.2&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine,leaf
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+&lt;omitted<span class="w"> </span><span class="k">for</span><span class="w"> </span>brevity&gt;
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>----------------------------------------------
+ceos-spine-1:
+<span class="w">    </span>netmiko_send_config:
+<span class="w">        </span>configure<span class="w"> </span>terminal
+<span class="w">        </span>ntp<span class="w"> </span>server<span class="w"> </span><span class="m">10</span>.0.0.1
+<span class="w">        </span>ntp<span class="w"> </span>server<span class="w"> </span><span class="m">10</span>.0.0.2
+<span class="w">        </span>end
 nf#
 </code></pre></div>
 <p>Demo</p>
@@ -6343,29 +6447,48 @@ nf#
 <p><code>inventory.yaml</code> should be located in same folder where we start nfcli, unless <code>nfcli -i path_to_inventory.yaml</code> flag used. Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on how to construct  <code>inventory.yaml</code> file</p>
 </div>
 <div class="tabbed-block">
-<p>This code is complete and can run as is</p>
-<div class="highlight"><pre><span></span><code>import pprint
+<p>Context manager - configure matching devices:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
-from norfab.core.nfapi import NorFab
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-if __name__ == &#39;__main__&#39;:
-    nf = NorFab(inventory=&quot;inventory.yaml&quot;)
-    nf.start()
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    client = nf.make_client()
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ntp server 10.0.0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;ntp server 10.0.0.2&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
 
-    res = client.run_job(
-        service=&quot;nornir&quot;,
-        task=&quot;cfg&quot;,
-        kwargs={
-            &quot;config&quot;: [&quot;ntp server 10.0.0.1&quot;, &quot;ntp server 10.0.0.2&quot;],
-            &quot;FC&quot;: &quot;spine,leaf&quot;              
-        }
-    )
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - same task:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
-    pprint.pprint(res)
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-    nf.destroy()
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ntp server 10.0.0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;ntp server 10.0.0.2&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span>              
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 <p>Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on how to construct  <code>inventory.yaml</code> file.</p>
 </div>
@@ -6374,19 +6497,534 @@ if __name__ == &#39;__main__&#39;:
 </div>
 <h2 id="use-different-configuration-plugins">Use Different Configuration Plugins<a class="headerlink" href="#use-different-configuration-plugins" title="Permanent link">¤</a></h2>
 <p>NorFab supports various configuration plugins such as <code>netmiko</code>, <code>napalm</code> and <code>scrapli</code>. These plugins enable you to push configurations to a wide range of network devices. Each plugin has its own set of capabilities and requirements, so it is essential to ensure that your Nornir inventory is properly configured for the chosen plugin. This includes specifying the necessary connection parameters and device-specific settings. By leveraging these plugins, you can standardize and automate the configuration management process across different network environments.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use Netmiko and enter enable mode before sending configuration:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span><span class="nb">enable</span>
+</code></pre></div>
+<p>Use Scrapli and stop execution when a device rejects a command:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>scrapli<span class="w"> </span>stop-on-failed
+</code></pre></div>
+<p>Use NAPALM to merge configuration:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>napalm
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - use Netmiko:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;enable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - use Scrapli:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;scrapli&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;stop_on_failed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="using-dry-run">Using Dry Run<a class="headerlink" href="#using-dry-run" title="Permanent link">¤</a></h2>
 <p>The dry run feature in NorFab allows you to simulate the application of configurations without actually pushing them to the devices. This is particularly useful for testing and validation purposes, as it enables you to verify the correctness of your configurations before making any changes to the network. Additionally, the dry run feature can be used for generating and rendering device configurations, which is beneficial for staging environments where you need to prepare configurations in advance. By using dry run, you can ensure that your configurations are accurate and ready for deployment.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;interface Loopback100&quot;</span><span class="w"> </span><span class="s2">&quot;description managed by NorFab&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - render configuration without applying it:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;interface Loopback100&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description managed by NorFab&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - dry run with rendered template data:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;interface {{ job_data.interface }}&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description {{ job_data.description }}&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback100&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;managed by NorFab&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="using-commit-confirmed">Using Commit Confirmed<a class="headerlink" href="#using-commit-confirmed" title="Permanent link">¤</a></h2>
 <p>The commit confirmed feature provides an added layer of safety when pushing configurations to network devices. With this feature, you can apply a configuration with a rollback timer. If the configuration is not explicitly confirmed within the specified time, it will be automatically rolled back to the previous state. This is particularly useful in scenarios where you need to ensure that a configuration change does not negatively impact the network. By using commit confirmed, you can mitigate the risk of configuration errors and ensure network stability.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI</label><label for="__tabbed_4_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;set system services netconf ssh&quot;</span><span class="w"> </span>FC<span class="w"> </span>junos<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>commit-confirm<span class="w"> </span>commit-confirm-delay<span class="w"> </span><span class="m">5</span><span class="w"> </span>commit-comment<span class="w"> </span><span class="s2">&quot;NorFab staged change&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - use Netmiko commit confirmed:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;set system services netconf ssh&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;junos&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;confirm&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;confirm_delay&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;NorFab staged change&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - NAPALM rollback timer:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;set system services netconf ssh&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;junos&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;napalm&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;revert_in&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="sourcing-configuration-from-files">Sourcing Configuration From Files<a class="headerlink" href="#sourcing-configuration-from-files" title="Permanent link">¤</a></h2>
 <p>NorFab allows you to source configurations from text files stored on the broker. This approach enables you to manage configurations as files, making it easier to version control and maintain them. By storing configurations in files, you can apply them as needed, ensuring consistency and repeatability in your configuration management process. This method is particularly useful for large-scale deployments where configurations need to be applied to multiple devices in a controlled and organized manner.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">CLI</label><label for="__tabbed_5_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span>nf://nornir_configs/common_ntp.cfg<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - load config from a broker file:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_configs/common_ntp.cfg&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - apply a broker file with Scrapli:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_configs/common_ntp.cfg&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;scrapli&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="using-jinja2-templates">Using Jinja2 Templates<a class="headerlink" href="#using-jinja2-templates" title="Permanent link">¤</a></h2>
 <p>Jinja2 templates provide a powerful way to create dynamic configurations based on variables defined in your inventory or passed as job data. By using templates, you can generate configurations that are tailored to the specific requirements of each device. This approach allows you to automate the creation of complex configurations and ensures consistency across your network. Jinja2 templates are highly flexible and can be used to incorporate conditional logic, loops, and other advanced features, making them an essential tool for network automation.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">CLI</label><label for="__tabbed_6_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Template file stored on the broker as <code>nf://nornir_templates/loopback.j2</code>:</p>
+<div class="highlight"><pre><span></span><code>interface {{ job_data.interface }}
+  description {{ host.name }} managed loopback
+  ip address {{ host.data.loopback_ip }}/32
+</code></pre></div>
+<p>Render the template without applying it:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span>nf://nornir_templates/loopback.j2<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;interface&quot;: &quot;Loopback100&quot;}&#39;</span><span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - render a template from the broker:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/loopback.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback100&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - render inline Jinja2 commands:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;interface {{ job_data.interface }}&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description {{ host.name }} managed loopback&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback100&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="templating-configuration-with-inline-job-data">Templating Configuration with Inline Job Data<a class="headerlink" href="#templating-configuration-with-inline-job-data" title="Permanent link">¤</a></h2>
+<p>Inline <code>job_data</code> is useful when a small amount of per-job data should be passed directly with the request instead of stored in a broker file.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">CLI</label><label for="__tabbed_7_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;router bgp {{ job_data.asn }}&quot;</span><span class="w"> </span><span class="s2">&quot;neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;asn&quot;: 65001, &quot;peer&quot;: &quot;192.0.2.2&quot;, &quot;peer_as&quot;: 65002}&#39;</span><span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - pass inline job data:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;router bgp {{ job_data.asn }}&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
+                <span class="s2">&quot;peer&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.2&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;peer_as&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - load job data from a broker file:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/bgp_neighbor.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://job_data/bgp_neighbor.yaml&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="parsing-and-generating-configuration-in-templates">Parsing and Generating Configuration in Templates<a class="headerlink" href="#parsing-and-generating-configuration-in-templates" title="Permanent link">¤</a></h2>
 <p>NorFab supports parsing of device output and the generation of new configurations within same template using parsing results. This capability allows you to create configurations based on the current state of the device, ensuring that your changes are applied accurately and efficiently. By parsing existing configurations, you can extract relevant information and use it to generate new configurations that are consistent with the device's current setup. </p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">CLI</label><label for="__tabbed_8_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Template file stored on the broker as <code>nf://nornir_templates/ensure_ntp.j2</code>:</p>
+<div class="highlight"><pre><span></span><code>{% set ntp_output = norfab.run_job(
+    service=&quot;nornir&quot;,
+    task=&quot;cli&quot;,
+    workers=&quot;any&quot;,
+    kwargs={&quot;commands&quot;: [&quot;show running-config | include ntp server&quot;], &quot;FL&quot;: [host.name]}
+) %}
+{% if &quot;10.0.0.1&quot; not in ntp_output | string %}
+ntp server 10.0.0.1
+{% endif %}
+</code></pre></div>
+<p>Render the generated configuration before applying it:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span>nf://nornir_templates/ensure_ntp.j2<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - render generated config:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/ensure_ntp.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - apply generated config after review:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_templates/ensure_ntp.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="outputting-text-tables">Outputting Text Tables<a class="headerlink" href="#outputting-text-tables" title="Permanent link">¤</a></h2>
 <p>The NorFab interactive shell supports the table command, which can be used to format output into text tables. This feature relies on the tabulate module and supports most of its functionalities. By outputting results in table format, you can easily visualize and analyze the data, making it easier to interpret and act upon. This is particularly useful for displaying configuration results in a structured, concise and readable manner.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">CLI</label><label for="__tabbed_9_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details<span class="w"> </span>table<span class="w"> </span>brief
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - return list output for table processing:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - collect detailed output for custom formatting:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="formatting-output-results">Formatting Output Results<a class="headerlink" href="#formatting-output-results" title="Permanent link">¤</a></h2>
 <p>You can format the output results using various options provided by the Nornir worker. The output of the commands can be formatted using the <code>to_dict</code> parameter. When set to <code>True</code>, the results will be returned as a dictionary. When set to <code>False</code>, the results will be returned as a list. In addition <code>add_details</code> argument can be used to control the verbosity of the output and return additional Nornir result information such as:</p>
 <ul>
@@ -6397,80 +7035,201 @@ if __name__ == &#39;__main__&#39;:
 <li><code>connection_retry</code> counter to show how many times RetryRunner tried to establish a connection</li>
 <li><code>task_retry</code> counter to show how many times RetryRunner tried to run this task</li>
 </ul>
-<h2 id="using-promptless-mode">Using Promptless Mode<a class="headerlink" href="#using-promptless-mode" title="Permanent link">¤</a></h2>
-<p>NorFab supports a proprietary promptless mode that can be used with Netmiko. This mode is particularly useful when dealing with devices that do not have a consistent prompt or when the default Netmiko output collection functions are not reliable enough. By enabling promptless mode, you can ensure that configurations are applied accurately and efficiently, even in challenging environments. This feature enhances the robustness of your configuration management process and ensures that your network devices are configured correctly.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">CLI</label><label for="__tabbed_10_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>add-details
+</code></pre></div>
+<p>Save results to a worker file group for later diff:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>tf<span class="w"> </span>cfg-baseline
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - request detailed result metadata:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - store results for later comparison:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;logging host 10.0.0.10&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tf&quot;</span><span class="p">:</span> <span class="s2">&quot;cfg-baseline&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+<h2 id="tuning-netmiko-read-handling">Tuning Netmiko Read Handling<a class="headerlink" href="#tuning-netmiko-read-handling" title="Permanent link">¤</a></h2>
+<p>Netmiko configuration pushes can be tuned for devices with slow command echo, unusual configuration prompts, or banner-style commands. Use options such as <code>read-timeout</code>, <code>cmd-verify</code>, <code>terminator</code>, and <code>bypass-commands</code> to control how Netmiko waits for command completion and validates command echo.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">CLI</label><label for="__tabbed_11_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>cfg<span class="w"> </span>config<span class="w"> </span><span class="s2">&quot;banner motd ^CAuthorized access only^C&quot;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>plugin<span class="w"> </span>netmiko<span class="w"> </span>read-timeout<span class="w"> </span><span class="m">30</span><span class="w"> </span>cmd-verify<span class="w"> </span><span class="nb">false</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - tune Netmiko command verification:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;banner motd ^CAuthorized access only^C&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;read_timeout&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+            <span class="s2">&quot;cmd_verify&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - use an alternate config terminator:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;cfg&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;banner motd ^CAuthorized access only^C&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;netmiko&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;terminator&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;#&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;read_timeout&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="norfab-nornir-cfg-shell-reference">NORFAB Nornir CFG Shell Reference<a class="headerlink" href="#norfab-nornir-cfg-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Nornir <code>cfg</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree nornir.cfg
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>nornir.cfg
 root
-└── nornir:    Nornir service
-    └── cfg:    Configure devices over CLI interface
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── add-details:    Add task details to results, default &#39;False&#39;
-        ├── num-workers:    RetryRunner number of threads for tasks execution
-        ├── num-connectors:    RetryRunner number of threads for device connections
-        ├── connect-retry:    RetryRunner number of connection attempts
-        ├── task-retry:    RetryRunner number of attempts to run task
-        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
-        ├── tf:    File group name to save task results to on worker file system
-        ├── tf-skip-failed:    Save results to file for failed tasks
-        ├── diff:    File group name to run the diff for
-        ├── diff-last:    File version number to diff, default is 1 (last)
-        ├── progress:    Display progress events, default &#39;True&#39;
-        ├── table:    Table format (brief, terse, extend) or parameters or True
-        ├── headers:    Table headers
-        ├── headers-exclude:    Table headers to exclude
-        ├── sortby:    Table header column to sort by
-        ├── reverse:    Table reverse the sort by order
-        ├── FO:    Filter hosts using Filter Object
-        ├── FB:    Filter hosts by name using Glob Patterns
-        ├── FH:    Filter hosts by hostname
-        ├── FC:    Filter hosts containment of pattern in name
-        ├── FR:    Filter hosts by name using Regular Expressions
-        ├── FG:    Filter hosts by group
-        ├── FP:    Filter hosts by hostname using IP Prefix
-        ├── FL:    Filter hosts by names list
-        ├── FM:    Filter hosts by platform
-        ├── FX:    Filter hosts excluding them by name
-        ├── FN:    Negate the match
-        ├── hosts:    Filter hosts to target
-        ├── dry-run:    Dry run cfg function
-        ├── *config:    List of configuration commands to send to devices
-        ├── plugin:    Configuration plugin parameters
-        │   ├── netmiko:    Use Netmiko plugin to configure devices
-        │   │   ├── enable:    Attempt to enter enable-mode
-        │   │   ├── exit-config-mode:    Determines whether or not to exit config mode after complete
-        │   │   ├── strip-command:    Determines whether or not to strip the command
-        │   │   ├── read-timeout:    Absolute timer to send to read_channel_timing
-        │   │   ├── config-mode-command:    The command to enter into config mode
-        │   │   ├── cmd-verify:    Whether or not to verify command echo for each command in config_set
-        │   │   ├── enter-config-mode:    Do you enter config mode before sending config commands
-        │   │   ├── error-pattern:    Regular expression pattern to detect config errors in the output
-        │   │   ├── terminator:    Regular expression pattern to use as an alternate terminator
-        │   │   ├── bypass-commands:    Regular expression pattern indicating configuration commands, cmd_verify is automatically disabled
-        │   │   ├── commit:    Commit configuration, default &#39;True&#39;
-        │   │   ├── commit-confirm:    Perform commit confirm on supported platforms
-        │   │   ├── commit-confirm-delay:    Confirmed commit rollback timeout in minutes, used with commit-confirm
-        │   │   ├── commit-final-delay:    Time to wait in seconds before doing final commit, used with commit-confirm
-        │   │   ├── commit-comment:    Commit operation comment
-        │   │   └── batch:    Commands count to send in batches
-        │   ├── scrapli:    Use Scrapli plugin to configure devices
-        │   │   ├── dry-run:    Apply changes or not, also tests if possible to enter config mode
-        │   │   ├── strip-prompt:    Strip prompt from returned output
-        │   │   ├── failed-when-contains:    String or list of strings indicating failure if found in response
-        │   │   ├── stop-on-failed:    Stop executing commands if command fails
-        │   │   ├── privilege-level:    Name of configuration privilege level to acquire
-        │   │   ├── eager:    Do not read until prompt is seen at each command sent to the channel
-        │   │   └── timeout-ops:    Timeout ops value for this operation
-        │   └── napalm:    Use NAPALM plugin to configure devices
-        │       ├── replace:    Whether to replace or merge the configuration
-        │       ├── dry-run:    Apply changes or not, also tests if possible to enter config mode
-        │       └── revert-in:    Amount of time in seconds after which to revert the commit
-        └── job-data:    Path to YAML file with job data
+└──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>cfg:<span class="w">    </span>Configure<span class="w"> </span>devices<span class="w"> </span>over<span class="w"> </span>CLI<span class="w"> </span>interface
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>├──<span class="w"> </span>task-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>├──<span class="w"> </span>reconnect-on-fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>├──<span class="w"> </span>connect-check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>├──<span class="w"> </span>connect-timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>├──<span class="w"> </span>creds-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>credentials<span class="w"> </span>and<span class="w"> </span>parameters<span class="w"> </span>to<span class="w"> </span>retry
+<span class="w">        </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True
+<span class="w">        </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
+<span class="w">        </span>├──<span class="w"> </span>headers-exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
+<span class="w">        </span>├──<span class="w"> </span>sortby:<span class="w">    </span>Table<span class="w"> </span>header<span class="w"> </span>column<span class="w"> </span>to<span class="w"> </span>sort<span class="w"> </span>by
+<span class="w">        </span>├──<span class="w"> </span>reverse:<span class="w">    </span>Table<span class="w"> </span>reverse<span class="w"> </span>the<span class="w"> </span>sort<span class="w"> </span>by<span class="w"> </span>order
+<span class="w">        </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">        </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Dry<span class="w"> </span>run<span class="w"> </span>cfg<span class="w"> </span><span class="k">function</span>
+<span class="w">        </span>├──<span class="w"> </span>*config:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>configuration<span class="w"> </span>commands<span class="w"> </span>to<span class="w"> </span>send<span class="w"> </span>to<span class="w"> </span>devices
+<span class="w">        </span>├──<span class="w"> </span>plugin:<span class="w">    </span>Configuration<span class="w"> </span>plugin<span class="w"> </span>parameters
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>netmiko:<span class="w">    </span>Use<span class="w"> </span>Netmiko<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>configure<span class="w"> </span>devices
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>enable:<span class="w">    </span>Attempt<span class="w"> </span>to<span class="w"> </span>enter<span class="w"> </span>enable-mode
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>exit-config-mode:<span class="w">    </span>Determines<span class="w"> </span>whether<span class="w"> </span>or<span class="w"> </span>not<span class="w"> </span>to<span class="w"> </span><span class="nb">exit</span><span class="w"> </span>config<span class="w"> </span>mode<span class="w"> </span>after<span class="w"> </span><span class="nb">complete</span>
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>strip-command:<span class="w">    </span>Determines<span class="w"> </span>whether<span class="w"> </span>or<span class="w"> </span>not<span class="w"> </span>to<span class="w"> </span>strip<span class="w"> </span>the<span class="w"> </span><span class="nb">command</span>
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>read-timeout:<span class="w">    </span>Absolute<span class="w"> </span>timer<span class="w"> </span>to<span class="w"> </span>send<span class="w"> </span>to<span class="w"> </span>read_channel_timing
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>config-mode-command:<span class="w">    </span>The<span class="w"> </span><span class="nb">command</span><span class="w"> </span>to<span class="w"> </span>enter<span class="w"> </span>into<span class="w"> </span>config<span class="w"> </span>mode
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>cmd-verify:<span class="w">    </span>Whether<span class="w"> </span>or<span class="w"> </span>not<span class="w"> </span>to<span class="w"> </span>verify<span class="w"> </span><span class="nb">command</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>each<span class="w"> </span><span class="nb">command</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>config_set
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>enter-config-mode:<span class="w">    </span>Do<span class="w"> </span>you<span class="w"> </span>enter<span class="w"> </span>config<span class="w"> </span>mode<span class="w"> </span>before<span class="w"> </span>sending<span class="w"> </span>config<span class="w"> </span>commands
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>error-pattern:<span class="w">    </span>Regular<span class="w"> </span>expression<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>detect<span class="w"> </span>config<span class="w"> </span>errors<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>output
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>terminator:<span class="w">    </span>Regular<span class="w"> </span>expression<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>as<span class="w"> </span>an<span class="w"> </span>alternate<span class="w"> </span>terminator
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>bypass-commands:<span class="w">    </span>Regular<span class="w"> </span>expression<span class="w"> </span>pattern<span class="w"> </span>indicating<span class="w"> </span>configuration<span class="w"> </span>commands,<span class="w"> </span>cmd_verify<span class="w"> </span>is<span class="w"> </span>automatically<span class="w"> </span>disabled
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit:<span class="w">    </span>Commit<span class="w"> </span>configuration,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit-confirm:<span class="w">    </span>Perform<span class="w"> </span>commit<span class="w"> </span>confirm<span class="w"> </span>on<span class="w"> </span>supported<span class="w"> </span>platforms
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit-confirm-delay:<span class="w">    </span>Confirmed<span class="w"> </span>commit<span class="w"> </span>rollback<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>minutes,<span class="w"> </span>used<span class="w"> </span>with<span class="w"> </span>commit-confirm
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit-final-delay:<span class="w">    </span>Time<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>before<span class="w"> </span>doing<span class="w"> </span>final<span class="w"> </span>commit,<span class="w"> </span>used<span class="w"> </span>with<span class="w"> </span>commit-confirm
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>commit-comment:<span class="w">    </span>Commit<span class="w"> </span>operation<span class="w"> </span>comment
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>batch:<span class="w">    </span>Commands<span class="w"> </span>count<span class="w"> </span>to<span class="w"> </span>send<span class="w"> </span><span class="k">in</span><span class="w"> </span>batches
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>scrapli:<span class="w">    </span>Use<span class="w"> </span>Scrapli<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>configure<span class="w"> </span>devices
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Apply<span class="w"> </span>changes<span class="w"> </span>or<span class="w"> </span>not,<span class="w"> </span>also<span class="w"> </span>tests<span class="w"> </span><span class="k">if</span><span class="w"> </span>possible<span class="w"> </span>to<span class="w"> </span>enter<span class="w"> </span>config<span class="w"> </span>mode
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>strip-prompt:<span class="w">    </span>Strip<span class="w"> </span>prompt<span class="w"> </span>from<span class="w"> </span>returned<span class="w"> </span>output
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>failed-when-contains:<span class="w">    </span>String<span class="w"> </span>or<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>strings<span class="w"> </span>indicating<span class="w"> </span>failure<span class="w"> </span><span class="k">if</span><span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>response
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>stop-on-failed:<span class="w">    </span>Stop<span class="w"> </span>executing<span class="w"> </span>commands<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>fails
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>privilege-level:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>configuration<span class="w"> </span>privilege<span class="w"> </span>level<span class="w"> </span>to<span class="w"> </span>acquire
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>eager:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">read</span><span class="w"> </span><span class="k">until</span><span class="w"> </span>prompt<span class="w"> </span>is<span class="w"> </span>seen<span class="w"> </span>at<span class="w"> </span>each<span class="w"> </span><span class="nb">command</span><span class="w"> </span>sent<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>channel
+<span class="w">        </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>timeout-ops:<span class="w">    </span>Timeout<span class="w"> </span>ops<span class="w"> </span>value<span class="w"> </span><span class="k">for</span><span class="w"> </span>this<span class="w"> </span>operation
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>napalm:<span class="w">    </span>Use<span class="w"> </span>NAPALM<span class="w"> </span>plugin<span class="w"> </span>to<span class="w"> </span>configure<span class="w"> </span>devices
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>replace:<span class="w">    </span>Whether<span class="w"> </span>to<span class="w"> </span>replace<span class="w"> </span>or<span class="w"> </span>merge<span class="w"> </span>the<span class="w"> </span>configuration
+<span class="w">        </span>│<span class="w">       </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Apply<span class="w"> </span>changes<span class="w"> </span>or<span class="w"> </span>not,<span class="w"> </span>also<span class="w"> </span>tests<span class="w"> </span><span class="k">if</span><span class="w"> </span>possible<span class="w"> </span>to<span class="w"> </span>enter<span class="w"> </span>config<span class="w"> </span>mode
+<span class="w">        </span>│<span class="w">       </span>└──<span class="w"> </span>revert-in:<span class="w">    </span>Amount<span class="w"> </span>of<span class="w"> </span><span class="nb">time</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>after<span class="w"> </span>which<span class="w"> </span>to<span class="w"> </span>revert<span class="w"> </span>the<span class="w"> </span>commit
+<span class="w">        </span>└──<span class="w"> </span>job-data:<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>YAML<span class="w"> </span>file<span class="w"> </span>with<span class="w"> </span>job<span class="w"> </span>data
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

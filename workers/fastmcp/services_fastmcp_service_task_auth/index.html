@@ -3348,10 +3348,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fastmcp-auth-tasks-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FastMCP Auth Tasks Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6121,10 +6143,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fastmcp-auth-tasks-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FastMCP Auth Tasks Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6260,6 +6304,9 @@
 
 
 <h1 id="fastmcp-service-auth-tasks">FastMCP Service Auth Tasks<a class="headerlink" href="#fastmcp-service-auth-tasks" title="Permanent link">¤</a></h1>
+<blockquote>
+<p>task api names: <code>bearer_token_store</code>, <code>bearer_token_list</code>, <code>bearer_token_delete</code>, <code>bearer_token_check</code></p>
+</blockquote>
 <p>FastMCP service supports optional bearer token authentication for the MCP
 streamable HTTP endpoint. To manage token lifecycle, FastMCP provides tasks to
 store, delete, list, and check bearer tokens in the worker diskcache database.</p>
@@ -6292,74 +6339,107 @@ are not exposed as MCP tools.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="fastmcp-auth-tasks-sample-usage">FastMCP Auth Tasks Sample Usage<a class="headerlink" href="#fastmcp-auth-tasks-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>username</code></td>
+<td style="text-align: right;">Required for create and username-scoped delete/list</td>
+<td>User name associated with one or more bearer tokens.</td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td style="text-align: right;">Required for check and token-scoped delete</td>
+<td>Bearer token value. If omitted on create, the worker generates one.</td>
+</tr>
+<tr>
+<td><code>expire</code></td>
+<td style="text-align: right;">No</td>
+<td>Token expiration time in seconds. If omitted, the token does not expire.</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td style="text-align: right;">No</td>
+<td>FastMCP workers to target. Defaults to all workers.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Create, delete, and check tasks return booleans per worker. List tasks return stored token records with username, token, age, creation time, and expiration time.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Store an explicit token:</p>
-<div class="highlight"><pre><span></span><code>nf#fastmcp auth create-token username automation token secret-token expire 3600
-{
-    &quot;fastmcp-worker-1&quot;: true
-}
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>create-token<span class="w"> </span>username<span class="w"> </span>automation<span class="w"> </span>token<span class="w"> </span>secret-token<span class="w"> </span>expire<span class="w"> </span><span class="m">3600</span>
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
 <p>Generate and store a token automatically:</p>
-<div class="highlight"><pre><span></span><code>nf#fastmcp auth create-token username automation
-{
-    &quot;fastmcp-worker-1&quot;: true
-}
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>create-token<span class="w"> </span>username<span class="w"> </span>automation
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
 <p>List tokens for a specific user:</p>
-<div class="highlight"><pre><span></span><code>nf#fastmcp auth list-tokens username automation
- worker              username    token         age             creation                    expires
- fastmcp-worker-1    automation  secret-token  0:01:29.688340  2026-05-31 12:08:51.914919  2026-05-31 13:08:51.914919
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>list-tokens<span class="w"> </span>username<span class="w"> </span>automation
+<span class="w"> </span>worker<span class="w">              </span>username<span class="w">    </span>token<span class="w">         </span>age<span class="w">             </span>creation<span class="w">                    </span>expires
+<span class="w"> </span>fastmcp-worker-1<span class="w">    </span>automation<span class="w">  </span>secret-token<span class="w">  </span><span class="m">0</span>:01:29.688340<span class="w">  </span><span class="m">2026</span>-05-31<span class="w"> </span><span class="m">12</span>:08:51.914919<span class="w">  </span><span class="m">2026</span>-05-31<span class="w"> </span><span class="m">13</span>:08:51.914919
 nf#
 </code></pre></div>
 <p>List all tokens:</p>
-<div class="highlight"><pre><span></span><code>nf#fastmcp auth list-tokens
- worker              username    token                             age             creation                    expires
- fastmcp-worker-1    automation  secret-token                      0:01:44.701374  2026-05-31 12:08:51.914919  2026-05-31 13:08:51.914919
- fastmcp-worker-1    vscode      888945f96b824bf1b4358de790c452b6  0:10:06.561696  2026-05-31 12:00:30.054597  None
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>list-tokens
+<span class="w"> </span>worker<span class="w">              </span>username<span class="w">    </span>token<span class="w">                             </span>age<span class="w">             </span>creation<span class="w">                    </span>expires
+<span class="w"> </span>fastmcp-worker-1<span class="w">    </span>automation<span class="w">  </span>secret-token<span class="w">                      </span><span class="m">0</span>:01:44.701374<span class="w">  </span><span class="m">2026</span>-05-31<span class="w"> </span><span class="m">12</span>:08:51.914919<span class="w">  </span><span class="m">2026</span>-05-31<span class="w"> </span><span class="m">13</span>:08:51.914919
+<span class="w"> </span>fastmcp-worker-1<span class="w">    </span>vscode<span class="w">      </span>888945f96b824bf1b4358de790c452b6<span class="w">  </span><span class="m">0</span>:10:06.561696<span class="w">  </span><span class="m">2026</span>-05-31<span class="w"> </span><span class="m">12</span>:00:30.054597<span class="w">  </span>None
 nf#
 </code></pre></div>
 <p>Delete a specific token:</p>
-<div class="highlight"><pre><span></span><code>nf#fastmcp auth delete-token token secret-token
-{
-    &quot;fastmcp-worker-1&quot;: true
-}
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>delete-token<span class="w"> </span>token<span class="w"> </span>secret-token
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
 <p>Delete all tokens for a user:</p>
-<div class="highlight"><pre><span></span><code>nf#fastmcp auth delete-token username automation
-{
-    &quot;fastmcp-worker-1&quot;: true
-}
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>delete-token<span class="w"> </span>username<span class="w"> </span>automation
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
 <p>Check whether a token is valid:</p>
-<div class="highlight"><pre><span></span><code>nf#fastmcp auth check-token token secret-token
-{
-    &quot;fastmcp-worker-1&quot;: true
-}
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>fastmcp<span class="w"> </span>auth<span class="w"> </span>check-token<span class="w"> </span>token<span class="w"> </span>secret-token
+<span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fastmcp-worker-1&quot;</span>:<span class="w"> </span><span class="nb">true</span>
+<span class="o">}</span>
 nf#
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Context manager - create and list tokens:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-    <span class="n">nfclient</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">,</span>
             <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">,</span>
@@ -6368,14 +6448,43 @@ nf#
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-        <span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bearer_token_list&quot;</span><span class="p">,</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_list&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">},</span>
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - same task:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;expire&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;bearer_token_list&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">},</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6391,29 +6500,29 @@ clients must send the stored token in the HTTP authorization header:</p>
 server definition if the client supports custom headers.</p>
 <h2 id="norfab-fastmcp-service-auth-tasks-command-shell-reference">NORFAB FastMCP Service Auth Tasks Command Shell Reference<a class="headerlink" href="#norfab-fastmcp-service-auth-tasks-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for FastMCP <code>auth</code> tasks:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree fastmcp.auth
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>fastmcp.auth
 root
-└── fastmcp:    FastMCP service
-    └── auth:    Manage auth tokens
-        ├── create-token:    Create authentication token
-        │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── token:    Token string to store, autogenerate if not given
-        │   ├── *username:    User name to store the token for
-        │   └── expire:    Token expiration time in seconds
-        ├── list-tokens:    Retrieve authentication tokens
-        │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   └── username:    User name to list tokens for
-        ├── delete-token:    Delete existing authentication token
-        │   ├── timeout:    Job timeout
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── username:    User name whose tokens should be deleted
-        │   └── token:    Bearer token string to delete
-        └── check-token:    Check if given token valid
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;all&#39;
-            └── *token:    Bearer token string to check
+└──<span class="w"> </span>fastmcp:<span class="w">    </span>FastMCP<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>auth:<span class="w">    </span>Manage<span class="w"> </span>auth<span class="w"> </span>tokens
+<span class="w">        </span>├──<span class="w"> </span>create-token:<span class="w">    </span>Create<span class="w"> </span>authentication<span class="w"> </span>token
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>token:<span class="w">    </span>Token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>store,<span class="w"> </span>autogenerate<span class="w"> </span><span class="k">if</span><span class="w"> </span>not<span class="w"> </span>given
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>*username:<span class="w">    </span>User<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>store<span class="w"> </span>the<span class="w"> </span>token<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>expire:<span class="w">    </span>Token<span class="w"> </span>expiration<span class="w"> </span><span class="nb">time</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds
+<span class="w">        </span>├──<span class="w"> </span>list-tokens:<span class="w">    </span>Retrieve<span class="w"> </span>authentication<span class="w"> </span>tokens
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>username:<span class="w">    </span>User<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>list<span class="w"> </span>tokens<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>delete-token:<span class="w">    </span>Delete<span class="w"> </span>existing<span class="w"> </span>authentication<span class="w"> </span>token
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>username:<span class="w">    </span>User<span class="w"> </span>name<span class="w"> </span>whose<span class="w"> </span>tokens<span class="w"> </span>should<span class="w"> </span>be<span class="w"> </span>deleted
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>token:<span class="w">    </span>Bearer<span class="w"> </span>token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>delete
+<span class="w">        </span>└──<span class="w"> </span>check-token:<span class="w">    </span>Check<span class="w"> </span><span class="k">if</span><span class="w"> </span>given<span class="w"> </span>token<span class="w"> </span>valid
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>*token:<span class="w">    </span>Bearer<span class="w"> </span>token<span class="w"> </span>string<span class="w"> </span>to<span class="w"> </span>check
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

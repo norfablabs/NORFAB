@@ -1036,10 +1036,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-save-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Save Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6060,10 +6082,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-save-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Save Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6134,7 +6178,26 @@
 <li><strong>Configuration Backup</strong>: Saves the current configuration of all devices in the lab.</li>
 <li><strong>Lab-Specific</strong>: Operates on a specified lab, ensuring targeted configuration management.</li>
 </ul>
-<h2 id="containerlab-save-task-sample-usage">Containerlab Save Task Sample Usage<a class="headerlink" href="#containerlab-save-task-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lab_name</code></td>
+<td style="text-align: right;">No</td>
+<td>Lab name to save configurations for</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns a per-lab boolean result indicating whether the configuration save completed.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Below is an example of how to use the Containerlab save task to back up a lab's configuration.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
@@ -6144,48 +6207,68 @@
 <p><img alt="Containerlab Save Demo" src="../../../images/containerlab/containerlab_save_demo.gif" /></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#containerlab save lab-name three-routers-lab
---------------------------------------------- Job Events -----------------------------------------------
-05-May-2025 20:48:25.322 7ffd783a18ee4db7b92d1643ef8b3390 job started
-05-May-2025 20:48:25.391 INFO containerlab-worker-1 running containerlab.save  - 20:48:25 INFO Parsing &amp; checking topology file=three-routers-topology.yaml
-05-May-2025 20:48:25.551 INFO containerlab-worker-1 running containerlab.save  - 20:48:25 INFO saved cEOS configuration from r2 node to
+<div class="highlight"><pre><span></span><code>nf#containerlab<span class="w"> </span>save<span class="w"> </span>lab-name<span class="w"> </span>three-routers-lab
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:48:25.322<span class="w"> </span>7ffd783a18ee4db7b92d1643ef8b3390<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:48:25.391<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.save<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:48:25<span class="w"> </span>INFO<span class="w"> </span>Parsing<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>checking<span class="w"> </span>topology<span class="w"> </span><span class="nv">file</span><span class="o">=</span>three-routers-topology.yaml
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:48:25.551<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.save<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:48:25<span class="w"> </span>INFO<span class="w"> </span>saved<span class="w"> </span>cEOS<span class="w"> </span>configuration<span class="w"> </span>from<span class="w"> </span>r2<span class="w"> </span>node<span class="w"> </span>to
 /home/norfabuser/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/containerlab/clab-three-routers-lab/r2/flash/startup-config
-05-May-2025 20:48:25.905 INFO containerlab-worker-1 running containerlab.save  - 20:48:25 INFO saved cEOS configuration from r3 node to
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:48:25.905<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.save<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:48:25<span class="w"> </span>INFO<span class="w"> </span>saved<span class="w"> </span>cEOS<span class="w"> </span>configuration<span class="w"> </span>from<span class="w"> </span>r3<span class="w"> </span>node<span class="w"> </span>to
 /home/norfabuser/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/containerlab/clab-three-routers-lab/r3/flash/startup-config
-05-May-2025 20:48:26.285 INFO containerlab-worker-1 running containerlab.save  - 20:48:26 INFO saved cEOS configuration from r1 node to
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:48:26.285<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.save<span class="w">  </span>-<span class="w"> </span><span class="m">20</span>:48:26<span class="w"> </span>INFO<span class="w"> </span>saved<span class="w"> </span>cEOS<span class="w"> </span>configuration<span class="w"> </span>from<span class="w"> </span>r1<span class="w"> </span>node<span class="w"> </span>to
 /home/norfabuser/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/containerlab/clab-three-routers-lab/r1/flash/startup-config
-05-May-2025 20:48:26.510 7ffd783a18ee4db7b92d1643ef8b3390 job completed in 1.188 seconds
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">20</span>:48:26.510<span class="w"> </span>7ffd783a18ee4db7b92d1643ef8b3390<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span>.188<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
 containerlab-worker-1:
-    ----------
-    three-routers-lab:
-        True
+<span class="w">    </span>----------
+<span class="w">    </span>three-routers-lab:
+<span class="w">        </span>True
 nf#
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="s2">&quot;save&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="p">},</span>
     <span class="p">)</span>
 
-    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;save&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;three-routers-lab&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6194,15 +6277,15 @@ nf#
 </div>
 <h2 id="norfab-containerlab-cli-shell-reference">NORFAB Containerlab CLI Shell Reference<a class="headerlink" href="#norfab-containerlab-cli-shell-reference" title="Permanent link">¤</a></h2>
 <p>Below are the commands supported by the <code>save</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf# man tree containerlab.save
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>containerlab.save
 root
-└── containerlab:    Containerlab service
-    └── save:    Perform configuration save for all containers running in a lab
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── verbose-result:    Control output details, default &#39;False&#39;
-        ├── lab-name:    Lab name to save configurations for
-        └── progress:    Display progress events, default &#39;True&#39;
+└──<span class="w"> </span>containerlab:<span class="w">    </span>Containerlab<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>save:<span class="w">    </span>Perform<span class="w"> </span>configuration<span class="w"> </span>save<span class="w"> </span><span class="k">for</span><span class="w"> </span>all<span class="w"> </span>containers<span class="w"> </span>running<span class="w"> </span><span class="k">in</span><span class="w"> </span>a<span class="w"> </span>lab
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Lab<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>configurations<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

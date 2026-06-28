@@ -2234,6 +2234,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#norfab-netbox-get-circuits-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6049,6 +6093,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#norfab-netbox-get-circuits-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6105,53 +6193,148 @@
 <blockquote>
 <p>task api name: <code>get_circuits</code></p>
 </blockquote>
+<p>Retrieves NetBox circuit data for selected devices. The task maps circuit terminations back to requested devices and can optionally enrich each circuit with interface details.</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
-<p>Sample devices' circuits data retrieved from Netbox:</p>
-<div class="highlight"><pre><span></span><code>{
-    &quot;netbox-worker-1.1&quot;: {
-        &quot;fceos4&quot;: {
-            &quot;CID1&quot;: {
-                &quot;comments&quot;: &quot;&quot;,
-                &quot;commit_rate&quot;: null,
-                &quot;custom_fields&quot;: {},
-                &quot;description&quot;: &quot;&quot;,
-                &quot;interface&quot;: &quot;eth101&quot;,
-                &quot;is_active&quot;: true,
-                &quot;last_updated&quot;: &quot;2026-01-02T22:50:14.739796+00:00&quot;,
-                &quot;provider&quot;: &quot;Provider1&quot;,
-                &quot;provider_account&quot;: &quot;&quot;,
-                &quot;remote_device&quot;: &quot;fceos5&quot;,
-                &quot;remote_interface&quot;: &quot;eth101&quot;,
-                &quot;status&quot;: &quot;active&quot;,
-                &quot;tags&quot;: [],
-                &quot;tenant&quot;: null,
-                &quot;termination_a&quot;: {
-                    &quot;id&quot;: &quot;36&quot;,
-                    &quot;last_updated&quot;: &quot;2026-01-02T22:50:12.085037+00:00&quot;
-                },
-                &quot;termination_z&quot;: {
-                    &quot;id&quot;: &quot;37&quot;,
-                    &quot;last_updated&quot;: &quot;2026-01-02T22:50:14.498313+00:00&quot;
-                },
-                &quot;type&quot;: &quot;DarkFibre&quot;
-            },
-            &quot;CID2&quot;: {
-              ... etc ...
+<ol>
+<li>Client submits a <code>get_circuits</code> request with a device list</li>
+<li>Worker fetches device data to identify the devices' sites</li>
+<li>Worker queries NetBox circuits for terminations at those sites</li>
+<li>Worker traces terminations and maps matching circuits back to requested devices</li>
+<li>Optional <code>cid</code> filtering limits results to specific circuit IDs</li>
+<li>Optional <code>add_interface_details=True</code> adds interface data from <code>get_interfaces</code></li>
+</ol>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Device names to retrieve circuits for</td>
+</tr>
+<tr>
+<td><code>cid</code></td>
+<td style="text-align: right;">No</td>
+<td>Circuit identifiers to retrieve</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return GraphQL query content without running it</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td style="text-align: right;">No</td>
+<td>Cache usage mode: <code>True</code>, <code>False</code>, <code>refresh</code>, or <code>force</code></td>
+</tr>
+<tr>
+<td><code>add_interface_details</code></td>
+<td style="text-align: right;">No</td>
+<td>Add interface IP, VRF, and child-interface details</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Normal mode returns circuit data keyed by device name and circuit ID:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;fceos4&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;CID1&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="s2">&quot;Provider1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;DarkFibre&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;eth101&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_device&quot;</span><span class="p">:</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;eth101&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
 </code></pre></div>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li>The task queries circuits broadly by device site, then filters and maps results client-side.</li>
+<li><code>devices</code> uses the NFCLI alias <code>device-list</code>.</li>
+<li><code>add_interface_details=True</code> performs extra interface lookups and increases runtime.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Get circuits for one device:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>circuits<span class="w"> </span>device-list<span class="w"> </span>fceos4
+</code></pre></div>
+<p>Get selected circuit IDs:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>circuits<span class="w"> </span>device-list<span class="w"> </span>fceos4<span class="w"> </span>fceos5<span class="w"> </span>cid<span class="w"> </span>CID1<span class="w"> </span>CID2
+</code></pre></div>
+<p>Add interface details:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>circuits<span class="w"> </span>device-list<span class="w"> </span>fceos4<span class="w"> </span>add-interface-details
+</code></pre></div>
+<p>Preview the query content:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>circuits<span class="w"> </span>device-list<span class="w"> </span>fceos4<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+<span class="c1"># get circuits for devices</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_circuits&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># filter by circuit IDs and add interface details</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_circuits&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;cid&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CID1&quot;</span><span class="p">,</span> <span class="s2">&quot;CID2&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;add_interface_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="norfab-netbox-get-circuits-command-shell-reference">NORFAB Netbox Get Circuits Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-circuits-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_circuits</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.circuits
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.get.circuits
 root
-└── netbox:    Netbox service
-    └── get:    Query data from Netbox
-        └── circuits:    Query Netbox circuits data for devices
-            ├── instance:    Netbox instance name to target
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── timeout:    Job timeout
-            ├── device-list:    Device names to query data for
-            ├── dry-run:    Only return query content, do not run it
-            ├── cid:    List of circuit identifiers to retrieve data for
-            └── cache:    How to use cache, default &#39;True&#39;
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>circuits:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>circuits<span class="w"> </span>data<span class="w"> </span><span class="k">for</span><span class="w"> </span>devices
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>device-list:<span class="w">    </span>Device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
+<span class="w">            </span>├──<span class="w"> </span>cid:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>circuit<span class="w"> </span>identifiers<span class="w"> </span>to<span class="w"> </span>retrieve<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>add-interface-details:<span class="w">    </span>Add<span class="w"> </span>interface<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>circuit<span class="w"> </span>results
+<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

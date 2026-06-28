@@ -3865,10 +3865,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-python" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from Python
+        Inputs
       
     </span>
   </a>
@@ -3876,10 +3876,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-nfcli" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from nfcli
+        Output
       
     </span>
   </a>
@@ -3887,10 +3887,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        API Reference
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesharing-fetch-file-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesharing Fetch File Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
       
     </span>
   </a>
@@ -6038,10 +6060,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-python" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from Python
+        Inputs
       
     </span>
   </a>
@@ -6049,10 +6071,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-nfcli" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from nfcli
+        Output
       
     </span>
   </a>
@@ -6060,10 +6082,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        API Reference
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesharing-fetch-file-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesharing Fetch File Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
       
     </span>
   </a>
@@ -6105,24 +6149,89 @@
 <blockquote>
 <p>task api name: <code>fetch_file</code></p>
 </blockquote>
-<p>The <code>fetch_file</code> task streams a file from the File Sharing worker to the client in chunks with offset support. This enables efficient downloading of large files with resume capability. The task is typically called through the client helper method <code>NFPClient.fetch_file()</code> which handles the streaming protocol, caching, and local file management automatically.</p>
-<h2 id="using-it-from-python">Using it from Python<a class="headerlink" href="#using-it-from-python" title="Permanent link">¤</a></h2>
+<p>The <code>fetch_file</code> task streams a file from the File Sharing worker to the client in chunks with offset support. In most user code, prefer the client helper method <code>NFPClient.fetch_file()</code> because it handles streaming, caching, and local file management.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url</code></td>
+<td style="text-align: right;">Yes</td>
+<td>File URL to fetch</td>
+</tr>
+<tr>
+<td><code>chunk_size</code></td>
+<td style="text-align: right;">No</td>
+<td>Number of bytes to return from the given offset when invoking the task directly</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td style="text-align: right;">No</td>
+<td>Byte offset for direct task invocation</td>
+</tr>
+<tr>
+<td><code>destination</code></td>
+<td style="text-align: right;">No</td>
+<td>Local destination path when using the CLI/helper</td>
+</tr>
+<tr>
+<td><code>read</code></td>
+<td style="text-align: right;">No</td>
+<td>Return file content as text instead of only downloading</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>The client helper returns a dictionary whose <code>content</code> value is either the local file path or the file text when <code>read=True</code>. Direct task invocation returns a chunk-oriented response intended for the helper protocol.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Download a file:</p>
+<div class="highlight"><pre><span></span><code>nf#file<span class="w"> </span>copy<span class="w"> </span>url<span class="w"> </span>nf://filesharing/test_file_1.txt<span class="w"> </span>destination<span class="w"> </span>./test_file_1.txt
+</code></pre></div>
+<p>Print file content:</p>
+<div class="highlight"><pre><span></span><code>nf#file<span class="w"> </span>copy<span class="w"> </span>url<span class="w"> </span>nf://filesharing/test_file_1.txt<span class="w"> </span><span class="nb">read</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - helper method:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
 <span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="c1"># Download file (recommended way - uses client helper)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">)</span>
-    <span class="n">local_path</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">)</span>
+    <span class="n">local_path</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+</code></pre></div>
+<p>Context manager - read content as text:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-    <span class="c1"># Download and read content as text</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>  <span class="c1"># text content</span>
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="c1"># Direct task invocation (not recommended - use client helper instead)</span>
-    <span class="n">reply</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span>
+        <span class="n">url</span><span class="o">=</span><span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">,</span>
+        <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>Direct lifecycle - direct task invocation:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="s2">&quot;fetch_file&quot;</span><span class="p">,</span>
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
@@ -6132,21 +6241,26 @@
             <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">reply</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
-<h2 id="using-it-from-nfcli">Using it from <code>nfcli</code><a class="headerlink" href="#using-it-from-nfcli" title="Permanent link">¤</a></h2>
-<p>NORFAB CLI exposes File Sharing under the <code>file</code> command group.</p>
-<div class="highlight"><pre><span></span><code>nf#man tree file.copy
+</div>
+</div>
+</div>
+<h2 id="filesharing-fetch-file-command-shell-reference">Filesharing Fetch File Command Shell Reference<a class="headerlink" href="#filesharing-fetch-file-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Filesharing <code>fetch_file</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>file.copy
 root
-└── file:    File sharing service
-    └── copy:    Copy files
-        ├── url:    File location, default &#39;nf://&#39;
-        ├── destination:    File location to save downloaded content
-        └── read:    Print file content, default &#39;False&#39;
+└──<span class="w"> </span>file:<span class="w">    </span>File<span class="w"> </span>sharing<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>copy:<span class="w">    </span>Copy<span class="w"> </span>files
+<span class="w">        </span>├──<span class="w"> </span>url:<span class="w">    </span>File<span class="w"> </span>location,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;nf://&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>destination:<span class="w">    </span>File<span class="w"> </span>location<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>downloaded<span class="w"> </span>content
+<span class="w">        </span>└──<span class="w"> </span>read:<span class="w">    </span>Print<span class="w"> </span>file<span class="w"> </span>content,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 
 nf#
 </code></pre></div>
-<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">¤</a></h2>
+<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 
 <div class="doc doc-object doc-function">

@@ -1002,10 +1002,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-deploy-netbox-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Deploy Netbox Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -1035,10 +1057,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-containerlab-cli-shell-reference" class="md-nav__link">
+  <a href="#norfab-containerlab-deploy-netbox-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Containerlab CLI Shell Reference
+        NORFAB Containerlab Deploy NetBox Command Shell Reference
       
     </span>
   </a>
@@ -6126,10 +6148,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-deploy-netbox-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Deploy Netbox Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6159,10 +6203,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-containerlab-cli-shell-reference" class="md-nav__link">
+  <a href="#norfab-containerlab-deploy-netbox-command-shell-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Containerlab CLI Shell Reference
+        NORFAB Containerlab Deploy NetBox Command Shell Reference
       
     </span>
   </a>
@@ -6215,42 +6259,42 @@
 <blockquote>
 <p>task api name: <code>deploy_netbox</code></p>
 </blockquote>
-<p>Containerlab service <code>deploy_netbox</code> task is designed to deploy network topologies using devices data retrieved from Netbox. This task automates the deployment process by fetching nodes and links data from Netbox and constructing the topology file, organizing it into a specific folder structure, and executing the <code>containerlab deploy</code> command with the appropriate arguments.</p>
+<p>Containerlab service <code>deploy_netbox</code> task deploys network topologies using device data retrieved from NetBox. The task fetches nodes and links from NetBox, builds a Containerlab topology file, organizes it into the worker topology directory, and runs <code>containerlab deploy</code> with the requested options.</p>
 <h2 id="containerlab-deploy-netbox-task-overview">Containerlab Deploy Netbox Task Overview<a class="headerlink" href="#containerlab-deploy-netbox-task-overview" title="Permanent link">¤</a></h2>
 <p>The <code>deploy_netbox</code> task provides the following features:</p>
 <ul>
 <li>
-<p><strong>Automated Topology Deployment</strong>: Deploys a topology sourcing nodes and links data from Netbox using either or all of these:</p>
+<p><strong>Automated Topology Deployment</strong>: Deploys a topology using nodes and links sourced from NetBox with one of these selection methods:</p>
 <ul>
-<li><strong>Netbox Devices List</strong> - use provided device names to construct topology and deploy lab</li>
-<li><strong>Netbox Tenant</strong> - source devices for given tenant and deploy the lab</li>
-<li><strong>Netbox Device Filters</strong> - fetch devices data from Netbox GraphQL API and deploy the lab</li>
+<li><strong>NetBox Devices List</strong> - use provided device names to construct topology and deploy lab</li>
+<li><strong>NetBox Tenant</strong> - source devices for a tenant and deploy the lab</li>
+<li><strong>NetBox Device Filters</strong> - fetch device data from NetBox GraphQL API and deploy the lab</li>
 </ul>
 </li>
 <li>
-<p><strong>Topology Links Sourcing</strong> - links formed using Netbox devices' connections and circuits data.</p>
+<p><strong>Topology Links Sourcing</strong> - forms links using NetBox device connections and circuit data.</p>
 </li>
 <li><strong>Reconfiguration</strong>: Supports reconfiguring an already deployed lab.</li>
 <li><strong>Node Filtering</strong>: Allows deploying specific nodes using a filter.</li>
 </ul>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
-<p><code>deploy_netbox</code> task uses Netbox service <a href="../../netbox/services_netbox_service_tasks_get_containerlab_inventory/">get_containerlab_inventory</a> task to fetch topology inventory data from Netbox.</p>
+<p><code>deploy_netbox</code> uses the NetBox service <a href="../../netbox/services_netbox_service_tasks_get_containerlab_inventory/">get_containerlab_inventory</a> task to fetch topology inventory data from NetBox.</p>
 <p><img alt="Containerlab Deploy Netbox" src="../../../images/Containerlab_Service_Deploy_Netbox.jpg" /></p>
 <ol>
 <li>
 <p>Client submits request to Containerlab service to deploy a lab</p>
 </li>
 <li>
-<p>Containerlab worker sends job request to Netbox service to retrieve topology data for requested devices</p>
+<p>Containerlab worker sends a job request to NetBox service to retrieve topology data for requested devices</p>
 </li>
 <li>
-<p>Netbox service fetches data from the Netbox and constructs Containerlab inventory</p>
+<p>NetBox service fetches data from NetBox and constructs Containerlab inventory</p>
 </li>
 <li>
-<p>Netbox returns lab inventor data back to Containerlab worker</p>
+<p>NetBox returns lab inventory data back to Containerlab worker</p>
 </li>
 <li>
-<p>Containerlab worker deploys lab using topology data provided by Netbox service</p>
+<p>Containerlab worker deploys the lab using topology data provided by NetBox service</p>
 </li>
 </ol>
 <h2 id="device-config-context-containerlab-parameters">Device Config Context Containerlab Parameters<a class="headerlink" href="#device-config-context-containerlab-parameters" title="Permanent link">¤</a></h2>
@@ -6281,10 +6325,74 @@
 </code></pre></div>
 <ul>
 <li><code>interfaces_rename</code>  - is a list of one or more interface renaming instructions, each item must have <code>find</code> and <code>replace</code> defined, optional <code>use_regex</code> flag specifies whether to use regex based pattern substitution.</li>
-<li><code>kind</code> - uses Netbox device <code>platform</code> field value by default</li>
+<li><code>kind</code> - uses NetBox device <code>platform</code> field value by default</li>
 <li><code>image</code> - uses <code>image</code> value if provided, otherwise uses <code>{kind}:latest</code></li>
 </ul>
-<h2 id="containerlab-deploy-netbox-task-sample-usage">Containerlab Deploy Netbox Task Sample Usage<a class="headerlink" href="#containerlab-deploy-netbox-task-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lab_name</code></td>
+<td style="text-align: right;">No</td>
+<td>Lab name to deploy</td>
+</tr>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox device names to include</td>
+</tr>
+<tr>
+<td><code>tenant</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox tenant name to select devices</td>
+</tr>
+<tr>
+<td><code>filters</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox device filters</td>
+</tr>
+<tr>
+<td><code>netbox_instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to query</td>
+</tr>
+<tr>
+<td><code>ipv4_subnet</code></td>
+<td style="text-align: right;">No</td>
+<td>IPv4 management subnet, default <code>172.100.100.0/24</code></td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td style="text-align: right;">No</td>
+<td>Docker image to use for all nodes</td>
+</tr>
+<tr>
+<td><code>ports</code></td>
+<td style="text-align: right;">No</td>
+<td>TCP/UDP port range to allocate for nodes</td>
+</tr>
+<tr>
+<td><code>reconfigure</code></td>
+<td style="text-align: right;">No</td>
+<td>Destroy and redeploy an existing lab</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Fetch and return inventory without deploying</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Normal mode returns Containerlab deployment details. With <code>dry_run=True</code>, the task returns generated topology inventory from NetBox without deploying the lab.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Below is an example of how to use the Containerlab deploy Netbox task to deploy a topology.</p>
 <div class="admonition examples">
 <p class="admonition-title">Examples</p>
@@ -6294,127 +6402,181 @@
 <p><img alt="Containerlab Deploy Netbox Demo" src="../../../images/containerlab/containerlab_deploy_netbox_demo_devices.gif" /></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf#containerlab deploy-netbox lab-name foobar devices fceos4 fceos5
---------------------------------------------- Job Events -----------------------------------------------
-31-May-2025 13:02:29.525 9e3b29210e1140f8b3a311e8c4669ca4 job started
-31-May-2025 13:02:29.533 INFO containerlab-worker-1 running containerlab.deploy_netbox  - Checking existing containers
-31-May-2025 13:02:29.573 INFO containerlab-worker-1 running containerlab.deploy_netbox  - Existing containers found, retrieving details
-31-May-2025 13:02:29.574 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 172.100.100.0/24 already in use, allocating new subnet
-31-May-2025 13:02:29.575 INFO containerlab-worker-1 running containerlab.deploy_netbox  - Collected TCP/UDP ports used by existing containers
-31-May-2025 13:02:29.576 INFO containerlab-worker-1 running containerlab.deploy_netbox  - foobar allocated new subnet 172.100.102.0/24
-31-May-2025 13:02:29.576 INFO containerlab-worker-1 running containerlab.deploy_netbox  - foobar fetching lab topology data from Netbox
-31-May-2025 13:02:31.090 INFO containerlab-worker-1 running containerlab.deploy_netbox  - foobar topology data retrieved from Netbox
-31-May-2025 13:02:31.094 INFO containerlab-worker-1 running containerlab.deploy_netbox  - foobar topology data saved to 
-&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/foobar.yaml&#39;
-31-May-2025 13:02:31.095 INFO containerlab-worker-1 running containerlab.deploy_netbox  - foobar deploying lab using foobar.yaml topology file
-31-May-2025 13:02:31.123 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO Containerlab started version=0.67.0
-31-May-2025 13:02:31.134 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO Parsing &amp; checking topology file=foobar.yaml
-31-May-2025 13:02:31.145 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO Creating docker network name=br-foobar IPv4 subnet=172.100.102.0/24 IPv6 subnet=&quot;&quot; MTU=0
-31-May-2025 13:02:31.257 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO Creating lab directory 
-path=/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar
-31-May-2025 13:02:31.268 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO config file 
-&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos4/flash/startup-config&#39; for node &#39;fceos4&#39; already exists and will not be generated/reset
-31-May-2025 13:02:31.280 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO Creating container name=fceos4
-31-May-2025 13:02:31.291 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO config file 
-&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos5/flash/startup-config&#39; for node &#39;fceos5&#39; already exists and will not be generated/reset
-31-May-2025 13:02:31.302 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:31 INFO Creating container name=fceos5
-31-May-2025 13:02:32.065 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:32 INFO Created link: fceos5:eth1 ▪┄┄▪ fceos4:eth1
-31-May-2025 13:02:32.220 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:32 INFO Created link: fceos5:eth2 ▪┄┄▪ fceos4:eth2
-31-May-2025 13:02:32.592 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:32 INFO Created link: fceos5:eth3 ▪┄┄▪ fceos4:eth3
-31-May-2025 13:02:32.744 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:32 INFO Created link: fceos5:eth4 ▪┄┄▪ fceos4:eth4
-31-May-2025 13:02:32.844 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:32 INFO Created link: fceos5:eth6 ▪┄┄▪ fceos4:eth6
-31-May-2025 13:02:32.953 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:32 INFO Created link: fceos5:eth7 ▪┄┄▪ fceos4:eth7
-31-May-2025 13:02:32.964 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:32 INFO Running postdeploy actions for Arista cEOS &#39;fceos5&#39; node
-31-May-2025 13:02:33.005 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:33 INFO Created link: fceos5:eth8 ▪┄┄▪ fceos4:eth101
-31-May-2025 13:02:33.053 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:33 INFO Created link: fceos5:eth11 ▪┄┄▪ fceos4:eth11
-31-May-2025 13:02:33.064 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:33 INFO Running postdeploy actions for Arista cEOS &#39;fceos4&#39; node
-31-May-2025 13:02:54.730 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:54 INFO Adding host entries path=/etc/hosts
-31-May-2025 13:02:54.742 INFO containerlab-worker-1 running containerlab.deploy_netbox  - 13:02:54 INFO Adding SSH config for nodes path=/etc/ssh/ssh_config.d/clab-foobar.conf
-31-May-2025 13:02:54.859 9e3b29210e1140f8b3a311e8c4669ca4 job completed in 25.334 seconds
+<div class="highlight"><pre><span></span><code>nf#containerlab<span class="w"> </span>deploy-netbox<span class="w"> </span>lab-name<span class="w"> </span>foobar<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>fceos5
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.525<span class="w"> </span>9e3b29210e1140f8b3a311e8c4669ca4<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.533<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>Checking<span class="w"> </span>existing<span class="w"> </span>containers
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.573<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>Existing<span class="w"> </span>containers<span class="w"> </span>found,<span class="w"> </span>retrieving<span class="w"> </span>details
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.574<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">172</span>.100.100.0/24<span class="w"> </span>already<span class="w"> </span><span class="k">in</span><span class="w"> </span>use,<span class="w"> </span>allocating<span class="w"> </span>new<span class="w"> </span>subnet
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.575<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>Collected<span class="w"> </span>TCP/UDP<span class="w"> </span>ports<span class="w"> </span>used<span class="w"> </span>by<span class="w"> </span>existing<span class="w"> </span>containers
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.576<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>allocated<span class="w"> </span>new<span class="w"> </span>subnet<span class="w"> </span><span class="m">172</span>.100.102.0/24
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:29.576<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>fetching<span class="w"> </span>lab<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.090<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span>retrieved<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.094<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span>saved<span class="w"> </span>to<span class="w"> </span>
+<span class="s1">&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/foobar.yaml&#39;</span>
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.095<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span>foobar<span class="w"> </span>deploying<span class="w"> </span>lab<span class="w"> </span>using<span class="w"> </span>foobar.yaml<span class="w"> </span>topology<span class="w"> </span>file
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.123<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Containerlab<span class="w"> </span>started<span class="w"> </span><span class="nv">version</span><span class="o">=</span><span class="m">0</span>.67.0
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.134<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Parsing<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>checking<span class="w"> </span>topology<span class="w"> </span><span class="nv">file</span><span class="o">=</span>foobar.yaml
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.145<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>docker<span class="w"> </span>network<span class="w"> </span><span class="nv">name</span><span class="o">=</span>br-foobar<span class="w"> </span>IPv4<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="m">172</span>.100.102.0/24<span class="w"> </span>IPv6<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="nv">MTU</span><span class="o">=</span><span class="m">0</span>
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.257<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>lab<span class="w"> </span>directory<span class="w"> </span>
+<span class="nv">path</span><span class="o">=</span>/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.268<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>config<span class="w"> </span>file<span class="w"> </span>
+<span class="s1">&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos4/flash/startup-config&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="s1">&#39;fceos4&#39;</span><span class="w"> </span>already<span class="w"> </span>exists<span class="w"> </span>and<span class="w"> </span>will<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>generated/reset
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.280<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>fceos4
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.291<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>config<span class="w"> </span>file<span class="w"> </span>
+<span class="s1">&#39;/home/norfab/norfab/tests/nf_containerlab/__norfab__/files/worker/containerlab-worker-1/topologies/foobar/clab-foobar/fceos5/flash/startup-config&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>node<span class="w"> </span><span class="s1">&#39;fceos5&#39;</span><span class="w"> </span>already<span class="w"> </span>exists<span class="w"> </span>and<span class="w"> </span>will<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>generated/reset
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:31.302<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:31<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>fceos5
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.065<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth1<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth1
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.220<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth2<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth2
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.592<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth3<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth3
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.744<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth4<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth4
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.844<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth6<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth6
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.953<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth7<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth7
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:32.964<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:32<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">&#39;fceos5&#39;</span><span class="w"> </span>node
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:33.005<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:33<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth8<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth101
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:33.053<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:33<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>fceos5:eth11<span class="w"> </span>▪┄┄▪<span class="w"> </span>fceos4:eth11
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:33.064<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:33<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">&#39;fceos4&#39;</span><span class="w"> </span>node
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:54.730<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:54<span class="w"> </span>INFO<span class="w"> </span>Adding<span class="w"> </span>host<span class="w"> </span>entries<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/etc/hosts
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:54.742<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy_netbox<span class="w">  </span>-<span class="w"> </span><span class="m">13</span>:02:54<span class="w"> </span>INFO<span class="w"> </span>Adding<span class="w"> </span>SSH<span class="w"> </span>config<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/etc/ssh/ssh_config.d/clab-foobar.conf
+<span class="m">31</span>-May-2025<span class="w"> </span><span class="m">13</span>:02:54.859<span class="w"> </span>9e3b29210e1140f8b3a311e8c4669ca4<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">25</span>.334<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
 containerlab-worker-1:
-    ----------
-    containers:
-        |_
-        ----------
-        lab_name:
-            foobar
-        labPath:
-            foobar.yaml
-        name:
-            clab-foobar-fceos4
-        container_id:
-            c24aa0089eca
-        image:
-            ceosimage:4.30.0F
-        kind:
-            ceos
-        state:
-            running
-        ipv4_address:
-            172.100.102.2/24
-            N/A
-        owner:
-            norfab
-        |_
-        lab_name:
-            foobar
-        labPath:
-            foobar.yaml
-        name:
-            clab-foobar-fceos5
-        container_id:
-            2098290d7a79
-        image:
-            ceosimage:4.30.0F
-        kind:
-            ceos
-        state:
-            running
-        ipv4_address:
-            172.100.102.3/24
-        ipv6_address:
-            N/A
-        owner:
-            norfab
-nf#show containerlab labs
+<span class="w">    </span>----------
+<span class="w">    </span>containers:
+<span class="w">        </span><span class="p">|</span>_
+<span class="w">        </span>----------
+<span class="w">        </span>lab_name:
+<span class="w">            </span>foobar
+<span class="w">        </span>labPath:
+<span class="w">            </span>foobar.yaml
+<span class="w">        </span>name:
+<span class="w">            </span>clab-foobar-fceos4
+<span class="w">        </span>container_id:
+<span class="w">            </span>c24aa0089eca
+<span class="w">        </span>image:
+<span class="w">            </span>ceosimage:4.30.0F
+<span class="w">        </span>kind:
+<span class="w">            </span>ceos
+<span class="w">        </span>state:
+<span class="w">            </span>running
+<span class="w">        </span>ipv4_address:
+<span class="w">            </span><span class="m">172</span>.100.102.2/24
+<span class="w">            </span>N/A
+<span class="w">        </span>owner:
+<span class="w">            </span>norfab
+<span class="w">        </span><span class="p">|</span>_
+<span class="w">        </span>lab_name:
+<span class="w">            </span>foobar
+<span class="w">        </span>labPath:
+<span class="w">            </span>foobar.yaml
+<span class="w">        </span>name:
+<span class="w">            </span>clab-foobar-fceos5
+<span class="w">        </span>container_id:
+<span class="w">            </span>2098290d7a79
+<span class="w">        </span>image:
+<span class="w">            </span>ceosimage:4.30.0F
+<span class="w">        </span>kind:
+<span class="w">            </span>ceos
+<span class="w">        </span>state:
+<span class="w">            </span>running
+<span class="w">        </span>ipv4_address:
+<span class="w">            </span><span class="m">172</span>.100.102.3/24
+<span class="w">        </span>ipv6_address:
+<span class="w">            </span>N/A
+<span class="w">        </span>owner:
+<span class="w">            </span>norfab
+nf#show<span class="w"> </span>containerlab<span class="w"> </span>labs
 containerlab-worker-1:
-    - foobar
+<span class="w">    </span>-<span class="w"> </span>foobar
 nf#
 </code></pre></div>
 <p>In this example:</p>
 <ul>
 <li><code>nfcli</code> command starts the NorFab Interactive Shell</li>
 <li><code>containerlab</code> command switches to the Containerlab sub-shell</li>
-<li><code>deploy_netbox</code> command instruct Containerlab service to deploy a topology</li>
-<li><code>devices</code> specifies list of devices to fetch data and links for from netbox</li>
+<li><code>deploy-netbox</code> command instructs Containerlab service to deploy a topology</li>
+<li><code>devices</code> specifies the devices to fetch data and links for from NetBox</li>
 </ul>
 </div>
 <div class="tabbed-block">
-<p>This code is complete and can run as is.</p>
+<p>Context manager - deploy selected devices:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy_netbox&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;foobar&quot;</span>
-        <span class="p">}</span>
+            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;foobar&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
     <span class="p">)</span>
 
-    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - dry run with filters:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy_netbox&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;netbox_instance&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+<p>Direct lifecycle - deploy by tenant and reconfigure:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy_netbox&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;tenant-lab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="s2">&quot;engineering&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ipv4_subnet&quot;</span><span class="p">:</span> <span class="s2">&quot;172.100.120.0/24&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="s2">&quot;ceosimage:4.30.0F&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ports&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">13000</span><span class="p">],</span>
+            <span class="s2">&quot;reconfigure&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6425,34 +6587,34 @@ nf#
 <p>The <code>deploy_netbox</code> task supports reconfiguring an already deployed lab by using the <code>reconfigure</code> argument. This allows you to update the lab configuration without destroying and redeploying it.</p>
 <h2 id="filtering-nodes-for-deployment">Filtering Nodes for Deployment<a class="headerlink" href="#filtering-nodes-for-deployment" title="Permanent link">¤</a></h2>
 <p>The <code>deploy_netbox</code> task allows you to deploy specific nodes in a topology using the <code>node_filter</code> argument. This is useful for testing or updating specific parts of a lab without affecting the entire topology.</p>
-<h2 id="norfab-containerlab-cli-shell-reference">NORFAB Containerlab CLI Shell Reference<a class="headerlink" href="#norfab-containerlab-cli-shell-reference" title="Permanent link">¤</a></h2>
+<h2 id="norfab-containerlab-deploy-netbox-command-shell-reference">NORFAB Containerlab Deploy NetBox Command Shell Reference<a class="headerlink" href="#norfab-containerlab-deploy-netbox-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>Below are the commands supported by the <code>deploy_netbox</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree containerlab.deploy-netbox
-└── containerlab:    Containerlab service
-    └── deploy-netbox:    Spins up a lab using devices data from Netbox
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;any&#39;
-        ├── verbose-result:    Control output details, default &#39;False&#39;
-        ├── lab-name:    Lab name to generate lab inventory for
-        ├── tenant:    Tenant name to generate lab inventory for
-        ├── filters:    Netbox device filters to generate lab inventory for
-        │   ├── tenant:    Filter devices by tenants
-        │   ├── device-name-contains:    Filter devices by name pattern
-        │   ├── model:    Filter devices by models
-        │   ├── platform:    Filter devices by platforms
-        │   ├── region:    Filter devices by regions
-        │   ├── role:    Filter devices by roles
-        │   ├── site:    Filter devices by sites
-        │   ├── status:    Filter devices by statuses
-        │   └── tag:    Filter devices by tags
-        ├── devices:    List of devices to generate lab inventory for
-        ├── progress:    Display progress events, default &#39;True&#39;
-        ├── netbox-instance:    Name of Netbox instance to pull inventory from
-        ├── ipv4-subnet:    IPv4 management subnet to use for lab, default &#39;172.100.100.0/24&#39;
-        ├── image:    Docker image to use for all nodes
-        ├── ports:    Range of TCP/UDP ports to use for nodes, default &#39;[12000, 13000]&#39;
-        ├── reconfigure:    Destroy the lab and then re-deploy it., default &#39;False&#39;
-        └── dry-run:    Do not deploy, only fetch inventory from Netbox
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>containerlab.deploy-netbox
+└──<span class="w"> </span>containerlab:<span class="w">    </span>Containerlab<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>deploy-netbox:<span class="w">    </span>Spins<span class="w"> </span>up<span class="w"> </span>a<span class="w"> </span>lab<span class="w"> </span>using<span class="w"> </span>devices<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>NetBox
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>lab-name:<span class="w">    </span>Lab<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>tenant:<span class="w">    </span>Tenant<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>filters:<span class="w">    </span>NetBox<span class="w"> </span>device<span class="w"> </span>filters<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tenant:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>tenants
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>device-name-contains:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>pattern
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>model:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>models
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>platform:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>platforms
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>region:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>regions
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>role:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>roles
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>site:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>sites
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>status:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>statuses
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>tag:<span class="w">    </span>Filter<span class="w"> </span>devices<span class="w"> </span>by<span class="w"> </span>tags
+<span class="w">        </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>devices<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>netbox-instance:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>NetBox<span class="w"> </span>instance<span class="w"> </span>to<span class="w"> </span>pull<span class="w"> </span>inventory<span class="w"> </span>from
+<span class="w">        </span>├──<span class="w"> </span>ipv4-subnet:<span class="w">    </span>IPv4<span class="w"> </span>management<span class="w"> </span>subnet<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>lab,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;172.100.100.0/24&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>image:<span class="w">    </span>Docker<span class="w"> </span>image<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>all<span class="w"> </span>nodes
+<span class="w">        </span>├──<span class="w"> </span>ports:<span class="w">    </span>Range<span class="w"> </span>of<span class="w"> </span>TCP/UDP<span class="w"> </span>ports<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;[12000, 13000]&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>reconfigure:<span class="w">    </span>Destroy<span class="w"> </span>the<span class="w"> </span>lab<span class="w"> </span>and<span class="w"> </span><span class="k">then</span><span class="w"> </span>re-deploy<span class="w"> </span>it.,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>└──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>deploy,<span class="w"> </span>only<span class="w"> </span>fetch<span class="w"> </span>inventory<span class="w"> </span>from<span class="w"> </span>NetBox
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

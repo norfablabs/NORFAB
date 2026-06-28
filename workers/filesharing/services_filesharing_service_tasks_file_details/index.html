@@ -3837,10 +3837,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-python" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from Python
+        Inputs
       
     </span>
   </a>
@@ -3848,10 +3848,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-nfcli" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from nfcli
+        Output
       
     </span>
   </a>
@@ -3859,10 +3859,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        API Reference
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesharing-file-details-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesharing File Details Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
       
     </span>
   </a>
@@ -6038,10 +6060,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-python" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from Python
+        Inputs
       
     </span>
   </a>
@@ -6049,10 +6071,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-it-from-nfcli" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using it from nfcli
+        Output
       
     </span>
   </a>
@@ -6060,10 +6082,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        API Reference
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesharing-file-details-command-shell-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesharing File Details Command Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
       
     </span>
   </a>
@@ -6105,32 +6149,81 @@
 <blockquote>
 <p>task api name: <code>file_details</code></p>
 </blockquote>
-<p>The <code>file_details</code> task returns metadata about a file including its existence status, size in bytes, and MD5 hash. This is useful for verifying file integrity, checking if a file exists before downloading, or comparing local and remote file versions without transferring the entire file.</p>
-<h2 id="using-it-from-python">Using it from Python<a class="headerlink" href="#using-it-from-python" title="Permanent link">¤</a></h2>
+<p>The <code>file_details</code> task returns metadata about a file, including existence status, size in bytes, and MD5 hash. Use it to verify file integrity or check a file before downloading it.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url</code></td>
+<td style="text-align: right;">Yes</td>
+<td>File URL to inspect</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns metadata for the requested file, including whether it exists, its size, and its MD5 hash when available.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Show file details:</p>
+<div class="highlight"><pre><span></span><code>nf#file<span class="w"> </span>details<span class="w"> </span>url<span class="w"> </span>nf://filesharing/test_file_1.txt
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
 <span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">reply</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_details&quot;</span><span class="p">,</span>
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">},</span>
     <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">reply</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="using-it-from-nfcli">Using it from <code>nfcli</code><a class="headerlink" href="#using-it-from-nfcli" title="Permanent link">¤</a></h2>
-<p>NORFAB CLI exposes File Sharing under the <code>file</code> command group.</p>
-<div class="highlight"><pre><span></span><code>nf#man tree file.details
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;filesharing&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;file_details&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://templates/base.j2&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="filesharing-file-details-command-shell-reference">Filesharing File Details Command Shell Reference<a class="headerlink" href="#filesharing-file-details-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>NorFab shell supports these command options for Filesharing <code>file_details</code> task:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>file.details
 root
-└── file:    File sharing service
-    └── details:    Show file details
-        └── url:    File location, default &#39;nf://&#39;
+└──<span class="w"> </span>file:<span class="w">    </span>File<span class="w"> </span>sharing<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>details:<span class="w">    </span>Show<span class="w"> </span>file<span class="w"> </span>details
+<span class="w">        </span>└──<span class="w"> </span>url:<span class="w">    </span>File<span class="w"> </span>location,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;nf://&#39;</span>
 
 nf#
 </code></pre></div>
-<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">¤</a></h2>
+<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 
 <div class="doc doc-object doc-function">

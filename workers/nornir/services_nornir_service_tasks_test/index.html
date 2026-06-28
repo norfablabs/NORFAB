@@ -1693,10 +1693,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-test-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir Test Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6115,10 +6137,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#nornir-test-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nornir Test Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6261,7 +6305,86 @@
 </blockquote>
 <p>The Nornir Service <code>test</code> task designed to facilitate the execution of network tests. This task provides network operations engineers and network automation developers with tools to validate network configurations, ensure compliance, and monitor network performance. By leveraging the capabilities of the Nornir service, users can automate testing process, identify issues proactively, and maintain a robust network infrastructure.</p>
 <p>Nornir service <code>test</code> task uses Nornir <a href="https://nornir-salt.readthedocs.io/en/latest/Processors/TestsProcessor.html">TestsProcessor</a> to run the tests and support test suites definition in YAML format, where test suite YAML files can be stored on and sourced from broker.</p>
-<h2 id="nornir-test-sample-usage">Nornir Test Sample Usage<a class="headerlink" href="#nornir-test-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>suite</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Test suite content or <code>nf://</code> path to a suite file on the broker.</td>
+</tr>
+<tr>
+<td><code>subset</code></td>
+<td style="text-align: right;">No</td>
+<td>Run only selected tests from the suite.</td>
+</tr>
+<tr>
+<td><code>failed_only</code></td>
+<td style="text-align: right;">No</td>
+<td>Return only failed tests.</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Render tests without executing them.</td>
+</tr>
+<tr>
+<td><code>groups</code></td>
+<td style="text-align: right;">No</td>
+<td>Run only tests assigned to the listed test groups.</td>
+</tr>
+<tr>
+<td><code>return_tests_suite</code></td>
+<td style="text-align: right;">No</td>
+<td>Include rendered per-host test suites in the result.</td>
+</tr>
+<tr>
+<td><code>remove_tasks</code></td>
+<td style="text-align: right;">No</td>
+<td>Exclude or include underlying task results in the output. Defaults to <code>True</code>.</td>
+</tr>
+<tr>
+<td><code>job_data</code></td>
+<td style="text-align: right;">No</td>
+<td>Path to YAML job data used by templates.</td>
+</tr>
+<tr>
+<td><code>markdown</code></td>
+<td style="text-align: right;">No</td>
+<td>Return a Markdown report from <code>client.run_job(...)</code>.</td>
+</tr>
+<tr>
+<td><code>extensive</code></td>
+<td style="text-align: right;">No</td>
+<td>Include detailed per-host data in Markdown output.</td>
+</tr>
+<tr>
+<td><code>add_details</code>, <code>to_dict</code></td>
+<td style="text-align: right;">No</td>
+<td>Control result detail level and serialized result shape.</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td style="text-align: right;">No</td>
+<td>Nornir workers to target. Defaults to all workers.</td>
+</tr>
+<tr>
+<td><code>FC</code>, <code>FB</code>, <code>FH</code>, <code>FL</code>, <code>FM</code>, <code>FG</code>, <code>FR</code>, <code>FO</code>, <code>FP</code>, <code>FX</code>, <code>FN</code>, <code>hosts</code></td>
+<td style="text-align: right;">No</td>
+<td>Host filters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>The task returns structured test results per host and test case. Shell output can be formatted as a table. Python client calls can also return a Markdown report when <code>markdown=True</code>.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Nornir service <code>test</code> task uses suites in YAML format to define tests, sample tests suite:</p>
 <div class="highlight"><span class="filename">suite_3.txt</span><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check ceos version</span>
 <span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;show</span><span class="nv"> </span><span class="s">version&quot;</span>
@@ -6282,68 +6405,68 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>C:\nf&gt;nfcli
-Welcome to NorFab Interactive Shell.
+<div class="highlight"><pre><span></span><code>C:<span class="se">\n</span>f&gt;nfcli
+Welcome<span class="w"> </span>to<span class="w"> </span>NorFab<span class="w"> </span>Interactive<span class="w"> </span>Shell.
 nf#
 nf#nornir
-nf[nornir-test]#
-nf[nornir-test]#suite nf://nornir_test_suites/suite_3.txt FC spine,leaf
---------------------------------------------- Job Events -----------------------------------------------
-07-Jan-2025 18:44:35 0c3309c54ee44397b055257a0d442e62 job started
-07-Jan-2025 18:44:35.207 nornir nornir-worker-1 ceos-spine-1, ceos-spine-2 task started - &#39;netmiko_send_commands&#39;
-07-Jan-2025 18:44:35.211 nornir nornir-worker-2 ceos-leaf-1, ceos-leaf-2, ceos-leaf-3 task started - &#39;netmiko_send_commands&#39;
-&lt;omitted for brevity&gt;
-07-Jan-2025 18:44:36 0c3309c54ee44397b055257a0d442e62 job completed in 1.391 seconds
+nf<span class="o">[</span>nornir-test<span class="o">]</span><span class="c1">#</span>
+nf<span class="o">[</span>nornir-test<span class="o">]</span><span class="c1">#suite nf://nornir_test_suites/suite_3.txt FC spine,leaf</span>
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">07</span>-Jan-2025<span class="w"> </span><span class="m">18</span>:44:35<span class="w"> </span>0c3309c54ee44397b055257a0d442e62<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">07</span>-Jan-2025<span class="w"> </span><span class="m">18</span>:44:35.207<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
+<span class="m">07</span>-Jan-2025<span class="w"> </span><span class="m">18</span>:44:35.211<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-2<span class="w"> </span>ceos-leaf-1,<span class="w"> </span>ceos-leaf-2,<span class="w"> </span>ceos-leaf-3<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
+&lt;omitted<span class="w"> </span><span class="k">for</span><span class="w"> </span>brevity&gt;
+<span class="m">07</span>-Jan-2025<span class="w"> </span><span class="m">18</span>:44:36<span class="w"> </span>0c3309c54ee44397b055257a0d442e62<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span>.391<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
 +----+--------------+-----------------------------+----------+-------------------+
-|    | host         | name                        | result   | exception         |
-+====+==============+=============================+==========+===================+
-|  0 | ceos-leaf-1  | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w">    </span><span class="p">|</span><span class="w"> </span>host<span class="w">         </span><span class="p">|</span><span class="w"> </span>name<span class="w">                        </span><span class="p">|</span><span class="w"> </span>result<span class="w">   </span><span class="p">|</span><span class="w"> </span>exception<span class="w">         </span><span class="p">|</span>
++<span class="o">====</span>+<span class="o">==============</span>+<span class="o">=============================</span>+<span class="o">==========</span>+<span class="o">===================</span>+
+<span class="p">|</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-1<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  1 | ceos-leaf-1  | Check NTP status            | FAIL     | Pattern in output |
+<span class="p">|</span><span class="w">  </span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-1<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>NTP<span class="w"> </span>status<span class="w">            </span><span class="p">|</span><span class="w"> </span>FAIL<span class="w">     </span><span class="p">|</span><span class="w"> </span>Pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>output<span class="w"> </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  2 | ceos-leaf-1  | Check Mgmt Interface Status | PASS     |                   |
+<span class="p">|</span><span class="w">  </span><span class="m">2</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-1<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>Mgmt<span class="w"> </span>Interface<span class="w"> </span>Status<span class="w"> </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  3 | ceos-leaf-2  | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w">  </span><span class="m">3</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-2<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  4 | ceos-leaf-2  | Check NTP status            | FAIL     | Pattern in output |
+<span class="p">|</span><span class="w">  </span><span class="m">4</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-2<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>NTP<span class="w"> </span>status<span class="w">            </span><span class="p">|</span><span class="w"> </span>FAIL<span class="w">     </span><span class="p">|</span><span class="w"> </span>Pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>output<span class="w"> </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  5 | ceos-leaf-2  | Check Mgmt Interface Status | PASS     |                   |
+<span class="p">|</span><span class="w">  </span><span class="m">5</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-2<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>Mgmt<span class="w"> </span>Interface<span class="w"> </span>Status<span class="w"> </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  6 | ceos-leaf-3  | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w">  </span><span class="m">6</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-3<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  7 | ceos-leaf-3  | Check NTP status            | FAIL     | Pattern in output |
+<span class="p">|</span><span class="w">  </span><span class="m">7</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-3<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>NTP<span class="w"> </span>status<span class="w">            </span><span class="p">|</span><span class="w"> </span>FAIL<span class="w">     </span><span class="p">|</span><span class="w"> </span>Pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>output<span class="w"> </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  8 | ceos-leaf-3  | Check Mgmt Interface Status | PASS     |                   |
+<span class="p">|</span><span class="w">  </span><span class="m">8</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-leaf-3<span class="w">  </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>Mgmt<span class="w"> </span>Interface<span class="w"> </span>Status<span class="w"> </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-|  9 | ceos-spine-1 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w">  </span><span class="m">9</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-1<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 10 | ceos-spine-1 | Check NTP status            | FAIL     | Pattern in output |
+<span class="p">|</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-1<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>NTP<span class="w"> </span>status<span class="w">            </span><span class="p">|</span><span class="w"> </span>FAIL<span class="w">     </span><span class="p">|</span><span class="w"> </span>Pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>output<span class="w"> </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 12 | ceos-spine-2 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 12 | ceos-spine-2 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 12 | ceos-spine-2 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 12 | ceos-spine-2 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 12 | ceos-spine-2 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 13 | ceos-spine-2 | Check NTP status            | FAIL     | Pattern in output |
+<span class="p">|</span><span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>NTP<span class="w"> </span>status<span class="w">            </span><span class="p">|</span><span class="w"> </span>FAIL<span class="w">     </span><span class="p">|</span><span class="w"> </span>Pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>output<span class="w"> </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 12 | ceos-spine-2 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 12 | ceos-spine-2 | Check ceos version          | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>ceos<span class="w"> </span>version<span class="w">          </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 13 | ceos-spine-2 | Check NTP status            | FAIL     | Pattern in output |
+<span class="p">|</span><span class="w"> </span><span class="m">13</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>NTP<span class="w"> </span>status<span class="w">            </span><span class="p">|</span><span class="w"> </span>FAIL<span class="w">     </span><span class="p">|</span><span class="w"> </span>Pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>output<span class="w"> </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-| 14 | ceos-spine-2 | Check Mgmt Interface Status | PASS     |                   |
+<span class="p">|</span><span class="w"> </span><span class="m">14</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>ceos-spine-2<span class="w"> </span><span class="p">|</span><span class="w"> </span>Check<span class="w"> </span>Mgmt<span class="w"> </span>Interface<span class="w"> </span>Status<span class="w"> </span><span class="p">|</span><span class="w"> </span>PASS<span class="w">     </span><span class="p">|</span><span class="w">                   </span><span class="p">|</span>
 +----+--------------+-----------------------------+----------+-------------------+
-nf[nornir-test]#
-nf[nornir-test]#top
+nf<span class="o">[</span>nornir-test<span class="o">]</span><span class="c1">#</span>
+nf<span class="o">[</span>nornir-test<span class="o">]</span><span class="c1">#top</span>
 nf#
 </code></pre></div>
 <p>Demo</p>
@@ -6359,29 +6482,48 @@ nf#
 <p><code>inventory.yaml</code> should be located in same folder where we start nfcli, unless <code>nfcli -i path_to_inventory.yaml</code> flag used. Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on how to construct  <code>inventory.yaml</code> file</p>
 </div>
 <div class="tabbed-block">
-<p>This code is complete and can run as is</p>
-<div class="highlight"><pre><span></span><code>import pprint
+<p>Context manager - run a suite from the broker:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
-from norfab.core.nfapi import NorFab
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-if __name__ == &#39;__main__&#39;:
-    nf = NorFab(inventory=&quot;inventory.yaml&quot;)
-    nf.start()
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    client = nf.make_client()
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
 
-    res = client.run_job(
-        service=&quot;nornir&quot;,
-        task=&quot;test&quot;,
-        kwargs={
-            &quot;suite&quot;: &quot;nf://nornir_test_suites/suite_3.txt&quot;,
-            &quot;FC&quot;: &quot;spine,leaf&quot;          
-        }
-    )
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - same task:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
-    pprint.pprint(res)
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-    nf.destroy()
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span>          
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 <p>Refer to <a href="../../../norfab_getting_started/">Getting Started</a> section on how to construct  <code>inventory.yaml</code> file.</p>
 </div>
@@ -6390,6 +6532,68 @@ if __name__ == &#39;__main__&#39;:
 </div>
 <h2 id="formatting-tests-output">Formatting Tests Output<a class="headerlink" href="#formatting-tests-output" title="Permanent link">¤</a></h2>
 <p>NorFab interactive shell allows you to format the results of network tests into text tables. This is particularly useful for presenting test results in a clear and organized manner, making it easier to analyze and interpret the data. The NorFab interactive shell supports the <code>table</code> command, which relies on the <a href="https://pypi.org/project/tabulate/">tabulate</a> module to generate text tables. By outputting test results in table format, you can quickly identify issues and take appropriate action.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the default brief table:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/suite_3.txt<span class="w"> </span>FC<span class="w"> </span>spine,leaf
+</code></pre></div>
+<p>Use an extended table and sort by host:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/suite_3.txt<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>table<span class="w"> </span>extend<span class="w"> </span>headers<span class="w"> </span>host<span class="w"> </span>name<span class="w"> </span>result<span class="w"> </span>exception<span class="w"> </span>sortby<span class="w"> </span>host
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - return list-shaped detailed results for custom table formatting:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - include test detail metadata:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="markdown-results-output-clientrun_job">Markdown Results Output (client.run_job)<a class="headerlink" href="#markdown-results-output-clientrun_job" title="Permanent link">¤</a></h2>
 <p>NorFab Python client can return Nornir <code>test</code> results as a <strong>Markdown report</strong> by passing <code>markdown=True</code> to <code>client.run_job(...)</code>.</p>
 <p>This is convenient when you want to:</p>
@@ -6403,6 +6607,61 @@ if __name__ == &#39;__main__&#39;:
 <li><code>extensive=False</code> (default) produces a summary table and debug section, without per-test details and command outputs.</li>
 <li><code>extensive=True</code> includes hierarchical per-host test details, device command outputs, devices inventory, and test suite definitions.</li>
 </ul>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label><label for="__tabbed_3_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Markdown output is a Python client feature. Use normal shell table output when running from NFCLI:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/suite_3.txt<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>table<span class="w"> </span>brief
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - produce a brief Markdown report:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">report_md</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">markdown</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">report_md</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - produce an extensive Markdown report:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">report_md</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extensive&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">markdown</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">report_md</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <div class="admonition example">
 <p class="admonition-title">Python: Markdown report (brief)</p>
 <p>Sample python script that produces brief markdown tests report:</p>
@@ -7618,59 +7877,375 @@ This section contains detailed debugging information for troubleshooting and ins
 </div>
 <h2 id="using-jinja2-templates-to-generate-tests">Using Jinja2 Templates to Generate Tests<a class="headerlink" href="#using-jinja2-templates-to-generate-tests" title="Permanent link">¤</a></h2>
 <p>Using Jinja2 Templates enables you to create dynamic test suites based on variables defined in your inventory or passed as job data. This approach allows you to tailor tests to specific devices or scenarios, ensuring that the tests are relevant and accurate. Jinja2 templates provide a powerful way to automate the creation of complex test cases, incorporating conditional logic, loops, and other advanced features to meet your testing requirements.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI</label><label for="__tabbed_4_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Template file stored on the broker as <code>nf://nornir_test_suites/platform_checks.j2</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check platform version</span>
+<span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;show</span><span class="nv"> </span><span class="s">version&quot;</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
+<span class="w">  </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">host.platform</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check management interface</span>
+<span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;show</span><span class="nv"> </span><span class="s">interface</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">job_data.mgmt_interface</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
+<span class="w">  </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;line</span><span class="nv"> </span><span class="s">protocol</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">up&quot;</span>
+</code></pre></div>
+<p>Render the suite without executing tests:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/platform_checks.j2<span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;mgmt_interface&quot;: &quot;Management0&quot;}&#39;</span><span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - run a templated suite:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/platform_checks.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mgmt_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Management0&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - review the rendered per-host suite:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/platform_checks.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mgmt_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Management0&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="templating-tests-with-inline-job-data">Templating Tests with Inline Job Data<a class="headerlink" href="#templating-tests-with-inline-job-data" title="Permanent link">¤</a></h2>
 <p>Inline Job Data allows you to define test parameters directly within the <code>job_data</code> argument, making it easy to customize tests on the fly. This feature is particularly useful for scenarios where test parameters need to be adjusted frequently or based on specific conditions. By templating tests with inline job data, you can ensure that your tests are always up-to-date and aligned with the current network state.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">CLI</label><label for="__tabbed_5_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use inline job data with an inline suite:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span><span class="s1">&#39;[{&quot;name&quot;: &quot;Check BGP peer&quot;, &quot;task&quot;: &quot;show bgp summary&quot;, &quot;test&quot;: &quot;contains&quot;, &quot;pattern&quot;: &quot;{{ job_data.peer }}&quot;}]&#39;</span><span class="w"> </span>FC<span class="w"> </span>spine<span class="w"> </span>job-data<span class="w"> </span><span class="s1">&#39;{&quot;peer&quot;: &quot;192.0.2.2&quot;}&#39;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - pass inline suite and job data:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">suite</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Check BGP peer&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="s2">&quot;show bgp summary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;contains&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pattern&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ job_data.peer }}&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="n">suite</span><span class="p">,</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;peer&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.2&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - load job data from a broker file:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/bgp_peer.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://job_data/bgp_peer.yaml&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="using-dry-run">Using Dry Run<a class="headerlink" href="#using-dry-run" title="Permanent link">¤</a></h2>
 <p>The Using Dry Run feature allows you to generate the content of network test suites without actually performing any actions on the devices. This is useful for validation purposes, as it enables you to verify the correctness of your tests before running them. By using dry run, you can identify potential issues and make necessary adjustments, ensuring that your tests will execute successfully when run for real.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">CLI</label><label for="__tabbed_6_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/suite_3.txt<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - render tests without executing them:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - include rendered suite with results:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;return_tests_suite&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="running-a-subset-of-tests">Running a Subset of Tests<a class="headerlink" href="#running-a-subset-of-tests" title="Permanent link">¤</a></h2>
 <p>Running a Subset of Tests allows you to execute only a specific set of tests, rather than running the entire test suite. This is useful for targeted testing, such as validating changes in a particular part of the network configuration or focusing on specific devices features. By running a subset of tests, you can save time and resources, while still ensuring that critical aspects of the network are thoroughly tested.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">CLI</label><label for="__tabbed_7_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Run tests whose names match <code>*NTP*</code>:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/suite_3.txt<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>subset<span class="w"> </span><span class="s2">&quot;*NTP*&quot;</span>
+</code></pre></div>
+<p>Run tests in the <code>routing</code> group:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/suite_3.txt<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>groups<span class="w"> </span>routing
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - run a name-based subset:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;subset&quot;</span><span class="p">:</span> <span class="s2">&quot;*NTP*&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - run selected test groups:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;routing&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="returning-only-failed-tests">Returning Only Failed Tests<a class="headerlink" href="#returning-only-failed-tests" title="Permanent link">¤</a></h2>
 <p>Returning only failed tests enables you to filter the test results to show only the tests that have failed. This is particularly useful for quickly identifying and addressing issues, as it allows you to focus on the areas that require attention. By returning only failed tests, you can streamline the troubleshooting process and ensure that network problems are resolved efficiently.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">CLI</label><label for="__tabbed_8_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suite<span class="w"> </span>nf://nornir_test_suites/suite_3.txt<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>failed-only
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager - return failed tests only:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;failed_only&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle - return failed tests with detailed metadata:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;suite&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://nornir_test_suites/suite_3.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FC&quot;</span><span class="p">:</span> <span class="s2">&quot;spine,leaf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;failed_only&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;add_details&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;to_dict&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
 <h2 id="norfab-nornir-test-shell-reference">NORFAB Nornir Test Shell Reference<a class="headerlink" href="#norfab-nornir-test-shell-reference" title="Permanent link">¤</a></h2>
 <p>The NORFAB Nornir Test Shell Reference provides a comprehensive set of command options for the Nornir <code>test</code> task. These commands allow you to control various aspects of the test execution, such as setting job timeouts, filtering devices, adding task details to results, and configuring retry mechanisms. By leveraging these command options, you can tailor the behavior of the tests to meet your specific network management needs, ensuring that your network remains reliable and performant.</p>
 <p>NorFab shell supports these command options for Nornir <code>test</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree nornir.test
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>nornir.test
 root
-└── nornir:    Nornir service
-    └── test:    Run network tests
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── add-details:    Add task details to results, default &#39;False&#39;
-        ├── num-workers:    RetryRunner number of threads for tasks execution
-        ├── num-connectors:    RetryRunner number of threads for device connections
-        ├── connect-retry:    RetryRunner number of connection attempts
-        ├── task-retry:    RetryRunner number of attempts to run task
-        ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-        ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-        ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
-        ├── tf:    File group name to save task results to on worker file system
-        ├── tf-skip-failed:    Save results to file for failed tasks
-        ├── diff:    File group name to run the diff for
-        ├── diff-last:    File version number to diff, default is 1 (last)
-        ├── table:    Table format (brief, terse, extend) or parameters or True, default &#39;brief&#39;
-        ├── headers:    Table headers
-        ├── headers-exclude:    Table headers to exclude
-        ├── sortby:    Table header column to sort by
-        ├── reverse:    Table reverse the sort by order
-        ├── FO:    Filter hosts using Filter Object
-        ├── FB:    Filter hosts by name using Glob Patterns
-        ├── FH:    Filter hosts by hostname
-        ├── FC:    Filter hosts containment of pattern in name
-        ├── FR:    Filter hosts by name using Regular Expressions
-        ├── FG:    Filter hosts by group
-        ├── FP:    Filter hosts by hostname using IP Prefix
-        ├── FL:    Filter hosts by names list
-        ├── FM:    Filter hosts by platform
-        ├── FX:    Filter hosts excluding them by name
-        ├── FN:    Negate the match
-        ├── hosts:    Filter hosts to target
-        ├── *suite:    Nornir suite nf://path/to/file.py
-        ├── dry-run:    Return produced per-host tests suite content without running tests
-        ├── subset:    Filter tests by name
-        ├── failed-only:    Return test results for failed tests only
-        ├── remove-tasks:    Include/Exclude tested task results
-        └── job-data:    Path to YAML file with job data
+└──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>test:<span class="w">    </span>Run<span class="w"> </span>network<span class="w"> </span>tests
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>├──<span class="w"> </span>task-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>├──<span class="w"> </span>reconnect-on-fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>├──<span class="w"> </span>connect-check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>├──<span class="w"> </span>connect-timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>├──<span class="w"> </span>creds-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>credentials<span class="w"> </span>and<span class="w"> </span>parameters<span class="w"> </span>to<span class="w"> </span>retry
+<span class="w">        </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>├──<span class="w"> </span>table:<span class="w">    </span>Table<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>brief,<span class="w"> </span>terse,<span class="w"> </span>extend<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>parameters<span class="w"> </span>or<span class="w"> </span>True,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;brief&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>headers:<span class="w">    </span>Table<span class="w"> </span>headers
+<span class="w">        </span>├──<span class="w"> </span>headers-exclude:<span class="w">    </span>Table<span class="w"> </span>headers<span class="w"> </span>to<span class="w"> </span>exclude
+<span class="w">        </span>├──<span class="w"> </span>sortby:<span class="w">    </span>Table<span class="w"> </span>header<span class="w"> </span>column<span class="w"> </span>to<span class="w"> </span>sort<span class="w"> </span>by
+<span class="w">        </span>├──<span class="w"> </span>reverse:<span class="w">    </span>Table<span class="w"> </span>reverse<span class="w"> </span>the<span class="w"> </span>sort<span class="w"> </span>by<span class="w"> </span>order
+<span class="w">        </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">        </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>├──<span class="w"> </span>*suite:<span class="w">    </span>Nornir<span class="w"> </span>suite<span class="w"> </span>nf://path/to/file.py
+<span class="w">        </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Return<span class="w"> </span>produced<span class="w"> </span>per-host<span class="w"> </span>tests<span class="w"> </span>suite<span class="w"> </span>content<span class="w"> </span>without<span class="w"> </span>running<span class="w"> </span>tests
+<span class="w">        </span>├──<span class="w"> </span>subset:<span class="w">    </span>Filter<span class="w"> </span>tests<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>├──<span class="w"> </span>failed-only:<span class="w">    </span>Return<span class="w"> </span><span class="nb">test</span><span class="w"> </span>results<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tests<span class="w"> </span>only
+<span class="w">        </span>├──<span class="w"> </span><span class="k">return</span>-tests-suite:<span class="w">    </span>Include<span class="w"> </span>rendered<span class="w"> </span>per-host<span class="w"> </span><span class="nb">test</span><span class="w"> </span>suites<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>result
+<span class="w">        </span>├──<span class="w"> </span>extensive:<span class="w">    </span>Return<span class="w"> </span>extensive<span class="w"> </span><span class="nb">test</span><span class="w"> </span>output<span class="w"> </span>and<span class="w"> </span>rendered<span class="w"> </span>suites
+<span class="w">        </span>├──<span class="w"> </span>groups:<span class="w">    </span>Test<span class="w"> </span>groups<span class="w"> </span>to<span class="w"> </span>run
+<span class="w">        </span>├──<span class="w"> </span>remove-tasks:<span class="w">    </span>Include/Exclude<span class="w"> </span>tested<span class="w"> </span>task<span class="w"> </span>results
+<span class="w">        </span>└──<span class="w"> </span>job-data:<span class="w">    </span>Path<span class="w"> </span>to<span class="w"> </span>YAML<span class="w"> </span>file<span class="w"> </span>with<span class="w"> </span>job<span class="w"> </span>data
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

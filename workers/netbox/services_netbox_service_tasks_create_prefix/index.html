@@ -2419,10 +2419,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6038,10 +6071,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#branching-support" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Branching Support
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6105,39 +6171,182 @@
 <blockquote>
 <p>task api name: <code>create_prefix</code></p>
 </blockquote>
-<p>Task to create next available prefix of given prefix length within parent prefix or get existing prefix. By default prefix length is <code>30</code> resulting in ptp subnet allocation.</p>
-<p>Netbox service <code>create_prefix</code> task integrated with Nornir service and can be called 
-using <a href="../../nornir/services_nornir_service_jinja2_filters/#netboxcreate_prefix">netbox.create_prefix Jinja2 filter</a>, 
-allowing to allocate prefixes in Netbox on the fly while rendering configuration templates. </p>
+<p>Allocates the next available child prefix from a parent prefix, or updates an existing matching prefix. By default it creates a <code>/30</code>, which is useful for point-to-point subnets.</p>
+<p>The task can also be called from Nornir templates through the <a href="../../nornir/services_nornir_service_jinja2_filters/#netboxcreate_prefix">netbox.create_prefix Jinja2 filter</a>.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>parent</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Parent prefix as a network string, description string, or pynetbox filter dictionary</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td style="text-align: right;">No</td>
+<td>Description for the new prefix and deduplication key for existing prefixes</td>
+</tr>
+<tr>
+<td><code>prefixlen</code></td>
+<td style="text-align: right;">No</td>
+<td>Length of the child prefix, default <code>30</code></td>
+</tr>
+<tr>
+<td><code>vrf</code></td>
+<td style="text-align: right;">No</td>
+<td>VRF name to associate with the prefix</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td style="text-align: right;">No</td>
+<td>Tags to assign to the prefix</td>
+</tr>
+<tr>
+<td><code>tenant</code></td>
+<td style="text-align: right;">No</td>
+<td>Tenant name to associate with the prefix</td>
+</tr>
+<tr>
+<td><code>comments</code></td>
+<td style="text-align: right;">No</td>
+<td>Prefix comments</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td style="text-align: right;">No</td>
+<td>Prefix role</td>
+</tr>
+<tr>
+<td><code>site</code></td>
+<td style="text-align: right;">No</td>
+<td>Site name to associate with the prefix</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td style="text-align: right;">No</td>
+<td>Prefix status</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox Branching plugin branch name to write to</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Preview the candidate prefix without writing</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns the created or updated prefix data. In dry-run mode, returns the candidate prefix that would be allocated.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.0/30&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-1 to spine-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Netbox <code>create_prefix</code> task uses prefix description argument to deduplicate prefixes, calls to <code>create_prefix</code> task should contain identical prefix description value for same prefix.</p>
+<p><code>create_prefix</code> uses the <code>description</code> argument to find existing prefixes. Use the same description for repeated calls that should refer to the same prefix.</p>
 </div>
-<h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
-<p>Create Prefix task is branch aware and can create IP addresses within the branch. <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> need to be installed on Netbox instance.</p>
+<ul>
+<li><code>parent</code> can be a prefix string such as <code>10.0.0.0/24</code>, a parent prefix description, or a dictionary of pynetbox prefix filters.</li>
+<li>If <code>vrf</code> is provided, the parent prefix must belong to the same VRF.</li>
+<li>Branch writes require the <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a>.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Allocate the next <code>/30</code> from a parent prefix:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>prefix<span class="w"> </span>parent<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;leaf-1 to spine-1&quot;</span>
+</code></pre></div>
+<p>Allocate a <code>/31</code> in a VRF:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>prefix<span class="w"> </span>parent<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;leaf-1 to spine-1&quot;</span><span class="w"> </span>prefixlen<span class="w"> </span><span class="m">31</span><span class="w"> </span>vrf<span class="w"> </span>PROD
+</code></pre></div>
+<p>Preview the allocation:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>prefix<span class="w"> </span>parent<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;leaf-1 to spine-1&quot;</span><span class="w"> </span>dry-run
+</code></pre></div>
+<p>Write into a NetBox branch:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>create<span class="w"> </span>prefix<span class="w"> </span>parent<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;leaf-1 to spine-1&quot;</span><span class="w"> </span>branch<span class="w"> </span>my-branch
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+<span class="c1"># allocate next available /30</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_prefix&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.0/24&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-1 to spine-1&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># allocate from a filtered parent prefix</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_prefix&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.0/24&quot;</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-2 to spine-1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prefixlen&quot;</span><span class="p">:</span> <span class="mi">31</span><span class="p">,</span>
+        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="s2">&quot;PROD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;automation-managed&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="norfab-netbox-create-prefix-command-shell-reference">NORFAB Netbox Create Prefix Command Shell Reference<a class="headerlink" href="#norfab-netbox-create-prefix-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>create_prefix</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.create.prefix
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.create.prefix
 root
-└── netbox:    Netbox service
-    └── create:    Create objects in Netbox
-            ├── instance:    Netbox instance name to target
-            ├── dry-run:    Do not commit to database
-            ├── *parent:    Parent prefix to allocate new prefix from
-            ├── *description:    Description for new prefix
-            ├── prefixlen:    The prefix length of the new prefix, default &#39;30&#39;
-            ├── vrf:    Name of the VRF to associate with the prefix
-            ├── tags:    List of tags to assign to the prefix
-            ├── tenant:    Name of the tenant to associate with the prefix
-            ├── comments:    Comments for the prefix
-            ├── role:    Role to assign to the prefix
-            ├── site:    Name of the site to associate with the prefix
-            ├── status:    Status of the prefix
-            ├── branch:    Branching plugin branch name to use
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            └── progress:    Display progress events, default &#39;True&#39;
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>create:<span class="w">    </span>Create<span class="w"> </span>objects<span class="w"> </span><span class="k">in</span><span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>prefix:<span class="w">    </span>Allocate<span class="w"> </span>next<span class="w"> </span>available<span class="w"> </span>prefix<span class="w"> </span>from<span class="w"> </span>parent<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>commit<span class="w"> </span>to<span class="w"> </span>database
+<span class="w">            </span>├──<span class="w"> </span>parent:<span class="w">    </span>Parent<span class="w"> </span>prefix<span class="w"> </span>to<span class="w"> </span>allocate<span class="w"> </span>new<span class="w"> </span>prefix<span class="w"> </span>from
+<span class="w">            </span>├──<span class="w"> </span>description:<span class="w">    </span>Description<span class="w"> </span><span class="k">for</span><span class="w"> </span>new<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>prefixlen:<span class="w">    </span>The<span class="w"> </span>prefix<span class="w"> </span>length<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>new<span class="w"> </span>prefix,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;30&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>vrf:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>VRF<span class="w"> </span>to<span class="w"> </span>associate<span class="w"> </span>with<span class="w"> </span>the<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>tags:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>tags<span class="w"> </span>to<span class="w"> </span>assign<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>tenant:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>tenant<span class="w"> </span>to<span class="w"> </span>associate<span class="w"> </span>with<span class="w"> </span>the<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>comments:<span class="w">    </span>Comments<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>role:<span class="w">    </span>Role<span class="w"> </span>to<span class="w"> </span>assign<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>site:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>site<span class="w"> </span>to<span class="w"> </span>associate<span class="w"> </span>with<span class="w"> </span>the<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>status:<span class="w">    </span>Status<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>prefix
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>

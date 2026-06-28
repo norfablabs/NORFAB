@@ -5452,6 +5452,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#agent-workflow-for-service-task-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent workflow for service task docs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#writing-style" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5496,6 +5507,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#command-shell-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command shell references
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output sections
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API references
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#links" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5522,6 +5566,17 @@
     <span class="md-ellipsis">
       
         When to create a new page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification checklist
       
     </span>
   </a>
@@ -6122,6 +6177,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#agent-workflow-for-service-task-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent workflow for service task docs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#writing-style" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6166,6 +6232,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#command-shell-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command shell references
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output sections
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API references
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#links" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6192,6 +6291,17 @@
     <span class="md-ellipsis">
       
         When to create a new page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification checklist
       
     </span>
   </a>
@@ -6233,16 +6343,32 @@
 <ol>
 <li><strong>Purpose</strong> (1–2 paragraphs)</li>
 <li><strong>Inputs</strong> (kwargs, required vs optional, defaults)</li>
-<li><strong>Outputs</strong> (what the result looks like)</li>
-<li><strong>Examples</strong></li>
-<li>CLI example</li>
-<li>Python example</li>
+<li><strong>Output</strong> (what the result looks like)</li>
+<li><strong>Examples</strong> (in tabbed format)</li>
+<li>CLI example in the <code>=== "CLI"</code> tab</li>
+<li>Python example in the <code>=== "Python"</code> tab</li>
 <li><strong>Notes / Gotchas</strong> (timeouts, filters, permissions)</li>
 <li><strong>Troubleshooting</strong></li>
+<li><strong>Task Command Shell Reference</strong> in tree format</li>
+<li><strong>Python API Reference</strong></li>
+</ol>
+<h2 id="agent-workflow-for-service-task-docs">Agent workflow for service task docs<a class="headerlink" href="#agent-workflow-for-service-task-docs" title="Permanent link">¤</a></h2>
+<p>When updating a service task page:</p>
+<ol>
+<li>Read the task implementation, input/output Pydantic models, and NFCLI/PICLE command model before editing.</li>
+<li>Derive Inputs from the Pydantic model and task signature.</li>
+<li>Add an Output section to every task page. If the exact output shape is unclear, write <code>TBD</code> and leave it for maintainer review.</li>
+<li>Derive CLI examples from NFCLI aliases and command structure.</li>
+<li>Derive Python examples from <code>client.run_job(...)</code> using the task API name and Python kwargs.</li>
+<li>Do not document exposed-but-unused parameters as active behavior. Mention them in Notes / Gotchas if they appear in the command model.</li>
+<li>Keep examples safe, realistic, and runnable-looking.</li>
+<li>Proofread the page for grammar, consistent capitalization, readable flow, and human-friendly wording.</li>
+<li>Verify Markdown structure, code fence languages, links, command references, and API references after editing.</li>
 </ol>
 <h2 id="writing-style">Writing style<a class="headerlink" href="#writing-style" title="Permanent link">¤</a></h2>
 <ul>
 <li>Prefer short sentences and active voice.</li>
+<li>Use <strong>NetBox</strong> for the product name in prose and headings. Keep lowercase <code>netbox</code> only for service names, task names, command paths, Python imports, and API references.</li>
 <li>Use consistent terminology:</li>
 <li>Pick one: <strong>Service</strong> vs <strong>Worker</strong> wording in headings and keep it consistent per section.</li>
 <li>Use the same names for the same concept everywhere (e.g. <code>kwargs</code>, <code>workers</code>, <code>service</code>, <code>task</code>).</li>
@@ -6267,9 +6393,44 @@
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <ul>
 <li>Provide both <strong>CLI</strong> and <strong>Python</strong> examples for user-facing tasks.</li>
+<li>Use exact tab labels: <code>=== "CLI"</code> and <code>=== "Python"</code>.</li>
+<li>In the CLI tab, show NFCLI shell commands with the <code>nf#</code> prompt.</li>
+<li>In the Python tab, show both context-manager usage (<code>with NorFab(...) as nf:</code>) and direct lifecycle usage (<code>nf.start()</code> / <code>nf.destroy()</code>) when practical.</li>
 <li>Use real-looking but safe sample values (avoid private endpoints/keys).</li>
 <li>If a task supports <code>markdown=True</code>, include one example showing how to render or store the markdown output.</li>
 </ul>
+<h2 id="command-shell-references">Command shell references<a class="headerlink" href="#command-shell-references" title="Permanent link">¤</a></h2>
+<ul>
+<li>Use a <code>bash</code> code block for command tree output.</li>
+<li>Use <code>nf# man tree ...</code> with a space after <code>nf#</code>.</li>
+<li>Keep command shell references near the end of the page.</li>
+<li>Keep the tree in sync with the NFCLI/PICLE command model.</li>
+</ul>
+<h2 id="output-sections">Output sections<a class="headerlink" href="#output-sections" title="Permanent link">¤</a></h2>
+<ul>
+<li>Every service task page must include an <code>Output</code> or <code>Outputs</code> section.</li>
+<li>Prefer <code>Output</code> for single-task pages and <code>Outputs</code> for pages that document several task APIs.</li>
+<li>Show the real result shape when it is known.</li>
+<li>Use <code>TBD</code> when the exact result shape is uncertain, so maintainers can review and fill it later.</li>
+</ul>
+<h2 id="python-api-references">Python API references<a class="headerlink" href="#python-api-references" title="Permanent link">¤</a></h2>
+<ul>
+<li>End service task pages with the autodoc reference for the task method:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>::: package.module.Class.task_method
+</code></pre></div>
+<ul>
+<li>Prefer the concrete task mixin/class that defines the method over a broad worker class when possible.</li>
+<li>When one page documents multiple task APIs, add a readable <code>###</code> subheading before every autodoc reference. Use Title Case task names in the subheading and keep the autodoc target immediately below it:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="gu">### SNMP Get</span>
+
+::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_get
+
+<span class="gu">### SNMP Walk</span>
+
+::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_walk
+</code></pre></div>
 <h2 id="links">Links<a class="headerlink" href="#links" title="Permanent link">¤</a></h2>
 <ul>
 <li>Prefer relative links to pages that are in <code>nav</code>.</li>
@@ -6292,6 +6453,16 @@
 <li>A task page exceeds ~2–3 screens and includes multiple distinct workflows.</li>
 </ul>
 <p>Otherwise, keep content in the closest existing page and add anchors.</p>
+<h2 id="verification-checklist">Verification checklist<a class="headerlink" href="#verification-checklist" title="Permanent link">¤</a></h2>
+<p>Before finishing a documentation change:</p>
+<ul>
+<li>Confirm every code block has a language.</li>
+<li>Confirm user-facing tasks have both CLI and Python examples.</li>
+<li>Confirm common behavior such as <code>dry_run</code>, <code>branch</code>, filters, and task modes are covered when supported.</li>
+<li>Confirm examples use real task names, aliases, and Python kwargs.</li>
+<li>Confirm notes call out exposed-but-unused options or version restrictions.</li>
+<li>Run Markdown, docs build, or diff checks when practical.</li>
+</ul>
 
 
 

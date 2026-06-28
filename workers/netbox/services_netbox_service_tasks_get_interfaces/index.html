@@ -2167,10 +2167,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-interfaces-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Interfaces Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6038,10 +6071,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-interfaces-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Interfaces Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6105,21 +6171,184 @@
 <blockquote>
 <p>task api name: <code>get_interfaces</code></p>
 </blockquote>
-<h2 id="get-interfaces-sample-usage">Get Interfaces Sample Usage<a class="headerlink" href="#get-interfaces-sample-usage" title="Permanent link">¤</a></h2>
+<p>Retrieves interface data from NetBox for one or more devices using the REST API. The task can include related IP addresses, inventory items, child interfaces, and LAG member relationships.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">No</td>
+<td>Device names to retrieve interfaces for</td>
+</tr>
+<tr>
+<td><code>interface_list</code></td>
+<td style="text-align: right;">No</td>
+<td>Exact interface names to retrieve</td>
+</tr>
+<tr>
+<td><code>interface_regex</code></td>
+<td style="text-align: right;">No</td>
+<td>Regex pattern to match interface names</td>
+</tr>
+<tr>
+<td><code>ip_addresses</code></td>
+<td style="text-align: right;">No</td>
+<td>Include IP addresses assigned to interfaces</td>
+</tr>
+<tr>
+<td><code>inventory_items</code></td>
+<td style="text-align: right;">No</td>
+<td>Include inventory items attached to interfaces</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox Branching plugin branch name to read from</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return REST filter parameters without querying NetBox</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td style="text-align: right;">No</td>
+<td>Cache usage mode: <code>True</code>, <code>False</code>, <code>refresh</code>, or <code>force</code></td>
+</tr>
+<tr>
+<td><code>brief</code></td>
+<td style="text-align: right;">No</td>
+<td>Return a stripped-down interface payload for smaller context windows</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Normal mode returns a dictionary keyed by device name and interface name:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Ethernet1&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1000base-t&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;1000BASE-T&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.1/31&quot;</span><span class="p">}],</span>
+            <span class="s2">&quot;inventory_items&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;child_interfaces&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;member_interfaces&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li><code>interface_list</code> maps to the NFCLI alias <code>interface-list</code>.</li>
+<li><code>interface_regex</code> maps to the NFCLI alias <code>interface-regex</code>.</li>
+<li><code>brief=True</code> affects only the returned payload. The task still fetches full interface data before reducing it.</li>
+<li>If no interface data is returned for the selected devices, the task raises an error.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Get all interfaces for a device:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1
+</code></pre></div>
+<p>Get selected interfaces:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-list<span class="w"> </span>Ethernet1<span class="w"> </span>Ethernet2
+</code></pre></div>
+<p>Match interfaces by regex and include IP addresses:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-regex<span class="w"> </span><span class="s2">&quot;Ethernet.*&quot;</span><span class="w"> </span>ip-addresses
+</code></pre></div>
+<p>Include inventory items and refresh cache:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>inventory-items<span class="w"> </span>cache<span class="w"> </span>refresh
+</code></pre></div>
+<p>Preview REST filters:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interface-list<span class="w"> </span>Ethernet1<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_interfaces&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;interface_list&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span> <span class="s2">&quot;Ethernet2&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_interfaces&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;interface_regex&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;inventory_items&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">branch_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_interfaces&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-branch&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="norfab-netbox-get-interfaces-command-shell-reference">NORFAB Netbox Get Interfaces Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-interfaces-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_interfaces</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.interfaces
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.get.interfaces
 root
-└── netbox:    Netbox service
-    └── get:    Query data from Netbox
-        └── interfaces:    Query Netbox device interfaces data
-            ├── instance:    Netbox instance name to target
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── timeout:    Job timeout
-            ├── *devices:    Devices to retrieve interface for
-            ├── ip-addresses:    Retrieves interface IP addresses
-            ├── inventory-items:    Retrieves interface inventory items
-            └── dry-run:    Only return query content, do not run it
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>interfaces:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>device<span class="w"> </span>interfaces<span class="w"> </span>data
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>Devices<span class="w"> </span>to<span class="w"> </span>retrieve<span class="w"> </span>interface<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>interface-list:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>interface<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>retrieve
+<span class="w">            </span>├──<span class="w"> </span>interface-regex:<span class="w">    </span>Regex<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>match<span class="w"> </span>interfaces<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>ip-addresses:<span class="w">    </span>Retrieves<span class="w"> </span>interface<span class="w"> </span>IP<span class="w"> </span>addresses
+<span class="w">            </span>├──<span class="w"> </span>inventory-items:<span class="w">    </span>Retrieves<span class="w"> </span>interface<span class="w"> </span>inventory<span class="w"> </span>items
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
+<span class="w">            </span>├──<span class="w"> </span>cache:<span class="w">    </span>Cache<span class="w"> </span>usage<span class="w"> </span>mode
+<span class="w">            </span>└──<span class="w"> </span>brief:<span class="w">    </span>Return<span class="w"> </span>stripped-down<span class="w"> </span>interface<span class="w"> </span>data
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -6349,42 +6578,7 @@ results in  certain format.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
 <span class="normal">260</span>
@@ -6578,7 +6772,42 @@ results in  certain format.</p>
 <span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
-<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInterfacesResult</span><span class="p">,</span>

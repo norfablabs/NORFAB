@@ -2195,10 +2195,76 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-connections-sample-usage" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Connections Sample Usage
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dry-run-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dry Run Mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6038,10 +6104,76 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-connections-sample-usage" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Connections Sample Usage
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dry-run-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dry Run Mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6105,22 +6237,196 @@
 <blockquote>
 <p>task api name: <code>get_connections</code></p>
 </blockquote>
-<h2 id="get-connections-sample-usage">Get Connections Sample Usage<a class="headerlink" href="#get-connections-sample-usage" title="Permanent link">¤</a></h2>
+<p>Retrieves connection details for interfaces and ports on one or more devices from NetBox. The task returns physical links, virtual and LAG-derived links, console connections, provider network connections, cable details, and remote MAC addresses where NetBox has that data.</p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<ol>
+<li>Client submits a <code>get_connections</code> request to the NetBox worker</li>
+<li>Worker resolves the target NetBox instance</li>
+<li>Worker queries NetBox GraphQL for interface and port objects on the selected devices</li>
+<li>Optional <code>interfaces</code> and <code>interface_regex</code> filters narrow the ports included in the GraphQL result</li>
+<li>Worker normalises physical, virtual, LAG, console, and provider network connections into a device/interface keyed dictionary</li>
+<li>In dry-run mode, the raw GraphQL query result is returned instead of the normalised connection map</li>
+</ol>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¤</a></h2>
+<ul>
+<li>Target devices must exist in NetBox.</li>
+<li>NetBox version must be <code>4.4.0</code> or newer.</li>
+</ul>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">Yes</td>
+<td>List of device names to retrieve connections for</td>
+</tr>
+<tr>
+<td><code>interfaces</code></td>
+<td style="text-align: right;">No</td>
+<td>Exact interface or port names to include</td>
+</tr>
+<tr>
+<td><code>interface_regex</code></td>
+<td style="text-align: right;">No</td>
+<td>Case-insensitive regex pattern to match interface and port names</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return raw GraphQL query content instead of processed connection data</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td style="text-align: right;">No</td>
+<td>Cache usage mode accepted by the command model</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Normal mode returns connection data keyed by device name and interface or port name:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;&lt;device&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;&lt;interface&gt;&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;breakout&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;remote_device&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;peer-device&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_device_status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;peer-interface&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_interface_label&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;peer-label&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_termination_type&quot;</span><span class="p">:</span> <span class="s2">&quot;interface&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;termination_type&quot;</span><span class="p">:</span> <span class="s2">&quot;interface&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_mac_addresses&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;00:11:22:33:44:55&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;cable&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;smf&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;connected&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;peer_termination_type&quot;</span><span class="p">:</span> <span class="s2">&quot;interface&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;peer_device&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;peer-device&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;peer_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;peer-interface&gt;&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Provider network connections include <code>provider</code> instead of remote device/interface details.</p>
+<h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
+<p>Use <code>interfaces</code> when you know exact port names. Use <code>interface_regex</code> when you want to match a group of ports. If both are provided, NetBox returns only ports matching the explicit names and the regex.</p>
+<h2 id="dry-run-mode">Dry Run Mode<a class="headerlink" href="#dry-run-mode" title="Permanent link">¤</a></h2>
+<p><code>dry_run=True</code> returns the raw GraphQL result used by the task. This is useful when checking the NetBox query output or troubleshooting why a connection was not normalised.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Query all connections for two devices:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>connections<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>fceos5
+</code></pre></div>
+<p>Query selected interface names only:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>connections<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>fceos5<span class="w"> </span>interfaces<span class="w"> </span>eth101<span class="w"> </span>eth103
+</code></pre></div>
+<p>Query connections matching an interface regex:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>connections<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>interface-regex<span class="w"> </span><span class="s2">&quot;eth10[1-4]&quot;</span>
+</code></pre></div>
+<p>Return the raw GraphQL query result:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>connections<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>dry-run
+</code></pre></div>
+<p>Query a specific NetBox instance:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>connections<span class="w"> </span>devices<span class="w"> </span>fceos4<span class="w"> </span>instance<span class="w"> </span>lab
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_connections&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_connections&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">,</span> <span class="s2">&quot;fceos5&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;eth101&quot;</span><span class="p">,</span> <span class="s2">&quot;eth103&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_connections&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;interface_regex&quot;</span><span class="p">:</span> <span class="s2">&quot;eth10[1-4]&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">instance_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_connections&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fceos4&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="norfab-netbox-get-connections-command-shell-reference">NORFAB Netbox Get Connections Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-connections-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_connections</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.connections
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The command model accepts <code>cache</code>, but the current task implementation does not use it when running the GraphQL query.</p>
+</div>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.get.connections
 root
-└── netbox:    Netbox service
-    └── get:    Query data from Netbox
-        └── connections:    Query Netbox connections data for devices
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
-            ├── instance:    Netbox instance name to target
-            ├── dry-run:    Only return query content, do not run it
-            ├── devices:    Device names to query data for
-            └── cache:    How to use cache, default &#39;True&#39;
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>connections:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>connections<span class="w"> </span>data<span class="w"> </span><span class="k">for</span><span class="w"> </span>devices
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
+<span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>Device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>interfaces:<span class="w">    </span>Interface<span class="w"> </span>and<span class="w"> </span>port<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>query<span class="w"> </span>data<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>interface-regex:<span class="w">    </span>Regex<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>match<span class="w"> </span>interfaces<span class="w"> </span>and<span class="w"> </span>ports
+<span class="w">            </span>└──<span class="w"> </span>cache:<span class="w">    </span>How<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>cache,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -6188,6 +6494,23 @@ and LAG sub-interfaces</p>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>interfaces</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of interface, console port, console server
+port, or power outlet names to retrieve connections for.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6321,8 +6644,7 @@ console server ports by name, case insensitive.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\connections_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">182</span>
-<span class="normal">183</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
@@ -6678,7 +7000,13 @@ console server ports by name, case insensitive.</p>
 <span class="normal">536</span>
 <span class="normal">537</span>
 <span class="normal">538</span>
-<span class="normal">539</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetConnectionsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetConnectionsResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -6696,6 +7024,7 @@ console server ports by name, case insensitive.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">interfaces</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">interface_regex</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -6719,6 +7048,8 @@ console server ports by name, case insensitive.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object containing relevant metadata</span>
 <span class="sd">        devices (list): List of device names to retrieve connections for.</span>
+<span class="sd">        interfaces (list, optional): List of interface, console port, console server</span>
+<span class="sd">            port, or power outlet names to retrieve connections for.</span>
 <span class="sd">        instance (str, optional): Netbox instance name for the GraphQL query.</span>
 <span class="sd">        dry_run (bool, optional): If True, perform a dry run without making actual changes.</span>
 <span class="sd">        interface_regex (str, optional): Regex pattern to match interfaces, console ports and</span>
@@ -6775,7 +7106,7 @@ console server ports by name, case insensitive.</p>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
 
-    <span class="c1"># query uses inline filters with variables for devices and interface regex</span>
+    <span class="c1"># query uses optional GraphQL variables for interface name and regex filters</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">UnsupportedNetboxVersion</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Netbox version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_version</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not supported, &quot;</span>
@@ -6788,6 +7119,8 @@ console server ports by name, case insensitive.</p>
         <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
         <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="n">interfaces</span><span class="p">:</span>
+        <span class="n">variables</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interfaces</span>
 
     <span class="c1"># retrieve full list of ports and process client-side to map connections</span>
     <span class="n">query_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netbox_graphql</span><span class="p">(</span>

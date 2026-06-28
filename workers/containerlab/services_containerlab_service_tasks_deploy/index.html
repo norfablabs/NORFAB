@@ -952,10 +952,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-deploy-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Deploy Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6082,10 +6104,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#containerlab-deploy-task-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Containerlab Deploy Task Sample Usage
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6180,7 +6224,36 @@
 <li><strong>Node Filtering</strong>: Allows deploying specific nodes using a filter.</li>
 <li><strong>Timeouts</strong>: Configurable timeout for the deployment process.</li>
 </ul>
-<h2 id="containerlab-deploy-task-sample-usage">Containerlab Deploy Task Sample Usage<a class="headerlink" href="#containerlab-deploy-task-sample-usage" title="Permanent link">¤</a></h2>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topology</code></td>
+<td style="text-align: right;">Yes</td>
+<td>URL to the topology file to deploy</td>
+</tr>
+<tr>
+<td><code>reconfigure</code></td>
+<td style="text-align: right;">No</td>
+<td>Destroy and redeploy an existing lab</td>
+</tr>
+<tr>
+<td><code>node_filter</code></td>
+<td style="text-align: right;">No</td>
+<td>Comma-separated node names to deploy</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns Containerlab deployment details, including container information for the deployed lab.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Containerlab topology file content used in examples:</p>
 <div class="highlight"><span class="filename">three-routers-lab.yaml</span><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">three-routers-lab</span>
 
@@ -6232,101 +6305,101 @@
 <p><img alt="Containerlab Deploy Demo" src="../../../images/containerlab/containerlab_deploy_demo.gif" /></p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>nf# containerlab
-nf[containerlab]#deploy topology nf://containerlab/three-routers-topology.yaml
---------------------------------------------- Job Events -----------------------------------------------
-05-May-2025 19:58:13.728 9e32d588fc27446db61200937974bb14 job started
-05-May-2025 19:58:13.753 INFO containerlab-worker-1 running containerlab.deploy  - Deploying lab three-routers-topology.yaml
-05-May-2025 19:58:13.770 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:13 INFO Containerlab started version=0.67.0
-05-May-2025 19:58:13.782 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:13 INFO Parsing &amp; checking topology file=three-routers-topology.yaml
-05-May-2025 19:58:13.793 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:13 INFO Creating docker network name=three_routers_lab IPv4 subnet=172.100.101.0/24 IPv6 subnet=&quot;&quot; MTU=0
-05-May-2025 19:58:13.927 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:13 INFO Creating container name=r3
-05-May-2025 19:58:13.939 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:13 INFO Creating container name=r1
-05-May-2025 19:58:13.950 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:13 INFO config file 
-05-May-2025 19:58:13.961 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:13 INFO Creating container name=r2
-05-May-2025 19:58:14.678 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:14 INFO Running postdeploy actions for Arista cEOS &#39;r3&#39; node
-05-May-2025 19:58:14.886 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:14 INFO Created link: r2:eth2 ▪┄┄▪ r3:eth2
-05-May-2025 19:58:14.897 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:14 INFO Running postdeploy actions for Arista cEOS &#39;r2&#39; node
-05-May-2025 19:58:14.908 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:14 INFO Created link: r1:eth1 ▪┄┄▪ r2:eth1
-05-May-2025 19:58:14.937 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:14 INFO Created link: r3:eth3 ▪┄┄▪ r1:eth3
-05-May-2025 19:58:14.948 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:14 INFO Running postdeploy actions for Arista cEOS &#39;r1&#39; node
-05-May-2025 19:58:41.856 INFO containerlab-worker-1 running containerlab.deploy  - 19:58:41 INFO Adding host entries path=/etc/hosts
-05-May-2025 19:58:42.091 9e32d588fc27446db61200937974bb14 job completed in 28.363 seconds
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>containerlab
+nf<span class="o">[</span>containerlab<span class="o">]</span><span class="c1">#deploy topology nf://containerlab/three-routers-topology.yaml</span>
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.728<span class="w"> </span>9e32d588fc27446db61200937974bb14<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.753<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span>Deploying<span class="w"> </span>lab<span class="w"> </span>three-routers-topology.yaml
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.770<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:13<span class="w"> </span>INFO<span class="w"> </span>Containerlab<span class="w"> </span>started<span class="w"> </span><span class="nv">version</span><span class="o">=</span><span class="m">0</span>.67.0
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.782<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:13<span class="w"> </span>INFO<span class="w"> </span>Parsing<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>checking<span class="w"> </span>topology<span class="w"> </span><span class="nv">file</span><span class="o">=</span>three-routers-topology.yaml
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.793<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:13<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>docker<span class="w"> </span>network<span class="w"> </span><span class="nv">name</span><span class="o">=</span>three_routers_lab<span class="w"> </span>IPv4<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="m">172</span>.100.101.0/24<span class="w"> </span>IPv6<span class="w"> </span><span class="nv">subnet</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="nv">MTU</span><span class="o">=</span><span class="m">0</span>
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.927<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:13<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>r3
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.939<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:13<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>r1
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.950<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:13<span class="w"> </span>INFO<span class="w"> </span>config<span class="w"> </span>file<span class="w"> </span>
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:13.961<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:13<span class="w"> </span>INFO<span class="w"> </span>Creating<span class="w"> </span>container<span class="w"> </span><span class="nv">name</span><span class="o">=</span>r2
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:14.678<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:14<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">&#39;r3&#39;</span><span class="w"> </span>node
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:14.886<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:14<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>r2:eth2<span class="w"> </span>▪┄┄▪<span class="w"> </span>r3:eth2
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:14.897<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:14<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">&#39;r2&#39;</span><span class="w"> </span>node
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:14.908<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:14<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>r1:eth1<span class="w"> </span>▪┄┄▪<span class="w"> </span>r2:eth1
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:14.937<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:14<span class="w"> </span>INFO<span class="w"> </span>Created<span class="w"> </span>link:<span class="w"> </span>r3:eth3<span class="w"> </span>▪┄┄▪<span class="w"> </span>r1:eth3
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:14.948<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:14<span class="w"> </span>INFO<span class="w"> </span>Running<span class="w"> </span>postdeploy<span class="w"> </span>actions<span class="w"> </span><span class="k">for</span><span class="w"> </span>Arista<span class="w"> </span>cEOS<span class="w"> </span><span class="s1">&#39;r1&#39;</span><span class="w"> </span>node
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:41.856<span class="w"> </span>INFO<span class="w"> </span>containerlab-worker-1<span class="w"> </span>running<span class="w"> </span>containerlab.deploy<span class="w">  </span>-<span class="w"> </span><span class="m">19</span>:58:41<span class="w"> </span>INFO<span class="w"> </span>Adding<span class="w"> </span>host<span class="w"> </span>entries<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/etc/hosts
+<span class="m">05</span>-May-2025<span class="w"> </span><span class="m">19</span>:58:42.091<span class="w"> </span>9e32d588fc27446db61200937974bb14<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">28</span>.363<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
 containerlab-worker-1:
-    ----------
-    containerlab-worker-1:
-        ----------
-        containers:
-            |_
-              ----------
-              lab_name:
-                  three-routers-lab
-              labPath:
-                  three-routers-topology.yaml
-              name:
-                  clab-three-routers-lab-r1
-              container_id:
-                  86205a93994c
-              image:
-                  ceosimage:4.30.0F
-              kind:
-                  ceos
-              state:
-                  running
-              ipv4_address:
-                  172.100.101.12/24
-              ipv6_address:
-                  N/A
-              owner:
-                  norfabuser
-            |_
-              ----------
-              lab_name:
-                  three-routers-lab
-              labPath:
-                  three-routers-topology.yaml
-              name:
-                  clab-three-routers-lab-r2
-              container_id:
-                  b5c74ff1f108
-              image:
-                  ceosimage:4.30.0F
-              kind:
-                  ceos
-              state:
-                  running
-              ipv4_address:
-                  172.100.101.13/24
-              ipv6_address:
-                  N/A
-              owner:
-                  norfabuser
-            |_
-              ----------
-              lab_name:
-                  three-routers-lab
-              labPath:
-                  three-routers-topology.yaml
-              name:
-                  clab-three-routers-lab-r3
-              container_id:
-                  1ddd29a0524d
-              image:
-                  ceosimage:4.30.0F
-              kind:
-                  ceos
-              state:
-                  running
-              ipv4_address:
-                  172.100.101.14/24
-              ipv6_address:
-                  N/A
-              owner:
-                  norfabuser
-nf[containerlab]# 
+<span class="w">    </span>----------
+<span class="w">    </span>containerlab-worker-1:
+<span class="w">        </span>----------
+<span class="w">        </span>containers:
+<span class="w">            </span><span class="p">|</span>_
+<span class="w">              </span>----------
+<span class="w">              </span>lab_name:
+<span class="w">                  </span>three-routers-lab
+<span class="w">              </span>labPath:
+<span class="w">                  </span>three-routers-topology.yaml
+<span class="w">              </span>name:
+<span class="w">                  </span>clab-three-routers-lab-r1
+<span class="w">              </span>container_id:
+<span class="w">                  </span>86205a93994c
+<span class="w">              </span>image:
+<span class="w">                  </span>ceosimage:4.30.0F
+<span class="w">              </span>kind:
+<span class="w">                  </span>ceos
+<span class="w">              </span>state:
+<span class="w">                  </span>running
+<span class="w">              </span>ipv4_address:
+<span class="w">                  </span><span class="m">172</span>.100.101.12/24
+<span class="w">              </span>ipv6_address:
+<span class="w">                  </span>N/A
+<span class="w">              </span>owner:
+<span class="w">                  </span>norfabuser
+<span class="w">            </span><span class="p">|</span>_
+<span class="w">              </span>----------
+<span class="w">              </span>lab_name:
+<span class="w">                  </span>three-routers-lab
+<span class="w">              </span>labPath:
+<span class="w">                  </span>three-routers-topology.yaml
+<span class="w">              </span>name:
+<span class="w">                  </span>clab-three-routers-lab-r2
+<span class="w">              </span>container_id:
+<span class="w">                  </span>b5c74ff1f108
+<span class="w">              </span>image:
+<span class="w">                  </span>ceosimage:4.30.0F
+<span class="w">              </span>kind:
+<span class="w">                  </span>ceos
+<span class="w">              </span>state:
+<span class="w">                  </span>running
+<span class="w">              </span>ipv4_address:
+<span class="w">                  </span><span class="m">172</span>.100.101.13/24
+<span class="w">              </span>ipv6_address:
+<span class="w">                  </span>N/A
+<span class="w">              </span>owner:
+<span class="w">                  </span>norfabuser
+<span class="w">            </span><span class="p">|</span>_
+<span class="w">              </span>----------
+<span class="w">              </span>lab_name:
+<span class="w">                  </span>three-routers-lab
+<span class="w">              </span>labPath:
+<span class="w">                  </span>three-routers-topology.yaml
+<span class="w">              </span>name:
+<span class="w">                  </span>clab-three-routers-lab-r3
+<span class="w">              </span>container_id:
+<span class="w">                  </span>1ddd29a0524d
+<span class="w">              </span>image:
+<span class="w">                  </span>ceosimage:4.30.0F
+<span class="w">              </span>kind:
+<span class="w">                  </span>ceos
+<span class="w">              </span>state:
+<span class="w">                  </span>running
+<span class="w">              </span>ipv4_address:
+<span class="w">                  </span><span class="m">172</span>.100.101.14/24
+<span class="w">              </span>ipv6_address:
+<span class="w">                  </span>N/A
+<span class="w">              </span>owner:
+<span class="w">                  </span>norfabuser
+nf<span class="o">[</span>containerlab<span class="o">]</span><span class="c1"># </span>
 </code></pre></div>
 <p>In this example:</p>
 <ul>
@@ -6337,27 +6410,48 @@ nf[containerlab]#
 </ul>
 </div>
 <div class="tabbed-block">
-<p>This code is complete and can run as is.</p>
+<p>Context manager:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;inventory.yaml&quot;</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
         <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://containerlab/three-routers-topology.yaml&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle with reconfigure and node filter:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="n">service</span><span class="o">=</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s2">&quot;deploy&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://containerlab/three-routers-topology.yaml&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reconfigure&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;node_filter&quot;</span><span class="p">:</span> <span class="s2">&quot;r1,r2&quot;</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
-    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
     <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6370,17 +6464,17 @@ nf[containerlab]#
 <p>The <code>deploy</code> task allows you to deploy specific nodes in a topology using the <code>node_filter</code> argument. This is useful for testing or updating specific parts of a lab without affecting the entire topology.</p>
 <h2 id="norfab-containerlab-cli-shell-reference">NORFAB Containerlab CLI Shell Reference<a class="headerlink" href="#norfab-containerlab-cli-shell-reference" title="Permanent link">¤</a></h2>
 <p>Below are the commands supported by the <code>deploy</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree containerlab.deploy
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>containerlab.deploy
 root
-└── containerlab:    Containerlab service
-    └── deploy:    Spins up a lab using provided topology
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── verbose-result:    Control output details, default &#39;False&#39;
-        ├── *topology:    URL to topology file to deploy
-        ├── reconfigure:    Destroy the lab and then re-deploy it., default &#39;False&#39;
-        ├── node-filter:    Comma-separated list of node names to deploy
-        └── progress:    Display progress events, default &#39;True&#39;
+└──<span class="w"> </span>containerlab:<span class="w">    </span>Containerlab<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>deploy:<span class="w">    </span>Spins<span class="w"> </span>up<span class="w"> </span>a<span class="w"> </span>lab<span class="w"> </span>using<span class="w"> </span>provided<span class="w"> </span>topology
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>*topology:<span class="w">    </span>URL<span class="w"> </span>to<span class="w"> </span>topology<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>deploy
+<span class="w">        </span>├──<span class="w"> </span>reconfigure:<span class="w">    </span>Destroy<span class="w"> </span>the<span class="w"> </span>lab<span class="w"> </span>and<span class="w"> </span><span class="k">then</span><span class="w"> </span>re-deploy<span class="w"> </span>it.,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>node-filter:<span class="w">    </span>Comma-separated<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>node<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>deploy
+<span class="w">        </span>└──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>

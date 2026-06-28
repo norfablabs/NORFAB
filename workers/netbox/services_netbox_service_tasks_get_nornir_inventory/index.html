@@ -2279,10 +2279,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-nornir-inventory-sample-usage" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Nornir Inventory Sample Usage
+        How It Works
       
     </span>
   </a>
@@ -2290,10 +2290,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-get-nornir-inventory-command-shell-reference" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Get Nornir Inventory Command Shell Reference
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6038,10 +6071,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#get-nornir-inventory-sample-usage" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Nornir Inventory Sample Usage
+        How It Works
       
     </span>
   </a>
@@ -6049,10 +6082,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#norfab-netbox-get-nornir-inventory-command-shell-reference" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        NORFAB Netbox Get Nornir Inventory Command Shell Reference
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-gotchas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes / Gotchas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -6105,24 +6171,162 @@
 <blockquote>
 <p>task api name: <code>get_nornir_inventory</code></p>
 </blockquote>
-<p>This task designed to provide Nornir workers with inventory data sourced from Netbox.</p>
-<p><strong>How it works</strong></p>
-<p>Netbox NorFab workers able to talk with Netbox GraphQL and REST API. Nornir workers can be configured to request Nornir inventory from Netbox workers on startup. Netbox workers in response to such a request will be fetching devices data from Netbox and constructing Nornir inventory returning it to Nornir worker.</p>
+<p>Builds a Nornir inventory from NetBox device data. Nornir workers can call this task during startup to source hosts, host data, platform, hostname, interfaces, connections, circuits, and BGP peerings from NetBox.</p>
 <p><img alt="Netbox get Nornir inventory" src="../../../images/Netbox_get_nornir_inventory.jpg" /></p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <ol>
-<li>
-<p>On startup Nornir worker sends <code>get_nornir_inventory</code> request to Netbox NorFab Workers</p>
-</li>
-<li>
-<p>Netbox worker fetches devices data from netbox - hostnames, interfaces, ip addresses, circuits, connections, configuration contexts etc.</p>
-</li>
-<li>
-<p>Netbox worker constructs Nornir inventory and sends it back to Nornir worker</p>
-</li>
+<li>Nornir worker or client submits a <code>get_nornir_inventory</code> request to the NetBox worker</li>
+<li>NetBox worker checks the target NetBox instance status</li>
+<li>NetBox worker fetches device data with <code>get_devices</code></li>
+<li>NetBox worker builds a Nornir <code>hosts</code> inventory from NetBox device data and config context</li>
+<li>Optional interface, connection, circuit, and BGP peering datasets are added to host data</li>
+<li>NetBox worker returns the assembled Nornir inventory</li>
 </ol>
-<h2 id="get-nornir-inventory-sample-usage">Get Nornir Inventory Sample Usage<a class="headerlink" href="#get-nornir-inventory-sample-usage" title="Permanent link">¤</a></h2>
-<h2 id="norfab-netbox-get-nornir-inventory-command-shell-reference">NORFAB Netbox Get Nornir Inventory Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-nornir-inventory-command-shell-reference" title="Permanent link">¤</a></h2>
-<p>NorFab shell supports these command options for Netbox <code>get_nornir_inventory</code> task:</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filters</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox device filter dictionaries</td>
+</tr>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">No</td>
+<td>Device names to include in inventory</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>interfaces</code></td>
+<td style="text-align: right;">No</td>
+<td><code>True</code> to include interfaces, or a dictionary of <code>get_interfaces</code> kwargs</td>
+</tr>
+<tr>
+<td><code>connections</code></td>
+<td style="text-align: right;">No</td>
+<td><code>True</code> to include connections, or a dictionary of <code>get_connections</code> kwargs</td>
+</tr>
+<tr>
+<td><code>circuits</code></td>
+<td style="text-align: right;">No</td>
+<td><code>True</code> to include circuits, or a dictionary of <code>get_circuits</code> kwargs</td>
+</tr>
+<tr>
+<td><code>bgp_peerings</code></td>
+<td style="text-align: right;">No</td>
+<td><code>True</code> to include BGP peerings, or a dictionary of <code>get_bgp_peerings</code> kwargs</td>
+</tr>
+<tr>
+<td><code>nbdata</code></td>
+<td style="text-align: right;">No</td>
+<td>Include NetBox device data in host data, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>primary_ip</code></td>
+<td style="text-align: right;">No</td>
+<td>Primary IP family to use for hostname, default <code>ip4</code></td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td style="text-align: right;">No</td>
+<td>Cache usage mode passed to supporting data retrieval tasks</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns a Nornir inventory dictionary:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;hosts&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;192.0.2.11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;eos&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lab&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
+<ul>
+<li>The host name can be overridden by <code>config_context.nornir.name</code> on the NetBox device.</li>
+<li>If host <code>platform</code> or <code>hostname</code> is not present in NetBox config context, the task derives them from NetBox platform and primary IP fields.</li>
+<li><code>interfaces</code>, <code>connections</code>, <code>circuits</code>, and <code>bgp_peerings</code> can be <code>True</code> or dictionaries with kwargs for the related task.</li>
+<li>The current NFCLI command model does not expose <code>get_nornir_inventory</code> directly under <code>netbox get</code>, so this task is commonly used by Nornir worker startup or Python API callers.</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+<span class="c1"># build inventory for specific devices</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># build inventory from NetBox filters</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">}],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># include related interface and connection data</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># use IPv6 primary addresses for hostnames</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_nornir_inventory&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;primary_ip&quot;</span><span class="p">:</span> <span class="s2">&quot;ip6&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 

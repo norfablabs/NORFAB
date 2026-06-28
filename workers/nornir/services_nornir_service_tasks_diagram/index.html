@@ -1777,6 +1777,39 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#creating-layer-2-network-diagram" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1836,6 +1869,17 @@
     <span class="md-ellipsis">
       
         NORFAB Nornir Diagram Shell Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
       
     </span>
   </a>
@@ -6071,6 +6115,39 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#creating-layer-2-network-diagram" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6136,6 +6213,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#python-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6172,13 +6260,79 @@
 <p>task api name: <code>diagram</code></p>
 </blockquote>
 <p>The Nornir Service Diagram Task is a powerful component of NorFab's Nornir service, designed to create detailed network diagrams. By leveraging the <a href="https://github.com/dmulyalin/N2G/">N2G (Need to Graph)</a> module, this task enables network engineers and architects to visualize network topologies and configurations, facilitating better network management and planning.</p>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>format</code></td>
+<td style="text-align: right;">No</td>
+<td>Diagram file format. Supported values include <code>yed</code>, <code>drawio</code>, and <code>v3d</code>. Defaults to <code>yed</code>.</td>
+</tr>
+<tr>
+<td><code>layer2</code>, <code>layer3</code>, <code>ospf</code>, <code>isis</code></td>
+<td style="text-align: right;">Yes</td>
+<td>Diagram data plugin to run.</td>
+</tr>
+<tr>
+<td><code>filename</code></td>
+<td style="text-align: right;">No</td>
+<td>Output filename for the generated diagram.</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td style="text-align: right;">No</td>
+<td>Nornir workers to target. Defaults to all workers.</td>
+</tr>
+<tr>
+<td><code>FC</code>, <code>FB</code>, <code>FH</code>, <code>FL</code>, <code>FM</code>, <code>FG</code>, <code>FR</code>, <code>FO</code>, <code>FP</code>, <code>FX</code>, <code>FN</code>, <code>hosts</code></td>
+<td style="text-align: right;">No</td>
+<td>Host filters.</td>
+</tr>
+<tr>
+<td>Diagram-specific options</td>
+<td style="text-align: right;">No</td>
+<td>Options such as <code>group-links</code>, <code>add-lag</code>, <code>add-connected</code>, <code>label-interface</code>, and <code>add-data</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>The command returns the diagram type, selected output format, generated file path, and the hosts used to build the diagram.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Create a Layer 3 diagram in yEd GraphML format:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>diagram<span class="w"> </span>layer3<span class="w"> </span>FC<span class="w"> </span>spine,leaf
+</code></pre></div>
+<p>Create a Layer 2 diagram and save it as a draw.io file:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>diagram<span class="w"> </span>format<span class="w"> </span>drawio<span class="w"> </span>layer2<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>filename<span class="w"> </span>./diagrams/fabric_l2.drawio
+</code></pre></div>
+<p>Create an OSPF topology diagram:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>diagram<span class="w"> </span>ospf<span class="w"> </span>FC<span class="w"> </span>spine,leaf<span class="w"> </span>add-connected
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>TBD. The diagram workflow is currently documented through the interactive shell command path. Confirm the stable Python API before adding <code>NorFab</code> client examples.</p>
+</div>
+</div>
+</div>
+</div>
 <h2 id="creating-layer-2-network-diagram">Creating Layer-2 Network Diagram<a class="headerlink" href="#creating-layer-2-network-diagram" title="Permanent link">¤</a></h2>
 <p>Layer-2 network diagrams illustrate the data link layer of the OSI model, showing how devices are interconnected within a local area network (LAN) based on the output provided by LLDP and CDP protocols. These diagrams are essential for understanding the physical and logical connections between switches, routers, and other network devices. By creating Layer-2 network diagrams, you can identify potential bottlenecks, optimize traffic flow, and ensure efficient network design. The Nornir Service Diagram Task uses the N2G module to automatically generate these diagrams, providing a clear and accurate representation of your Layer-2 topology.</p>
 <h2 id="creating-layer-3-network-diagram">Creating Layer-3 Network Diagram<a class="headerlink" href="#creating-layer-3-network-diagram" title="Permanent link">¤</a></h2>
 <p>Layer-3 network diagrams depict the network layer of the OSI model, highlighting the routing and IP addressing within a network. These diagrams are crucial for understanding how data is routed between different subnets and networks. By creating Layer-3 network diagrams, you can visualize the routing paths, identify potential routing issues, and ensure proper IP address allocation. The Nornir Service Diagram Task leverages the N2G module to construct these diagrams, offering a comprehensive view of your Layer-3 network infrastructure.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block"></div>
 </div>
@@ -6186,20 +6340,20 @@
 <div class="highlight"><pre><span></span><code>nf#
 nf#
 nf#nornir
-nf[nornir]#diagram
-nf[nornir-diagram]#layer3 FC spine,leaf
---------------------------------------------- Job Events -----------------------------------------------
-04-Jan-2025 22:59:56 85fd42146327446cae3c26ceb2077abf job started
-04-Jan-2025 22:59:56.664 nornir nornir-worker-1 ceos-spine-1, ceos-spine-2 task started - &#39;netmiko_send_commands&#39;
-&lt;omitted for brevity&gt;
-04-Jan-2025 22:59:58 85fd42146327446cae3c26ceb2077abf job completed in 2.117 seconds
+nf<span class="o">[</span>nornir<span class="o">]</span><span class="c1">#diagram</span>
+nf<span class="o">[</span>nornir-diagram<span class="o">]</span><span class="c1">#layer3 FC spine,leaf</span>
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:59:56<span class="w"> </span>85fd42146327446cae3c26ceb2077abf<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:59:56.664<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
+&lt;omitted<span class="w"> </span><span class="k">for</span><span class="w"> </span>brevity&gt;
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">22</span>:59:58<span class="w"> </span>85fd42146327446cae3c26ceb2077abf<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">2</span>.117<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
-diagram: &#39;layer3&#39;, format: &#39;yed&#39;
-saved at: &#39;./diagrams\layer3_2025-01-04_22-59-56.graphml&#39;
-hosts: ceos-leaf-1, ceos-leaf-2, ceos-leaf-3, ceos-spine-1, ceos-spine-2
-nf[nornir-diagram]#
+diagram:<span class="w"> </span><span class="s1">&#39;layer3&#39;</span>,<span class="w"> </span>format:<span class="w"> </span><span class="s1">&#39;yed&#39;</span>
+saved<span class="w"> </span>at:<span class="w"> </span><span class="s1">&#39;./diagrams\layer3_2025-01-04_22-59-56.graphml&#39;</span>
+hosts:<span class="w"> </span>ceos-leaf-1,<span class="w"> </span>ceos-leaf-2,<span class="w"> </span>ceos-leaf-3,<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2
+nf<span class="o">[</span>nornir-diagram<span class="o">]</span><span class="c1">#</span>
 </code></pre></div>
 <p>Demo</p>
 <p><img alt="Nornir Cli Demo" src="../../../images/nornir_diagram_demo_layer3.gif" /></p>
@@ -6218,7 +6372,7 @@ nf[nornir-diagram]#
 <p>N2G module can produce diagrams in several formats, to create <a href="https://www.drawio.com/">draw.io</a> diagram need to use <code>format</code> argument with <code>drawio</code> value.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block"></div>
 </div>
@@ -6226,21 +6380,21 @@ nf[nornir-diagram]#
 <div class="highlight"><pre><span></span><code>nf#
 nf#
 nf#nornir
-nf[nornir]#diagram
-nf[nornir-diagram]#format drawio layer3 FC spine,leaf
---------------------------------------------- Job Events -----------------------------------------------
-04-Jan-2025 23:16:13 a2d39b5b1268488a95805baed96699a1 job started
-04-Jan-2025 23:16:14.277 nornir nornir-worker-1 ceos-spine-1, ceos-spine-2 task started - &#39;netmiko_send_commands&#39;
-04-Jan-2025 23:16:14.289 nornir nornir-worker-2 ceos-leaf-1, ceos-leaf-2, ceos-leaf-3 task started - &#39;netmiko_send_commands&#39;
-&lt;omitted for brevity&gt;
-04-Jan-2025 23:16:16 a2d39b5b1268488a95805baed96699a1 job completed in 2.606 seconds
+nf<span class="o">[</span>nornir<span class="o">]</span><span class="c1">#diagram</span>
+nf<span class="o">[</span>nornir-diagram<span class="o">]</span><span class="c1">#format drawio layer3 FC spine,leaf</span>
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Events<span class="w"> </span>-----------------------------------------------
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">23</span>:16:13<span class="w"> </span>a2d39b5b1268488a95805baed96699a1<span class="w"> </span>job<span class="w"> </span>started
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">23</span>:16:14.277<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-1<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">23</span>:16:14.289<span class="w"> </span>nornir<span class="w"> </span>nornir-worker-2<span class="w"> </span>ceos-leaf-1,<span class="w"> </span>ceos-leaf-2,<span class="w"> </span>ceos-leaf-3<span class="w"> </span>task<span class="w"> </span>started<span class="w"> </span>-<span class="w"> </span><span class="s1">&#39;netmiko_send_commands&#39;</span>
+&lt;omitted<span class="w"> </span><span class="k">for</span><span class="w"> </span>brevity&gt;
+<span class="m">04</span>-Jan-2025<span class="w"> </span><span class="m">23</span>:16:16<span class="w"> </span>a2d39b5b1268488a95805baed96699a1<span class="w"> </span>job<span class="w"> </span>completed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">2</span>.606<span class="w"> </span>seconds
 
---------------------------------------------- Job Results --------------------------------------------
+---------------------------------------------<span class="w"> </span>Job<span class="w"> </span>Results<span class="w"> </span>--------------------------------------------
 
-diagram: &#39;layer3&#39;, format: &#39;drawio&#39;
-saved at: &#39;./diagrams\layer3_2025-01-04_23-16-13.drawio&#39;
-hosts: ceos-leaf-1, ceos-leaf-2, ceos-leaf-3, ceos-spine-1, ceos-spine-2
-nf[nornir-diagram]#
+diagram:<span class="w"> </span><span class="s1">&#39;layer3&#39;</span>,<span class="w"> </span>format:<span class="w"> </span><span class="s1">&#39;drawio&#39;</span>
+saved<span class="w"> </span>at:<span class="w"> </span><span class="s1">&#39;./diagrams\layer3_2025-01-04_23-16-13.drawio&#39;</span>
+hosts:<span class="w"> </span>ceos-leaf-1,<span class="w"> </span>ceos-leaf-2,<span class="w"> </span>ceos-leaf-3,<span class="w"> </span>ceos-spine-1,<span class="w"> </span>ceos-spine-2
+nf<span class="o">[</span>nornir-diagram<span class="o">]</span><span class="c1">#</span>
 </code></pre></div>
 <ul>
 <li><code>nornir</code> command switches to the Nornir sub-shell.</li>
@@ -6251,150 +6405,152 @@ nf[nornir-diagram]#
 </div>
 <h2 id="norfab-nornir-diagram-shell-reference">NORFAB Nornir Diagram Shell Reference<a class="headerlink" href="#norfab-nornir-diagram-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Nornir <code>diagram</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree nornir.diagram
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>nornir.diagram
 root
-└── nornir:    Nornir service
-    └── diagram:    Produce network diagrams
-        ├── timeout:    Job timeout
-        ├── workers:    Filter worker to target, default &#39;all&#39;
-        ├── format:    Diagram application format, default &#39;yed&#39;
-        ├── layer3:    Create L3 Network diagram using IP data
-        │   ├── add-details:    Add task details to results, default &#39;False&#39;
-        │   ├── num-workers:    RetryRunner number of threads for tasks execution
-        │   ├── num-connectors:    RetryRunner number of threads for device connections
-        │   ├── connect-retry:    RetryRunner number of connection attempts
-        │   ├── task-retry:    RetryRunner number of attempts to run task
-        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
-        │   ├── tf:    File group name to save task results to on worker file system
-        │   ├── tf-skip-failed:    Save results to file for failed tasks
-        │   ├── diff:    File group name to run the diff for
-        │   ├── diff-last:    File version number to diff, default is 1 (last)
-        │   ├── progress:    Display progress events, default &#39;True&#39;
-        │   ├── FO:    Filter hosts using Filter Object
-        │   ├── FB:    Filter hosts by name using Glob Patterns
-        │   ├── FH:    Filter hosts by hostname
-        │   ├── FC:    Filter hosts containment of pattern in name
-        │   ├── FR:    Filter hosts by name using Regular Expressions
-        │   ├── FG:    Filter hosts by group
-        │   ├── FP:    Filter hosts by hostname using IP Prefix
-        │   ├── FL:    Filter hosts by names list
-        │   ├── FM:    Filter hosts by platform
-        │   ├── FX:    Filter hosts excluding them by name
-        │   ├── FN:    Negate the match
-        │   ├── hosts:    Filter hosts to target
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── group_links:    Group links between same nodes
-        │   ├── add-arp:    Add IP nodes from ARP cache parsing results
-        │   ├── label-interface:    Add interface name to the link’s source and target labels
-        │   ├── label-vrf:    Add VRF name to the link’s source and target labels
-        │   ├── collapse-ptp:    Combines links for /31 and /30 IPv4 and /127 IPv6 subnets into a single link
-        │   ├── add-fhrp:    Add HSRP and VRRP IP addresses to the diagram
-        │   ├── bottom-label-length:    Length of interface description to use for subnet labels, if 0, label not set
-        │   └── lbl-next-to-subnet:    Put link port:vrf:ip label next to subnet node
-        ├── layer2:    Create L2 Network diagram using CDP/LLDP data
-        │   ├── add-details:    Add task details to results, default &#39;False&#39;
-        │   ├── num-workers:    RetryRunner number of threads for tasks execution
-        │   ├── num-connectors:    RetryRunner number of threads for device connections
-        │   ├── connect-retry:    RetryRunner number of connection attempts
-        │   ├── task-retry:    RetryRunner number of attempts to run task
-        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
-        │   ├── tf:    File group name to save task results to on worker file system
-        │   ├── tf-skip-failed:    Save results to file for failed tasks
-        │   ├── diff:    File group name to run the diff for
-        │   ├── diff-last:    File version number to diff, default is 1 (last)
-        │   ├── progress:    Display progress events, default &#39;True&#39;
-        │   ├── FO:    Filter hosts using Filter Object
-        │   ├── FB:    Filter hosts by name using Glob Patterns
-        │   ├── FH:    Filter hosts by hostname
-        │   ├── FC:    Filter hosts containment of pattern in name
-        │   ├── FR:    Filter hosts by name using Regular Expressions
-        │   ├── FG:    Filter hosts by group
-        │   ├── FP:    Filter hosts by hostname using IP Prefix
-        │   ├── FL:    Filter hosts by names list
-        │   ├── FM:    Filter hosts by platform
-        │   ├── FX:    Filter hosts excluding them by name
-        │   ├── FN:    Negate the match
-        │   ├── hosts:    Filter hosts to target
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── add-interfaces-data:    Add interfaces configuration and state data to links
-        │   ├── group-links:    Group links between nodes
-        │   ├── add-lag:    Add LAG/MLAG links to diagram
-        │   ├── add-all-connected:    Add all nodes connected to devices based on interfaces state
-        │   ├── combine-peers:    Combine CDP/LLDP peers behind same interface by adding L2 node
-        │   └── skip-lag:    Skip CDP peers for LAG, some platforms send CDP/LLDP PDU from LAG ports
-        ├── isis:    Create ISIS Network diagram using LSDB data
-        │   ├── add-details:    Add task details to results, default &#39;False&#39;
-        │   ├── num-workers:    RetryRunner number of threads for tasks execution
-        │   ├── num-connectors:    RetryRunner number of threads for device connections
-        │   ├── connect-retry:    RetryRunner number of connection attempts
-        │   ├── task-retry:    RetryRunner number of attempts to run task
-        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        │   ├── creds-retry:    RetryRunner list of connection credentials and parameters to retry
-        │   ├── tf:    File group name to save task results to on worker file system
-        │   ├── tf-skip-failed:    Save results to file for failed tasks
-        │   ├── diff:    File group name to run the diff for
-        │   ├── diff-last:    File version number to diff, default is 1 (last)
-        │   ├── progress:    Display progress events, default &#39;True&#39;
-        │   ├── FO:    Filter hosts using Filter Object
-        │   ├── FB:    Filter hosts by name using Glob Patterns
-        │   ├── FH:    Filter hosts by hostname
-        │   ├── FC:    Filter hosts containment of pattern in name
-        │   ├── FR:    Filter hosts by name using Regular Expressions
-        │   ├── FG:    Filter hosts by group
-        │   ├── FP:    Filter hosts by hostname using IP Prefix
-        │   ├── FL:    Filter hosts by names list
-        │   ├── FM:    Filter hosts by platform
-        │   ├── FX:    Filter hosts excluding them by name
-        │   ├── FN:    Negate the match
-        │   ├── hosts:    Filter hosts to target
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── ip-lookup-data:    IP Lookup dictionary or OS path to CSV file
-        │   ├── add-connected:    Add connected subnets as nodes
-        │   ├── ptp-filter:    List of glob patterns to filter point-to-point links based on link IP
-        │   └── add-data:    Add data information to nodes and links
-        ├── ospf:    Create OSPF Network diagram using LSDB data
-        │   ├── add-details:    Add task details to results, default &#39;False&#39;
-        │   ├── num-workers:    RetryRunner number of threads for tasks execution
-        │   ├── num-connectors:    RetryRunner number of threads for device connections
-        │   ├── connect-retry:    RetryRunner number of connection attempts
-        │   ├── task-retry:    RetryRunner number of attempts to run task
-        │   ├── reconnect-on-fail:    RetryRunner perform reconnect to host on task failure
-        │   ├── connect-check:    RetryRunner test TCP connection before opening actual connection
-        │   ├── connect-timeout:    RetryRunner timeout in seconds to wait for test TCP connection to establish
-        │   ├── tf:    File group name to save task results to on worker file system
-        │   ├── tf-skip-failed:    Save results to file for failed tasks
-        │   ├── diff:    File group name to run the diff for
-        │   ├── diff-last:    File version number to diff, default is 1 (last)
-        │   ├── progress:    Display progress events, default &#39;True&#39;
-        │   ├── FO:    Filter hosts using Filter Object
-        │   ├── FB:    Filter hosts by name using Glob Patterns
-        │   ├── FH:    Filter hosts by hostname
-        │   ├── FC:    Filter hosts containment of pattern in name
-        │   ├── FR:    Filter hosts by name using Regular Expressions
-        │   ├── FG:    Filter hosts by group
-        │   ├── FP:    Filter hosts by hostname using IP Prefix
-        │   ├── FL:    Filter hosts by names list
-        │   ├── FM:    Filter hosts by platform
-        │   ├── FX:    Filter hosts excluding them by name
-        │   ├── FN:    Negate the match
-        │   ├── hosts:    Filter hosts to target
-        │   ├── workers:    Filter worker to target, default &#39;all&#39;
-        │   ├── ip-lookup-data:    IP Lookup dictionary or OS path to CSV file
-        │   ├── add-connected:    Add connected subnets as nodes
-        │   ├── ptp-filter:    List of glob patterns to filter point-to-point links based on link IP
-        │   └── add-data:    Add data information to nodes and links
-        └── filename:    Name of the file to save diagram content
+└──<span class="w"> </span>nornir:<span class="w">    </span>Nornir<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>diagram:<span class="w">    </span>Produce<span class="w"> </span>network<span class="w"> </span>diagrams
+<span class="w">        </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">        </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>format:<span class="w">    </span>Diagram<span class="w"> </span>application<span class="w"> </span>format,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;yed&#39;</span>
+<span class="w">        </span>├──<span class="w"> </span>layer3:<span class="w">    </span>Create<span class="w"> </span>L3<span class="w"> </span>Network<span class="w"> </span>diagram<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>data
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>task-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>reconnect-on-fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>creds-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>credentials<span class="w"> </span>and<span class="w"> </span>parameters<span class="w"> </span>to<span class="w"> </span>retry
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>group_links:<span class="w">    </span>Group<span class="w"> </span>links<span class="w"> </span>between<span class="w"> </span>same<span class="w"> </span>nodes
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-arp:<span class="w">    </span>Add<span class="w"> </span>IP<span class="w"> </span>nodes<span class="w"> </span>from<span class="w"> </span>ARP<span class="w"> </span>cache<span class="w"> </span>parsing<span class="w"> </span>results
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>label-interface:<span class="w">    </span>Add<span class="w"> </span>interface<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>link’s<span class="w"> </span><span class="nb">source</span><span class="w"> </span>and<span class="w"> </span>target<span class="w"> </span>labels
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>label-vrf:<span class="w">    </span>Add<span class="w"> </span>VRF<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>link’s<span class="w"> </span><span class="nb">source</span><span class="w"> </span>and<span class="w"> </span>target<span class="w"> </span>labels
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>collapse-ptp:<span class="w">    </span>Combines<span class="w"> </span>links<span class="w"> </span><span class="k">for</span><span class="w"> </span>/31<span class="w"> </span>and<span class="w"> </span>/30<span class="w"> </span>IPv4<span class="w"> </span>and<span class="w"> </span>/127<span class="w"> </span>IPv6<span class="w"> </span>subnets<span class="w"> </span>into<span class="w"> </span>a<span class="w"> </span>single<span class="w"> </span>link
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-fhrp:<span class="w">    </span>Add<span class="w"> </span>HSRP<span class="w"> </span>and<span class="w"> </span>VRRP<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>diagram
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>bottom-label-length:<span class="w">    </span>Length<span class="w"> </span>of<span class="w"> </span>interface<span class="w"> </span>description<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>subnet<span class="w"> </span>labels,<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="m">0</span>,<span class="w"> </span>label<span class="w"> </span>not<span class="w"> </span><span class="nb">set</span>
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>lbl-next-to-subnet:<span class="w">    </span>Put<span class="w"> </span>link<span class="w"> </span>port:vrf:ip<span class="w"> </span>label<span class="w"> </span>next<span class="w"> </span>to<span class="w"> </span>subnet<span class="w"> </span>node
+<span class="w">        </span>├──<span class="w"> </span>layer2:<span class="w">    </span>Create<span class="w"> </span>L2<span class="w"> </span>Network<span class="w"> </span>diagram<span class="w"> </span>using<span class="w"> </span>CDP/LLDP<span class="w"> </span>data
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>task-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>reconnect-on-fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>creds-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>credentials<span class="w"> </span>and<span class="w"> </span>parameters<span class="w"> </span>to<span class="w"> </span>retry
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-interfaces-data:<span class="w">    </span>Add<span class="w"> </span>interfaces<span class="w"> </span>configuration<span class="w"> </span>and<span class="w"> </span>state<span class="w"> </span>data<span class="w"> </span>to<span class="w"> </span>links
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>group-links:<span class="w">    </span>Group<span class="w"> </span>links<span class="w"> </span>between<span class="w"> </span>nodes
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-lag:<span class="w">    </span>Add<span class="w"> </span>LAG/MLAG<span class="w"> </span>links<span class="w"> </span>to<span class="w"> </span>diagram
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-all-connected:<span class="w">    </span>Add<span class="w"> </span>all<span class="w"> </span>nodes<span class="w"> </span>connected<span class="w"> </span>to<span class="w"> </span>devices<span class="w"> </span>based<span class="w"> </span>on<span class="w"> </span>interfaces<span class="w"> </span>state
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>combine-peers:<span class="w">    </span>Combine<span class="w"> </span>CDP/LLDP<span class="w"> </span>peers<span class="w"> </span>behind<span class="w"> </span>same<span class="w"> </span>interface<span class="w"> </span>by<span class="w"> </span>adding<span class="w"> </span>L2<span class="w"> </span>node
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>skip-lag:<span class="w">    </span>Skip<span class="w"> </span>CDP<span class="w"> </span>peers<span class="w"> </span><span class="k">for</span><span class="w"> </span>LAG,<span class="w"> </span>some<span class="w"> </span>platforms<span class="w"> </span>send<span class="w"> </span>CDP/LLDP<span class="w"> </span>PDU<span class="w"> </span>from<span class="w"> </span>LAG<span class="w"> </span>ports
+<span class="w">        </span>├──<span class="w"> </span>isis:<span class="w">    </span>Create<span class="w"> </span>ISIS<span class="w"> </span>Network<span class="w"> </span>diagram<span class="w"> </span>using<span class="w"> </span>LSDB<span class="w"> </span>data
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>task-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>reconnect-on-fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>creds-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>credentials<span class="w"> </span>and<span class="w"> </span>parameters<span class="w"> </span>to<span class="w"> </span>retry
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>ip-lookup-data:<span class="w">    </span>IP<span class="w"> </span>Lookup<span class="w"> </span>dictionary<span class="w"> </span>or<span class="w"> </span>OS<span class="w"> </span>path<span class="w"> </span>to<span class="w"> </span>CSV<span class="w"> </span>file
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-connected:<span class="w">    </span>Add<span class="w"> </span>connected<span class="w"> </span>subnets<span class="w"> </span>as<span class="w"> </span>nodes
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>ptp-filter:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>glob<span class="w"> </span>patterns<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>point-to-point<span class="w"> </span>links<span class="w"> </span>based<span class="w"> </span>on<span class="w"> </span>link<span class="w"> </span>IP
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>add-data:<span class="w">    </span>Add<span class="w"> </span>data<span class="w"> </span>information<span class="w"> </span>to<span class="w"> </span>nodes<span class="w"> </span>and<span class="w"> </span>links
+<span class="w">        </span>├──<span class="w"> </span>ospf:<span class="w">    </span>Create<span class="w"> </span>OSPF<span class="w"> </span>Network<span class="w"> </span>diagram<span class="w"> </span>using<span class="w"> </span>LSDB<span class="w"> </span>data
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-details:<span class="w">    </span>Add<span class="w"> </span>task<span class="w"> </span>details<span class="w"> </span>to<span class="w"> </span>results,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-workers:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>tasks<span class="w"> </span>execution
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>num-connectors:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>threads<span class="w"> </span><span class="k">for</span><span class="w"> </span>device<span class="w"> </span>connections
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>connection<span class="w"> </span>attempts
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>task-retry:<span class="w">    </span>RetryRunner<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>attempts<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>task
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>reconnect-on-fail:<span class="w">    </span>RetryRunner<span class="w"> </span>perform<span class="w"> </span>reconnect<span class="w"> </span>to<span class="w"> </span>host<span class="w"> </span>on<span class="w"> </span>task<span class="w"> </span>failure
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-check:<span class="w">    </span>RetryRunner<span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>before<span class="w"> </span>opening<span class="w"> </span>actual<span class="w"> </span>connection
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>connect-timeout:<span class="w">    </span>RetryRunner<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span>to<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>TCP<span class="w"> </span>connection<span class="w"> </span>to<span class="w"> </span>establish
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>task<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>on<span class="w"> </span>worker<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>tf-skip-failed:<span class="w">    </span>Save<span class="w"> </span>results<span class="w"> </span>to<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>failed<span class="w"> </span>tasks
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff:<span class="w">    </span>File<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span>the<span class="w"> </span>diff<span class="w"> </span><span class="k">for</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>diff-last:<span class="w">    </span>File<span class="w"> </span>version<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>diff,<span class="w"> </span>default<span class="w"> </span>is<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">(</span>last<span class="o">)</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>containment<span class="w"> </span>of<span class="w"> </span>pattern<span class="w"> </span><span class="k">in</span><span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FX:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>excluding<span class="w"> </span>them<span class="w"> </span>by<span class="w"> </span>name
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>match
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>hosts:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;all&#39;</span>
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>ip-lookup-data:<span class="w">    </span>IP<span class="w"> </span>Lookup<span class="w"> </span>dictionary<span class="w"> </span>or<span class="w"> </span>OS<span class="w"> </span>path<span class="w"> </span>to<span class="w"> </span>CSV<span class="w"> </span>file
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>add-connected:<span class="w">    </span>Add<span class="w"> </span>connected<span class="w"> </span>subnets<span class="w"> </span>as<span class="w"> </span>nodes
+<span class="w">        </span>│<span class="w">   </span>├──<span class="w"> </span>ptp-filter:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>glob<span class="w"> </span>patterns<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>point-to-point<span class="w"> </span>links<span class="w"> </span>based<span class="w"> </span>on<span class="w"> </span>link<span class="w"> </span>IP
+<span class="w">        </span>│<span class="w">   </span>└──<span class="w"> </span>add-data:<span class="w">    </span>Add<span class="w"> </span>data<span class="w"> </span>information<span class="w"> </span>to<span class="w"> </span>nodes<span class="w"> </span>and<span class="w"> </span>links
+<span class="w">        </span>└──<span class="w"> </span>filename:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>save<span class="w"> </span>diagram<span class="w"> </span>content
 nf#
 </code></pre></div>
 <p><code>*</code> - mandatory/required command argument</p>
+<h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
+<p>TBD. Confirm the stable worker API for diagram generation before adding an autodoc reference.</p>
 
 
 

@@ -6237,13 +6237,13 @@
 <blockquote>
 <p>task api name: <code>update_interfaces_description</code></p>
 </blockquote>
-<p>Updates the description field of interfaces, console ports, and console server ports for one or more devices in NetBox. Supports two mutually usable modes: <strong>template mode</strong> (<code>description_template</code>) renders descriptions dynamically using Jinja2 with live connection context, and <strong>static mode</strong> (<code>descriptions</code>) applies a fixed mapping of interface names to description strings.</p>
+<p>Updates the description field of interfaces, console ports, and console server ports for one or more devices in NetBox. Supports two mutually usable modes: <strong>template mode</strong> (<code>description_template</code>) renders descriptions dynamically using Jinja2 with interface and connection context where available, and <strong>static mode</strong> (<code>descriptions</code>) applies a fixed mapping of interface names to description strings.</p>
 <h2 id="how-it-works">How it Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <ol>
 <li>Client submits <code>update_interfaces_description</code> request to NetBox worker</li>
 <li>Worker resolves the target NetBox instance and optionally the branch</li>
-<li>If <code>description_template</code> is provided, the worker fetches all interface connections for the given devices via <code>get_connections</code></li>
-<li>For each interface, the Jinja2 template is rendered with the connection context (device, interface, remote device, cable attributes, etc.)</li>
+<li>If <code>description_template</code> is provided, the worker fetches interface connections via <code>get_connections</code> and NetBox interface objects for the selected devices</li>
+<li>For each selected interface, the Jinja2 template is rendered with interface context and, when present, connection context (remote device, cable attributes, etc.)</li>
 <li>If <code>descriptions</code> dict is provided, the worker iterates over the given device list and applies the fixed description values directly</li>
 <li>In dry-run mode — the before (<code>-</code>) / after (<code>+</code>) diff is returned without writing to NetBox</li>
 <li>Otherwise, the new description is saved to NetBox</li>
@@ -6269,7 +6269,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="template-mode">Template Mode<a class="headerlink" href="#template-mode" title="Permanent link">¤</a></h2>
-<p>When <code>description_template</code> is provided, the Jinja2 template is rendered once per interface using the full connection context. The template can be an inline string or a remote NorFab file reference (<code>nf://path/to/template.txt</code>).</p>
+<p>When <code>description_template</code> is provided, the Jinja2 template is rendered once per selected interface. Connected interfaces receive the full connection context. Virtual, LAG, or disconnected interfaces that have no connection data are still rendered with <code>device</code>, <code>interface</code>, and empty remote/cable fields. The template can be an inline string or a remote NorFab file reference (<code>nf://path/to/template.txt</code>).</p>
 <p>Jinja2 context variables available in the template:</p>
 <ul>
 <li><code>device</code> — pynetbox <code>dcim.device</code> object</li>
@@ -6305,87 +6305,87 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Update interface descriptions using a Jinja2 template:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox update interfaces description devices ceos-leaf-1 description-template &quot;{{ remote_device }}:{{ remote_interface }}&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>update<span class="w"> </span>interfaces<span class="w"> </span>description<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>description-template<span class="w"> </span><span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span>
+</code></pre></div>
+<p>Update only selected interfaces:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>update<span class="w"> </span>interfaces<span class="w"> </span>description<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>interfaces<span class="w"> </span>Ethernet1<span class="w"> </span>Ethernet2<span class="w"> </span>description-template<span class="w"> </span><span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span>
 </code></pre></div>
 <p>Filter interfaces by regex pattern:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox update interfaces description devices ceos-leaf-1 description-template &quot;{{ remote_device }}:{{ remote_interface }}&quot; interface-regex &quot;Ethernet.*&quot;
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>update<span class="w"> </span>interfaces<span class="w"> </span>description<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>description-template<span class="w"> </span><span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="w"> </span>interface-regex<span class="w"> </span><span class="s2">&quot;Ethernet.*&quot;</span>
 </code></pre></div>
-<p>Dry run — preview changes without writing:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox update interfaces description devices ceos-leaf-1 description-template &quot;{{ remote_device }}:{{ remote_interface }}&quot; dry-run
+<p>Dry run - preview changes without writing:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>update<span class="w"> </span>interfaces<span class="w"> </span>description<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>description-template<span class="w"> </span><span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="w"> </span>dry-run
+</code></pre></div>
+<p>Apply static descriptions to matching interface names:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>update<span class="w"> </span>interfaces<span class="w"> </span>description<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>descriptions<span class="w"> </span><span class="o">{</span><span class="s2">&quot;Ethernet1&quot;</span>:<span class="s2">&quot;uplink to spine-1&quot;</span>,<span class="s2">&quot;Ethernet2&quot;</span>:<span class="s2">&quot;uplink to spine-2&quot;</span><span class="o">}</span>
 </code></pre></div>
 <p>Update descriptions in a NetBox branch:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox update interfaces description devices ceos-leaf-1 description-template &quot;{{ remote_device }}:{{ remote_interface }}&quot; branch my-branch
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>update<span class="w"> </span>interfaces<span class="w"> </span>description<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>description-template<span class="w"> </span><span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="w"> </span>branch<span class="w"> </span>my-branch
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;description_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
 
 <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
-<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
 
-<span class="c1"># update descriptions using a Jinja2 template</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;description_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
-
-<span class="c1"># filter interfaces by regex and use a remote template</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;description_template&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://templates/intf_desc.j2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;interface_regex&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet.*&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
-
-<span class="c1"># dry run — preview diff without writing</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;description_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
-
-<span class="c1"># static descriptions dict applied to multiple devices</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;descriptions&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;Ethernet1&quot;</span><span class="p">:</span> <span class="s2">&quot;uplink to spine-1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Ethernet2&quot;</span><span class="p">:</span> <span class="s2">&quot;uplink to spine-2&quot;</span><span class="p">,</span>
+    <span class="n">preview</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span> <span class="s2">&quot;Ethernet2&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;description_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+    <span class="p">)</span>
 
-<span class="c1"># update into a NetBox branch</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;description_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ remote_device }}:{{ remote_interface }}&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-branch&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">)</span>
+    <span class="n">static_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;descriptions&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;Ethernet1&quot;</span><span class="p">:</span> <span class="s2">&quot;uplink to spine-1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Ethernet2&quot;</span><span class="p">:</span> <span class="s2">&quot;uplink to spine-2&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-branch&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
 
-<span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="n">template_result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;update_interfaces_description&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;description_template&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://templates/intf_desc.j2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;interface_regex&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet.*&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
@@ -6407,6 +6407,8 @@ root
                 ├── dry-run:    Return diff without writing to NetBox
                 ├── devices:    Device names to update interfaces for
                 ├── description-template:    Jinja2 template to render descriptions
+                ├── descriptions:    Dict keyed by interface name with description string values
+                ├── interfaces:    Specific interface names to update
                 └── interface-regex:    Regex pattern to match interfaces and ports
 nf#
 </code></pre></div>
@@ -6651,42 +6653,7 @@ before and after descriptions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">604</span>
-<span class="normal">605</span>
-<span class="normal">606</span>
-<span class="normal">607</span>
-<span class="normal">608</span>
-<span class="normal">609</span>
-<span class="normal">610</span>
-<span class="normal">611</span>
-<span class="normal">612</span>
-<span class="normal">613</span>
-<span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span>
-<span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span>
-<span class="normal">629</span>
-<span class="normal">630</span>
-<span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span>
-<span class="normal">635</span>
-<span class="normal">636</span>
-<span class="normal">637</span>
-<span class="normal">638</span>
-<span class="normal">639</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">639</span>
 <span class="normal">640</span>
 <span class="normal">641</span>
 <span class="normal">642</span>
@@ -6812,7 +6779,103 @@ before and after descriptions.</p>
 <span class="normal">762</span>
 <span class="normal">763</span>
 <span class="normal">764</span>
-<span class="normal">765</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span>
+<span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
+<span class="normal">823</span>
+<span class="normal">824</span>
+<span class="normal">825</span>
+<span class="normal">826</span>
+<span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">UpdateInterfacesDescriptionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">UpdateInterfacesDescriptionResult</span><span class="p">,</span>
@@ -6894,32 +6957,82 @@ before and after descriptions.</p>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+    <span class="n">update_action</span> <span class="o">=</span> <span class="s2">&quot;would update&quot;</span> <span class="k">if</span> <span class="n">dry_run</span> <span class="k">else</span> <span class="s2">&quot;updating&quot;</span>
+    <span class="n">apply_action</span> <span class="o">=</span> <span class="s2">&quot;would apply&quot;</span> <span class="k">if</span> <span class="n">dry_run</span> <span class="k">else</span> <span class="s2">&quot;applying&quot;</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Update interfaces description: Updating descriptions for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Update interfaces description: &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">update_action</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s2"> descriptions for &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
     <span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;updating interface descriptions for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">update_action</span><span class="si">}</span><span class="s2"> interface descriptions for &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">description_template</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;rendering interface descriptions from connection data&quot;</span><span class="p">)</span>
-        <span class="c1"># get list of all interfaces connections</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;rendering interface descriptions from interface data&quot;</span><span class="p">)</span>
+        <span class="c1"># get list of all interface connections</span>
         <span class="n">nb_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connections</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
+            <span class="n">interfaces</span><span class="o">=</span><span class="n">interfaces</span><span class="p">,</span>
             <span class="n">interface_regex</span><span class="o">=</span><span class="n">interface_regex</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># produce interfaces description and update it</span>
-        <span class="k">while</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
-            <span class="n">device</span><span class="p">,</span> <span class="n">device_connections</span> <span class="o">=</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_connections</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">failed</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+        <span class="c1"># Fetch NetBox interfaces as well so virtual/disconnected interfaces</span>
+        <span class="c1"># absent from get_connections still receive template-rendered descriptions.</span>
+        <span class="n">interface_filter</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">interfaces</span><span class="p">:</span>
+            <span class="n">interface_filter</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interfaces</span>
+        <span class="k">if</span> <span class="n">interface_regex</span><span class="p">:</span>
+            <span class="n">interface_filter</span><span class="p">[</span><span class="s2">&quot;name__regex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_regex</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb_interfaces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">interface_filter</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to fetch interfaces for description update: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="n">nb_interfaces_by_device</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">nb_interface</span> <span class="ow">in</span> <span class="n">nb_interfaces</span><span class="p">:</span>
+            <span class="n">nb_interfaces_by_device</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">nb_interface</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{})[</span>
+                <span class="n">nb_interface</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="n">nb_interface</span>
+
+        <span class="c1"># produce interface description and update it</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">device_connections</span> <span class="o">=</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">device_interfaces</span> <span class="o">=</span> <span class="n">nb_interfaces_by_device</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">interface_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="n">device_connections</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">device_interfaces</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">interfaces</span><span class="p">:</span>
+                <span class="n">interface_names</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">interface</span>
+                    <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">interface_names</span>
+                    <span class="k">if</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">interfaces</span>
+                <span class="p">]</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">device_connections</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">interface_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">interface</span><span class="p">,</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">device_connections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2"> updating description&quot;</span><span class="p">)</span>
+            <span class="n">nb_device</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">interface_names</span><span class="p">:</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">update_action</span><span class="si">}</span><span class="s2"> description&quot;</span><span class="p">)</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">device_connections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+                <span class="n">nb_interface</span> <span class="o">=</span> <span class="n">device_interfaces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_interface</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">connection</span> <span class="o">=</span> <span class="n">_empty_interface_connection_context</span><span class="p">(</span><span class="n">nb_interface</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;termination_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;consoleport&quot;</span><span class="p">:</span>
                     <span class="n">api_endpoint</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">console_ports</span>
                 <span class="k">elif</span> <span class="n">connection</span><span class="p">[</span><span class="s2">&quot;termination_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;consoleserverport&quot;</span><span class="p">:</span>
@@ -6930,8 +7043,11 @@ before and after descriptions.</p>
                     <span class="n">api_endpoint</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">power_outlets</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">api_endpoint</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span>
-                <span class="n">nb_interface</span> <span class="o">=</span> <span class="n">api_endpoint</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">interface</span><span class="p">)</span>
-                <span class="n">nb_device</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">nb_interface</span> <span class="o">=</span> <span class="n">nb_interface</span> <span class="ow">or</span> <span class="n">api_endpoint</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">interface</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_interface</span><span class="p">:</span>
+                    <span class="k">continue</span>
                 <span class="n">rendered_description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_render_templates</span><span class="p">(</span>
                     <span class="n">templates</span><span class="o">=</span><span class="p">[</span><span class="n">description_template</span><span class="p">],</span>
                     <span class="n">context</span><span class="o">=</span><span class="p">{</span>
@@ -6950,7 +7066,8 @@ before and after descriptions.</p>
                     <span class="n">nb_interface</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">descriptions</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;applying </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">descriptions</span><span class="p">)</span><span class="si">}</span><span class="s2"> description(s) to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">apply_action</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">descriptions</span><span class="p">)</span><span class="si">}</span><span class="s2"> description(s) &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})</span>
@@ -6967,8 +7084,15 @@ before and after descriptions.</p>
 
     <span class="n">updated_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interfaces</span><span class="p">)</span> <span class="k">for</span> <span class="n">interfaces</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">changed_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+            <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">interfaces</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">diff</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">diff</span><span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">diff</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;dry-run: </span><span class="si">{</span><span class="n">updated_count</span><span class="si">}</span><span class="s2"> interface description update(s) calculated&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;dry-run: would update </span><span class="si">{</span><span class="n">updated_count</span><span class="si">}</span><span class="s2"> interface description(s), &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;would change </span><span class="si">{</span><span class="n">changed_count</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="n">updated_count</span><span class="si">}</span><span class="s2"> interface description(s)&quot;</span><span class="p">)</span>

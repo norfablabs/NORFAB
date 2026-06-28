@@ -2346,52 +2346,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#get-topology-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Topology Sample Usage
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Get Topology Sample Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API
+        Inputs
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#sample-output" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sample Output
+        Output
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#fetching-topology-for-all-devices" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fetching Topology for All Devices
+        Examples
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -2415,23 +2398,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Adjacent Nodes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dry-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dry Run
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -2442,23 +2408,6 @@
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="NORFAB Netbox Get Topology Command Shell Reference">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#shell-usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Shell Usage Examples
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -6194,52 +6143,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#get-topology-sample-usage" class="md-nav__link">
+  <a href="#inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Get Topology Sample Usage
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Get Topology Sample Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#python-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python API
+        Inputs
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#sample-output" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sample Output
+        Output
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#fetching-topology-for-all-devices" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fetching Topology for All Devices
+        Examples
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -6263,23 +6195,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Adjacent Nodes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dry-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dry Run
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -6290,23 +6205,6 @@
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="NORFAB Netbox Get Topology Command Shell Reference">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#shell-usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Shell Usage Examples
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -6404,29 +6302,86 @@ D3.js graphs, or any tool that consumes node-link graph data.</p>
 and tags. Links carry interface-level details — interface type, speed, MTU, cable type/status,
 and tags. Every physical cable appears <strong>exactly once</strong> in the links list regardless of which
 side of the connection was queried first.</p>
-<h2 id="get-topology-sample-usage">Get Topology Sample Usage<a class="headerlink" href="#get-topology-sample-usage" title="Permanent link">¤</a></h2>
-<h3 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">¤</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
-
-<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
-<span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-2&quot;</span><span class="p">]},</span>
-<span class="p">)</span>
-
-<span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">nodes</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
-    <span class="n">links</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;links&quot;</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nodes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2">, Links: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
-</code></pre></div>
-<h3 id="sample-output">Sample Output<a class="headerlink" href="#sample-output" title="Permanent link">¤</a></h3>
+<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: right;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>devices</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Device names to include in the topology</td>
+</tr>
+<tr>
+<td><code>device_contains</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Case-insensitive substring to filter device names</td>
+</tr>
+<tr>
+<td><code>device_regex</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Regex pattern to filter device names</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Device role slugs to filter by</td>
+</tr>
+<tr>
+<td><code>platform</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Platform slugs to filter by</td>
+</tr>
+<tr>
+<td><code>manufacturers</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Manufacturer slugs to filter by</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Device status values to filter by</td>
+</tr>
+<tr>
+<td><code>sites</code></td>
+<td style="text-align: right;">Conditional</td>
+<td>Site slugs to filter by</td>
+</tr>
+<tr>
+<td>Nornir filters</td>
+<td style="text-align: right;">Conditional</td>
+<td>Host filters such as <code>FL</code>, <code>FB</code>, <code>FG</code>, <code>FC</code>, or <code>FN</code></td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox instance name to target</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox Branching plugin branch name to read from</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td style="text-align: right;">No</td>
+<td>Return query parameters without executing NetBox calls</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td style="text-align: right;">No</td>
+<td>Timeout in seconds for Nornir host resolution</td>
+</tr>
+</tbody>
+</table>
+<p>At least one NetBox device filter or Nornir host filter is required.</p>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Returns topology data with <code>nodes</code> and <code>links</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;nodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
@@ -6440,18 +6395,6 @@ side of the connection was queried first.</p>
 <span class="w">      </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;core&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">],</span>
 <span class="w">      </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Arista&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;device_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DCS-7050CX3-32S&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arista_eos&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.0.0.2/32&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;site&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dc-nyc&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;production&quot;</span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Arista&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;device_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DCS-7050TX-64&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;links&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -6471,19 +6414,69 @@ side of the connection was queried first.</p>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="fetching-topology-for-all-devices">Fetching Topology for All Devices<a class="headerlink" href="#fetching-topology-for-all-devices" title="Permanent link">¤</a></h3>
-<p>Omit the <code>devices</code> argument to build a full topology of every device in NetBox:</p>
-<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
-    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
-<span class="p">)</span>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Retrieve topology for specific devices:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>topology<span class="w"> </span>devices<span class="w"> </span>spine-1<span class="w"> </span>leaf-1<span class="w"> </span>leaf-2
 </code></pre></div>
+<p>Filter by name substring:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>topology<span class="w"> </span>device-contains<span class="w"> </span>spine
+</code></pre></div>
+<p>Filter by role and status:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>topology<span class="w"> </span>role<span class="w"> </span>spine<span class="w"> </span>leaf<span class="w"> </span>status<span class="w"> </span>active
+</code></pre></div>
+<p>Dry run to inspect query parameters:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>get<span class="w"> </span>topology<span class="w"> </span>devices<span class="w"> </span>spine-1<span class="w"> </span>leaf-1<span class="w"> </span>dry-run
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Context manager:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf-2&quot;</span><span class="p">]},</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Direct lifecycle:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+        <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;get_topology&quot;</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;spine&quot;</span><span class="p">,</span> <span class="s2">&quot;leaf&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;links&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nodes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span><span class="si">}</span><span class="s2">, Links: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Fetching all devices at once can be slow on large NetBox installations. Use the
-<code>devices</code> filter to narrow down the scope when possible.</p>
+<p>Fetching broad topologies can be slow on large NetBox installations. Use filters to narrow the scope when possible.</p>
 </div>
 <h2 id="filtering-devices">Filtering Devices<a class="headerlink" href="#filtering-devices" title="Permanent link">¤</a></h2>
 <p>The task provides several filtering parameters, all resolved via the NetBox REST API before
@@ -6555,9 +6548,6 @@ corresponding node entry — and lets you visualise partial topologies without o
 result will contain three nodes (<code>spine-1</code>, <code>leaf-1</code>, <code>leaf-2</code>) and all links between them.</p>
 <p>Adjacent nodes are fetched in a single additional REST call after the interface connection
 query, so the overhead is minimal regardless of how many extra devices are discovered.</p>
-<h3 id="dry-run">Dry Run<a class="headerlink" href="#dry-run" title="Permanent link">¤</a></h3>
-<p>Pass <code>dry_run=True</code> to inspect the REST filter parameters and GraphQL query that would
-be sent to NetBox without executing any network calls:</p>
 <p>Pass <code>dry_run=True</code> to inspect the REST filter parameters and GraphQL query that would
 be sent to NetBox without executing any network calls:</p>
 <div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
@@ -6569,44 +6559,27 @@ be sent to NetBox without executing any network calls:</p>
 </code></pre></div>
 <h2 id="norfab-netbox-get-topology-command-shell-reference">NORFAB Netbox Get Topology Command Shell Reference<a class="headerlink" href="#norfab-netbox-get-topology-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for Netbox <code>get_topology</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf#man tree netbox.get.topology
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.get.topology
 root
-└── netbox:    Netbox service
-    └── get:    Query data from Netbox
-        └── topology:    Query Netbox topology data for devices
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
-            ├── instance:    Netbox instance name to target
-            ├── dry-run:    Do not commit to database
-            ├── devices:    List of device names to build topology for
-            ├── device-contains:    Case-insensitive substring filter on device name
-            ├── device-regex:    Regex filter on device name
-            ├── role:    List of device role slugs to filter by
-            ├── platform:    List of platform slugs to filter by
-            ├── manufacturers:    List of manufacturer slugs to filter by
-            └── status:    List of device status values to filter by
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>get:<span class="w">    </span>Query<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>Netbox
+<span class="w">        </span>└──<span class="w"> </span>topology:<span class="w">    </span>Query<span class="w"> </span>Netbox<span class="w"> </span>topology<span class="w"> </span>data<span class="w"> </span><span class="k">for</span><span class="w"> </span>devices
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span>commit<span class="w"> </span>to<span class="w"> </span>database
+<span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>build<span class="w"> </span>topology<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>device-contains:<span class="w">    </span>Case-insensitive<span class="w"> </span>substring<span class="w"> </span>filter<span class="w"> </span>on<span class="w"> </span>device<span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>device-regex:<span class="w">    </span>Regex<span class="w"> </span>filter<span class="w"> </span>on<span class="w"> </span>device<span class="w"> </span>name
+<span class="w">            </span>├──<span class="w"> </span>role:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>role<span class="w"> </span>slugs<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>by
+<span class="w">            </span>├──<span class="w"> </span>platform:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>platform<span class="w"> </span>slugs<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>by
+<span class="w">            </span>├──<span class="w"> </span>manufacturers:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>manufacturer<span class="w"> </span>slugs<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>by
+<span class="w">            </span>├──<span class="w"> </span>status:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>device<span class="w"> </span>status<span class="w"> </span>values<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>by
+<span class="w">            </span>└──<span class="w"> </span>sites:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>site<span class="w"> </span>slugs<span class="w"> </span>to<span class="w"> </span>filter<span class="w"> </span>by
 nf#
-</code></pre></div>
-<h3 id="shell-usage-examples">Shell Usage Examples<a class="headerlink" href="#shell-usage-examples" title="Permanent link">¤</a></h3>
-<p>Retrieve topology for specific devices:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox get topology devices spine-1 leaf-1 leaf-2
-</code></pre></div>
-<p>Retrieve topology for a single device and pipe through JSON formatter:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox get topology devices spine-1 | json
-</code></pre></div>
-<p>Filter by name substring (returns all matching devices plus their adjacent neighbours):</p>
-<div class="highlight"><pre><span></span><code>nf#netbox get topology device-contains spine
-</code></pre></div>
-<p>Filter by role and status:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox get topology role spine leaf status active
-</code></pre></div>
-<p>Dry run to inspect the query parameters:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox get topology devices spine-1 leaf-1 dry-run
-</code></pre></div>
-<p>Target a specific NetBox instance:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox get topology devices spine-1 leaf-1 instance prod
 </code></pre></div>
 <h2 id="output-structure-reference">Output Structure Reference<a class="headerlink" href="#output-structure-reference" title="Permanent link">¤</a></h2>
 <h3 id="node-fields">Node Fields<a class="headerlink" href="#node-fields" title="Permanent link">¤</a></h3>
