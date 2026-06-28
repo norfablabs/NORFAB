@@ -10,6 +10,7 @@
 
 ## BUGS
 
+1. NFAPI fixing `depends_on` feature check when dependency worker is yet to start
 
 ---
 
