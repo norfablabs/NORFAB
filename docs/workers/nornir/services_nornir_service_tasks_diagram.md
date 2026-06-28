@@ -9,6 +9,49 @@ tags:
 
 The Nornir Service Diagram Task is a powerful component of NorFab's Nornir service, designed to create detailed network diagrams. By leveraging the [N2G (Need to Graph)](https://github.com/dmulyalin/N2G/) module, this task enables network engineers and architects to visualize network topologies and configurations, facilitating better network management and planning.
 
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `format` | No | Diagram file format. Supported values include `yed`, `drawio`, and `v3d`. Defaults to `yed`. |
+| `layer2`, `layer3`, `ospf`, `isis` | Yes | Diagram data plugin to run. |
+| `filename` | No | Output filename for the generated diagram. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+| Diagram-specific options | No | Options such as `group-links`, `add-lag`, `add-connected`, `label-interface`, and `add-data`. |
+
+## Output
+
+The command returns the diagram type, selected output format, generated file path, and the hosts used to build the diagram.
+
+## Examples
+
+!!! example
+
+    === "CLI"
+
+        Create a Layer 3 diagram in yEd GraphML format:
+
+        ```bash
+        nf# nornir diagram layer3 FC spine,leaf
+        ```
+
+        Create a Layer 2 diagram and save it as a draw.io file:
+
+        ```bash
+        nf# nornir diagram format drawio layer2 FC spine,leaf filename ./diagrams/fabric_l2.drawio
+        ```
+
+        Create an OSPF topology diagram:
+
+        ```bash
+        nf# nornir diagram ospf FC spine,leaf add-connected
+        ```
+
+    === "Python"
+
+        TBD. The diagram workflow is currently documented through the interactive shell command path. Confirm the stable Python API before adding `NorFab` client examples.
+
 ## Creating Layer-2 Network Diagram
 
 Layer-2 network diagrams illustrate the data link layer of the OSI model, showing how devices are interconnected within a local area network (LAN) based on the output provided by LLDP and CDP protocols. These diagrams are essential for understanding the physical and logical connections between switches, routers, and other network devices. By creating Layer-2 network diagrams, you can identify potential bottlenecks, optimize traffic flow, and ensure efficient network design. The Nornir Service Diagram Task uses the N2G module to automatically generate these diagrams, providing a clear and accurate representation of your Layer-2 topology.
@@ -21,7 +64,7 @@ Layer-3 network diagrams depict the network layer of the OSI model, highlighting
 
     === "CLI"
     
-    ```
+    ```bash
     nf#
     nf#
     nf#nornir
@@ -68,7 +111,7 @@ N2G module can produce diagrams in several formats, to create [draw.io](https://
 
     === "CLI"
     
-    ```
+    ```bash
     nf#
     nf#
     nf#nornir
@@ -99,8 +142,8 @@ N2G module can produce diagrams in several formats, to create [draw.io](https://
 
 NorFab shell supports these command options for Nornir `diagram` task:
 
-```
-nf#man tree nornir.diagram
+```bash
+nf# man tree nornir.diagram
 root
 └── nornir:    Nornir service
     └── diagram:    Produce network diagrams
@@ -245,3 +288,7 @@ nf#
 ```
 
 ``*`` - mandatory/required command argument
+
+## Python API Reference
+
+TBD. Confirm the stable worker API for diagram generation before adding an autodoc reference.

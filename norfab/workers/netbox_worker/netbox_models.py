@@ -1263,7 +1263,7 @@ class CreateDeviceInterfacesInput(
     )
     interface_type: Union[StrictStr, InterfaceTypeEnum] = Field(
         "other",
-        description="Type of interface to create",
+        description="Interface type value, for example 'other', 'virtual', 'lag', or '1000base-t'",
         alias="interface-type",
     )
     description: Union[None, StrictStr] = Field(

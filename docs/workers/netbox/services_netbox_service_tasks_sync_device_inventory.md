@@ -242,7 +242,7 @@ inventory record.
     Transformer files are executed as trusted Python code. Store them only in
     controlled File Service locations.
 
-## Result Structure
+## Output
 
 **Dry-run mode** (`dry_run=True`) returns the raw diff without writing to
 NetBox:
@@ -299,7 +299,7 @@ branch.
 
 ## Examples
 
-=== "NFCLI"
+=== "CLI"
 
     Preview chassis serial and module changes for one device:
 

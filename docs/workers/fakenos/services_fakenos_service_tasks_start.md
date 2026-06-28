@@ -17,14 +17,14 @@ The `start` task provides the following features:
 - **Flexible Inventory**: Accepts an inline dict, a file path, or a URL pointing to a FakeNOS inventory YAML file.
 - **Immediate Feedback**: Returns host details (name, platform, port, credentials) for the newly started network.
 
-## FakeNOS Start Task Arguments
+## Inputs
 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `network` | `str` | required | Unique name to assign to the new FakeNOS network. |
 | `inventory` | `str`, `dict`, or `None` | `None` | Inventory to use for the network. A `str` is treated as a file path or URL and fetched as YAML. A `dict` is used directly. `None` uses the default inventory from the worker configuration. |
 
-## FakeNOS Start Task Return Data
+## Output
 
 The `start` task returns the same structure as [inspect_networks](services_fakenos_service_tasks_inspect_networks.md) with `details=True`, scoped to the newly started network.
 
@@ -41,12 +41,84 @@ The `start` task returns the same structure as [inspect_networks](services_faken
 | `memory_vms_mb` | `float` | Virtual memory size in MB. |
 | `num_threads` | `int` | Number of threads in the child process. |
 
+## Examples
+
+=== "CLI"
+
+    Start a network using the worker default inventory:
+
+    ```bash
+    nf#fakenos start network lab1
+    ```
+
+    Start a network from a shared inventory file:
+
+    ```bash
+    nf#fakenos start network lab1 inventory nf://fakenos/lab1.yaml
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="start",
+            workers="any",
+            kwargs={
+                "network": "lab1",
+                "inventory": "nf://fakenos/lab1.yaml",
+            },
+        )
+        print(result)
+    ```
+
+    Direct lifecycle with inline inventory:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    inventory = {
+        "hosts": {
+            "ceos-spine-1": {
+                "username": "admin",
+                "password": "admin",
+                "platform": "arista_eos",
+            }
+        }
+    }
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="start",
+            workers="any",
+            kwargs={
+                "network": "lab-inline",
+                "inventory": inventory,
+            },
+        )
+        print(result)
+    finally:
+        nf.destroy()
+    ```
+
 ## FakeNOS Start Command Shell Reference
 
-NorFab shell supports these command options for Netbox `create_prefix` task:
+NorFab shell supports these command options for FakeNOS `start` task:
 
-```
-nf#man tree fakenos.start
+```bash
+nf# man tree fakenos.start
 
 R - required field, M - supports multiline input, D - dynamic key
 

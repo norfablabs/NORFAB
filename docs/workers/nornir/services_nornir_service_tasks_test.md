@@ -11,7 +11,29 @@ The Nornir Service `test` task designed to facilitate the execution of network t
 
 Nornir service `test` task uses Nornir [TestsProcessor](https://nornir-salt.readthedocs.io/en/latest/Processors/TestsProcessor.html) to run the tests and support test suites definition in YAML format, where test suite YAML files can be stored on and sourced from broker.
 
-## Nornir Test Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `suite` | Yes | Test suite content or `nf://` path to a suite file on the broker. |
+| `subset` | No | Run only selected tests from the suite. |
+| `failed_only` | No | Return only failed tests. |
+| `dry_run` | No | Render tests without executing them. |
+| `groups` | No | Run only tests assigned to the listed test groups. |
+| `return_tests_suite` | No | Include rendered per-host test suites in the result. |
+| `remove_tasks` | No | Exclude or include underlying task results in the output. Defaults to `True`. |
+| `job_data` | No | Path to YAML job data used by templates. |
+| `markdown` | No | Return a Markdown report from `client.run_job(...)`. |
+| `extensive` | No | Include detailed per-host data in Markdown output. |
+| `add_details`, `to_dict` | No | Control result detail level and serialized result shape. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+The task returns structured test results per host and test case. Shell output can be formatted as a table. Python client calls can also return a Markdown report when `markdown=True`.
+
+## Examples
 
 Nornir service `test` task uses suites in YAML format to define tests, sample tests suite:
 
@@ -36,7 +58,7 @@ File `suite_3.txt` stored on broker and downloaded by Nornir service prior to ru
 
     === "CLI"
     
-        ```
+        ```bash
         C:\nf>nfcli
         Welcome to NorFab Interactive Shell.
         nf#
@@ -118,9 +140,31 @@ File `suite_3.txt` stored on broker and downloaded by Nornir service prior to ru
 		
     === "Python"
     
-        This code is complete and can run as is
-		
+        Context manager - run a suite from the broker:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                },
+            )
+
+            pprint.pprint(result)
         ```
+
+        Direct lifecycle - same task:
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -151,6 +195,75 @@ File `suite_3.txt` stored on broker and downloaded by Nornir service prior to ru
 
 NorFab interactive shell allows you to format the results of network tests into text tables. This is particularly useful for presenting test results in a clear and organized manner, making it easier to analyze and interpret the data. The NorFab interactive shell supports the `table` command, which relies on the [tabulate](https://pypi.org/project/tabulate/) module to generate text tables. By outputting test results in table format, you can quickly identify issues and take appropriate action.
 
+!!! example
+
+    === "CLI"
+
+        Use the default brief table:
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/suite_3.txt FC spine,leaf
+        ```
+
+        Use an extended table and sort by host:
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/suite_3.txt FC spine,leaf table extend headers host name result exception sortby host
+        ```
+
+    === "Python"
+
+        Context manager - return list-shaped detailed results for custom table formatting:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "add_details": True,
+                    "to_dict": False,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - include test detail metadata:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "add_details": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Markdown Results Output (client.run_job)
 
 NorFab Python client can return Nornir `test` results as a **Markdown report** by passing `markdown=True` to `client.run_job(...)`.
@@ -165,6 +278,65 @@ The content of the report depends on the `extensive` keyword in `kwargs`:
 
 - `extensive=False` (default) produces a summary table and debug section, without per-test details and command outputs.
 - `extensive=True` includes hierarchical per-host test details, device command outputs, devices inventory, and test suite definitions.
+
+!!! example
+
+    === "CLI"
+
+        Markdown output is a Python client feature. Use normal shell table output when running from NFCLI:
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/suite_3.txt FC spine,leaf table brief
+        ```
+
+    === "Python"
+
+        Context manager - produce a brief Markdown report:
+
+        ```python
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            report_md = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                },
+                markdown=True,
+            )
+
+            print(report_md)
+        ```
+
+        Direct lifecycle - produce an extensive Markdown report:
+
+        ```python
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            report_md = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "extensive": True,
+                },
+                markdown=True,
+            )
+
+            print(report_md)
+        finally:
+            nf.destroy()
+        ```
 
 !!! example "Python: Markdown report (brief)"
 
@@ -1395,21 +1567,358 @@ The content of the report depends on the `extensive` keyword in `kwargs`:
 
 Using Jinja2 Templates enables you to create dynamic test suites based on variables defined in your inventory or passed as job data. This approach allows you to tailor tests to specific devices or scenarios, ensuring that the tests are relevant and accurate. Jinja2 templates provide a powerful way to automate the creation of complex test cases, incorporating conditional logic, loops, and other advanced features to meet your testing requirements.
 
+!!! example
+
+    === "CLI"
+
+        Template file stored on the broker as `nf://nornir_test_suites/platform_checks.j2`:
+
+        ```yaml
+        - name: Check platform version
+          task: "show version"
+          test: contains
+          pattern: "{{ host.platform }}"
+        - name: Check management interface
+          task: "show interface {{ job_data.mgmt_interface }}"
+          test: contains
+          pattern: "line protocol is up"
+        ```
+
+        Render the suite without executing tests:
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/platform_checks.j2 FC spine job-data '{"mgmt_interface": "Management0"}' dry-run
+        ```
+
+    === "Python"
+
+        Context manager - run a templated suite:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/platform_checks.j2",
+                    "job_data": {"mgmt_interface": "Management0"},
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - review the rendered per-host suite:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/platform_checks.j2",
+                    "job_data": {"mgmt_interface": "Management0"},
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Templating Tests with Inline Job Data
 
 Inline Job Data allows you to define test parameters directly within the `job_data` argument, making it easy to customize tests on the fly. This feature is particularly useful for scenarios where test parameters need to be adjusted frequently or based on specific conditions. By templating tests with inline job data, you can ensure that your tests are always up-to-date and aligned with the current network state.
+
+!!! example
+
+    === "CLI"
+
+        Use inline job data with an inline suite:
+
+        ```bash
+        nf# nornir test suite '[{"name": "Check BGP peer", "task": "show bgp summary", "test": "contains", "pattern": "{{ job_data.peer }}"}]' FC spine job-data '{"peer": "192.0.2.2"}'
+        ```
+
+    === "Python"
+
+        Context manager - pass inline suite and job data:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        suite = [
+            {
+                "name": "Check BGP peer",
+                "task": "show bgp summary",
+                "test": "contains",
+                "pattern": "{{ job_data.peer }}",
+            }
+        ]
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": suite,
+                    "job_data": {"peer": "192.0.2.2"},
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - load job data from a broker file:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/bgp_peer.j2",
+                    "job_data": "nf://job_data/bgp_peer.yaml",
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Using Dry Run
 
 The Using Dry Run feature allows you to generate the content of network test suites without actually performing any actions on the devices. This is useful for validation purposes, as it enables you to verify the correctness of your tests before running them. By using dry run, you can identify potential issues and make necessary adjustments, ensuring that your tests will execute successfully when run for real.
 
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/suite_3.txt FC spine,leaf dry-run
+        ```
+
+    === "Python"
+
+        Context manager - render tests without executing them:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - include rendered suite with results:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "return_tests_suite": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Running a Subset of Tests
 
 Running a Subset of Tests allows you to execute only a specific set of tests, rather than running the entire test suite. This is useful for targeted testing, such as validating changes in a particular part of the network configuration or focusing on specific devices features. By running a subset of tests, you can save time and resources, while still ensuring that critical aspects of the network are thoroughly tested.
 
+!!! example
+
+    === "CLI"
+
+        Run tests whose names match `*NTP*`:
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/suite_3.txt FC spine,leaf subset "*NTP*"
+        ```
+
+        Run tests in the `routing` group:
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/suite_3.txt FC spine,leaf groups routing
+        ```
+
+    === "Python"
+
+        Context manager - run a name-based subset:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "subset": "*NTP*",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - run selected test groups:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "groups": ["routing"],
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Returning Only Failed Tests
 
 Returning only failed tests enables you to filter the test results to show only the tests that have failed. This is particularly useful for quickly identifying and addressing issues, as it allows you to focus on the areas that require attention. By returning only failed tests, you can streamline the troubleshooting process and ensure that network problems are resolved efficiently.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir test suite nf://nornir_test_suites/suite_3.txt FC spine,leaf failed-only
+        ```
+
+    === "Python"
+
+        Context manager - return failed tests only:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "failed_only": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - return failed tests with detailed metadata:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="test",
+                kwargs={
+                    "suite": "nf://nornir_test_suites/suite_3.txt",
+                    "FC": "spine,leaf",
+                    "failed_only": True,
+                    "add_details": True,
+                    "to_dict": False,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## NORFAB Nornir Test Shell Reference
 
@@ -1417,8 +1926,8 @@ The NORFAB Nornir Test Shell Reference provides a comprehensive set of command o
 
 NorFab shell supports these command options for Nornir `test` task:
 
-```
-nf#man tree nornir.test
+```bash
+nf# man tree nornir.test
 root
 └── nornir:    Nornir service
     └── test:    Run network tests
@@ -1458,6 +1967,9 @@ root
         ├── dry-run:    Return produced per-host tests suite content without running tests
         ├── subset:    Filter tests by name
         ├── failed-only:    Return test results for failed tests only
+        ├── return-tests-suite:    Include rendered per-host test suites in the result
+        ├── extensive:    Return extensive test output and rendered suites
+        ├── groups:    Test groups to run
         ├── remove-tasks:    Include/Exclude tested task results
         └── job-data:    Path to YAML file with job data
 nf#

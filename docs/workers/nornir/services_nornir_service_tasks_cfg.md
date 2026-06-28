@@ -9,7 +9,23 @@ tags:
 
 Nornir service `cfg` task designed to send configuration to devices using SSH and Telnet. Nornir `cfg` can use Netmiko, Scrapli and NAPALM libraries to configure devices.
 
-## Nornir CFG Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `config` | Yes | Configuration commands to send to devices. |
+| `plugin` | No | Configuration plugin parameters for Netmiko, Scrapli, or NAPALM. |
+| `dry_run` | No | Render or validate configuration without applying changes when supported by the selected plugin. |
+| `job_data` | No | Path to YAML job data used by templates. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `add_details` | No | Include detailed Nornir task metadata in the result. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+The task returns per-host configuration results. When supported by the plugin and `add_details=True`, output can include `changed`, `diff`, `failed`, `exception`, `connection_retry`, and `task_retry` details.
+
+## Examples
 
 Example of sending configuration commands to devices.
 
@@ -17,11 +33,21 @@ Example of sending configuration commands to devices.
 
     === "CLI"
     
-        ```
+        ```bash
 		C:\nf>nfcli
 		Welcome to NorFab Interactive Shell.
 		nf#
-
+		nf# nornir cfg config "ntp server 10.0.0.1" "ntp server 10.0.0.2" FC spine,leaf
+		--------------------------------------------- Job Events -----------------------------------------------
+		<omitted for brevity>
+		--------------------------------------------- Job Results ----------------------------------------------
+		ceos-spine-1:
+		    netmiko_send_config:
+		        configure terminal
+		        ntp server 10.0.0.1
+		        ntp server 10.0.0.2
+		        end
+		nf#
         ```
         
         Demo
@@ -34,9 +60,31 @@ Example of sending configuration commands to devices.
 		
     === "Python"
     
-		This code is complete and can run as is
-		
+        Context manager - configure matching devices:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["ntp server 10.0.0.1", "ntp server 10.0.0.2"],
+                    "FC": "spine,leaf",
+                },
+            )
+
+            pprint.pprint(result)
         ```
+
+        Direct lifecycle - same task:
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -67,31 +115,586 @@ Example of sending configuration commands to devices.
 
 NorFab supports various configuration plugins such as `netmiko`, `napalm` and `scrapli`. These plugins enable you to push configurations to a wide range of network devices. Each plugin has its own set of capabilities and requirements, so it is essential to ensure that your Nornir inventory is properly configured for the chosen plugin. This includes specifying the necessary connection parameters and device-specific settings. By leveraging these plugins, you can standardize and automate the configuration management process across different network environments.
 
+!!! example
+
+    === "CLI"
+
+        Use Netmiko and enter enable mode before sending configuration:
+
+        ```bash
+        nf# nornir cfg config "logging host 10.0.0.10" FC spine plugin netmiko enable
+        ```
+
+        Use Scrapli and stop execution when a device rejects a command:
+
+        ```bash
+        nf# nornir cfg config "logging host 10.0.0.10" FC spine plugin scrapli stop-on-failed
+        ```
+
+        Use NAPALM to merge configuration:
+
+        ```bash
+        nf# nornir cfg config "logging host 10.0.0.10" FC spine plugin napalm
+        ```
+
+    === "Python"
+
+        Context manager - use Netmiko:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["logging host 10.0.0.10"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "enable": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - use Scrapli:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["logging host 10.0.0.10"],
+                    "FC": "spine",
+                    "plugin": "scrapli",
+                    "stop_on_failed": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Using Dry Run
 
 The dry run feature in NorFab allows you to simulate the application of configurations without actually pushing them to the devices. This is particularly useful for testing and validation purposes, as it enables you to verify the correctness of your configurations before making any changes to the network. Additionally, the dry run feature can be used for generating and rendering device configurations, which is beneficial for staging environments where you need to prepare configurations in advance. By using dry run, you can ensure that your configurations are accurate and ready for deployment.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cfg config "interface Loopback100" "description managed by NorFab" FC spine dry-run
+        ```
+
+    === "Python"
+
+        Context manager - render configuration without applying it:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": [
+                        "interface Loopback100",
+                        "description managed by NorFab",
+                    ],
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - dry run with rendered template data:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": [
+                        "interface {{ job_data.interface }}",
+                        "description {{ job_data.description }}",
+                    ],
+                    "job_data": {
+                        "interface": "Loopback100",
+                        "description": "managed by NorFab",
+                    },
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Using Commit Confirmed
 
 The commit confirmed feature provides an added layer of safety when pushing configurations to network devices. With this feature, you can apply a configuration with a rollback timer. If the configuration is not explicitly confirmed within the specified time, it will be automatically rolled back to the previous state. This is particularly useful in scenarios where you need to ensure that a configuration change does not negatively impact the network. By using commit confirmed, you can mitigate the risk of configuration errors and ensure network stability.
 
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cfg config "set system services netconf ssh" FC junos plugin netmiko commit-confirm commit-confirm-delay 5 commit-comment "NorFab staged change"
+        ```
+
+    === "Python"
+
+        Context manager - use Netmiko commit confirmed:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["set system services netconf ssh"],
+                    "FC": "junos",
+                    "plugin": "netmiko",
+                    "commit": {
+                        "confirm": True,
+                        "confirm_delay": 5,
+                        "comment": "NorFab staged change",
+                    },
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - NAPALM rollback timer:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["set system services netconf ssh"],
+                    "FC": "junos",
+                    "plugin": "napalm",
+                    "revert_in": 300,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Sourcing Configuration From Files
 
 NorFab allows you to source configurations from text files stored on the broker. This approach enables you to manage configurations as files, making it easier to version control and maintain them. By storing configurations in files, you can apply them as needed, ensuring consistency and repeatability in your configuration management process. This method is particularly useful for large-scale deployments where configurations need to be applied to multiple devices in a controlled and organized manner.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cfg config nf://nornir_configs/common_ntp.cfg FC spine dry-run
+        ```
+
+    === "Python"
+
+        Context manager - load config from a broker file:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": "nf://nornir_configs/common_ntp.cfg",
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - apply a broker file with Scrapli:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": "nf://nornir_configs/common_ntp.cfg",
+                    "FC": "spine",
+                    "plugin": "scrapli",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Using Jinja2 Templates
 
 Jinja2 templates provide a powerful way to create dynamic configurations based on variables defined in your inventory or passed as job data. By using templates, you can generate configurations that are tailored to the specific requirements of each device. This approach allows you to automate the creation of complex configurations and ensures consistency across your network. Jinja2 templates are highly flexible and can be used to incorporate conditional logic, loops, and other advanced features, making them an essential tool for network automation.
 
+!!! example
+
+    === "CLI"
+
+        Template file stored on the broker as `nf://nornir_templates/loopback.j2`:
+
+        ```jinja2
+        interface {{ job_data.interface }}
+          description {{ host.name }} managed loopback
+          ip address {{ host.data.loopback_ip }}/32
+        ```
+
+        Render the template without applying it:
+
+        ```bash
+        nf# nornir cfg config nf://nornir_templates/loopback.j2 FC spine job-data '{"interface": "Loopback100"}' dry-run
+        ```
+
+    === "Python"
+
+        Context manager - render a template from the broker:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": "nf://nornir_templates/loopback.j2",
+                    "job_data": {"interface": "Loopback100"},
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - render inline Jinja2 commands:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": [
+                        "interface {{ job_data.interface }}",
+                        "description {{ host.name }} managed loopback",
+                    ],
+                    "job_data": {"interface": "Loopback100"},
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Templating Configuration with Inline Job Data
+
+Inline `job_data` is useful when a small amount of per-job data should be passed directly with the request instead of stored in a broker file.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cfg config "router bgp {{ job_data.asn }}" "neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}" FC spine job-data '{"asn": 65001, "peer": "192.0.2.2", "peer_as": 65002}' dry-run
+        ```
+
+    === "Python"
+
+        Context manager - pass inline job data:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": [
+                        "router bgp {{ job_data.asn }}",
+                        "neighbor {{ job_data.peer }} remote-as {{ job_data.peer_as }}",
+                    ],
+                    "job_data": {
+                        "asn": 65001,
+                        "peer": "192.0.2.2",
+                        "peer_as": 65002,
+                    },
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - load job data from a broker file:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": "nf://nornir_templates/bgp_neighbor.j2",
+                    "job_data": "nf://job_data/bgp_neighbor.yaml",
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Parsing and Generating Configuration in Templates
 
 NorFab supports parsing of device output and the generation of new configurations within same template using parsing results. This capability allows you to create configurations based on the current state of the device, ensuring that your changes are applied accurately and efficiently. By parsing existing configurations, you can extract relevant information and use it to generate new configurations that are consistent with the device's current setup. 
 
+!!! example
+
+    === "CLI"
+
+        Template file stored on the broker as `nf://nornir_templates/ensure_ntp.j2`:
+
+        ```jinja2
+        {% set ntp_output = norfab.run_job(
+            service="nornir",
+            task="cli",
+            workers="any",
+            kwargs={"commands": ["show running-config | include ntp server"], "FL": [host.name]}
+        ) %}
+        {% if "10.0.0.1" not in ntp_output | string %}
+        ntp server 10.0.0.1
+        {% endif %}
+        ```
+
+        Render the generated configuration before applying it:
+
+        ```bash
+        nf# nornir cfg config nf://nornir_templates/ensure_ntp.j2 FC spine dry-run
+        ```
+
+    === "Python"
+
+        Context manager - render generated config:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": "nf://nornir_templates/ensure_ntp.j2",
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - apply generated config after review:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": "nf://nornir_templates/ensure_ntp.j2",
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Outputting Text Tables
 
 The NorFab interactive shell supports the table command, which can be used to format output into text tables. This feature relies on the tabulate module and supports most of its functionalities. By outputting results in table format, you can easily visualize and analyze the data, making it easier to interpret and act upon. This is particularly useful for displaying configuration results in a structured, concise and readable manner.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cfg config "logging host 10.0.0.10" FC spine add-details table brief
+        ```
+
+    === "Python"
+
+        Context manager - return list output for table processing:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["logging host 10.0.0.10"],
+                    "FC": "spine",
+                    "add_details": True,
+                    "to_dict": False,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - collect detailed output for custom formatting:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["logging host 10.0.0.10"],
+                    "FC": "spine",
+                    "add_details": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Formatting Output Results
 
@@ -104,16 +707,146 @@ You can format the output results using various options provided by the Nornir w
 - `connection_retry` counter to show how many times RetryRunner tried to establish a connection
 - `task_retry` counter to show how many times RetryRunner tried to run this task
 
-## Using Promptless Mode
+!!! example
 
-NorFab supports a proprietary promptless mode that can be used with Netmiko. This mode is particularly useful when dealing with devices that do not have a consistent prompt or when the default Netmiko output collection functions are not reliable enough. By enabling promptless mode, you can ensure that configurations are applied accurately and efficiently, even in challenging environments. This feature enhances the robustness of your configuration management process and ensures that your network devices are configured correctly.
+    === "CLI"
+
+        ```bash
+        nf# nornir cfg config "logging host 10.0.0.10" FC spine add-details
+        ```
+
+        Save results to a worker file group for later diff:
+
+        ```bash
+        nf# nornir cfg config "logging host 10.0.0.10" FC spine tf cfg-baseline
+        ```
+
+    === "Python"
+
+        Context manager - request detailed result metadata:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["logging host 10.0.0.10"],
+                    "FC": "spine",
+                    "add_details": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - store results for later comparison:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["logging host 10.0.0.10"],
+                    "FC": "spine",
+                    "tf": "cfg-baseline",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
+## Tuning Netmiko Read Handling
+
+Netmiko configuration pushes can be tuned for devices with slow command echo, unusual configuration prompts, or banner-style commands. Use options such as `read-timeout`, `cmd-verify`, `terminator`, and `bypass-commands` to control how Netmiko waits for command completion and validates command echo.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cfg config "banner motd ^CAuthorized access only^C" FC spine plugin netmiko read-timeout 30 cmd-verify false
+        ```
+
+    === "Python"
+
+        Context manager - tune Netmiko command verification:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["banner motd ^CAuthorized access only^C"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "read_timeout": 30,
+                    "cmd_verify": False,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - use an alternate config terminator:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cfg",
+                kwargs={
+                    "config": ["banner motd ^CAuthorized access only^C"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "terminator": r"#",
+                    "read_timeout": 30,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 		
 ## NORFAB Nornir CFG Shell Reference
 
 NorFab shell supports these command options for Nornir `cfg` task:
 
-```
-nf#man tree nornir.cfg
+```bash
+nf# man tree nornir.cfg
 root
 └── nornir:    Nornir service
     └── cfg:    Configure devices over CLI interface

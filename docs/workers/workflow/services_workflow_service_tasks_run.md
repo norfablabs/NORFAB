@@ -7,13 +7,44 @@ tags:
 
 > task api name: `run`
 
-Run workflow defined using YAML file.
+Runs a workflow defined as a YAML file reference or an inline dictionary. Workflow steps call other NorFab services and collect the per-step job results under the workflow name.
 
-## Workflow Sample Usage
+## Inputs
 
-Workflow service `run` task uses YAML formatted files to execute workflow steps:
+| Parameter | Required | Description |
+|---|---:|---|
+| `workflow` | Yes | Workflow definition dictionary or URL to a YAML workflow file |
 
-``` yaml title="workflow-1.yaml"
+## Output
+
+Returns workflow execution results keyed by workflow name and step name:
+
+```python
+{
+    "workflow_1": {
+        "step1": {
+            "nornir-worker-1": {
+                "result": {"ceos-spine-1": {"show version": "..."}},
+                "failed": False,
+                "errors": [],
+            },
+        },
+        "step2": {
+            "nornir-worker-2": {
+                "result": {"ceos-leaf-1": {"show hostname": "..."}},
+                "failed": False,
+                "errors": [],
+            },
+        },
+    },
+}
+```
+
+## Workflow File Example
+
+Workflow service `run` task uses YAML files to execute workflow steps:
+
+```yaml title="workflow-1.yaml"
 name: workflow_1
 description: Sample workflow with two steps.
 
@@ -25,7 +56,7 @@ step1:
     commands:
       - show version
       - show ip int brief
-      
+
 step2:
   service: nornir
   task: cli
@@ -36,184 +67,97 @@ step2:
       - show ntp status
 ```
 
-File `workflow-1.yaml` stored on broker and downloaded by Workflow service prior to running steps, below is an example of how to run the the workflow.
+Store the file on the broker, for example as `nf://workflow/workflow-1.yaml`, before running the workflow.
 
-!!! example
+## Examples
 
-    === "CLI"
-    
-        ```
-        C:\nf>nfcli
-        Welcome to NorFab Interactive Shell.
-        nf#
-        nf#workflow run workflow nf://workflow/workflow-1.yaml
-        --------------------------------------------- Job Events -----------------------------------------------
-        05-Apr-2025 21:34:53.846 d1634ce3dc764f56ac00971950a033cc job started
-        05-Apr-2025 21:34:53.883 INFO workflow-worker-1 running workflow.run  - Starting workflow 'workflow_1'
-        05-Apr-2025 21:34:53.883 INFO workflow-worker-1 running workflow.run  - Doing workflow step 'step1'
-        05-Apr-2025 21:34:55.008 INFO workflow-worker-1 running workflow.run  - Doing workflow step 'step2'
-        05-Apr-2025 21:34:56.557 d1634ce3dc764f56ac00971950a033cc job completed in 2.711 seconds
+=== "CLI"
 
-        --------------------------------------------- Job Results --------------------------------------------
+    Run a workflow from a broker file:
 
-        workflow-worker-1:
-            ----------
-            workflow_1:
-                ----------
-                step1:
-                    ----------
-                    nornir-worker-1:
-                        ----------
-                        task:
-                            nornir-worker-1:cli
-                        failed:
-                            False
-                        errors:
-                        result:
-                            ----------
-                            ceos-spine-2:
-                                ----------
-                                show version:
-                                    Arista cEOSLab
-                                    Hardware version:
-                                    Serial number: 8B7EBC67A4FA6C48F1D1BCC5438866A7
-                                    Hardware MAC address: 001c.73ab.5167
-                                    System MAC address: 001c.73ab.5167
+    ```bash
+    nf#workflow run workflow nf://workflow/workflow-1.yaml
+    ```
 
-                                    Software image version: 4.30.0F-31408673.4300F (engineering build)
-                                    Architecture: x86_64
-                                    Internal build version: 4.30.0F-31408673.4300F
-                                    Internal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c
-                                    Image format version: 1.0
-                                    Image optimization: None
+    Run with a longer timeout:
 
-                                    cEOS tools version: (unknown)
-                                    Kernel version: 5.15.0-136-generic
+    ```bash
+    nf#workflow run workflow nf://workflow/workflow-1.yaml timeout 900
+    ```
 
-                                    Uptime: 1 hour and 17 minutes
-                                    Total memory: 32827264 kB
-                                    Free memory: 19525528 kB
-                                show ip int brief:
-                                                                                                                      Address
-                                    Interface         IP Address              Status       Protocol            MTU    Owner
-                                    ----------------- ----------------------- ------------ -------------- ----------- -------
-                                    Loopback0         unassigned              up           up                65535
-                                    Loopback123       unassigned              up           up                65535
-                                    Management0       172.100.100.11/24       up           up                 1500
-                            ceos-spine-1:
-                                ----------
-                                show version:
-                                    Arista cEOSLab
-                                    Hardware version:
-                                    Serial number: 7B5E3CF8CB9A6DE53FB8411896DE476F
-                                    Hardware MAC address: 001c.730a.5369
-                                    System MAC address: 001c.730a.5369
+=== "Python"
 
-                                    Software image version: 4.30.0F-31408673.4300F (engineering build)
-                                    Architecture: x86_64
-                                    Internal build version: 4.30.0F-31408673.4300F
-                                    Internal build ID: a35f0dc7-2d65-4f2a-a010-279cf445fd8c
-                                    Image format version: 1.0
-                                    Image optimization: None
+    Context manager - run from a broker file:
 
-                                    cEOS tools version: (unknown)
-                                    Kernel version: 5.15.0-136-generic
+    ```python
+    import pprint
 
-                                    Uptime: 1 hour and 17 minutes
-                                    Total memory: 32827264 kB
-                                    Free memory: 19525528 kB
-                                show ip int brief:
-                                                                                                                      Address
-                                    Interface         IP Address              Status       Protocol            MTU    Owner
-                                    ----------------- ----------------------- ------------ -------------- ----------- -------
-                                    Loopback0         unassigned              up           up                65535
-                                    Loopback123       unassigned              up           up                65535
-                                    Management0       172.100.100.10/24       up           up                 1500
-                        messages:
-                        juuid:
-                            0bef61db66cf46318735e02bdb0389c0
-                        status:
-                            completed
-                step2:
-                    ----------
-                    nornir-worker-2:
-                        ----------
-                        task:
-                            nornir-worker-2:cli
-                        failed:
-                            False
-                        errors:
-                        result:
-                            ----------
-                            ceos-leaf-2:
-                                ----------
-                                show hostname:
-                                    Hostname: ceos-leaf-2
-                                    FQDN:     ceos-leaf-2
-                                    unsynchronised
-                                    poll interval unknown
-                            ceos-leaf-1:
-                                ----------
-                                show hostname:
-                                    Hostname: ceos-leaf-1
-                                    FQDN:     ceos-leaf-1
-                                show ntp status:
-                                    unsynchronised
-                                    poll interval unknown
-                            ceos-leaf-3:
-                                ----------
-                                show hostname:
-                                    Hostname: ceos-leaf-3
-                                    FQDN:     ceos-leaf-3
-                                show ntp status:
-                                    unsynchronised
-                                    poll interval unknown
-                        messages:
-                        juuid:
-                            972287e3abc94e86acfff99b54940ef9
-                        status:
-                            completed
-        nf#
-        ```    
-        In this example:
+    from norfab.core.nfapi import NorFab
 
-        - `nfcli` command starts the NorFab Interactive Shell.
-        - `workflow run` command runs `workflow-1.yaml` workflow.
-		
-    === "Python"
-    
-        This code is complete and can run as is
-		
-        ```
-        import pprint
-        
-        from norfab.core.nfapi import NorFab
-        
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-            
-            client = nf.make_client()
-            
-            res = client.run_job(
-                service="workflow",
-                task="run",
-                kwargs={
-                    "workflow": "nf://workflow/workflow-1.yaml",
-                }
-            )
-            
-            pprint.pprint(res)
-            
-            nf.destroy()
-        ```
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
 
-## NORFAB Workflow Test Shell Reference
+        result = client.run_job(
+            service="workflow",
+            task="run",
+            workers="any",
+            kwargs={
+                "workflow": "nf://workflow/workflow-1.yaml",
+            },
+        )
+        pprint.pprint(result)
+    ```
 
-NorFab shell supports these command options for workflow `run` task:
+    Direct lifecycle - run an inline workflow:
 
-```
-nf#man tree workflow
+    ```python
+    import pprint
+
+    from norfab.core.nfapi import NorFab
+
+    workflow = {
+        "name": "inline_workflow",
+        "description": "Collect basic command output from lab devices.",
+        "show_version": {
+            "service": "nornir",
+            "task": "cli",
+            "kwargs": {
+                "FC": "spine",
+                "commands": ["show version"],
+            },
+        },
+        "show_hostname": {
+            "service": "nornir",
+            "task": "cli",
+            "kwargs": {
+                "FC": "leaf",
+                "commands": ["show hostname"],
+            },
+        },
+    }
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="workflow",
+            task="run",
+            workers="any",
+            kwargs={"workflow": workflow},
+        )
+        pprint.pprint(result)
+    finally:
+        nf.destroy()
+    ```
+
+## NORFAB Workflow Run Command Shell Reference
+
+NorFab shell supports these command options for Workflow `run` task:
+
+```bash
+nf# man tree workflow
 root
 └── workflow:    Workflow service
     └── run:    Run workflows
@@ -223,8 +167,6 @@ root
         └── progress:    Display progress events, default 'True'
 nf#
 ```
-
-``*`` - mandatory/required command argument
 
 ## Python API Reference
 

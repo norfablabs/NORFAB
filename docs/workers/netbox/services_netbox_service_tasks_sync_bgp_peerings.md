@@ -100,7 +100,7 @@ name_template="{device}_BGP_{name}"
 
 **Live-run mode** (`dry_run=False`, default) applies changes and returns the same structure.
 
-## Result Structure
+## Output
 
 **Dry-run mode** returns what *would* happen without writing to NetBox.
 

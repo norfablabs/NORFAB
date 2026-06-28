@@ -15,6 +15,27 @@ The task supports alphanumeric range expansion, allowing you to create multiple 
 
     The `create_device_interfaces` task automatically skips interfaces that already exist, preventing duplicate creation attempts and allowing for safe re-runs of automation tasks.
 
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `devices` | Yes | Device names or device objects to create interfaces for |
+| `interface_name` | Conditional | Interface name, list of names, or range pattern to create |
+| `interfaces_data` | Conditional | Per-interface payload dictionaries; each item must include `name` |
+| `interface_type` | No | NetBox interface type, default `other` |
+| `description` | No | Interface description |
+| `speed` | No | Interface speed in Kbit/s |
+| `mtu` | No | Interface MTU in bytes |
+| `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name to write to |
+| `dry_run` | No | Preview create actions without writing |
+
+Provide either `interface_name` or `interfaces_data`.
+
+## Output
+
+Returns per-device create results with created and skipped interface details. Existing interfaces are skipped rather than recreated.
+
 ## Interface Name Range Expansion
 
 The task supports powerful range expansion patterns for creating multiple interfaces:
@@ -58,7 +79,7 @@ interface_name: "[ge,xe]-0/0/[0-3]"
 Pass a list of interface names (with or without ranges):
 
 ```yaml
-interface_name: 
+interface_name:
   - "Loopback[1-3]"
   - "Management1"
   - "[ge,xe]-0/1/0"
@@ -71,54 +92,76 @@ Create Device Interfaces task is branch aware and can create interfaces within a
 
 When using branches, interfaces are created in the specified branch and can be reviewed before merging into the main database.
 
-## NORFAB Netbox Create Device Interfaces Command Shell Reference
+## Examples
 
-NorFab shell supports these command options for Netbox `create_device_interfaces` task:
+=== "CLI"
 
-```
-nf#man tree netbox.create.device-interfaces
-root
-└── netbox:    Netbox service
-    └── create:    Create objects in Netbox
-        └── device-interfaces:    Create devices interfaces
-            ├── instance:    Netbox instance name to target
-            ├── dry-run:    Do not commit to database
-            ├── branch:    Branching plugin branch name to use
-            ├── *devices:    List of device names or device objects to create interfaces for
-            ├── *interface_name:    Name(s) of the interface(s) to create
-            ├── interface-type:    Name(s) of the interface(s) to create, default 'other'
-            ├── description:    Interface description
-            ├── speed:    Interface speed in Kbps
-            ├── mtu:    Maximum transmission unit size in bytes
-            ├── timeout:    Job timeout
-            ├── workers:    Filter worker to target, default 'any'
-            ├── verbose-result:    Control output details, default 'False'
-            └── progress:    Display progress events, default 'True'
-nf#
-```
+    Create loopback interfaces on two devices:
 
-## Usage Examples
+    ```bash
+    nf#netbox create device-interfaces devices switch-01 switch-02 interface_name "Loopback[0-5]" interface-type virtual description "Test interfaces"
+    ```
 
-### Basic Interface Creation
+    Preview interface creation:
 
-Create a single interface on one device:
+    ```bash
+    nf#netbox create device-interfaces devices switch-01 interface_name "Ethernet[1-4]" interface-type 1000base-t dry-run
+    ```
 
-```python
-from norfab.core.nfapi import NorFab
+    Create interfaces in a NetBox branch:
 
-nf = NorFab()
-result = nf.run_job(
-    service="netbox",
-    task="create_device_interfaces",
-    workers="any",
-    kwargs={
-        "devices": ["switch-01", "switch-02"],
-        "interface_name": "Loopbback[0-5]",
-        "interface_type": "virtual",
-        "description": "Test interfaces"
-    }
-)
-```
+    ```bash
+    nf#netbox create device-interfaces devices switch-01 interface_name "Ethernet[1-4]" branch my-branch
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "create_device_interfaces",
+            workers="any",
+            kwargs={
+                "devices": ["switch-01", "switch-02"],
+                "interface_name": "Loopback[0-5]",
+                "interface_type": "virtual",
+                "description": "Test interfaces",
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "create_device_interfaces",
+            workers="any",
+            kwargs={
+                "devices": ["switch-01"],
+                "interfaces_data": [
+                    {"name": "Ethernet1", "type": "1000base-t", "mtu": 1500},
+                    {"name": "Port-Channel1", "type": "lag"},
+                ],
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
 
 ## Interface Types
 
@@ -139,10 +182,10 @@ Refer to your NetBox instance for the complete list of available interface types
 
 Task handles several error conditions gracefully:
 
-1. **Non-existent Device**: If a device doesn't exist in NetBox, an error is logged but processing continues for other devices
+1. **Non-existent Device**: If a device does not exist in NetBox, an error is logged but processing continues for other devices
 2. **Duplicate Interfaces**: Existing interfaces are automatically skipped and listed in the `skipped` array
 3. **Invalid Interface Type**: NetBox will reject invalid interface types with an error message
-4. **Branch Not Found**: If a specified branch doesn't exist and the branching plugin is not available, the task will fail
+4. **Branch Not Found**: If a specified branch does not exist and the branching plugin is not available, the task will fail
 
 ## Best Practices
 
@@ -153,6 +196,32 @@ Task handles several error conditions gracefully:
 5. **Branch Usage**: Use branches for testing bulk operations before committing to the main database
 6. **Idempotency**: The task is idempotent - running it multiple times with the same parameters is safe
 
+## NORFAB Netbox Create Device Interfaces Command Shell Reference
+
+NorFab shell supports these command options for Netbox `create_device_interfaces` task:
+
+```bash
+nf# man tree netbox.create.device-interfaces
+root
+└── netbox:    Netbox service
+    └── create:    Create objects in Netbox
+        └── device-interfaces:    Create devices interfaces
+            ├── instance:    Netbox instance name to target
+            ├── dry-run:    Do not commit to database
+            ├── branch:    Branching plugin branch name to use
+            ├── *devices:    List of device names or device objects to create interfaces for
+            ├── *interface_name:    Name(s) of the interface(s) to create
+            ├── interface-type:    Interface type value, for example 'other', 'virtual', 'lag', or '1000base-t', default 'other'
+            ├── description:    Interface description
+            ├── speed:    Interface speed in Kbps
+            ├── mtu:    Maximum transmission unit size in bytes
+            ├── timeout:    Job timeout
+            ├── workers:    Filter worker to target, default 'any'
+            ├── verbose-result:    Control output details, default 'False'
+            └── progress:    Display progress events, default 'True'
+nf#
+```
+
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.create_device_interfaces
+::: norfab.workers.netbox_worker.interfaces_tasks.NetboxInterfacesTasks.create_device_interfaces

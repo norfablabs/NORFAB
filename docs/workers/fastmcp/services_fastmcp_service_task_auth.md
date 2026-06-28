@@ -7,6 +7,8 @@ tags:
 
 # FastMCP Service Auth Tasks
 
+> task api names: `bearer_token_store`, `bearer_token_list`, `bearer_token_delete`, `bearer_token_check`
+
 FastMCP service supports optional bearer token authentication for the MCP
 streamable HTTP endpoint. To manage token lifecycle, FastMCP provides tasks to
 store, delete, list, and check bearer tokens in the worker diskcache database.
@@ -23,7 +25,20 @@ are not exposed as MCP tools.
 | `bearer_token_delete` | Delete one token or all tokens for a username. |
 | `bearer_token_check` | Check whether a token exists and is still active. |
 
-## FastMCP Auth Tasks Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `username` | Required for create and username-scoped delete/list | User name associated with one or more bearer tokens. |
+| `token` | Required for check and token-scoped delete | Bearer token value. If omitted on create, the worker generates one. |
+| `expire` | No | Token expiration time in seconds. If omitted, the token does not expire. |
+| `workers` | No | FastMCP workers to target. Defaults to all workers. |
+
+## Output
+
+Create, delete, and check tasks return booleans per worker. List tasks return stored token records with username, token, age, creation time, and expiration time.
+
+## Examples
 
 !!! example
 
@@ -31,8 +46,8 @@ are not exposed as MCP tools.
 
         Store an explicit token:
 
-        ```
-        nf#fastmcp auth create-token username automation token secret-token expire 3600
+        ```bash
+        nf# fastmcp auth create-token username automation token secret-token expire 3600
         {
             "fastmcp-worker-1": true
         }
@@ -41,8 +56,8 @@ are not exposed as MCP tools.
 
         Generate and store a token automatically:
 
-        ```
-        nf#fastmcp auth create-token username automation
+        ```bash
+        nf# fastmcp auth create-token username automation
         {
             "fastmcp-worker-1": true
         }
@@ -51,8 +66,8 @@ are not exposed as MCP tools.
 
         List tokens for a specific user:
 
-        ```
-        nf#fastmcp auth list-tokens username automation
+        ```bash
+        nf# fastmcp auth list-tokens username automation
          worker              username    token         age             creation                    expires
          fastmcp-worker-1    automation  secret-token  0:01:29.688340  2026-05-31 12:08:51.914919  2026-05-31 13:08:51.914919
         nf#
@@ -60,8 +75,8 @@ are not exposed as MCP tools.
 
         List all tokens:
 
-        ```
-        nf#fastmcp auth list-tokens
+        ```bash
+        nf# fastmcp auth list-tokens
          worker              username    token                             age             creation                    expires
          fastmcp-worker-1    automation  secret-token                      0:01:44.701374  2026-05-31 12:08:51.914919  2026-05-31 13:08:51.914919
          fastmcp-worker-1    vscode      888945f96b824bf1b4358de790c452b6  0:10:06.561696  2026-05-31 12:00:30.054597  None
@@ -70,8 +85,8 @@ are not exposed as MCP tools.
 
         Delete a specific token:
 
-        ```
-        nf#fastmcp auth delete-token token secret-token
+        ```bash
+        nf# fastmcp auth delete-token token secret-token
         {
             "fastmcp-worker-1": true
         }
@@ -80,8 +95,8 @@ are not exposed as MCP tools.
 
         Delete all tokens for a user:
 
-        ```
-        nf#fastmcp auth delete-token username automation
+        ```bash
+        nf# fastmcp auth delete-token username automation
         {
             "fastmcp-worker-1": true
         }
@@ -90,8 +105,8 @@ are not exposed as MCP tools.
 
         Check whether a token is valid:
 
-        ```
-        nf#fastmcp auth check-token token secret-token
+        ```bash
+        nf# fastmcp auth check-token token secret-token
         {
             "fastmcp-worker-1": true
         }
@@ -100,19 +115,19 @@ are not exposed as MCP tools.
 
     === "Python"
 
+        Context manager - create and list tokens:
+
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == "__main__":
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-            nfclient = nf.make_client()
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
 
-            nfclient.run_job(
-                "fastmcp",
-                "bearer_token_store",
+            client.run_job(
+                service="fastmcp",
+                task="bearer_token_store",
                 kwargs={
                     "username": "automation",
                     "token": "secret-token",
@@ -121,14 +136,46 @@ are not exposed as MCP tools.
                 workers="all",
             )
 
-            result = nfclient.run_job(
-                "fastmcp",
-                "bearer_token_list",
+            result = client.run_job(
+                service="fastmcp",
+                task="bearer_token_list",
                 kwargs={"username": "automation"},
                 workers="all",
             )
             pprint.pprint(result)
+        ```
 
+        Direct lifecycle - same task:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            client.run_job(
+                service="fastmcp",
+                task="bearer_token_store",
+                kwargs={
+                    "username": "automation",
+                    "token": "secret-token",
+                    "expire": 3600,
+                },
+                workers="all",
+            )
+
+            result = client.run_job(
+                service="fastmcp",
+                task="bearer_token_list",
+                kwargs={"username": "automation"},
+                workers="all",
+            )
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -148,8 +195,8 @@ server definition if the client supports custom headers.
 
 NorFab shell supports these command options for FastMCP `auth` tasks:
 
-```
-nf#man tree fastmcp.auth
+```bash
+nf# man tree fastmcp.auth
 root
 └── fastmcp:    FastMCP service
     └── auth:    Manage auth tokens

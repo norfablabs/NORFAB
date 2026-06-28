@@ -7,31 +7,80 @@ tags:
 
 > task api name: `walk`
 
-The `walk` task recursively lists all files from all subdirectories under the specified URL path. This is useful when you need to discover all files available in a directory tree, returning a list of complete `nf://...` URLs for each file found. The task skips hidden files (starting with `.`) and special directories (containing `__`).
+The `walk` task recursively lists files under a File Sharing URL. It returns complete `nf://...` URLs for each file found and skips hidden files and special directories.
 
-## Using it from Python
+## Inputs
 
-```python
-from norfab.core.nfapi import NorFab
+| Parameter | Required | Description |
+|---|---:|---|
+| `url` | No | Directory URL to walk, default `nf://` |
 
-with NorFab(inventory="./inventory.yaml") as nf:
-    client = nf.make_client()
+## Output
 
-    reply = client.run_job(
-        service="filesharing",
-        task="walk",
-        workers="any",
-        kwargs={"url": "nf://"},
-    )
-    print(reply)
-```
+Returns a recursive list of file URLs under the requested path.
 
-## Using it from `nfcli`
+## Examples
 
-NORFAB CLI exposes File Sharing under the `file` command group.
+=== "CLI"
 
-```
-nf#man tree file
+    Walk the repository root:
+
+    ```bash
+    nf#file walk
+    ```
+
+    Walk a subdirectory:
+
+    ```bash
+    nf#file walk url nf://templates/
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="filesharing",
+            task="walk",
+            workers="any",
+            kwargs={"url": "nf://"},
+        )
+        print(result)
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="filesharing",
+            task="walk",
+            workers="any",
+            kwargs={"url": "nf://templates/"},
+        )
+        print(result)
+    finally:
+        nf.destroy()
+    ```
+
+## Filesharing Walk Command Shell Reference
+
+NorFab shell supports these command options for Filesharing `walk` task:
+
+```bash
+nf# man tree file
 root
 └── file:    File sharing service
     └── walk:    Walk directory tree recursively
@@ -39,6 +88,6 @@ root
 nf#
 ```
 
-## API Reference
+## Python API Reference
 
 ::: norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker.walk

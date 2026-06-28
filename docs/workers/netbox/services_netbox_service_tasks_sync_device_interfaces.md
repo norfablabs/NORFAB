@@ -31,7 +31,7 @@ The task follows a four-step pipeline:
 4. Nornir returns normalized interface data to the Netbox worker
 5. Netbox worker applies planned actions and returns per-device action summaries and field-level diffs
 
-## Result Structure
+## Output
 
 **Dry-run mode** (`dry_run=True`) returns the diff plan without making any changes, keyed by device name:
 

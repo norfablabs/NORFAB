@@ -34,7 +34,7 @@ Roles are assigned automatically:
 4. Nornir returns normalized interface and IP data to the Netbox worker
 5. Netbox worker reconciles live addresses against NetBox and applies bulk create/update operations
 
-## Result Structure
+## Output
 
 Both dry-run and live-run modes return the same per-device structure keyed by device name:
 

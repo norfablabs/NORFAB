@@ -20,7 +20,17 @@ The `restart_lab` task provides the following features:
 - **Lab Restart**: Destroys the current lab and redeploys it using the original topology file.
 - **Error Handling**: Provides detailed error messages if the lab cannot be found or restarted.
 
-## Containerlab Restart Task Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `lab_name` | No | Lab name to restart |
+
+## Output
+
+Returns a per-lab boolean result indicating whether the lab was restarted.
+
+## Examples
 
 Below is an example of how to use the Containerlab restart task to restart a lab.
 
@@ -32,7 +42,7 @@ Below is an example of how to use the Containerlab restart task to restart a lab
 
     === "CLI"
 
-        ```
+        ```bash
         nf#containerlab restart lab-name three-routers-lab
         --------------------------------------------- Job Events -----------------------------------------------
         05-May-2025 20:51:33.947 ee23b3ec4bfb474fac0a7e87e910862b job started
@@ -67,27 +77,51 @@ Below is an example of how to use the Containerlab restart task to restart a lab
 
     === "Python"
 
+        Context manager:
+
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-
+        with NorFab(inventory="./inventory.yaml") as nf:
             client = nf.make_client()
 
-            res = client.run_job(
+            result = client.run_job(
                 service="containerlab",
                 task="restart_lab",
+                workers="any",
                 kwargs={
                     "lab_name": "three-routers-lab",
-                }
+                },
             )
 
-            pprint.pprint(res)
+            pprint.pprint(result)
+        ```
 
+        Direct lifecycle:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="restart_lab",
+                workers="any",
+                kwargs={
+                    "lab_name": "three-routers-lab",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -95,8 +129,8 @@ Below is an example of how to use the Containerlab restart task to restart a lab
 
 Below are the commands supported by the `restart_lab` task:
 
-```
-nf#man tree containerlab.restart
+```bash
+nf# man tree containerlab.restart
 root
 └── containerlab:    Containerlab service
     └── restart:    Restart lab devices

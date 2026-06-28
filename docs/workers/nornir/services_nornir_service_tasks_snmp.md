@@ -23,7 +23,24 @@ library under the hood.
 Only numeric OIDs are supported. MIB name loading and symbolic OID resolution
 are not provided by the installed puresnmp API.
 
-## Nornir SNMP Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `oid` | Required for single-OID operations | Numeric OID for `snmp_get`, `snmp_getnext`, `snmp_walk`, `snmp_table`, `snmp_bulktable`, or `snmp_set`. |
+| `oids` | Required for multi-OID operations | Numeric OIDs for `snmp_multiget`, `snmp_multiwalk`, or `snmp_bulkwalk`. |
+| `scalar_oids`, `repeating_oids` | Required for `snmp_bulkget` | Scalar and repeating OIDs for GETBULK. |
+| `value` | Required for `snmp_set` | Value to write. Converted to SNMP `OctetString`. |
+| `mappings` | Required for `snmp_multiset` | Mapping of numeric OIDs to values. |
+| `bulk_size`, `max_list_size`, `errors` | No | Operation-specific SNMP read options. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+SNMP tasks return per-host dictionaries keyed by operation name, such as `get`, `walk`, `multiget`, `bulkget`, `table`, or `set`. Read operations return collected OID values. Write operations return the values acknowledged by the device.
+
+## Examples
 
 Below is an example of how to use the Nornir SNMP tasks to retrieve and
 set OID values on devices.
@@ -32,7 +49,7 @@ set OID values on devices.
 
     === "CLI"
     
-        ```
+        ```bash
 		C:\nf>nfcli
 		Welcome to NorFab Interactive Shell.
 		nf#
@@ -87,9 +104,31 @@ set OID values on devices.
 		
     === "Python"
     
-		This code is complete and can run as is
-		
+        Context manager - retrieve a single OID:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="snmp_get",
+                kwargs={
+                    "oid": "1.3.6.1.2.1.1.5.0",
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
         ```
+
+        Direct lifecycle - same task:
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -116,7 +155,7 @@ set OID values on devices.
 
 		Once executed, above code should produce this output:
 		
-		```
+		```text
         C:\nf>python nornir_snmp.py
         {'nornir-worker-1': {'errors': [],
                              'failed': False,
@@ -158,7 +197,7 @@ Argument names match the installed puresnmp methods. In particular,
 
     === "CLI"
     
-        ```
+        ```bash
 		nf[nornir-snmp]#walk oid 1.3.6.1.2.1.2.2
 		ceos-leaf-1:
 		  walk:
@@ -207,7 +246,7 @@ Argument names match the installed puresnmp methods. In particular,
     
 		This code is complete and can run as is
 		
-        ```
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -252,7 +291,7 @@ Both operations are annotated as destructive for MCP tool safety.
 
     === "CLI"
     
-        ```
+        ```bash
 		nf[nornir-snmp]#set oid 1.3.6.1.2.1.1.6.0 value "Brisbane lab" FC spine
 		ceos-spine-1:
 		  set:
@@ -276,7 +315,7 @@ Both operations are annotated as destructive for MCP tool safety.
     
 		This code is complete and can run as is
 		
-        ```
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -449,8 +488,8 @@ These commands include options for setting job timeouts, specifying connection
 parameters, applying host filters, and controlling the execution of SNMP
 operations.
 
-```
-nf#man tree nornir.snmp
+```bash
+nf# man tree nornir.snmp
 
 R - required field, M - supports multiline input, D - dynamic key
 
@@ -956,14 +995,46 @@ nf#
 
 ## Python API Reference
 
+### SNMP Get
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_get
+
+### SNMP GetNext
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_getnext
+
+### SNMP MultiGet
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_multiget
+
+### SNMP Walk
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_walk
+
+### SNMP MultiWalk
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_multiwalk
+
+### SNMP BulkGet
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_bulkget
+
+### SNMP BulkWalk
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_bulkwalk
+
+### SNMP Table
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_table
+
+### SNMP BulkTable
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_bulktable
+
+### SNMP Set
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_set
+
+### SNMP MultiSet
+
 ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_multiset

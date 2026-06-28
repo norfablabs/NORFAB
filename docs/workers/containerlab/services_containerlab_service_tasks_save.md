@@ -16,7 +16,17 @@ The `save` task provides the following features:
 - **Configuration Backup**: Saves the current configuration of all devices in the lab.
 - **Lab-Specific**: Operates on a specified lab, ensuring targeted configuration management.
 
-## Containerlab Save Task Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `lab_name` | No | Lab name to save configurations for |
+
+## Output
+
+Returns a per-lab boolean result indicating whether the configuration save completed.
+
+## Examples
 
 Below is an example of how to use the Containerlab save task to back up a lab's configuration.
 
@@ -28,7 +38,7 @@ Below is an example of how to use the Containerlab save task to back up a lab's 
 
     === "CLI"
 
-        ```
+        ```bash
         nf#containerlab save lab-name three-routers-lab
         --------------------------------------------- Job Events -----------------------------------------------
         05-May-2025 20:48:25.322 7ffd783a18ee4db7b92d1643ef8b3390 job started
@@ -52,27 +62,51 @@ Below is an example of how to use the Containerlab save task to back up a lab's 
 
     === "Python"
 
+        Context manager:
+
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-
+        with NorFab(inventory="./inventory.yaml") as nf:
             client = nf.make_client()
 
-            res = client.run_job(
+            result = client.run_job(
                 service="containerlab",
                 task="save",
+                workers="any",
                 kwargs={
                     "lab_name": "three-routers-lab",
-                }
+                },
             )
 
-            pprint.pprint(res)
+            pprint.pprint(result)
+        ```
 
+        Direct lifecycle:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="save",
+                workers="any",
+                kwargs={
+                    "lab_name": "three-routers-lab",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -80,7 +114,7 @@ Below is an example of how to use the Containerlab save task to back up a lab's 
 
 Below are the commands supported by the `save` task:
 
-```
+```bash
 nf# man tree containerlab.save
 root
 └── containerlab:    Containerlab service

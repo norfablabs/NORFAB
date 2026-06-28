@@ -18,14 +18,14 @@ The `get_nornir_inventory` task provides the following features:
 - **Group Assignment**: Optionally assign one or more Nornir group names to every host in the generated inventory.
 - **Network Scoping**: Optionally limit inventory generation to a single named network.
 
-## FakeNOS Get Nornir Inventory Task Arguments
+## Inputs
 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `network` | `str` or `None` | `None` | Name of a specific FakeNOS network to build inventory for. If `None`, hosts from all running networks are included. |
 | `groups` | `str`, `list`, or `None` | `None` | A group name or list of Nornir group names to assign to every generated host. |
 
-## FakeNOS Get Nornir Inventory Task Return Data
+## Output
 
 The task returns a dict with a single `hosts` key. The value is a dict keyed by host name.
 
@@ -38,12 +38,71 @@ The task returns a dict with a single `hosts` key. The value is a dict keyed by 
 | `password` | `str` | SSH password for the simulated device. |
 | `groups` | `list` | List of Nornir group names. Empty list if `groups` was not specified. |
 
+## Examples
+
+=== "CLI"
+
+    Build Nornir inventory from all running FakeNOS networks:
+
+    ```bash
+    nf#fakenos get-nornir-inventory
+    ```
+
+    Build inventory for one network and assign groups:
+
+    ```bash
+    nf#fakenos get-nornir-inventory network lab1 groups lab simulated
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="get_nornir_inventory",
+            workers="any",
+            kwargs={
+                "network": "lab1",
+                "groups": ["lab", "simulated"],
+            },
+        )
+        print(result)
+    ```
+
+    Direct lifecycle - all networks:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="get_nornir_inventory",
+            workers="any",
+            kwargs={"groups": ["simulated"]},
+        )
+        print(result)
+    finally:
+        nf.destroy()
+    ```
+
 ## FakeNOS Get Nornir Inventory Command Shell Reference
 
-NorFab shell supports these command options for Netbox `create_prefix` task:
+NorFab shell supports these command options for FakeNOS `get_nornir_inventory` task:
 
-```
-nf#man tree fakenos.get-nornir-inventory
+```bash
+nf# man tree fakenos.get-nornir-inventory
 
 R - required field, M - supports multiline input, D - dynamic key
 

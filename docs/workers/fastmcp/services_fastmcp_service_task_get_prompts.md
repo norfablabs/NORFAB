@@ -24,7 +24,20 @@ service_<service_name>__task_<task_name>__prompt_<prompt_name>
 Retrieving a prompt through MCP returns rendered messages. It does not execute
 the related NorFab task.
 
-## FastMCP Get Prompts Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `brief` | No | Return prompt names only. |
+| `service` | No | Filter prompts by NorFab service name. |
+| `name` | No | Filter prompts by glob pattern. |
+| `workers` | No | FastMCP workers to target. Defaults to any worker. |
+
+## Output
+
+The task returns MCP prompt definitions with prompt name, title, description, arguments, and unrendered message templates. With `brief=True`, it returns prompt names only.
+
+## Examples
 
 !!! example
 
@@ -32,8 +45,8 @@ the related NorFab task.
 
         List all prompts:
 
-        ```
-        nf#show fastmcp prompts
+        ```bash
+        nf# show fastmcp prompts
         ```
 
         The detailed output includes each prompt's `messages` list and its
@@ -41,36 +54,57 @@ the related NorFab task.
 
         List prompt names for a specific service:
 
-        ```
-        nf#show fastmcp prompts service nornir brief
+        ```bash
+        nf# show fastmcp prompts service nornir brief
         ```
 
         Filter prompts by name using glob patterns:
 
-        ```
-        nf#show fastmcp prompts name "*troubleshoot" brief
+        ```bash
+        nf# show fastmcp prompts name "*troubleshoot" brief
         ```
 
     === "Python"
+
+        Context manager - list Nornir prompt names:
 
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == "__main__":
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-            nfclient = nf.make_client()
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
 
-            result = nfclient.run_job(
-                "fastmcp",
-                "get_prompts",
+            result = client.run_job(
+                service="fastmcp",
+                task="get_prompts",
                 kwargs={"brief": True, "service": "nornir"},
                 workers="any",
             )
             pprint.pprint(result)
+        ```
 
+        Direct lifecycle - filter prompts by name:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="fastmcp",
+                task="get_prompts",
+                kwargs={"brief": True, "name": "*troubleshoot"},
+                workers="any",
+            )
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -78,8 +112,8 @@ the related NorFab task.
 
 NorFab shell supports these command options for FastMCP `get_prompts` task:
 
-```
-nf#man tree show.fastmcp.prompts
+```bash
+nf# man tree show.fastmcp.prompts
 root
 └── show:    NorFab show commands
     └── fastmcp:    Show FastMCP service

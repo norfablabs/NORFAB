@@ -55,12 +55,68 @@ When `include_metadata=False`:
 }
 ```
 
+### Examples
+
+=== "CLI"
+
+    List all object types with full metadata:
+
+    ```bash
+    nf#netbox crud list-objects
+    ```
+
+    List object names only (no metadata), filtered to dcim and ipam apps:
+
+    ```bash
+    nf#netbox crud list-objects no-include-metadata app-filter dcim,ipam
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_list_objects",
+            workers="any",
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_list_objects",
+            workers="any",
+            kwargs={
+                "app_filter": ["dcim"],
+                "include_metadata": False,
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
 ### NORFAB Netbox CRUD List Objects Command Shell Reference
 
 NorFab shell supports these command options for Netbox `crud_list_objects` task:
 
-```
-nf#man tree netbox.crud.list-objects
+```bash
+nf# man tree netbox.crud.list-objects
 root
 └── netbox:    Netbox service
     └── crud:    Generic CRUD operations on NetBox objects
@@ -72,52 +128,6 @@ root
             └── no-include-metadata:    Return object names only (omit path/methods/schema)
 nf#
 ```
-
-### Examples
-
-=== "CLI"
-
-    List all object types with full metadata:
-
-    ```
-    nf#netbox crud list-objects
-    ```
-
-    List object names only (no metadata), filtered to dcim and ipam apps:
-
-    ```
-    nf#netbox crud list-objects no-include-metadata app-filter dcim,ipam
-    ```
-
-=== "Python"
-
-    ```python
-    from norfab.core.nfapi import NorFab
-
-    nf = NorFab(inventory="./inventory.yaml")
-    nf.start()
-    client = nf.make_client()
-
-    # all object types with metadata
-    result = client.run_job(
-        "netbox",
-        "crud_list_objects",
-        workers="any",
-    )
-
-    # names only, filtered to dcim app
-    result = client.run_job(
-        "netbox",
-        "crud_list_objects",
-        workers="any",
-        kwargs={
-            "app_filter": ["dcim"],
-            "include_metadata": False,
-        },
-    )
-
-    nf.destroy()
-    ```
 
 ### Python API Reference
 
@@ -149,12 +159,71 @@ Default object types searched when `object_types` is omitted:
 }
 ```
 
+### Examples
+
+=== "CLI"
+
+    Search for "ceos" across default object types:
+
+    ```bash
+    nf#netbox crud search ceos
+    ```
+
+    Search within specific object types and return selected fields:
+
+    ```bash
+    nf#netbox crud search ceos object-types dcim.devices,dcim.interfaces fields id,name limit 5
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_search",
+            workers="any",
+            kwargs={"query": "ceos"},
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_search",
+            workers="any",
+            kwargs={
+                "query": "ceos",
+                "object_types": ["dcim.devices", "dcim.interfaces"],
+                "fields": ["id", "name"],
+                "limit": 5,
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
 ### NORFAB Netbox CRUD Search Command Shell Reference
 
 NorFab shell supports these command options for Netbox `crud_search` task:
 
-```
-nf#man tree netbox.crud.search
+```bash
+nf# man tree netbox.crud.search
 root
 └── netbox:    Netbox service
     └── crud:    Generic CRUD operations on NetBox objects
@@ -169,55 +238,6 @@ root
             └── limit:    Max results per object type, default 10
 nf#
 ```
-
-### Examples
-
-=== "CLI"
-
-    Search for "ceos" across default object types:
-
-    ```
-    nf#netbox crud search ceos
-    ```
-
-    Search within specific object types and return selected fields:
-
-    ```
-    nf#netbox crud search ceos object-types dcim.devices,dcim.interfaces fields id,name limit 5
-    ```
-
-=== "Python"
-
-    ```python
-    from norfab.core.nfapi import NorFab
-
-    nf = NorFab(inventory="./inventory.yaml")
-    nf.start()
-    client = nf.make_client()
-
-    # search across default object types
-    result = client.run_job(
-        "netbox",
-        "crud_search",
-        workers="any",
-        kwargs={"query": "ceos"},
-    )
-
-    # search in specific types, restrict fields and limit results
-    result = client.run_job(
-        "netbox",
-        "crud_search",
-        workers="any",
-        kwargs={
-            "query": "ceos",
-            "object_types": ["dcim.devices", "dcim.interfaces"],
-            "fields": ["id", "name"],
-            "limit": 5,
-        },
-    )
-
-    nf.destroy()
-    ```
 
 ### Python API Reference
 
@@ -246,12 +266,79 @@ provided, results are merged and de-duplicated by `id`.
 }
 ```
 
+### Examples
+
+=== "CLI"
+
+    Retrieve a single device by name filter:
+
+    ```bash
+    nf#netbox crud get object-type dcim.devices filters '{"name":"ceos1"}' fields id,name,status
+    ```
+
+    Retrieve multiple devices by ID:
+
+    ```bash
+    nf#netbox crud get object-type dcim.devices object-id 1,2,3
+    ```
+
+    Paginate through all devices sorted by name:
+
+    ```bash
+    nf#netbox crud get object-type dcim.devices limit 50 offset 0 ordering name
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_read",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.devices",
+                "filters": {"name": "ceos1"},
+                "fields": ["id", "name", "status", "site"],
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_read",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.devices",
+                "object_id": [1, 2, 3],
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
 ### NORFAB Netbox CRUD Get Command Shell Reference
 
 NorFab shell supports these command options for Netbox `crud_read` task:
 
-```
-nf#man tree netbox.crud.get
+```bash
+nf# man tree netbox.crud.get
 root
 └── netbox:    Netbox service
     └── crud:    Generic CRUD operations on NetBox objects
@@ -269,63 +356,6 @@ root
             └── ordering:    Comma-separated ordering fields, prefix "-" for descending
 nf#
 ```
-
-### Examples
-
-=== "CLI"
-
-    Retrieve a single device by name filter:
-
-    ```
-    nf#netbox crud get object-type dcim.devices filters '{"name":"ceos1"}' fields id,name,status
-    ```
-
-    Retrieve multiple devices by ID:
-
-    ```
-    nf#netbox crud get object-type dcim.devices object-id 1,2,3
-    ```
-
-    Paginate through all devices sorted by name:
-
-    ```
-    nf#netbox crud get object-type dcim.devices limit 50 offset 0 ordering name
-    ```
-
-=== "Python"
-
-    ```python
-    from norfab.core.nfapi import NorFab
-
-    nf = NorFab(inventory="./inventory.yaml")
-    nf.start()
-    client = nf.make_client()
-
-    # single filter dict
-    result = client.run_job(
-        "netbox",
-        "crud_read",
-        workers="any",
-        kwargs={
-            "object_type": "dcim.devices",
-            "filters": {"name": "ceos1"},
-            "fields": ["id", "name", "status", "site"],
-        },
-    )
-
-    # multiple IDs
-    result = client.run_job(
-        "netbox",
-        "crud_read",
-        workers="any",
-        kwargs={
-            "object_type": "dcim.devices",
-            "object_id": [1, 2, 3],
-        },
-    )
-
-    nf.destroy()
-    ```
 
 ### Python API Reference
 
@@ -368,12 +398,74 @@ Dry run:
 }
 ```
 
+### Examples
+
+=== "CLI"
+
+    Create a single manufacturer (dry run first):
+
+    ```bash
+    nf#netbox crud create object-type dcim.manufacturers data '{"name":"Acme","slug":"acme"}' dry-run
+    nf#netbox crud create object-type dcim.manufacturers data '{"name":"Acme","slug":"acme"}'
+    ```
+
+    Bulk-create interfaces:
+
+    ```bash
+    nf#netbox crud create object-type dcim.interfaces data '[{"device":1,"name":"eth0","type":"1000base-t"},{"device":1,"name":"eth1","type":"1000base-t"}]'
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_create",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.manufacturers",
+                "data": {"name": "Acme", "slug": "acme"},
+                "dry_run": True,
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_create",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.manufacturers",
+                "data": {"name": "Acme", "slug": "acme"},
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
 ### NORFAB Netbox CRUD Create Command Shell Reference
 
 NorFab shell supports these command options for Netbox `crud_create` task:
 
-```
-nf#man tree netbox.crud.create
+```bash
+nf# man tree netbox.crud.create
 root
 └── netbox:    Netbox service
     └── crud:    Generic CRUD operations on NetBox objects
@@ -386,38 +478,6 @@ root
             └── dry-run:    Preview without creating
 nf#
 ```
-
-### Examples
-
-=== "CLI"
-
-    Create a single manufacturer (dry run first):
-
-    ```
-    nf#netbox crud create object-type dcim.manufacturers data '{"name":"Acme","slug":"acme"}' dry-run
-    nf#netbox crud create object-type dcim.manufacturers data '{"name":"Acme","slug":"acme"}'
-    ```
-
-    Bulk-create interfaces:
-
-    ```
-    nf#netbox crud create object-type dcim.interfaces data '[{"device":1,"name":"eth0","type":"1000base-t"},{"device":1,"name":"eth1","type":"1000base-t"}]'
-    ```
-
-=== "Python"
-
-    ```python
-    result = client.run_job(
-        "netbox",
-        "crud_create",
-        workers="any",
-        kwargs={
-            "object_type": "dcim.manufacturers",
-            "data": {"name": "Acme", "slug": "acme"},
-            "dry_run": True,
-        },
-    )
-    ```
 
 ### Python API Reference
 
@@ -465,12 +525,68 @@ Dry run:
 }
 ```
 
+### Examples
+
+=== "CLI"
+
+    Preview changes before applying:
+
+    ```bash
+    nf#netbox crud update object-type dcim.manufacturers data '{"id":10,"name":"Acme Corp"}' dry-run
+    nf#netbox crud update object-type dcim.manufacturers data '{"id":10,"name":"Acme Corp"}'
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        preview = client.run_job(
+            "netbox",
+            "crud_update",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.manufacturers",
+                "data": {"id": 10, "name": "Acme Corp"},
+                "dry_run": True,
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_update",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.manufacturers",
+                "data": {"id": 10, "name": "Acme Corp"},
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
 ### NORFAB Netbox CRUD Update Command Shell Reference
 
 NorFab shell supports these command options for Netbox `crud_update` task:
 
-```
-nf#man tree netbox.crud.update
+```bash
+nf# man tree netbox.crud.update
 root
 └── netbox:    Netbox service
     └── crud:    Generic CRUD operations on NetBox objects
@@ -484,44 +600,6 @@ root
             └── dry-run:    Show diffs without updating
 nf#
 ```
-
-### Examples
-
-=== "CLI"
-
-    Preview changes before applying:
-
-    ```
-    nf#netbox crud update object-type dcim.manufacturers data '{"id":10,"name":"Acme Corp"}' dry-run
-    nf#netbox crud update object-type dcim.manufacturers data '{"id":10,"name":"Acme Corp"}'
-    ```
-
-=== "Python"
-
-    ```python
-    # dry run first
-    result = client.run_job(
-        "netbox",
-        "crud_update",
-        workers="any",
-        kwargs={
-            "object_type": "dcim.manufacturers",
-            "data": {"id": 10, "name": "Acme Corp"},
-            "dry_run": True,
-        },
-    )
-
-    # apply
-    result = client.run_job(
-        "netbox",
-        "crud_update",
-        workers="any",
-        kwargs={
-            "object_type": "dcim.manufacturers",
-            "data": {"id": 10, "name": "Acme Corp"},
-        },
-    )
-    ```
 
 ### Python API Reference
 
@@ -560,12 +638,68 @@ Dry run:
 }
 ```
 
+### Examples
+
+=== "CLI"
+
+    Preview then delete:
+
+    ```bash
+    nf#netbox crud delete object-type dcim.manufacturers object-id 10,11 dry-run
+    nf#netbox crud delete object-type dcim.manufacturers object-id 10,11
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        preview = client.run_job(
+            "netbox",
+            "crud_delete",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.manufacturers",
+                "object_id": [10, 11],
+                "dry_run": True,
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_delete",
+            workers="any",
+            kwargs={
+                "object_type": "dcim.manufacturers",
+                "object_id": [10, 11],
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
 ### NORFAB Netbox CRUD Delete Command Shell Reference
 
 NorFab shell supports these command options for Netbox `crud_delete` task:
 
-```
-nf#man tree netbox.crud.delete
+```bash
+nf# man tree netbox.crud.delete
 root
 └── netbox:    Netbox service
     └── crud:    Generic CRUD operations on NetBox objects
@@ -578,32 +712,6 @@ root
             └── dry-run:    Preview objects that would be deleted
 nf#
 ```
-
-### Examples
-
-=== "CLI"
-
-    Preview then delete:
-
-    ```
-    nf#netbox crud delete object-type dcim.manufacturers object-id 10,11 dry-run
-    nf#netbox crud delete object-type dcim.manufacturers object-id 10,11
-    ```
-
-=== "Python"
-
-    ```python
-    result = client.run_job(
-        "netbox",
-        "crud_delete",
-        workers="any",
-        kwargs={
-            "object_type": "dcim.manufacturers",
-            "object_id": [10, 11],
-            "dry_run": True,
-        },
-    )
-    ```
 
 ### Python API Reference
 
@@ -643,12 +751,73 @@ fallback to older versions.
 }
 ```
 
+### Examples
+
+=== "CLI"
+
+    Recent create actions:
+
+    ```bash
+    nf#netbox crud changelogs filters '{"action":"create"}' limit 20
+    ```
+
+    Changes to a specific object:
+
+    ```bash
+    nf#netbox crud changelogs filters '{"changed_object_id":10}' fields id,action,time,object_repr
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_get_changelogs",
+            workers="any",
+            kwargs={
+                "filters": {"action": "create"},
+                "fields": ["id", "action", "time", "object_repr", "user_name"],
+                "limit": 20,
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "crud_get_changelogs",
+            workers="any",
+            kwargs={
+                "filters": {"changed_object_id": 10},
+                "fields": ["id", "action", "time", "object_repr"],
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
 ### NORFAB Netbox CRUD Changelogs Command Shell Reference
 
 NorFab shell supports these command options for Netbox `crud_get_changelogs` task:
 
-```
-nf#man tree netbox.crud.changelogs
+```bash
+nf# man tree netbox.crud.changelogs
 root
 └── netbox:    Netbox service
     └── crud:    Generic CRUD operations on NetBox objects
@@ -662,37 +831,6 @@ root
             └── offset:    Pagination skip count, default 0
 nf#
 ```
-
-### Examples
-
-=== "CLI"
-
-    Recent create actions:
-
-    ```
-    nf#netbox crud changelogs filters '{"action":"create"}' limit 20
-    ```
-
-    Changes to a specific object:
-
-    ```
-    nf#netbox crud changelogs filters '{"changed_object_id":10}' fields id,action,time,object_repr
-    ```
-
-=== "Python"
-
-    ```python
-    result = client.run_job(
-        "netbox",
-        "crud_get_changelogs",
-        workers="any",
-        kwargs={
-            "filters": {"action": "create"},
-            "fields": ["id", "action", "time", "object_repr", "user_name"],
-            "limit": 20,
-        },
-    )
-    ```
 
 ### Python API Reference
 

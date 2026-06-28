@@ -7,123 +7,137 @@ tags:
 
 > task api name: `get_containerlab_inventory`
 
-This task designed to provide Containerlab workers with inventory data sourced from Netbox to deploy lab topologies.
+Builds a Containerlab topology inventory from NetBox device and connection data. The task is intended for Containerlab workers that deploy lab topologies sourced from NetBox.
 
-## Get Containerlab Inventory Sample Usage
+## How It Works
 
-Below is an example of how to fetch Containerlab topology inventory data from Netbox for two devices named `fceos4` and `fceos5`.
+1. Client submits a `get_containerlab_inventory` request with device selectors
+2. Worker fetches matching devices from NetBox
+3. Worker reads Containerlab node settings from each device config context at `norfab.containerlab`
+4. Worker fetches NetBox connection data and converts links to Containerlab `veth` endpoints
+5. Worker assigns management IP addresses and optional port mappings
+6. Worker returns a Containerlab inventory dictionary
 
-```
-nf#netbox get containerlab-inventory devices fceos4 fceos5 lab-name foobar
---------------------------------------------- Job Events -----------------------------------------------
-31-May-2025 13:10:14.477 7d434ed4e24c4a69af5d52797d7a187e job started
-31-May-2025 13:10:14.525 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Fetching devices data from Netbox
-31-May-2025 13:10:14.594 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Node added fceos4
-31-May-2025 13:10:14.600 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Node added fceos5
-31-May-2025 13:10:14.606 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Fetching connections data from Netbox
-31-May-2025 13:10:15.211 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth1 - fceos4:eth1
-31-May-2025 13:10:15.217 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth2 - fceos4:eth2
-31-May-2025 13:10:15.225 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth3 - fceos4:eth3
-31-May-2025 13:10:15.232 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth4 - fceos4:eth4
-31-May-2025 13:10:15.238 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth6 - fceos4:eth6
-31-May-2025 13:10:15.244 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth7 - fceos4:eth7
-31-May-2025 13:10:15.250 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth8 - fceos4:eth101
-31-May-2025 13:10:15.257 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Link added fceos5:eth11 - fceos4:eth11
-31-May-2025 13:10:15.580 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Renaming fceos4 interfaces
-31-May-2025 13:10:15.587 INFO netbox-worker-1.1 running netbox.get_containerlab_inventory  - Renaming fceos5 interfaces
-31-May-2025 13:10:15.808 7d434ed4e24c4a69af5d52797d7a187e job completed in 1.331 seconds
+## Inputs
 
---------------------------------------------- Job Results --------------------------------------------
+| Parameter | Required | Description |
+|---|---:|---|
+| `lab_name` | Conditional | Containerlab lab name; required unless `tenant` is used |
+| `tenant` | Conditional | Tenant name used to source devices and as lab name when `lab_name` is omitted |
+| `filters` | Conditional | NetBox device filter dictionaries |
+| `devices` | Conditional | Device names to include in the lab |
+| `instance` | No | NetBox instance name to target |
+| `image` | No | Container image to use for all nodes |
+| `ipv4_subnet` | No | Management subnet, default `172.100.100.0/24` |
+| `ports` | No | TCP/UDP port allocation range |
+| `ports_map` | No | Port mappings keyed by node name |
+| `cache` | No | Cache usage mode passed to device retrieval |
 
-netbox-worker-1.1:
-  mgmt:
-    ipv4-subnet: 172.100.100.0/24
-    network: br-foobar
-  name: foobar
-  topology:
-    links:
-    - endpoints:
-      - interface: eth1
-        node: fceos5
-      - interface: eth1
-        node: fceos4
-      type: veth
-    - endpoints:
-      - interface: eth2
-        node: fceos5
-      - interface: eth2
-        node: fceos4
-      type: veth
-    - endpoints:
-      - interface: eth3
-        node: fceos5
-      - interface: eth3
-        node: fceos4
-      type: veth
-    - endpoints:
-      - interface: eth4
-        node: fceos5
-      - interface: eth4
-        node: fceos4
-      type: veth
-    - endpoints:
-      - interface: eth6
-        node: fceos5
-      - interface: eth6
-        node: fceos4
-      type: veth
-    - endpoints:
-      - interface: eth7
-        node: fceos5
-      - interface: eth7
-        node: fceos4
-      type: veth
-    - endpoints:
-      - interface: eth8
-        node: fceos5
-      - interface: eth101
-        node: fceos4
-      type: veth
-    - endpoints:
-      - interface: eth11
-        node: fceos5
-      - interface: eth11
-        node: fceos4
-      type: veth
-    nodes:
-      fceos4:
-        image: ceosimage:4.30.0F
-        kind: ceos
-        mgmt-ipv4: 172.100.100.2
-        ports:
+Provide at least one device selector: `tenant`, `devices`, or `filters`.
+
+## Output
+
+Returns Containerlab inventory data:
+
+```yaml
+name: lab-demo
+mgmt:
+  ipv4-subnet: 172.100.100.0/24
+  network: br-lab-demo
+topology:
+  nodes:
+    fceos4:
+      kind: ceos
+      image: ceos:latest
+      mgmt-ipv4: 172.100.100.2
+      ports:
         - 12000:22/tcp
-        - 12001:23/tcp
-        - 12002:80/tcp
-        - 12003:161/udp
-        - 12005:830/tcp
-        - 12006:8080/tcp
-      fceos5:
-        image: ceosimage:4.30.0F
-        kind: ceos
-        mgmt-ipv4: 172.100.100.3
-        ports:
-        - 12007:22/tcp
-        - 12008:23/tcp
-        - 12009:80/tcp
-        - 12010:161/udp
-        - 12011:443/tcp
-        - 12012:830/tcp
-        - 12013:8080/tcp
-
-nf#
+  links:
+    - type: veth
+      endpoints:
+        - node: fceos4
+          interface: eth1
+        - node: fceos5
+          interface: eth1
 ```
+
+## Notes / Gotchas
+
+- Node-specific Containerlab settings must be stored in NetBox device config context under `norfab.containerlab`.
+- If `image` is provided, it overrides node image values. Otherwise, the task uses `{kind}:latest` when no image is configured.
+- `interfaces_rename` in config context can rename interfaces in generated links.
+- If `lab_name` is omitted and `tenant` is provided, the tenant name becomes the lab name.
+
+## Examples
+
+=== "CLI"
+
+    Build inventory for explicit devices:
+
+    ```bash
+    nf#netbox get containerlab-inventory devices fceos4 fceos5 lab-name lab-demo
+    ```
+
+    Build inventory from tenant devices:
+
+    ```bash
+    nf#netbox get containerlab-inventory tenant lab-tenant
+    ```
+
+    Filter devices by site and role:
+
+    ```bash
+    nf#netbox get containerlab-inventory lab-name lab-demo filters site lab role leaf
+    ```
+
+    Use a custom management subnet and image:
+
+    ```bash
+    nf#netbox get containerlab-inventory devices fceos4 fceos5 lab-name lab-demo ipv4-subnet 172.20.20.0/24 image ceos:latest
+    ```
+
+=== "Python"
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    nf.start()
+    client = nf.make_client()
+
+    # build inventory for explicit devices
+    result = client.run_job(
+        "netbox",
+        "get_containerlab_inventory",
+        workers="any",
+        kwargs={
+            "devices": ["fceos4", "fceos5"],
+            "lab_name": "lab-demo",
+        },
+    )
+
+    # build inventory from NetBox filters
+    result = client.run_job(
+        "netbox",
+        "get_containerlab_inventory",
+        workers="any",
+        kwargs={
+            "filters": [{"site": "lab", "role": "leaf"}],
+            "lab_name": "lab-demo",
+            "ipv4_subnet": "172.20.20.0/24",
+            "image": "ceos:latest",
+        },
+    )
+
+    nf.destroy()
+    ```
 
 ## NORFAB Netbox Get Containerlab Inventory Command Shell Reference
 
 NorFab shell supports these command options for Netbox `get_containerlab_inventory` task:
 
-```
-nf#man tree netbox.get.containerlab-inventory
+```bash
+nf# man tree netbox.get.containerlab-inventory
 root
 └── netbox:    Netbox service
     └── get:    Query data from Netbox
@@ -153,4 +167,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_containerlab_inventory
+::: norfab.workers.netbox_worker.containerlab_inventory_tasks.NetboxContainerlabInventoryTasks.get_containerlab_inventory

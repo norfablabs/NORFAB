@@ -16,7 +16,18 @@ The `inspect` task provides the following features:
 - **Lab Inspection**: Retrieves information about a specific lab or all labs.
 - **Detailed View**: Optionally includes detailed information about the lab's containers.
 
-## Containerlab Inspect Task Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `lab_name` | No | Lab name to inspect |
+| `details` | No | Include detailed container information |
+
+## Output
+
+Returns container information for one lab or all labs. With `details=True`, the result includes expanded Docker/containerlab details.
+
+## Examples
 
 Below is an example of how to use the Containerlab inspect task to inspect a lab.
 
@@ -28,7 +39,7 @@ Below is an example of how to use the Containerlab inspect task to inspect a lab
 
     === "CLI"
 
-        ```
+        ```bash
         nf#show containerlab containers lab-name three-routers-lab
         containerlab-worker-1:
             ----------
@@ -103,7 +114,7 @@ Below is an example of how to use the Containerlab inspect task to inspect a lab
 
     === "CLI with Details"
 
-        ```
+        ```bash
         nf#show containerlab containers lab-name three-routers-lab details
         containerlab-worker-1:
             |_
@@ -249,27 +260,52 @@ Below is an example of how to use the Containerlab inspect task to inspect a lab
 
     === "Python"
 
+        Context manager:
+
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-
+        with NorFab(inventory="./inventory.yaml") as nf:
             client = nf.make_client()
 
-            res = client.run_job(
+            result = client.run_job(
                 service="containerlab",
                 task="inspect",
+                workers="any",
                 kwargs={
                     "lab_name": "three-routers-lab",
-                }
+                },
             )
 
-            pprint.pprint(res)
+            pprint.pprint(result)
+        ```
 
+        Direct lifecycle with details:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="inspect",
+                workers="any",
+                kwargs={
+                    "lab_name": "three-routers-lab",
+                    "details": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -277,8 +313,8 @@ Below is an example of how to use the Containerlab inspect task to inspect a lab
 
 Below are the commands supported by the `inspect` task:
 
-```
-nf#man tree show.containerlab.containers
+```bash
+nf# man tree show.containerlab.containers
 root
 └── show:    NorFab show commands
     └── containerlab:    Show Containerlab service

@@ -3,13 +3,13 @@ tags:
   - netbox
 ---
 
-# Netbox Create BGP Peering Task
+# NetBox Create BGP Peering Task
 
 > task api name: `create_bgp_peering`
 
 Creates one or many BGP sessions in NetBox. Supports single-session mode (individual keyword arguments) and bulk mode (`bulk_create` list of dicts). IP addresses and ASNs are resolved from IPAM or created on-demand. When `local_interface` is provided the local address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote address is derived automatically. Optionally creates a mirror (reverse) session on the remote device.
 
-## How it Works
+## How It Works
 
 1. Client submits `create_bgp_peering` request to NetBox worker
 2. NetBox worker validates that the BGP plugin is installed
@@ -33,6 +33,10 @@ Creates one or many BGP sessions in NetBox. Supports single-session mode (indivi
 
 `create_bgp_peering` is branch-aware. Pass `branch=<name>` to write all sessions into a [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching) branch instead of main.
 
+## Output
+
+Normal mode returns the created, existing, and skipped BGP session details. In dry-run mode, the task returns the session names that would be created and the sessions that already exist.
+
 ## Dry Run Mode
 
 `dry_run=True` returns session names without any NetBox writes:
@@ -50,7 +54,7 @@ Sessions that already exist in NetBox appear in `exists` regardless of dry-run m
 
 By default, sessions are named using:
 
-```
+```text
 {device}_{local_address}_{remote_address}
 ```
 
@@ -58,7 +62,7 @@ Use the `name_template` parameter for a custom naming scheme. The template is a 
 
 Example:
 
-```
+```text
 name_template="{device}_BGP_{local_address}"
 # ceos-spine-1_BGP_10.0.0.1
 ```
@@ -109,148 +113,237 @@ being stored as an object reference in the custom field.
 
     Create a single BGP session:
 
-    ```
+    ```bash
     nf#netbox create bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 device ceos-spine-1 local-address 10.0.0.1 remote-address 10.0.0.2 local-as 65001 remote-as 65002 rir lab
     ```
 
-    Dry run — preview what would be created:
+    Dry run - preview what would be created:
 
-    ```
+    ```bash
     nf#netbox create bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 device ceos-spine-1 local-address 10.0.0.1 remote-address 10.0.0.2 local-as 65001 remote-as 65002 dry-run
     ```
 
     Create session from interface (P2P peer derived automatically):
 
-    ```
+    ```bash
     nf#netbox create bgp-peering device ceos-spine-1 local-interface Ethernet1 local-as 65001 rir lab
     ```
 
     Create session into a NetBox branch:
 
-    ```
+    ```bash
     nf#netbox create bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 device ceos-spine-1 local-address 10.0.0.1 remote-address 10.0.0.2 local-as 65001 remote-as 65002 rir lab branch my-bgp-branch
     ```
 
 === "Python"
 
+    Context manager - create a single session:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+                "device": "ceos-spine-1",
+                "local_address": "10.0.0.1",
+                "remote_address": "10.0.0.2",
+                "local_as": 65001,
+                "remote_as": 65002,
+                "rir": "lab",
+            },
+        )
+    ```
+
+    Context manager - bulk create several sessions:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "bulk_create": [
+                    {
+                        "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+                        "device": "ceos-spine-1",
+                        "local_address": "10.0.0.1",
+                        "remote_address": "10.0.0.2",
+                        "local_as": 65001,
+                        "remote_as": 65002,
+                        "description": "spine-1 to leaf-1",
+                    },
+                    {
+                        "name": "ceos-spine-2_10.0.0.5_10.0.0.6",
+                        "device": "ceos-spine-2",
+                        "local_address": "10.0.0.5",
+                        "remote_address": "10.0.0.6",
+                        "local_as": 65001,
+                        "remote_as": 65003,
+                        "description": "spine-2 to leaf-1",
+                    },
+                ],
+                "peer_group": "EBGP_LEAFS",
+                "import_policies": ["IMPORT_FROM_LEAFS"],
+                "export_policies": ["EXPORT_TO_LEAFS"],
+                "prefix_list_in": "PL-IN-LEAFS",
+                "prefix_list_out": "PL-OUT-LEAFS",
+                "rir": "lab",
+                "message": "Create leaf BGP peerings",
+            },
+        )
+    ```
+
+    Context manager - create from local interfaces:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "bulk_create": [
+                    {
+                        "name": "ceos-spine-1_Ethernet1",
+                        "device": "ceos-spine-1",
+                        "local_interface": "Ethernet1",
+                        "local_as": 65001,
+                    },
+                    {
+                        "name": "ceos-spine-1_Ethernet2",
+                        "device": "ceos-spine-1",
+                        "local_interface": "Ethernet2",
+                        "local_as": 65001,
+                    },
+                ],
+                "rir": "lab",
+                "create_reverse": True,
+            },
+        )
+    ```
+
+    Direct lifecycle - dry run and then create from interface data:
+
     ```python
     from norfab.core.nfapi import NorFab
 
     nf = NorFab(inventory="./inventory.yaml")
-    nf.start()
-    client = nf.make_client()
+    try:
+        nf.start()
+        client = nf.make_client()
 
-    # create a single BGP session
-    result = client.run_job(
-        "netbox",
-        "create_bgp_peering",
-        workers="any",
-        kwargs={
-            "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-            "device": "ceos-spine-1",
-            "local_address": "10.0.0.1",
-            "remote_address": "10.0.0.2",
-            "local_as": "65001",
-            "remote_as": "65002",
-            "rir": "lab",
-        },
-    )
+        preview = client.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+                "device": "ceos-spine-1",
+                "local_address": "10.0.0.1",
+                "remote_address": "10.0.0.2",
+                "local_as": 65001,
+                "remote_as": 65002,
+                "dry_run": True,
+            },
+        )
 
-    # dry run — preview without writing
-    result = client.run_job(
-        "netbox",
-        "create_bgp_peering",
-        workers="any",
-        kwargs={
-            "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-            "device": "ceos-spine-1",
-            "local_address": "10.0.0.1",
-            "remote_address": "10.0.0.2",
-            "local_as": "65001",
-            "remote_as": "65002",
-            "dry_run": True,
-        },
-    )
-
-    # bulk create
-    result = client.run_job(
-        "netbox",
-        "create_bgp_peering",
-        workers="any",
-        kwargs={
-            "bulk_create": [
-                {
-                    "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-                    "device": "ceos-spine-1",
-                    "local_address": "10.0.0.1",
-                    "remote_address": "10.0.0.2",
-                    "local_as": "65001",
-                    "remote_as": "65002",
-                },
-                {
-                    "name": "ceos-spine-2_10.0.0.3_10.0.0.4",
-                    "device": "ceos-spine-2",
-                    "local_address": "10.0.0.3",
-                    "remote_address": "10.0.0.4",
-                    "local_as": "65001",
-                    "remote_as": "65003",
-                },
-            ],
-            "rir": "lab",
-        },
-    )
-
-    # create from interface — local address resolved from IPAM, P2P remote derived
-    result = client.run_job(
-        "netbox",
-        "create_bgp_peering",
-        workers="any",
-        kwargs={
-            "device": "ceos-spine-1",
-            "local_interface": "Ethernet1",
-            "local_as": "65001",
-            "rir": "lab",
-        },
-    )
-
-    # ASN source from device custom fields
-    result = client.run_job(
-        "netbox",
-        "create_bgp_peering",
-        workers="any",
-        kwargs={
-            "device": "ceos-spine-1",
-            "local_interface": "Ethernet1",
-            "asn_source": "custom_fields.asn",
-            "rir": "lab",
-        },
-    )
-
-    # create into a NetBox branch
-    result = client.run_job(
-        "netbox",
-        "create_bgp_peering",
-        workers="any",
-        kwargs={
-            "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-            "device": "ceos-spine-1",
-            "local_address": "10.0.0.1",
-            "remote_address": "10.0.0.2",
-            "local_as": "65001",
-            "remote_as": "65002",
-            "rir": "lab",
-            "branch": "my-bgp-branch",
-        },
-    )
-
-    nf.destroy()
+        result = client.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "device": "ceos-spine-1",
+                "local_interface": "Ethernet1",
+                "local_as": 65001,
+                "asn_source": "custom_fields.asn",
+                "rir": "lab",
+                "branch": "my-bgp-branch",
+            },
+        )
+    finally:
+        nf.destroy()
     ```
 
-## NORFAB Netbox Create BGP Peering Command Shell Reference
+    Direct lifecycle - use a custom name template and VRF custom field:
 
-NorFab shell supports these command options for the Netbox `create_bgp_peering` task:
+    ```python
+    from norfab.core.nfapi import NorFab
 
-```
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "device": "ceos-spine-1",
+                "local_interface": "Ethernet[1-2]",
+                "local_as": 65001,
+                "asn_source": "custom_fields.asn",
+                "name_template": "{{ device }}_{{ vrf }}_{{ remote_address }}",
+                "vrf": "PROD",
+                "vrf_custom_field": "tenant_vrf",
+                "peer_group": "EBGP_LEAFS",
+                "create_reverse": False,
+                "rir": "lab",
+                "message": "Create PROD BGP peerings from interface range",
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
+    Direct lifecycle - resolve ASNs from an IPAM ASN query:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "device": "ceos-spine-1",
+                "local_interface": "Ethernet1",
+                "asn_source": {"asn": 65001},
+                "name_template": "{{ device }}_ASN{{ local_as }}_{{ remote_address }}",
+                "rir": "lab",
+                "dry_run": True,
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
+
+## NORFAB NetBox Create BGP Peering Command Shell Reference
+
+NorFab shell supports these command options for the NetBox `create_bgp_peering` task:
+
+```bash
 nf# man tree netbox.create.bgp-peering
 root
 └── netbox:    Netbox service
@@ -287,5 +380,7 @@ root
             └── message:    Changelog message for NetBox write operations
 nf#
 ```
+
+## Python API Reference
 
 ::: norfab.workers.netbox_worker.bgp_peerings_tasks.NetboxBgpPeeringsTasks.create_bgp_peering

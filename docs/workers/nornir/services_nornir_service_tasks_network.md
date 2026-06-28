@@ -17,6 +17,97 @@ Key features of the Nornir Service Network Task include:
 
 The document also includes a reference for the NorFab shell commands related to the Nornir `network` task, detailing the available options and parameters. These commands provide granular control over the execution of network tasks, enabling users to tailor the behavior of the tasks to meet specific network management needs.
 
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `fun` | Yes | Network utility function to run. Supported values include `ping` and `dns`. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `use_host_name` | No | Use the Nornir host name instead of the host hostname value. |
+| `count` | No | Number of ICMP echo requests for `ping`. |
+| `ping_timeout` | No | Timeout for each ping reply. |
+| `size`, `interval`, `payload`, `sweep_start`, `sweep_end`, `df`, `match`, `source` | No | Additional ping options. |
+| `servers` | No | DNS servers to use for `dns`. |
+| `dns_timeout` | No | DNS query timeout. |
+| `ipv4`, `ipv6` | No | Resolve A or AAAA records for `dns`. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+The task returns per-host results for the selected utility function. Ping results include reachability statistics. DNS results include resolved addresses or lookup errors.
+
+## Examples
+
+!!! example
+
+    === "CLI"
+
+        Ping devices whose hostnames contain `spine`:
+
+        ```bash
+        nf# nornir network ping FC spine count 3
+        ```
+
+        Resolve DNS names using selected DNS servers:
+
+        ```bash
+        nf# nornir network dns FC spine servers 8.8.8.8 1.1.1.1 ipv4
+        ```
+
+    === "Python"
+
+        Context manager - ping selected devices:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="network",
+                kwargs={
+                    "fun": "ping",
+                    "FC": "spine",
+                    "count": 3,
+                    "ping_timeout": 2,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - run DNS checks:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="network",
+                kwargs={
+                    "fun": "dns",
+                    "FC": "spine",
+                    "servers": ["8.8.8.8", "1.1.1.1"],
+                    "ipv4": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Network Ping
 
 The Network Ping task in NorFab's Nornir service allows you to perform ICMP echo requests (pings) to verify the reachability of network devices. This task is essential for network troubleshooting and monitoring, as it helps you determine if a device is online and responsive. The ping task can be customized with various parameters such as timeout, number of retries, payload size and others. By using the ping task, you can quickly identify connectivity issues and ensure that your network devices are functioning correctly.
@@ -29,8 +120,8 @@ The DNS Testing task in NorFab's Nornir service enables you to perform DNS resol
 
 NorFab shell supports these command options for Nornir `network` task:
 
-```
-nf#man tree nornir.network
+```bash
+nf# man tree nornir.network
 root
 └── nornir:    Nornir service
     └── network:    Network utility functions - ping, dns etc.

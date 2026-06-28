@@ -111,68 +111,66 @@ Use `interfaces` when you know exact port names. Use `interface_regex` when you 
 
 === "Python"
 
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
     ```python
     from norfab.core.nfapi import NorFab
 
     nf = NorFab(inventory="./inventory.yaml")
-    nf.start()
-    client = nf.make_client()
+    try:
+        nf.start()
+        client = nf.make_client()
 
-    # query all connections for two devices
-    result = client.run_job(
-        "netbox",
-        "get_connections",
-        workers="any",
-        kwargs={
-            "devices": ["fceos4", "fceos5"],
-        },
-    )
+        result = client.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+                "interfaces": ["eth101", "eth103"],
+            },
+        )
 
-    # query selected interface names only
-    result = client.run_job(
-        "netbox",
-        "get_connections",
-        workers="any",
-        kwargs={
-            "devices": ["fceos4", "fceos5"],
-            "interfaces": ["eth101", "eth103"],
-        },
-    )
+        preview = client.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4"],
+                "interface_regex": "eth10[1-4]",
+                "dry_run": True,
+            },
+        )
 
-    # query connections matching an interface regex
-    result = client.run_job(
-        "netbox",
-        "get_connections",
-        workers="any",
-        kwargs={
-            "devices": ["fceos4"],
-            "interface_regex": "eth10[1-4]",
-        },
-    )
-
-    # return raw GraphQL query result
-    result = client.run_job(
-        "netbox",
-        "get_connections",
-        workers="any",
-        kwargs={
-            "devices": ["fceos4"],
-            "dry_run": True,
-        },
-    )
-
-    # query a specific NetBox instance
-    result = client.run_job(
-        "netbox",
-        "get_connections",
-        workers="any",
-        kwargs={
-            "devices": ["fceos4"],
-            "instance": "lab",
-        },
-    )
-
-    nf.destroy()
+        instance_result = client.run_job(
+            "netbox",
+            "get_connections",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4"],
+                "instance": "lab",
+            },
+        )
+    finally:
+        nf.destroy()
     ```
 
 ## NORFAB Netbox Get Connections Command Shell Reference

@@ -18,7 +18,19 @@ The `deploy` task provides the following features:
 - **Node Filtering**: Allows deploying specific nodes using a filter.
 - **Timeouts**: Configurable timeout for the deployment process.
 
-## Containerlab Deploy Task Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `topology` | Yes | URL to the topology file to deploy |
+| `reconfigure` | No | Destroy and redeploy an existing lab |
+| `node_filter` | No | Comma-separated node names to deploy |
+
+## Output
+
+Returns Containerlab deployment details, including container information for the deployed lab.
+
+## Examples
 
 Containerlab topology file content used in examples:
 
@@ -76,7 +88,7 @@ Below is an example of how to use the Containerlab deploy task to deploy a topol
 
     === "CLI"
 
-        ```
+        ```bash
         nf# containerlab
         nf[containerlab]#deploy topology nf://containerlab/three-routers-topology.yaml
         --------------------------------------------- Job Events -----------------------------------------------
@@ -183,29 +195,53 @@ Below is an example of how to use the Containerlab deploy task to deploy a topol
 
     === "Python"
 
-        This code is complete and can run as is.
+        Context manager:
 
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-
+        with NorFab(inventory="./inventory.yaml") as nf:
             client = nf.make_client()
 
-            res = client.run_job(
+            result = client.run_job(
                 service="containerlab",
                 task="deploy",
+                workers="any",
                 kwargs={
                     "topology": "nf://containerlab/three-routers-topology.yaml",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle with reconfigure and node filter:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="deploy",
+                workers="any",
+                kwargs={
+                    "topology": "nf://containerlab/three-routers-topology.yaml",
+                    "reconfigure": True,
+                    "node_filter": "r1,r2",
                 }
             )
 
-            pprint.pprint(res)
-
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -221,8 +257,8 @@ The `deploy` task allows you to deploy specific nodes in a topology using the `n
 
 Below are the commands supported by the `deploy` task:
 
-```
-nf#man tree containerlab.deploy
+```bash
+nf# man tree containerlab.deploy
 root
 └── containerlab:    Containerlab service
     └── deploy:    Spins up a lab using provided topology

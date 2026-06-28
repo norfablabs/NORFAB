@@ -7,23 +7,117 @@ tags:
 
 > task api name: `runtime_inventory`
 
-The Nornir Service `runtime_inventory` task designed to work with Nornir inventory content at a runtime. This task uses nornir-salt `InventoryFun` functions to create, read, update or delete hosts.
+The Nornir service `runtime_inventory` task works with Nornir inventory content at runtime. It uses nornir-salt `InventoryFun` functions to create, read, update, delete, and load hosts without restarting the worker.
 
-## Sample Usage
+## Inputs
 
-Sample NorFab client call to invoke inventory host creation:
+| Parameter | Required | Description |
+|---|---:|---|
+| `action` | Yes | Inventory action to perform. |
+| `name` | Required for host actions | Host name to create, read, update, or delete. |
+| `hostname` | No | Hostname or IP address used for connections. |
+| `platform` | No | Host platform used by connection plugins. |
+| `username`, `password`, `port` | No | Host connection parameters. |
+| `groups` | No | Groups associated with the host. |
+| `data` | No | Arbitrary host data. |
+| `connection_options` | No | Nornir connection options. |
+| `workers` | No | Nornir workers to target. |
 
-``` python
-result = nfclient.run_job(
-    "nornir",
-    "runtime_inventory",
-    workers=["nornir-worker-1"],
-    kwargs={
-        "action": "create_host",
-        "name": "foobar"
-    },
-)
-```
+## Output
+
+The task returns action-specific inventory data. Create, update, delete, and load actions commonly return booleans or per-host status. Read actions return inventory content.
+
+## Examples
+
+!!! example
+
+    === "CLI"
+
+        Create a runtime host:
+
+        ```bash
+        nf# nornir inventory create-host name foobar hostname 192.0.2.10 platform arista_eos username admin password admin
+        ```
+
+        Read runtime host inventory:
+
+        ```bash
+        nf# nornir inventory read-host name foobar
+        ```
+
+        Load hosts from a Containerlab lab into a Nornir worker:
+
+        ```bash
+        nf# nornir inventory load containerlab clab-workers containerlab-worker-1 workers nornir-worker-1 lab-name three-routers-lab
+        ```
+
+    === "Python"
+
+        Context manager - create and read a runtime host:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            create_result = client.run_job(
+                service="nornir",
+                task="runtime_inventory",
+                workers=["nornir-worker-1"],
+                kwargs={
+                    "action": "create_host",
+                    "name": "foobar",
+                    "hostname": "192.0.2.10",
+                    "platform": "arista_eos",
+                    "username": "admin",
+                    "password": "admin",
+                },
+            )
+
+            read_result = client.run_job(
+                service="nornir",
+                task="runtime_inventory",
+                workers=["nornir-worker-1"],
+                kwargs={
+                    "action": "read_host",
+                    "name": "foobar",
+                },
+            )
+
+            pprint.pprint(create_result)
+            pprint.pprint(read_result)
+        ```
+
+        Direct lifecycle - load inventory from Containerlab:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="nornir_inventory_load_containerlab",
+                workers=["nornir-worker-1"],
+                kwargs={
+                    "lab_name": "three-routers-lab",
+                    "clab_workers": ["containerlab-worker-1"],
+                    "groups": ["containerlab"],
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 Supported actions are:
 
@@ -39,9 +133,11 @@ Supported actions are:
 - `update_defaults` - non recursively update defaults attributes
 - `load` - load Nornir inventory from external sources
 
-### Create Host Example
+## Notes
 
-```
+### Create Host Output Example
+
+```bash
 nf#nornir inventory create-host name foobar
 --------------------------------------------- Job Events -----------------------------------------------
 15-Feb-2025 11:12:38.908 d42e073070b94d408225af2a880d1d26 job started
@@ -65,8 +161,8 @@ Nornir Service supports loading hosts inventory from running Containerlab labs u
 !!! example
 
     === "CLI"
-    
-        ```
+
+        ```bash
         nf#nornir inventory load containerlab clab-workers containerlab-worker-1 workers nornir-worker-1 lab-name three-routers-lab
         --------------------------------------------- Job Events -----------------------------------------------
         05-May-2025 21:32:07.155 ed210f6c91ac40ada02149118eede2c9 job started
@@ -83,15 +179,13 @@ Nornir Service supports loading hosts inventory from running Containerlab labs u
         ```
 		
     === "Python"
-    
-		This code is complete and can run as is
-		
-        ```
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
         
-        if __name__ == '__main__':
+        if __name__ == "__main__":
             nf = NorFab(inventory="inventory.yaml")
             nf.start()
             
@@ -104,7 +198,6 @@ Nornir Service supports loading hosts inventory from running Containerlab labs u
                 kwargs={
                     "lab_name": "three-routers-lab",
                     "clab_workers": ["containerlab-worker-1"],
-                    "lab_name": "three-routers-lab"
                 }
             )
             
@@ -117,8 +210,8 @@ Nornir Service supports loading hosts inventory from running Containerlab labs u
 
 NorFab shell supports these command options for Nornir `runtime_inventory` task:
 
-```
-nf#man tree nornir.inventory
+```bash
+nf# man tree nornir.inventory
 root
 └── nornir:    Nornir service
     └── inventory:    Work with Nornir inventory

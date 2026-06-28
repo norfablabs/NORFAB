@@ -16,7 +16,17 @@ The `destroy_lab` task provides the following features:
 - **Lab Cleanup**: Removes all containers, networks, and other resources associated with the specified lab.
 - **Error Handling**: Provides detailed error messages if the lab cannot be found or destroyed.
 
-## Containerlab Destroy Task Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `lab_name` | No | Lab name to destroy |
+
+## Output
+
+Returns a per-lab boolean result indicating whether the lab was destroyed.
+
+## Examples
 
 Below is an example of how to use the Containerlab destroy task to clean up a lab.
 
@@ -28,7 +38,7 @@ Below is an example of how to use the Containerlab destroy task to clean up a la
 
     === "CLI"
 
-        ```
+        ```bash
         nf#containerlab destroy lab-name three-routers-lab
         --------------------------------------------- Job Events -----------------------------------------------
         05-May-2025 20:45:48.745 831d3d485489476c98159f8d4dbf7ec2 job started
@@ -53,27 +63,51 @@ Below is an example of how to use the Containerlab destroy task to clean up a la
 
     === "Python"
 
+        Context manager:
+
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-
+        with NorFab(inventory="./inventory.yaml") as nf:
             client = nf.make_client()
 
-            res = client.run_job(
+            result = client.run_job(
                 service="containerlab",
                 task="destroy_lab",
+                workers="any",
                 kwargs={
                     "lab_name": "three-routers-lab",
-                }
+                },
             )
 
-            pprint.pprint(res)
+            pprint.pprint(result)
+        ```
 
+        Direct lifecycle:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="destroy_lab",
+                workers="any",
+                kwargs={
+                    "lab_name": "three-routers-lab",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -81,8 +115,8 @@ Below is an example of how to use the Containerlab destroy task to clean up a la
 
 Below are the commands supported by the `destroy_lab` task:
 
-```
-nf#man tree containerlab.destroy
+```bash
+nf# man tree containerlab.destroy
 root
 └── containerlab:    Containerlab service
     └── destroy:    The destroy command destroys a lab referenced by its name

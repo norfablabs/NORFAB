@@ -1,6 +1,6 @@
 # Netbox Worker Inventory
 
-Content of `inventory.yaml` need to be updated to include Netbox worker details:
+Update `inventory.yaml` to include NetBox worker details:
 
 ``` yaml title="inventory.yaml"
 broker: 
@@ -55,7 +55,7 @@ instances:
 
 | Parameter | Default | Description |
 | --- | --- | --- |
-| `service` | `netbox` | Worker service type. Must be set to `netbox` for Netbox workers. |
+| `service` | `netbox` | Worker service type. Must be set to `netbox` for NetBox workers. |
 | `cache_use` | `True` | Controls whether Netbox query results are cached. Supports `True`, `False`, `refresh`, and `force`. |
 | `cache_ttl` | `31557600` | Cache entry TTL in seconds. Default is one year. |
 | `netbox_connect_timeout` | `10` | Netbox API connection timeout in seconds. |
@@ -64,13 +64,13 @@ instances:
 | `netbox_retry_backoff` | `0.5` | Retry backoff factor for Netbox API requests. |
 | `branch_create_timeout` | `120` | Maximum wait time in seconds for a Netbox branching plugin branch to become ready. |
 | `grapqhl_max_workers` | `4` | Maximum number of parallel workers used by paginated Netbox GraphQL queries. |
-| `instances` | required | Mapping of Netbox instance names to connection parameters. At least one instance is required. |
+| `instances` | required | Mapping of NetBox instance names to connection parameters. At least one instance is required. |
 
 ## Netbox Instance Parameters
 
 | Parameter | Default | Description |
 | --- | --- | --- |
-| `default` | `False` | Marks this instance as the default Netbox instance. If no instance has `default: True`, the last configured instance is used. |
-| `url` | required | Base URL for the Netbox instance. Trailing slashes are removed automatically. |
+| `default` | `False` | Marks this instance as the default NetBox instance. If no instance has `default: True`, the last configured instance is used. |
+| `url` | required | Base URL for the NetBox instance. Trailing slashes are removed automatically. |
 | `token` | required | Netbox API token used for REST, GraphQL, and `pynetbox` requests. |
 | `ssl_verify` | `True` | Controls TLS certificate verification. Set to `False` for lab systems with self-signed certificates. |

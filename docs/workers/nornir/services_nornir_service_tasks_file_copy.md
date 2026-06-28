@@ -7,16 +7,107 @@ tags:
 
 > task api name: `file_copy`
 
-The Nornir Service File Copy Task is a component of NorFab's Nornir service, designed to facilitate the transfer of files to and from network devices. This task provides network engineers with a reliable and efficient method for managing device configurations, firmware updates, and other critical files. By leveraging the capabilities of the Nornir service, users can automate file transfers.
+The Nornir service `file_copy` task transfers files to or from network devices. It is commonly used for configuration backups, file staging, image transfers, and other operational file movement workflows. The task currently exposes file transfer through the Netmiko plugin.
 
-## Nornir File Copy Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `source_file` | Yes | Local source file path on the worker. |
+| `plugin` | No | File transfer plugin parameters. Use `{"netmiko": {...}}` for Netmiko options. |
+| `dry_run` | No | Return the planned operation without copying files. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `add_details` | No | Include detailed Nornir task metadata in the result. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+The task returns per-host file transfer results. With `dry_run=True`, the result shows what would be copied without performing the transfer.
+
+## Examples
+
+!!! example
+
+    === "CLI"
+
+        Copy a file to devices whose hostnames contain `spine`:
+
+        ```bash
+        nf# nornir file-copy source-file ./files/startup.cfg FC spine plugin netmiko destination-file startup.cfg file-system flash:
+        ```
+
+        Preview the copy operation without transferring the file:
+
+        ```bash
+        nf# nornir file-copy source-file ./files/startup.cfg FC spine dry-run
+        ```
+
+    === "Python"
+
+        Context manager - copy a file with Netmiko:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="file_copy",
+                kwargs={
+                    "source_file": "./files/startup.cfg",
+                    "FC": "spine",
+                    "plugin": {
+                        "netmiko": {
+                            "destination_file": "startup.cfg",
+                            "file_system": "flash:",
+                            "direction": "put",
+                            "overwrite_file": True,
+                            "verify_file": True,
+                        }
+                    },
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - dry run before copying:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="file_copy",
+                kwargs={
+                    "source_file": "./files/startup.cfg",
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## NORFAB Nornir File Copy Shell Reference
 
 NorFab shell supports these command options for Nornir `file-copy` task:
 
-```
-nf#man tree nornir.file_copy
+```bash
+nf# man tree nornir.file_copy
 root
 └── nornir:    Nornir service
     └── file-copy:    Copy files to/from devices

@@ -7,52 +7,151 @@ tags:
 
 > task api name: `check_device_sync`
 
-The `check_device_sync` task performs a read-only sync-check against live devices and reports
-whether the data stored in NetBox is in sync with the actual device state. It does this by
-calling four existing sync sub-tasks in `dry_run=True` mode:
+Checks whether NetBox data is in sync with live device state without writing to NetBox. The task runs selected sync tasks in `dry_run=True` mode and returns a per-device summary plus detailed dry-run diffs.
+
+## How It Works
+
+`check_device_sync` can run these read-only sub-checks:
 
 - **interfaces** — calls `sync_device_interfaces(dry_run=True)`
 - **mac_addresses** — calls `sync_mac_addresses(dry_run=True)`
 - **ip_addresses** — calls `sync_device_ip(dry_run=True)`
 - **bgp_peerings** — calls `sync_bgp_peerings(dry_run=True)`
 
-No data is written to NetBox. Each sub-check can be individually enabled or disabled.
+Each sub-check can be enabled or disabled independently.
 
-## Result Format
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `devices` | No | NetBox device names to check |
+| `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name to read from |
+| `timeout` | No | Timeout in seconds for Nornir parse jobs |
+| `check_interfaces` | No | Check interface sync state, default `True` |
+| `check_mac_addresses` | No | Check MAC address sync state, default `True` |
+| `check_ip_addresses` | No | Check IP address sync state, default `True` |
+| `check_bgp_peerings` | No | Check BGP peering sync state, default `True` |
+| Nornir filters | No | Host filters such as `FL`, `FB`, `FG`, `FC`, or `FN` |
+
+At least one explicit device or Nornir host filter must resolve to a device.
+
+## Output
 
 ```python
 {
-    # per-device summary — one entry per resolved device
     "result": {
         "ceos-spine-1": {
-            "in_sync":       False,
-            "interfaces":    True,
+            "in_sync": False,
+            "interfaces": True,
             "mac_addresses": False,
-            "ip_addresses":  True,
-            "bgp_peerings":  True,
+            "ip_addresses": True,
+            "bgp_peerings": True,
         },
-        ...
     },
-    # per-category dry-run detail — full output from each sub-task
     "diff": {
-        "interfaces":    { ... },   # dry-run result from sync_device_interfaces
-        "mac_addresses": { ... },   # dry-run result from sync_mac_addresses
-        "ip_addresses":  { ... },   # dry-run result from sync_device_ip
-        "bgp_peerings":  { ... },   # dry-run result from sync_bgp_peerings
+        "interfaces": {},
+        "mac_addresses": {},
+        "ip_addresses": {},
+        "bgp_peerings": {},
     },
 }
 ```
 
-A category is considered **in sync** when the corresponding dry-run reports no pending creates,
-updates, or deletes.
+A category is considered in sync when the corresponding dry-run reports no pending creates, updates, or deletes.
 
-## Sample Usage
+## Notes / Gotchas
+
+- No data is written to NetBox.
+- `Result.diff` contains the raw dry-run detail from each enabled sub-task.
+- Device names can be supplied directly or resolved from Nornir filters.
+
+## Examples
+
+=== "CLI"
+
+    Check all sync categories for explicit devices:
+
+    ```bash
+    nf#netbox check-sync devices devices ceos-leaf-1 ceos-leaf-2
+    ```
+
+    Check only interface and IP address sync:
+
+    ```bash
+    nf#netbox check-sync devices devices ceos-leaf-1 check-mac-addresses false check-bgp-peerings false
+    ```
+
+    Resolve devices using a Nornir group filter:
+
+    ```bash
+    nf#netbox check-sync devices FG leafs
+    ```
+
+    Check against a NetBox branch:
+
+    ```bash
+    nf#netbox check-sync devices devices ceos-leaf-1 branch my-branch
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": ["ceos-leaf-1", "ceos-leaf-2"],
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": ["ceos-leaf-1"],
+                "check_mac_addresses": False,
+                "check_bgp_peerings": False,
+            },
+        )
+
+        filtered_result = client.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "FG": "leafs",
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
 
 ## NORFAB Netbox Check Device Sync Command Shell Reference
 
 NorFab shell supports these command options for Netbox `check_device_sync` task:
 
-```
+```bash
 nf# man tree netbox.check-sync.devices
 root
 └── netbox:    Netbox service
@@ -84,4 +183,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.check_device_sync
+::: norfab.workers.netbox_worker.devices_tasks.NetboxDevicesTasks.check_device_sync

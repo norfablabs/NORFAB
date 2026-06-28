@@ -17,14 +17,14 @@ The `inspect_networks` task provides the following features:
 - **Detailed View**: When `details=True`, queries each child process for its host list and enriches the result with process-level metrics from `psutil` (CPU, memory, uptime, thread count).
 - **Selective Query**: Optionally scope the result to a single named network.
 
-## FakeNOS Inspect Networks Task Arguments
+## Inputs
 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `network` | `str` or `None` | `None` | Name of the network to inspect. If `None`, all running networks are returned. |
 | `details` | `bool` | `True` | When `True`, returns full host and process information. When `False`, returns only the list of network names. |
 
-## FakeNOS Inspect Networks Task Return Data
+## Output
 
 ### Detailed mode (`details=True`)
 
@@ -51,12 +51,77 @@ Returns a dict keyed by network name. Each value is a dict with the following fi
 
 Returns a list of strings — one entry per running network name.
 
+## Examples
+
+=== "CLI"
+
+    Show all network details:
+
+    ```bash
+    nf#show fakenos networks details
+    ```
+
+    Show one network:
+
+    ```bash
+    nf#show fakenos networks network lab1 details
+    ```
+
+    Show only running network names:
+
+    ```bash
+    nf#show fakenos networks
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="inspect_networks",
+            workers="any",
+            kwargs={"details": True},
+        )
+        print(result)
+    ```
+
+    Direct lifecycle - inspect one network:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="inspect_networks",
+            workers="any",
+            kwargs={
+                "network": "lab1",
+                "details": True,
+            },
+        )
+        print(result)
+    finally:
+        nf.destroy()
+    ```
+
 ## FakeNOS Inspect Networks Command Shell Reference
 
-NorFab shell supports these command options for Netbox `create_prefix` task:
+NorFab shell supports these command options for FakeNOS `inspect_networks` task:
 
-```
-nf#man tree show.fakenos.networks
+```bash
+nf# man tree show.fakenos.networks
 
 R - required field, M - supports multiline input, D - dynamic key
 

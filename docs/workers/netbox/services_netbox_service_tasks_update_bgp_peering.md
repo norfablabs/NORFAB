@@ -3,13 +3,13 @@ tags:
   - netbox
 ---
 
-# Netbox Update BGP Peering Task
+# NetBox Update BGP Peering Task
 
 > task api name: `update_bgp_peering`
 
 Updates one or many existing BGP sessions in NetBox. Supports single-session mode (`name` plus field kwargs) and bulk mode (`bulk_update` list of dicts). Only non-None fields are updated. Idempotency is enforced via `DeepDiff`: sessions with no effective changes are reported in `in_sync` and no write is performed.
 
-## How it Works
+## How It Works
 
 1. Client submits `update_bgp_peering` request to NetBox worker
 2. NetBox worker validates that the BGP plugin is installed
@@ -28,6 +28,10 @@ Updates one or many existing BGP sessions in NetBox. Supports single-session mod
 ## Branching Support
 
 `update_bgp_peering` is branch-aware. Pass `branch=<name>` to write all changes into a [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching) branch instead of main.
+
+## Output
+
+Normal mode returns updated and in-sync BGP session details. In dry-run mode, the task returns the field-level diff that would be applied without writing to NetBox.
 
 ## Dry Run Mode
 
@@ -81,7 +85,7 @@ result = client.run_job(
     nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 status planned
     ```
 
-    Dry run — preview diff without writing:
+    Dry run - preview diff without writing:
 
     ```
     nf#netbox update bgp-peering name ceos-spine-1_10.0.0.1_10.0.0.2 description "new desc" dry-run
@@ -95,78 +99,76 @@ result = client.run_job(
 
 === "Python"
 
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+                "description": "updated description",
+                "status": "active",
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
     ```python
     from norfab.core.nfapi import NorFab
 
     nf = NorFab(inventory="./inventory.yaml")
-    nf.start()
-    client = nf.make_client()
+    try:
+        nf.start()
+        client = nf.make_client()
 
-    # update a single BGP session
-    result = client.run_job(
-        "netbox",
-        "update_bgp_peering",
-        workers="any",
-        kwargs={
-            "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-            "description": "updated description",
-            "status": "active",
-        },
-    )
+        preview = client.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+                "description": "new description",
+                "dry_run": True,
+            },
+        )
 
-    # dry run — preview diff without writing
-    result = client.run_job(
-        "netbox",
-        "update_bgp_peering",
-        workers="any",
-        kwargs={
-            "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-            "description": "new description",
-            "dry_run": True,
-        },
-    )
-
-    # bulk update
-    result = client.run_job(
-        "netbox",
-        "update_bgp_peering",
-        workers="any",
-        kwargs={
-            "bulk_update": [
-                {
-                    "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-                    "description": "spine-1 session",
-                    "status": "active",
-                },
-                {
-                    "name": "ceos-spine-2_10.0.0.3_10.0.0.4",
-                    "description": "spine-2 session",
-                    "import_policies": ["IMPORT_FROM_LEAF"],
-                },
-            ],
-        },
-    )
-
-    # update into a NetBox branch
-    result = client.run_job(
-        "netbox",
-        "update_bgp_peering",
-        workers="any",
-        kwargs={
-            "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
-            "description": "branch update",
-            "branch": "my-bgp-branch",
-        },
-    )
-
-    nf.destroy()
+        result = client.run_job(
+            "netbox",
+            "update_bgp_peering",
+            workers="any",
+            kwargs={
+                "bulk_update": [
+                    {
+                        "name": "ceos-spine-1_10.0.0.1_10.0.0.2",
+                        "description": "spine-1 session",
+                        "status": "active",
+                    },
+                    {
+                        "name": "ceos-spine-2_10.0.0.3_10.0.0.4",
+                        "description": "spine-2 session",
+                        "import_policies": ["IMPORT_FROM_LEAF"],
+                    },
+                ],
+                "branch": "my-bgp-branch",
+            },
+        )
+    finally:
+        nf.destroy()
     ```
 
-## NORFAB Netbox Update BGP Peering Command Shell Reference
+## NORFAB NetBox Update BGP Peering Command Shell Reference
 
-NorFab shell supports these command options for the Netbox `update_bgp_peering` task:
+NorFab shell supports these command options for the NetBox `update_bgp_peering` task:
 
-```
+```bash
 nf# man tree netbox.update.bgp-peering
 root
 └── netbox:    Netbox service

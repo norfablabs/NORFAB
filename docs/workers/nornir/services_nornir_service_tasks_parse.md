@@ -13,12 +13,130 @@ Three tasks for parsing network device CLI output into structured data:
 - **`parse_ttp`** — collects CLI output and parses it with a [TTP](https://ttp.readthedocs.io) template. Supports inline templates, `ttp://` paths from [ttp_templates](https://ttp-templates.readthedocs.io), `nf://` file paths, and HTTP URLs. Template input definitions drive which commands are collected automatically.
 - **`parse_textfsm`** — collects CLI output and parses it with a [TextFSM](https://github.com/google/textfsm) template. When no template is provided, [NTC-Templates](https://github.com/networktocode/ntc-templates) auto-detection is used based on device platform and command.
 
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `getters` | Yes for `parse_napalm` | NAPALM getter names to run. |
+| `commands` | Yes for `parse_textfsm`; optional for `parse_ttp` | Commands to collect before parsing. |
+| `template` | No | TTP or TextFSM template path or inline template text. |
+| `get` | No | TTP template getter name. |
+| `plugin` | No | CLI collection plugin parameters for Netmiko, Scrapli, or NAPALM. |
+| `structure` | No | TTP result structure. |
+| `enable` | No | Enter enable mode before collecting command output. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+The parse tasks return structured per-host data. The shape depends on the parser: NAPALM returns getter payloads, TTP returns the requested TTP structure, and TextFSM returns parsed records from either a supplied template or NTC-Templates auto-detection.
+
+## Examples
+
+!!! example
+
+    === "CLI"
+
+        Run NAPALM getters:
+
+        ```bash
+        nf# nornir parse napalm getters get_facts get_interfaces FC spine
+        ```
+
+        Parse command output using a TTP template from `ttp_templates`:
+
+        ```bash
+        nf# nornir parse ttp template ttp://platform/arista_eos_show_interfaces.txt FC spine
+        ```
+
+        Parse command output with TextFSM and NTC-Templates auto-detection:
+
+        ```bash
+        nf# nornir parse textfsm commands "show ip interface brief" FC spine
+        ```
+
+    === "Python"
+
+        Context manager - run NAPALM getters:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="parse_napalm",
+                kwargs={
+                    "getters": ["get_facts", "get_interfaces"],
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - parse with TextFSM:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="parse_textfsm",
+                kwargs={
+                    "commands": ["show ip interface brief"],
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
+        Direct lifecycle - parse with TTP:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="parse_ttp",
+                kwargs={
+                    "template": "ttp://platform/arista_eos_show_interfaces.txt",
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## NORFAB Shell Reference
 
 NorFab shell commands for Nornir parse tasks:
 
-```
-nf#man tree nornir.parse
+```bash
+nf# man tree nornir.parse
 
 R - required field, M - supports multiline input, D - dynamic key
 
@@ -168,6 +286,11 @@ nf#
 
 ## Python API Reference
 
+### NAPALM
 ::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse_napalm
+
+### TTP
 ::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse_ttp
+
+### TextFSM
 ::: norfab.workers.nornir_worker.nornir_worker.NornirWorker.parse_textfsm

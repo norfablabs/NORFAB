@@ -21,7 +21,7 @@ The task follows a three-step pipeline:
     - **In sync** — MAC already assigned to the correct interface: no action needed.
     - **Error** — MAC exists in NetBox and is assigned to a *different* interface: report a conflict error without modifying the record.
 
-## Result Structure
+## Output
 
 Both dry-run and live-run return the same structure, keyed by device name:
 

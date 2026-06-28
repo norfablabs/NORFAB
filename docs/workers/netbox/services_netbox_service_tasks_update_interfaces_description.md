@@ -106,7 +106,7 @@ descriptions = {
     nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" interface-regex "Ethernet.*"
     ```
 
-    Dry run — preview changes without writing:
+    Dry run - preview changes without writing:
 
     ```bash
     nf#netbox update interfaces description devices ceos-leaf-1 description-template "{{ remote_device }}:{{ remote_interface }}" dry-run
@@ -126,87 +126,73 @@ descriptions = {
 
 === "Python"
 
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "update_interfaces_description",
+            workers="any",
+            kwargs={
+                "devices": ["ceos-leaf-1", "ceos-leaf-2"],
+                "description_template": "{{ remote_device }}:{{ remote_interface }}",
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
     ```python
     from norfab.core.nfapi import NorFab
 
     nf = NorFab(inventory="./inventory.yaml")
-    nf.start()
-    client = nf.make_client()
+    try:
+        nf.start()
+        client = nf.make_client()
 
-    # update descriptions using a Jinja2 template
-    result = client.run_job(
-        "netbox",
-        "update_interfaces_description",
-        workers="any",
-        kwargs={
-            "devices": ["ceos-leaf-1", "ceos-leaf-2"],
-            "description_template": "{{ remote_device }}:{{ remote_interface }}",
-        },
-    )
-
-    # update only selected interfaces
-    result = client.run_job(
-        "netbox",
-        "update_interfaces_description",
-        workers="any",
-        kwargs={
-            "devices": ["ceos-leaf-1"],
-            "interfaces": ["Ethernet1", "Ethernet2"],
-            "description_template": "{{ remote_device }}:{{ remote_interface }}",
-        },
-    )
-
-    # filter interfaces by regex and use a remote template
-    result = client.run_job(
-        "netbox",
-        "update_interfaces_description",
-        workers="any",
-        kwargs={
-            "devices": ["ceos-leaf-1"],
-            "description_template": "nf://templates/intf_desc.j2",
-            "interface_regex": "Ethernet.*",
-        },
-    )
-
-    # dry run — preview diff without writing
-    result = client.run_job(
-        "netbox",
-        "update_interfaces_description",
-        workers="any",
-        kwargs={
-            "devices": ["ceos-leaf-1"],
-            "description_template": "{{ remote_device }}:{{ remote_interface }}",
-            "dry_run": True,
-        },
-    )
-
-    # static descriptions dict applied to multiple devices
-    result = client.run_job(
-        "netbox",
-        "update_interfaces_description",
-        workers="any",
-        kwargs={
-            "devices": ["ceos-leaf-1", "ceos-leaf-2"],
-            "descriptions": {
-                "Ethernet1": "uplink to spine-1",
-                "Ethernet2": "uplink to spine-2",
+        preview = client.run_job(
+            "netbox",
+            "update_interfaces_description",
+            workers="any",
+            kwargs={
+                "devices": ["ceos-leaf-1"],
+                "interfaces": ["Ethernet1", "Ethernet2"],
+                "description_template": "{{ remote_device }}:{{ remote_interface }}",
+                "dry_run": True,
             },
-        },
-    )
+        )
 
-    # update into a NetBox branch
-    result = client.run_job(
-        "netbox",
-        "update_interfaces_description",
-        workers="any",
-        kwargs={
-            "devices": ["ceos-leaf-1"],
-            "description_template": "{{ remote_device }}:{{ remote_interface }}",
-            "branch": "my-branch",
-        },
-    )
+        static_result = client.run_job(
+            "netbox",
+            "update_interfaces_description",
+            workers="any",
+            kwargs={
+                "devices": ["ceos-leaf-1", "ceos-leaf-2"],
+                "descriptions": {
+                    "Ethernet1": "uplink to spine-1",
+                    "Ethernet2": "uplink to spine-2",
+                },
+                "branch": "my-branch",
+            },
+        )
 
-    nf.destroy()
+        template_result = client.run_job(
+            "netbox",
+            "update_interfaces_description",
+            workers="any",
+            kwargs={
+                "devices": ["ceos-leaf-1"],
+                "description_template": "nf://templates/intf_desc.j2",
+                "interface_regex": "Ethernet.*",
+            },
+        )
+    finally:
+        nf.destroy()
     ```
 
 ## NORFAB Netbox Update Interfaces Description Command Shell Reference

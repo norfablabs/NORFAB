@@ -7,19 +7,19 @@ tags:
 
 > task api name: `deploy_netbox`
 
-Containerlab service `deploy_netbox` task is designed to deploy network topologies using devices data retrieved from Netbox. This task automates the deployment process by fetching nodes and links data from Netbox and constructing the topology file, organizing it into a specific folder structure, and executing the `containerlab deploy` command with the appropriate arguments.
+Containerlab service `deploy_netbox` task deploys network topologies using device data retrieved from NetBox. The task fetches nodes and links from NetBox, builds a Containerlab topology file, organizes it into the worker topology directory, and runs `containerlab deploy` with the requested options.
 
 ## Containerlab Deploy Netbox Task Overview
 
 The `deploy_netbox` task provides the following features:
 
-- **Automated Topology Deployment**: Deploys a topology sourcing nodes and links data from Netbox using either or all of these:
+- **Automated Topology Deployment**: Deploys a topology using nodes and links sourced from NetBox with one of these selection methods:
 
-    - **Netbox Devices List** - use provided device names to construct topology and deploy lab
-    - **Netbox Tenant** - source devices for given tenant and deploy the lab
-    - **Netbox Device Filters** - fetch devices data from Netbox GraphQL API and deploy the lab
+    - **NetBox Devices List** - use provided device names to construct topology and deploy lab
+    - **NetBox Tenant** - source devices for a tenant and deploy the lab
+    - **NetBox Device Filters** - fetch device data from NetBox GraphQL API and deploy the lab
 
-- **Topology Links Sourcing** - links formed using Netbox devices' connections and circuits data.
+- **Topology Links Sourcing** - forms links using NetBox device connections and circuit data.
 - **Reconfiguration**: Supports reconfiguring an already deployed lab.
 - **Node Filtering**: Allows deploying specific nodes using a filter.
 
@@ -27,19 +27,19 @@ The `deploy_netbox` task provides the following features:
 
 ## How It Works
 
-`deploy_netbox` task uses Netbox service [get_containerlab_inventory](../netbox/services_netbox_service_tasks_get_containerlab_inventory.md) task to fetch topology inventory data from Netbox.
+`deploy_netbox` uses the NetBox service [get_containerlab_inventory](../netbox/services_netbox_service_tasks_get_containerlab_inventory.md) task to fetch topology inventory data from NetBox.
 
 ![Containerlab Deploy Netbox](../../images/Containerlab_Service_Deploy_Netbox.jpg)
 
 1. Client submits request to Containerlab service to deploy a lab
 
-2. Containerlab worker sends job request to Netbox service to retrieve topology data for requested devices
+2. Containerlab worker sends a job request to NetBox service to retrieve topology data for requested devices
 
-3. Netbox service fetches data from the Netbox and constructs Containerlab inventory
+3. NetBox service fetches data from NetBox and constructs Containerlab inventory
 
-4. Netbox returns lab inventor data back to Containerlab worker
+4. NetBox returns lab inventory data back to Containerlab worker
 
-5. Containerlab worker deploys lab using topology data provided by Netbox service
+5. Containerlab worker deploys the lab using topology data provided by NetBox service
 
 ## Device Config Context Containerlab Parameters
 
@@ -72,10 +72,29 @@ Containerlab node details can be defined under device configuration context `nor
 ```
 
 - `interfaces_rename`  - is a list of one or more interface renaming instructions, each item must have `find` and `replace` defined, optional `use_regex` flag specifies whether to use regex based pattern substitution.
-- `kind` - uses Netbox device `platform` field value by default
+- `kind` - uses NetBox device `platform` field value by default
 - `image` - uses `image` value if provided, otherwise uses `{kind}:latest`
 
-## Containerlab Deploy Netbox Task Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `lab_name` | No | Lab name to deploy |
+| `devices` | No | NetBox device names to include |
+| `tenant` | No | NetBox tenant name to select devices |
+| `filters` | No | NetBox device filters |
+| `netbox_instance` | No | NetBox instance name to query |
+| `ipv4_subnet` | No | IPv4 management subnet, default `172.100.100.0/24` |
+| `image` | No | Docker image to use for all nodes |
+| `ports` | No | TCP/UDP port range to allocate for nodes |
+| `reconfigure` | No | Destroy and redeploy an existing lab |
+| `dry_run` | No | Fetch and return inventory without deploying |
+
+## Output
+
+Normal mode returns Containerlab deployment details. With `dry_run=True`, the task returns generated topology inventory from NetBox without deploying the lab.
+
+## Examples
 
 Below is an example of how to use the Containerlab deploy Netbox task to deploy a topology.
 
@@ -87,7 +106,7 @@ Below is an example of how to use the Containerlab deploy Netbox task to deploy 
 
     === "CLI"
 
-        ```
+        ```bash
         nf#containerlab deploy-netbox lab-name foobar devices fceos4 fceos5
         --------------------------------------------- Job Events -----------------------------------------------
         31-May-2025 13:02:29.525 9e3b29210e1140f8b3a311e8c4669ca4 job started
@@ -183,35 +202,95 @@ Below is an example of how to use the Containerlab deploy Netbox task to deploy 
 
         - `nfcli` command starts the NorFab Interactive Shell
         - `containerlab` command switches to the Containerlab sub-shell
-        - `deploy_netbox` command instruct Containerlab service to deploy a topology
-        - `devices` specifies list of devices to fetch data and links for from netbox
+        - `deploy-netbox` command instructs Containerlab service to deploy a topology
+        - `devices` specifies the devices to fetch data and links for from NetBox
 
     === "Python"
 
-        This code is complete and can run as is.
+        Context manager - deploy selected devices:
 
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-
+        with NorFab(inventory="./inventory.yaml") as nf:
             client = nf.make_client()
 
-            res = client.run_job(
+            result = client.run_job(
                 service="containerlab",
                 task="deploy_netbox",
+                workers="any",
                 kwargs={
                     "devices": ["fceos4", "fceos5"],
-                    "lab_name": "foobar"
-                }
+                    "lab_name": "foobar",
+                },
             )
 
-            pprint.pprint(res)
+            pprint.pprint(result)
+        ```
 
+        Direct lifecycle - dry run with filters:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="deploy_netbox",
+                workers="any",
+                kwargs={
+                    "lab_name": "leaf-lab",
+                    "filters": {
+                        "role": "leaf",
+                        "site": "lab",
+                        "status": "active",
+                    },
+                    "netbox_instance": "lab",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
+        Direct lifecycle - deploy by tenant and reconfigure:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="deploy_netbox",
+                workers="any",
+                kwargs={
+                    "lab_name": "tenant-lab",
+                    "tenant": "engineering",
+                    "ipv4_subnet": "172.100.120.0/24",
+                    "image": "ceosimage:4.30.0F",
+                    "ports": [12000, 13000],
+                    "reconfigure": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -223,20 +302,20 @@ The `deploy_netbox` task supports reconfiguring an already deployed lab by using
 
 The `deploy_netbox` task allows you to deploy specific nodes in a topology using the `node_filter` argument. This is useful for testing or updating specific parts of a lab without affecting the entire topology.
 
-## NORFAB Containerlab CLI Shell Reference
+## NORFAB Containerlab Deploy NetBox Command Shell Reference
 
 Below are the commands supported by the `deploy_netbox` task:
 
-```
-nf#man tree containerlab.deploy-netbox
+```bash
+nf# man tree containerlab.deploy-netbox
 └── containerlab:    Containerlab service
-    └── deploy-netbox:    Spins up a lab using devices data from Netbox
+    └── deploy-netbox:    Spins up a lab using devices data from NetBox
         ├── timeout:    Job timeout
         ├── workers:    Filter worker to target, default 'any'
         ├── verbose-result:    Control output details, default 'False'
         ├── lab-name:    Lab name to generate lab inventory for
         ├── tenant:    Tenant name to generate lab inventory for
-        ├── filters:    Netbox device filters to generate lab inventory for
+        ├── filters:    NetBox device filters to generate lab inventory for
         │   ├── tenant:    Filter devices by tenants
         │   ├── device-name-contains:    Filter devices by name pattern
         │   ├── model:    Filter devices by models
@@ -248,12 +327,12 @@ nf#man tree containerlab.deploy-netbox
         │   └── tag:    Filter devices by tags
         ├── devices:    List of devices to generate lab inventory for
         ├── progress:    Display progress events, default 'True'
-        ├── netbox-instance:    Name of Netbox instance to pull inventory from
+        ├── netbox-instance:    Name of NetBox instance to pull inventory from
         ├── ipv4-subnet:    IPv4 management subnet to use for lab, default '172.100.100.0/24'
         ├── image:    Docker image to use for all nodes
         ├── ports:    Range of TCP/UDP ports to use for nodes, default '[12000, 13000]'
         ├── reconfigure:    Destroy the lab and then re-deploy it., default 'False'
-        └── dry-run:    Do not deploy, only fetch inventory from Netbox
+        └── dry-run:    Do not deploy, only fetch inventory from NetBox
 nf#
 ```
 

@@ -17,7 +17,18 @@ The `get_nornir_inventory` task provides the following features:
 - **Platform Mapping**: Maps containerlab node kinds to Netmiko SSH platform types.
 - **Default Credentials**: Optionally includes default credentials for containerlab nodes.
 
-## Containerlab Nornir Inventory Task Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `lab_name` | No | Lab name to build inventory for |
+| `groups` | No | Groups to include in generated host inventory |
+
+## Output
+
+Returns a Nornir-compatible inventory dictionary keyed by host name.
+
+## Examples
 
 Below is an example of how to use the Containerlab `get_nornir_inventory` task to generate an inventory.
 
@@ -29,7 +40,7 @@ Below is an example of how to use the Containerlab `get_nornir_inventory` task t
 
     === "CLI"
 
-        ```
+        ```bash
         nf#containerlab get-nornir-inventory lab-name three-routers-lab
         --------------------------------------------- Job Events -----------------------------------------------
         05-May-2025 21:14:09.594 fc13d3b11ad54c2fb2330af20a7ceacd job started
@@ -84,27 +95,52 @@ Below is an example of how to use the Containerlab `get_nornir_inventory` task t
 
     === "Python"
 
+        Context manager:
+
         ```python
         import pprint
 
         from norfab.core.nfapi import NorFab
 
-        if __name__ == '__main__':
-            nf = NorFab(inventory="inventory.yaml")
-            nf.start()
-
+        with NorFab(inventory="./inventory.yaml") as nf:
             client = nf.make_client()
 
-            res = client.run_job(
+            result = client.run_job(
                 service="containerlab",
                 task="get_nornir_inventory",
+                workers="any",
                 kwargs={
                     "lab_name": "three-routers-lab",
-                }
+                    "groups": ["lab", "containerlab"],
+                },
             )
 
-            pprint.pprint(res)
+            pprint.pprint(result)
+        ```
 
+        Direct lifecycle:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="./inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="containerlab",
+                task="get_nornir_inventory",
+                workers="any",
+                kwargs={
+                    "lab_name": "three-routers-lab",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
             nf.destroy()
         ```
 
@@ -112,8 +148,8 @@ Below is an example of how to use the Containerlab `get_nornir_inventory` task t
 
 Below are the commands supported by the `get_nornir_inventory` task:
 
-```
-nf#man tree containerlab.get-nornir-inventory
+```bash
+nf# man tree containerlab.get-nornir-inventory
 root
 └── containerlab:    Containerlab service
     └── get-nornir-inventory:    Get nornir inventory for a given lab

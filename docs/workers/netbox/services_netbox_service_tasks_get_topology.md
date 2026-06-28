@@ -19,33 +19,29 @@ and tags. Links carry interface-level details — interface type, speed, MTU, ca
 and tags. Every physical cable appears **exactly once** in the links list regardless of which
 side of the connection was queried first.
 
-## Get Topology Sample Usage
+## Inputs
 
-### Python API
+| Parameter | Required | Description |
+|---|---:|---|
+| `devices` | Conditional | Device names to include in the topology |
+| `device_contains` | Conditional | Case-insensitive substring to filter device names |
+| `device_regex` | Conditional | Regex pattern to filter device names |
+| `role` | Conditional | Device role slugs to filter by |
+| `platform` | Conditional | Platform slugs to filter by |
+| `manufacturers` | Conditional | Manufacturer slugs to filter by |
+| `status` | Conditional | Device status values to filter by |
+| `sites` | Conditional | Site slugs to filter by |
+| Nornir filters | Conditional | Host filters such as `FL`, `FB`, `FG`, `FC`, or `FN` |
+| `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name to read from |
+| `dry_run` | No | Return query parameters without executing NetBox calls |
+| `timeout` | No | Timeout in seconds for Nornir host resolution |
 
-```python
-from norfab.core.nfapi import NorFab
+At least one NetBox device filter or Nornir host filter is required.
 
-nf = NorFab(inventory="./inventory.yaml")
-nf.start()
-client = nf.make_client()
+## Output
 
-result = client.run_job(
-    "netbox",
-    "get_topology",
-    workers="any",
-    kwargs={"devices": ["spine-1", "leaf-1", "leaf-2"]},
-)
-
-for worker, res in result.items():
-    nodes = res["result"]["nodes"]
-    links = res["result"]["links"]
-    print(f"Nodes: {len(nodes)}, Links: {len(links)}")
-
-nf.destroy()
-```
-
-### Sample Output
+Returns topology data with `nodes` and `links`.
 
 ```json
 {
@@ -61,18 +57,6 @@ nf.destroy()
       "tags": ["core", "production"],
       "manufacturer": "Arista",
       "device_type": "DCS-7050CX3-32S"
-    },
-    {
-      "id": "leaf-1",
-      "name": "leaf-1",
-      "type": "arista_eos",
-      "ip": "10.0.0.2/32",
-      "status": "active",
-      "role": "leaf",
-      "site": "dc-nyc",
-      "tags": ["production"],
-      "manufacturer": "Arista",
-      "device_type": "DCS-7050TX-64"
     }
   ],
   "links": [
@@ -93,22 +77,83 @@ nf.destroy()
 }
 ```
 
-### Fetching Topology for All Devices
+## Examples
 
-Omit the `devices` argument to build a full topology of every device in NetBox:
+=== "CLI"
 
-```python
-result = client.run_job(
-    "netbox",
-    "get_topology",
-    workers="any",
-    kwargs={},
-)
-```
+    Retrieve topology for specific devices:
+
+    ```bash
+    nf#netbox get topology devices spine-1 leaf-1 leaf-2
+    ```
+
+    Filter by name substring:
+
+    ```bash
+    nf#netbox get topology device-contains spine
+    ```
+
+    Filter by role and status:
+
+    ```bash
+    nf#netbox get topology role spine leaf status active
+    ```
+
+    Dry run to inspect query parameters:
+
+    ```bash
+    nf#netbox get topology devices spine-1 leaf-1 dry-run
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={"devices": ["spine-1", "leaf-1", "leaf-2"]},
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "get_topology",
+            workers="any",
+            kwargs={
+                "role": ["spine", "leaf"],
+                "status": ["active"],
+            },
+        )
+
+        for worker, res in result.items():
+            nodes = res["result"]["nodes"]
+            links = res["result"]["links"]
+            print(f"Nodes: {len(nodes)}, Links: {len(links)}")
+
+    finally:
+        nf.destroy()
+    ```
 
 !!! warning
-    Fetching all devices at once can be slow on large NetBox installations. Use the
-    `devices` filter to narrow down the scope when possible.
+    Fetching broad topologies can be slow on large NetBox installations. Use filters to narrow the scope when possible.
 
 ## Filtering Devices
 
@@ -164,11 +209,6 @@ result will contain three nodes (`spine-1`, `leaf-1`, `leaf-2`) and all links be
 Adjacent nodes are fetched in a single additional REST call after the interface connection
 query, so the overhead is minimal regardless of how many extra devices are discovered.
 
-### Dry Run
-
-Pass `dry_run=True` to inspect the REST filter parameters and GraphQL query that would
-be sent to NetBox without executing any network calls:
-
 Pass `dry_run=True` to inspect the REST filter parameters and GraphQL query that would
 be sent to NetBox without executing any network calls:
 
@@ -185,8 +225,8 @@ result = client.run_job(
 
 NorFab shell supports these command options for Netbox `get_topology` task:
 
-```
-nf#man tree netbox.get.topology
+```bash
+nf# man tree netbox.get.topology
 root
 └── netbox:    Netbox service
     └── get:    Query data from Netbox
@@ -196,6 +236,7 @@ root
             ├── verbose-result:    Control output details, default 'False'
             ├── progress:    Display progress events, default 'True'
             ├── instance:    Netbox instance name to target
+            ├── branch:    Branching plugin branch name to use
             ├── dry-run:    Do not commit to database
             ├── devices:    List of device names to build topology for
             ├── device-contains:    Case-insensitive substring filter on device name
@@ -203,46 +244,9 @@ root
             ├── role:    List of device role slugs to filter by
             ├── platform:    List of platform slugs to filter by
             ├── manufacturers:    List of manufacturer slugs to filter by
-            └── status:    List of device status values to filter by
+            ├── status:    List of device status values to filter by
+            └── sites:    List of site slugs to filter by
 nf#
-```
-
-### Shell Usage Examples
-
-Retrieve topology for specific devices:
-
-```
-nf#netbox get topology devices spine-1 leaf-1 leaf-2
-```
-
-Retrieve topology for a single device and pipe through JSON formatter:
-
-```
-nf#netbox get topology devices spine-1 | json
-```
-
-Filter by name substring (returns all matching devices plus their adjacent neighbours):
-
-```
-nf#netbox get topology device-contains spine
-```
-
-Filter by role and status:
-
-```
-nf#netbox get topology role spine leaf status active
-```
-
-Dry run to inspect the query parameters:
-
-```
-nf#netbox get topology devices spine-1 leaf-1 dry-run
-```
-
-Target a specific NetBox instance:
-
-```
-nf#netbox get topology devices spine-1 leaf-1 instance prod
 ```
 
 ## Output Structure Reference
@@ -280,4 +284,4 @@ nf#netbox get topology devices spine-1 leaf-1 instance prod
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_topology
+::: norfab.workers.netbox_worker.topology_tasks.NetboxTopologyTasks.get_topology

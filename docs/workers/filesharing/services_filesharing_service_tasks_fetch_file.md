@@ -7,45 +7,99 @@ tags:
 
 > task api name: `fetch_file`
 
-The `fetch_file` task streams a file from the File Sharing worker to the client in chunks with offset support. This enables efficient downloading of large files with resume capability. The task is typically called through the client helper method `NFPClient.fetch_file()` which handles the streaming protocol, caching, and local file management automatically.
+The `fetch_file` task streams a file from the File Sharing worker to the client in chunks with offset support. In most user code, prefer the client helper method `NFPClient.fetch_file()` because it handles streaming, caching, and local file management.
 
-## Using it from Python
+## Inputs
 
-```python
-from norfab.core.nfapi import NorFab
+| Parameter | Required | Description |
+|---|---:|---|
+| `url` | Yes | File URL to fetch |
+| `chunk_size` | No | Number of bytes to return from the given offset when invoking the task directly |
+| `offset` | No | Byte offset for direct task invocation |
+| `destination` | No | Local destination path when using the CLI/helper |
+| `read` | No | Return file content as text instead of only downloading |
 
-with NorFab(inventory="./inventory.yaml") as nf:
-    client = nf.make_client()
+## Output
 
-    # Download file (recommended way - uses client helper)
-    ret = client.fetch_file(url="nf://filesharing/test_file_1.txt")
-    local_path = ret["content"]
-    print(local_path)
+The client helper returns a dictionary whose `content` value is either the local file path or the file text when `read=True`. Direct task invocation returns a chunk-oriented response intended for the helper protocol.
 
-    # Download and read content as text
-    ret = client.fetch_file(url="nf://filesharing/test_file_1.txt", read=True)
-    print(ret["content"])  # text content
+## Examples
 
-    # Direct task invocation (not recommended - use client helper instead)
-    reply = client.run_job(
-        service="filesharing",
-        task="fetch_file",
-        workers="any",
-        kwargs={
-            "url": "nf://filesharing/test_file_1.txt",
-            "chunk_size": 256000,
-            "offset": 0,
-        },
-    )
-    print(reply)
-```
+=== "CLI"
 
-## Using it from `nfcli`
+    Download a file:
 
-NORFAB CLI exposes File Sharing under the `file` command group.
+    ```bash
+    nf#file copy url nf://filesharing/test_file_1.txt destination ./test_file_1.txt
+    ```
 
-```
-nf#man tree file.copy
+    Print file content:
+
+    ```bash
+    nf#file copy url nf://filesharing/test_file_1.txt read
+    ```
+
+=== "Python"
+
+    Context manager - helper method:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.fetch_file(url="nf://filesharing/test_file_1.txt")
+        local_path = result["content"]
+        print(local_path)
+    ```
+
+    Context manager - read content as text:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.fetch_file(
+            url="nf://filesharing/test_file_1.txt",
+            read=True,
+        )
+        print(result["content"])
+    ```
+
+    Direct lifecycle - direct task invocation:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="filesharing",
+            task="fetch_file",
+            workers="any",
+            kwargs={
+                "url": "nf://filesharing/test_file_1.txt",
+                "chunk_size": 256000,
+                "offset": 0,
+            },
+        )
+        print(result)
+    finally:
+        nf.destroy()
+    ```
+
+## Filesharing Fetch File Command Shell Reference
+
+NorFab shell supports these command options for Filesharing `fetch_file` task:
+
+```bash
+nf# man tree file.copy
 root
 └── file:    File sharing service
     └── copy:    Copy files
@@ -56,6 +110,6 @@ root
 nf#
 ```
 
-## API Reference
+## Python API Reference
 
 ::: norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker.fetch_file

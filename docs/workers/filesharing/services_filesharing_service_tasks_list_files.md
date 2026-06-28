@@ -3,35 +3,84 @@ tags:
   - filesharing
 ---
 
-# Filesharing Service List FIles Task
+# Filesharing Service List Files Task
 
 > task api name: `list_files`
 
-The `list_files` task lists the contents of a directory at the specified URL path in a non-recursive manner. This task returns only the immediate files and subdirectories within the given path, without descending into nested directories. It's useful for browsing the structure of your file sharing repository one level at a time.
+The `list_files` task lists the immediate files and subdirectories under a File Sharing URL. It does not descend into nested directories.
 
-## Using it from Python
+## Inputs
 
-```python
-from norfab.core.nfapi import NorFab
+| Parameter | Required | Description |
+|---|---:|---|
+| `url` | No | Directory URL to list, default `nf://` |
 
-with NorFab(inventory="./inventory.yaml") as nf:
-    client = nf.make_client()
+## Output
 
-    reply = client.run_job(
-        service="filesharing",
-        task="list_files",
-        workers="any",
-        kwargs={"url": "nf://"},
-    )
-    print(reply)
-```
+Returns directory entries for the requested `nf://` URL. Results are worker keyed when called through `client.run_job(...)`.
 
-## Using it from `nfcli`
+## Examples
 
-NORFAB CLI exposes File Sharing under the `file` command group.
+=== "CLI"
 
-```
-nf#man tree file.list
+    List the repository root:
+
+    ```bash
+    nf#file list url nf://
+    ```
+
+    List a subdirectory:
+
+    ```bash
+    nf#file list url nf://templates/
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="filesharing",
+            task="list_files",
+            workers="any",
+            kwargs={"url": "nf://"},
+        )
+        print(result)
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="filesharing",
+            task="list_files",
+            workers="any",
+            kwargs={"url": "nf://templates/"},
+        )
+        print(result)
+    finally:
+        nf.destroy()
+    ```
+
+## Filesharing List Files Command Shell Reference
+
+NorFab shell supports these command options for Filesharing `list_files` task:
+
+```bash
+nf# man tree file.list
 root
 └── file:    File sharing service
     └── list:    List files
@@ -40,6 +89,6 @@ root
 nf#
 ```
 
-## API Reference
+## Python API Reference
 
 ::: norfab.workers.filesharing_worker.filesharing_worker.FileSharingWorker.list_files

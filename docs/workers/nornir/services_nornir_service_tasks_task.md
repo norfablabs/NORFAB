@@ -17,12 +17,27 @@ Key features of the Nornir Service "Task" Task include:
 
 - **Scalability and Reusability**: Custom Nornir tasks can be designed to be scalable and reusable, allowing you to apply the same task logic across different network environments and scenarios. This promotes consistency and efficiency in your network automation workflows, reducing the need for repetitive coding and manual intervention.
 
-## Nornir Tasks Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `plugin` | Yes | Nornir task plugin path. Use `nf://` for a task file stored on the broker or dotted import notation for installed Python modules. |
+| Task-specific kwargs | No | Additional keyword arguments passed directly to the selected task plugin. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `add_details` | No | Include detailed Nornir task metadata in the result. |
+| `to_dict` | No | Return results as a dictionary. Defaults to `True`. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+The task returns serialized Nornir task results per host. The result shape depends on the selected task plugin and whether `add_details` or `to_dict` is enabled.
+
+## Examples
 
 Example of calling Nornir custom task function stored on NORFAB 
 broker under `nornir_tasks/echo.py` file path:
 
-```
+```text
 ├───inventory.yaml
 └───nornir_tasks
     └───echo.py
@@ -31,7 +46,7 @@ broker under `nornir_tasks/echo.py` file path:
 Task `echo.py` takes provided arguments and echoes them back in
 results:
 
-``` echo.py
+```python title="echo.py"
 from nornir.core.task import Result, Task
 
 
@@ -44,7 +59,7 @@ def task(task: Task, **kwargs) -> Result:
 
     === "CLI"
     
-        ```
+        ```bash
 		C:\nf>nfcli
 		Welcome to NorFab Interactive Shell.
 		nf#
@@ -78,9 +93,32 @@ def task(task: Task, **kwargs) -> Result:
 		
     === "Python"
     
-		This code is complete and can run as is
-		
+        Context manager - run a custom task from the broker:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="task",
+                kwargs={
+                    "plugin": "nf://nornir_tasks/echo.py",
+                    "foo": "bar",
+                    "FC": "ceos-spine",
+                },
+            )
+
+            pprint.pprint(result)
         ```
+
+        Direct lifecycle - same task:
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -96,7 +134,7 @@ def task(task: Task, **kwargs) -> Result:
                 task="task",
                 kwargs={
                     "plugin": "nf://nornir_tasks/echo.py",
-					"argument": {"foo": "bar"},
+                    "foo": "bar",
                     "FC": "ceos-spine"    
                 }
             )
@@ -108,13 +146,13 @@ def task(task: Task, **kwargs) -> Result:
 
 		Once executed, above code should produce this output:
 		
-		```
+		```text
 		C:\nf>python nornir_task_docs.py
 		{'nornir-worker-1': {'errors': [],
 							'failed': False,
 							'messages': [],
-							'result': {'ceos-spine-1': {'echo': {'argument': {'foo': 'bar'}}},
-										'ceos-spine-2': {'echo': {'argument': {'foo': 'bar'}}}},
+							'result': {'ceos-spine-1': {'echo': {'foo': 'bar'}},
+										'ceos-spine-2': {'echo': {'foo': 'bar'}}},
 							'task': 'nornir-worker-1:task'}}
 		```
 		
@@ -134,7 +172,7 @@ option to provide further task parameters.
 
     === "CLI"
     
-        ```
+        ```bash
 		C:\nf>nfcli
 		Welcome to NorFab Interactive Shell.
 		nf#
@@ -169,9 +207,9 @@ option to provide further task parameters.
 		
     === "Python"
     
-		This code is complete and can run as is
-		
-        ```
+        Direct lifecycle - run an installed community task:
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -187,7 +225,7 @@ option to provide further task parameters.
                 task="task",
                 kwargs={
                     "plugin": "nornir_netmiko.tasks.netmiko_send_command",
-					"command_string": "show hostname",
+                    "command_string": "show hostname",
                     "FC": "ceos-spine"    
                 }
             )
@@ -203,7 +241,7 @@ option to provide further task parameters.
 		
 		Once executed, above code should produce this output:
 		
-		```
+		```text
 		C:\nf>python nornir_task_module_docs.py
 		{'nornir-worker-1': {'errors': [],
 							'failed': False,
@@ -225,8 +263,8 @@ option to provide further task parameters.
 
 NorFab shell supports these command options for Nornir `task` task:
 
-```
-nf#man tree nornir.task
+```bash
+nf# man tree nornir.task
 root
 └── nornir:    Nornir service
     └── task:    Run Nornir task

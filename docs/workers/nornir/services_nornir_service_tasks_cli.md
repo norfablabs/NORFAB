@@ -15,7 +15,23 @@ and NAPALM libraries to communicate with devices.
 - **Scrapli**: A fast and flexible library for interacting with network devices.
 - **NAPALM**: A library that provides a unified API to interact with different network device operating systems.
 
-## Nornir CLI Sample Usage
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `commands` | Yes | Commands to run on target devices. |
+| `plugin` | No | CLI collection plugin parameters for Netmiko, Scrapli, or NAPALM. |
+| `enable` | No | Enter enable mode before running commands. |
+| `workers` | No | Nornir workers to target. Defaults to all workers. |
+| `add_details` | No | Include detailed Nornir task metadata in the result. |
+| `tf`, `diff`, `diff_last` | No | Save task results to worker files or compare with previous saved results. |
+| `FC`, `FB`, `FH`, `FL`, `FM`, `FG`, `FR`, `FO`, `FP`, `FX`, `FN`, `hosts` | No | Host filters. |
+
+## Output
+
+The task returns per-host command output keyed by command. With `add_details=True`, the result can include Nornir task metadata such as failure state, exception text, retry counters, and plugin-specific details.
+
+## Examples
 
 Below is an example of how to use the Nornir CLI task to retrieve command outputs from devices.
 
@@ -23,7 +39,7 @@ Below is an example of how to use the Nornir CLI task to retrieve command output
 
     === "CLI"
     
-        ```
+        ```bash
 		C:\nf>nfcli
 		Welcome to NorFab Interactive Shell.
 		nf#
@@ -65,9 +81,31 @@ Below is an example of how to use the Nornir CLI task to retrieve command output
 		
     === "Python"
     
-		This code is complete and can run as is
-		
+        Context manager - collect show command output:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show clock", "show hostname"],
+                    "FC": "ceos-spine",
+                },
+            )
+
+            pprint.pprint(result)
         ```
+
+        Direct lifecycle - same task:
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -94,7 +132,7 @@ Below is an example of how to use the Nornir CLI task to retrieve command output
 
 		Once executed, above code should produce this output:
 		
-		```
+		```text
         C:\nf>python nornir_cli.py
         {'nornir-worker-1': {'errors': [],
                              'failed': False,
@@ -134,7 +172,7 @@ To use a specific connection plugin, ensure that your Nornir inventory is proper
 
     === "CLI"
     
-        ```
+        ```bash
 		C:\nf>nfcli
 		Welcome to NorFab Interactive Shell.
         nf#
@@ -239,10 +277,34 @@ To use a specific connection plugin, ensure that your Nornir inventory is proper
 		`inventory.yaml` should be located in same folder where we start nfcli, unless `nfcli -i path_to_inventory.yaml` flag used. Refer to [Getting Started](../../norfab_getting_started.md) section on how to construct  `inventory.yaml` file
 		
     === "Python"
-    
-		This code is complete and can run as is
-		
+
+        Context manager - select Netmiko and enter enable mode:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show clock"],
+                    "FC": "ceos-spine",
+                    "plugin": "netmiko",
+                    "enable": True,
+                },
+            )
+
+            pprint.pprint(result)
         ```
+
+        Direct lifecycle - select a connection plugin:
+
+        ```python
         import pprint
         
         from norfab.core.nfapi import NorFab
@@ -270,7 +332,7 @@ To use a specific connection plugin, ensure that your Nornir inventory is proper
 
 		Once executed, above code should produce this output:
 		
-		```
+		```text
         C:\nf>python nornir_cli.py
         {'nornir-worker-1': {'errors': [],
                              'failed': False,
@@ -296,13 +358,217 @@ To use a specific connection plugin, ensure that your Nornir inventory is proper
 
 NorFab interactive shell supports ``table`` argument  that can be used to format output into text tables. Internally it relies on [tabulate](https://pypi.org/project/tabulate/) module and most of its features are supported.
 
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cli commands "show version" FC spine add-details table brief
+        ```
+
+        Select and sort table columns:
+
+        ```bash
+        nf# nornir cli commands "show version" FC spine add-details table extend headers host name result sortby host
+        ```
+
+    === "Python"
+
+        Context manager - return list output for custom table formatting:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version"],
+                    "FC": "spine",
+                    "add_details": True,
+                    "to_dict": False,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - collect detailed output for external formatting:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version"],
+                    "FC": "spine",
+                    "add_details": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Sourcing Commands From File
 
-Commands can be provided inline in the shell itself, but it is also possible to source commands from text files stored on broker.
+Commands can be provided inline in the shell itself, but it is also possible to source commands from text files stored in the Filesharing service.
+
+!!! example
+
+    === "CLI"
+
+        Run commands stored in a Filesharing service file:
+
+        ```bash
+        nf# nornir cli commands nf://nornir_commands/show_baseline.txt FC spine
+        ```
+
+        Preview commands from the file without sending them to devices:
+
+        ```bash
+        nf# nornir cli commands nf://nornir_commands/show_baseline.txt FC spine dry-run
+        ```
+
+    === "Python"
+
+        Context manager - run commands from a Filesharing service file:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": "nf://nornir_commands/show_baseline.txt",
+                    "FC": "spine",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - dry run commands from a Filesharing service file:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": "nf://nornir_commands/show_baseline.txt",
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Using Jinja2 Templates
 
 Commands can be templated using Jinja2. This allows you to create dynamic commands based on variables defined in your inventory or passed as job data.
+
+!!! example
+
+    === "CLI"
+
+        Render commands with host inventory data:
+
+        ```bash
+        nf# nornir cli commands "show interface {{ host.data.uplink_interface }}" FC spine dry-run
+        ```
+
+        Render commands from a Filesharing service file:
+
+        ```bash
+        nf# nornir cli commands nf://nornir_commands/interface_checks.j2 FC spine job-data '{"interface": "Ethernet1"}' dry-run
+        ```
+
+    === "Python"
+
+        Context manager - render inline Jinja2 commands:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show interface {{ job_data.interface }}"],
+                    "job_data": {"interface": "Ethernet1"},
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - render a command template from a Filesharing service file:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": "nf://nornir_commands/interface_checks.j2",
+                    "job_data": {"interface": "Ethernet1"},
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Templating Commands with Inline Job Data
 
@@ -310,9 +576,134 @@ Templating commands with inline job data allows you to dynamically generate comm
 
 When defining a job, you can include variables directly within the `job_data` argument. These variables can then be referenced within the command strings using Jinja2 templating syntax. The Nornir worker will process these templates, substituting the variables with their corresponding values from the job data.
 
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cli commands "show bgp ipv4 unicast neighbors {{ job_data.peer }} received-routes" FC spine job-data '{"peer": "192.0.2.2"}' dry-run
+        ```
+
+    === "Python"
+
+        Context manager - pass inline job data:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": [
+                        "show bgp ipv4 unicast neighbors {{ job_data.peer }} received-routes"
+                    ],
+                    "job_data": {"peer": "192.0.2.2"},
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - load job data from a Filesharing service file:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": "nf://nornir_commands/bgp_peer_checks.j2",
+                    "job_data": "nf://job_data/bgp_peer.yaml",
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Using Dry Run
 
 The dry run feature allows you to see the commands that would be executed without actually sending them to the devices. This is useful for testing and validation. When set to `True`, the commands will not be sent to the devices, but will be returned as part of the result.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cli commands "show interface {{ job_data.interface }}" FC spine job-data '{"interface": "Ethernet1"}' dry-run
+        ```
+
+    === "Python"
+
+        Context manager - preview rendered commands:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show interface {{ job_data.interface }}"],
+                    "job_data": {"interface": "Ethernet1"},
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - preview command file expansion:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": "nf://nornir_commands/show_baseline.txt",
+                    "FC": "spine",
+                    "dry_run": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Formatting Output Results
 
@@ -325,42 +716,595 @@ You can format the output results using various options provided by the Nornir w
 - `connection_retry` counter to show how many times RetryRunner tried to establish a connection
 - `task_retry` counter to show how many times RetryRunner tried to run this task
 
+!!! example
+
+    === "CLI"
+
+        Include detailed result metadata:
+
+        ```bash
+        nf# nornir cli commands "show version" FC spine add-details
+        ```
+
+        Return a table with selected columns:
+
+        ```bash
+        nf# nornir cli commands "show version" FC spine add-details table extend headers host name result
+        ```
+
+    === "Python"
+
+        Context manager - include detailed metadata:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version"],
+                    "FC": "spine",
+                    "add_details": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - return list-shaped results:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version"],
+                    "FC": "spine",
+                    "add_details": True,
+                    "to_dict": False,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Running Show Commands Multiple Times
 
 You can run show commands multiple times using the `repeat` parameter. This is useful for monitoring changes over time. The `repeat` parameter can be used to run the same command multiple times. You can also specify the interval between each repeat using the `repeat_interval` parameter.
+
+!!! example
+
+    === "CLI"
+
+        Run a command three times and return only the latest result:
+
+        ```bash
+        nf# nornir cli commands "show interfaces counters errors" FC spine plugin netmiko repeat 3 repeat-interval 5 return-last 1
+        ```
+
+    === "Python"
+
+        Context manager - repeat a command with Netmiko:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show interfaces counters errors"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "repeat": 3,
+                    "repeat_interval": 5,
+                    "return_last": 1,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - repeat with Scrapli:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show interfaces counters errors"],
+                    "FC": "spine",
+                    "plugin": "scrapli",
+                    "repeat": 3,
+                    "repeat_interval": 5,
+                    "return_last": 1,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Using Netmiko Promptless Mode
 
 NorFab support proprietary promptless mode that can be used with Netmiko, it can be useful when dealing with devices that do not have a consistent prompt, or default Netmiko output collection functions are not reliable enough. This mode can be enabled by setting the `use_ps` parameter to `True`.
 
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cli commands "show tech-support" FC spine plugin netmiko use-ps use-ps-timeout 120
+        ```
+
+    === "Python"
+
+        Context manager - use promptless mode:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show tech-support"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "use_ps": True,
+                    "timeout": 120,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - combine promptless mode with a stop pattern:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show tech-support"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "use_ps": True,
+                    "timeout": 120,
+                    "stop_pattern": "*END*",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Parsing Commands Output
 
 When using Netmiko plugin the output of commands can be parsed using various parsers such as `textfsm`, `ttp` and `genie`. This allows you to convert the raw output into structured data. 
 
-Using TTP parsing templates supported by all Netmiko, Scrapli and NAPALM connection plugins, to invoke TTP can us `run_ttp` command specifying path to parsing template stored on broker. 
+TTP parsing templates are supported by Netmiko, Scrapli, and NAPALM connection plugins. To invoke TTP, use `run_ttp` with a path to a parsing template stored in the Filesharing service.
+
+!!! example
+
+    === "CLI"
+
+        Parse command output with TextFSM through Netmiko:
+
+        ```bash
+        nf# nornir cli commands "show ip interface brief" FC spine plugin netmiko use-textfsm
+        ```
+
+        Parse output with a TTP template stored in the Filesharing service:
+
+        ```bash
+        nf# nornir cli commands "show lldp neighbors" FC spine run-ttp nf://ttp_templates/lldp_neighbors.ttp
+        ```
+
+    === "Python"
+
+        Context manager - use TextFSM:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show ip interface brief"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "use_textfsm": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - run a TTP parser:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show lldp neighbors"],
+                    "FC": "spine",
+                    "run_ttp": "nf://ttp_templates/lldp_neighbors.ttp",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Filtering Commands Output
 
 The output of commands can be filtered to only include specific information. This can be done using `match` command with containment patterns.
 
+!!! example
+
+    === "CLI"
+
+        Use the shell pipe to keep lines containing `up`:
+
+        ```bash
+        nf# nornir cli commands "show ip interface brief" FC spine | match up
+        ```
+
+        Stop repeated collection when output contains a pattern:
+
+        ```bash
+        nf# nornir cli commands "show bgp summary" FC spine plugin netmiko repeat 10 repeat-interval 5 stop-pattern "*Established*"
+        ```
+
+    === "Python"
+
+        Context manager - stop repeated collection on a pattern:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show bgp summary"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "repeat": 10,
+                    "repeat_interval": 5,
+                    "stop_pattern": "*Established*",
+                    "return_last": 1,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - retrieve output and filter in Python:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show ip interface brief"],
+                    "FC": "spine",
+                },
+            )
+
+            filtered = {
+                worker: {
+                    host: {
+                        command: "\n".join(
+                            line for line in output.splitlines() if "up" in line
+                        )
+                        for command, output in hosts.items()
+                    }
+                    for host, hosts in payload["result"].items()
+                }
+                for worker, payload in result.items()
+            }
+            pprint.pprint(filtered)
+        finally:
+            nf.destroy()
+        ```
+
 ## Sending New Line Character
 
 You can send a new line character as part of the command to devices. This is useful for commands that require a new line to be executed properly. To send new-line character need to include `_br_` into command text.
+
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cli commands "show running-config section router bgp_br_" FC spine plugin netmiko split-lines
+        ```
+
+    === "Python"
+
+        Context manager - split multiline commands with the default `_br_` marker:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show running-config section router bgp_br_"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "split_lines": True,
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - use a custom newline marker:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["terminal length 0__NL__show version"],
+                    "FC": "spine",
+                    "plugin": "netmiko",
+                    "split_lines": True,
+                    "new_line_char": "__NL__",
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## Saving Task Results to Files
 
 The results of tasks can be saved to files for later analysis and record-keeping. This is particularly useful for maintaining logs of command outputs, configuration changes, and other important data. By saving task results to files, you can create a historical record of network operations, which can be invaluable for troubleshooting, auditing, and compliance purposes.
 
+!!! example
+
+    === "CLI"
+
+        ```bash
+        nf# nornir cli commands "show version" "show ip interface brief" FC spine tf pre-change
+        ```
+
+        Skip saving failed host results:
+
+        ```bash
+        nf# nornir cli commands "show version" FC spine tf pre-change tf-skip-failed
+        ```
+
+    === "Python"
+
+        Context manager - save task results to a file group:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version", "show ip interface brief"],
+                    "FC": "spine",
+                    "tf": "pre-change",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - skip failed hosts when saving:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version"],
+                    "FC": "spine",
+                    "tf": "pre-change",
+                    "tf_skip_failed": True,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
+
 ## Using Diff Function to Compare Results
 
 The diff function allows you to compare the results of different task results for same commands. This is useful for identifying changes in configurations or device state, detecting anomalies, and verifying the impact of network modifications. By using the diff function, you can ensure that your network remains consistent and identify any unintended changes that may have occurred.
+
+!!! example
+
+    === "CLI"
+
+        Save a baseline:
+
+        ```bash
+        nf# nornir cli commands "show version" "show ip interface brief" FC spine tf pre-change
+        ```
+
+        Compare current output with the latest saved baseline:
+
+        ```bash
+        nf# nornir cli commands "show version" "show ip interface brief" FC spine diff pre-change diff-last 1
+        ```
+
+    === "Python"
+
+        Context manager - save a baseline:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        with NorFab(inventory="inventory.yaml") as nf:
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version", "show ip interface brief"],
+                    "FC": "spine",
+                    "tf": "pre-change",
+                },
+            )
+
+            pprint.pprint(result)
+        ```
+
+        Direct lifecycle - compare with the latest saved baseline:
+
+        ```python
+        import pprint
+
+        from norfab.core.nfapi import NorFab
+
+        nf = NorFab(inventory="inventory.yaml")
+        try:
+            nf.start()
+            client = nf.make_client()
+
+            result = client.run_job(
+                service="nornir",
+                task="cli",
+                kwargs={
+                    "commands": ["show version", "show ip interface brief"],
+                    "FC": "spine",
+                    "diff": "pre-change",
+                    "diff_last": 1,
+                },
+            )
+
+            pprint.pprint(result)
+        finally:
+            nf.destroy()
+        ```
 
 ## NORFAB Nornir CLI Shell Reference
 
 The NorFab shell provides a comprehensive set of commands for the Nornir `cli` task, allowing you to perform various network utility functions. These commands include options for setting job timeouts, specifying connection parameters, and controlling the execution of CLI commands. The shell reference details the available commands and their descriptions, providing you with the flexibility to tailor the behavior of the tasks to meet your specific network management needs.
 
-```
-nf#man tree nornir.cli
+```bash
+nf# man tree nornir.cli
 root
 └── nornir:    Nornir service
     └── cli:    Send CLI commands to devices

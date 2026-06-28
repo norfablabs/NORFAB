@@ -56,7 +56,7 @@ inventory, interfaces, and BGP peerings.
 The shared `message` argument is used as the NetBox changelog message for both
 inventory and BGP write operations.
 
-## Result Structure
+## Output
 
 The result structure aggregates the outcomes of all five subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox.
 
@@ -104,7 +104,7 @@ When `dry_run=True` the same structure is returned but no changes are written to
 
 ## Examples
 
-=== "NFCLI"
+=== "CLI"
 
     Preview all five sync categories:
 

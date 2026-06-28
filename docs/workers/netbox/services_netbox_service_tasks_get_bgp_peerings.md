@@ -3,11 +3,21 @@ tags:
   - netbox
 ---
 
-# Netbox Get BGP Peerings Task
+# NetBox Get BGP Peerings Task
 
 > task api name: `get_bgp_peerings`
 
-This task integrates with [Netbox BGP Plugin](https://github.com/netbox-community/netbox-bgp) and allows to fetch devices' BGP peerings.
+This task integrates with the [NetBox BGP Plugin](https://github.com/netbox-community/netbox-bgp) and fetches BGP peerings for devices.
+
+## Inputs
+
+| Parameter | Required | Description |
+|---|---:|---|
+| `devices` | Yes | Device names to retrieve BGP peerings for |
+| `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name to read from |
+| `dry_run` | No | Return query content without running it |
+| `cache` | No | Cache usage mode: `True`, `False`, `refresh`, or `force` |
 
 ## How It Works
 
@@ -18,120 +28,111 @@ This task integrates with [Netbox BGP Plugin](https://github.com/netbox-communit
 - Smart caching: Per-device cache key `get_bgp_peerings::<device>` is used. Modes:
   - `True`: Uses cache when up-to-date; performs smart update by comparing `last_updated` and fetching only changed/new sessions.
   - `False`: Bypasses cache entirely and does not write to cache.
-  - `refresh`: Forces re-fetch from NetBox and overwrites cache. 
+  - `refresh`: Forces re-fetch from NetBox and overwrites cache.
   - `force`: Returns cached data if present without freshness checks.
 
-Sample BGP session data retrieved from Netbox:
+## Output
 
-```
-"fceos4": {
-    "fceos4-fceos5-eth105": {
-        "comments": "",
-        "created": "2025-12-31T08:17:39.168208Z",
-        "custom_fields": {},
-        "description": "BGP peering between fceos4 and fceos5 on eth105",
-        "device": {
-            "description": "",
-            "display": "fceos4 (UUID-123451)",
-            "id": 111,
-            "name": "fceos4",
-            "url": "http://192.168.1.210:8000/api/dcim/devices/111/"
+Returns BGP session data keyed by device name and session name:
+
+```python
+{
+    "fceos4": {
+        "fceos4-fceos5-eth105": {
+            "name": "fceos4-fceos5-eth105",
+            "description": "BGP peering between fceos4 and fceos5 on eth105",
+            "status": {"label": "Active", "value": "active"},
+            "local_address": {"address": "10.0.2.1/30"},
+            "remote_address": {"address": "10.0.2.2/30"},
+            "local_as": {"asn": 65100},
+            "remote_as": {"asn": 65101},
+            "peer_group": {"name": "TEST_BGP_PEER_GROUP_1"},
+            "...": "...",
         },
-        "display": "fceos4 (UUID-123451):fceos4-fceos5-eth105",
-        "export_policies": [],
-        "id": 4,
-        "import_policies": [],
-        "last_updated": "2025-12-31T08:17:39.168231Z",
-        "local_address": {
-            "address": "10.0.2.1/30",
-            "description": "",
-            "display": "10.0.2.1/30",
-            "family": {
-                "label": "IPv4",
-                "value": 4
-            },
-            "id": 123,
-            "url": "http://192.168.1.210:8000/api/ipam/ip-addresses/123/"
-        },
-        "local_as": {
-            "asn": 65100,
-            "description": "BGP ASN for fceos4",
-            "display": "AS65100",
-            "id": 3,
-            "url": "http://192.168.1.210:8000/api/ipam/asns/3/"
-        },
-        "name": "fceos4-fceos5-eth105",
-        "peer_group": {
-            "description": "Test BGP peer group 1 for standard peerings",
-            "display": "TEST_BGP_PEER_GROUP_1",
-            "id": 9,
-            "name": "TEST_BGP_PEER_GROUP_1",
-            "url": "http://192.168.1.210:8000/api/plugins/bgp/bgppeergroup/9/"
-        },
-        "prefix_list_in": null,
-        "prefix_list_out": null,
-        "remote_address": {
-            "address": "10.0.2.2/30",
-            "description": "",
-            "display": "10.0.2.2/30",
-            "family": {
-                "label": "IPv4",
-                "value": 4
-            },
-            "id": 124,
-            "url": "http://192.168.1.210:8000/api/ipam/ip-addresses/124/"
-        },
-        "remote_as": {
-            "asn": 65101,
-            "description": "BGP ASN for fceos5",
-            "display": "AS65101",
-            "id": 4,
-            "url": "http://192.168.1.210:8000/api/ipam/asns/4/"
-        },
-        "site": {
-            "description": "",
-            "display": "SALTNORNIR-LAB",
-            "id": 16,
-            "name": "SALTNORNIR-LAB",
-            "slug": "saltnornir-lab",
-            "url": "http://192.168.1.210:8000/api/dcim/sites/16/"
-        },
-        "status": {
-            "label": "Active",
-            "value": "active"
-        },
-        "tags": [],
-        "tenant": {
-            "description": "",
-            "display": "SALTNORNIR",
-            "id": 11,
-            "name": "SALTNORNIR",
-            "slug": "saltnornir",
-            "url": "http://192.168.1.210:8000/api/tenancy/tenants/11/"
-        },
-        "url": "http://192.168.1.210:8000/api/plugins/bgp/bgpsession/4/",
-        "virtualmachine": null
     },
-    "fceos4-fceos5-eth106": {
-
-        ...etc...
+}
 ```
 
-## Gotchas
+## Notes / Gotchas
 
-- Supported and tested Netbox version is 4.4 onwards.
+- Supported and tested NetBox version is 4.4 and later.
 - NetBox BGP plugin required: If missing, the task fails early with an error. Confirm plugin availability and version compatibility.
 - Device name must exist: Unknown devices are skipped with warnings; verify names beforehand or use `get_devices` to inspect inventory.
 - Session key uniqueness: Sessions in the result are keyed by `name`. If session names are not unique per device, later entries overwrite earlier ones.
-- Partial-field queries: Smart update relies on `fields="id,last_updated,name"`. Older Netbox versions may not support `fields`, impacting cache comparison.
+- Partial-field queries: Smart update relies on `fields="id,last_updated,name"`. Older NetBox versions may not support `fields`, which can affect cache comparison.
 - Large datasets: Fetching many devices or sessions may be slow; prefer cache or limit `devices` for interactive runs.
+
+## Examples
+
+=== "CLI"
+
+    Get BGP peerings for devices:
+
+    ```bash
+    nf#netbox get bgp-peerings devices fceos4 fceos5
+    ```
+
+    Refresh cached BGP peering data:
+
+    ```bash
+    nf#netbox get bgp-peerings devices fceos4 cache refresh
+    ```
+
+    Preview query content:
+
+    ```bash
+    nf#netbox get bgp-peerings devices fceos4 dry-run
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4", "fceos5"],
+            },
+        )
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": ["fceos4"],
+                "cache": "refresh",
+            },
+        )
+    finally:
+        nf.destroy()
+    ```
 
 ## NORFAB Netbox Get BGP Peerings Command Shell Reference
 
 NorFab shell supports these command options for Netbox `get_bgp_peerings` task:
 
-```
-nf#man tree netbox.get.bgp_peerings
+```bash
+nf# man tree netbox.get.bgp-peerings
 root
 └── netbox:    Netbox service
     └── get:    Query data from Netbox
@@ -150,4 +151,4 @@ nf#
 
 ## Python API Reference
 
-::: norfab.workers.netbox_worker.netbox_worker.NetboxWorker.get_bgp_peerings
+::: norfab.workers.netbox_worker.bgp_peerings_tasks.NetboxBgpPeeringsTasks.get_bgp_peerings

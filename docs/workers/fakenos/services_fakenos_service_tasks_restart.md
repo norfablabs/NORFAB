@@ -18,26 +18,79 @@ The `restart` task provides the following features:
 - **Immediate Feedback**: Returns the same detailed host and process information as the [start](services_fakenos_service_tasks_start.md) task.
 
 
-## FakeNOS Restart Task Arguments
+## Inputs
 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `network` | `str` | required | Name of the FakeNOS network to restart. The network must already be running. |
 
+## Output
+
+Returns the same detailed host and process information as the [start](services_fakenos_service_tasks_start.md) task for the restarted network.
+
+## Examples
+
+=== "CLI"
+
+    Restart a running network:
+
+    ```bash
+    nf#fakenos restart network lab1
+    ```
+
+=== "Python"
+
+    Context manager:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    with NorFab(inventory="./inventory.yaml") as nf:
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="restart",
+            workers="any",
+            kwargs={"network": "lab1"},
+        )
+        print(result)
+    ```
+
+    Direct lifecycle:
+
+    ```python
+    from norfab.core.nfapi import NorFab
+
+    nf = NorFab(inventory="./inventory.yaml")
+    try:
+        nf.start()
+        client = nf.make_client()
+
+        result = client.run_job(
+            service="fakenos",
+            task="restart",
+            workers="any",
+            kwargs={"network": "lab1"},
+        )
+        print(result)
+    finally:
+        nf.destroy()
+    ```
+
 ## FakeNOS Restart Command Shell Reference
 
-NorFab shell supports these command options for Netbox `create_prefix` task:
+NorFab shell supports these command options for FakeNOS `restart` task:
 
-```
-nf#man tree fakenos.start
+```bash
+nf# man tree fakenos.restart
 
 R - required field, M - supports multiline input, D - dynamic key
 
 root
 └── fakenos:    FakeNOS service
-    └── start:    FakeNOS start command
-        ├── network (R):    FakeNOS network name to start
-        ├── inventory:    Inventory content (dict) or path/URL to an inventory file
+    └── restart:    FakeNOS restart command
+        ├── network (R):    FakeNOS network name to restart
         ├── timeout:    Job timeout
         ├── workers:    Filter workers to target, default 'all'
         ├── verbose-result:    Control output details, default 'False'
