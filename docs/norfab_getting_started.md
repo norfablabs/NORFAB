@@ -115,7 +115,7 @@ nf#? # (1)!
  help      Print help message
  pwd       Print current shell path
  top       Exit to top shell
-nf#show workers # (2)!
+nf#show norfab broker workers # (2)!
  name             service  status  holdtime  keepalives tx/rx  alive (s)
  nornir-worker-1  nornir   alive   12.8      58 / 58           149
 nf#

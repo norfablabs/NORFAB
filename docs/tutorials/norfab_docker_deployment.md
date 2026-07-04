@@ -168,7 +168,7 @@ NorFan interactive shell should start:
 ```
 Welcome to NorFab Interactive Shell.
 
-nf#show broker
+nf#show norfab broker
  status: active
  keepalives:
    interval: 2500
@@ -182,12 +182,12 @@ nf#show broker
  security:
    broker-private-key-file: /etc/norfab/__norfab__/files/broker/private_keys/broker.key_secret
    broker-public-key-file: /etc/norfab/__norfab__/files/broker/public_keys/broker.key
-nf#show workers
+nf#show norfab broker workers
  name             service  status  holdtime  keepalives tx/rx  alive (s) 
  nornir-worker-1  nornir   alive   12.6      835 / 835         2104
 nf#
 ```
 
-Successfully running `show broker` and `show workers` commands is a good indication that everything works well and you did a great job setting up NorFab in a distributed dockerized fashion :smile:.
+Successfully running `show norfab broker` and `show norfab broker workers` commands is a good indication that everything works well and you did a great job setting up NorFab in a distributed dockerized fashion :smile:.
 
 Next steps would be to adjust `inventory.yaml` file on the docker host to configure Nornir Service workers to manage your environment, for further details on how to do it refer to [Nornir Service documentations](../workers/nornir/services_nornir_service.md). Good Luck 🤞

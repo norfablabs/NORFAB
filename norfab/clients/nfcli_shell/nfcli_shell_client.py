@@ -40,7 +40,10 @@ from .norfab_jobs_shell import NorFabJobsShellCommands
 from .nornir import nornir_picle_shell
 from .workers.workers_picle_shell import (
     NorfabWorkersCommands,
-    ShowWorkersModel,
+    ShowWorkersJobsModel,
+    ShowWorkersStatistics,
+    ShowWorkersStatusBrief,
+    ShowWorkersVersion,
 )
 from .workflow import workflow_picle_shell
 
@@ -54,13 +57,25 @@ log = logging.getLogger(__name__)
 
 
 class ShowBrokerModel(BaseModel):
-    version: StrictBool = Field(
-        False,
+    version: Any = Field(
+        None,
         description="Show broker version report",
-        json_schema_extra={"presence": True},
+        json_schema_extra={
+            "outputter": Outputters.outputter_yaml,
+            "absolute_indent": 2,
+            "function": "show_broker_version",
+        },
     )
-    inventory: StrictBool = Field(
-        False, description="Show broker inventory", json_schema_extra={"presence": True}
+    inventory: Any = Field(
+        None,
+        description="Show broker inventory",
+        json_schema_extra={
+            "outputter": Outputters.outputter_yaml,
+            "function": "show_broker_inventory",
+        },
+    )
+    workers: ShowWorkersStatusBrief = Field(
+        None, description="Show workers known to broker"
     )
 
     class PicleConfig:
@@ -70,19 +85,39 @@ class ShowBrokerModel(BaseModel):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        if kwargs.get("version"):
-            reply = NFCLIENT.mmi("mmi.service.broker", "show_broker_version")
-        elif kwargs.get("inventory"):
-            reply = NFCLIENT.mmi("mmi.service.broker", "show_broker_inventory")
-        else:
-            reply = NFCLIENT.mmi("mmi.service.broker", "show_broker")
+        return ShowBrokerModel._run_broker_mmi("show_broker")
+
+    @staticmethod
+    def show_broker_version(**kwargs: object):
+        return ShowBrokerModel._run_broker_mmi("show_broker_version")
+
+    @staticmethod
+    def show_broker_inventory(**kwargs: object):
+        return ShowBrokerModel._run_broker_mmi("show_broker_inventory")
+
+    @staticmethod
+    def _run_broker_mmi(task: str):
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        reply = nfclient.mmi("mmi.service.broker", task)
         if reply["errors"]:
             return "\n".join(reply["errors"])
         else:
             return reply["results"]
 
 
-class ShowCommandsModel(BaseModel):
+class ShowNorfabWorkersModel(BaseModel):
+    jobs: ShowWorkersJobsModel = Field(None, description="Show workers jobs")
+    statistics: ShowWorkersStatistics = Field(
+        None, description="Show workers statistics"
+    )
+    version: ShowWorkersVersion = Field(None, description="Show workers version info")
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
+
+
+class ShowNorfabClientModel(BaseModel):
     version: Any = Field(
         None,
         description="show nfcli client version report",
@@ -91,13 +126,71 @@ class ShowCommandsModel(BaseModel):
     jobs: NorFabJobsShellCommands = Field(
         None, description="Show NorFab Jobs for all services"
     )
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_yaml
+        outputter_kwargs = {"absolute_indent": 2}
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        return {
+            "client-type": "PICLE Shell",
+            "status": "connected",
+            "name": nfclient.name,
+            "zmq-name": nfclient.zmq_name,
+            "broker": {
+                "endpoint": nfclient.broker,
+                "reconnects": nfclient.stats_reconnect_to_broker,
+                "messages-rx": nfclient.stats_recv_from_broker,
+                "messages-tx": nfclient.stats_send_to_broker,
+            },
+            "directories": {
+                "base-dir": nfclient.base_dir,
+                "public-keys-dir": nfclient.public_keys_dir,
+                "private-keys-dir": nfclient.private_keys_dir,
+            },
+            "security": {
+                "client-private-key-file": nfclient.client_private_key_file,
+                "broker-public-key-file": nfclient.broker_public_key_file,
+                "zmq_auth": nfclient.zmq_auth,
+            },
+        }
+
+    @staticmethod
+    def show_version(**kwargs: object):
+        libs = {
+            "norfab": "",
+            "pyyaml": "",
+            "pyzmq": "",
+            "psutil": "",
+            "tornado": "",
+            "jinja2": "",
+            "picle": "",
+            "rich": "",
+            "tabulate": "",
+            "pydantic": "",
+            "pyreadline3": "",
+            "python": sys.version.split(" ")[0],
+            "platform": sys.platform,
+        }
+        # get version of packages installed
+        for pkg in libs.keys():
+            try:
+                libs[pkg] = importlib.metadata.version(pkg)
+            except importlib.metadata.PackageNotFoundError:
+                pass
+
+        return libs
+
+
+class ShowNorfabModel(BaseModel):
     broker: ShowBrokerModel = Field(None, description="show broker details")
-    workers: ShowWorkersModel = Field(None, description="show workers information")
-    client: Any = Field(
-        None,
-        description="Show client details",
-        json_schema_extra={"function": "show_client"},
+    workers: ShowNorfabWorkersModel = Field(
+        None, description="show workers information"
     )
+    client: ShowNorfabClientModel = Field(None, description="Show client details")
     inventory: Any = Field(
         None,
         description="Show NorFab inventory",
@@ -106,6 +199,20 @@ class ShowCommandsModel(BaseModel):
             "function": "show_inventory",
         },
     )
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_yaml
+        outputter_kwargs = {"absolute_indent": 2}
+
+    @staticmethod
+    def show_inventory(**kwargs: object):
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        return nfclient.inventory.dict()
+
+
+class ShowCommandsModel(BaseModel):
+    norfab: ShowNorfabModel = Field(None, description="Show NorFab platform")
     nornir: nornir_picle_shell.NornirShowCommandsModel = Field(
         None, description="Show Nornir service"
     )
@@ -135,61 +242,6 @@ class ShowCommandsModel(BaseModel):
         pipe = PipeFunctionsModel
         outputter = Outputters.outputter_yaml
         outputter_kwargs = {"absolute_indent": 2}
-
-    @staticmethod
-    def show_version():
-        libs = {
-            "norfab": "",
-            "pyyaml": "",
-            "pyzmq": "",
-            "psutil": "",
-            "tornado": "",
-            "jinja2": "",
-            "picle": "",
-            "rich": "",
-            "tabulate": "",
-            "pydantic": "",
-            "pyreadline3": "",
-            "python": sys.version.split(" ")[0],
-            "platform": sys.platform,
-        }
-        # get version of packages installed
-        for pkg in libs.keys():
-            try:
-                libs[pkg] = importlib.metadata.version(pkg)
-            except importlib.metadata.PackageNotFoundError:
-                pass
-
-        return libs
-
-    @staticmethod
-    def show_client():
-        return {
-            "client-type": "PICLE Shell",
-            "status": "connected",
-            "name": NFCLIENT.name,
-            "zmq-name": NFCLIENT.zmq_name,
-            "broker": {
-                "endpoint": NFCLIENT.broker,
-                "reconnects": NFCLIENT.stats_reconnect_to_broker,
-                "messages-rx": NFCLIENT.stats_recv_from_broker,
-                "messages-tx": NFCLIENT.stats_send_to_broker,
-            },
-            "directories": {
-                "base-dir": NFCLIENT.base_dir,
-                "public-keys-dir": NFCLIENT.public_keys_dir,
-                "private-keys-dir": NFCLIENT.private_keys_dir,
-            },
-            "security": {
-                "client-private-key-file": NFCLIENT.client_private_key_file,
-                "broker-public-key-file": NFCLIENT.broker_public_key_file,
-                "zmq_auth": NFCLIENT.zmq_auth,
-            },
-        }
-
-    @staticmethod
-    def show_inventory():
-        return NFCLIENT.inventory.dict()
 
 
 # ---------------------------------------------------------------------------------------------
@@ -375,7 +427,13 @@ class FileServiceCommands(BaseModel):
 # ---------------------------------------------------------------------------------------------
 
 
+class NorfabCommands(BaseModel):
+    configure: NorFabInventory = Field(None, description="Configure NorFab inventory")
+    workers: NorfabWorkersCommands = Field(None, description="NorFab workers commands")
+
+
 class NorFabShell(BaseModel):
+    norfab: NorfabCommands = Field(None, description="NorFab platform commands")
     show: ShowCommandsModel = Field(None, description="NorFab show commands")
     file: FileServiceCommands = Field(None, description="File sharing service")
     nornir: nornir_picle_shell.NornirServiceCommands = Field(
@@ -405,8 +463,6 @@ class NorFabShell(BaseModel):
     containerlab: containerlab_picle_shell.ContainerlabServiceCommands = Field(
         None, description="Containerlab service"
     )
-    workers: NorfabWorkersCommands = Field(None, description="NorFab workers commands")
-    configure: NorFabInventory = Field(None, description="Configure NorFab inventory")
 
     class PicleConfig:
         subshell = True

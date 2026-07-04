@@ -38,7 +38,7 @@ By default, the MCP endpoint is available at `http://127.0.0.1:8001/mcp`. To
 verify the worker is up and serving tools and prompts:
 
 ```
-nf#show workers
+nf#show norfab broker workers
 nf#show fastmcp status
 ```
 
@@ -118,7 +118,7 @@ Run "show interfaces" on router1.
 
 ## Troubleshooting
 
-If VS Code cannot connect, confirm the FastMCP worker is running (nfcli `show workers`, `show fastmcp status`) and that `.vscode/mcp.json` points at the correct URL.
+If VS Code cannot connect, confirm the FastMCP worker is running (nfcli `show norfab broker workers`, `show fastmcp status`) and that `.vscode/mcp.json` points at the correct URL.
 
 If the agent does not show up, double-check the file ends with `.agent.md`, then restart VS Code.
 

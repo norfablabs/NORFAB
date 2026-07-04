@@ -8,6 +8,15 @@
 
 1. Extended Nornir worker statistics with SID, NetBox, Containerlab inventory load statuses and managed `nornir_hosts` count.
 
+## CHANGES
+
+1. Moved NorFab platform nfcli show commands under `show norfab`, including `show norfab client jobs`, `show norfab broker workers`, and `show norfab workers statistics`.
+2. Moved worker job history commands from `show nornir jobs` to `show norfab workers jobs`.
+3. Moved NFCLI inventory configuration shell from `configure` to `norfab configure`.
+4. Added a `service` filter to `show norfab workers jobs summary` and `show norfab workers jobs details`.
+5. Moved worker utility commands from `workers` to `norfab workers`.
+6. Moved the NFCLI client version report from `show norfab version` to `show norfab client version`.
+
 ---
 
 # 0.20.2

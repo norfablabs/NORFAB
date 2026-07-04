@@ -26,7 +26,6 @@ from .nornir_picle_shell_common import (
 from .nornir_picle_shell_diagram import NornirDiagramShell
 from .nornir_picle_shell_file_copy import NornirFileCopyShell
 from .nornir_picle_shell_inventory import NornirInventoryShell
-from .nornir_picle_shell_jobs import NornirJobsShell
 from .nornir_picle_shell_netconf import NornirNetconfShell
 from .nornir_picle_shell_network import NornirNetworkShell
 from .nornir_picle_shell_parse import NornirParseShell
@@ -201,7 +200,6 @@ class NornirShowCommandsModel(BaseModel):
         None,
         description="show Nornir service version report",
     )
-    jobs: NornirJobsShell = Field(None, description="Show Nornir Jobs")
 
     class PicleConfig:
         outputter = Outputters.outputter_nested

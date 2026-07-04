@@ -126,6 +126,154 @@ class ShowWorkersVersion(ClientRunJobArgs):
         outputter = Outputters.outputter_nested
 
 
+class ListWorkersJobsModel(ClientRunJobArgs):
+    workers: StrictStr = Field("all", description="Workers to return jobs for")
+    service: StrictStr = Field("all", description="Service name to return jobs for")
+    last: StrictInt = Field(
+        10, description="Return last N completed and last N pending jobs, default is 10"
+    )
+    pending: StrictBool = Field(
+        True, description="Return pending jobs", json_schema_extra={"presence": True}
+    )
+    completed: StrictBool = Field(
+        True, description="Return completed jobs", json_schema_extra={"presence": True}
+    )
+    client: StrictStr = Field(None, description="Client name to return jobs for")
+    uuid: StrictStr = Field(None, description="Job UUID to return")
+    task: StrictStr = Field(None, description="Task name to return jobs for")
+
+    @staticmethod
+    def source_client() -> list:
+        return ["self"]
+
+    @staticmethod
+    def source_service() -> list:
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        services = sorted({i["service"] for i in reply["results"]})
+
+        return ["all"] + services
+
+    @staticmethod
+    def source_workers() -> list:
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        NFCLIENT = builtins.NFCLIENT
+        workers = kwargs.pop("workers", "all")
+        service = kwargs.pop("service", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+
+        if kwargs.get("client") == "self":
+            kwargs["client"] = NFCLIENT.zmq_name
+
+        result = run_future_job(
+            service,
+            "job_list",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+            nowait=nowait,
+        )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        result = log_error_or_result(result, verbose_result=verbose_result)
+
+        ret = []
+        for worker_results in result.values():
+            ret.extend(worker_results)
+
+        return ret
+
+    class PicleConfig:
+        outputter = Outputters.outputter_rich_table
+
+
+class WorkersJobDetailsModel(ClientRunJobArgs):
+    uuid: StrictStr = Field(..., description="Job UUID")
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        "all", description="Workers to return jobs for"
+    )
+    service: StrictStr = Field("all", description="Service name to return jobs for")
+    result: StrictBool = Field(
+        True, description="Return job result", json_schema_extra={"presence": True}
+    )
+    events: StrictBool = Field(
+        True, description="Return job events", json_schema_extra={"presence": True}
+    )
+
+    @staticmethod
+    def source_service() -> list:
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        services = sorted({i["service"] for i in reply["results"]})
+
+        return ["all"] + services
+
+    @staticmethod
+    def source_workers() -> list:
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        workers = kwargs.pop("workers", "all")
+        service = kwargs.pop("service", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+
+        result = run_future_job(
+            service,
+            "job_details",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+            nowait=nowait,
+        )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        result = log_error_or_result(result, verbose_result=verbose_result)
+
+        return result
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
+
+
+class ShowWorkersJobsModel(BaseModel):
+    summary: ListWorkersJobsModel = Field(None, description="List jobs")
+    details: WorkersJobDetailsModel = Field(None, description="Show job details")
+
+    class PicleConfig:
+        pass
+
+
 class ShowWorkersModel(BaseModel):
     brief: ShowWorkersStatusBrief = Field(None, description="Show workers brief info")
     statistics: ShowWorkersStatistics = Field(
