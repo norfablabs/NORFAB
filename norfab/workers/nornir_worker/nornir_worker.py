@@ -120,9 +120,9 @@ class WatchDog(WorkerWatchDog):
             "dead_connections_cleaned": self.dead_connections_cleaned,
             "idle_connections_cleaned": self.idle_connections_cleaned,
             "worker_ram_usage_mbyte": self.get_ram_usage(),
-            "nornir_hosts": len(self.worker.nr.inventory.hosts)
-            if self.worker.nr
-            else 0,
+            "nornir_hosts": (
+                len(self.worker.nr.inventory.hosts) if self.worker.nr else 0
+            ),
             "sid_inventory_status": self.worker.status.get("sid_inventory_status"),
             "netbox_inventory_status": self.worker.status.get(
                 "netbox_inventory_status"

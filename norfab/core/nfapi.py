@@ -385,7 +385,11 @@ class NorFab:
                             raise RuntimeError(f"Dependent process is dead '{w}'")
                 # check if all depended process fully initialized
                 if not all(
-                    self.workers_processes[w]["init_done"].is_set() if w in self.workers_processes else False
+                    (
+                        self.workers_processes[w]["init_done"].is_set()
+                        if w in self.workers_processes
+                        else False
+                    )
                     for w in worker_data["depends_on"]
                 ):
                     return

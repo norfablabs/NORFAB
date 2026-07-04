@@ -268,11 +268,10 @@ class NetboxTopologyTasks:
                 else ""
             )
         )
-        all_nb_devices = list(
-            nb.dcim.devices.filter(
-                **device_filter_params,
-                fields="name,platform,primary_ip4,status,role,site,tags,device_type",
-            )
+        all_nb_devices = self.bulk_filter(
+            nb.dcim.devices,
+            **device_filter_params,
+            fields="name,platform,primary_ip4,status,role,site,tags,device_type",
         )
         device_names = set()
         role_slugs: set = set()
@@ -285,7 +284,7 @@ class NetboxTopologyTasks:
         role_colors: Dict[str, str] = {}
         if role_slugs:
             job.event("fetching role colors for {} role(s)".format(len(role_slugs)))
-            for role in nb.dcim.device_roles.filter(slug=list(role_slugs)):
+            for role in self.bulk_filter(nb.dcim.device_roles, slug=list(role_slugs)):
                 role_colors[role.slug] = role.color
 
         for dev in all_nb_devices:
@@ -372,11 +371,10 @@ class NetboxTopologyTasks:
             job.event(
                 f"fetching data for {len(missing_device_names)} additional connected device(s)"
             )
-            extra_nb_devices = list(
-                nb.dcim.devices.filter(
-                    name=list(missing_device_names),
-                    fields="name,platform,primary_ip4,status,role,site,tags,device_type",
-                )
+            extra_nb_devices = self.bulk_filter(
+                nb.dcim.devices,
+                name=list(missing_device_names),
+                fields="name,platform,primary_ip4,status,role,site,tags,device_type",
             )
             extra_role_slugs = {
                 dev.role.slug
@@ -384,7 +382,9 @@ class NetboxTopologyTasks:
                 if dev.role and dev.role.slug not in role_colors
             }
             if extra_role_slugs:
-                for role in nb.dcim.device_roles.filter(slug=list(extra_role_slugs)):
+                for role in self.bulk_filter(
+                    nb.dcim.device_roles, slug=list(extra_role_slugs)
+                ):
                     role_colors[role.slug] = role.color
             for dev in extra_nb_devices:
                 device_names.add(dev.name)

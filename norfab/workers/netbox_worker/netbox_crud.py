@@ -1,4 +1,3 @@
-import itertools
 import logging
 import re
 from typing import Any, Dict, Union
@@ -261,7 +260,7 @@ class NetboxCrudTasks:
                 elif fields:
                     params["fields"] = ",".join(fields)
 
-                found = list(itertools.islice(accessor.filter(**params), limit))
+                found = self.bulk_filter(accessor, **params)[:limit]
                 ret.result[object_type] = [dict(obj) for obj in found]
             except Exception as exc:
                 log.warning(
@@ -353,19 +352,19 @@ class NetboxCrudTasks:
                 results = [dict(obj)] if obj else []
             else:
                 job.event(f"retrieving {object_type} by ID(s)")
-                found = list(accessor.filter(id=list(object_id), **params))
+                found = self.bulk_filter(accessor, id=list(object_id), **params)
                 results = [dict(o) for o in found]
         elif filters is not None:
             if isinstance(filters, dict):
                 job.event(f"retrieving {object_type} with 1 filter(s)")
-                found = list(accessor.filter(**filters, **params))
+                found = self.bulk_filter(accessor, **filters, **params)
                 results = [dict(o) for o in found]
             else:
                 # list of dicts — run one filter per dict and merge
                 job.event(f"retrieving {object_type} with {len(filters)} filter(s)")
                 seen_ids: set = set()
                 for flt in filters:
-                    for obj in accessor.filter(**flt, **params):
+                    for obj in self.bulk_filter(accessor, **flt, **params):
                         obj_dict = dict(obj)
                         obj_id_ = obj_dict.get("id")
                         if obj_id_ not in seen_ids:
@@ -373,7 +372,7 @@ class NetboxCrudTasks:
                             results.append(obj_dict)
         else:
             job.event(f"retrieving {object_type} with 0 filter(s)")
-            found = list(accessor.filter(**params))
+            found = self.bulk_filter(accessor, **params)
             results = [dict(o) for o in found]
 
         job.event(f"retrieved {len(results)} total objects")
@@ -746,9 +745,9 @@ class NetboxCrudTasks:
                 params.update(filters)
             try:
                 # NetBox 4.0+: ObjectChange moved from extras to core
-                found = list(nb.core.object_changes.filter(**params))
+                found = self.bulk_filter(nb.core.object_changes, **params)
             except Exception:
-                found = list(nb.extras.object_changes.filter(**params))
+                found = self.bulk_filter(nb.extras.object_changes, **params)
             results = [dict(obj) for obj in found]
         else:
             # list of filter dicts — run multiple queries
@@ -756,9 +755,11 @@ class NetboxCrudTasks:
             for flt in filters:
                 params = {**base_params, **flt}
                 try:
-                    changelog_iter = nb.core.object_changes.filter(**params)
+                    changelog_iter = self.bulk_filter(nb.core.object_changes, **params)
                 except Exception:
-                    changelog_iter = nb.extras.object_changes.filter(**params)
+                    changelog_iter = self.bulk_filter(
+                        nb.extras.object_changes, **params
+                    )
                 for obj in changelog_iter:
                     obj_dict = dict(obj)
                     oid = obj_dict.get("id")

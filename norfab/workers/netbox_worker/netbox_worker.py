@@ -739,51 +739,129 @@ class NetboxWorker(
     def bulk_filter(
         self,
         endpoint: object,
-        filter_by_key: str,
-        filter_by_values: list,
+        chunk_by: Union[None, str] = None,
         chunk_size: int = 4000,
+        fields: Any = None,
+        limit: Any = None,
+        offset: Any = None,
+        ordering: Any = None,
+        brief: Any = None,
+        exclude: Any = None,
+        q: Any = None,
         **kwargs,
     ) -> list:
         """
-        Netbox REST API chokes when using list as a filter and it contains too many items in it.
+        Chunk pynetbox filter requests to avoid hitting URI length limits.
 
-        This helper function chunks filtering requests to avoid hitting 414 (Request-URI Too Long) error.
-        Uses an adaptive mechanism: ``chunk_size`` is the maximum allowed URI length in characters
-        (default 4000, matching common gunicorn/nginx/apache request-line buffer limits of 4094). The function
-        measures the base URI cost from ``kwargs`` plus 50 characters for the endpoint path, then
-        dynamically determines how many items from ``filter_by_values`` fit in each request.
+        Netbox REST API list filters are encoded as URI query parameters. This helper
+        measures the encoded filter URI and splits a list filter when needed.
+        ``chunk_by`` optionally gives explicit control over which filter to split.
+        If omitted, the longest encoded list filter is split automatically.
 
         Args:
             endpoint: pynetbox endpoint object, e.g. ``nb.ipam.ip_addresses``.
-            filter_by_key: keyword argument name passed to pynetbox ``filter()`` call.
-            filter_by_values: list of values to filter by, split adaptively across requests.
-            chunk_size (bytes): maximum URI character length per request. Defaults to 4000 bytes/characters.
-            kwargs (any): optional additional filter kwargs passed to every ``filter()`` call.
+            chunk_by: optional keyword argument name to chunk first.
+            chunk_size (bytes): maximum URI character length per request.
+                Defaults to 4000 bytes/characters.
+            fields: NetBox sparse fieldset query parameter.
+            limit: pynetbox page size override.
+            offset: pynetbox pagination offset.
+            ordering: NetBox result ordering query parameter.
+            brief: NetBox brief result query parameter.
+            exclude: NetBox exclude query parameter.
+            q: NetBox free-form search query parameter.
+            kwargs (any): filter kwargs passed to ``endpoint.filter()``.
 
         Returns:
             list: All collected pynetbox objects across all chunked requests.
         """
-        ret = []
-        # base URI length: 50 chars for the endpoint path + serialized static kwargs
-        base_length = 0
-        if kwargs:
-            base_length += len(urllib.parse.urlencode(kwargs, doseq=True))
-        # prefix cost per item: "&filter_by_key=<url-encoded-value>"
-        key_prefix_len = len(f"&{filter_by_key}=")
+        endpoint_url = getattr(endpoint, "url", "")
+        request_options = {
+            "fields": fields,
+            "limit": limit,
+            "offset": offset,
+            "ordering": ordering,
+            "brief": brief,
+            "exclude": exclude,
+            "q": q,
+        }
+        request_option_kwargs = {
+            k: v for k, v in request_options.items() if v is not None
+        }
+        request_kwargs = {**kwargs, **request_option_kwargs}
 
+        # Match pynetbox filter encoding closely enough to predict request length:
+        # None becomes "null", and list-like values become repeated query params.
+        def uri_len(params: dict) -> int:
+            encoded_params = {
+                k: v if v is not None else "null" for k, v in params.items()
+            }
+            return (
+                len(endpoint_url)
+                + 1
+                + len(urllib.parse.urlencode(encoded_params, doseq=True))
+            )
+
+        uri_length = uri_len(request_kwargs)
+
+        if uri_length <= chunk_size:
+            return list(endpoint.filter(**request_kwargs))
+
+        # Prefer the caller's explicit chunk key. If it is omitted or cannot be
+        # split, choose the list-like filter contributing the most encoded bytes.
+        # Request options such as fields/limit/ordering are never chunk candidates.
+        if not chunk_by:
+            list_args = {
+                k: len(urllib.parse.urlencode({k: v}, doseq=True))
+                for k, v in kwargs.items()
+                if isinstance(v, (list, tuple, set)) and len(v) > 1
+            }
+            if not list_args:
+                raise ValueError(
+                    f"Unable to bulk filter '{endpoint_url or endpoint}': "
+                    f"encoded URI length {uri_length} exceeds chunk_size {chunk_size} "
+                    "and no list filter can be chunked"
+                )
+            chunk_by = max(list_args, key=list_args.get)
+
+        ret = []
         current_chunk = []
-        current_length = base_length
-        for value in filter_by_values:
-            item_length = key_prefix_len + len(urllib.parse.quote(str(value), safe=""))
-            if current_chunk and current_length + item_length > chunk_size:
-                ret.extend(endpoint.filter(**{filter_by_key: current_chunk}, **kwargs))
+        for value in list(kwargs[chunk_by]):
+            candidate_chunk = current_chunk + [value]
+            candidate_kwargs = {
+                **kwargs,
+                chunk_by: candidate_chunk,
+                **request_option_kwargs,
+            }
+            candidate_length = uri_len(candidate_kwargs)
+
+            if candidate_length <= chunk_size:
+                current_chunk = candidate_chunk
+                continue
+
+            if current_chunk:
+                ret.extend(
+                    endpoint.filter(
+                        **{**kwargs, chunk_by: current_chunk, **request_option_kwargs}
+                    )
+                )
                 current_chunk = [value]
-                current_length = base_length + item_length
-            else:
-                current_chunk.append(value)
-                current_length += item_length
+                single_value_length = uri_len(
+                    {**kwargs, chunk_by: current_chunk, **request_option_kwargs}
+                )
+                if single_value_length > chunk_size:
+                    raise ValueError(
+                        f"Unable to bulk filter '{endpoint_url or endpoint}': "
+                        f"single '{chunk_by}' value URI length {candidate_length} "
+                        f"exceeds chunk_size {chunk_size}"
+                    )
+
         if current_chunk:
-            ret.extend(endpoint.filter(**{filter_by_key: current_chunk}, **kwargs))
+            ret.extend(
+                endpoint.filter(
+                    **{**kwargs, chunk_by: current_chunk, **request_option_kwargs}
+                )
+            )
         return ret
 
     @Task(

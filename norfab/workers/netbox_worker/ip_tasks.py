@@ -177,7 +177,7 @@ class NetboxIpTasks:
                 prefix = {"description": prefix, "vrf__name": vrf}
             elif is_network is False:
                 prefix = {"description": prefix}
-        nb_prefixes = list(nb.ipam.prefixes.filter(**prefix))
+        nb_prefixes = self.bulk_filter(nb.ipam.prefixes, **prefix)
         if not nb_prefixes:
             raise NetboxAllocationError(
                 f"Unable to source parent prefix from Netbox - {prefix}"
@@ -750,7 +750,7 @@ class NetboxIpTasks:
                 "site_id": d.site.id if d.site else None,
             }
             for d in self.bulk_filter(
-                nb.dcim.devices, "name", devices, fields="id,name,site"
+                nb.dcim.devices, name=devices, fields="id,name,site"
             )
         }
         for d in list(devices):
@@ -933,8 +933,7 @@ class NetboxIpTasks:
             }
             for ip in self.bulk_filter(
                 endpoint=nb.ipam.ip_addresses,
-                filter_by_key="address",
-                filter_by_values=[i["address"].split("/")[0] for i in all_ip_live],
+                address=[i["address"].split("/")[0] for i in all_ip_live],
                 fields="id,address,vrf,role,assigned_object",
             )
         ]
@@ -1142,10 +1141,7 @@ class NetboxIpTasks:
                 (pfx.prefix, pfx.vrf.id if pfx.vrf else None)
                 for pfx in self.bulk_filter(
                     endpoint=nb.ipam.prefixes,
-                    filter_by_key="prefix",
-                    filter_by_values=[
-                        p["prefix"] for p in all_prefixes_live if p["prefix"]
-                    ],
+                    prefix=[p["prefix"] for p in all_prefixes_live if p["prefix"]],
                     fields="id,prefix,vrf",
                 )
             }

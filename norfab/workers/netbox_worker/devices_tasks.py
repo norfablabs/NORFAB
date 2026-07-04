@@ -250,7 +250,8 @@ class NetboxDevicesTasks:
             self.cache.expire()  # remove expired items from cache
             # retrieve last_updated data from Netbox for all filters using REST
             for filter_item in filters:
-                result = nb.dcim.devices.filter(
+                result = self.bulk_filter(
+                    nb.dcim.devices,
                     **filter_item,
                     fields="name,last_updated",
                 )
@@ -286,18 +287,8 @@ class NetboxDevicesTasks:
             all_devices_raw = {}
 
             for filter_item in filters_to_fetch:
-                # use bulk filter if only single list-like filter criteria given
-                if len(filter_item) == 1:
-                    filter_key, filter_value = next(iter(filter_item.items()))
-                    if isinstance(filter_value, list):
-                        for device in self.bulk_filter(
-                            nb.dcim.devices, filter_key, filter_value
-                        ):
-                            all_devices_raw.setdefault(device.name, device)
-                # filter as is in case multiple filtering criteria or scalar value given
-                else:
-                    for device in nb.dcim.devices.filter(**filter_item):
-                        all_devices_raw.setdefault(device.name, device)
+                for device in self.bulk_filter(nb.dcim.devices, **filter_item):
+                    all_devices_raw.setdefault(device.name, device)
 
             job.event(f"retrieved {len(all_devices_raw)} device(s) from NetBox")
 
@@ -522,8 +513,7 @@ class NetboxDevicesTasks:
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
         for device in self.bulk_filter(
             nb.dcim.devices,
-            "name",
-            devices,
+            name=devices,
             fields="id,name,serial,device_type,platform",
         ):
             device_type = device.device_type
@@ -555,7 +545,7 @@ class NetboxDevicesTasks:
         # Fetch current module bays and installed modules.
         job.event("fetching current module bay data from NetBox")
         nb_module_bays = {device_name: {} for device_name in devices}
-        for module_bay in self.bulk_filter(nb.dcim.module_bays, "device", devices):
+        for module_bay in self.bulk_filter(nb.dcim.module_bays, device=devices):
             device_name = module_bay.device.name
             bay_name = module_bay.name
             nb_module_bays[device_name][bay_name] = int(module_bay.id)
@@ -563,7 +553,7 @@ class NetboxDevicesTasks:
         job.event("fetching installed module data from NetBox")
         nb_modules = {device_name: {} for device_name in devices}
         nb_module_ids = {device_name: {} for device_name in devices}
-        for module in self.bulk_filter(nb.dcim.modules, "device", devices):
+        for module in self.bulk_filter(nb.dcim.modules, device=devices):
             device_name = module.device.name
             bay_name = module.module_bay.name
             nb_modules[device_name][bay_name] = normalise_netbox_module(module)
@@ -918,8 +908,7 @@ class NetboxDevicesTasks:
             for lookup_field in ("model", "part_number"):
                 for module_type in self.bulk_filter(
                     nb.dcim.module_types,
-                    lookup_field,
-                    module_type_names,
+                    **{lookup_field: module_type_names},
                 ):
                     module_type_id = int(module_type.id)
                     manufacturer_slug = module_type.manufacturer.slug

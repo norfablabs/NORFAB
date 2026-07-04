@@ -534,8 +534,8 @@ class NetboxDesignTasks:
                         for k in ["slug", "name", "model"]
                         if k in object_data
                     }
-                    nb_object = getattr(getattr(nb, app), obj_type).filter(
-                        **object_filter_data
+                    nb_object = self.bulk_filter(
+                        getattr(getattr(nb, app), obj_type), **object_filter_data
                     )
                     if not nb_object:
                         new_objects.append(object_data)

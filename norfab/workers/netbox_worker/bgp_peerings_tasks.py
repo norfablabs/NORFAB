@@ -674,8 +674,7 @@ def preseed_bgp_lookup_cache(
         if ip_values:
             nb_ips = bulk_filter(
                 nb.ipam.ip_addresses,
-                "address",
-                list(ip_values),
+                address=list(ip_values),
                 fields="id,address,assigned_object",
             )
             for ip_obj in nb_ips:
@@ -695,8 +694,7 @@ def preseed_bgp_lookup_cache(
         if device_names:
             nb_devices = bulk_filter(
                 nb.dcim.devices,
-                "name",
-                list(device_names),
+                name=list(device_names),
                 fields="id,name,platform,site,device_type",
             )
             found_names = set()
@@ -715,9 +713,7 @@ def preseed_bgp_lookup_cache(
             )
 
         if asn_values:
-            nb_asns = bulk_filter(
-                nb.ipam.asns, "asn", list(asn_values), fields="id,asn"
-            )
+            nb_asns = bulk_filter(nb.ipam.asns, asn=list(asn_values), fields="id,asn")
             for asn_obj in nb_asns:
                 lookup_cache[("asn", int(asn_obj.asn))] = asn_obj.id
             job.event(
@@ -725,9 +721,7 @@ def preseed_bgp_lookup_cache(
             )
 
         if vrf_values:
-            nb_vrfs = bulk_filter(
-                nb.ipam.vrfs, "name", list(vrf_values), fields="id,name"
-            )
+            nb_vrfs = bulk_filter(nb.ipam.vrfs, name=list(vrf_values), fields="id,name")
             for vrf_obj in nb_vrfs:
                 lookup_cache[("vrf", vrf_obj.name)] = vrf_obj.id
             job.event(
@@ -956,7 +950,9 @@ class NetboxBgpPeeringsTasks:
 
             # Mode: cache disabled - fetch without caching
             if cache is False:
-                bgp_sessions = nb.plugins.bgp.session.filter(device_id=device_id)
+                bgp_sessions = self.bulk_filter(
+                    nb.plugins.bgp.session, device_id=device_id
+                )
                 ret.result[device_name] = {s.name: dict(s) for s in bgp_sessions}
                 job.event(
                     f"retrieved {len(ret.result[device_name])} BGP session(s) for '{device_name}'",
@@ -968,7 +964,9 @@ class NetboxBgpPeeringsTasks:
             if cache == "refresh" or cached_data is None:
                 if cache == "refresh" and cached_data is not None:
                     self.cache.delete(cache_key, retry=True)
-                bgp_sessions = nb.plugins.bgp.session.filter(device_id=device_id)
+                bgp_sessions = self.bulk_filter(
+                    nb.plugins.bgp.session, device_id=device_id
+                )
                 ret.result[device_name] = {s.name: dict(s) for s in bgp_sessions}
                 self.cache.set(
                     cache_key, ret.result[device_name], expire=self.cache_ttl
@@ -987,8 +985,10 @@ class NetboxBgpPeeringsTasks:
             )
 
             # Fetch brief session info to compare timestamps
-            brief_sessions = nb.plugins.bgp.session.filter(
-                device_id=device_id, fields="id,last_updated,name"
+            brief_sessions = self.bulk_filter(
+                nb.plugins.bgp.session,
+                device_id=device_id,
+                fields="id,last_updated,name",
             )
             netbox_sessions = {
                 s.id: {"name": s.name, "last_updated": s.last_updated}
@@ -1031,7 +1031,7 @@ class NetboxBgpPeeringsTasks:
                     resource=instance,
                 )
                 for session in self.bulk_filter(
-                    nb.plugins.bgp.session, "id", session_ids_to_fetch
+                    nb.plugins.bgp.session, id=session_ids_to_fetch
                 ):
                     ret.result[device_name][session.name] = dict(session)
 
@@ -1226,8 +1226,7 @@ class NetboxBgpPeeringsTasks:
                     i.name: i
                     for i in self.bulk_filter(
                         endpoint=nb.dcim.interfaces,
-                        filter_by_key="name",
-                        filter_by_values=intf_names,
+                        name=intf_names,
                         device=bgp_session_device,
                         fields="id,name",
                     )
@@ -1237,8 +1236,7 @@ class NetboxBgpPeeringsTasks:
                 if found_intf_ids:
                     for _ip in self.bulk_filter(
                         endpoint=nb.ipam.ip_addresses,
-                        filter_by_key="interface_id",
-                        filter_by_values=found_intf_ids,
+                        interface_id=found_intf_ids,
                         fields="id,address,assigned_object_id",
                     ):
                         ips_by_intf_id.setdefault(_ip.assigned_object_id, []).append(
@@ -1360,8 +1358,7 @@ class NetboxBgpPeeringsTasks:
             try:
                 existing = self.bulk_filter(
                     nb.plugins.bgp.session,
-                    "device",
-                    list(all_device_names),
+                    device=list(all_device_names),
                     fields="name,id",
                 )
                 existing_session_names = {s.name for s in existing}
@@ -1738,8 +1735,7 @@ class NetboxBgpPeeringsTasks:
         job.event(f"fetching {len(session_names)} BGP session(s) from NetBox")
         nb_sessions_raw = self.bulk_filter(
             nb.plugins.bgp.session,
-            "name",
-            session_names,
+            name=session_names,
             fields="id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
         )
         normalised_nb = {
@@ -2347,8 +2343,7 @@ class NetboxBgpPeeringsTasks:
                 job.event(f"fetching {len(all_deletions)} BGP session(s) to delete")
                 sessions_to_delete = self.bulk_filter(
                     nb.plugins.bgp.session,
-                    "name",
-                    list(all_deletions),
+                    name=list(all_deletions),
                     fields="id,name",
                 )
                 for session in sessions_to_delete:

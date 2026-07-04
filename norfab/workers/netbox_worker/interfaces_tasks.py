@@ -358,8 +358,8 @@ class NetboxInterfacesTasks:
         if cache == True or cache == "force":
             job.event(f"checking cache for {len(devices)} device(s)")
             # quick REST call to get current last_updated for all matching interfaces
-            result = nb.dcim.interfaces.filter(
-                **filter_params, fields="name,last_updated,device"
+            result = self.bulk_filter(
+                nb.dcim.interfaces, **filter_params, fields="name,last_updated,device"
             )
             # build per-device last_updated map
             for intf in result:
@@ -408,7 +408,7 @@ class NetboxInterfacesTasks:
             job.event(
                 f"fetching interfaces from NetBox for {len(devices_to_fetch)} device(s)"
             )
-            all_interfaces = list(nb.dcim.interfaces.filter(**fetch_filter_params))
+            all_interfaces = self.bulk_filter(nb.dcim.interfaces, **fetch_filter_params)
             job.event(f"retrieved {len(all_interfaces)} interface(s) from NetBox")
 
         if not all_interfaces and not any(ret.result.get(d) for d in devices):
@@ -427,9 +427,7 @@ class NetboxInterfacesTasks:
         # fetch IP addresses if requested (one bulk call keyed by assigned_object_id)
         if ip_addresses and devices_to_fetch:
             job.event(f"fetching IP addresses for {len(devices_to_fetch)} device(s)")
-            for ip in self.bulk_filter(
-                nb.ipam.ip_addresses, "device", devices_to_fetch
-            ):
+            for ip in self.bulk_filter(nb.ipam.ip_addresses, device=devices_to_fetch):
                 if (
                     ip.assigned_object_id
                     and ip.assigned_object_type == "dcim.interface"
@@ -440,7 +438,7 @@ class NetboxInterfacesTasks:
         if inventory_items and devices_to_fetch:
             job.event(f"fetching inventory items for {len(devices_to_fetch)} device(s)")
             for item in self.bulk_filter(
-                nb.dcim.inventory_items, "device", devices_to_fetch
+                nb.dcim.inventory_items, device=devices_to_fetch
             ):
                 if item.component_id and item.component_type == "dcim.interface":
                     inv_by_intf_id.setdefault(item.component_id, []).append(dict(item))
@@ -593,7 +591,8 @@ class NetboxInterfacesTasks:
                 continue
 
             existing_interface_names = {
-                intf.name for intf in nb.dcim.interfaces.filter(device=device_name)
+                intf.name
+                for intf in self.bulk_filter(nb.dcim.interfaces, device=device_name)
             }
             interfaces_to_create = []
 
@@ -754,7 +753,7 @@ class NetboxInterfacesTasks:
             if interface_regex:
                 interface_filter["name__regex"] = interface_regex
             try:
-                nb_interfaces = list(nb.dcim.interfaces.filter(**interface_filter))
+                nb_interfaces = self.bulk_filter(nb.dcim.interfaces, **interface_filter)
             except Exception as exc:
                 msg = f"failed to fetch interfaces for description update: {exc}"
                 log.error(msg)
@@ -1025,7 +1024,7 @@ class NetboxInterfacesTasks:
         nb_devices_data = {
             d.name: {"id": d.id, "site_id": d.site.id, "name": d.name}
             for d in self.bulk_filter(
-                nb.dcim.devices, "name", devices, fields="id,name,site"
+                nb.dcim.devices, name=devices, fields="id,name,site"
             )
         }
         for d in list(devices):
@@ -1294,7 +1293,7 @@ class NetboxInterfacesTasks:
         job.event("refreshing interface IDs after LAG interface creation")
         nb_intf_ids = {}
         for intf in self.bulk_filter(
-            nb.dcim.interfaces, "device", devices, fields="id,name,device"
+            nb.dcim.interfaces, device=devices, fields="id,name,device"
         ):
             nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
 
@@ -1350,7 +1349,7 @@ class NetboxInterfacesTasks:
         job.event("refreshing interface IDs after non-child/main interface creation")
         nb_intf_ids = {}
         for intf in self.bulk_filter(
-            nb.dcim.interfaces, "device", devices, fields="id,name,device"
+            nb.dcim.interfaces, device=devices, fields="id,name,device"
         ):
             nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
 
@@ -1605,9 +1604,7 @@ class NetboxInterfacesTasks:
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {
             d.name: {"id": d.id, "name": d.name}
-            for d in self.bulk_filter(
-                nb.dcim.devices, "name", devices, fields="id,name"
-            )
+            for d in self.bulk_filter(nb.dcim.devices, name=devices, fields="id,name")
         }
         for d in list(devices):
             if d not in nb_devices_data:
@@ -1703,8 +1700,7 @@ class NetboxInterfacesTasks:
         nb_macs: dict = {}
         for _m in self.bulk_filter(
             nb.dcim.mac_addresses,
-            "mac_address",
-            list(all_mac_live.keys()),
+            mac_address=list(all_mac_live.keys()),
             fields="id,mac_address,assigned_object",
         ):
             _mac = _m.mac_address.lower()
