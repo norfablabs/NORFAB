@@ -70,9 +70,11 @@ class InventoryTasks:
         """
         ret = Result(task=f"{self.name}:nornir_inventory_load_netbox", result=True)
 
+        self.status["netbox_inventory_status"] = "initialising"
+
         # form Netbox inventory load arguments
         if isinstance(self.nornir_worker_inventory.get("netbox"), dict):
-            kwargs = self.nornir_worker_inventory["netbox"]
+            kwargs = self.nornir_worker_inventory["netbox"].copy()
         elif self.nornir_worker_inventory.get("netbox") is True:
             kwargs = {}
         timeout = max(10, kwargs.pop("timeout", 100))
@@ -86,6 +88,7 @@ class InventoryTasks:
                 log.warning(msg)
                 ret.result = False
                 ret.messages = [msg]
+                self.status["netbox_inventory_status"] = "failed"
                 return ret
 
         nb_inventory_data = self.client.run_job(
@@ -99,6 +102,7 @@ class InventoryTasks:
         if nb_inventory_data is None:
             msg = f"{self.name} - Netbox get_nornir_inventory no inventory returned"
             log.error(msg)
+            self.status["netbox_inventory_status"] = "failed"
             raise RuntimeError(msg)
 
         # merge Netbox inventory into Nornir inventory
@@ -113,7 +117,12 @@ class InventoryTasks:
             )
             log.error(msg)
             job.event(msg, severity="ERROR")
+            ret.result = False
+            ret.messages = [msg]
+            self.status["netbox_inventory_status"] = "failed"
+            return ret
 
+        self.status["netbox_inventory_status"] = "completed"
         job.event("completed processing Nornir inventory from Netbox")
 
         return ret
@@ -170,6 +179,7 @@ class InventoryTasks:
         ret = Result(
             task=f"{self.name}:nornir_inventory_load_containerlab", result=True
         )
+        self.status["containerlab_inventory_status"] = "initialising"
         job.event(
             f"pulling Containerlab '{lab_name or 'all'}' inventory from '{clab_workers}' workers"
         )
@@ -188,12 +198,14 @@ class InventoryTasks:
         if clab_inventory_data is None:
             msg = f"{self.name} - Containerlab get_nornir_inventory no data returned"
             log.error(msg)
+            self.status["containerlab_inventory_status"] = "failed"
             raise RuntimeError(msg)
 
         job.event(f"pulled Containerlab '{lab_name or 'all'}' lab inventory")
 
         if dry_run is True:
             ret.result = {w: r["result"] for w, r in clab_inventory_data.items()}
+            self.status["containerlab_inventory_status"] = "completed"
             return ret
 
         for wname, wdata in clab_inventory_data.items():
@@ -207,6 +219,7 @@ class InventoryTasks:
                 f"returned no hosts data for '{lab_name}' lab."
             )
             log.error(msg)
+            self.status["containerlab_inventory_status"] = "failed"
             raise RuntimeError(msg)
 
         job.event(
@@ -216,6 +229,8 @@ class InventoryTasks:
         if re_init_nornir is True:
             self.init_nornir(self.nornir_worker_inventory)
             job.event("nornir instance re-initialized")
+
+        self.status["containerlab_inventory_status"] = "completed"
 
         return ret
 

@@ -1,3 +1,13 @@
+# 0.20.3
+
+## BUGS
+
+## ENHANCEMENTS
+
+1. Extended Nornir worker statistics with SID, NetBox, Containerlab inventory load statuses and managed `nornir_hosts` count.
+
+---
+
 # 0.20.2
 
 ## ENHANCEMENTS

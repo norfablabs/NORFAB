@@ -1197,13 +1197,15 @@ class WorkerWatchDog(threading.Thread):
                 - alive (int): The time in seconds since the worker started.
                 - worker_ram_usage_mbyte (float): The current RAM usage of the worker in megabytes.
         """
-        return {
+        stats = {
             "watchdog_runs": self.runs,
             "timestamp": time.ctime(),
             "uptime": format_duration(int(time.time() - self.started_at)),
             "uptime_seconds": int(time.time() - self.started_at),
             "worker_ram_usage_mbyte": self.get_ram_usage(),
         }
+        stats.update(self.worker.status)
+        return stats
 
     def check_ram(self) -> None:
         """
@@ -1613,6 +1615,9 @@ class NFPWorker:
 
         # dictionary to store currently running jobs
         self.running_jobs = {}
+        self.status = {
+            "sid_inventory_status": None,
+        }
 
         # create events and queues
         self.destroy_event = threading.Event()
@@ -1800,11 +1805,20 @@ class NFPWorker:
         Returns:
             dict: The inventory data results if available, otherwise an empty dictionary.
         """
-        inventory_data = self.client.mmi(
-            "sid.service.broker", "get_inventory", kwargs={"name": self.name}
-        )
+        self.status["sid_inventory_status"] = "initialising"
+        try:
+            inventory_data = self.client.mmi(
+                "sid.service.broker", "get_inventory", kwargs={"name": self.name}
+            )
+        except Exception:
+            self.status["sid_inventory_status"] = "failed"
+            raise
 
         log.debug(f"{self.name} - worker received inventory data {inventory_data}")
+
+        self.status["sid_inventory_status"] = (
+            "failed" if inventory_data.get("errors") else "completed"
+        )
 
         if inventory_data["results"]:
             return inventory_data["results"]

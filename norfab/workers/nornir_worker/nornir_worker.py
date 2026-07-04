@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import time
-from threading import Lock
+from threading import Lock, Thread
 from typing import Any, Dict, Tuple
 
 import yaml
@@ -120,6 +120,16 @@ class WatchDog(WorkerWatchDog):
             "dead_connections_cleaned": self.dead_connections_cleaned,
             "idle_connections_cleaned": self.idle_connections_cleaned,
             "worker_ram_usage_mbyte": self.get_ram_usage(),
+            "nornir_hosts": len(self.worker.nr.inventory.hosts)
+            if self.worker.nr
+            else 0,
+            "sid_inventory_status": self.worker.status.get("sid_inventory_status"),
+            "netbox_inventory_status": self.worker.status.get(
+                "netbox_inventory_status"
+            ),
+            "containerlab_inventory_status": self.worker.status.get(
+                "containerlab_inventory_status"
+            ),
         }
 
     def configuration(self) -> Dict:
@@ -342,6 +352,12 @@ class NornirWorker(
         )
         self.init_done_event = init_done_event
         self.tf_base_path = os.path.join(self.base_dir, "tf")
+        self.status.update(
+            {
+                "netbox_inventory_status": None,
+                "containerlab_inventory_status": None,
+            }
+        )
 
         # misc attributes
         self.connections_lock = Lock()
@@ -855,7 +871,6 @@ class NornirWorker(
     def refresh_nornir(
         self,
         job: Job,
-        progress: bool = False,
     ) -> Result:
         """
         Refreshes the Nornir instance by reloading the inventory from configured sources.
@@ -866,11 +881,8 @@ class NornirWorker(
             2. If Netbox is specified in the inventory, pulls inventory data from Netbox.
             3. If Containerlab is specified in the inventory, pulls inventory data from Containerlab.
             4. Initializes the Nornir instance with the refreshed inventory.
-            5. Optionally emits progress events at each stage if `progress` is True.
-
         Args:
             job: NorFab Job object containing relevant metadata
-            progress (bool, optional): If True, emits progress events during the refresh process. Defaults to False.
 
         The inventory configuration is expected to be a dictionary with the following keys:
 
