@@ -113,6 +113,9 @@ class NornirTestShell(
                 sortby=sortby,
                 reverse=reverse,
             )
+            ret = ret.replace("ERROR", "[red]ERROR[/red]")
+            ret = ret.replace("FAIL", "[red]FAIL[/red]")
+            ret = ret.replace("PASS", "[green]PASS[/green]")
         else:
             ret = result
 
