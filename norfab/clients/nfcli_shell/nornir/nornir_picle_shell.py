@@ -73,7 +73,7 @@ class NornirShowHostsModel(
         # form table results
         if table:
             if table is True or table == "brief":
-                table = {"tablefmt": "grid"}
+                table = {"tablefmt": "grid", "showindex": True}
             table_result = {}
             for w_name, w_res in result.items():
                 if isinstance(w_res, list):

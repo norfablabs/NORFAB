@@ -8,6 +8,8 @@
 
 1. Extended Nornir worker statistics with SID, NetBox, Containerlab inventory load statuses and managed `nornir_hosts` count.
 2. Enhanced NetBox worker REST filtering to route task-side `pynetbox.filter()` calls through adaptive `bulk_filter`, automatically chunking long list filters to avoid URI length errors while preserving query options such as `fields`, `limit`, and `ordering`.
+3. Improved result status coloring for nornir test task
+4. Nornir show hosts table added index column
 
 ## CHANGES
 
