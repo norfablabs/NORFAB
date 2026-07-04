@@ -2,6 +2,8 @@
 
 ## BUGS
 
+1. Fixing nornir tests nfcli shell to pass verbose_on_fail to results processing, to make sure return results as table even when have failed tests.
+
 ## ENHANCEMENTS
 
 1. Extended Nornir worker statistics with SID, NetBox, Containerlab inventory load statuses and managed `nornir_hosts` count.

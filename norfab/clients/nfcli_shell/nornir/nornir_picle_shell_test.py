@@ -94,7 +94,7 @@ class NornirTestShell(
         if nowait:
             return result, Outputters.outputter_nested
 
-        result = log_error_or_result(result, verbose_result=verbose_result)
+        result = log_error_or_result(result, verbose_result=verbose_result, verbose_on_fail=False)
 
         # form table results
         if verbose_result or dry_run:
