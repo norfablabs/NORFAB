@@ -7578,11 +7578,10 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
             <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">all_nb_devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-            <span class="o">**</span><span class="n">device_filter_params</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,platform,primary_ip4,status,role,site,tags,device_type&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="n">all_nb_devices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">device_filter_params</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,platform,primary_ip4,status,role,site,tags,device_type&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">device_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">role_slugs</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -7595,7 +7594,7 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
     <span class="n">role_colors</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">role_slugs</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching role colors for </span><span class="si">{}</span><span class="s2"> role(s)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">role_slugs</span><span class="p">)))</span>
-        <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">device_roles</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">role_slugs</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">device_roles</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">role_slugs</span><span class="p">)):</span>
             <span class="n">role_colors</span><span class="p">[</span><span class="n">role</span><span class="o">.</span><span class="n">slug</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span><span class="o">.</span><span class="n">color</span>
 
     <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">all_nb_devices</span><span class="p">:</span>
@@ -7682,11 +7681,10 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;fetching data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">missing_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> additional connected device(s)&quot;</span>
         <span class="p">)</span>
-        <span class="n">extra_nb_devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">missing_device_names</span><span class="p">),</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,platform,primary_ip4,status,role,site,tags,device_type&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">extra_nb_devices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">missing_device_names</span><span class="p">),</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,platform,primary_ip4,status,role,site,tags,device_type&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">extra_role_slugs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">dev</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">slug</span>
@@ -7694,7 +7692,9 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
             <span class="k">if</span> <span class="n">dev</span><span class="o">.</span><span class="n">role</span> <span class="ow">and</span> <span class="n">dev</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">slug</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">role_colors</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">extra_role_slugs</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">device_roles</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">extra_role_slugs</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">device_roles</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">extra_role_slugs</span><span class="p">)</span>
+            <span class="p">):</span>
                 <span class="n">role_colors</span><span class="p">[</span><span class="n">role</span><span class="o">.</span><span class="n">slug</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span><span class="o">.</span><span class="n">color</span>
         <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">extra_nb_devices</span><span class="p">:</span>
             <span class="n">device_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>

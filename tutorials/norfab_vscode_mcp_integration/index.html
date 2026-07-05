@@ -6242,7 +6242,7 @@ task-authored prompts.</p>
 </code></pre></div>
 <p>By default, the MCP endpoint is available at <code>http://127.0.0.1:8001/mcp</code>. To
 verify the worker is up and serving tools and prompts:</p>
-<div class="highlight"><pre><span></span><code>nf#show workers
+<div class="highlight"><pre><span></span><code>nf#show norfab broker workers
 nf#show fastmcp status
 </code></pre></div>
 <div class="admonition tip">
@@ -6302,7 +6302,7 @@ Run &quot;show version&quot; on router1.
 Run &quot;show interfaces&quot; on router1.
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¤</a></h2>
-<p>If VS Code cannot connect, confirm the FastMCP worker is running (nfcli <code>show workers</code>, <code>show fastmcp status</code>) and that <code>.vscode/mcp.json</code> points at the correct URL.</p>
+<p>If VS Code cannot connect, confirm the FastMCP worker is running (nfcli <code>show norfab broker workers</code>, <code>show fastmcp status</code>) and that <code>.vscode/mcp.json</code> points at the correct URL.</p>
 <p>If the agent does not show up, double-check the file ends with <code>.agent.md</code>, then restart VS Code.</p>
 <p>If a tool or prompt is missing, confirm its exact name with
 <code>show fastmcp tools ...</code> or <code>show fastmcp prompts ...</code> and check that the

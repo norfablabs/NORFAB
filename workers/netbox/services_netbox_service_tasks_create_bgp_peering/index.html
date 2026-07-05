@@ -7618,10 +7618,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
 <span class="normal">1574</span>
 <span class="normal">1575</span>
 <span class="normal">1576</span>
-<span class="normal">1577</span>
-<span class="normal">1578</span>
-<span class="normal">1579</span>
-<span class="normal">1580</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpPeeringInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpPeeringResult</span><span class="p">,</span>
@@ -7798,8 +7795,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
                 <span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                     <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span>
-                    <span class="n">filter_by_key</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-                    <span class="n">filter_by_values</span><span class="o">=</span><span class="n">intf_names</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">intf_names</span><span class="p">,</span>
                     <span class="n">device</span><span class="o">=</span><span class="n">bgp_session_device</span><span class="p">,</span>
                     <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -7809,8 +7805,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="k">if</span> <span class="n">found_intf_ids</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">_ip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                     <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span>
-                    <span class="n">filter_by_key</span><span class="o">=</span><span class="s2">&quot;interface_id&quot;</span><span class="p">,</span>
-                    <span class="n">filter_by_values</span><span class="o">=</span><span class="n">found_intf_ids</span><span class="p">,</span>
+                    <span class="n">interface_id</span><span class="o">=</span><span class="n">found_intf_ids</span><span class="p">,</span>
                     <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,address,assigned_object_id&quot;</span><span class="p">,</span>
                 <span class="p">):</span>
                     <span class="n">ips_by_intf_id</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">_ip</span><span class="o">.</span><span class="n">assigned_object_id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -7932,8 +7927,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
-                <span class="s2">&quot;device&quot;</span><span class="p">,</span>
-                <span class="nb">list</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">),</span>
+                <span class="n">device</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">),</span>
                 <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,id&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">existing_session_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">}</span>

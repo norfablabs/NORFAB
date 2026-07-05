@@ -7293,7 +7293,12 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
 <span class="normal">414</span>
 <span class="normal">415</span>
 <span class="normal">416</span>
-<span class="normal">417</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Starts a worker process if it is not already running.</span>
 
@@ -7317,11 +7322,16 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
         <span class="k">if</span> <span class="n">worker_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;depends_on&quot;</span><span class="p">):</span>
             <span class="c1"># check if all dependent processes are alive</span>
             <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;depends_on&quot;</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
-                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dependent process is dead &#39;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">&quot;process&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dependent process is dead &#39;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
             <span class="c1"># check if all depended process fully initialized</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">&quot;init_done&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="s2">&quot;init_done&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workers_processes</span>
+                    <span class="k">else</span> <span class="kc">False</span>
+                <span class="p">)</span>
                 <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;depends_on&quot;</span><span class="p">]</span>
             <span class="p">):</span>
                 <span class="k">return</span>
@@ -7497,12 +7507,7 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\nfapi.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">424</span>
 <span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
@@ -7605,7 +7610,12 @@ Error: If no broker endpoint is defined or if the broker fails to start.</p>
 <span class="normal">524</span>
 <span class="normal">525</span>
 <span class="normal">526</span>
-<span class="normal">527</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">run_broker</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">run_workers</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7739,12 +7749,7 @@ Otherwise, it enters a loop that continues to run until the <code>exiting</code>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\nfapi.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">534</span>
 <span class="normal">535</span>
 <span class="normal">536</span>
 <span class="normal">537</span>
@@ -7753,7 +7758,12 @@ Otherwise, it enters a loop that continues to run until the <code>exiting</code>
 <span class="normal">540</span>
 <span class="normal">541</span>
 <span class="normal">542</span>
-<span class="normal">543</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runs the main loop until a termination signal (CTRL+C) is received.</span>
 <span class="sd">    This method checks if there are any broker or worker processes running.</span>
@@ -7822,12 +7832,7 @@ Otherwise, it enters a loop that continues to run until the <code>exiting</code>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\nfapi.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
 <span class="normal">551</span>
 <span class="normal">552</span>
 <span class="normal">553</span>
@@ -7862,7 +7867,12 @@ Otherwise, it enters a loop that continues to run until the <code>exiting</code>
 <span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
-<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gracefully stop all NORFAB processes and clean up resources.</span>
 
@@ -8014,12 +8024,7 @@ instance's client attribute.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\nfapi.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">592</span>
 <span class="normal">593</span>
 <span class="normal">594</span>
 <span class="normal">595</span>
@@ -8055,7 +8060,12 @@ instance's client attribute.</p>
 <span class="normal">625</span>
 <span class="normal">626</span>
 <span class="normal">627</span>
-<span class="normal">628</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">broker_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NFPClient</span><span class="p">:</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">broker_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NFPClient</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates and returns an NFPClient instance.</span>
 

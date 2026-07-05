@@ -6811,7 +6811,10 @@ VRF object reference read from and written into
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1582</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1579</span>
+<span class="normal">1580</span>
+<span class="normal">1581</span>
+<span class="normal">1582</span>
 <span class="normal">1583</span>
 <span class="normal">1584</span>
 <span class="normal">1585</span>
@@ -7078,11 +7081,7 @@ VRF object reference read from and written into
 <span class="normal">1846</span>
 <span class="normal">1847</span>
 <span class="normal">1848</span>
-<span class="normal">1849</span>
-<span class="normal">1850</span>
-<span class="normal">1851</span>
-<span class="normal">1852</span>
-<span class="normal">1853</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1849</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">UpdateBgpPeeringInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">UpdateBgpPeeringResult</span><span class="p">,</span>
@@ -7241,8 +7240,7 @@ VRF object reference read from and written into
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session(s) from NetBox&quot;</span><span class="p">)</span>
     <span class="n">nb_sessions_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">,</span>
-        <span class="n">session_names</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">session_names</span><span class="p">,</span>
         <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">normalised_nb</span> <span class="o">=</span> <span class="p">{</span>

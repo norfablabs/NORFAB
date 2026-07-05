@@ -6653,7 +6653,8 @@ before and after descriptions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">639</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">638</span>
+<span class="normal">639</span>
 <span class="normal">640</span>
 <span class="normal">641</span>
 <span class="normal">642</span>
@@ -6874,8 +6875,7 @@ before and after descriptions.</p>
 <span class="normal">857</span>
 <span class="normal">858</span>
 <span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">860</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">UpdateInterfacesDescriptionInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">UpdateInterfacesDescriptionResult</span><span class="p">,</span>
@@ -6993,7 +6993,7 @@ before and after descriptions.</p>
         <span class="k">if</span> <span class="n">interface_regex</span><span class="p">:</span>
             <span class="n">interface_filter</span><span class="p">[</span><span class="s2">&quot;name__regex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface_regex</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">nb_interfaces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">interface_filter</span><span class="p">))</span>
+            <span class="n">nb_interfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="o">**</span><span class="n">interface_filter</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to fetch interfaces for description update: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

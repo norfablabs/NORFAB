@@ -6753,7 +6753,8 @@ dry-run mode.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 863</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 862</span>
+<span class="normal"> 863</span>
 <span class="normal"> 864</span>
 <span class="normal"> 865</span>
 <span class="normal"> 866</span>
@@ -7379,8 +7380,7 @@ dry-run mode.</p>
 <span class="normal">1486</span>
 <span class="normal">1487</span>
 <span class="normal">1488</span>
-<span class="normal">1489</span>
-<span class="normal">1490</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -7545,7 +7545,7 @@ dry-run mode.</p>
     <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;site_id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,site&quot;</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,site&quot;</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
@@ -7814,7 +7814,7 @@ dry-run mode.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;refreshing interface IDs after LAG interface creation&quot;</span><span class="p">)</span>
     <span class="n">nb_intf_ids</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device&quot;</span>
+        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device&quot;</span>
     <span class="p">):</span>
         <span class="n">nb_intf_ids</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{})[</span><span class="n">intf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">id</span>
 
@@ -7870,7 +7870,7 @@ dry-run mode.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;refreshing interface IDs after non-child/main interface creation&quot;</span><span class="p">)</span>
     <span class="n">nb_intf_ids</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device&quot;</span>
+        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device&quot;</span>
     <span class="p">):</span>
         <span class="n">nb_intf_ids</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">intf</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{})[</span><span class="n">intf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf</span><span class="o">.</span><span class="n">id</span>
 

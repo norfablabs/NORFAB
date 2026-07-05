@@ -7503,11 +7503,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="normal">1176</span>
 <span class="normal">1177</span>
 <span class="normal">1178</span>
-<span class="normal">1179</span>
-<span class="normal">1180</span>
-<span class="normal">1181</span>
-<span class="normal">1182</span>
-<span class="normal">1183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -7668,7 +7664,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
             <span class="s2">&quot;site_id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">site</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,site&quot;</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,site&quot;</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
@@ -7851,8 +7847,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span>
-            <span class="n">filter_by_key</span><span class="o">=</span><span class="s2">&quot;address&quot;</span><span class="p">,</span>
-            <span class="n">filter_by_values</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_ip_live</span><span class="p">],</span>
+            <span class="n">address</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_ip_live</span><span class="p">],</span>
             <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,address,vrf,role,assigned_object&quot;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">]</span>
@@ -8060,10 +8055,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
             <span class="p">(</span><span class="n">pfx</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">pfx</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">pfx</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span>
-                <span class="n">filter_by_key</span><span class="o">=</span><span class="s2">&quot;prefix&quot;</span><span class="p">,</span>
-                <span class="n">filter_by_values</span><span class="o">=</span><span class="p">[</span>
-                    <span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_prefixes_live</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span>
-                <span class="p">],</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_prefixes_live</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]],</span>
                 <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,prefix,vrf&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">}</span>

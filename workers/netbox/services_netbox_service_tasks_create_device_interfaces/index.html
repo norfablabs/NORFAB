@@ -6787,7 +6787,9 @@ The result dictionary contains status and details of interface creation operatio
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">488</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
 <span class="normal">491</span>
@@ -6935,8 +6937,7 @@ The result dictionary contains status and details of interface creation operatio
 <span class="normal">633</span>
 <span class="normal">634</span>
 <span class="normal">635</span>
-<span class="normal">636</span>
-<span class="normal">637</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">636</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateDeviceInterfacesResult</span><span class="p">,</span>
@@ -7044,7 +7045,8 @@ The result dictionary contains status and details of interface creation operatio
             <span class="k">continue</span>
 
         <span class="n">existing_interface_names</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">intf</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device_name</span><span class="p">)</span>
+            <span class="n">intf</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">for</span> <span class="n">intf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device_name</span><span class="p">)</span>
         <span class="p">}</span>
         <span class="n">interfaces_to_create</span> <span class="o">=</span> <span class="p">[]</span>
 

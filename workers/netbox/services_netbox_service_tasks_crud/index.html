@@ -7110,7 +7110,8 @@ methods (GET/POST/PATCH/PUT/DELETE), schema_name, description</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\netbox_crud.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 86</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 85</span>
+<span class="normal"> 86</span>
 <span class="normal"> 87</span>
 <span class="normal"> 88</span>
 <span class="normal"> 89</span>
@@ -7219,8 +7220,7 @@ methods (GET/POST/PATCH/PUT/DELETE), schema_name, description</p>
 <span class="normal">192</span>
 <span class="normal">193</span>
 <span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CrudListObjectsArgs</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CrudListObjectsResult</span><span class="p">,</span>
@@ -7590,7 +7590,8 @@ sensible default set when omitted</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\netbox_crud.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
+<span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span>
 <span class="normal">201</span>
@@ -7668,8 +7669,7 @@ sensible default set when omitted</p>
 <span class="normal">273</span>
 <span class="normal">274</span>
 <span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CrudSearchArgs</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CrudSearchResult</span><span class="p">,</span>
@@ -7735,7 +7735,7 @@ sensible default set when omitted</p>
             <span class="k">elif</span> <span class="n">fields</span><span class="p">:</span>
                 <span class="n">params</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
 
-            <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">accessor</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">),</span> <span class="n">limit</span><span class="p">))</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)[:</span><span class="n">limit</span><span class="p">]</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">object_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -8043,7 +8043,8 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\netbox_crud.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">279</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">278</span>
+<span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
@@ -8153,8 +8154,7 @@ nf#
 <span class="normal">386</span>
 <span class="normal">387</span>
 <span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">389</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CrudReadArgs</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CrudReadResult</span><span class="p">,</span>
@@ -8231,19 +8231,19 @@ nf#
             <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)]</span> <span class="k">if</span> <span class="n">obj</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving </span><span class="si">{</span><span class="n">object_type</span><span class="si">}</span><span class="s2"> by ID(s)&quot;</span><span class="p">)</span>
-            <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">accessor</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">object_id</span><span class="p">),</span> <span class="o">**</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">object_id</span><span class="p">),</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
             <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving </span><span class="si">{</span><span class="n">object_type</span><span class="si">}</span><span class="s2"> with 1 filter(s)&quot;</span><span class="p">)</span>
-            <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">accessor</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
             <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># list of dicts — run one filter per dict and merge</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving </span><span class="si">{</span><span class="n">object_type</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span><span class="si">}</span><span class="s2"> filter(s)&quot;</span><span class="p">)</span>
             <span class="n">seen_ids</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">flt</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">accessor</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">flt</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="o">**</span><span class="n">flt</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
                     <span class="n">obj_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
                     <span class="n">obj_id_</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">obj_id_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_ids</span><span class="p">:</span>
@@ -8251,7 +8251,7 @@ nf#
                         <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj_dict</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving </span><span class="si">{</span><span class="n">object_type</span><span class="si">}</span><span class="s2"> with 0 filter(s)&quot;</span><span class="p">)</span>
-        <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">accessor</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">))</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
         <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> total objects&quot;</span><span class="p">)</span>
@@ -8513,7 +8513,8 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\netbox_crud.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">392</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">391</span>
+<span class="normal">392</span>
 <span class="normal">393</span>
 <span class="normal">394</span>
 <span class="normal">395</span>
@@ -8592,8 +8593,7 @@ nf#
 <span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">471</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CrudCreateArgs</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CrudCreateResult</span><span class="p">,</span>
@@ -8939,7 +8939,8 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\netbox_crud.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">474</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">473</span>
+<span class="normal">474</span>
 <span class="normal">475</span>
 <span class="normal">476</span>
 <span class="normal">477</span>
@@ -9051,8 +9052,7 @@ nf#
 <span class="normal">583</span>
 <span class="normal">584</span>
 <span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">586</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CrudUpdateArgs</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CrudUpdateResult</span><span class="p">,</span>
@@ -9406,7 +9406,8 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\netbox_crud.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">589</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">588</span>
+<span class="normal">589</span>
 <span class="normal">590</span>
 <span class="normal">591</span>
 <span class="normal">592</span>
@@ -9495,8 +9496,7 @@ nf#
 <span class="normal">675</span>
 <span class="normal">676</span>
 <span class="normal">677</span>
-<span class="normal">678</span>
-<span class="normal">679</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">678</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;DELETE&quot;</span><span class="p">],</span>
         <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">(),</span>
@@ -9859,7 +9859,8 @@ time_before, time_after (ISO-8601), q</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\netbox_crud.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">681</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">680</span>
+<span class="normal">681</span>
 <span class="normal">682</span>
 <span class="normal">683</span>
 <span class="normal">684</span>
@@ -9956,7 +9957,8 @@ time_before, time_after (ISO-8601), q</p>
 <span class="normal">775</span>
 <span class="normal">776</span>
 <span class="normal">777</span>
-<span class="normal">778</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">778</span>
+<span class="normal">779</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CrudChangelogArgs</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CrudChangelogResult</span><span class="p">,</span>
@@ -10024,9 +10026,9 @@ time_before, time_after (ISO-8601), q</p>
             <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># NetBox 4.0+: ObjectChange moved from extras to core</span>
-            <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">object_changes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">object_changes</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">object_changes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">object_changes</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
         <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># list of filter dicts — run multiple queries</span>
@@ -10034,9 +10036,11 @@ time_before, time_after (ISO-8601), q</p>
         <span class="k">for</span> <span class="n">flt</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">base_params</span><span class="p">,</span> <span class="o">**</span><span class="n">flt</span><span class="p">}</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">changelog_iter</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">object_changes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="n">changelog_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">object_changes</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="n">changelog_iter</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">object_changes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="n">changelog_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                    <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">object_changes</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
+                <span class="p">)</span>
             <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">changelog_iter</span><span class="p">:</span>
                 <span class="n">obj_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
                 <span class="n">oid</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>

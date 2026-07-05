@@ -6721,7 +6721,8 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1492</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1491</span>
+<span class="normal">1492</span>
 <span class="normal">1493</span>
 <span class="normal">1494</span>
 <span class="normal">1495</span>
@@ -7087,11 +7088,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 <span class="normal">1855</span>
 <span class="normal">1856</span>
 <span class="normal">1857</span>
-<span class="normal">1858</span>
-<span class="normal">1859</span>
-<span class="normal">1860</span>
-<span class="normal">1861</span>
-<span class="normal">1862</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1858</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncMacAddressesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncMacAddressesResult</span><span class="p">,</span>
@@ -7207,9 +7204,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox&quot;</span><span class="p">)</span>
     <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
-        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span>
-        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="p">:</span>
@@ -7305,8 +7300,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
     <span class="n">nb_macs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">_m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">mac_addresses</span><span class="p">,</span>
-        <span class="s2">&quot;mac_address&quot;</span><span class="p">,</span>
-        <span class="nb">list</span><span class="p">(</span><span class="n">all_mac_live</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="n">mac_address</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">all_mac_live</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
         <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,mac_address,assigned_object&quot;</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">_mac</span> <span class="o">=</span> <span class="n">_m</span><span class="o">.</span><span class="n">mac_address</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>

@@ -6371,58 +6371,62 @@ names to their details.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\fastmcp_worker\fastmcp_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetToolsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetToolsResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
@@ -6471,7 +6475,11 @@ names to their details.</p>
             <span class="k">if</span> <span class="n">service</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="n">service_name</span> <span class="o">==</span> <span class="n">service</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">tool_data</span> <span class="ow">in</span> <span class="n">tasks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">tool_name</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-                        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">tool_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tool_data</span><span class="p">[</span><span class="s2">&quot;tool&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+                        <span class="n">tool_definition</span> <span class="o">=</span> <span class="n">tool_data</span><span class="p">[</span><span class="s2">&quot;tool&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+                        <span class="n">guardrails</span> <span class="o">=</span> <span class="n">tool_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;guardrails&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">guardrails</span><span class="p">:</span>
+                            <span class="n">tool_definition</span><span class="p">[</span><span class="s2">&quot;guardrails&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">guardrails</span>
+                        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">tool_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tool_definition</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>

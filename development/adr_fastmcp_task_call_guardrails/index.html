@@ -12,31 +12,27 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/workers/fastmcp/services_fastmcp_service_inventory/">
+        <link rel="canonical" href="https://docs.norfablabs.com/development/adr_fastmcp_task_call_guardrails/">
       
       
-        <link rel="prev" href="../services_fastmcp_service/">
-      
-      
-        <link rel="next" href="../services_fastmcp_service_task_auth/">
       
       
         
       
       
-      <link rel="icon" href="../../../images/logo.jpg">
+      <link rel="icon" href="../../images/logo.jpg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
-        <title>Inventory - Network Automations Fabric [NORFAB]</title>
+        <title>ADR - FastMCP Task Call Guardrails - Network Automations Fabric [NORFAB]</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,11 +51,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -84,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fastmcp-worker-inventory" class="md-skip">
+        <a href="#adr-fastmcp-task-call-guardrails" class="md-skip">
           Skip to content
         </a>
       
@@ -100,9 +96,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -119,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Inventory
+              ADR - FastMCP Task Call Guardrails
             
           </span>
         </div>
@@ -235,9 +231,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
       
-  <img src="../../../images/logo.jpg" alt="logo">
+  <img src="../../images/logo.jpg" alt="logo">
 
     </a>
     Network Automations Fabric [NORFAB]
@@ -311,7 +307,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -339,7 +335,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
+      <a href="../../norfab_why_use_norfab/" class="md-nav__link">
         
   
   
@@ -421,7 +417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_installation/" class="md-nav__link">
+      <a href="../../norfab_installation/" class="md-nav__link">
         
   
   
@@ -449,7 +445,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_getting_started/" class="md-nav__link">
+      <a href="../../norfab_getting_started/" class="md-nav__link">
         
   
   
@@ -477,7 +473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_inventory/" class="md-nav__link">
+      <a href="../../reference_norfab_inventory/" class="md-nav__link">
         
   
   
@@ -559,7 +555,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorials/norfab_docker_deployment/" class="md-nav__link">
+      <a href="../../tutorials/norfab_docker_deployment/" class="md-nav__link">
         
   
   
@@ -587,7 +583,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
+      <a href="../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
         
   
   
@@ -615,7 +611,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+      <a href="../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
         
   
   
@@ -647,20 +643,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -681,7 +675,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -699,7 +693,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../services_overview/" class="md-nav__link">
+      <a href="../../services_overview/" class="md-nav__link">
         
   
   
@@ -774,7 +768,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service/" class="md-nav__link">
         
   
   
@@ -802,7 +796,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
         
   
   
@@ -877,7 +871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
         
   
   
@@ -905,7 +899,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
         
   
   
@@ -933,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
         
   
   
@@ -961,7 +955,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
         
   
   
@@ -989,7 +983,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
         
   
   
@@ -1017,7 +1011,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
         
   
   
@@ -1045,7 +1039,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1136,7 +1130,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service/" class="md-nav__link">
         
   
   
@@ -1164,7 +1158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_inventory/" class="md-nav__link">
         
   
   
@@ -1239,7 +1233,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_start/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_start/" class="md-nav__link">
         
   
   
@@ -1267,7 +1261,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_stop/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_stop/" class="md-nav__link">
         
   
   
@@ -1295,7 +1289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_restart/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_restart/" class="md-nav__link">
         
   
   
@@ -1323,7 +1317,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_inspect_networks/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_inspect_networks/" class="md-nav__link">
         
   
   
@@ -1351,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/services_fakenos_service_tasks_get_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_get_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -1442,7 +1436,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service/" class="md-nav__link">
         
   
   
@@ -1470,7 +1464,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
         
   
   
@@ -1545,7 +1539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_task/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
         
   
   
@@ -1573,7 +1567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
         
   
   
@@ -1601,7 +1595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
         
   
   
@@ -1629,7 +1623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_test/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
         
   
   
@@ -1657,7 +1651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_network/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
         
   
   
@@ -1685,7 +1679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
         
   
   
@@ -1713,7 +1707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
         
   
   
@@ -1741,7 +1735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
         
   
   
@@ -1769,7 +1763,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
         
   
   
@@ -1797,7 +1791,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
         
   
   
@@ -1833,7 +1827,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
+      <a href="../../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
         
   
   
@@ -1916,7 +1910,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service/" class="md-nav__link">
         
   
   
@@ -1944,7 +1938,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
         
   
   
@@ -2019,7 +2013,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
         
   
   
@@ -2047,7 +2041,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
         
   
   
@@ -2075,7 +2069,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
         
   
   
@@ -2103,7 +2097,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
         
   
   
@@ -2131,7 +2125,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
         
   
   
@@ -2159,7 +2153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
         
   
   
@@ -2187,7 +2181,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
         
   
   
@@ -2215,7 +2209,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
         
   
   
@@ -2243,7 +2237,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
         
   
   
@@ -2271,7 +2265,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_get_topology/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_topology/" class="md-nav__link">
         
   
   
@@ -2299,7 +2293,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
         
   
   
@@ -2327,7 +2321,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
         
   
   
@@ -2355,7 +2349,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
         
   
   
@@ -2383,7 +2377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2411,7 +2405,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_device_inventory/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_inventory/" class="md-nav__link">
         
   
   
@@ -2439,7 +2433,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
         
   
   
@@ -2467,7 +2461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
   
@@ -2495,7 +2489,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
         
   
   
@@ -2523,7 +2517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_bgp_peerings/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/" class="md-nav__link">
         
   
   
@@ -2551,7 +2545,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_check_device_sync/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_check_device_sync/" class="md-nav__link">
         
   
   
@@ -2579,7 +2573,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_sync_all/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_all/" class="md-nav__link">
         
   
   
@@ -2607,7 +2601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_create_bgp_peering/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_bgp_peering/" class="md-nav__link">
         
   
   
@@ -2635,7 +2629,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_update_bgp_peering/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_bgp_peering/" class="md-nav__link">
         
   
   
@@ -2663,7 +2657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
         
   
   
@@ -2691,7 +2685,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/services_netbox_service_tasks_crud/" class="md-nav__link">
+      <a href="../../workers/netbox/services_netbox_service_tasks_crud/" class="md-nav__link">
         
   
   
@@ -2782,7 +2776,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service/" class="md-nav__link">
         
   
   
@@ -2810,7 +2804,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service_inventory/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_inventory/" class="md-nav__link">
         
   
   
@@ -2885,7 +2879,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/services_agent_service_tasks_chat/" class="md-nav__link">
+      <a href="../../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
         
   
   
@@ -2976,7 +2970,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service/" class="md-nav__link">
         
   
   
@@ -3004,7 +2998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service_inventory/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
         
   
   
@@ -3079,7 +3073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
+      <a href="../../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
         
   
   
@@ -3120,20 +3114,18 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
         
           
           <label class="md-nav__link" for="__nav_4_8" id="__nav_4_8_label" tabindex="0">
@@ -3154,7 +3146,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -3172,7 +3164,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_fastmcp_service/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
         
   
   
@@ -3197,37 +3189,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Inventory
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
         
   
   
@@ -3243,59 +3208,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Authentication
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tools-and-prompts-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Tools And Prompts Policy
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tool-call-guardrails" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Tool Call Guardrails
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3355,7 +3267,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_fastmcp_service_task_auth/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_auth/" class="md-nav__link">
         
   
   
@@ -3383,7 +3295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_fastmcp_service_task_get_tools/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
         
   
   
@@ -3411,7 +3323,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services_fastmcp_service_task_get_prompts/" class="md-nav__link">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_prompts/" class="md-nav__link">
         
   
   
@@ -3502,7 +3414,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service/" class="md-nav__link">
         
   
   
@@ -3530,7 +3442,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_inventory/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
         
   
   
@@ -3605,7 +3517,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+      <a href="../../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
         
   
   
@@ -3696,7 +3608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service/" class="md-nav__link">
         
   
   
@@ -3724,7 +3636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_inventory/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_inventory/" class="md-nav__link">
         
   
   
@@ -3799,7 +3711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
         
   
   
@@ -3827,7 +3739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
         
   
   
@@ -3855,7 +3767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
         
   
   
@@ -3883,7 +3795,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
         
   
   
@@ -3981,7 +3893,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_overview/" class="md-nav__link">
+      <a href="../../clients_overview/" class="md-nav__link">
         
   
   
@@ -4009,7 +3921,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_nfcli_overview/" class="md-nav__link">
+      <a href="../../clients_nfcli_overview/" class="md-nav__link">
         
   
   
@@ -4037,7 +3949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_python_api_overview/" class="md-nav__link">
+      <a href="../../clients_python_api_overview/" class="md-nav__link">
         
   
   
@@ -4065,7 +3977,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../clients_robot_client_overview/" class="md-nav__link">
+      <a href="../../clients_robot_client_overview/" class="md-nav__link">
         
   
   
@@ -4147,7 +4059,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/norfab_hooks/" class="md-nav__link">
+      <a href="../../customization/norfab_hooks/" class="md-nav__link">
         
   
   
@@ -4222,7 +4134,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_overview/" class="md-nav__link">
+      <a href="../../customization/service_plugin_overview/" class="md-nav__link">
         
   
   
@@ -4250,7 +4162,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_local/" class="md-nav__link">
+      <a href="../../customization/service_plugin_local/" class="md-nav__link">
         
   
   
@@ -4278,7 +4190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../customization/service_plugin_module/" class="md-nav__link">
+      <a href="../../customization/service_plugin_module/" class="md-nav__link">
         
   
   
@@ -4368,7 +4280,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tags/" class="md-nav__link">
+      <a href="../../tags/" class="md-nav__link">
         
   
   
@@ -4396,7 +4308,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_changelog/" class="md-nav__link">
+      <a href="../../norfab_changelog/" class="md-nav__link">
         
   
   
@@ -4471,7 +4383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_norfab/" class="md-nav__link">
+      <a href="../../reference_architecture_norfab/" class="md-nav__link">
         
   
   
@@ -4499,7 +4411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_architecture_nfp/" class="md-nav__link">
+      <a href="../../reference_architecture_nfp/" class="md-nav__link">
         
   
   
@@ -4629,7 +4541,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_nfapi/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_nfapi/" class="md-nav__link">
         
   
   
@@ -4657,7 +4569,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_broker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_broker/" class="md-nav__link">
         
   
   
@@ -4685,7 +4597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_worker/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_worker/" class="md-nav__link">
         
   
   
@@ -4713,7 +4625,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_client/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_client/" class="md-nav__link">
         
   
   
@@ -4741,7 +4653,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
         
   
   
@@ -4769,7 +4681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_core_norfab_exceptions/" class="md-nav__link">
+      <a href="../../api_reference_core_norfab_exceptions/" class="md-nav__link">
         
   
   
@@ -4852,7 +4764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
+      <a href="../../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
         
   
   
@@ -4880,7 +4792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fakenos/api_reference_workers_fakenos_worker/" class="md-nav__link">
+      <a href="../../workers/fakenos/api_reference_workers_fakenos_worker/" class="md-nav__link">
         
   
   
@@ -4908,7 +4820,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
+      <a href="../../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
         
   
   
@@ -4936,7 +4848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
+      <a href="../../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
         
   
   
@@ -4964,7 +4876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
+      <a href="../../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
         
   
   
@@ -4992,7 +4904,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference_workers_fastmcp_worker/" class="md-nav__link">
+      <a href="../../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
         
   
   
@@ -5020,7 +4932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../agent/api_reference_workers_agent_worker/" class="md-nav__link">
+      <a href="../../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
         
   
   
@@ -5048,7 +4960,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+      <a href="../../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
         
   
   
@@ -5076,7 +4988,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
+      <a href="../../workers/filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
         
   
   
@@ -5159,7 +5071,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_clients_nfcli_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_nfcli_client/" class="md-nav__link">
         
   
   
@@ -5187,7 +5099,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api_reference_clients_robot_client/" class="md-nav__link">
+      <a href="../../api_reference_clients_robot_client/" class="md-nav__link">
         
   
   
@@ -5278,7 +5190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_mmi_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_mmi_subsystem/" class="md-nav__link">
         
   
   
@@ -5306,7 +5218,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_jobs_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_jobs_subsystem/" class="md-nav__link">
         
   
   
@@ -5334,7 +5246,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference_norfab_events_subsystem/" class="md-nav__link">
+      <a href="../../reference_norfab_events_subsystem/" class="md-nav__link">
         
   
   
@@ -5424,7 +5336,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/norfab_docker_development/" class="md-nav__link">
+      <a href="../norfab_docker_development/" class="md-nav__link">
         
   
   
@@ -5452,7 +5364,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/documentation_style_guide/" class="md-nav__link">
+      <a href="../documentation_style_guide/" class="md-nav__link">
         
   
   
@@ -5480,7 +5392,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
+      <a href="../adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
   
@@ -5508,7 +5420,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/file_streaming_fetch_file/" class="md-nav__link">
+      <a href="../file_streaming_fetch_file/" class="md-nav__link">
         
   
   
@@ -5583,7 +5495,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
+      <a href="../adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
   
@@ -5611,7 +5523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
+      <a href="../adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
         
   
   
@@ -5639,7 +5551,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_check_sync_plan/" class="md-nav__link">
+      <a href="../adr_netbox_check_sync_plan/" class="md-nav__link">
         
   
   
@@ -5667,7 +5579,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_fastmcp_bearer_authentication/" class="md-nav__link">
+      <a href="../adr_fastmcp_bearer_authentication/" class="md-nav__link">
         
   
   
@@ -5695,7 +5607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_mcp_tool_annotations_plan/" class="md-nav__link">
+      <a href="../adr_mcp_tool_annotations_plan/" class="md-nav__link">
         
   
   
@@ -5723,7 +5635,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
+      <a href="../adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
   
@@ -5751,7 +5663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_norfab_interactive_client/" class="md-nav__link">
+      <a href="../adr_norfab_interactive_client/" class="md-nav__link">
         
   
   
@@ -5779,7 +5691,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_mcp_task_prompts_plan/" class="md-nav__link">
+      <a href="../adr_mcp_task_prompts_plan/" class="md-nav__link">
         
   
   
@@ -5807,7 +5719,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_norfab_aaa_security_architecture/" class="md-nav__link">
+      <a href="../adr_norfab_aaa_security_architecture/" class="md-nav__link">
         
   
   
@@ -5835,7 +5747,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/adr_nornir_snmp_tasks/" class="md-nav__link">
+      <a href="../adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
   
@@ -5918,7 +5830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../testing/norfab_testing_framework/" class="md-nav__link">
+      <a href="../../testing/norfab_testing_framework/" class="md-nav__link">
         
   
   
@@ -5946,7 +5858,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../testing/netbox_service_tests/" class="md-nav__link">
+      <a href="../../testing/netbox_service_tests/" class="md-nav__link">
         
   
   
@@ -5989,7 +5901,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../norfab_help_with_norfab/" class="md-nav__link">
+      <a href="../../norfab_help_with_norfab/" class="md-nav__link">
         
   
   
@@ -6036,10 +5948,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#authentication" class="md-nav__link">
+  <a href="#status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Authentication
+        Status
       
     </span>
   </a>
@@ -6047,10 +5959,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tools-and-prompts-policy" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tools And Prompts Policy
+        Overview
       
     </span>
   </a>
@@ -6058,10 +5970,181 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tool-call-guardrails" class="md-nav__link">
+  <a href="#decision" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tool Call Guardrails
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#relationship-to-existing-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relationship To Existing Controls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-decorator-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Decorator Contract
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Task Decorator Contract">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extend-the-existing-mcp-argument" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extend The Existing mcp Argument
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reserved-mcp-metadata-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reserved MCP Metadata Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guardrail-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guardrail Metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inventory-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inventory Contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enforcement-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enforcement Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rejection-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejection Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nornir-cli-default-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nornir CLI Default Guardrails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
       
     </span>
   </a>
@@ -6088,252 +6171,146 @@
   
 
 
-<h1 id="fastmcp-worker-inventory">FastMCP Worker Inventory<a class="headerlink" href="#fastmcp-worker-inventory" title="Permanent link">¤</a></h1>
-<p>Content of <code>inventory.yaml</code> need to be updated to include FastMCP worker details:</p>
-<div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">broker</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://127.0.0.1:5555&quot;</span>
-<span class="w">  </span><span class="nt">shared_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CHANGE_ME&quot;</span>
-
-<span class="nt">workers</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">fastmcp-worker-1</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp/fastmcp-worker-1.yaml</span>
-
-<span class="nt">topology</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">workers</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp-worker-1</span>
-</code></pre></div>
-<p>To obtain broker <code>shared_key</code> run this command on broker:</p>
-<div class="highlight"><pre><span></span><code>cd &lt;path/to/broker/inventory.yaml&gt;
-nfcli --show-broker-shared-key
-</code></pre></div>
-<p>Sample FastMCP worker inventory definition</p>
-<div class="admonition example">
-<p class="admonition-title">Example</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Minimal</label><label for="__tabbed_1_2">Allow specific services</label><label for="__tabbed_1_3">Allow specific tasks only</label><label for="__tabbed_1_4">Reject sensitive tasks</label><label for="__tabbed_1_5">Allow all (default)</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><span class="filename">fastmcp/fastmcp-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-
-<span class="c1"># MCP server bind settings</span>
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
-<span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
-
-<span class="c1"># Optional bearer authentication for MCP streamable HTTP</span>
-<span class="nt">authentication_enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="nt">auth_bearer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">token_ttl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-
-<span class="c1"># Optional sections reserved for future/extended configuration</span>
-<span class="nt">fastmcp</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="nt">uvicorn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><span class="filename">fastmcp/fastmcp-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
-<span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
-
-<span class="nt">tools</span><span class="p">:</span>
+<h1 id="adr-fastmcp-task-call-guardrails">ADR - FastMCP Task Call Guardrails<a class="headerlink" href="#adr-fastmcp-task-call-guardrails" title="Permanent link">¤</a></h1>
+<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">¤</a></h2>
+<p>Accepted</p>
+<p>Date: 2026-07-05</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¤</a></h2>
+<p>FastMCP exposes NorFab service tasks as MCP tools. Existing FastMCP policy
+controls whether a service task is published and callable:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">policy</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nornir&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;netbox&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
+<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cli&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
 <span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reject</span><span class="w">   </span><span class="c1"># block everything else</span>
-
-<span class="nt">uvicorn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reject</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><span class="filename">fastmcp/fastmcp-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
-<span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
-
-<span class="nt">tools</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">policy</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nornir&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cli&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;cfg_deploy&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;netbox&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get_*&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reject</span><span class="w">   </span><span class="c1"># block everything else</span>
-
-<span class="nt">uvicorn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<p>Policy answers the coarse question: "May this MCP server expose and call this
+task?"</p>
+<p>Guardrails answer the next question: "Is this particular task call acceptable
+with these arguments?"</p>
+<p>For example, the Nornir <code>cli</code> task is intentionally exposed as a flexible MCP
+tool, but an MCP client should not be able to submit disruptive commands such
+as <code>reboot</code> or <code>configure terminal</code> by accident. The task can provide a
+default guardrail set that rejects any value in the <code>commands</code> argument
+matching unsafe regex checks. A FastMCP operator can also define additional
+guardrails in the FastMCP worker inventory for the same task.</p>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">¤</a></h2>
+<p>NorFab will add FastMCP task call guardrails as serializable metadata attached
+to task definitions and as inventory-defined overlays in the FastMCP worker.</p>
+<p>Task-owned defaults live under the existing <code>Task(..., mcp={...})</code> metadata:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="nb">input</span><span class="o">=</span><span class="n">CliInput</span><span class="p">,</span>
+    <span class="n">output</span><span class="o">=</span><span class="n">CliResult</span><span class="p">,</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
+    <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Run CLI Commands&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that reboot, reload, or restart devices.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(reboot|reload|restart)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+(reboot|power-off)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*admin</span><span class="se">\\</span><span class="s2">s+reboot</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a reboot, reload, or restart command.&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter configuration mode.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configure</span><span class="se">\\</span><span class="s2">s+(terminal|private|exclusive)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configuration</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*conf</span><span class="se">\\</span><span class="s2">s+t</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*edit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*system-view</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a configuration mode command.&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that commit, delete, debug, or clear state.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*commit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(delete|erase|format|factory-reset|clear|debug|undebug|monitor|test|reset)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+zeroize</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a destructive or state-changing command.&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter device shell modes.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*start</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*run</span><span class="se">\\</span><span class="s2">s+(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(guestshell|run</span><span class="se">\\</span><span class="s2">s+guestshell)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a shell mode command.&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that change device software or boot images.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*install</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+software</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*software</span><span class="se">\\</span><span class="s2">s+(install|add|activate|commit|rollback|clean|remove)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*boot</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*package</span><span class="se">\\</span><span class="s2">s+(install|add|delete|remove|activate)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an OS/image/package operation command.&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that open outbound device sessions.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(ssh|telnet)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an outbound session command.&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">...</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cli</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+    <span class="o">...</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><span class="filename">fastmcp/fastmcp-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
-<span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
-
-<span class="nt">tools</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">policy</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nornir&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cfg_deploy&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;cfg_rollback&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reject</span><span class="w">   </span><span class="c1"># block destructive tasks</span>
-<span class="w">    </span><span class="c1"># no further rules — everything else is allowed by default</span>
-
-<span class="nt">uvicorn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><span class="filename">fastmcp/fastmcp-worker-1.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
-
-<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
-<span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
-
-<span class="nt">tools</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w">   </span><span class="c1"># omit policy to expose every discovered tool</span>
-
-<span class="nt">uvicorn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
-<p><strong>host</strong></p>
-<p>IP address to bind the MCP HTTP server to. Default is <code>0.0.0.0</code>.
-For local development and VS Code MCP integration, prefer <code>127.0.0.1</code>.</p>
-<p><strong>port</strong></p>
-<p>TCP port to serve MCP HTTP endpoint on. Default is <code>8001</code>.</p>
-<hr />
-<h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">¤</a></h2>
-<p>FastMCP bearer authentication is disabled by default. Enable it with
-<code>authentication_enabled: true</code> to require MCP clients to send
-<code>Authorization: Bearer &lt;token&gt;</code> on the MCP streamable HTTP endpoint.</p>
+<p>FastMCP inventory can add deployment-specific guardrails. Built-in task
+guardrails are enabled by default:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fastmcp</span>
 <span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
 <span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
 
-<span class="nt">authentication_enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="nt">auth_bearer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">token_ttl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400</span>
-<span class="w">  </span><span class="nt">issuer_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8001&quot;</span>
-<span class="w">  </span><span class="nt">resource_server_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8001&quot;</span>
-<span class="w">  </span><span class="nt">required_scopes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
-</code></pre></div>
-<p>Tokens are stored in the FastMCP worker diskcache using the same
-<code>bearer_token::&lt;token&gt;</code> key format as the FastAPI worker:</p>
-<div class="highlight"><pre><span></span><code><span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-    <span class="s2">&quot;fastmcp&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;bearer_token_store&quot;</span><span class="p">,</span>
-    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;automation&quot;</span><span class="p">,</span> <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;secret-token&quot;</span><span class="p">,</span> <span class="s2">&quot;expire&quot;</span><span class="p">:</span> <span class="mi">86400</span><span class="p">},</span>
-<span class="p">)</span>
-</code></pre></div>
-<p>Use <code>bearer_token_list</code>, <code>bearer_token_check</code>, and <code>bearer_token_delete</code> to
-inspect or remove tokens. Token management tasks are available through NorFab
-client jobs and are not exposed as MCP tools.</p>
-<hr />
-<h2 id="tools-and-prompts-policy">Tools And Prompts Policy<a class="headerlink" href="#tools-and-prompts-policy" title="Permanent link">¤</a></h2>
-<p>The optional <code>tools</code> section controls which NorFab service tasks are
-exposed as MCP tools. The same policy also controls prompts associated with
-those tasks. Rejecting a task hides both its tool and every prompt declared by
-that task.</p>
-<p><strong>tools.policy</strong></p>
-<p>An ordered list of rule dictionaries. Each rule has three keys:</p>
-<table>
-<thead>
-<tr>
-<th>Key</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>service</code></td>
-<td>glob string</td>
-<td>Matched against the NorFab service name (e.g. <code>nornir</code>, <code>net*</code>)</td>
-</tr>
-<tr>
-<td><code>tasks</code></td>
-<td>list of globs</td>
-<td>Matched against the task name (e.g. <code>cli</code>, <code>cfg_*</code>, <code>*</code>)</td>
-</tr>
-<tr>
-<td><code>action</code></td>
-<td><code>allow</code> / <code>reject</code></td>
-<td>What to do when the rule matches</td>
-</tr>
-</tbody>
-</table>
-<p>Rules are evaluated <strong>in order</strong>; the <strong>first matching rule wins</strong>. A task must
-match both <code>service</code> and at least one pattern in <code>tasks</code> for a rule to apply.
-If no rule matches, the task's MCP tool and prompts are <strong>allowed</strong>
-(default-allow policy).</p>
-<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">policy</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nornir&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cli&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;cfg_*&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;netbox&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get_*&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
-<span class="w">      </span><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reject</span><span class="w">   </span><span class="c1"># catch-all — block everything else</span>
-</code></pre></div>
-<table>
-<thead>
-<tr>
-<th>Example rule</th>
-<th>Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>service: "*", tasks: ["*"], action: allow</code></td>
-<td>Allow every task tool and its prompts (same as no rules)</td>
-</tr>
-<tr>
-<td><code>service: "nornir", tasks: ["*"], action: allow</code> + catch-all reject</td>
-<td>Expose only Nornir task tools and prompts</td>
-</tr>
-<tr>
-<td><code>service: "nornir", tasks: ["cfg_*"], action: reject</code></td>
-<td>Block matching Nornir tools and their prompts, allow the rest</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Task names can be inspected at runtime with the <code>show fastmcp tools</code> CLI
-command or the <code>get_tools</code> API call. Published prompts can be inspected
-with <code>show fastmcp prompts</code> or <code>get_prompts</code>.</p>
-</div>
-<hr />
-<h2 id="tool-call-guardrails">Tool Call Guardrails<a class="headerlink" href="#tool-call-guardrails" title="Permanent link">¤</a></h2>
-<p>FastMCP guardrails reject specific MCP tool calls by inspecting the call
-arguments before the NorFab job is dispatched. They are useful for allowing a
-flexible task such as <code>nornir.cli</code> while blocking unsafe command values.</p>
-<p>Guardrails do not replace <code>tools.policy</code>. Policy decides whether a task is
-published and callable. Guardrails decide whether one specific call to an
-allowed task is acceptable.</p>
-<p>Task authors can define default guardrails in task MCP metadata. FastMCP
-inventory can add deployment-specific guardrails under <code>tools.guardrails</code>.
-Built-in task guardrails are enabled by default.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
+<span class="nt">tools</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">guardrails</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
 <span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reject commit confirmed commands through MCP.</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reject reload commands from MCP clients.</span>
 <span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commit confirmed</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">commit</span><span class="nv"> </span><span class="s">confirmed</span><span class="nv"> </span><span class="s">command.&quot;</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?i)^\\s*reload\\b.*&quot;</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">reload</span><span class="nv"> </span><span class="s">command.&quot;</span>
 </code></pre></div>
-<p><code>tools.guardrails</code> is a list of guardrail entries.</p>
-<p>Set <code>tools.disable_builtin_guardrails: true</code> to ignore guardrails declared by
-tasks. Inventory-defined guardrails still apply:</p>
+<p>Operators can disable task-defined guardrails while keeping inventory-defined
+guardrails active:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">disable_builtin_guardrails</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">guardrails</span><span class="p">:</span>
@@ -6344,108 +6321,517 @@ tasks. Inventory-defined guardrails still apply:</p>
 <span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?i)^\\s*reload\\b.*&quot;</span>
 <span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">reload</span><span class="nv"> </span><span class="s">command.&quot;</span>
 </code></pre></div>
+<p>The FastMCP worker evaluates all matching guardrails before calling
+<code>self.client.run_job(...)</code>. If any guardrail matches, the MCP tool call is
+rejected and no NorFab job is dispatched.</p>
+<h2 id="goals">Goals<a class="headerlink" href="#goals" title="Permanent link">¤</a></h2>
+<ul>
+<li>Let task authors publish safe defaults next to task description, input
+  schema, output schema, annotations, and prompts.</li>
+<li>Let FastMCP operators add local guardrails per service/task from inventory.</li>
+<li>Keep guardrails serializable in <code>list_tasks</code> output.</li>
+<li>Keep the core <code>Task</code> decorator independent of the MCP SDK.</li>
+<li>Evaluate guardrails at the FastMCP boundary before job dispatch.</li>
+<li>Return a clear MCP error when a call is rejected.</li>
+<li>Keep the first implementation small, readable, and deterministic.</li>
+</ul>
+<h2 id="non-goals">Non-Goals<a class="headerlink" href="#non-goals" title="Permanent link">¤</a></h2>
+<ul>
+<li>Replacing <code>tools.policy</code>; policy remains the task exposure and coarse
+  authorization layer.</li>
+<li>Replacing service-side validation, authorization, dry-run behavior, or
+  task-specific safety checks.</li>
+<li>Adding an external policy engine.</li>
+<li>Evaluating guardrails against task output.</li>
+<li>Supporting arbitrary Python callbacks in guardrail definitions.</li>
+<li>Automatically generating guardrails from task descriptions or JSON Schema.</li>
+<li>Publishing guardrails as MCP <code>Tool</code> fields; guardrails are a NorFab extension
+  consumed by the FastMCP worker.</li>
+</ul>
+<h2 id="relationship-to-existing-controls">Relationship To Existing Controls<a class="headerlink" href="#relationship-to-existing-controls" title="Permanent link">¤</a></h2>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Scope</th>
+<th>Enforcement point</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcp=False</code></td>
+<td>Task definition</td>
+<td>Discovery</td>
+<td>Task is not exposed through MCP.</td>
+</tr>
+<tr>
+<td><code>tools.policy</code></td>
+<td>Service/task name</td>
+<td>Discovery and call time</td>
+<td>Task is hidden or rejected.</td>
+</tr>
+<tr>
+<td>Guardrails</td>
+<td>Service/task arguments</td>
+<td>Call time</td>
+<td>Specific call is rejected before dispatch.</td>
+</tr>
+<tr>
+<td>Task input model</td>
+<td>Task arguments</td>
+<td>Worker execution</td>
+<td>Invalid arguments fail Pydantic validation.</td>
+</tr>
+<tr>
+<td>Task logic</td>
+<td>Full task behavior</td>
+<td>Worker execution</td>
+<td>Service-specific safety remains authoritative.</td>
+</tr>
+</tbody>
+</table>
+<p>Guardrails are evaluated only after the tool name has resolved to a registered
+NorFab service/task and after <code>tools.policy</code> has allowed the call.</p>
+<h2 id="task-decorator-contract">Task Decorator Contract<a class="headerlink" href="#task-decorator-contract" title="Permanent link">¤</a></h2>
+<h3 id="extend-the-existing-mcp-argument">Extend The Existing <code>mcp</code> Argument<a class="headerlink" href="#extend-the-existing-mcp-argument" title="Permanent link">¤</a></h3>
+<p>Do not add a new <code>guardrails</code> argument to <code>Task</code>. Reserve the <code>guardrails</code> key
+inside the existing <code>mcp</code> dictionary:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="nb">input</span><span class="o">=</span><span class="n">SomeInput</span><span class="p">,</span>
+    <span class="n">output</span><span class="o">=</span><span class="n">SomeOutput</span><span class="p">,</span>
+    <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;prompts&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The <code>mcp</code> values have these meanings:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Tool behavior</th>
+<th>Guardrail behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>omitted, <code>None</code>, or <code>{}</code></td>
+<td>Publish the task as a tool with default metadata.</td>
+<td>No task-defined guardrails.</td>
+</tr>
+<tr>
+<td><code>False</code></td>
+<td>Publish no tool.</td>
+<td>No guardrails are evaluated through MCP because the task is hidden.</td>
+</tr>
+<tr>
+<td>dictionary without <code>guardrails</code></td>
+<td>Publish the task as a tool.</td>
+<td>No task-defined guardrails.</td>
+</tr>
+<tr>
+<td>dictionary with <code>guardrails: []</code></td>
+<td>Publish the task as a tool.</td>
+<td>No task-defined guardrails.</td>
+</tr>
+<tr>
+<td>dictionary with guardrail entries</td>
+<td>Publish the task as a tool.</td>
+<td>Evaluate guardrails on each MCP tool call.</td>
+</tr>
+</tbody>
+</table>
+<p><code>mcp["guardrails"]</code> is a NorFab metadata extension. It is not accepted by the
+MCP SDK <code>Tool</code> model. The FastMCP worker must remove it from the copied MCP
+metadata before constructing <code>types.Tool(...)</code>, the same way it removes
+<code>prompts</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tool_metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">])</span>
+<span class="n">prompts_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;prompts&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<span class="n">guardrails_metadata</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;guardrails&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+<span class="n">tool</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">derived_tool_name</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+    <span class="n">inputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;inputSchema&quot;</span><span class="p">],</span>
+    <span class="n">outputSchema</span><span class="o">=</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;outputSchema&quot;</span><span class="p">],</span>
+    <span class="o">**</span><span class="n">tool_metadata</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The split must operate on a copy. It must not mutate the task schema retained
+for diagnostics, prompt rendering, or later discovery cycles.</p>
+<h3 id="reserved-mcp-metadata-keys">Reserved MCP Metadata Keys<a class="headerlink" href="#reserved-mcp-metadata-keys" title="Permanent link">¤</a></h3>
+<p>The NorFab-reserved keys inside <code>mcp</code> become:</p>
+<ul>
+<li><code>prompts</code></li>
+<li><code>guardrails</code></li>
+</ul>
+<p>All other top-level keys retain their existing meaning as keyword arguments for
+the MCP SDK <code>Tool</code> model.</p>
+<h3 id="guardrail-metadata">Guardrail Metadata<a class="headerlink" href="#guardrail-metadata" title="Permanent link">¤</a></h3>
+<p><code>mcp["guardrails"]</code> is a list of guardrail dictionaries. A list preserves
+author-defined order and allows a task to define more than one independent
+check.</p>
+<p>Each guardrail has this contract:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>no</td>
+<td>Human-readable explanation for operators.</td>
+</tr>
+<tr>
+<td><code>field</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Top-level argument field to inspect.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>contains</code>, <code>equals</code>, or <code>regex</code></td>
+<td>yes</td>
+<td>Match strategy.</td>
+</tr>
+<tr>
+<td><code>match</code></td>
+<td>string or list of strings</td>
+<td>yes</td>
+<td>Text checks to compare, or Python regular expressions used with <code>re.search</code> when <code>type</code> is <code>regex</code>.</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>string</td>
+<td>no</td>
+<td>Client-facing rejection message.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>field</code> selector is intentionally small:</p>
+<ul>
+<li><code>commands</code> selects the top-level <code>commands</code> argument.</li>
+<li>When the selected value is a list, each list item is inspected.</li>
+<li>String, dictionary, and other non-list values are converted to strings and
+  inspected as one value.</li>
+<li>Missing fields do not match. Required argument validation remains the task
+  input model's responsibility.</li>
+</ul>
+<p>All selected scalar values are compared as strings. When <code>match</code> is a list,
+entries are evaluated with OR semantics. A guardrail matches when any selected
+scalar value matches any configured check. <code>contains</code> and <code>equals</code> are always
+case-insensitive; regex checks use the flags declared in the regex value.</p>
+<p>Guardrails inspect only inline MCP call arguments. They do not resolve NorFab
+URLs, download Filesharing content, or inspect templates rendered later by the
+target service worker. For example, <code>commands: "nf://cli/commands.txt"</code> is
+checked as that literal path string, not as the file's eventual contents.</p>
+<p>Invalid guardrail metadata must fail early:</p>
+<ul>
+<li>Task-defined guardrails are validated by the FastMCP worker during discovery
+  before they are attached to a tool.</li>
+<li>Inventory-defined guardrails are validated during discovery before they are
+  attached to a tool.</li>
+<li>Invalid regex checks are rejected during validation, not during a tool
+  call. When <code>match</code> is a list, every regex in the list is validated.</li>
+</ul>
+<h2 id="inventory-contract">Inventory Contract<a class="headerlink" href="#inventory-contract" title="Permanent link">¤</a></h2>
+<p>FastMCP inventory guardrails live under <code>tools.guardrails</code> as a list of
+guardrail entries. Built-in task guardrails are enabled by default. Set
+<code>tools.disable_builtin_guardrails: true</code> to skip task-defined guardrails while
+still applying inventory-defined guardrails.</p>
+<p>Each inventory guardrail entry declares the service and task it applies to:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">guardrails</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reject commit confirmed commands through MCP.</span>
+<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contains</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commit confirmed</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">commit</span><span class="nv"> </span><span class="s">confirmed</span><span class="nv"> </span><span class="s">command.&quot;</span>
+</code></pre></div>
 <p>Inventory options:</p>
 <table>
 <thead>
 <tr>
 <th>Key</th>
 <th>Type</th>
-<th>Description</th>
+<th>Required</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>disable_builtin_guardrails</code></td>
 <td>boolean</td>
-<td>Optional flag under <code>tools</code>; defaults to <code>false</code></td>
+<td>no</td>
+<td>Optional flag under <code>tools</code>; defaults to <code>false</code>.</td>
 </tr>
 </tbody>
 </table>
-<p>Guardrail entry keys:</p>
+<p>Inventory guardrail entry fields:</p>
 <table>
 <thead>
 <tr>
 <th>Key</th>
 <th>Type</th>
-<th>Description</th>
+<th>Required</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>service</code></td>
 <td>string</td>
-<td>Exact NorFab service name, for example <code>nornir</code></td>
+<td>yes</td>
+<td>Exact NorFab service name, for example <code>nornir</code>.</td>
 </tr>
 <tr>
 <td><code>task</code></td>
 <td>string</td>
-<td>Exact NorFab task name, for example <code>cli</code></td>
+<td>yes</td>
+<td>Exact NorFab task name, for example <code>cli</code>.</td>
 </tr>
 <tr>
 <td><code>description</code></td>
 <td>string</td>
-<td>Optional human-readable explanation for operators</td>
+<td>no</td>
+<td>Human-readable explanation for operators.</td>
 </tr>
 <tr>
 <td><code>field</code></td>
 <td>string</td>
-<td>Top-level tool argument field to inspect</td>
+<td>yes</td>
+<td>Top-level argument field to inspect.</td>
 </tr>
 <tr>
 <td><code>type</code></td>
-<td><code>contains</code> / <code>equals</code> / <code>regex</code></td>
-<td>Match strategy</td>
+<td><code>contains</code>, <code>equals</code>, or <code>regex</code></td>
+<td>yes</td>
+<td>Match strategy.</td>
 </tr>
 <tr>
 <td><code>match</code></td>
 <td>string or list of strings</td>
-<td>Text value or regex value to match</td>
+<td>yes</td>
+<td>Match check or checks.</td>
 </tr>
 <tr>
 <td><code>message</code></td>
 <td>string</td>
-<td>Optional client-facing rejection message</td>
+<td>no</td>
+<td>Client-facing rejection message.</td>
 </tr>
 </tbody>
 </table>
-<p>When <code>match</code> is a list, FastMCP rejects the call if any selected argument
-value matches any configured match value. <code>contains</code> and <code>equals</code> checks are
-always case-insensitive; regex checks use the flags declared in the regex
-value.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Guardrails inspect only the inline MCP call arguments. They do not
-download NorFab URLs or inspect content resolved later by service workers,
-such as <code>nf://cli/commands.txt</code> files rendered by the Nornir worker at
-runtime.</p>
-</div>
-<p>Use NFCLI to inspect effective guardrails for a published task:</p>
-<div class="highlight"><pre><span></span><code>show<span class="w"> </span>fastmcp<span class="w"> </span>tools<span class="w"> </span>service<span class="w"> </span>nornir<span class="w"> </span>name<span class="w"> </span>*cli*
+<p>Inventory guardrails are appended after task-defined guardrails unless
+<code>tools.disable_builtin_guardrails</code> is <code>true</code>.</p>
+<h2 id="enforcement-flow">Enforcement Flow<a class="headerlink" href="#enforcement-flow" title="Permanent link">¤</a></h2>
+<p>FastMCP tool discovery will store guardrails with the registered tool data:</p>
+<div class="highlight"><pre><span></span><code><span class="n">result</span><span class="p">[</span><span class="n">task</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="n">task_tool</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;tool&quot;</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span><span class="o">**</span><span class="n">task_tool</span><span class="p">),</span>
+    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+    <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="n">effective_guardrails</span><span class="p">,</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>Example with several regex values:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">guardrails</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
-<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reject CLI commands that enter configuration mode.</span>
-<span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">commands</span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
-<span class="w">      </span><span class="nt">match</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;(?i)^\\s*configure\\s+terminal\\b.*&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;(?i)^\\s*configuration\\b.*&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;(?i)^\\s*conf\\s+t\\b.*&quot;</span>
-<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MCP</span><span class="nv"> </span><span class="s">guardrail</span><span class="nv"> </span><span class="s">rejected</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">configuration</span><span class="nv"> </span><span class="s">mode</span><span class="nv"> </span><span class="s">command.&quot;</span>
+<p>MCP <code>tools/call</code> will follow this sequence:</p>
+<ol>
+<li>Log the requested tool name.</li>
+<li>Resolve the MCP tool name to a registered NorFab service/task.</li>
+<li>Enforce <code>tools.policy</code> again at call time.</li>
+<li>Load the registered tool's effective guardrails.</li>
+<li>Evaluate guardrails against the raw MCP <code>arguments</code> dictionary.</li>
+<li>Reject the call on the first matching guardrail.</li>
+<li>Dispatch the NorFab job only when no guardrail matches.</li>
+</ol>
+<p>The enforcement point must sit immediately before:</p>
+<div class="highlight"><pre><span></span><code><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">task_name</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="n">arguments</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
-<p>The Nornir <code>cli</code> task includes default MCP guardrails that reject <code>reboot</code> and
-related reload or restart commands, configuration-mode commands such as
-<code>configure terminal</code>, <code>configuration</code>, and <code>conf t</code>, and destructive or
-state-changing commands such as <code>commit</code>, <code>delete</code>, <code>clear</code>, and <code>debug</code>.
-It also rejects shell-mode commands such as <code>bash</code>, <code>shell</code>, <code>start shell</code>,
-<code>request system shell</code>, and <code>guestshell</code>, OS/image/package operations, and
-outbound session commands such as <code>ssh</code> and <code>telnet</code>.
-The Nornir <code>cfg</code> task includes default MCP guardrails that reject operational
-command escapes in configuration input, such as <code>do ...</code> and <code>run ...</code>, plus
-reboot, reload, restart, delete, erase, zeroize, <code>ssh</code>, and <code>telnet</code> commands.</p>
+<p>This prevents a rejected call from creating a NorFab job, reaching a service
+worker, or producing partial side effects.</p>
+<h2 id="rejection-behavior">Rejection Behavior<a class="headerlink" href="#rejection-behavior" title="Permanent link">¤</a></h2>
+<p>When a guardrail matches, FastMCP will:</p>
+<ul>
+<li>Return an MCP error to the caller.</li>
+<li>Include the guardrail <code>message</code> when provided.</li>
+<li>Log a warning with service, task, tool name, field, and match type.</li>
+<li>Avoid logging the full argument payload in the rejection warning.</li>
+<li>Not call <code>self.client.run_job(...)</code>.</li>
+</ul>
+<p>Example client-facing message:</p>
+<div class="highlight"><pre><span></span><code>MCP tool call &#39;service_nornir__task_cli&#39; rejected by guardrail
+MCP guardrail rejected a configuration mode command.
+</code></pre></div>
+<h2 id="nornir-cli-default-guardrails">Nornir CLI Default Guardrails<a class="headerlink" href="#nornir-cli-default-guardrails" title="Permanent link">¤</a></h2>
+<p>The Nornir <code>cli</code> task should ship with six default MCP guardrails:</p>
+<div class="highlight"><pre><span></span><code><span class="n">MCP_GUARDRAILS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that reboot, reload, or restart devices.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(reboot|reload|restart)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+(reboot|power-off)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*admin</span><span class="se">\\</span><span class="s2">s+reboot</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a reboot, reload, or restart command.&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter configuration mode.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configure</span><span class="se">\\</span><span class="s2">s+(terminal|private|exclusive)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*configuration</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*conf</span><span class="se">\\</span><span class="s2">s+t</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*edit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*system-view</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a configuration mode command.&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that commit, delete, debug, or clear state.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*commit</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(delete|erase|format|factory-reset|clear|debug|undebug|monitor|test|reset)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+zeroize</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a destructive or state-changing command.&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that enter device shell modes.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*start</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+shell</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*run</span><span class="se">\\</span><span class="s2">s+(bash|shell|sh)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(guestshell|run</span><span class="se">\\</span><span class="s2">s+guestshell)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected a shell mode command.&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that change device software or boot images.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*install</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*request</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">s+software</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*software</span><span class="se">\\</span><span class="s2">s+(install|add|activate|commit|rollback|clean|remove)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*boot</span><span class="se">\\</span><span class="s2">s+system</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*package</span><span class="se">\\</span><span class="s2">s+(install|add|delete|remove|activate)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an OS/image/package operation command.&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reject CLI commands that open outbound device sessions.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;commands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;(?im)^</span><span class="se">\\</span><span class="s2">s*(ssh|telnet)</span><span class="se">\\</span><span class="s2">b.*&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;MCP guardrail rejected an outbound session command.&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</code></pre></div>
+<p>These guardrails apply whether <code>commands</code> is a string or a list of strings:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;show version&quot;</span><span class="p">}</span>
+</code></pre></div>
+<p>passes, while:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;show version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;conf t&quot;</span><span class="p">]}</span>
+</code></pre></div>
+<p>is rejected before FastMCP dispatches the NorFab job.</p>
+<p>The guardrails apply even when <code>dry_run=true</code>. <code>dry_run</code> is a service task
+feature, while FastMCP guardrails protect the MCP boundary before task
+execution.</p>
+<h2 id="inspection">Inspection<a class="headerlink" href="#inspection" title="Permanent link">¤</a></h2>
+<p>FastMCP does not publish guardrails through MCP <code>tools/list</code> because MCP
+<code>Tool</code> has no guardrail field.</p>
+<p>NorFab-side inspection is available through <code>fastmcp.get_tools</code> when
+<code>brief=False</code>. Tool definitions returned by this task include the effective
+guardrails after inventory overlays, not only task-defined defaults.</p>
+<h2 id="implementation-notes">Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permanent link">¤</a></h2>
+<p>Core worker changes:</p>
+<ol>
+<li>Keep <code>mcp["guardrails"]</code> as plain serializable task metadata in the task
+   schema. Do not add FastMCP guardrail validation models to core worker code.</li>
+</ol>
+<p>FastMCP worker changes:</p>
+<ol>
+<li>Add FastMCP-local Pydantic models for guardrail metadata.</li>
+<li>During discovery, validate task-defined guardrails unless
+   <code>tools.disable_builtin_guardrails</code> is <code>true</code>, validate inventory-defined
+   guardrails, and append matching inventory entries.</li>
+<li>During discovery, remove <code>guardrails</code> from the copied tool metadata before
+   constructing <code>types.Tool(...)</code>.</li>
+<li>Store effective guardrails with each registered tool.</li>
+<li>During <code>call_tool</code>, evaluate guardrails before <code>client.run_job(...)</code>.</li>
+<li>Keep logic flat and explicit. Do not introduce a generic policy engine.</li>
+</ol>
+<p>Nornir worker changes:</p>
+<ol>
+<li>Add the default reboot/reload/restart, configuration-mode, and destructive
+   command guardrails to the <code>cli</code> task MCP metadata.</li>
+</ol>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">¤</a></h2>
+<p>Unit tests should cover:</p>
+<ul>
+<li>FastMCP accepts valid guardrail metadata.</li>
+<li>FastMCP rejects invalid match types.</li>
+<li>FastMCP rejects invalid regex checks.</li>
+<li>FastMCP strips <code>guardrails</code> before constructing <code>types.Tool</code>.</li>
+<li>Inventory guardrails append to task-defined guardrails.</li>
+<li><code>tools.disable_builtin_guardrails</code> skips task-defined guardrails while
+  keeping inventory-defined guardrails active.</li>
+<li><code>contains</code>, <code>equals</code>, and <code>regex</code> matching work for string values,
+  list-valued <code>match</code>, and list-valued task arguments.</li>
+<li>Missing fields do not match.</li>
+<li>A rejected call does not call <code>client.run_job(...)</code>.</li>
+</ul>
+<p>Service tests should cover:</p>
+<ul>
+<li><code>service_nornir__task_cli</code> accepts safe commands such as <code>show version</code>.</li>
+<li><code>service_nornir__task_cli</code> rejects <code>commands=["reboot"]</code>,
+  <code>commands=["configure terminal"]</code>, and <code>commands=["conf t"]</code>.</li>
+<li>Inventory-defined guardrails reject an additional rule without changing
+  the Nornir task source.</li>
+<li><code>tools.policy</code> rejection still hides tools and prompts before guardrails are
+  considered.</li>
+</ul>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">¤</a></h2>
+<ul>
+<li>FastMCP gains a payload-aware safety layer without changing the broker,
+  client API, or service task execution model.</li>
+<li>Task authors can document and enforce MCP-specific safety expectations in
+  the same metadata block already used for annotations and prompts.</li>
+<li>Operators can make local MCP deployments stricter without forking service
+  task code.</li>
+<li>Guardrails are intentionally conservative. They reject matching calls; they
+  do not rewrite arguments, request confirmation, or dispatch dry-run previews.</li>
+<li>Complex authorization remains outside this feature and belongs to the wider
+  NorFab AAA and policy architecture.</li>
+</ul>
 
 
 
@@ -6470,44 +6856,6 @@ reboot, reload, restart, delete, erase, zeroize, <code>ssh</code>, and <code>tel
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../services_fastmcp_service/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Overview
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../services_fastmcp_service_task_auth/" class="md-footer__link md-footer__link--next" aria-label="Next: Auth">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Auth
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -6564,14 +6912,14 @@ reboot, reload, restart, delete, erase, zeroize, <code>ssh</code>, and <code>tel
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
-        <script src="../../../javascripts/mermaid.js"></script>
+        <script src="../../javascripts/mermaid.js"></script>
       
     
   </body>

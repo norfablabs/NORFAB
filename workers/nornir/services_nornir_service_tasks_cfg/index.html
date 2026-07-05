@@ -1687,6 +1687,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mcp-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Guardrails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6192,6 +6203,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mcp-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Guardrails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6419,6 +6441,21 @@
 </table>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>The task returns per-host configuration results. When supported by the plugin and <code>add_details=True</code>, output can include <code>changed</code>, <code>diff</code>, <code>failed</code>, <code>exception</code>, <code>connection_retry</code>, and <code>task_retry</code> details.</p>
+<h2 id="mcp-guardrails">MCP Guardrails<a class="headerlink" href="#mcp-guardrails" title="Permanent link">¤</a></h2>
+<p>When exposed through FastMCP, the <code>cfg</code> task includes default guardrails that
+reject configuration input attempting to execute operational commands from
+configuration mode, such as Cisco-style <code>do ...</code> and Junos-style <code>run ...</code>
+commands. They also reject reboot, reload, restart, delete, erase, zeroize,
+<code>ssh</code>, and <code>telnet</code> commands. These guardrails apply only to MCP tool calls.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Guardrails inspect inline <code>config</code> values only. If <code>config</code> points to a
+Filesharing path such as <code>nf://cfg/config.txt</code>, FastMCP checks the path
+string, not the downloaded or rendered file content.</p>
+</div>
+<p>Use NFCLI to inspect the currently published guardrails:</p>
+<div class="highlight"><pre><span></span><code>show<span class="w"> </span>fastmcp<span class="w"> </span>tools<span class="w"> </span>service<span class="w"> </span>nornir<span class="w"> </span>name<span class="w"> </span>*cfg*
+</code></pre></div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <p>Example of sending configuration commands to devices.</p>
 <div class="admonition example">
@@ -7453,53 +7490,7 @@ URL that resolves to a file.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\nornir_worker\cfg_task.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 76</span>
 <span class="normal"> 77</span>
 <span class="normal"> 78</span>
 <span class="normal"> 79</span>
@@ -7562,7 +7553,54 @@ URL that resolves to a file.</p>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
-<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CfgInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CfgResult</span><span class="p">,</span>
@@ -7573,7 +7611,8 @@ URL that resolves to a file.</p>
             <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;guardrails&quot;</span><span class="p">:</span> <span class="n">MCP_GUARDRAILS</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cfg</span><span class="p">(</span>

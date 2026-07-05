@@ -6582,7 +6582,13 @@ API explorer:</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 744</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 738</span>
+<span class="normal"> 739</span>
+<span class="normal"> 740</span>
+<span class="normal"> 741</span>
+<span class="normal"> 742</span>
+<span class="normal"> 743</span>
+<span class="normal"> 744</span>
 <span class="normal"> 745</span>
 <span class="normal"> 746</span>
 <span class="normal"> 747</span>
@@ -7103,7 +7109,9 @@ API explorer:</p>
 
         <span class="c1"># Mode: cache disabled - fetch without caching</span>
         <span class="k">if</span> <span class="n">cache</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">)</span>
+            <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span>
+            <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">}</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">])</span><span class="si">}</span><span class="s2"> BGP session(s) for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
@@ -7115,7 +7123,9 @@ API explorer:</p>
         <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span> <span class="ow">or</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cache</span> <span class="o">==</span> <span class="s2">&quot;refresh&quot;</span> <span class="ow">and</span> <span class="n">cached_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">)</span>
+            <span class="n">bgp_sessions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span>
+            <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                 <span class="n">cache_key</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">],</span> <span class="n">expire</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span>
@@ -7134,8 +7144,10 @@ API explorer:</p>
         <span class="p">)</span>
 
         <span class="c1"># Fetch brief session info to compare timestamps</span>
-        <span class="n">brief_sessions</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-            <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,last_updated,name&quot;</span>
+        <span class="n">brief_sessions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
+            <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,last_updated,name&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">netbox_sessions</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">last_updated</span><span class="p">}</span>
@@ -7178,7 +7190,7 @@ API explorer:</p>
                 <span class="n">resource</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-                <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">session_ids_to_fetch</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">session_ids_to_fetch</span>
             <span class="p">):</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
 

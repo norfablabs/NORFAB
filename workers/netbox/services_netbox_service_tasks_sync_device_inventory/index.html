@@ -7238,7 +7238,16 @@ to <code>parse_ttp</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 329</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 320</span>
+<span class="normal"> 321</span>
+<span class="normal"> 322</span>
+<span class="normal"> 323</span>
+<span class="normal"> 324</span>
+<span class="normal"> 325</span>
+<span class="normal"> 326</span>
+<span class="normal"> 327</span>
+<span class="normal"> 328</span>
+<span class="normal"> 329</span>
 <span class="normal"> 330</span>
 <span class="normal"> 331</span>
 <span class="normal"> 332</span>
@@ -8056,18 +8065,7 @@ to <code>parse_ttp</code>.</p>
 <span class="normal">1144</span>
 <span class="normal">1145</span>
 <span class="normal">1146</span>
-<span class="normal">1147</span>
-<span class="normal">1148</span>
-<span class="normal">1149</span>
-<span class="normal">1150</span>
-<span class="normal">1151</span>
-<span class="normal">1152</span>
-<span class="normal">1153</span>
-<span class="normal">1154</span>
-<span class="normal">1155</span>
-<span class="normal">1156</span>
-<span class="normal">1157</span>
-<span class="normal">1158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInventoryResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -8263,8 +8261,7 @@ to <code>parse_ttp</code>.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">,</span>
-        <span class="n">devices</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
         <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,serial,device_type,platform&quot;</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">device_type</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">device_type</span>
@@ -8296,7 +8293,7 @@ to <code>parse_ttp</code>.</p>
     <span class="c1"># Fetch current module bays and installed modules.</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching current module bay data from NetBox&quot;</span><span class="p">)</span>
     <span class="n">nb_module_bays</span> <span class="o">=</span> <span class="p">{</span><span class="n">device_name</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
-    <span class="k">for</span> <span class="n">module_bay</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">module_bays</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">module_bay</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">module_bays</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">devices</span><span class="p">):</span>
         <span class="n">device_name</span> <span class="o">=</span> <span class="n">module_bay</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
         <span class="n">bay_name</span> <span class="o">=</span> <span class="n">module_bay</span><span class="o">.</span><span class="n">name</span>
         <span class="n">nb_module_bays</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">bay_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">module_bay</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -8304,7 +8301,7 @@ to <code>parse_ttp</code>.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;fetching installed module data from NetBox&quot;</span><span class="p">)</span>
     <span class="n">nb_modules</span> <span class="o">=</span> <span class="p">{</span><span class="n">device_name</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
     <span class="n">nb_module_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">device_name</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
-    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">devices</span><span class="p">):</span>
         <span class="n">device_name</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
         <span class="n">bay_name</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">module_bay</span><span class="o">.</span><span class="n">name</span>
         <span class="n">nb_modules</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">bay_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalise_netbox_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
@@ -8659,8 +8656,7 @@ to <code>parse_ttp</code>.</p>
         <span class="k">for</span> <span class="n">lookup_field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;part_number&quot;</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">module_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">module_types</span><span class="p">,</span>
-                <span class="n">lookup_field</span><span class="p">,</span>
-                <span class="n">module_type_names</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">{</span><span class="n">lookup_field</span><span class="p">:</span> <span class="n">module_type_names</span><span class="p">},</span>
             <span class="p">):</span>
                 <span class="n">module_type_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">module_type</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                 <span class="n">manufacturer_slug</span> <span class="o">=</span> <span class="n">module_type</span><span class="o">.</span><span class="n">manufacturer</span><span class="o">.</span><span class="n">slug</span>
