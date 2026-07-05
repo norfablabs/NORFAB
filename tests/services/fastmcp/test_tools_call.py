@@ -1,6 +1,9 @@
 import asyncio
 
 import pytest
+from mcp import ClientSession
+from mcp.client.streamable_http import streamable_http_client
+from mcp.shared.exceptions import McpError
 
 try:
     from tests.services.fastmcp.common import (
@@ -115,6 +118,40 @@ class TestToolsCallNornir:
 
         asyncio.run(run_test())
 
+    @pytest.mark.parametrize(
+        "commands, message",
+        [
+            (["reload"], "reboot, reload, or restart command"),
+            (["show version", "conf t"], "configuration mode command"),
+            (["delete flash:test.txt"], "destructive or state-changing command"),
+            (["bash"], "shell mode command"),
+            (["boot system flash:image.bin"], "OS/image/package operation command"),
+            (["ssh admin@192.0.2.1"], "outbound session command"),
+        ],
+    )
+    def test_call_cli_rejects_guardrails(self, nfclient, mcp_url, commands, message):
+        ensure_tool_discovered(self, nfclient, "nornir", "cli")
+
+        async def run_test():
+            tool_name = "service_nornir__task_cli"
+            kwargs = {"commands": commands, "FC": "spine", "dry_run": True}
+            async with streamable_http_client(mcp_url) as (
+                read_stream,
+                write_stream,
+                _,
+            ):
+                async with ClientSession(read_stream, write_stream) as session:
+                    await session.initialize()
+                    try:
+                        result = await session.call_tool(tool_name, arguments=kwargs)
+                    except McpError as exc:
+                        assert message in str(exc)
+                    else:
+                        assert result.isError
+                        assert message in result.content[0].text
+
+        asyncio.run(run_test())
+
     def test_call_test(self, nfclient, mcp_url):
         ensure_tool_discovered(self, nfclient, "nornir", "test")
 
@@ -136,6 +173,38 @@ class TestToolsCallNornir:
             tool_name = "service_nornir__task_cfg"
             kwargs = {"config": "hostname test-device", "FC": "spine", "dry_run": True}
             await call_mcp_tool(mcp_url, tool_name, kwargs)
+
+        asyncio.run(run_test())
+
+    @pytest.mark.parametrize(
+        "config, message",
+        [
+            (["reload"], "reboot, reload, or restart command"),
+            (["do show version"], "operational command in configuration input"),
+            (["delete flash:test.txt"], "delete or erase command"),
+            (["ssh admin@192.0.2.1"], "outbound session command"),
+        ],
+    )
+    def test_call_cfg_rejects_guardrails(self, nfclient, mcp_url, config, message):
+        ensure_tool_discovered(self, nfclient, "nornir", "cfg")
+
+        async def run_test():
+            tool_name = "service_nornir__task_cfg"
+            kwargs = {"config": config, "FC": "spine", "dry_run": True}
+            async with streamable_http_client(mcp_url) as (
+                read_stream,
+                write_stream,
+                _,
+            ):
+                async with ClientSession(read_stream, write_stream) as session:
+                    await session.initialize()
+                    try:
+                        result = await session.call_tool(tool_name, arguments=kwargs)
+                    except McpError as exc:
+                        assert message in str(exc)
+                    else:
+                        assert result.isError
+                        assert message in result.content[0].text
 
         asyncio.run(run_test())
 

@@ -1,12 +1,45 @@
-from typing import Any, Union
+import re
+from typing import Any, Literal, Union
 
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictInt,
+    StrictStr,
+    model_validator,
+)
 
 from norfab.models import Result
 
 # --------------------------------------------------------------------------
 # FASTMCP WORKER MODELS
 # --------------------------------------------------------------------------
+
+
+class TaskMCPGuardrail(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    description: StrictStr = ""
+    field: StrictStr = Field(..., min_length=1)
+    type: Literal["contains", "equals", "regex"]
+    match: Union[StrictStr, list[StrictStr]]
+    message: StrictStr = ""
+
+    @model_validator(mode="after")
+    def validate_regex_values(self) -> "TaskMCPGuardrail":
+        if self.type != "regex":
+            return self
+
+        values = self.match if isinstance(self.match, list) else [self.match]
+        for value in values:
+            try:
+                re.compile(value)
+            except re.error as exc:
+                raise ValueError(f"Invalid guardrail regex match: {exc}") from exc
+
+        return self
 
 
 class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):

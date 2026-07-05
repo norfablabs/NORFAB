@@ -26,6 +26,52 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 
 
+MCP_GUARDRAILS = [
+    {
+        "description": "Reject configuration commands that reboot, reload, or restart devices.",
+        "field": "config",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*(reboot|reload|restart)\b.*",
+            r"(?im)^\s*request\s+system\s+(reboot|power-off)\b.*",
+            r"(?im)^\s*admin\s+reboot\b.*",
+        ],
+        "message": "MCP guardrail rejected a reboot, reload, or restart command.",
+    },
+    {
+        "description": (
+            "Reject configuration commands that execute operational commands."
+        ),
+        "field": "config",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*do\s+\S+.*",
+            r"(?im)^\s*run\s+\S+.*",
+        ],
+        "message": "MCP guardrail rejected an operational command in configuration input.",
+    },
+    {
+        "description": "Reject configuration commands that delete or erase data.",
+        "field": "config",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*(delete|erase|format|factory-reset)\b.*",
+            r"(?im)^\s*request\s+system\s+zeroize\b.*",
+        ],
+        "message": "MCP guardrail rejected a delete or erase command.",
+    },
+    {
+        "description": "Reject configuration commands that open outbound device sessions.",
+        "field": "config",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*(ssh|telnet)\b.*",
+        ],
+        "message": "MCP guardrail rejected an outbound session command.",
+    },
+]
+
+
 class CfgTask:
     @Task(
         fastapi={"methods": ["POST"]},
@@ -38,7 +84,8 @@ class CfgTask:
                 "destructiveHint": True,
                 "idempotentHint": False,
                 "openWorldHint": True,
-            }
+            },
+            "guardrails": MCP_GUARDRAILS,
         },
     )
     def cfg(

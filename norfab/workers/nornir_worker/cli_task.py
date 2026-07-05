@@ -162,6 +162,81 @@ Context:
 }
 
 
+MCP_GUARDRAILS = [
+    {
+        "description": "Reject CLI commands that reboot, reload, or restart devices.",
+        "field": "commands",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*(reboot|reload|restart)\b.*",
+            r"(?im)^\s*request\s+system\s+(reboot|power-off)\b.*",
+            r"(?im)^\s*admin\s+reboot\b.*",
+        ],
+        "message": "MCP guardrail rejected a reboot, reload, or restart command.",
+    },
+    {
+        "description": "Reject CLI commands that enter configuration mode.",
+        "field": "commands",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*configure\s+(terminal|private|exclusive)\b.*",
+            r"(?im)^\s*configuration\b.*",
+            r"(?im)^\s*conf\s+t\b.*",
+            r"(?im)^\s*edit\b.*",
+            r"(?im)^\s*system-view\b.*",
+        ],
+        "message": "MCP guardrail rejected a configuration mode command.",
+    },
+    {
+        "description": "Reject CLI commands that commit, delete, debug, or clear state.",
+        "field": "commands",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*commit\b.*",
+            r"(?im)^\s*(delete|erase|format|factory-reset|clear|debug|undebug|monitor|test|reset)\b.*",
+            r"(?im)^\s*request\s+system\s+zeroize\b.*",
+        ],
+        "message": "MCP guardrail rejected a destructive or state-changing command.",
+    },
+    {
+        "description": "Reject CLI commands that enter device shell modes.",
+        "field": "commands",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*(bash|shell|sh)\b.*",
+            r"(?im)^\s*start\s+shell\b.*",
+            r"(?im)^\s*admin\b.*",
+            r"(?im)^\s*request\s+system\s+shell\b.*",
+            r"(?im)^\s*run\s+(bash|shell|sh)\b.*",
+            r"(?im)^\s*(guestshell|run\s+guestshell)\b.*",
+        ],
+        "message": "MCP guardrail rejected a shell mode command.",
+    },
+    {
+        "description": "Reject CLI commands that change device software or boot images.",
+        "field": "commands",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*install\b.*",
+            r"(?im)^\s*request\s+system\s+software\b.*",
+            r"(?im)^\s*software\s+(install|add|activate|commit|rollback|clean|remove)\b.*",
+            r"(?im)^\s*boot\s+system\b.*",
+            r"(?im)^\s*package\s+(install|add|delete|remove|activate)\b.*",
+        ],
+        "message": "MCP guardrail rejected an OS/image/package operation command.",
+    },
+    {
+        "description": "Reject CLI commands that open outbound device sessions.",
+        "field": "commands",
+        "type": "regex",
+        "match": [
+            r"(?im)^\s*(ssh|telnet)\b.*",
+        ],
+        "message": "MCP guardrail rejected an outbound session command.",
+    },
+]
+
+
 class CliTask:
     @Task(
         fastapi={"methods": ["POST"]},
@@ -179,6 +254,7 @@ class CliTask:
                 CLI_COLLECT_OPERATIONAL_DATA_PROMPT,
                 CLI_TROUBLESHOOT_PROMPT,
             ],
+            "guardrails": MCP_GUARDRAILS,
         },
     )
     def cli(

@@ -25,6 +25,24 @@ Nornir service `cfg` task designed to send configuration to devices using SSH an
 
 The task returns per-host configuration results. When supported by the plugin and `add_details=True`, output can include `changed`, `diff`, `failed`, `exception`, `connection_retry`, and `task_retry` details.
 
+## MCP Guardrails
+
+When exposed through FastMCP, the `cfg` task includes default guardrails that
+reject configuration input attempting to execute operational commands from
+configuration mode, such as Cisco-style `do ...` and Junos-style `run ...`
+commands. They also reject reboot, reload, restart, delete, erase, zeroize,
+`ssh`, and `telnet` commands. These guardrails apply only to MCP tool calls.
+!!! warning
+    Guardrails inspect inline `config` values only. If `config` points to a
+    Filesharing path such as `nf://cfg/config.txt`, FastMCP checks the path
+    string, not the downloaded or rendered file content.
+
+Use NFCLI to inspect the currently published guardrails:
+
+```bash
+show fastmcp tools service nornir name *cfg*
+```
+
 ## Examples
 
 Example of sending configuration commands to devices.

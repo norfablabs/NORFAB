@@ -217,3 +217,111 @@ tools:
     Task names can be inspected at runtime with the `show fastmcp tools` CLI
     command or the `get_tools` API call. Published prompts can be inspected
     with `show fastmcp prompts` or `get_prompts`.
+
+---
+
+## Tool Call Guardrails
+
+FastMCP guardrails reject specific MCP tool calls by inspecting the call
+arguments before the NorFab job is dispatched. They are useful for allowing a
+flexible task such as `nornir.cli` while blocking unsafe command values.
+
+Guardrails do not replace `tools.policy`. Policy decides whether a task is
+published and callable. Guardrails decide whether one specific call to an
+allowed task is acceptable.
+
+Task authors can define default guardrails in task MCP metadata. FastMCP
+inventory can add deployment-specific guardrails under `tools.guardrails`.
+Built-in task guardrails are enabled by default.
+
+```yaml
+tools:
+  guardrails:
+    - service: nornir
+      task: cli
+      description: Reject commit confirmed commands through MCP.
+      field: commands
+      type: contains
+      match: commit confirmed
+      message: "MCP guardrail rejected a commit confirmed command."
+```
+
+`tools.guardrails` is a list of guardrail entries.
+
+Set `tools.disable_builtin_guardrails: true` to ignore guardrails declared by
+tasks. Inventory-defined guardrails still apply:
+
+```yaml
+tools:
+  disable_builtin_guardrails: true
+  guardrails:
+    - service: nornir
+      task: cli
+      field: commands
+      type: regex
+      match: "(?i)^\\s*reload\\b.*"
+      message: "MCP guardrail rejected a reload command."
+```
+
+Inventory options:
+
+| Key | Type | Description |
+|---|---|---|
+| `disable_builtin_guardrails` | boolean | Optional flag under `tools`; defaults to `false` |
+
+Guardrail entry keys:
+
+| Key | Type | Description |
+|---|---|---|
+| `service` | string | Exact NorFab service name, for example `nornir` |
+| `task` | string | Exact NorFab task name, for example `cli` |
+| `description` | string | Optional human-readable explanation for operators |
+| `field` | string | Top-level tool argument field to inspect |
+| `type` | `contains` / `equals` / `regex` | Match strategy |
+| `match` | string or list of strings | Text value or regex value to match |
+| `message` | string | Optional client-facing rejection message |
+
+When `match` is a list, FastMCP rejects the call if any selected argument
+value matches any configured match value. `contains` and `equals` checks are
+always case-insensitive; regex checks use the flags declared in the regex
+value.
+
+!!! warning
+    Guardrails inspect only the inline MCP call arguments. They do not
+    download NorFab URLs or inspect content resolved later by service workers,
+    such as `nf://cli/commands.txt` files rendered by the Nornir worker at
+    runtime.
+
+Use NFCLI to inspect effective guardrails for a published task:
+
+```bash
+show fastmcp tools service nornir name *cli*
+```
+
+Example with several regex values:
+
+```yaml
+tools:
+  guardrails:
+    - service: nornir
+      task: cli
+      description: Reject CLI commands that enter configuration mode.
+      field: commands
+      type: regex
+      match:
+        - "(?i)^\\s*configure\\s+terminal\\b.*"
+        - "(?i)^\\s*configuration\\b.*"
+        - "(?i)^\\s*conf\\s+t\\b.*"
+      message: "MCP guardrail rejected a configuration mode command."
+```
+
+The Nornir `cli` task includes default MCP guardrails that reject `reboot` and
+related reload or restart commands, configuration-mode commands such as
+`configure terminal`, `configuration`, and `conf t`, and destructive or
+state-changing commands such as `commit`, `delete`, `clear`, and `debug`.
+It also rejects shell-mode commands such as `bash`, `shell`, `start shell`,
+`request system shell`, and `guestshell`, OS/image/package operations, and
+outbound session commands such as `ssh` and `telnet`.
+The Nornir `cfg` task includes default MCP guardrails that reject operational
+command escapes in configuration input, such as `do ...` and `run ...`, plus
+reboot, reload, restart, delete, erase, zeroize, `ssh`, and `telnet` commands.

@@ -357,6 +357,11 @@ class Task:
             of MCP prompt definitions associated with the task. Task validates
             and normalizes these definitions before registration. FastMCP
             removes this key before constructing the MCP Tool object.
+            The optional `guardrails` key is a NorFab extension containing a
+            list of MCP task call guardrails. FastMCP validates these
+            definitions during discovery, removes this key before constructing
+            the MCP Tool object, and evaluates guardrails before dispatching
+            tool calls to NorFab services.
 
     Methods:
         __call__(function: Callable) -> Callable:

@@ -31,6 +31,30 @@ and NAPALM libraries to communicate with devices.
 
 The task returns per-host command output keyed by command. With `add_details=True`, the result can include Nornir task metadata such as failure state, exception text, retry counters, and plugin-specific details.
 
+## MCP Guardrails
+
+When exposed through FastMCP, the `cli` task includes default guardrails that
+reject high-risk command values before a NorFab job is dispatched. The defaults
+block commands that reboot, reload, or restart devices; enter configuration
+mode; enter device shell modes such as `bash`, `shell`, or `guestshell`; or
+change OS images or packages; open outbound sessions such as `ssh` or
+`telnet`; or commit, delete, clear, debug, reset, or otherwise change device
+state.
+
+These guardrails apply only to MCP tool calls. They do not change direct NorFab
+client, NFCLI, FastAPI, or worker behavior. FastMCP operators can add inventory
+guardrails or disable built-in guardrails with `tools.disable_builtin_guardrails`.
+!!! warning
+    Guardrails inspect inline `commands` values only. If `commands` points to a
+    Filesharing path such as `nf://cli/commands.txt`, FastMCP checks the path
+    string, not the downloaded or rendered file content.
+
+Use NFCLI to inspect the currently published guardrails:
+
+```bash
+show fastmcp tools service nornir name *cli*
+```
+
 ## Examples
 
 Below is an example of how to use the Nornir CLI task to retrieve command outputs from devices.

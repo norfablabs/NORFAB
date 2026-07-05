@@ -4,12 +4,18 @@
 
 1. Fixing nornir tests nfcli shell to pass verbose_on_fail to results processing, to make sure return results as table even when have failed tests.
 
+## FEATURES
+
+1. Added FastMCP tool call guardrails to reject unsafe MCP tool calls before NorFab job dispatch. Guardrails can be defined by tasks or FastMCP inventory, support `regex`, `contains`, and `equals` checks, can disable built-in task guardrails with `tools.disable_builtin_guardrails`, and are visible through `show fastmcp tools`.
+
 ## ENHANCEMENTS
 
 1. Extended Nornir worker statistics with SID, NetBox, Containerlab inventory load statuses and managed `nornir_hosts` count.
 2. Enhanced NetBox worker REST filtering to route task-side `pynetbox.filter()` calls through adaptive `bulk_filter`, automatically chunking long list filters to avoid URI length errors while preserving query options such as `fields`, `limit`, and `ordering`.
 3. Improved result status coloring for nornir test task
 4. Nornir show hosts table added index column
+5. Enhanced Nornir `cli` task MCP metadata with default guardrails that block reboot, reload, restart, configuration-mode, shell-mode, OS/image/package operations, outbound `ssh`/`telnet`, commit, delete, clear, debug, reset, zeroize, and related state-changing commands when called through FastMCP.
+6. Enhanced Nornir `cfg` task MCP metadata with default guardrails that block reboot, reload, restart, `do ...` and `run ...` operational escapes, delete, erase, zeroize, and outbound `ssh`/`telnet` commands when called through FastMCP.
 
 ## CHANGES
 

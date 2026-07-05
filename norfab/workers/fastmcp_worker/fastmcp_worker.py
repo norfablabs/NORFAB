@@ -1,6 +1,7 @@
 import importlib.metadata
 import logging
 import os
+import re
 import signal
 import sys
 import threading
@@ -45,15 +46,12 @@ from .fastmcp_models import (
     GetToolsResult,
     GetVersionInput,
     GetVersionResult,
+    TaskMCPGuardrail,
 )
 
 SERVICE = "fastmcp"
 
 log = logging.getLogger(__name__)
-
-# --------------------------------------------------------------------------
-# FASTMCP TASKS MODELS
-# --------------------------------------------------------------------------
 
 
 class DiskcacheBearerTokenVerifier:
@@ -139,6 +137,108 @@ def make_task_prompt(
     }
 
 
+def make_task_guardrails(
+    worker: Any, task: dict[str, Any], tool_metadata: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """
+    Build effective FastMCP guardrails from task metadata and inventory.
+    """
+    tools_inventory = worker.fastmcp_inventory.get("tools", {})
+    guardrails_metadata = []
+    task_guardrails = tool_metadata.pop("guardrails", [])
+
+    if not tools_inventory.get("disable_builtin_guardrails", False):
+        guardrails_metadata.extend(
+            TaskMCPGuardrail.model_validate(guardrail).model_dump()
+            for guardrail in task_guardrails
+        )
+
+    inventory_guardrails = tools_inventory.get("guardrails", [])
+    if inventory_guardrails:
+        if not isinstance(inventory_guardrails, list):
+            raise ValueError("FastMCP tools.guardrails must be a list")
+        for guardrail in inventory_guardrails:
+            if guardrail.get("service") != task["service"]:
+                continue
+            if guardrail.get("task") != task["name"]:
+                continue
+            inventory_guardrail = dict(guardrail)
+            inventory_guardrail.pop("service")
+            inventory_guardrail.pop("task")
+            try:
+                guardrails_metadata.append(
+                    TaskMCPGuardrail.model_validate(inventory_guardrail).model_dump()
+                )
+            except Exception:
+                log.warning(
+                    f"Invalid FastMCP inventory guardrail for "
+                    f"'{task['service']}:{task['name']}'"
+                )
+                raise
+
+    return guardrails_metadata
+
+
+def check_tool_call_guardrails(
+    tool_name: str,
+    service: str,
+    task_name: str,
+    arguments: dict[str, Any],
+    guardrails: list[dict[str, Any]],
+) -> None:
+    """
+    Reject a tool call when any configured guardrail matches its arguments.
+    """
+    for guardrail in guardrails:
+        if guardrail["field"] not in arguments:
+            continue
+
+        selected_values = []
+        stack = [arguments[guardrail["field"]]]
+        while stack:
+            item = stack.pop()
+            if isinstance(item, list):
+                stack.extend(item)
+            elif item is not None:
+                selected_values.append(str(item))
+
+        match_values = guardrail["match"]
+        if isinstance(match_values, str):
+            match_values = [match_values]
+
+        matched = False
+        for selected_value in selected_values:
+            for match_value in match_values:
+                if guardrail["type"] == "regex":
+                    matched = re.search(match_value, selected_value) is not None
+                elif guardrail["type"] == "equals":
+                    matched = selected_value.lower() == match_value.lower()
+                elif guardrail["type"] == "contains":
+                    matched = match_value.lower() in selected_value.lower()
+
+                if matched:
+                    break
+            if matched:
+                break
+
+        if matched:
+            message = guardrail.get("message") or "MCP guardrail rejected the tool call"
+            log.warning(
+                f"Rejected MCP tool call '{tool_name}' by guardrail: "
+                f"service='{service}', task='{task_name}', "
+                f"field='{guardrail['field']}', type='{guardrail['type']}'"
+            )
+            raise McpError(
+                types.ErrorData(
+                    code=types.INVALID_PARAMS,
+                    message=(
+                        f"MCP tool call '{tool_name}' rejected by guardrail: "
+                        f"{message}"
+                    ),
+                )
+            )
+
+
 def service_tasks_discovery(
     worker: Any, cycles: int = 5, discover_service: str = "all"
 ) -> dict:
@@ -204,6 +304,7 @@ def service_tasks_discovery(
                     continue
                 tool_metadata = dict(task["mcp"])
                 prompts_metadata = tool_metadata.pop("prompts", [])
+                guardrails_metadata = make_task_guardrails(worker, task, tool_metadata)
 
                 result.setdefault(task["service"], {})
                 prompts_result.setdefault(task["service"], {})
@@ -222,6 +323,7 @@ def service_tasks_discovery(
                         result[task["service"]][task_tool["name"]] = {
                             "tool": types.Tool(**task_tool),
                             "task": task,
+                            "guardrails": guardrails_metadata,
                         }
                     except Exception as exc:
                         log.error(
@@ -483,7 +585,11 @@ class FastMCPWorker(NFPWorker):
                 if service == "all" or service_name == service:
                     for tool_name, tool_data in tasks.items():
                         if fnmatch(tool_name, name):
-                            ret.result[tool_name] = tool_data["tool"].model_dump()
+                            tool_definition = tool_data["tool"].model_dump()
+                            guardrails = tool_data.get("guardrails")
+                            if guardrails:
+                                tool_definition["guardrails"] = guardrails
+                            ret.result[tool_name] = tool_definition
 
         return ret
 
@@ -804,12 +910,11 @@ class FastMCPWorker(NFPWorker):
         It registers four MCP server endpoints:
 
           - `list_tools`: Asynchronously returns a list of available
-            tools by aggregating all tools from `self.norfab_services_tasks`,
-            filtered by the inventory ``tools.allow`` glob patterns.
+            tools by aggregating all tools from `self.norfab_services_tasks`.
           - `call_tool`: Asynchronously handles tool invocation requests by
-            parsing the tool name, checking it against the ``tools.allow``
-            inventory patterns, extracting the corresponding service and
-            task, and running the job using `self.client.run_job`.
+            parsing the tool name, checking it against ``tools.policy``,
+            evaluating registered guardrails, extracting the corresponding
+            service and task, and running the job using `self.client.run_job`.
           - `list_prompts`: Returns prompts discovered from task MCP metadata.
           - `get_prompt`: Validates prompt arguments and renders prompt messages
             without dispatching a NorFab job.
@@ -843,9 +948,18 @@ class FastMCPWorker(NFPWorker):
 
         @self.app._mcp_server.call_tool()
         async def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+            arguments = arguments or {}
             log.info(f"Calling tool '{name}' with arguments: '{arguments}'")
 
             service, task_name = self.get_allowed_task_call(name)
+            tool_data = self.norfab_services_tasks[service][name]
+            check_tool_call_guardrails(
+                name,
+                service,
+                task_name,
+                arguments,
+                tool_data.get("guardrails", []),
+            )
 
             log.info(
                 f"Calling NorFab service '{service}' task '{task_name}' with arguments: '{arguments}'"
