@@ -104,6 +104,48 @@ class FastMCPShowToolsModel(
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
+class FastMCPShowGuardrailsModel(
+    ClientRunJobArgs, GetToolsInput, use_enum_values=True, populate_by_name=True
+):
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        workers = kwargs.pop("workers", "any")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+        kwargs["brief"] = False
+
+        result = run_future_job(
+            "fastmcp",
+            "get_tools",
+            kwargs=kwargs,
+            workers=workers,
+            timeout=timeout,
+            nowait=nowait,
+        )
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        if isinstance(result, dict):
+            for worker_result in result.values():
+                if isinstance(worker_result, dict):
+                    tools = worker_result.get("result")
+                    if not isinstance(tools, dict):
+                        tools = {}
+                    worker_result["result"] = {
+                        tool_name: tool_details["guardrails"]
+                        for tool_name, tool_details in tools.items()
+                        if isinstance(tool_details, dict)
+                        and tool_details.get("guardrails")
+                    }
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+
 class FastMCPShowPromptsModel(
     ClientRunJobArgs, GetPromptsInput, use_enum_values=True, populate_by_name=True
 ):
@@ -153,6 +195,10 @@ class FastMCPShowCommandsModel(BaseModel):
     tools: FastMCPShowToolsModel = Field(
         None,
         description="show FastMCP server tools",
+    )
+    guardrails: FastMCPShowGuardrailsModel = Field(
+        None,
+        description="show FastMCP server tools guardrails",
     )
     prompts: FastMCPShowPromptsModel = Field(
         None,

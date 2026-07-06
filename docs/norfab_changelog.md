@@ -1,3 +1,12 @@
+# 0.20.4
+
+## ENHANCEMENTS
+
+1. Added `show fastmcp guardrails` NFCLI command to fetch FastMCP tools data and display only configured tool guardrails.
+
+
+---
+
 # 0.20.3
 
 ## BUGS
