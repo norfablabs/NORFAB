@@ -33,8 +33,8 @@ class SyncMacAddressesShell(
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        if nowait and kwargs.get("with_review"):
-            raise ValueError("'with-review' cannot be combined with 'nowait'")
+        if nowait and kwargs.get("with_approval"):
+            raise ValueError("'with-approval' cannot be combined with 'nowait'")
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]

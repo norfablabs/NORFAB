@@ -3,6 +3,7 @@ Common Pydantic Models for PICLE Client Shells
 """
 
 import builtins
+import asyncio
 import logging
 import time
 from datetime import datetime
@@ -16,6 +17,7 @@ from pydantic import (
     StrictInt,
     StrictStr,
 )
+from prompt_toolkit import PromptSession
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 
@@ -75,6 +77,39 @@ def print_event(event: dict, richconsole: Console = None) -> None:
     )
 
 
+def _confirm_with_timeout(
+    question: str,
+    default: bool,
+    timeout: int,
+    richconsole: Console,
+) -> bool:
+    """Ask for a yes/no approval, returning False when the timeout expires."""
+    choice_hint = "Y/n" if default else "y/N"
+    prompt_text = f"{question} ({timeout}s left to approve) [{choice_hint}]: "
+
+    async def ask() -> str:
+        return await PromptSession().prompt_async(prompt_text)
+
+    try:
+        answer = asyncio.run(asyncio.wait_for(ask(), timeout=timeout))
+    except TimeoutError:
+        richconsole.print("\nApproval timed out; sending No.")
+        return False
+    except (EOFError, KeyboardInterrupt):
+        richconsole.print()
+        return False
+
+    answer = answer.strip().lower()
+    if not answer:
+        return default
+    if answer in {"y", "yes"}:
+        return True
+    if answer in {"n", "no"}:
+        return False
+    richconsole.print("Please enter y or n.")
+    return False
+
+
 def collect_input_request(
     future: Any, event: dict, richconsole: Console = None, outputter: callable = None
 ) -> None:
@@ -89,6 +124,7 @@ def collect_input_request(
     richconsole = richconsole or Console()
     question = input_request.get("question", "Worker asks for input")
     default = input_request.get("default")
+    approval_timeout = input_request.get("timeout") or event.get("timeout")
     choices = input_request.get("choices")
     preview = (input_request.get("metadata") or {}).get("preview")
 
@@ -103,7 +139,15 @@ def collect_input_request(
         richconsole.print()
 
     if isinstance(default, bool):
-        response = Confirm.ask(question, default=default, console=richconsole)
+        if approval_timeout:
+            response = _confirm_with_timeout(
+                question,
+                default,
+                max(1, int(approval_timeout) - 1),
+                richconsole,
+            )
+        else:
+            response = Confirm.ask(question, default=default, console=richconsole)
     else:
         prompt_kwargs = {}
         if default is not None:

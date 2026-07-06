@@ -20,17 +20,17 @@ fixed sequence:
 
 The `sync_all` task orchestrates five subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When `dry_run=True`, all tasks preview changes
-without writing. When `with_review=True`, each stage waits for user confirmation before applying changes.
+without writing. When `with_approval=True`, each stage waits for user confirmation before applying changes.
 
 ## Execution Modes
 
 **Dry-run mode** (`dry_run=True`) previews all changes without writing to NetBox.
 
-**With Review** — Pass `with_review=True` to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops `sync_all` at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.
+**With Approval** — Pass `with_approval=True` to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops `sync_all` at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.
 
 !!! note
     
-    When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
+    When both `dry-run` and `with_approval` are `True`, `dry-run` logic ignored.
 
 **Live-run mode** (`dry_run=False`, default) applies all changes to NetBox.
 
@@ -115,7 +115,7 @@ When `dry_run=True` the same structure is returned but no changes are written to
     Preview, prompt for review, and apply the changes:
 
     ```
-    nf#netbox sync all devices ceos-spine-1 ceos-spine-2 with-review
+    nf#netbox sync all devices ceos-spine-1 ceos-spine-2 with-approval
     ```
 
     Create missing module bays and module types during inventory sync:
@@ -185,7 +185,7 @@ root
             ├── branch:    Branching plugin branch name to use
             ├── devices:    List of NetBox devices to sync all data for
             ├── dry-run:    Return diff without writing to NetBox, default 'False'
-            ├── with-review:    Preview each sync stage and ask for review before writing to NetBox
+            ├── with-approval:    Preview each sync stage and ask for review before writing to NetBox
             ├── process-deletions:    Process deletions for inventory, interfaces and BGP peerings
             ├── message:    Changelog message for inventory and BGP operations
             ├── inventory-create-module-types:    Create missing module types during inventory sync

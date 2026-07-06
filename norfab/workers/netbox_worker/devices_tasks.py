@@ -336,7 +336,7 @@ class NetboxDevicesTasks:
         job: Job,
         instance: Union[None, str] = None,
         dry_run: bool = False,
-        with_review: bool = False,
+        with_approval: bool = False,
         timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
@@ -386,7 +386,7 @@ class NetboxDevicesTasks:
                 default NetBox instance.
             dry_run: Return the planned inventory diff without writing changes
                 to NetBox.
-            with_review: Preview changes, ask for review, then apply them.
+            with_approval: Preview changes, ask for review, then apply them.
             timeout: Timeout in seconds for the Nornir ``parse_ttp`` job.
             devices: NetBox device names to synchronize.
             branch: NetBox Branching plugin branch name.
@@ -839,7 +839,7 @@ class NetboxDevicesTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
-        if with_review and not review_sync_task_result(
+        if with_approval and not review_sync_task_result(
             job, "device inventory sync", full_diff
         ):
             ret.status = "skipped"
@@ -1366,7 +1366,7 @@ class NetboxDevicesTasks:
         devices: Union[None, list] = None,
         branch: str = None,
         dry_run: bool = False,
-        with_review: bool = False,
+        with_approval: bool = False,
         process_deletions: bool = False,
         message: Union[None, str] = None,
         inventory_create_module_types: bool = False,
@@ -1406,7 +1406,7 @@ class NetboxDevicesTasks:
         inventory → interfaces → MAC addresses → IP addresses → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
-        Pass ``with_review=True`` to have each sync stage run a dry-run preview,
+        Pass ``with_approval=True`` to have each sync stage run a dry-run preview,
         ask the interactive client for review, and only then apply that stage.
 
         ``Result.result`` is keyed by device name, then by category::
@@ -1428,7 +1428,7 @@ class NetboxDevicesTasks:
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
-            with_review (bool): Preview and ask for review before applying
+            with_approval (bool): Preview and ask for review before applying
                 each sync stage. Defaults to False.
             process_deletions (bool): Process deletions for inventory,
                 interfaces, and BGP peerings. Defaults to False.
@@ -1509,7 +1509,7 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
-            with_review=with_review,
+            with_approval=with_approval,
             process_deletions=process_deletions,
             create_module_types=inventory_create_module_types,
             create_module_bays=inventory_create_module_bays,
@@ -1542,7 +1542,7 @@ class NetboxDevicesTasks:
             devices=list(devices),
             branch=branch,
             process_deletions=process_deletions,
-            with_review=with_review,
+            with_approval=with_approval,
             filter_by_name=interfaces_filter_by_name,
             filter_by_description=interfaces_filter_by_description,
             update_type=interfaces_update_type,
@@ -1568,7 +1568,7 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
-            with_review=with_review,
+            with_approval=with_approval,
             filter_by_name=mac_filter_by_name,
             filter_by_description=mac_filter_by_description,
             filter_by_mac=mac_filter_by_mac,
@@ -1593,7 +1593,7 @@ class NetboxDevicesTasks:
             timeout=timeout,
             devices=list(devices),
             branch=branch,
-            with_review=with_review,
+            with_approval=with_approval,
             anycast_ranges=ip_anycast_ranges,
             ignore_ranges=ip_ignore_ranges,
             create_prefixes=ip_create_prefixes,
@@ -1624,7 +1624,7 @@ class NetboxDevicesTasks:
             devices=list(devices),
             branch=branch,
             process_deletions=process_deletions,
-            with_review=with_review,
+            with_approval=with_approval,
             rir=bgp_rir,
             message=message,
             name_template=bgp_name_template,

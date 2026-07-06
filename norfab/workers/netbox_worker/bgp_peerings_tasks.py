@@ -1869,7 +1869,7 @@ class NetboxBgpPeeringsTasks:
         devices: Union[None, list] = None,
         status: str = "active",
         dry_run: bool = False,
-        with_review: bool = False,
+        with_approval: bool = False,
         process_deletions: bool = False,
         timeout: int = 600,
         branch: str = None,
@@ -1896,7 +1896,7 @@ class NetboxBgpPeeringsTasks:
             devices (list, optional): List of device names to process.
             status (str): Status to assign to created/updated sessions when not ``established`` on device.
             dry_run (bool): If True, return diff report without writing to NetBox.
-            with_review (bool): Preview changes, ask for review, then apply them.
+            with_approval (bool): Preview changes, ask for review, then apply them.
             process_deletions (bool): If True, delete NetBox sessions not found on device.
             timeout (int): Timeout in seconds for Nornir ``parse_ttp`` job.
             branch (str, optional): NetBox branching plugin branch name.
@@ -2209,7 +2209,7 @@ class NetboxBgpPeeringsTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
-        if with_review and not review_sync_task_result(
+        if with_approval and not review_sync_task_result(
             job, "BGP peerings sync", full_diff
         ):
             ret.status = "skipped"

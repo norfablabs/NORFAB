@@ -885,6 +885,7 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
                 "severity": "INFO",
                 "status": "waiting_client_input",
                 "resource": [],
+                "timeout": input_request.get("timeout"),
                 "extras": {"input_request": input_request},
             }
             future = client.job_futures.get(juuid)

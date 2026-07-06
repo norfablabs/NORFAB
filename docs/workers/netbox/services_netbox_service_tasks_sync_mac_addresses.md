@@ -37,11 +37,11 @@ Both dry-run and live-run return the same structure, keyed by device name:
 
 In **dry-run mode** (`dry_run=True`) the lists reflect what *would* happen — no changes are written to NetBox.
 
-**With Review** — Pass `with_review=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
+**With Approval** — Pass `with_approval=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.
 
 !!! note
     
-    When both `dry-run` and `with_review` are `True`, `dry-run` logic ignored.
+    When both `dry-run` and `with_approval` are `True`, `dry-run` logic ignored.
 
 In **live-run mode** (`dry_run=False`, default) the lists reflect what was actually done.
 

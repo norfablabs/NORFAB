@@ -878,7 +878,7 @@ class NetboxInterfacesTasks:
         job: Job,
         instance: Union[None, str] = None,
         dry_run: bool = False,
-        with_review: bool = False,
+        with_approval: bool = False,
         timeout: int = 600,
         devices: Union[None, list] = None,
         process_deletions: bool = False,
@@ -957,7 +957,7 @@ class NetboxInterfacesTasks:
             job: NorFab Job object containing relevant metadata.
             instance (str, optional): The NetBox instance name to use.
             dry_run (bool, optional): If True, no changes will be made to NetBox.
-            with_review (bool, optional): Preview changes, ask for review, then apply them.
+            with_approval (bool, optional): Preview changes, ask for review, then apply them.
             timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
             devices (list, optional): List of device names to sync.
             process_deletions (bool, optional): If True, delete interfaces present in
@@ -1210,7 +1210,7 @@ class NetboxInterfacesTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
-        if with_review and not review_sync_task_result(
+        if with_approval and not review_sync_task_result(
             job, "interface sync", full_diff
         ):
             ret.status = "skipped"
@@ -1507,7 +1507,7 @@ class NetboxInterfacesTasks:
         job: Job,
         instance: Union[None, str] = None,
         dry_run: bool = False,
-        with_review: bool = False,
+        with_approval: bool = False,
         timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
@@ -1547,7 +1547,7 @@ class NetboxInterfacesTasks:
             job: NorFab Job object containing relevant metadata.
             instance (str, optional): The NetBox instance name to use.
             dry_run (bool, optional): If True, no changes will be made to NetBox.
-            with_review (bool, optional): Preview changes, ask for review, then apply them.
+            with_approval (bool, optional): Preview changes, ask for review, then apply them.
             timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branch name to use.
@@ -1794,7 +1794,7 @@ class NetboxInterfacesTasks:
             f"{len(bulk_update_mac)} update"
         )
 
-        if with_review:
+        if with_approval:
             mac_preview_result = {
                 device_name: {
                     "created": list(device_result["created"]),

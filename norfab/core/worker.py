@@ -167,6 +167,7 @@ class Job:
         input_request = InputRequestModel(
             question=question,
             default=default,
+            timeout=timeout,
             metadata=metadata or {},
         ).model_dump()
         self.pending_input_request = input_request

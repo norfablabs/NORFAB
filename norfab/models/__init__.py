@@ -73,6 +73,7 @@ class InputRequestModel(BaseModel):
     id: StrictStr = Field(default_factory=lambda: uuid4().hex)
     question: StrictStr = Field(...)
     default: Any = Field(default=False)
+    timeout: StrictInt = Field(None)
     metadata: Dict = Field(default_factory=dict)
 
 

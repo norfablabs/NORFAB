@@ -173,10 +173,10 @@ class SyncBgpPeeringsInput(
         "active",
         description="Status to set on created/updated BGP sessions",
     )
-    with_review: StrictBool = Field(
+    with_approval: StrictBool = Field(
         False,
         description="Preview changes and ask for review before writing to NetBox",
-        alias="with-review",
+        alias="with-approval",
         json_schema_extra={"presence": True},
     )
     process_deletions: bool = Field(
@@ -839,10 +839,10 @@ class SyncDeviceInventoryInput(
         60,
         description="Timeout in seconds for Nornir parse_ttp inventory job",
     )
-    with_review: StrictBool = Field(
+    with_approval: StrictBool = Field(
         False,
         description="Preview changes and ask for review before writing to NetBox",
-        alias="with-review",
+        alias="with-approval",
         json_schema_extra={"presence": True},
     )
     process_deletions: StrictBool = Field(
@@ -951,10 +951,10 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         json_schema_extra={"presence": True},
         alias="dry-run",
     )
-    with_review: StrictBool = Field(
+    with_approval: StrictBool = Field(
         False,
         description="Preview each sync stage and ask for review before writing to NetBox",
-        alias="with-review",
+        alias="with-approval",
         json_schema_extra={"presence": True},
     )
     process_deletions: StrictBool = Field(
@@ -1488,10 +1488,10 @@ class SyncDeviceInterfacesInput(
         60,
         description="Timeout in seconds for Nornir parse_ttp job",
     )
-    with_review: StrictBool = Field(
+    with_approval: StrictBool = Field(
         False,
         description="Preview changes and ask for review before writing to NetBox",
-        alias="with-review",
+        alias="with-approval",
         json_schema_extra={"presence": True},
     )
     process_deletions: StrictBool = Field(
@@ -1534,10 +1534,10 @@ class SyncMacAddressesInput(
         60,
         description="Timeout in seconds for Nornir parse_ttp job",
     )
-    with_review: StrictBool = Field(
+    with_approval: StrictBool = Field(
         False,
         description="Preview changes and ask for review before writing to NetBox",
-        alias="with-review",
+        alias="with-approval",
         json_schema_extra={"presence": True},
     )
     filter_by_name: Union[None, StrictStr] = Field(
@@ -1606,10 +1606,10 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         60,
         description="Timeout in seconds for Nornir parse_ttp job",
     )
-    with_review: StrictBool = Field(
+    with_approval: StrictBool = Field(
         False,
         description="Preview changes and ask for review before writing to NetBox",
-        alias="with-review",
+        alias="with-approval",
         json_schema_extra={"presence": True},
     )
     anycast_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
