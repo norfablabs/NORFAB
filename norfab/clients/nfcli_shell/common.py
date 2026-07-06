@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from enum import Enum
 from typing import Any, List, Optional, Union
+from picle.models import Outputters
 
 from pydantic import (
     BaseModel,
@@ -135,7 +136,7 @@ def collect_input_request(
         if outputter:
             richconsole.print(outputter(preview))
         else:
-            richconsole.print(preview)
+            richconsole.print(Outputters.outputter_nested(preview))
         richconsole.print()
 
     if isinstance(default, bool):

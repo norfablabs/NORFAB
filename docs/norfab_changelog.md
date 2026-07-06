@@ -4,6 +4,7 @@
 
 1. Added `show fastmcp guardrails` NFCLI command to fetch FastMCP tools data and display only configured tool guardrails.
 2. Enhanced NFCLI input request prompts to show the approval timeout and automatically send `False`/No when the prompt expires.
+3. Enhanced NFCLI approval previews to use nested output by default.
 
 ## CHANGES
 
