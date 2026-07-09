@@ -86,6 +86,7 @@ nav:
 
 - Overview:
   - Introduction: index.md
+  - Features: norfab_features.md
   - Why use NORFAB: norfab_why_use_norfab.md
 
 - Getting Started:
@@ -251,10 +252,13 @@ nav:
     - Netbox Device Check Sync Task Plan: development/adr_netbox_check_sync_plan.md
     - FastMCP Bearer Auth plan: development\adr_fastmcp_bearer_authentication.md
     - MCP Tools Annotations plan: development\adr_mcp_tool_annotations_plan.md
+    - FastMCP Task Call Guardrails: development/adr_fastmcp_task_call_guardrails.md
     - Netbox Sync Devices Inventory plan: development\adr_netbox_sync_device_inventory_plan.md
     - Norfab Interactive Client Plan: development\adr_norfab_interactive_client.md
+    - NFAPI Client First Startup: development/adr_nfapi_client_first_startup.md
     - MCP Task Prompt Plan: development\adr_mcp_task_prompts_plan.md
     - Norfab AAA Security Architecture: development\adr_norfab_aaa_security_architecture.md
+    - Norfab Logging Isolation: development/adr_norfab_logging_isolation.md
     - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md

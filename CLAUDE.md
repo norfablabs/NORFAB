@@ -162,6 +162,12 @@ poetry run mkdocs serve
 poetry run mkdocs build
 ```
 
+#### Feature Documentation Maintenance
+
+- `docs/norfab_features.md` is the evaluator- and RFP-oriented catalogue of NORFAB capabilities.
+- When adding, changing, deprecating, or removing a code feature, review and update the relevant feature wording on this page in the same change.
+- Keep each entry concise and verify its description, supported interfaces, use cases, limitations, documentation links, and the page's **Last updated** date.
+
 ## Inventory File Structure
 
 NorFab is configured via a YAML `inventory.yaml`. The default search path is `./inventory.yaml`.
@@ -266,5 +272,6 @@ Selected rule sets: `E`, `F`, `I`, `ANN`
 
 - Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
 - Documentation style guide for docs changes: `docs/development/documentation_style_guide.md`
+- Feature catalogue: `docs/norfab_features.md`
 - Testing framework: `docs/testing/norfab_testing_framework.md`
 - NetBox service tests and refactoring guidance: `docs/testing/netbox_service_tests.md`
