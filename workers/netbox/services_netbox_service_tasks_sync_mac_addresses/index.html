@@ -339,6 +339,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../norfab_features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
         
   
@@ -5808,6 +5836,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_call_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Call Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -5864,6 +5920,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_nfapi_client_first_startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI Client First Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_mcp_task_prompts_plan/" class="md-nav__link">
         
   
@@ -5900,6 +5984,34 @@
     
   
     Norfab AAA Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_norfab_logging_isolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Logging Isolation
   
 
     
@@ -6296,10 +6408,10 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>In <strong>dry-run mode</strong> (<code>dry_run=True</code>) the lists reflect what <em>would</em> happen — no changes are written to NetBox.</p>
-<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+<p>When both <code>dry-run</code> and <code>with_approval</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
 </div>
 <p>In <strong>live-run mode</strong> (<code>dry_run=False</code>, default) the lists reflect what was actually done.</p>
 <p>Conflict errors (MAC assigned to a different interface) are reported in <code>res["errors"]</code> and do not appear in any action list.</p>
@@ -6561,7 +6673,7 @@ the same structure showing what was done.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>with_review</code>
+                <code>with_approval</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
@@ -7107,7 +7219,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_approval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7147,7 +7259,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
 <span class="sd">        job: NorFab Job object containing relevant metadata.</span>
 <span class="sd">        instance (str, optional): The NetBox instance name to use.</span>
 <span class="sd">        dry_run (bool, optional): If True, no changes will be made to NetBox.</span>
-<span class="sd">        with_review (bool, optional): Preview changes, ask for review, then apply them.</span>
+<span class="sd">        with_approval (bool, optional): Preview changes, ask for review, then apply them.</span>
 <span class="sd">        timeout (int, optional): Timeout in seconds for the Nornir parse_ttp job.</span>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branch name to use.</span>
@@ -7394,7 +7506,7 @@ are included, e.g. <code>'aa:bb:*'</code>.</p>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_mac</span><span class="p">)</span><span class="si">}</span><span class="s2"> update&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">with_review</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">with_approval</span><span class="p">:</span>
         <span class="n">mac_preview_result</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">device_result</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]),</span>

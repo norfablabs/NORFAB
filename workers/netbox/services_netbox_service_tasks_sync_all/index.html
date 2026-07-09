@@ -339,6 +339,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../norfab_features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
         
   
@@ -5769,6 +5797,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_call_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Call Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -5825,6 +5881,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_nfapi_client_first_startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI Client First Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_mcp_task_prompts_plan/" class="md-nav__link">
         
   
@@ -5861,6 +5945,34 @@
     
   
     Norfab AAA Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_norfab_logging_isolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Logging Isolation
   
 
     
@@ -6205,13 +6317,13 @@ fixed sequence:</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <p>The <code>sync_all</code> task orchestrates five subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When <code>dry_run=True</code>, all tasks preview changes
-without writing. When <code>with_review=True</code>, each stage waits for user confirmation before applying changes.</p>
+without writing. When <code>with_approval=True</code>, each stage waits for user confirmation before applying changes.</p>
 <h2 id="execution-modes">Execution Modes<a class="headerlink" href="#execution-modes" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) previews all changes without writing to NetBox.</p>
-<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops <code>sync_all</code> at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.</p>
+<p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops <code>sync_all</code> at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+<p>When both <code>dry-run</code> and <code>with_approval</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
 </div>
 <p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies all changes to NetBox.</p>
 <h2 id="inventory-arguments">Inventory Arguments<a class="headerlink" href="#inventory-arguments" title="Permanent link">¤</a></h2>
@@ -6312,7 +6424,7 @@ inventory and BGP write operations.</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
 </code></pre></div>
 <p>Preview, prompt for review, and apply the changes:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 with-review
+<div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 with-approval
 </code></pre></div>
 <p>Create missing module bays and module types during inventory sync:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync all devices iosxr1 inventory-create-module-bays inventory-create-module-types
@@ -6367,7 +6479,7 @@ root
             ├── branch:    Branching plugin branch name to use
             ├── devices:    List of NetBox devices to sync all data for
             ├── dry-run:    Return diff without writing to NetBox, default &#39;False&#39;
-            ├── with-review:    Preview each sync stage and ask for review before writing to NetBox
+            ├── with-approval:    Preview each sync stage and ask for review before writing to NetBox
             ├── process-deletions:    Process deletions for inventory, interfaces and BGP peerings
             ├── message:    Changelog message for inventory and BGP operations
             ├── inventory-create-module-types:    Create missing module types during inventory sync
@@ -6403,7 +6515,7 @@ nf#
         <p>Synchronize all device data from live devices into NetBox in sequence:
 inventory → interfaces → MAC addresses → IP addresses → BGP peerings.</p>
 <p>Pass <code>dry_run=True</code> to preview changes without writing to NetBox.
-Pass <code>with_review=True</code> to have each sync stage run a dry-run preview,
+Pass <code>with_approval=True</code> to have each sync stage run a dry-run preview,
 ask the interactive client for review, and only then apply that stage.</p>
 <p><code>Result.result</code> is keyed by device name, then by category::</p>
 <pre><code>{
@@ -6527,7 +6639,7 @@ ask the interactive client for review, and only then apply that stage.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>with_review</code>
+                <code>with_approval</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
@@ -7426,7 +7538,7 @@ operations.</p>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_approval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">message</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inventory_create_module_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -7466,7 +7578,7 @@ operations.</p>
 <span class="sd">    inventory → interfaces → MAC addresses → IP addresses → BGP peerings.</span>
 
 <span class="sd">    Pass ``dry_run=True`` to preview changes without writing to NetBox.</span>
-<span class="sd">    Pass ``with_review=True`` to have each sync stage run a dry-run preview,</span>
+<span class="sd">    Pass ``with_approval=True`` to have each sync stage run a dry-run preview,</span>
 <span class="sd">    ask the interactive client for review, and only then apply that stage.</span>
 
 <span class="sd">    ``Result.result`` is keyed by device name, then by category::</span>
@@ -7488,7 +7600,7 @@ operations.</p>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name.</span>
 <span class="sd">        dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.</span>
-<span class="sd">        with_review (bool): Preview and ask for review before applying</span>
+<span class="sd">        with_approval (bool): Preview and ask for review before applying</span>
 <span class="sd">            each sync stage. Defaults to False.</span>
 <span class="sd">        process_deletions (bool): Process deletions for inventory,</span>
 <span class="sd">            interfaces, and BGP peerings. Defaults to False.</span>
@@ -7569,7 +7681,7 @@ operations.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
-        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
+        <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
         <span class="n">process_deletions</span><span class="o">=</span><span class="n">process_deletions</span><span class="p">,</span>
         <span class="n">create_module_types</span><span class="o">=</span><span class="n">inventory_create_module_types</span><span class="p">,</span>
         <span class="n">create_module_bays</span><span class="o">=</span><span class="n">inventory_create_module_bays</span><span class="p">,</span>
@@ -7602,7 +7714,7 @@ operations.</p>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">process_deletions</span><span class="o">=</span><span class="n">process_deletions</span><span class="p">,</span>
-        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
+        <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
         <span class="n">filter_by_name</span><span class="o">=</span><span class="n">interfaces_filter_by_name</span><span class="p">,</span>
         <span class="n">filter_by_description</span><span class="o">=</span><span class="n">interfaces_filter_by_description</span><span class="p">,</span>
         <span class="n">update_type</span><span class="o">=</span><span class="n">interfaces_update_type</span><span class="p">,</span>
@@ -7628,7 +7740,7 @@ operations.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
-        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
+        <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
         <span class="n">filter_by_name</span><span class="o">=</span><span class="n">mac_filter_by_name</span><span class="p">,</span>
         <span class="n">filter_by_description</span><span class="o">=</span><span class="n">mac_filter_by_description</span><span class="p">,</span>
         <span class="n">filter_by_mac</span><span class="o">=</span><span class="n">mac_filter_by_mac</span><span class="p">,</span>
@@ -7653,7 +7765,7 @@ operations.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
-        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
+        <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
         <span class="n">anycast_ranges</span><span class="o">=</span><span class="n">ip_anycast_ranges</span><span class="p">,</span>
         <span class="n">ignore_ranges</span><span class="o">=</span><span class="n">ip_ignore_ranges</span><span class="p">,</span>
         <span class="n">create_prefixes</span><span class="o">=</span><span class="n">ip_create_prefixes</span><span class="p">,</span>
@@ -7684,7 +7796,7 @@ operations.</p>
         <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">process_deletions</span><span class="o">=</span><span class="n">process_deletions</span><span class="p">,</span>
-        <span class="n">with_review</span><span class="o">=</span><span class="n">with_review</span><span class="p">,</span>
+        <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
         <span class="n">rir</span><span class="o">=</span><span class="n">bgp_rir</span><span class="p">,</span>
         <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
         <span class="n">name_template</span><span class="o">=</span><span class="n">bgp_name_template</span><span class="p">,</span>

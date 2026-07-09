@@ -339,6 +339,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../norfab_features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
         
   
@@ -5836,6 +5864,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_call_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Call Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -5892,6 +5948,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_nfapi_client_first_startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI Client First Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_mcp_task_prompts_plan/" class="md-nav__link">
         
   
@@ -5928,6 +6012,34 @@
     
   
     Norfab AAA Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_norfab_logging_isolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Logging Isolation
   
 
     
@@ -6538,10 +6650,10 @@ NetBox:</p>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+<p>When both <code>dry-run</code> and <code>with_approval</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
 </div>
 <p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns a per-device action summary:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -6950,7 +7062,7 @@ to NetBox.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>with_review</code>
+                <code>with_approval</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
@@ -8084,7 +8196,7 @@ to <code>parse_ttp</code>.</p>
     <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_approval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8134,7 +8246,7 @@ to <code>parse_ttp</code>.</p>
 <span class="sd">            default NetBox instance.</span>
 <span class="sd">        dry_run: Return the planned inventory diff without writing changes</span>
 <span class="sd">            to NetBox.</span>
-<span class="sd">        with_review: Preview changes, ask for review, then apply them.</span>
+<span class="sd">        with_approval: Preview changes, ask for review, then apply them.</span>
 <span class="sd">        timeout: Timeout in seconds for the Nornir ``parse_ttp`` job.</span>
 <span class="sd">        devices: NetBox device names to synchronize.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
@@ -8587,7 +8699,7 @@ to <code>parse_ttp</code>.</p>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> delete, </span><span class="si">{</span><span class="n">in_sync_count</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">with_review</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
+    <span class="k">if</span> <span class="n">with_approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
         <span class="n">job</span><span class="p">,</span> <span class="s2">&quot;device inventory sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span>
     <span class="p">):</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>

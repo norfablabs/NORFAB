@@ -339,6 +339,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../norfab_features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../norfab_why_use_norfab/" class="md-nav__link">
         
   
@@ -5824,6 +5852,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_call_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Call Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -5880,6 +5936,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_nfapi_client_first_startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI Client First Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_mcp_task_prompts_plan/" class="md-nav__link">
         
   
@@ -5916,6 +6000,34 @@
     
   
     Norfab AAA Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_norfab_logging_isolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Logging Isolation
   
 
     
@@ -6317,10 +6429,10 @@
 <li>Nornir returns parsed BGP session data to NetBox worker</li>
 <li>NetBox worker computes diff, then writes creates/updates/deletes to NetBox</li>
 </ol>
-<p><strong>With Review</strong> - Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<p><strong>With Approval</strong> - Pass <code>with_approval=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+<p>When both <code>dry-run</code> and <code>with_approval</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
 </div>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¤</a></h2>
 <ul>
@@ -6418,10 +6530,10 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>With Review</strong> — Pass <code>with_review=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
+<p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When both <code>dry-run</code> and <code>with_review</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
+<p>When both <code>dry-run</code> and <code>with_approval</code> are <code>True</code>, <code>dry-run</code> logic ignored.</p>
 </div>
 <p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns the same structure.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
@@ -6782,7 +6894,7 @@ creates, updates, or (optionally) deletes sessions in NetBox accordingly.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>with_review</code>
+                <code>with_approval</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
@@ -7611,7 +7723,7 @@ VRF object reference read from and written into
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">with_review</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_approval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7638,7 +7750,7 @@ VRF object reference read from and written into
 <span class="sd">        devices (list, optional): List of device names to process.</span>
 <span class="sd">        status (str): Status to assign to created/updated sessions when not ``established`` on device.</span>
 <span class="sd">        dry_run (bool): If True, return diff report without writing to NetBox.</span>
-<span class="sd">        with_review (bool): Preview changes, ask for review, then apply them.</span>
+<span class="sd">        with_approval (bool): Preview changes, ask for review, then apply them.</span>
 <span class="sd">        process_deletions (bool): If True, delete NetBox sessions not found on device.</span>
 <span class="sd">        timeout (int): Timeout in seconds for Nornir ``parse_ttp`` job.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name.</span>
@@ -7951,7 +8063,7 @@ VRF object reference read from and written into
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">delete_count</span><span class="si">}</span><span class="s2"> delete, </span><span class="si">{</span><span class="n">in_sync_count</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">with_review</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
+    <span class="k">if</span> <span class="n">with_approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span>
         <span class="n">job</span><span class="p">,</span> <span class="s2">&quot;BGP peerings sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span>
     <span class="p">):</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
