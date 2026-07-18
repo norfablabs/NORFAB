@@ -7,10 +7,10 @@ client:
   agent_profiles:
     default:
       llm:
-        api_key: '{{ env.get("OPENROUTER_API_KEY") }}'
-        model: openai/gpt-oss-120b:free
         profile_name: testAgent1
         provider: openrouter
+        api_key: '{{ env.get("OPENROUTER_API_KEY") }}'
+        model: nvidia/nemotron-3-ultra-550b-a55b:free
     interfaces_check_agent:
       from_yaml_file: ./agents/client_agent_interface_health_checker.yaml
         

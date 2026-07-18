@@ -881,9 +881,10 @@ class TestSyncDeviceInterfaces:
                 nfclient, TestSyncDeviceInterfaces.ALL_DEVICES, "TEST_SYNC"
             )
             self._delete_vlan(nfclient, 510)
+            self._delete_vlan(nfclient, 411)
 
     # ------------------------------------------------------------------ #
-    # Update scenarios                                                     #
+    # Update scenarios                                                   #
     # ------------------------------------------------------------------ #
 
     def test_sync_device_interfaces_update_description(self, nfclient):

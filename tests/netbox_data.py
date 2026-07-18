@@ -16,7 +16,8 @@ NB_URL = "http://netbox.lab:8000/"
 NB_URL_SSL = "https://netbox.lab:443/"
 NB_USERNAME = "admin"
 NB_PASSWORD = "admin"
-NB_API_TOKEN = "0123456789abcdef0123456789abcdef01234567"
+# NB_API_TOKEN = "0123456789abcdef0123456789abcdef01234567"
+NB_API_TOKEN = "nbt_cgxqWN26HAT7.mZXez4QM08SO7G2hwlntAAlQqKhV3CBjble8YmXR"
 NB_SECRETS_PRIVATE_KEY = """
 -----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAqlYAwxqIYx1rE3ZHfbSVKpVQXdvjkDYvFAIzApenoGZMr95u
@@ -252,6 +253,10 @@ device_types = [
         "manufacturer": {"name": "Cisco"},
     },
     {
+        "model": "vMX",
+        "manufacturer": {"name": "Juniper"},
+    },
+    {
         "model": "24-port LC Patch Panel",
         "manufacturer": {"name": "Generic"},
         "front-ports": [
@@ -383,10 +388,11 @@ prefixes = [
     {
         "prefix": "192.168.100.0/24",
         "description": "Test IP allocation by role and site",
-        "role": "prefix_role_1",
+        "role": {"slug": "prefix_role_1"},
         "scope_type": "dcim.site",
         "scope_name": "NORFAB-LAB",
     },
+    {"prefix": "172.16.1.100/30", "description": "For bgp sync test_sync_bgp_peerings_resolve_local_ip_via_peer test"},
 ]
 
 prefix_roles = [
@@ -866,6 +872,18 @@ rirs = [
         "is_private": True,
         "description": "Lab RIR for private ASN and IP space",
     },
+]
+
+# Custom fields data
+custom_fields = [
+    {
+        "name": "vrf",
+        "label": "VRF",
+        "type": "object",
+        "description": "VRF associated with a BGP peering",
+        "object_types": ["netbox_bgp.bgpsession"],
+        "related_object_type": "ipam.vrf",
+    }
 ]
 
 # BGP peer groups data
@@ -1712,6 +1730,13 @@ devices = [
         "tags": [{"name": "nornir-worker-1"}, {"name": "NORFAB"}],
         "platform": {"name": "arista_eos"},
     },
+    {
+        "name": "vmx-1",
+        "device_type": {"slug": slugify("vMX")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+    },
 ]
 # add fceos3_390-fceos3_399 devices to test multi-threading retrieval
 for i in range(10):
@@ -2174,9 +2199,17 @@ def create_device_roles():
 
 def create_prefixes():
     log.info("creating prefixes")
+    payloads = []
+    for prefix in prefixes:
+        payload = dict(prefix)
+        if payload.get("scope_type") == "dcim.site":
+            scope_name = payload.pop("scope_name")
+            payload["scope_id"] = nb.dcim.sites.get(name=scope_name).id
+        payloads.append(payload)
+
     _create_in_batches(
         endpoint=nb.ipam.prefixes,
-        items=prefixes,
+        items=payloads,
         item_name="prefix",
         batch_size=100,
     )
@@ -2749,6 +2782,24 @@ def create_config_templates():
                 )
 
 
+def create_custom_fields():
+    log.info("creating custom fields")
+    payloads = []
+    for custom_field in custom_fields:
+        payload = dict(custom_field)
+        if NB_VERSION < 4.0:
+            payload["content_types"] = payload.pop("object_types")
+            payload["object_type"] = payload.pop("related_object_type")
+        payloads.append(payload)
+
+    _create_in_batches(
+        endpoint=nb.extras.custom_fields,
+        items=payloads,
+        item_name="custom field",
+        batch_size=100,
+    )
+
+
 def creat_circuit_provider_networks():
     log.info("creating circuit provider networks")
     for item in circuit_provider_networks:
@@ -3009,15 +3060,13 @@ def delete_vrfs():
 
 
 def delete_vlans():
-    log.info("deleting vlans")
-    for vlan in vlans:
-        try:
-            vlan_nb = nb.ipam.vlans.filter(name=vlan["name"])
-            if vlan_nb:
-                for v in vlan_nb:
-                    v.delete()
-        except Exception as e:
-            log.error(f"deleting vlan '{vlan}' error '{e}'")
+    log.info("deleting all vlans")
+    try:
+        nb_vlans = nb.ipam.vlans.all()
+        for vlan in nb_vlans:
+            vlan.delete()
+    except Exception as e:
+        log.error(f"deleting all vlans error '{e}'")
 
 
 def delete_vlan_groups():
@@ -3264,10 +3313,22 @@ def delete_bgp_asn():
         log.error(traceback.format_exc())
 
 
+def delete_custom_fields():
+    log.info("deleting custom fields")
+    for custom_field in custom_fields:
+        try:
+            nb_custom_field = nb.extras.custom_fields.get(name=custom_field["name"])
+            if nb_custom_field:
+                nb_custom_field.delete()
+        except Exception as e:
+            log.error(f"deleting custom field '{custom_field['name']}' error '{e}'")
+
+
 def clean_up_netbox():
     # delete_netbox_secrets_secrets()
     # delete_netbox_secrets_roles()
     delete_bgp_peerings()
+    delete_custom_fields()
     delete_bgp_peer_groups()
     delete_bgp_asn()
     delete_rir()
@@ -3307,6 +3368,7 @@ def populate_netbox():
     create_device_roles()
     create_platforms()
     create_vrfs()
+    create_custom_fields()
     create_rir()
     create_prefix_roles()
     create_prefixes()

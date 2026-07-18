@@ -5,11 +5,16 @@
 1. Added `show fastmcp guardrails` NFCLI command to fetch FastMCP tools data and display only configured tool guardrails.
 2. Enhanced NFCLI input request prompts to show the approval timeout and automatically send `False`/No when the prompt expires.
 3. Enhanced NFCLI approval previews to use nested output by default.
+4. NorFab netbox service and Netbox v4.6 compatibility verified and tested
+5. NorFab netbox service and Netbox BGP plugin v0.19.0 compatibility verified and tested
+6. NorFab netbox service and Netbox Branching plugin v1.1.1 compatibility verified and tested
 
 ## CHANGES
 
 1. Renamed NetBox sync interactive confirmation argument from `with_review`/`with-review` to `with_approval`/`with-approval`.
+2. Dependencies update:
 
+  - pynetbox 7.7.0 -> 7.8.0
 
 ---
 

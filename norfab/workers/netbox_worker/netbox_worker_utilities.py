@@ -110,23 +110,29 @@ def resolve_vlan(
 
     # fetch vlans from Netbox
     filter_kwargs = {"vid": vid}
-    if group_id:
-        filter_kwargs["group_id"] = group_id
-        nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
-        if nb_vlan:
-            _lookup_cache[cache_key] = nb_vlan.id
-    elif site_id:
-        filter_kwargs["site_id"] = site_id
-
-        nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
-        if nb_vlan:
-            _lookup_cache[cache_key] = nb_vlan.id
-    # try to source global vlan - not assigned to site or group
-    else:
-        for nb_vlan in nb.ipam.vlans.filter(**filter_kwargs):
-            if not nb_vlan.site and not nb_vlan.group:
+    try:
+        if group_id:
+            filter_kwargs["group_id"] = group_id
+            nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
+            if nb_vlan:
                 _lookup_cache[cache_key] = nb_vlan.id
-                break
+        elif site_id:
+            filter_kwargs["site_id"] = site_id
+            nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
+            if nb_vlan:
+                _lookup_cache[cache_key] = nb_vlan.id
+        # try to source global vlan - not assigned to site or group
+        else:
+            for nb_vlan in nb.ipam.vlans.filter(**filter_kwargs):
+                if not nb_vlan.site and not nb_vlan.group:
+                    _lookup_cache[cache_key] = nb_vlan.id
+                    break
+    except Exception as e:
+        msg = f"Failed to fetch Netbox vlan using filters '{filter_kwargs}', error: {e}"
+        log.error(msg)
+        job.event(msg, severity="ERROR")
+        ret.errors.append(msg)
+        return None
 
     # check if managed to find a matching vlan
     if cache_key in _lookup_cache:
