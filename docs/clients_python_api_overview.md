@@ -15,6 +15,32 @@ nf.destroy()
 Refer to [Getting Started](norfab_getting_started.md) section on 
 how to construct  `inventory.yaml` file.
 
+## Loading local environment variables
+
+NFAPI automatically checks for `.env` beside `inventory.yaml` and loads it
+before inventory templates are rendered. File values override existing process
+variables by default. This allows local settings to be referenced from
+inventory with expressions such as `{{ env.get("NORFAB_BROKER_URL") }}` without
+manually exporting each variable.
+
+`list_environment_variables()` returns a copy of the variables visible to
+NFAPI:
+
+```python
+nf = NorFab(inventory="./inventory.yaml")
+print(nf.list_environment_variables()["LAB_USERNAME"])
+```
+
+Pass `load_env_override=False` when existing shell or CI variables should take
+precedence over `.env`:
+
+```python
+nf = NorFab(inventory="./inventory.yaml", load_env_override=False)
+```
+
+See the [NFAPI reference](api_reference_core_norfab_nfapi.md#environment-file-loading)
+for supported `.env` syntax and path resolution.
+
 All interaction with NorFab happens via client, to create a client need to call `make_client` method:
 
 !!! example

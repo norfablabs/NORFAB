@@ -4,6 +4,7 @@ broker:
   zmq_auth: true
 
 client:
+  nfapi_test_variable: '{{ env.get("NFAPI_TEST_VARIABLE") }}'
   agent_profiles:
     default:
       llm:

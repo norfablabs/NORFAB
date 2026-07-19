@@ -392,7 +392,10 @@ prefixes = [
         "scope_type": "dcim.site",
         "scope_name": "NORFAB-LAB",
     },
-    {"prefix": "172.16.1.100/30", "description": "For bgp sync test_sync_bgp_peerings_resolve_local_ip_via_peer test"},
+    {
+        "prefix": "172.16.1.100/30",
+        "description": "For bgp sync test_sync_bgp_peerings_resolve_local_ip_via_peer test",
+    },
 ]
 
 prefix_roles = [

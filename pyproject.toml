@@ -36,6 +36,7 @@ jinja2 = "3.1.6"
 pydantic = "2.13.4"
 mdutils = "1.8.1"
 orjson = "3.11.9"
+python-dotenv = "1.2.2"
 
 # PICLE NFCLI Shell Dependencies
 picle = { version = "0.12.2", optional = true }
@@ -294,6 +295,7 @@ case-sensitive = true
 
 [tool.pytest.ini_options]
 markers = [
+    "core: NORFAB core component tests",
     "netbox: NetBox service tests",
     "graphql: NetBox GraphQL tests",
     "interfaces: NetBox interface-related tests",

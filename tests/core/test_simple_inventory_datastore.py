@@ -5,6 +5,8 @@ import pytest
 from norfab.core.inventory import NorFabInventory
 from norfab.core.worker import NFPWorker
 
+pytestmark = pytest.mark.core
+
 os.environ["TERMINAL_LOGGING_LEVEL"] = "INFO"
 os.environ["NORNIR_USERNAME"] = "foo"
 

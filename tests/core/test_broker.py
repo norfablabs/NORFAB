@@ -1,7 +1,11 @@
 import threading
 
+import pytest
+
 from norfab.core import NFP
 from norfab.core.broker import NFPBroker
+
+pytestmark = pytest.mark.core
 
 
 class DummySocket:

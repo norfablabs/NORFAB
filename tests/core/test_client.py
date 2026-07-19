@@ -2,7 +2,11 @@ import pprint
 import time
 from uuid import uuid4
 
+import pytest
+
 from norfab.core.client import JobStatus
+
+pytestmark = pytest.mark.core
 
 
 class TestClientApi:

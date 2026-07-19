@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 9 July 2026*
+*Last updated: 19 July 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -130,6 +130,17 @@ endpoints, environment-dependent values, reusable worker definitions, and
 reducing duplicated YAML. **Limitations:** templates execute at inventory load
 time and should remain deterministic and reviewable.
 [Jinja2 inventory details](reference_norfab_inventory.md#jinja2-support)
+
+### Local environment bootstrap
+
+Detects and loads a project `.env` file before inventory rendering using the
+`python-dotenv` library. Local values override existing process variables by
+default, with an NFAPI option to preserve existing values instead. **Use cases:**
+local NFCLI configuration, environment-specific endpoints, and development
+credentials kept outside inventory YAML. **Limitations:** the `.env` file is
+local process configuration rather than a secret store; files containing
+secrets must be excluded from source control and protected appropriately.
+[NFAPI environment details](api_reference_core_norfab_nfapi.md#environment-file-loading)
 
 ### Topology dependencies and lifecycle hooks
 

@@ -9,6 +9,8 @@ from importlib.metadata import EntryPoint, entry_points
 from multiprocessing import Event, Process, Queue
 from typing import Union
 
+from dotenv import load_dotenv
+
 from norfab.core import exceptions as norfab_exceptions
 from norfab.core.broker import NFPBroker
 from norfab.core.client import NFPClient
@@ -106,6 +108,7 @@ class NorFab:
         inventory_data: dictionary with NorFab inventory
         base_dir: OS path to base directory to anchor NorFab at
         log_level: one or supported logging levels - `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`
+        load_env_override: whether `.env` values override existing environment variables
 
     Example:
 
@@ -151,8 +154,10 @@ class NorFab:
         log_level: str = None,
         run_broker: bool = True,
         run_workers: Union[bool, list[str]] = True,
+        load_env_override: bool = True,
     ) -> None:
         self.exiting = False  # flag to signal that Norfab is exiting
+        self.load_env_file(inventory, inventory_data, base_dir, load_env_override)
         self.inventory = NorFabInventory(
             path=inventory, data=inventory_data, base_dir=base_dir
         )
@@ -186,6 +191,27 @@ class NorFab:
 
         # find all workers plugins
         self.register_plugins()
+
+    def load_env_file(
+        self,
+        inventory: str,
+        inventory_data: dict,
+        base_dir: str,
+        load_env_override: bool,
+    ) -> None:
+        """Detect and load an env file before inventory initialization."""
+        env_base_dir = (
+            os.path.abspath(base_dir or os.getcwd())
+            if inventory_data
+            else os.path.dirname(os.path.abspath(inventory))
+        )
+        env_file = os.path.join(env_base_dir, ".env")
+        load_dotenv(dotenv_path=env_file, override=load_env_override)
+
+    @staticmethod
+    def list_environment_variables() -> dict:
+        """Return a copy of the environment variables visible to NFAPI."""
+        return dict(os.environ)
 
     def __enter__(self) -> "NorFab":
         self.start()

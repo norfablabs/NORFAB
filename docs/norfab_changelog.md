@@ -1,5 +1,9 @@
 # 0.20.4
 
+## FEATURES
+
+1. Added NFAPI `.env` detection and loading with `python-dotenv` before inventory initialization, making local variables available to NFCLI and inventory Jinja2 templates. Local `.env` values override existing process variables by default; `load_env_override=False` preserves existing values. NFAPI also exposes `list_environment_variables()` for inspecting its environment.
+
 ## ENHANCEMENTS
 
 1. Added `show fastmcp guardrails` NFCLI command to fetch FastMCP tools data and display only configured tool guardrails.

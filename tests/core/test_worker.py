@@ -8,6 +8,8 @@ from pydantic import ValidationError
 
 from norfab.core.worker import Task
 
+pytestmark = pytest.mark.core
+
 
 def make_task_prompt():
     return {

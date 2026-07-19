@@ -194,6 +194,23 @@ Function import path is a dot separated path used to import module file that con
 
 Starting with version 0.3.0 NorFab supports Jinja2 syntax rendering of inventory files, in addition, `env` dictionary variable available to source environment variables:
 
+NFAPI and NFCLI automatically load a `.env` file from the directory containing
+`inventory.yaml` before rendering it. Existing process environment variables
+are overridden by `.env` values by default. Pass `load_env_override=False` to
+`NorFab` to preserve existing process values instead. For dictionary
+inventories, detection uses `base_dir`, or the current directory when
+`base_dir` is omitted.
+
+```bash title=".env"
+TERMINAL_LOGGING_LEVEL=INFO
+FILE_LOGGING_LEVEL="DEBUG"
+```
+
+The `python-dotenv` loader accepts Bash-like assignments, comments, quoted and
+multiline values, the optional `export` directive, and `${VAR}` expansion. See the
+[NFAPI reference](api_reference_core_norfab_nfapi.md#environment-file-loading)
+for details.
+
 ``` yaml title="inventory.yaml"
 logging:
   handlers:

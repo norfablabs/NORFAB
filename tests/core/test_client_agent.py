@@ -1,3 +1,8 @@
+import pytest
+
+pytestmark = pytest.mark.core
+
+
 class TestClientApi:
     def test_get_agent(self, nfclient):
         agent = nfclient.get_agent(profile="default")
