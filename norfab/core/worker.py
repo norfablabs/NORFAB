@@ -363,6 +363,11 @@ class Task:
             definitions during discovery, removes this key before constructing
             the MCP Tool object, and evaluates guardrails before dispatching
             tool calls to NorFab services.
+            The optional `result_guardrails` key is a NorFab extension
+            containing a list of model-facing task result size and content
+            guardrails. FastMCP validates these definitions during discovery,
+            removes this key before constructing the MCP Tool object, and
+            evaluates them on a copied result after task execution.
 
     Methods:
         __call__(function: Callable) -> Callable:

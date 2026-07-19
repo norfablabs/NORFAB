@@ -118,6 +118,26 @@ class TestToolsCallNornir:
 
         asyncio.run(run_test())
 
+    def test_call_cli_redacts_secrets(self, nfclient, mcp_url):
+        ensure_tool_discovered(self, nfclient, "nornir", "cli")
+
+        async def run_test():
+            result = await call_mcp_tool(
+                mcp_url,
+                "service_nornir__task_cli",
+                {
+                    "commands": ["show run | inc secret"],
+                    "FL": ["ceos-spine-1"],
+                },
+            )
+            output = result["nornir-worker-1"]["result"]["ceos-spine-1"][
+                "show run | inc secret"
+            ]
+            assert "REDACTED" in output
+            assert "$6$" not in output
+
+        asyncio.run(run_test())
+
     @pytest.mark.parametrize(
         "commands, message",
         [

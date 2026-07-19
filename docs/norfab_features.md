@@ -1060,6 +1060,20 @@ tailoring prohibited commands to local policy. **Limitations:**
 guardrails inspect inline arguments only and do not inspect content later loaded
 from `nf://` files; they complement rather than replace authorization.
 
+### Result guardrails
+
+Applies `limit`, `replace`, and blocking regex rules in their configured order
+to each completed MCP task result. Limit rules measure
+the compact JSON aggregate at the point where they appear. Content rules
+recursively inspect string values below each worker's `result` and `diff`.
+Oversized content is replaced by one bounded base result with job-UUID retrieval
+guidance, while regex blocking replaces only an affected worker field with its
+configured message. **Use cases:** model-context budgets, deterministic
+credential redaction, and deployment-specific indirect-prompt-injection
+deny-lists. **Limitations:** rules are pattern-based, metadata fields are not
+content-inspected, and trusted retrieval by UUID returns the unsanitized raw
+database result.
+
 ### MCP bearer authentication
 
 Optionally protects the MCP endpoint with expiring bearer tokens.

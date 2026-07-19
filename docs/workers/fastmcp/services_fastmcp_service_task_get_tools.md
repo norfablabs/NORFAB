@@ -26,7 +26,10 @@ service_<service_name>__task_<task_name>
 
 ## Output
 
-The task returns MCP tool definitions. With `brief=True`, it returns tool names only.
+The task returns MCP tool definitions. Detailed definitions include effective
+task call `guardrails` and task `result_guardrails` when configured. These are
+NorFab inspection fields and are not added to the MCP SDK Tool schema. With
+`brief=True`, the task returns tool names only.
 
 ## Examples
 

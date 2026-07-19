@@ -1,3 +1,4 @@
+import copy
 import importlib.metadata
 import logging
 import os
@@ -8,8 +9,9 @@ import threading
 import time
 from datetime import datetime
 from fnmatch import fnmatch
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
+import orjson
 from diskcache import FanoutCache
 from mcp import types
 from mcp.server.auth.provider import AccessToken
@@ -47,6 +49,7 @@ from .fastmcp_models import (
     GetVersionInput,
     GetVersionResult,
     TaskMCPGuardrail,
+    TaskMCPResultGuardrail,
 )
 
 SERVICE = "fastmcp"
@@ -165,18 +168,145 @@ def make_task_guardrails(
             inventory_guardrail = dict(guardrail)
             inventory_guardrail.pop("service")
             inventory_guardrail.pop("task")
-            try:
-                guardrails_metadata.append(
-                    TaskMCPGuardrail.model_validate(inventory_guardrail).model_dump()
-                )
-            except Exception:
-                log.warning(
-                    f"Invalid FastMCP inventory guardrail for "
-                    f"'{task['service']}:{task['name']}'"
-                )
-                raise
+            guardrails_metadata.append(
+                TaskMCPGuardrail.model_validate(inventory_guardrail).model_dump()
+            )
 
     return guardrails_metadata
+
+
+def make_task_result_guardrails(
+    worker: Any, task: dict[str, Any], tool_metadata: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Build effective task and inventory result guardrails in authored order."""
+    tools_inventory = worker.fastmcp_inventory.get("tools", {})
+    result_guardrails_metadata = []
+    task_result_guardrails = tool_metadata.pop("result_guardrails", None) or []
+
+    if not tools_inventory.get("disable_builtin_guardrails", False):
+        for guardrail in task_result_guardrails:
+            TaskMCPResultGuardrail.model_validate(guardrail)
+            result_guardrails_metadata.append(guardrail)
+
+    inventory_result_guardrails = tools_inventory.get("result_guardrails") or []
+
+    for guardrail in inventory_result_guardrails:
+        inventory_guardrail = copy.deepcopy(guardrail)
+        service_selector = inventory_guardrail.pop("service")
+        task_selector = inventory_guardrail.pop("task")
+        TaskMCPResultGuardrail.model_validate(inventory_guardrail)
+
+        if fnmatch(task["service"], service_selector) and fnmatch(
+            task["name"], task_selector
+        ):
+            result_guardrails_metadata.append(inventory_guardrail)
+
+    return result_guardrails_metadata
+
+
+def iter_result_string_leaves(
+    container: dict | list,
+    key: Any,
+    path: str,
+) -> Iterator[tuple[dict | list, Any, str, str]]:
+    """Yield mutable containers for string leaves below a result field."""
+    value = container[key]
+    if isinstance(value, dict):
+        for child_key in value:
+            yield from iter_result_string_leaves(
+                value, child_key, f"{path}.{child_key}"
+            )
+    elif isinstance(value, list):
+        for index in range(len(value)):
+            yield from iter_result_string_leaves(value, index, f"{path}[{index}]")
+    elif isinstance(value, str):
+        yield container, key, path, value
+
+
+def apply_task_result_guardrails(
+    tool_name: str,
+    service: str,
+    task_name: str,
+    raw_result: dict[str, Any] | None,
+    result_guardrails: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    """Apply ordered result guardrails to one deep MCP delivery copy."""
+    if raw_result is None:
+        return None
+
+    delivery_result = copy.deepcopy(raw_result)
+
+    for guardrail in result_guardrails:
+        guardrail_type = guardrail["type"]
+
+        if guardrail_type == "limit":
+            serialized_size = len(orjson.dumps(delivery_result))
+            limit = guardrail["limit"]
+            if serialized_size <= limit:
+                continue
+
+            worker_result = next(iter(delivery_result.values()), {})
+            juuid = worker_result.get("juuid")
+            message = guardrail.get("message") or (
+                f"Guardrail omitted the result for tool '{tool_name}' because its "
+                f"size of {serialized_size} bytes exceeded the limit of {limit} bytes."
+            )
+            log.warning(message)
+            return Result(result=message, failed=False, juuid=juuid).model_dump()
+
+        elif guardrail_type == "replace":
+            match_values = guardrail["match"]
+            if isinstance(match_values, str):
+                match_values = [match_values]
+            patterns = [re.compile(value) for value in match_values]
+            replacement_count = 0
+
+            for worker_result in delivery_result.values():
+                for field in ("result", "diff"):
+                    for container, key, _, value in iter_result_string_leaves(
+                        worker_result, field, field
+                    ):
+                        for pattern in patterns:
+                            value, count = pattern.subn(guardrail["replace"], value)
+                            replacement_count += count
+                        container[key] = value
+
+            if replacement_count:
+                log.warning(
+                    f"Guardrail replaced {replacement_count} matches in the result "
+                    f"for tool '{tool_name}'"
+                )
+
+        elif guardrail_type == "regex":
+            match_values = guardrail["match"]
+            if isinstance(match_values, str):
+                match_values = [match_values]
+            patterns = [re.compile(value) for value in match_values]
+            blocked_fields = 0
+
+            for worker_name, worker_result in delivery_result.items():
+                for field in ("result", "diff"):
+                    matched_path = None
+                    for _, _, path, value in iter_result_string_leaves(
+                        worker_result, field, field
+                    ):
+                        if any(pattern.search(value) for pattern in patterns):
+                            matched_path = path
+                            break
+                    if matched_path is None:
+                        continue
+                    msg = f"Guardrail withheld content for '{matched_path}', blocked by regex."
+                    worker_result[field] = guardrail.get("message") or msg
+                    log.warning(msg)
+                    blocked_fields += 1
+
+            if blocked_fields:
+                log.warning(
+                    f"Guardrail withheld {blocked_fields} result fields for tool "
+                    f"'{tool_name}' from service '{service}' task '{task_name}'."
+                )
+
+    return delivery_result
 
 
 def check_tool_call_guardrails(
@@ -305,6 +435,9 @@ def service_tasks_discovery(
                 tool_metadata = dict(task["mcp"])
                 prompts_metadata = tool_metadata.pop("prompts", [])
                 guardrails_metadata = make_task_guardrails(worker, task, tool_metadata)
+                result_guardrails_metadata = make_task_result_guardrails(
+                    worker, task, tool_metadata
+                )
 
                 result.setdefault(task["service"], {})
                 prompts_result.setdefault(task["service"], {})
@@ -324,6 +457,7 @@ def service_tasks_discovery(
                             "tool": types.Tool(**task_tool),
                             "task": task,
                             "guardrails": guardrails_metadata,
+                            "result_guardrails": result_guardrails_metadata,
                         }
                     except Exception as exc:
                         log.error(
@@ -589,6 +723,9 @@ class FastMCPWorker(NFPWorker):
                             guardrails = tool_data.get("guardrails")
                             if guardrails:
                                 tool_definition["guardrails"] = guardrails
+                            result_guardrails = tool_data.get("result_guardrails")
+                            if result_guardrails:
+                                tool_definition["result_guardrails"] = result_guardrails
                             ret.result[tool_name] = tool_definition
 
         return ret
@@ -965,11 +1102,18 @@ class FastMCPWorker(NFPWorker):
                 f"Calling NorFab service '{service}' task '{task_name}' with arguments: '{arguments}'"
             )
 
-            return self.client.run_job(
+            raw_result = self.client.run_job(
                 service=service,
                 task=task_name,
                 kwargs=arguments,
                 workers="all",
+            )
+            return apply_task_result_guardrails(
+                name,
+                service,
+                task_name,
+                raw_result,
+                tool_data.get("result_guardrails", []),
             )
 
         @self.app._mcp_server.list_prompts()

@@ -30,7 +30,7 @@ class FastMCPShowInventoryModel(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args: object, **kwargs: object):
+    def run(*args: object, **kwargs: object) -> Any:
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -56,7 +56,7 @@ class FastMCPShowStatusModel(ClientRunJobArgs):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args: object, **kwargs: object):
+    def run(*args: object, **kwargs: object) -> Any:
         workers = kwargs.pop("workers", "all")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -84,7 +84,7 @@ class FastMCPShowToolsModel(
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args: object, **kwargs: object):
+    def run(*args: object, **kwargs: object) -> Any:
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -112,7 +112,7 @@ class FastMCPShowGuardrailsModel(
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args: object, **kwargs: object):
+    def run(*args: object, **kwargs: object) -> Any:
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -137,10 +137,18 @@ class FastMCPShowGuardrailsModel(
                     if not isinstance(tools, dict):
                         tools = {}
                     worker_result["result"] = {
-                        tool_name: tool_details["guardrails"]
+                        tool_name: {
+                            "guardrails": tool_details.get("guardrails", []),
+                            "result_guardrails": tool_details.get(
+                                "result_guardrails", []
+                            ),
+                        }
                         for tool_name, tool_details in tools.items()
                         if isinstance(tool_details, dict)
-                        and tool_details.get("guardrails")
+                        and (
+                            tool_details.get("guardrails")
+                            or tool_details.get("result_guardrails")
+                        )
                     }
 
         return log_error_or_result(result, verbose_result=verbose_result)
@@ -154,7 +162,7 @@ class FastMCPShowPromptsModel(
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def run(*args: object, **kwargs: object):
+    def run(*args: object, **kwargs: object) -> Any:
         workers = kwargs.pop("workers", "any")
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
@@ -198,7 +206,7 @@ class FastMCPShowCommandsModel(BaseModel):
     )
     guardrails: FastMCPShowGuardrailsModel = Field(
         None,
-        description="show FastMCP server tools guardrails",
+        description="show FastMCP server tools guardrails and result guardrails",
     )
     prompts: FastMCPShowPromptsModel = Field(
         None,
@@ -210,7 +218,7 @@ class FastMCPShowCommandsModel(BaseModel):
         pipe = PipeFunctionsModel
 
     @staticmethod
-    def get_version(**kwargs: object):
+    def get_version(**kwargs: object) -> Any:
         workers = kwargs.pop("workers", "all")
         result = run_future_job("fastmcp", "get_version", workers=workers)
         return log_error_or_result(result)

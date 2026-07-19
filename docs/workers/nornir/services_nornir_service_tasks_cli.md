@@ -44,10 +44,23 @@ state.
 These guardrails apply only to MCP tool calls. They do not change direct NorFab
 client, NFCLI, FastAPI, or worker behavior. FastMCP operators can add inventory
 guardrails or disable built-in guardrails with `tools.disable_builtin_guardrails`.
+
+The MCP result also has built-in replacement guardrails for documented Cisco
+IOS, Cisco IOS XR, Arista EOS, Juniper Junos, FortiOS, Huawei VRP, and Linux
+credential formats. Passwords, SNMP communities, shared secrets,
+authentication keys, HTTP authorization and cookie headers, URL credentials,
+OAuth token parameters, netrc passwords, Linux shadow hashes, and PEM
+private-key bodies are replaced with `REDACTED`.
+The raw result stored in the FastMCP job database is unchanged.
+
 !!! warning
     Guardrails inspect inline `commands` values only. If `commands` points to a
     Filesharing path such as `nf://cli/commands.txt`, FastMCP checks the path
     string, not the downloaded or rendered file content.
+
+    Result redaction is pattern-based and applies only to results delivered
+    through FastMCP. Direct NorFab clients and raw database retrieval remain
+    unsanitized.
 
 Use NFCLI to inspect the currently published guardrails:
 

@@ -42,6 +42,44 @@ class TaskMCPGuardrail(BaseModel):
         return self
 
 
+class TaskMCPResultGuardrail(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    description: StrictStr = ""
+    type: Literal["limit", "replace", "regex"]
+    limit: Union[StrictInt, None] = None
+    match: Union[StrictStr, list[StrictStr], None] = None
+    replace: Union[StrictStr, None] = None
+    message: StrictStr = ""
+
+    @model_validator(mode="after")
+    def validate_rule(self) -> "TaskMCPResultGuardrail":
+        fields = self.model_fields_set
+        if self.type == "limit":
+            if fields & {"match", "replace"}:
+                raise ValueError("Limit result guardrail has unsupported fields")
+            if self.limit is None or self.limit <= 0:
+                raise ValueError("Result guardrail limit must be a positive integer")
+            return self
+
+        if "limit" in fields:
+            raise ValueError(f"{self.type.title()} result guardrail cannot use limit")
+        if not self.match:
+            raise ValueError("Result guardrail match must not be empty")
+        patterns = self.match if isinstance(self.match, list) else [self.match]
+        compiled_patterns = [re.compile(pattern) for pattern in patterns]
+
+        if self.type == "replace":
+            if self.replace is None:
+                raise ValueError("Replace result guardrail requires replace")
+            for pattern in compiled_patterns:
+                pattern.sub(self.replace, "")
+        elif "replace" in fields:
+            raise ValueError("Regex result guardrail has unsupported fields")
+
+        return self
+
+
 class GetVersionInput(BaseModel, use_enum_values=True, populate_by_name=True):
     pass
 

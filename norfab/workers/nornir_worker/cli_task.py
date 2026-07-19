@@ -236,6 +236,56 @@ MCP_GUARDRAILS = [
     },
 ]
 
+MCP_RESULT_GUARDRAILS = [
+    {
+        "description": "Redact passwords, keys, and secrets from CLI output.",
+        "type": "replace",
+        "match": [
+            r"(?im)^(\s*username\s+\S+.*?\s+password(?:\s+(?:\d+|md5|sha256|sha512|pbkdf2))?\s+)\S+",
+            r"(?im)^(\s*username\s+\S+.*?\s+secret(?:\s+(?:\d+|md5|sha256|sha512|pbkdf2))?\s+)\S+",
+            r"(?im)^(\s*enable\s+password(?:\s+(?:\d+|md5|sha256|sha512|pbkdf2))?\s+)\S+",
+            r"(?im)^(\s*enable\s+secret(?:\s+(?:\d+|md5|sha256|sha512|pbkdf2))?\s+)\S+",
+            r"(?im)^(\s*neighbor\s+\S+\s+password(?:\s+\d+)?\s+)\S+",
+            r"(?im)^(\s*snmp-server\s+community(?:\s+\d+)?\s+)\S+",
+            r"(?im)^(\s*radius-server\s+key(?:\s+\d+)?\s+)\S+",
+            r"(?im)^(\s*tacacs-server\s+key(?:\s+\d+)?\s+)\S+",
+            r"(?im)^(\s*snmp-server\s+user\b[^\r\n]*?\bauth\s+\S+\s+)\S+",
+            r"(?im)^(\s*snmp-server\s+user\b[^\r\n]*?\bpriv\s+\S+(?:\s+\d+)?\s+)\S+",
+            r"(?im)^(\s*set\s+snmp\s+community\s+)\S+",
+            r"(?im)^(\s*(?:set\s+.+?\s+)?encrypted-password\s+)\S+",
+            r"(?im)^(\s*(?:set\s+.+?\s+)?authentication-key\s+)\S+",
+            r"(?im)^(\s*(?:set\s+.+?\s+)?authentication-password\s+)\S+",
+            r"(?im)^(\s*(?:set\s+.+?\s+)?privacy-key\s+)\S+",
+            r"(?im)^(\s*(?:set\s+.+?\s+)?privacy-password\s+)\S+",
+            r"(?im)^(\s*(?:set\s+.+?\s+)?pre-shared-key\s+)\S+",
+            r"(?im)^(\s*set\s+password\s+)(?:\"[^\"\r\n]*\"|\S+)",
+            r"(?im)^(\s*local-user\s+\S+\s+password(?:\s+(?:cipher|irreversible-cipher))?\s+)\S+",
+            r"(?im)^(\s*snmp-agent\s+community\s+read(?:\s+(?:cipher|irreversible-cipher))?\s+)\S+",
+            r"(?im)^(\s*snmp-agent\s+community\s+write(?:\s+(?:cipher|irreversible-cipher))?\s+)\S+",
+            r"(?im)^(\s*radius-server\s+shared-key(?:\s+(?:cipher|irreversible-cipher))?\s+)\S+",
+            r"(?im)^(\s*hwtacacs-server\s+shared-key(?:\s+(?:cipher|irreversible-cipher))?\s+)\S+",
+            r"(?im)^(\s*crypto\s+isakmp\s+key(?:\s+\d+)?\s+)\S+",
+            r"(?im)^(\s*authorization\s*:\s*)[^\r\n]+",
+            r"(?im)^(\s*proxy-authorization\s*:\s*)[^\r\n]+",
+            r"(?im)^(\s*cookie\s*:\s*)[^\r\n]+",
+            r"(?im)^(\s*set-cookie\s*:\s*)[^\r\n]+",
+            r"(?i)(\b[a-z][a-z0-9+.-]*://[^/\s:@]+:)[^@/\s]+",
+            r"(?i)([?&]access_token=)[^&#\s]+",
+            r"(?i)([?&]refresh_token=)[^&#\s]+",
+            r"(?i)([?&]client_secret=)[^&#\s]+",
+            r"(?im)^(\s*machine\s+\S+\s+login\s+\S+\s+password\s+)\S+",
+            r"(?m)^([^:\r\n]+:)(?:\$[^:\r\n]+|[A-Za-z0-9./]{20,})(?=:)",
+        ],
+        "replace": r"\1REDACTED",
+    },
+    {
+        "description": "Redact PEM private keys from CLI output.",
+        "type": "replace",
+        "match": r"(?ims)(-----BEGIN ([A-Z0-9 ]*PRIVATE KEY)-----).*?(-----END \2-----)",
+        "replace": r"\1\nREDACTED\n\3",
+    },
+]
+
 
 class CliTask:
     @Task(
@@ -255,6 +305,7 @@ class CliTask:
                 CLI_TROUBLESHOOT_PROMPT,
             ],
             "guardrails": MCP_GUARDRAILS,
+            "result_guardrails": MCP_RESULT_GUARDRAILS,
         },
     )
     def cli(

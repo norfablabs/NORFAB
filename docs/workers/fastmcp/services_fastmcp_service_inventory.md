@@ -322,6 +322,69 @@ state-changing commands such as `commit`, `delete`, `clear`, and `debug`.
 It also rejects shell-mode commands such as `bash`, `shell`, `start shell`,
 `request system shell`, and `guestshell`, OS/image/package operations, and
 outbound session commands such as `ssh` and `telnet`.
+Its built-in result guardrails also redact common network-platform and Linux
+passwords, secrets, authentication keys, shadow hashes, and PEM private keys
+from MCP-delivered CLI output.
 The Nornir `cfg` task includes default MCP guardrails that reject operational
 command escapes in configuration input, such as `do ...` and `run ...`, plus
 reboot, reload, restart, delete, erase, zeroize, `ssh`, and `telnet` commands.
+
+---
+
+## Task Result Guardrails
+
+FastMCP result guardrails inspect the aggregate result after the NorFab job has
+completed but before the result is returned to the MCP client. The raw result
+stored in the FastMCP client's job database is not changed. Configure
+deployment rules under `tools.result_guardrails`:
+
+```yaml
+tools:
+  result_guardrails:
+    - service: "*"
+      task: "*"
+      description: Keep MCP task results below 256 KiB.
+      type: limit
+      limit: 262144
+      message: The task result is too large to return through MCP.
+
+    - service: nornir
+      task: cli
+      description: Redact labelled passwords.
+      type: replace
+      match: "(?i)(password\\s*[=:]\\s*)\\S+"
+      replace: "\\1[REDACTED:PASSWORD]"
+
+    - service: "*"
+      task: "*"
+      description: Withhold known instruction-injection content.
+      type: regex
+      match: "(?i)ignore (all |the )?previous instructions"
+      message: Task result content was withheld for safety.
+```
+
+Result guardrail selectors use glob (`fnmatch`) matching. Task-owned rules from
+`mcp.result_guardrails` run first in their declared order, followed by matching
+inventory rules in inventory order. `tools.disable_builtin_guardrails: true`
+disables both task-owned call and result guardrails while leaving inventory
+rules enabled.
+
+| Type | Required keys | Behavior |
+|---|---|---|
+| `limit` | `limit` (positive byte count) | Measures the compact JSON aggregate. If exceeded, returns one bounded base result containing `message` and the existing job UUID. |
+| `replace` | `match`, `replace` | Recursively replaces matching string values below each worker's `result` and `diff`. |
+| `regex` | `match` | Recursively detects matching string values below `result` and `diff` and replaces only the affected worker field with `message`. |
+
+Guardrails run once in authored order. A limit rule measures the delivery copy
+at the point where the rule appears. Dictionary keys and result metadata such as
+`errors`, `messages`, and `resources` are not regex-inspected, although the
+complete aggregate counts toward a `limit`.
+
+!!! warning
+    A job UUID locates the original database record; it is not an authorization
+    credential. Raw stored results have not been sanitized and may be large or
+    sensitive. Do not expose unrestricted raw-result retrieval to a model.
+
+Effective result guardrails are included by `get_tools`, `show fastmcp tools`
+when detailed tool data is requested, and `show fastmcp guardrails` under the
+`result_guardrails` section for each matching tool.

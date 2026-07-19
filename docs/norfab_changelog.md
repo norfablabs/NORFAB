@@ -3,17 +3,19 @@
 ## FEATURES
 
 1. Added NFAPI `.env` detection and loading with `python-dotenv` before inventory initialization, making local variables available to NFCLI and inventory Jinja2 templates. Local `.env` values override existing process variables by default; `load_env_override=False` preserves existing values. NFAPI also exposes `list_environment_variables()` for inspecting its environment.
+2. Added FastMCP task result guardrails with ordered aggregate byte limits, recursive regex replacement, selective regex blocking, wildcard inventory selectors, and raw-result preservation in the FastMCP client database.
 
 ## ENHANCEMENTS
 
-1. Added `show fastmcp guardrails` NFCLI command to fetch FastMCP tools data and display only configured tool guardrails.
-2. Enhanced NFCLI input request prompts to show the approval timeout and automatically send `False`/No when the prompt expires.
-3. Enhanced NFCLI approval previews to use nested output by default.
-4. NorFab netbox service and Netbox v4.6 compatibility verified and tested
-5. NorFab netbox service and Netbox BGP plugin v0.19.0 compatibility verified and tested
-6. NorFab netbox service and Netbox Branching plugin v1.1.1 compatibility verified and tested
-7. Enhanced Netbox `check_device_sync` with an optional inventory check that runs `sync_device_inventory` in dry-run mode and includes inventory state in the per-device summary and detailed diff.
-8. Enhanced NetBox `sync_device_inventory` with `inventory-parse-template` for parsing live inventory with a custom TTP template.
+1. Added `show fastmcp guardrails` NFCLI command to fetch FastMCP tools data and display configured tool guardrails and result guardrails in separate sections.
+2. Enhanced Nornir `cli` MCP task results with built-in redaction guardrails for documented network-device, Linux, HTTP header, URL credential, OAuth token parameter, netrc, and PEM private-key secrets, replacing matched values with `REDACTED` while preserving raw job results in the FastMCP client database.
+3. Enhanced NFCLI input request prompts to show the approval timeout and automatically send `False`/No when the prompt expires.
+4. Enhanced NFCLI approval previews to use nested output by default.
+5. NorFab netbox service and Netbox v4.6 compatibility verified and tested
+6. NorFab netbox service and Netbox BGP plugin v0.19.0 compatibility verified and tested
+7. NorFab netbox service and Netbox Branching plugin v1.1.1 compatibility verified and tested
+8. Enhanced Netbox `check_device_sync` with an optional inventory check that runs `sync_device_inventory` in dry-run mode and includes inventory state in the per-device summary and detailed diff.
+9. Enhanced NetBox `sync_device_inventory` with `inventory-parse-template` for parsing live inventory with a custom TTP template.
 
 ## CHANGES
 
