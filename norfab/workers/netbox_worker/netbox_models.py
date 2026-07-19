@@ -863,6 +863,11 @@ class SyncDeviceInventoryInput(
         alias="create-module-bays",
         json_schema_extra={"presence": True},
     )
+    inventory_parse_template: Union[None, StrictStr] = Field(
+        None,
+        description="TTP template string or URL used to parse live inventory",
+        alias="inventory-parse-template",
+    )
     inventory_map: Union[None, StrictStr, InventoryPatternMap] = Field(
         None,
         description="Pattern mappings or nf:// YAML file reference",

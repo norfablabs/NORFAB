@@ -300,20 +300,20 @@ class TestDeviceInventoryRecords:
         records = DeviceInventoryRecords.model_validate(
             [
                 {
-                    "description": None,
-                    "slot": "module 0/RSP0/CPU0",
+                    "description": "ASR9K Route Switch Processor",
                     "module": "A9K-RSP440-TR",
                     "serial": "M9YXCZV9QF",
+                    "slot": "module 0/RSP0/CPU0",
                 }
             ]
         )
 
         assert records.model_dump() == [
             {
-                "description": None,
-                "slot": "module 0/RSP0/CPU0",
+                "description": "ASR9K Route Switch Processor",
                 "module": "A9K-RSP440-TR",
                 "serial": "M9YXCZV9QF",
+                "slot": "module 0/RSP0/CPU0",
             }
         ]
 
@@ -324,7 +324,15 @@ class TestDeviceInventoryRecords:
             [{"slot": "module 0/RSP0/CPU0"}],
             [
                 {
-                    "description": None,
+                    "description": "ASR9K Route Switch Processor",
+                    "slot": "module 0/RSP0/CPU0",
+                    "model": "A9K-RSP440-TR",
+                    "serial": "M9YXCZV9QF",
+                }
+            ],
+            [
+                {
+                    "description": "ASR9K Route Switch Processor",
                     "slot": "module 0/RSP0/CPU0",
                     "module": 123,
                     "serial": None,
@@ -339,6 +347,13 @@ class TestDeviceInventoryRecords:
 
 @pytest.mark.task_inventory_models
 class TestSyncDeviceInventoryInput:
+    def test_accepts_inventory_parse_template_alias(self):
+        data = SyncDeviceInventoryInput.model_validate(
+            {"inventory-parse-template": "nf://netbox/inventory_parse.ttp"}
+        )
+
+        assert data.inventory_parse_template == "nf://netbox/inventory_parse.ttp"
+
     @pytest.mark.parametrize(
         "field",
         [
@@ -453,6 +468,7 @@ class TestSyncDeviceInventory:
     INVENTORY_MAP = "nf://netbox/inventory_map.yaml"
     INVALID_INVENTORY_MAP = "nf://netbox/inventory_map_invalid.yaml"
     INVENTORY_TRANSFORM = "nf://netbox/inventory_transform.py"
+    INVENTORY_PARSE_TEMPLATE = "nf://netbox/inventory_parse.ttp"
     MISSING_INVENTORY_TRANSFORM = "nf://netbox/inventory_transform_missing.py"
     RAISING_INVENTORY_TRANSFORM = "nf://netbox/inventory_transform_raises.py"
     INVALID_INVENTORY_TRANSFORM = "nf://netbox/inventory_transform_invalid.py"
@@ -666,6 +682,23 @@ class TestSyncDeviceInventory:
             assert res["dry_run"] is True
             inventory = res["result"][self.DEVICE]
             assert "chassis" in inventory["update"]
+            assert (
+                inventory["update"]["chassis"]["serial"]["new_value"]
+                == self.CHASSIS_SERIAL
+            )
+            assert self.RSP_SLOT in inventory["create"]
+
+    def test_sync_device_inventory_uses_custom_parse_template(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            dry_run=True,
+            inventory_parse_template=self.INVENTORY_PARSE_TEMPLATE,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            inventory = res["result"][self.DEVICE]
             assert (
                 inventory["update"]["chassis"]["serial"]["new_value"]
                 == self.CHASSIS_SERIAL

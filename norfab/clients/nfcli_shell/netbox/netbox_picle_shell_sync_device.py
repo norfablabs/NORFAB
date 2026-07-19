@@ -79,6 +79,10 @@ class SyncDeviceInventoryShell(
         return completions
 
     @staticmethod
+    def source_inventory_parse_template(choice: str) -> list:
+        return ClientRunJobArgs.walk_norfab_files(choice)
+
+    @staticmethod
     def source_inventory_transform(choice: str) -> list:
         completions = ClientRunJobArgs.walk_norfab_files(choice)
         return completions

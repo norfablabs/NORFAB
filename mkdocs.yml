@@ -253,6 +253,7 @@ nav:
     - FastMCP Bearer Auth plan: development\adr_fastmcp_bearer_authentication.md
     - MCP Tools Annotations plan: development\adr_mcp_tool_annotations_plan.md
     - FastMCP Task Call Guardrails: development/adr_fastmcp_task_call_guardrails.md
+    - FastMCP Task Result Guardrails: development/adr_fastmcp_task_result_guardrails.md
     - Netbox Sync Devices Inventory plan: development\adr_netbox_sync_device_inventory_plan.md
     - Norfab Interactive Client Plan: development\adr_norfab_interactive_client.md
     - NFAPI Client First Startup: development/adr_nfapi_client_first_startup.md

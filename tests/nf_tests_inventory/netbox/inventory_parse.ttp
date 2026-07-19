@@ -1,0 +1,14 @@
+<input>
+commands = [
+    "show inventory"
+]
+platform = [
+    "cisco_xr"
+]
+</input>
+
+<group>
+NAME: "{{ slot | ORPHRASE }}", DESCR: "{{ description | ORPHRASE }}"
+PID: {{ module | strip(",") }}{{ ignore(".+") }}SN: {{ serial }}
+PID: {{ module | strip(",") | let("serial", "") }}{{ ignore(".+") }}SN:
+</group>

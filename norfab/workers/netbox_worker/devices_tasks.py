@@ -343,6 +343,7 @@ class NetboxDevicesTasks:
         process_deletions: bool = False,
         create_module_types: bool = False,
         create_module_bays: bool = False,
+        inventory_parse_template: Union[None, str] = None,
         inventory_map: Union[None, str, dict, InventoryPatternMap] = None,
         inventory_transform: Union[None, str] = None,
         filter_by_module: Union[None, list] = None,
@@ -396,6 +397,8 @@ class NetboxDevicesTasks:
                 module model data.
             create_module_bays: Create missing NetBox module bays from live
                 inventory slot names.
+            inventory_parse_template: TTP template string or URL to use instead
+                of the default ``get="inventory"`` template.
             inventory_map: Manufacturer and device type scoped pattern mappings,
                 or an ``nf://`` YAML file containing them.
             inventory_transform: ``nf://`` Python file containing
@@ -562,7 +565,10 @@ class NetboxDevicesTasks:
         # Collect live inventory data from Network.
         job.event(f"retrieving live inventory for {len(devices)} device(s)")
         nornir_kwargs = dict(kwargs)
-        nornir_kwargs["get"] = "inventory"
+        if inventory_parse_template:
+            nornir_kwargs["template"] = inventory_parse_template
+        else:
+            nornir_kwargs["get"] = "inventory"
         nornir_kwargs["strict"] = False
         nornir_kwargs["FL"] = devices
         parse_data = self.client.run_job(
@@ -645,12 +651,10 @@ class NetboxDevicesTasks:
             )
 
             for record in records:
-                raw_slot = str(record["slot"] or "").strip()
-                raw_module_name = str(record["module"] or "").strip()
-                slot = raw_slot
-                module_name = raw_module_name
-                serial = str(record["serial"] or "").strip()
-                description = str(record["description"] or "")
+                slot = record["slot"]
+                module_name = record["module"]
+                serial = record["serial"]
+                description = record["description"]
                 is_chassis = slot.lower() == "chassis"
 
                 if not is_chassis:
@@ -692,7 +696,7 @@ class NetboxDevicesTasks:
                     if len(module_type_matches) > 1:
                         skipped_slots.add(slot)
                         msg = (
-                            f"{device_name}:{raw_slot or 'unknown'} - live module "
+                            f"{device_name}:{slot or 'unknown'} - live module "
                             f"'{module_name}' matches multiple NetBox module types: "
                             f"{sorted(module_type_matches)}"
                         )
@@ -703,7 +707,7 @@ class NetboxDevicesTasks:
                     if module_type_matches:
                         module_name = module_type_matches[0]
 
-                ignored_slot = f"{raw_slot} -> {slot}" if raw_slot != slot else slot
+                ignored_slot = slot
                 ignored_reason = ""
 
                 if serial.upper() == "BUILTIN":

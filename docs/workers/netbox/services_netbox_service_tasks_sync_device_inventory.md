@@ -10,7 +10,8 @@ tags:
 The `sync_device_inventory` task reconciles live hardware inventory collected
 from the Nornir service with NetBox device and module data.
 
-Live inventory is collected with Nornir `parse_ttp` using `get="inventory"`.
+Live inventory is collected with Nornir `parse_ttp` using `get="inventory"` by
+default. Set `inventory_parse_template` to use a custom TTP template instead.
 The chassis inventory record updates `dcim.device.serial`. Non-chassis
 inventory records, including optics and transceivers, are managed as NetBox
 `dcim.modules` installed in device-level `dcim.module_bays`.
@@ -18,16 +19,50 @@ inventory records, including optics and transceivers, are managed as NetBox
 ## Parsed Inventory Records
 
 The Nornir inventory parser and optional inventory transformer must return one
-list of records per device. Every record has exactly these fields:
+list of dictionaries per device. Every dictionary has exactly these keys:
 
 ```yaml
 - description: "ASR9K Route Switch Processor with 440G/slot Fabric and 6GB"
-  slot: "module 0/RSP0/CPU0"
   module: "A9K-RSP440-TR"
   serial: "M9YXCZV9QF"
+  slot: "module 0/RSP0/CPU0"
 ```
 
-Each field value must be a string or `null`.
+Each field value must be a string.
+
+### Custom Inventory Parsing Template
+
+`inventory_parse_template` accepts an inline TTP template or a template URL
+such as `nf://netbox/inventory_parse.ttp`. The template must return a list of
+dictionaries with the keys `description`, `module`, `serial`, and `slot` for
+each device. For example, this Cisco IOS XR template parses `show inventory`:
+
+```xml
+<input>
+commands = ["show inventory"]
+platform = ["cisco_xr"]
+</input>
+
+<group>
+NAME: "{{ slot | ORPHRASE }}", DESCR: "{{ description | ORPHRASE }}"
+PID: {{ module | strip(",") }}{{ ignore(".+") }}SN: {{ serial }}
+</group>
+```
+
+Use the template with the task:
+
+```python
+result = client.run_job(
+    "netbox",
+    "sync_device_inventory",
+    workers="any",
+    kwargs={
+        "devices": ["iosxr1"],
+        "inventory_parse_template": "nf://netbox/inventory_parse.ttp",
+        "dry_run": True,
+    },
+)
+```
 
 ### Device Serial Number
 
@@ -35,9 +70,9 @@ A record whose trimmed `slot` value is `chassis`, case-insensitive, is the devic
 
 ```yaml
 - description: "Cisco ASR 9006 Router"
-  slot: "chassis"
   module: "ASR-9006"
   serial: "JCY98XR393D"
+  slot: "chassis"
 ```
 
 For this record, the task:
@@ -218,7 +253,8 @@ def transform(
 The arguments are:
 
 - `device_name`: current NetBox and Nornir device name.
-- `parsed_data`: parsed records for that device, list of dictionaries with `slot`, `serial`, `description`, `module` keys.
+- `parsed_data`: parsed records for that device, a list of dictionaries with
+  `description`, `module`, `serial`, and `slot` keys.
 - `worker`: active NetBox worker object, including its configuration and
   all worker helper methods.
 - `device_platform`: NetBox device platform `name`, or `None` when no platform
@@ -227,10 +263,10 @@ The arguments are:
 - `device_type`: NetBox device type `model`.
 
 The return value must be a list of dictionaries. Every dictionary must contain
-exactly `description`, `slot`, `module`, and `serial`, with each value set to a
-string or `None`. Returning an empty list means there is no usable inventory
-for that device. Invalid output or an exception skips that device and records
-the validation or execution error in result's `errors`.
+exactly `description`, `module`, `serial`, and `slot`, with every value set
+to a string. Returning an empty list means there is no usable inventory for
+that device. Invalid output or an exception skips that device and records the
+validation or execution error in result's `errors`.
 
 The transformer is loaded once per task and called once per device. It runs
 before `inventory_map`, so pattern conditions test the transformed `module`
@@ -602,6 +638,7 @@ root
             ├── process-deletions:    Delete NetBox modules present in module bays but absent from live inventory
             ├── create-module-types:    Create missing NetBox module types from live inventory model data
             ├── create-module-bays:    Create missing NetBox module bays using the live inventory slot names
+            ├── inventory-parse-template:    TTP template string or URL used to parse live inventory
             ├── inventory-map:    Pattern mappings or nf:// YAML file reference
             ├── inventory-transform:    nf:// Python transformer file containing a transform function
             ├── filter-by-module:    Glob patterns selecting normalized module type names
