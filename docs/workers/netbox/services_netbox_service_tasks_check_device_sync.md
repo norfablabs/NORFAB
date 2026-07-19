@@ -13,6 +13,7 @@ Checks whether NetBox data is in sync with live device state without writing to 
 
 `check_device_sync` can run these read-only sub-checks:
 
+- **inventory** — calls `sync_device_inventory(dry_run=True)`
 - **interfaces** — calls `sync_device_interfaces(dry_run=True)`
 - **mac_addresses** — calls `sync_mac_addresses(dry_run=True)`
 - **ip_addresses** — calls `sync_device_ip(dry_run=True)`
@@ -28,6 +29,7 @@ Each sub-check can be enabled or disabled independently.
 | `instance` | No | NetBox instance name to target |
 | `branch` | No | NetBox Branching plugin branch name to read from |
 | `timeout` | No | Timeout in seconds for Nornir parse jobs |
+| `check_inventory` | No | Check device inventory sync state, default `True` |
 | `check_interfaces` | No | Check interface sync state, default `True` |
 | `check_mac_addresses` | No | Check MAC address sync state, default `True` |
 | `check_ip_addresses` | No | Check IP address sync state, default `True` |
@@ -43,6 +45,7 @@ At least one explicit device or Nornir host filter must resolve to a device.
     "result": {
         "ceos-spine-1": {
             "in_sync": False,
+            "inventory": True,
             "interfaces": True,
             "mac_addresses": False,
             "ip_addresses": True,
@@ -50,6 +53,7 @@ At least one explicit device or Nornir host filter must resolve to a device.
         },
     },
     "diff": {
+        "inventory": {},
         "interfaces": {},
         "mac_addresses": {},
         "ip_addresses": {},
@@ -79,7 +83,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
     Check only interface and IP address sync:
 
     ```bash
-    nf#netbox check-sync devices devices ceos-leaf-1 check-mac-addresses false check-bgp-peerings false
+    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-mac-addresses false check-bgp-peerings false
     ```
 
     Resolve devices using a Nornir group filter:
@@ -130,6 +134,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
             workers="any",
             kwargs={
                 "devices": ["ceos-leaf-1"],
+                "check_inventory": False,
                 "check_mac_addresses": False,
                 "check_bgp_peerings": False,
             },
@@ -164,6 +169,7 @@ root
             ├── instance:    Netbox instance name to target
             ├── branch:    Branching plugin branch name to use
             ├── devices:    List of NetBox devices to check sync state for
+            ├── check-inventory:    Check device inventory sync state, default 'True'
             ├── check-interfaces:    Check interfaces sync state, default 'True'
             ├── check-mac-addresses:    Check MAC addresses sync state, default 'True'
             ├── check-ip-addresses:    Check IP addresses sync state, default 'True'

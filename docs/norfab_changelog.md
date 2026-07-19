@@ -12,6 +12,7 @@
 4. NorFab netbox service and Netbox v4.6 compatibility verified and tested
 5. NorFab netbox service and Netbox BGP plugin v0.19.0 compatibility verified and tested
 6. NorFab netbox service and Netbox Branching plugin v1.1.1 compatibility verified and tested
+7. Enhanced Netbox `check_device_sync` with an optional inventory check that runs `sync_device_inventory` in dry-run mode and includes inventory state in the per-device summary and detailed diff.
 
 ## CHANGES
 

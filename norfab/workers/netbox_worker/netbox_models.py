@@ -910,6 +910,12 @@ class CheckDeviceSyncInput(
         60,
         description="Timeout in seconds for Nornir parse_ttp jobs",
     )
+    check_inventory: StrictBool = Field(
+        True,
+        description="Check device inventory sync state",
+        json_schema_extra={"presence": True},
+        alias="check-inventory",
+    )
     check_interfaces: StrictBool = Field(
         True,
         description="Check interface sync state",

@@ -57,6 +57,7 @@ MCP_GUARDRAILS = [
         "match": [
             r"(?im)^\s*(delete|erase|format|factory-reset)\b.*",
             r"(?im)^\s*request\s+system\s+zeroize\b.*",
+            r"(?im)^\s*commit\s+replace\b.*",
         ],
         "message": "MCP guardrail rejected a delete or erase command.",
     },

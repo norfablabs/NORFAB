@@ -620,10 +620,16 @@ class TestCheckDeviceSync:
 
     DEVICES = ["ceos-spine-1", "ceos-spine-2"]
     # Expected per-device sub-categories when all checks are enabled
-    ALL_CATEGORIES = {"interfaces", "mac_addresses", "ip_addresses", "bgp_peerings"}
+    ALL_CATEGORIES = {
+        "inventory",
+        "interfaces",
+        "mac_addresses",
+        "ip_addresses",
+        "bgp_peerings",
+    }
 
     def test_check_device_sync_result_structure(self, nfclient):
-        """Result has a dict per device with all four sync categories."""
+        """Result has a dict per device with all five sync categories."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
@@ -701,6 +707,7 @@ class TestCheckDeviceSync:
             workers="any",
             kwargs={
                 "devices": self.DEVICES,
+                "check_inventory": False,
                 "check_interfaces": True,
                 "check_mac_addresses": False,
                 "check_ip_addresses": False,
@@ -718,6 +725,9 @@ class TestCheckDeviceSync:
                     "interfaces" in device_data
                 ), f"{worker}:{device} missing interfaces"
                 assert (
+                    "inventory" not in device_data
+                ), f"{worker}:{device} inventory should not be present"
+                assert (
                     "mac_addresses" not in device_data
                 ), f"{worker}:{device} mac_addresses should not be present"
                 assert (
@@ -727,6 +737,9 @@ class TestCheckDeviceSync:
                     "bgp_peerings" not in device_data
                 ), f"{worker}:{device} bgp_peerings should not be present"
             assert "interfaces" in res["diff"], f"{worker} diff missing interfaces"
+            assert (
+                "inventory" not in res["diff"]
+            ), f"{worker} diff should not have inventory"
             assert (
                 "mac_addresses" not in res["diff"]
             ), f"{worker} diff should not have mac_addresses"
@@ -739,6 +752,7 @@ class TestCheckDeviceSync:
             workers="any",
             kwargs={
                 "devices": self.DEVICES,
+                "check_inventory": False,
                 "check_interfaces": False,
                 "check_mac_addresses": True,
                 "check_ip_addresses": True,
@@ -752,6 +766,9 @@ class TestCheckDeviceSync:
             for device in self.DEVICES:
                 device_data = res["result"][device]
                 assert (
+                    "inventory" not in device_data
+                ), f"{worker}:{device} inventory should not be present"
+                assert (
                     "interfaces" not in device_data
                 ), f"{worker}:{device} interfaces should not be present"
                 assert (
@@ -763,6 +780,35 @@ class TestCheckDeviceSync:
                 assert (
                     "bgp_peerings" not in device_data
                 ), f"{worker}:{device} bgp_peerings should not be present"
+
+    def test_check_device_sync_selective_inventory_only(self, nfclient):
+        """Inventory check can be explicitly enabled while other checks are disabled."""
+        ret = nfclient.run_job(
+            "netbox",
+            "check_device_sync",
+            workers="any",
+            kwargs={
+                "devices": self.DEVICES,
+                "check_inventory": True,
+                "check_interfaces": False,
+                "check_mac_addresses": False,
+                "check_ip_addresses": False,
+                "check_bgp_peerings": False,
+            },
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert "inventory" in res["diff"], f"{worker} diff missing inventory"
+            for device in self.DEVICES:
+                device_data = res["result"][device]
+                assert set(device_data) == {
+                    "inventory",
+                    "in_sync",
+                }, f"{worker}:{device} returned unexpected categories"
+                assert isinstance(device_data["inventory"], bool)
+                assert device_data["in_sync"] == device_data["inventory"]
 
     def test_check_device_sync_with_nornir_filter(self, nfclient):
         """Devices resolved via Nornir FC filter."""

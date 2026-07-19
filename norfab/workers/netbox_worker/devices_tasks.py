@@ -1167,6 +1167,7 @@ class NetboxDevicesTasks:
         timeout: int = 600,
         devices: Union[None, list] = None,
         branch: str = None,
+        check_inventory: bool = True,
         check_interfaces: bool = True,
         check_mac_addresses: bool = True,
         check_ip_addresses: bool = True,
@@ -1176,13 +1177,14 @@ class NetboxDevicesTasks:
         """
         Check if NetBox device data is in sync with live device data.
 
-        Calls ``sync_device_interfaces``, ``sync_mac_addresses``, ``sync_device_ip``,
-        and ``sync_bgp_peerings`` in dry-run mode and produces a per-device report
-        indicating which items are in sync and which are not.
+        Calls ``sync_device_inventory``, ``sync_device_interfaces``,
+        ``sync_mac_addresses``, ``sync_device_ip``, and ``sync_bgp_peerings`` in
+        dry-run mode and produces a per-device report indicating which items are
+        in sync and which are not.
 
         ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by
-        sub-task name (``interfaces``, ``mac_addresses``, ``ip_addresses``,
-        ``bgp_peerings``).
+        sub-task name (``inventory``, ``interfaces``, ``mac_addresses``,
+        ``ip_addresses``, ``bgp_peerings``).
 
         Args:
             job: NorFab Job object.
@@ -1190,6 +1192,7 @@ class NetboxDevicesTasks:
             timeout (int): Timeout in seconds for Nornir jobs. Defaults to 60.
             devices (list, optional): List of device names to check.
             branch (str, optional): NetBox branching plugin branch name.
+            check_inventory (bool): Check device inventory sync state. Defaults to True.
             check_interfaces (bool): Check interface sync state. Defaults to True.
             check_mac_addresses (bool): Check MAC address sync state. Defaults to True.
             check_ip_addresses (bool): Check IP address sync state. Defaults to True.
@@ -1202,6 +1205,7 @@ class NetboxDevicesTasks:
                 {
                     "<device>": {
                         "in_sync": True | False,
+                        "inventory":     True | False,
                         "interfaces":    True | False,
                         "mac_addresses": True | False,
                         "ip_addresses":  True | False,
@@ -1245,6 +1249,28 @@ class NetboxDevicesTasks:
         # initialize per-device result structure
         for device in devices:
             ret.result[device] = {}
+
+        # --- check inventory ---
+        if check_inventory:
+            job.event("checking device inventory sync state")
+            inventory_result = self.sync_device_inventory(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+            if inventory_result.errors:
+                ret.errors.extend(inventory_result.errors)
+            for device, data in inventory_result.result.items():
+                in_sync = (
+                    not data.get("create")
+                    and not data.get("update")
+                    and not data.get("delete")
+                )
+                ret.result.setdefault(device, {})["inventory"] = in_sync
+            ret.diff["inventory"] = inventory_result.result
 
         # --- check interfaces ---
         if check_interfaces:
@@ -1327,6 +1353,7 @@ class NetboxDevicesTasks:
             ret.diff["bgp_peerings"] = bgp_result.result
 
         checked_categories = {
+            "inventory": check_inventory,
             "interfaces": check_interfaces,
             "mac_addresses": check_mac_addresses,
             "ip_addresses": check_ip_addresses,
