@@ -20,6 +20,8 @@
 
   - pynetbox 7.7.0 -> 7.8.0
 
+3. Changing Nornir parse ttp logic to not mark results as failed if any of cli commands collection failed for any of the hosts
+
 ---
 
 # 0.20.3

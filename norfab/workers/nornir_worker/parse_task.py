@@ -250,7 +250,6 @@ class ParseTask:
                 job=job, commands=cli_run["commands"], **cli_run_kwargs, plugin=plugin
             )
             if result.failed:
-                ret.failed = True
                 log.error(
                     f"Failed collecting commands output, errors: {result.errors or result.messages}"
                 )
@@ -295,5 +294,9 @@ class ParseTask:
             for hname, hres in ret.result.items():
                 if not hres or hres in [[{}], [], {}, [[]]]:
                     raise RuntimeError(f"{hname} host parsing produced no results")
+
+        # if no parsing results and have errors, mark job as failed
+        if not ret.result and ret.errors:
+            ret.failed = True
 
         return ret
