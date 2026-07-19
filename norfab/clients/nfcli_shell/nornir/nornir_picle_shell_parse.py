@@ -114,11 +114,6 @@ class TTPParseModel(
     enable: StrictBool = Field(
         None, description="Enter exec mode", json_schema_extra={"presence": True}
     )
-    strict: StrictBool = Field(
-        True,
-        description="Strict mode, raise error on empty results",
-        json_schema_extra={"presence": True},
-    )
 
     @staticmethod
     def source_template(choice) -> list:

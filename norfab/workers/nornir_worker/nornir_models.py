@@ -1341,7 +1341,7 @@ class ParseTTPInput(
         description="TTP template string, nf:// path, or ttp:// path",
     )
     strict: StrictBool = Field(
-        True,
+        False,
         description="Raise an error when a host produces no parsed output",
         json_schema_extra={"presence": True},
     )
