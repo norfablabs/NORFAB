@@ -286,8 +286,9 @@ class ParseTask:
                     msg = f"No input data collected for '{hname}' device"
                     log.error(msg)
                     ret.errors.append(msg)
-                    ret.result[hname] = None
                     job.event(msg, severity="ERROR")
+                    if strict:
+                        raise RuntimeError(msg)
 
         # if strict - check hosts parsing results and raise error if empty
         if strict:
