@@ -1,0 +1,10 @@
+{% set interfaces = netbox.filter(
+    "dcim.interfaces", fields=["name"], device=host.name,
+    name=["Ethernet2", "Loopback0"]
+) -%}
+{% for interface in interfaces %}
+- task: "show interfaces {{ interface.name }}"
+  test: contains
+  pattern: "{{ interface.name }}"
+  name: "Check {{ interface.name }} status"
+{% endfor %}

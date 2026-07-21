@@ -663,7 +663,7 @@ class NornirWorker(
         # reply is a dict of {worker_name: results_dict}
         res = list(reply.values())[0]
         if res["failed"]:
-            raise RuntimeError(res["messages"])
+            raise RuntimeError(res["errors"] or res["messages"])
         return res["result"]["address"]
 
     def jinja2_nb_create_prefix(
@@ -686,9 +686,33 @@ class NornirWorker(
         # reply is a dict of {worker_name: results_dict}
         res = list(reply.values())[0]
         if res["failed"]:
-            raise RuntimeError(res["messages"])
+            raise RuntimeError(res["errors"] or res["messages"])
 
         return res["result"]["prefix"]
+
+    def jinja2_nb_filter(
+        self, object_type: str, fields: list = None, **filters: object
+    ) -> list[dict]:
+        """
+        Jinja2 helper to filter objects from NetBox.
+        """
+        reply = self.client.run_job(
+            "netbox",
+            "crud_read",
+            kwargs={
+                "object_type": object_type,
+                "filters": filters,
+                "fields": fields,
+            },
+            workers="any",
+            timeout=60,
+        )
+        # reply is a dict of {worker_name: results_dict}
+        res = list(reply.values())[0]
+        if res["failed"]:
+            raise RuntimeError(res["errors"] or res["messages"])
+
+        return res["result"]["results"]
 
     def jinja2_call_netbox(self, netbox_task: str) -> callable:
         """
@@ -708,7 +732,7 @@ class NornirWorker(
 
             # check if has an error
             if res["failed"]:
-                raise RuntimeError(res["messages"])
+                raise RuntimeError(res["errors"] or res["messages"])
 
             # return result for single host only
             if len(kwargs.get("devices", [])) == 1:
@@ -729,6 +753,7 @@ class NornirWorker(
             "get_interfaces": self.jinja2_call_netbox("get_interfaces"),
             "get_circuits": self.jinja2_call_netbox("get_circuits"),
             "get_devices": self.jinja2_call_netbox("get_devices"),
+            "filter": self.jinja2_nb_filter,
             "rest": self.jinja2_call_netbox("rest"),
             "graphql": self.jinja2_call_netbox("graphql"),
             "create_ip": self.jinja2_nb_create_ip,

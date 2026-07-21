@@ -367,6 +367,62 @@ class TestCrudRead:
                 d.get("name") == "ceos1" for d in result["results"]
             ), f"{worker} - ceos1 not found in results"
 
+    @pytest.mark.parametrize(
+        "object_type, object_name",
+        [
+            ("plugins.bgp.session", "fceos4-fceos5-eth105"),
+            ("plugins.bgp.peer_group", "TEST_BGP_PEER_GROUP_1"),
+        ],
+    )
+    def test_plugin_objects_by_filters(self, nfclient, object_type, object_name):
+        """Read third-party NetBox plugin objects by name filter."""
+        ret = nfclient.run_job(
+            "netbox",
+            "crud_read",
+            workers="any",
+            kwargs={
+                "object_type": object_type,
+                "filters": {"name": object_name},
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            result = res["result"]
+            assert result["count"] == 1, f"{worker} - expected exactly 1 result"
+            assert (
+                result["results"][0]["name"] == object_name
+            ), f"{worker} - wrong plugin object name"
+
+    def test_plugin_object_by_id(self, nfclient):
+        """Read a third-party NetBox BGP session by its integer ID."""
+        nb = get_pynetbox()
+        session = nb.plugins.bgp.session.get(name="fceos4-fceos5-eth105")
+        assert session is not None, "BGP session not found in NetBox"
+
+        ret = nfclient.run_job(
+            "netbox",
+            "crud_read",
+            workers="any",
+            kwargs={
+                "object_type": "plugins.bgp.session",
+                "object_id": session.id,
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+            result = res["result"]
+            assert result["count"] == 1, f"{worker} - expected exactly 1 result"
+            assert (
+                result["results"][0]["id"] == session.id
+            ), f"{worker} - wrong BGP session id"
+            assert (
+                result["results"][0]["name"] == session.name
+            ), f"{worker} - wrong BGP session name"
+
     def test_by_id_single(self, nfclient):
         """Read a device by its integer ID."""
         nb = get_pynetbox()

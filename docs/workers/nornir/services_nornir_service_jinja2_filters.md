@@ -31,6 +31,56 @@ Returns:
 ["192.168.2.1", "192.168.2.2"]
 ```
 
+## netbox.filter
+
+`netbox.filter` reads objects through the NetBox `crud_read` task and returns a
+list of matching object dictionaries. The first argument is an object type in
+`app.resource` format. Pass an optional list of returned `fields`, followed by
+NetBox filter arguments as keyword arguments.
+
+This configuration template retrieves `Loopback0` for the current host and
+renders its NetBox description:
+
+``` jinja2
+{% set interfaces = netbox.filter(
+    "dcim.interfaces", fields=["name", "description"],
+    device=host.name, name="Loopback0"
+) -%}
+{% for interface in interfaces %}
+interface {{ interface.name }}
+  description {{ interface.description }}
+{% endfor %}
+```
+
+The helper can also generate a test suite dynamically. This example creates one
+test for every interface assigned to the current device:
+
+``` jinja2
+{% set interfaces = netbox.filter(
+    "dcim.interfaces", fields=["name"], device=host.name
+) -%}
+{% for interface in interfaces %}
+- task: "show interfaces {{ interface.name }}"
+  test: contains
+  pattern: "{{ interface.name }}"
+  name: "Check {{ interface.name }} status"
+{% endfor %}
+```
+
+NetBox plugin resources use the three-part
+`plugins.<plugin>.<resource>` form. For example, the following retrieves BGP
+sessions assigned to the current host:
+
+``` jinja2
+{% set sessions = netbox.filter(
+    "plugins.bgp.session", device=host.name
+) -%}
+{% for session in sessions %}
+router bgp
+  neighbor {{ session.remote_address.address }} description {{ session.name }}
+{% endfor %}
+```
+
 ## netbox.create_ip
 
 This Jinja2 filter queries Netbox to get existing or create next available IP in prefix.

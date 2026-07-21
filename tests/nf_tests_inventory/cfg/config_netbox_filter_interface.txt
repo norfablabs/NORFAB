@@ -1,0 +1,8 @@
+{% set interfaces = netbox.filter(
+    "dcim.interfaces", fields=["name", "description"],
+    device=host.name, name="Loopback0"
+) -%}
+{% for interface in interfaces %}
+interface {{ interface.name }}
+  description {{ interface.description }}
+{% endfor %}

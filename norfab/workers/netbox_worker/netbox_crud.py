@@ -41,9 +41,14 @@ def _get_pynetbox_accessor(nb: Any, object_type: str) -> Any:
     Converts dashes to underscores in the resource name so that
     e.g. ``ipam.ip-addresses`` → ``nb.ipam.ip_addresses``.
     """
-    app, resource = object_type.split(".", 1)
-    resource_attr = resource.replace("-", "_")
-    return getattr(getattr(nb, app), resource_attr)
+    if object_type.startswith("plugins."):
+        _, app, resource = object_type.split(".")
+        resource_attr = resource.replace("-", "_")
+        return getattr(getattr(nb.plugins, app), resource_attr)
+    else:
+        app, resource = object_type.split(".", 1)
+        resource_attr = resource.replace("-", "_")
+        return getattr(getattr(nb, app), resource_attr)
 
 
 def _schema_name_from_path_spec(path_spec: dict) -> Union[None, str]:

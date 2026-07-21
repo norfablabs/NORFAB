@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 19 July 2026*
+*Last updated: 21 July 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -321,6 +321,17 @@ Dry-run returns rendered commands without connecting to devices. **Use cases:**
 parameterized diagnostics, per-device VRF/interface commands, and reviewing
 target-specific intent before execution. **Limitations:** template inputs and
 host data are trusted automation content.
+
+### NetBox-backed Jinja2 object filtering
+
+Exposes `netbox.filter` to Nornir Jinja2 templates for retrieving filtered
+NetBox core or plugin objects with optional field selection. Results are returned
+as a list for direct iteration when rendering commands, configuration, or test
+suites. **Use cases:** source-of-truth-driven interface configuration, dynamic
+per-object tests, and plugin-backed routing templates. **Limitations:** requires
+an available NetBox service and knowledge of the target object and filter
+fields; per-host rendering queries can add NetBox API load and latency.
+[Jinja2 filter examples](workers/nornir/services_nornir_service_jinja2_filters.md#netboxfilter)
 
 ### Resilient execution with RetryRunner
 
