@@ -245,6 +245,8 @@ MCP_RESULT_GUARDRAILS = [
             r"(?im)^(\s*username\s+\S+.*?\s+secret(?:\s+(?:\d+|md5|sha256|sha512|pbkdf2))?\s+)\S+",
             r"(?im)^(\s*enable\s+password(?:\s+(?:\d+|md5|sha256|sha512|pbkdf2))?\s+)\S+",
             r"(?im)^(\s*enable\s+secret(?:\s+(?:\d+|md5|sha256|sha512|pbkdf2))?\s+)\S+",
+            r"(?im)^(\s*secret\s+\d\s+)\$\d\$[^\s$]+\$\S+",
+            r"(?im)^(\s*password\s+\d\s+)\S+",
             r"(?im)^(\s*neighbor\s+\S+\s+password(?:\s+\d+)?\s+)\S+",
             r"(?im)^(\s*snmp-server\s+community(?:\s+\d+)?\s+)\S+",
             r"(?im)^(\s*radius-server\s+key(?:\s+\d+)?\s+)\S+",

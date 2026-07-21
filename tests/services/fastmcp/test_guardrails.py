@@ -1,12 +1,31 @@
+import asyncio
 import threading
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+from mcp import ClientSession
+from mcp.client.streamable_http import streamable_http_client
+from mcp.shared.exceptions import McpError
 from pydantic import ValidationError
 
 from norfab.workers.fastmcp_worker.fastmcp_models import TaskMCPGuardrail
 from norfab.workers.fastmcp_worker.fastmcp_worker import service_tasks_discovery
+
+try:
+    from tests.services.fastmcp.common import (
+        ensure_tool_discovered,
+        mcp_url,  # noqa: F401 - imported pytest fixture
+    )
+except ModuleNotFoundError as exc:
+    if exc.name not in {
+        "tests",
+        "tests.services",
+        "tests.services.fastmcp",
+        "tests.services.fastmcp.common",
+    }:
+        raise
+    from services.fastmcp.common import ensure_tool_discovered, mcp_url  # noqa: F401
 
 pytestmark = [
     pytest.mark.fastmcp,
@@ -16,6 +35,8 @@ pytestmark = [
 
 @pytest.mark.task_fastmcp_guardrails
 class TestFastMCPGuardrails:
+    tools_discovered = {}
+
     @staticmethod
     def make_task_guardrail():
         return {
@@ -134,3 +155,42 @@ class TestFastMCPGuardrails:
         assert [item["message"] for item in tool_data["guardrails"]] == [
             "Rejected reload command.",
         ]
+
+    @pytest.mark.parametrize(
+        "command, message",
+        [
+            ("reload", "reboot, reload, or restart command"),
+            ("conf t", "configuration mode command"),
+            ("delete flash:test.txt", "destructive or state-changing command"),
+            ("bash", "shell mode command"),
+            ("boot system flash:image.bin", "OS/image/package operation command"),
+            ("ssh admin@192.0.2.1", "outbound session command"),
+        ],
+    )
+    def test_cli_rejects_unsafe_command_integration(
+        self, nfclient, mcp_url, command, message
+    ):
+        ensure_tool_discovered(self, nfclient, "nornir", "cli")
+
+        async def run_test():
+            async with streamable_http_client(mcp_url) as (read, write, _):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    try:
+                        result = await session.call_tool(
+                            "service_nornir__task_cli",
+                            arguments={
+                                "commands": [command],
+                                "FL": ["ceos-spine-1"],
+                                "dry_run": True,
+                            },
+                        )
+                    except McpError as exc:
+                        response = str(exc)
+                    else:
+                        assert result.isError
+                        response = result.content[0].text
+
+                    assert message in response
+
+        asyncio.run(run_test())

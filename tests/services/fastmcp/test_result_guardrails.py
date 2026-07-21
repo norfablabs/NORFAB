@@ -1,3 +1,4 @@
+import asyncio
 import copy
 import re
 import threading
@@ -16,6 +17,26 @@ from norfab.workers.fastmcp_worker.fastmcp_worker import (
     service_tasks_discovery,
 )
 from norfab.workers.nornir_worker.cli_task import MCP_RESULT_GUARDRAILS
+
+try:
+    from tests.services.fastmcp.common import (
+        call_mcp_tool,
+        ensure_tool_discovered,
+        mcp_url,  # noqa: F401 - imported pytest fixture
+    )
+except ModuleNotFoundError as exc:
+    if exc.name not in {
+        "tests",
+        "tests.services",
+        "tests.services.fastmcp",
+        "tests.services.fastmcp.common",
+    }:
+        raise
+    from services.fastmcp.common import (
+        call_mcp_tool,
+        ensure_tool_discovered,
+        mcp_url,  # noqa: F401 - imported pytest fixture
+    )
 
 pytestmark = [pytest.mark.fastmcp, pytest.mark.guardrails]
 
@@ -214,6 +235,11 @@ def test_replace_updates_nested_strings_without_mutating_raw_result():
             "$6$ARISTA_SECRET",
         ),
         ("username admin secret 9 $9$CISCO_IOS_SECRET", "$9$CISCO_IOS_SECRET"),
+        (
+            "secret 5 $1$abcd$XXXXXXXXXXXXXXXXXXXXXXXXX",
+            "$1$abcd$XXXXXXXXXXXXXXXXXXXXXXXXX",
+        ),
+        ("password 7 030752180500", "030752180500"),
         ("username admin\n secret 10 $6$CISCO_XR_SECRET", "$6$CISCO_XR_SECRET"),
         (
             'set system login user admin authentication encrypted-password "$9$JUNOS_SECRET"',
@@ -342,3 +368,27 @@ def test_limit_runs_in_authored_order():
 
     assert apply(raw, [limit, replace])["worker"]["result"] == "a larger replacement"
     assert apply(raw, [replace, limit])["result"] == "Result is too large."
+
+
+class TestFastMCPResultGuardrailsIntegration:
+    tools_discovered = {}
+
+    def test_cli_redacts_secret(self, nfclient, mcp_url):
+        ensure_tool_discovered(self, nfclient, "nornir", "cli")
+
+        async def run_test():
+            result = await call_mcp_tool(
+                mcp_url,
+                "service_nornir__task_cli",
+                {
+                    "commands": ["show run | inc secret"],
+                    "FL": ["ceos-spine-1"],
+                },
+            )
+            output = result["nornir-worker-1"]["result"]["ceos-spine-1"][
+                "show run | inc secret"
+            ]
+            assert "REDACTED" in output
+            assert "$6$" not in output
+
+        asyncio.run(run_test())
