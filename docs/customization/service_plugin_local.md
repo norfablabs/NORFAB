@@ -57,7 +57,6 @@ class DummyServiceWorker(NFPWorker):
         exit_event=None,
         init_done_event=None,
         log_level: str = "WARNING",
-        log_queue: object = None,
     ):
         """
         Initialize the DummyService.
@@ -69,11 +68,8 @@ class DummyServiceWorker(NFPWorker):
             exit_event (threading.Event, optional): Event to signal service exit.
             init_done_event (threading.Event, optional): Event to signal initialization completion.
             log_level (str, optional): The logging level.
-            log_queue (object, optional): The logging queue.
         """
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
 
         # get inventory from broker

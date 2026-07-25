@@ -261,7 +261,6 @@ class FastAPIWorker(NFPWorker):
         exit_event (threading.Event, optional): Event to signal worker to stop/exit.
         init_done_event (threading.Event, optional): Event to signal when worker is done initializing.
         log_level (str, optional): Logging level for this worker.
-        log_queue (object, optional): Queue for logging.
     """
 
     def __init__(
@@ -272,11 +271,8 @@ class FastAPIWorker(NFPWorker):
         exit_event=None,
         init_done_event=None,
         log_level: str = None,
-        log_queue: object = None,
     ) -> None:
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
         self.exit_event = exit_event
         self.api_prefix = "/api"

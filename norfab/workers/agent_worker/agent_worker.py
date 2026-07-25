@@ -42,7 +42,6 @@ class AgentWorker(NFPWorker):
         exit_event: An event that, if set, indicates the worker needs to stop/exit.
         init_done_event: An event to set when the worker has finished initializing.
         log_level (str): The logging level of this worker. Defaults to "WARNING".
-        log_queue (object): The logging queue object.
 
     Attributes:
         agent_inventory: The inventory loaded from the broker.
@@ -69,11 +68,8 @@ class AgentWorker(NFPWorker):
         exit_event: object = None,
         init_done_event: object = None,
         log_level: str = "WARNING",
-        log_queue: object = None,
     ) -> None:
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
 
         # get inventory from broker

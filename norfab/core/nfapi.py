@@ -1,12 +1,11 @@
 import hashlib
 import logging
-import logging.config
 import os
 import signal
 import sys
 import time
 from importlib.metadata import EntryPoint, entry_points
-from multiprocessing import Event, Process, Queue
+from multiprocessing import Event, Process
 from typing import Union
 
 from dotenv import load_dotenv
@@ -15,6 +14,7 @@ from norfab.core import exceptions as norfab_exceptions
 from norfab.core.broker import NFPBroker
 from norfab.core.client import NFPClient
 from norfab.core.inventory import NorFabInventory
+from norfab.utils.nflogging import setup_process_logging
 
 log = logging.getLogger(__name__)
 
@@ -24,26 +24,23 @@ def start_broker_process(
     exit_event=None,
     inventory=None,
     log_level: str = None,
-    log_queue=None,
     init_done_event=None,
 ) -> None:
     """
-    Thread target function too start a broker process with the given parameters.
+    Process target function to start a broker process.
 
     Args:
-        endpoint (str): The endpoint for the broker to connect to.
-        exit_event (threading.Event, optional): An event to signal the broker to exit. Defaults to None.
-        inventory (object, optional): An inventory object to be used by the broker. Defaults to None.
-        log_level (int, optional): The logging level for the broker. Defaults to None.
-        log_queue (queue.Queue, optional): A queue for logging messages. Defaults to None.
-        init_done_event (threading.Event, optional): An event to signal that initialization is done. Defaults to None.
+        endpoint (str): The endpoint for the broker to bind to.
+        exit_event (threading.Event, optional): An event to signal the broker to exit.
+        inventory (NorFabInventory, optional): The inventory object to use.
+        log_level (str, optional): The logging level for the broker.
+        init_done_event (threading.Event, optional): Event signaled when initialization is done.
     """
     broker = NFPBroker(
         endpoint=endpoint,
         exit_event=exit_event,
         inventory=inventory,
         log_level=log_level,
-        log_queue=log_queue,
         init_done_event=init_done_event,
     )
     broker.mediate()
@@ -51,28 +48,25 @@ def start_broker_process(
 
 def start_worker_process(
     worker_plugin: object,
-    inventory: str,
+    inventory: NorFabInventory,
     broker_endpoint: str,
     worker_name: str,
     exit_event=None,
     log_level=None,
-    log_queue=None,
     init_done_event=None,
 ) -> None:
     """
-    Thread target function to start a worker process using the provided worker plugin.
+    Process target function to start a worker process.
 
     Args:
         worker_plugin (object): The worker plugin class to instantiate and run.
-        inventory (str): The inventory data or path to be used by the worker.
+        inventory (NorFabInventory): The inventory object to use.
         broker_endpoint (str): The endpoint of the broker to connect to.
         worker_name (str): The name of the worker.
-        exit_event (threading.Event, optional): An event to signal the worker to exit. Defaults to None.
-        log_level (int, optional): The logging level for the worker. Defaults to None.
-        log_queue (queue.Queue, optional): The queue to use for logging. Defaults to None.
-        init_done_event (threading.Event, optional): An event to signal when initialization is done. Defaults to None.
+        exit_event (threading.Event, optional): An event to signal the worker to exit.
+        log_level (str, optional): The logging level for the worker.
+        init_done_event (threading.Event, optional): Event signaled when initialization is done.
     """
-    # load entry point on first call
     if hasattr(worker_plugin, "load"):
         worker_plugin = worker_plugin.load()
     elif isinstance(worker_plugin, str):
@@ -87,7 +81,6 @@ def start_worker_process(
         exit_event=exit_event,
         init_done_event=init_done_event,
         log_level=log_level,
-        log_queue=log_queue,
     )
     worker.work()
 
@@ -109,6 +102,8 @@ class NorFab:
         base_dir: OS path to base directory to anchor NorFab at
         log_level: one or supported logging levels - `CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`
         load_env_override: whether `.env` values override existing environment variables
+        configure_logging: configure NorFab process logging during initialization
+        logging_name: process identity to use in the NFAPI JSONL log filename
 
     Example:
 
@@ -155,16 +150,26 @@ class NorFab:
         run_broker: bool = True,
         run_workers: Union[bool, list[str]] = True,
         load_env_override: bool = True,
+        configure_logging: bool = False,
+        logging_name: str = "nfapi",
     ) -> None:
+        self.log_level = log_level
+        self.inventory_path = inventory
+        self.inventory_data = inventory_data
+        self.base_dir = base_dir
         self.exiting = False  # flag to signal that Norfab is exiting
         self.load_env_file(inventory, inventory_data, base_dir, load_env_override)
+        if configure_logging:
+            self.setup_logging(name=logging_name)
+
         self.inventory = NorFabInventory(
             path=inventory, data=inventory_data, base_dir=base_dir
         )
+        if configure_logging:
+            self.setup_logging(name=logging_name)
+
         self.run_broker = run_broker
         self.run_workers = run_workers
-        self.log_queue = Queue()
-        self.log_level = log_level
         self.broker_endpoint = self.inventory.broker["endpoint"]
         self.workers_init_timeout = self.inventory.topology.get(
             "workers_init_timeout", 300
@@ -181,7 +186,6 @@ class NorFab:
             os.path.join(self.inventory.base_dir, "__norfab__", "logs"), exist_ok=True
         )
 
-        self.setup_logging()
         # to fix ValueError: signal only works in main thread of the main interpreter
         # when trying to use nfapi to instantiate a client from different process
         try:
@@ -207,6 +211,17 @@ class NorFab:
         )
         env_file = os.path.join(env_base_dir, ".env")
         load_dotenv(dotenv_path=env_file, override=load_env_override)
+
+    @staticmethod
+    def resolve_base_dir(
+        inventory: str = None, inventory_data: dict = None, base_dir: str = None
+    ) -> str:
+        """Resolve the NorFab base directory without constructing inventory."""
+        if inventory_data:
+            return os.path.abspath(base_dir or os.getcwd())
+
+        path = os.path.abspath(inventory or "./inventory.yaml")
+        return base_dir or os.path.split(path)[0]
 
     @staticmethod
     def list_environment_variables() -> dict:
@@ -309,29 +324,39 @@ class NorFab:
             signal.signal(signal.SIGINT, signal.default_int_handler)
             os.kill(os.getpid(), signal.SIGINT)
 
-    def setup_logging(self) -> None:
+    def setup_logging(self, name: str = "nfapi") -> dict:
         """
-        Sets up logging configuration and starts a log queue listener.
+        Explicitly configure logging for the current process.
 
-        This method updates the logging levels for all handlers based on the
-        inventory, configures the logging system using the provided
-        inventory, and starts a log queue listener to process logs from child
-        processes.
+        If inventory is not initialized yet, bootstrap logging with NorFab
+        defaults anchored to the resolved base directory. Once inventory exists,
+        reapply logging with the inventory logging configuration.
+
+        Args:
+            name: Process identity to use in the NorFab JSONL log filename.
+
+        Returns:
+            dict: Logging configuration applied to this process.
         """
-        # update logging levels for all handlers
-        if self.log_level is not None:
-            self.inventory["logging"]["root"]["level"] = self.log_level
-            for handler in self.inventory["logging"]["handlers"].values():
-                handler["level"] = self.log_level
-        # configure logging
-        logging.config.dictConfig(self.inventory["logging"])
-        # start logs queue listener thread to process logs from child processes
-        self.log_listener = logging.handlers.QueueListener(
-            self.log_queue,
-            *logging.getLogger("root").handlers,
-            respect_handler_level=True,
+        inventory = getattr(self, "inventory", None)
+        if inventory is None:
+            base_dir = self.resolve_base_dir(
+                inventory=getattr(self, "inventory_path", None),
+                inventory_data=getattr(self, "inventory_data", None),
+                base_dir=getattr(self, "base_dir", None),
+            )
+            inventory_logging = None
+        else:
+            base_dir = inventory.base_dir
+            inventory_logging = inventory.logging
+
+        return setup_process_logging(
+            base_dir=base_dir,
+            role="nfapi",
+            name=name,
+            log_level=self.log_level,
+            inventory_logging=inventory_logging,
         )
-        self.log_listener.start()
 
     def start_broker(self) -> None:
         """
@@ -358,7 +383,6 @@ class NorFab:
                     self.broker_exit_event,
                     self.inventory,
                     self.log_level,
-                    self.log_queue,
                     init_done_event,
                 ),
             )
@@ -436,7 +460,6 @@ class NorFab:
                         worker_name,
                         self.workers_exit_event,
                         self.log_level,
-                        self.log_queue,
                         init_done_event,
                     ),
                 ),
@@ -612,8 +635,7 @@ class NorFab:
             self.broker_exit_event.set()
             if self.broker:
                 self.broker.join()
-            # stop logging thread
-            log.info("NorFab is exiting, stopping logging queue listener")
+            log.info("NorFab is exiting")
 
     def make_client(self, broker_endpoint: str = None, name: str = None) -> NFPClient:
         """

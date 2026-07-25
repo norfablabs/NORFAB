@@ -13,8 +13,10 @@ import zmq
 import zmq.auth
 from zmq.auth.thread import ThreadAuthenticator
 
+from norfab.utils.nflogging import read_jsonl_logs, setup_process_logging
+
 from . import NFP
-from .inventory import NorFabInventory, logging_config_producer
+from .inventory import NorFabInventory
 from .keepalives import KeepAliver
 from .security import generate_certificates
 
@@ -24,6 +26,7 @@ try:
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 except Exception:
     pass
+
 
 # ----------------------------------------------------------------------
 # NORFAB Protocol Broker Implementation
@@ -160,8 +163,6 @@ class NFPBroker:
         socket_lock (threading.Lock): The lock to protect the socket object.
 
     Methods:
-        setup_logging(self, log_queue, log_level: str) -> None:
-            Method to apply logging configuration.
         mediate(self):
             Main broker work happens here.
         destroy(self):
@@ -196,7 +197,6 @@ class NFPBroker:
         exit_event (Event): An event to signal the broker to exit.
         inventory (NorFabInventory): The inventory object containing configuration and state.
         log_level (str, optional): The logging level. Defaults to None.
-        log_queue (object, optional): The logging queue. Defaults to None.
         multiplier (int, optional): A multiplier value for internal use. Defaults to 6.
         keepalive (int, optional): The keepalive interval in milliseconds. Defaults to 2500.
         init_done_event (Event, optional): An event to signal that initialization is done. Defaults to None.
@@ -213,12 +213,12 @@ class NFPBroker:
         exit_event: Event,
         inventory: NorFabInventory,
         log_level: str = None,
-        log_queue: object = None,
         multiplier: int = 6,
         keepalive: int = 2500,
         init_done_event: Event = None,
     ) -> None:
-        self.setup_logging(log_queue, log_level)
+        self.inventory = inventory
+        self.setup_logging(log_level)
         self.keepalive = keepalive
         self.multiplier = multiplier
         init_done_event = init_done_event or Event()
@@ -227,7 +227,6 @@ class NFPBroker:
         self.workers = {}
         self.build_message = NFP.MessageBuilder()
         self.exit_event = exit_event
-        self.inventory = inventory
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
 
         self.base_dir = self.inventory.base_dir
@@ -284,25 +283,27 @@ class NFPBroker:
         init_done_event.set()  # signal finished initializing broker
         log.debug(f"NFPBroker - is ready and listening on {endpoint}")
 
-    def setup_logging(self, log_queue, log_level: str) -> None:
+    def setup_logging(self, log_level: str = None) -> dict:
         """
-        Configures logging for the application.
+        Configure logging for this broker process.
 
-        This method sets up the logging configuration using a provided log queue and log level.
-        It updates the logging configuration dictionary with the given log queue and log level,
-        and then applies the configuration using `logging.config.dictConfig`.
+        The broker uses the logging inventory it received during construction
+        as a per-process template and writes its default NorFab file sink to
+        ``__norfab__/logs/broker-NFPBroker.jsonl``.
 
         Args:
-            log_queue (queue.Queue): The queue to be used for logging.
-            log_level (str): The logging level to be set. If None, the default level is used.
+            log_level: Optional logging level override.
 
         Returns:
-            None
+            dict: Logging configuration applied to this process.
         """
-        logging_config_producer["handlers"]["queue"]["queue"] = log_queue
-        if log_level is not None:
-            logging_config_producer["root"]["level"] = log_level
-        logging.config.dictConfig(logging_config_producer)
+        return setup_process_logging(
+            base_dir=self.inventory.base_dir,
+            role="broker",
+            name="NFPBroker",
+            log_level=log_level,
+            inventory_logging=self.inventory.logging,
+        )
 
     def mediate(self) -> None:
         """
@@ -803,6 +804,7 @@ class NFPBroker:
         - "show_broker": Returns broker details including endpoint, status, keepalives, workers count, services count, directories, and security.
         - "show_broker_version": Returns the version of various packages and the platform.
         - "show_broker_inventory": Returns the broker's inventory.
+        - "get_logs": Returns broker process JSONL log records.
 
         The response is sent back to the client in a format of JSON formatted string.
         """
@@ -883,6 +885,19 @@ class NFPBroker:
                     pass
         elif task == "show_broker_inventory":
             ret = self.inventory.dict()
+        elif task == "get_logs":
+            ret = read_jsonl_logs(
+                logs_dir=os.path.join(self.base_dir, "__norfab__", "logs"),
+                log_files=["broker-NFPBroker.jsonl"],
+                last=kwargs.get("last", 100),
+                level=kwargs.get("level"),
+                logger=kwargs.get("logger"),
+                since=kwargs.get("since"),
+                until=kwargs.get("until"),
+            )
+            for record in ret:
+                record.setdefault("role", "broker")
+                record.setdefault("name", "NFPBroker")
         reply = orjson.dumps(ret)
         self.send_to_client(
             sender, NFP.RESPONSE, b"mmi.service.broker", [uuid, b"200", reply]

@@ -501,11 +501,8 @@ class FastMCPWorker(NFPWorker):
         exit_event: Optional[threading.Event] = None,
         init_done_event: Optional[threading.Event] = None,
         log_level: Optional[str] = None,
-        log_queue: Optional[object] = None,
     ) -> None:
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
         self.exit_event = exit_event
         self.norfab_services_tasks = {}

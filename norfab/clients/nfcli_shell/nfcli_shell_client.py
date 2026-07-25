@@ -9,7 +9,8 @@ import builtins
 import importlib.metadata
 import logging
 import sys
-from typing import Any, Optional
+from enum import Enum
+from typing import Any, List, Optional, Union
 
 from picle import App
 from picle.models import Outputters, PipeFunctionsModel
@@ -17,6 +18,7 @@ from pydantic import (
     BaseModel,
     Field,
     StrictBool,
+    StrictInt,
     StrictStr,
 )
 from rich.console import Console
@@ -54,6 +56,15 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------------------------
 # SHELL SHOW COMMANDS MODELS
 # ---------------------------------------------------------------------------------------------
+
+
+class LogLevel(str, Enum):
+    NOTSET = "NOTSET"
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
 
 
 class ShowBrokerModel(BaseModel):
@@ -185,12 +196,156 @@ class ShowNorfabClientModel(BaseModel):
         return libs
 
 
+class ShowNorfabLoggingModel(BaseModel):
+    broker: StrictBool = Field(
+        True,
+        description="Retrieve broker logs",
+        json_schema_extra={"presence": True},
+    )
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        "all", description="Workers to retrieve logs from"
+    )
+    service: StrictStr = Field(
+        "all", description="Service to retrieve worker logs from"
+    )
+    details: StrictBool = Field(
+        False,
+        description="Return complete log records",
+        json_schema_extra={"presence": True},
+    )
+    last: Optional[StrictInt] = Field(
+        100,
+        description="Return the last N log records after filtering",
+    )
+    level: Optional[LogLevel] = Field(None, description="Filter by log level")
+    logger: Optional[StrictStr] = Field(None, description="Filter by logger name")
+    since: Optional[StrictStr] = Field(
+        None, description="Filter records at or after timestamp"
+    )
+    until: Optional[StrictStr] = Field(
+        None, description="Filter records at or before timestamp"
+    )
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_pprint
+
+    @staticmethod
+    def source_workers() -> list:
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        reply = nfclient.mmi("mmi.service.broker", "show_workers")
+        return ["all"] + [worker["name"] for worker in reply["results"]]
+
+    @staticmethod
+    def source_service() -> list:
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        reply = nfclient.mmi("mmi.service.broker", "show_workers")
+        services = sorted({worker["service"] for worker in reply["results"]})
+        return ["all"] + services
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        details = kwargs.pop("details", False)
+        records = ShowNorfabLoggingModel._collect_records(kwargs)
+        records.sort(key=lambda item: item.get("ts") or "9999")
+
+        last = kwargs.get("last", 100)
+        records = records[-last:] if last else records
+        if details:
+            return records, Outputters.outputter_nested
+
+        return ShowNorfabLoggingModel._format_records(records)
+
+    @staticmethod
+    def _collect_records(kwargs: dict) -> list:
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        broker = kwargs.pop("broker", True)
+        workers = kwargs.pop("workers", "all")
+        service = kwargs.pop("service", "all")
+        filters = {"last": kwargs.get("last", 100)}
+        filters.update(
+            {
+                k: v.value if isinstance(v, Enum) else v
+                for k, v in kwargs.items()
+                if v is not None
+            }
+        )
+        records = []
+
+        if broker:
+            reply = nfclient.mmi(
+                "mmi.service.broker", "get_logs", kwargs=filters, timeout=600
+            )
+            if reply.get("errors"):
+                records.append(
+                    {
+                        "ts": "",
+                        "level": "ERROR",
+                        "role": "broker",
+                        "name": "NFPBroker",
+                        "message": "; ".join(reply["errors"]),
+                    }
+                )
+            else:
+                records.extend(reply.get("results", []))
+
+        if workers:
+            reply = nfclient.run_job(
+                service, "get_logs", workers=workers, kwargs=filters, timeout=600
+            )
+            for worker_name, result in reply.items():
+                if result.get("failed"):
+                    records.append(
+                        {
+                            "ts": "",
+                            "level": "ERROR",
+                            "role": "worker",
+                            "name": worker_name,
+                            "message": "; ".join(result.get("errors", [])),
+                        }
+                    )
+                else:
+                    records.extend(result.get("result") or [])
+
+        return records
+
+    @staticmethod
+    def _format_records(records: list[dict]) -> str:
+        return "\n".join(
+            ShowNorfabLoggingModel._format_record(record) for record in records
+        )
+
+    @staticmethod
+    def _format_record(record: dict) -> str:
+        location = ":".join(
+            str(item)
+            for item in (
+                record.get("module") or record.get("filename"),
+                record.get("function"),
+                record.get("line"),
+            )
+            if item
+        )
+        source = f"{record.get('role', '')}:{record.get('name', '')}".strip(":")
+        parts = [
+            record.get("ts", ""),
+            record.get("level", ""),
+            source,
+            record.get("logger", ""),
+        ]
+        if location:
+            parts.append(location)
+        parts.append(record.get("message", ""))
+        return " ".join(str(part) for part in parts if part)
+
+
 class ShowNorfabModel(BaseModel):
     broker: ShowBrokerModel = Field(None, description="show broker details")
     workers: ShowNorfabWorkersModel = Field(
         None, description="show workers information"
     )
     client: ShowNorfabClientModel = Field(None, description="Show client details")
+    logging: ShowNorfabLoggingModel = Field(None, description="Show NorFab logs")
     inventory: Any = Field(
         None,
         description="Show NorFab inventory",
@@ -561,6 +716,8 @@ def start_picle_shell(
     with NorFab(
         inventory=inventory,
         log_level=log_level,
+        configure_logging=True,
+        logging_name="nfcli",
         run_broker=run_broker,
         run_workers=run_workers,
     ) as nf:

@@ -130,7 +130,6 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         exit_event: Any = None,
         init_done_event: Any = None,
         log_level: str = "WARNING",
-        log_queue: object = None,
     ) -> None:
         """
         Initialise the FakeNOS worker.
@@ -146,12 +145,8 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
                 signalling the parent that the worker is ready.
             log_level: Logging level string (e.g. ``"DEBUG"``,
                 ``"WARNING"``).
-            log_queue: Optional queue used for multi-process log
-                forwarding.
         """
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.networks = {}
         self.init_done_event = init_done_event
         self.fakenos_inventory = self.load_inventory()

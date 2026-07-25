@@ -46,11 +46,8 @@ class FileSharingWorker(NFPWorker):
         exit_event: Any = None,
         init_done_event: Any = None,
         log_level: str = "WARNING",
-        log_queue: object = None,
     ) -> None:
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
 
         # get inventory from broker

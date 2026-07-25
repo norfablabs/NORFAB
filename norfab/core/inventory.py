@@ -80,96 +80,9 @@ from typing import Any, Dict, List
 import yaml
 from jinja2 import Environment
 
+from norfab.utils.nflogging import make_logging_config as make_norfab_logging_config
+
 log = logging.getLogger(__name__)
-
-# logs producer process configuration is just a QueueHandler attached to the
-# root logger, which allows all messages to be sent to the queue. Producers are
-# workers and broker processes
-logging_config_producer = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"queue": {"class": "logging.handlers.QueueHandler", "queue": None}},
-    "root": {"handlers": ["queue"], "level": "DEBUG"},
-}
-
-# listener is nfapi process
-logging_config_listener = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "class": "logging.Formatter",
-            "format": "%(asctime)s.%(msecs)d %(levelname)s [%(name)s:%(lineno)d ] -- %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        }
-    },
-    "handlers": {
-        "terminal": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
-            "level": "CRITICAL",
-        },
-        "file": {
-            "backupCount": 50,
-            "class": "logging.handlers.RotatingFileHandler",
-            "delay": False,
-            "encoding": "utf-8",
-            "filename": None,
-            "formatter": "default",
-            "level": "INFO",
-            "maxBytes": 1024000,
-            "mode": "a",
-        },
-    },
-    "root": {"handlers": ["terminal", "file"], "level": "INFO"},
-}
-
-
-def make_logging_config(base_dir: str, inventory: dict) -> dict:
-    """
-    Combines the inventory logging section with a predefined logging configuration.
-    This function updates the predefined logging configuration with the settings
-    provided in the inventory dictionary. It ensures that the log file is stored
-    in the specified base directory and merges handlers, formatters, and root logger
-    settings from the inventory into the predefined configuration.
-
-    Args:
-        base_dir (str): The base directory where the log file will be stored.
-        inventory (dict): A dictionary containing logging configuration settings.
-
-    Returns:
-        dict: The combined logging configuration.
-    """
-    logging_config_listener["handlers"]["file"]["filename"] = os.path.join(
-        base_dir, "__norfab__", "logs", "norfab.log"
-    )
-
-    if not inventory:
-        return logging_config_listener
-
-    log_cfg = copy.deepcopy(inventory)
-    ret = copy.deepcopy(logging_config_listener)
-
-    # merge handlers
-    ret["handlers"]["terminal"].update(log_cfg.get("handlers", {}).pop("terminal", {}))
-    ret["handlers"]["file"].update(log_cfg.get("handlers", {}).pop("file", {}))
-    ret["handlers"].update(log_cfg.pop("handlers", {}))
-    # merge formatters
-    ret["formatters"]["default"].update(
-        log_cfg.get("formatters", {}).pop("default", {})
-    )
-    ret["formatters"].update(log_cfg.pop("formatters", {}))
-    # merge root logger
-    ret["root"].update(log_cfg.pop("root", {}))
-    if "file" not in ret["root"]["handlers"]:
-        ret["root"]["handlers"].append("file")
-    if "terminal" not in ret["root"]["handlers"]:
-        ret["root"]["handlers"].append("terminal")
-    # merge remaining config
-    ret.update(log_cfg)
-    ret["disable_existing_loggers"] = False
-
-    return ret
 
 
 def merge_recursively(data: dict, merge: dict) -> None:
@@ -493,9 +406,13 @@ class NorFabInventory:
         self.client = data.pop("client", {})
         self.workers = WorkersInventory(self.base_dir, data.pop("workers", {}))
         self.topology = data.pop("topology", {})
-        self.logging = make_logging_config(self.base_dir, data.pop("logging", {}))
+        self.logging = self.make_logging_config(data.pop("logging", {}))
         self.hooks = make_hooks(self.base_dir, data.pop("hooks", {}))
         self.plugins = data.pop("plugins", {})
+
+    def make_logging_config(self, logging_config: dict = None) -> dict:
+        """Build NorFab logging config anchored to this inventory base dir."""
+        return make_norfab_logging_config(self.base_dir, logging_config or {})
 
     def load_plugin(self, service: str) -> dict:
         """

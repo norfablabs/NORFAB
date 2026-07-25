@@ -21,11 +21,12 @@
 ## CHANGES
 
 1. Renamed NetBox sync interactive confirmation argument from `with_review`/`with-review` to `with_approval`/`with-approval`.
-2. Dependencies update:
+2. Reworked NorFab logging isolation so NFAPI no longer configures application logging by default, NorFab-owned broker and worker processes configure logging from their own inventories, and default file logs are written as per-process JSONL files under `__norfab__/logs`. NFCLI and TUI opt in to NFAPI process logging with distinct names, and `show norfab logging` now retrieves broker and worker logs through normal NorFab client calls with human-readable output by default and raw records with `details`.
+3. Dependencies update:
 
   - pynetbox 7.7.0 -> 7.8.0
 
-3. Changing Nornir parse ttp logic to not mark results as failed if any of cli commands collection failed for any of the hosts
+4. Changing Nornir parse ttp logic to not mark results as failed if any of cli commands collection failed for any of the hosts
 
 ## BUGS
 

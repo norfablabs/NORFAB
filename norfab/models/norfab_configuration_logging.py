@@ -341,9 +341,9 @@ class LoggingConfig(BaseModel):
                     "class": "logging.handlers.RotatingFileHandler",
                     "formatter": "default",
                     "level": "INFO",
-                    "filename": "/var/log/norfab/norfab.log",
+                    "filename": "/var/log/norfab/worker-nornir-worker-1.jsonl",
                     "maxBytes": 1024000,
-                    "backupCount": 50,
+                    "backupCount": 30,
                     "encoding": "utf-8",
                     "mode": "a",
                     "delay": false

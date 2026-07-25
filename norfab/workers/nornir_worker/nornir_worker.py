@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import time
-from threading import Lock, Thread
+from threading import Lock
 from typing import Any, Dict, Tuple
 
 import yaml
@@ -323,7 +323,6 @@ class NornirWorker(
         exit_event (threading.Event, optional): Event to signal worker exit. Defaults to None.
         init_done_event (threading.Event, optional): Event to signal initialization completion. Defaults to None.
         log_level (str, optional): Logging level. Defaults to None.
-        log_queue (object, optional): Queue for logging. Defaults to None.
 
     Attributes:
         init_done_event (threading.Event): Event to signal initialization completion.
@@ -345,11 +344,8 @@ class NornirWorker(
         exit_event=None,
         init_done_event=None,
         log_level: str = None,
-        log_queue: object = None,
     ) -> None:
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
         self.tf_base_path = os.path.join(self.base_dir, "tf")
         self.status.update(

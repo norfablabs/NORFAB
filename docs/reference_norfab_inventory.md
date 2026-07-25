@@ -140,7 +140,16 @@ Topology section of NorFab inventory identifies the components that need to be s
 
 ## Logging Inventory Section
 
-Logging inventory section allows to configure logging parameters such as file retention options, logging to remote hosts, logging levels etc. using Python logging [configuration dictionary schema](https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema). 
+Logging inventory section allows to configure logging parameters such as file retention options, logging to remote hosts, logging levels etc. using Python logging [configuration dictionary schema](https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema).
+
+NorFab treats the handler named `file` as its default local file sink. When
+NorFab-owned applications and child processes configure logging, this handler is
+resolved to a per-process JSONL file under `__norfab__/logs`, for example
+`nfapi-nfcli.jsonl`, `nfapi-tui.jsonl`, `broker-NFPBroker.jsonl`, or
+`worker-nornir-worker-1.jsonl`. The handler's `level`, `maxBytes`, and
+`backupCount` can still be controlled from inventory, while its `filename` and
+JSON formatter are managed by NorFab. Custom file handlers with other names are
+preserved as user-managed Python logging handlers.
 
 Additional `logging` section supported attributes:
 

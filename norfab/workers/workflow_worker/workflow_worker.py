@@ -46,7 +46,6 @@ class WorkflowWorker(NFPWorker):
         exit_event (threading.Event, optional): Event to signal the worker to exit. Defaults to None.
         init_done_event (threading.Event, optional): Event to signal that initialization is done. Defaults to None.
         log_level (str, optional): The logging level. Defaults to "WARNING".
-        log_queue (object, optional): The logging queue. Defaults to None.
     """
 
     def __init__(
@@ -57,11 +56,8 @@ class WorkflowWorker(NFPWorker):
         exit_event=None,
         init_done_event=None,
         log_level: str = "WARNING",
-        log_queue: object = None,
     ) -> None:
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
 
         # get inventory from broker

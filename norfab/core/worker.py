@@ -33,11 +33,11 @@ from pydantic import (
 from norfab import models
 from norfab.core.inventory import NorFabInventory
 from norfab.models import InputRequestModel, NorFabEvent, Result
+from norfab.utils.nflogging import read_jsonl_logs, setup_process_logging
 from norfab.utils.text import format_duration
 
 from . import NFP
 from .client import NFPClient
-from .inventory import logging_config_producer
 from .keepalives import KeepAliver
 from .security import generate_certificates
 
@@ -47,6 +47,7 @@ except Exception:
     pass
 
 log = logging.getLogger(__name__)
+
 
 # --------------------------------------------------------------------------------------------
 # NORFAB Worker Job Object
@@ -1575,8 +1576,7 @@ class NFPWorker:
         service (str): The service name.
         name (str): The name of the worker.
         exit_event: The event used to signal the worker to exit.
-        log_level (str, optional): The logging level. Defaults to None.
-        log_queue (object, optional): The logging queue. Defaults to None.
+        log_level (str, optional): Logging level configured from worker inventory.
         multiplier (int, optional): The multiplier value. Defaults to 6.
         keepalive (int, optional): The keepalive interval in milliseconds. Defaults to 2500.
     """
@@ -1592,18 +1592,17 @@ class NFPWorker:
         name: str,
         exit_event: object,
         log_level: str = None,
-        log_queue: object = None,
         multiplier: int = 6,
         keepalive: int = 2500,
     ) -> None:
-        self.setup_logging(log_queue, log_level)
         self.inventory = inventory
+        self.name = name
+        self.setup_logging(log_level)
         self.max_concurrent_jobs = max(1, inventory.get("max_concurrent_jobs", 5))
         self.jobs_compress = inventory.get("jobs_compress", True)
         self.autostart_watchdog = inventory.get("autostart_watchdog", True)
         self.broker = broker
         self.service = service.encode("utf-8") if isinstance(service, str) else service
-        self.name = name
         self.exit_event = exit_event
         self.broker_socket = None
         self.multiplier = multiplier
@@ -1679,22 +1678,27 @@ class NFPWorker:
             self.watchdog = WorkerWatchDog(self)
             self.watchdog.start()
 
-    def setup_logging(self, log_queue, log_level: str) -> None:
+    def setup_logging(self, log_level: str = None) -> dict:
         """
-        Configures logging for the worker.
+        Configure logging for this worker process.
 
-        This method sets up the logging configuration using a provided log queue and log level.
-        It updates the logging configuration dictionary with the given log queue and log level,
-        and then applies the configuration using `logging.config.dictConfig`.
+        The worker uses the logging inventory it received during construction
+        as a per-process template and writes its default NorFab file sink to
+        ``__norfab__/logs/worker-<worker-name>.jsonl``.
 
         Args:
-            log_queue (queue.Queue): The queue to be used for logging.
-            log_level (str): The logging level to be set. If None, the default level is used.
+            log_level: Optional logging level override.
+
+        Returns:
+            dict: Logging configuration applied to this process.
         """
-        logging_config_producer["handlers"]["queue"]["queue"] = log_queue
-        if log_level is not None:
-            logging_config_producer["root"]["level"] = log_level
-        logging.config.dictConfig(logging_config_producer)
+        return setup_process_logging(
+            base_dir=self.inventory.base_dir,
+            role="worker",
+            name=self.name,
+            log_level=log_level,
+            inventory_logging=self.inventory.logging,
+        )
 
     def reconnect_to_broker(self) -> None:
         """
@@ -2181,6 +2185,46 @@ class NFPWorker:
         return Result(
             task=f"{self.name}:job_list",
             result=jobs,
+        )
+
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
+    def get_logs(
+        self,
+        last: int = 100,
+        level: str = None,
+        logger: str = None,
+        since: str = None,
+        until: str = None,
+    ) -> Result:
+        """
+        Return this worker process JSONL log records.
+
+        Args:
+            last: Return the last N records after filtering.
+            level: Filter by log severity.
+            logger: Filter by logger name.
+            since: Return records at or after this timestamp.
+            until: Return records at or before this timestamp.
+
+        Returns:
+            Result: Log records from this worker's process log file.
+        """
+        records = read_jsonl_logs(
+            logs_dir=os.path.join(self.inventory.base_dir, "__norfab__", "logs"),
+            log_files=[f"worker-{self.name}.jsonl"],
+            last=last,
+            level=level,
+            logger=logger,
+            since=since,
+            until=until,
+        )
+        for record in records:
+            record.setdefault("role", "worker")
+            record.setdefault("name", self.name)
+
+        return Result(
+            task=f"{self.name}:get_logs",
+            result=records,
         )
 
     @Task(

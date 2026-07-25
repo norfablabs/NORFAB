@@ -233,6 +233,8 @@ def nfcli() -> str | None:
         with NorFab(
             inventory=INVENTORY,
             log_level=LOGLEVEL,
+            configure_logging=True,
+            logging_name="tui",
             run_broker=BROKER,
             run_workers=(WORKERS or WORKERS_LIST),
         ) as nf:

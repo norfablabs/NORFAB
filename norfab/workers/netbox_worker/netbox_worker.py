@@ -85,7 +85,6 @@ class NetboxWorker(
         exit_event (threading.Event, optional): Event to signal exit.
         init_done_event (threading.Event, optional): Event to signal initialization completion.
         log_level (int, optional): Logging level.
-        log_queue (object, optional): Queue for logging.
 
     Raises:
         AssertionError: If the inventory has no Netbox instances.
@@ -114,11 +113,8 @@ class NetboxWorker(
         exit_event=None,
         init_done_event=None,
         log_level: str = None,
-        log_queue: object = None,
     ) -> None:
-        super().__init__(
-            inventory, broker, SERVICE, worker_name, exit_event, log_level, log_queue
-        )
+        super().__init__(inventory, broker, SERVICE, worker_name, exit_event, log_level)
         self.init_done_event = init_done_event
         self.cache = None
 
