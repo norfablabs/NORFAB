@@ -134,6 +134,7 @@ nav:
       - Diagram: workers/nornir/services_nornir_service_tasks_diagram.md
       - File Copy: workers/nornir/services_nornir_service_tasks_file_copy.md
       - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
+      - Create Host from NetBox: workers/nornir/services_nornir_service_tasks_create_host_from_netbox.md
       - SNMP: workers/nornir/services_nornir_service_tasks_snmp.md
     - Jinja2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md
   - Netbox:
@@ -261,6 +262,7 @@ nav:
     - Norfab AAA Security Architecture: development\adr_norfab_aaa_security_architecture.md
     - Norfab Logging Isolation: development/adr_norfab_logging_isolation.md
     - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
+    - Nornir Create Hosts from NetBox Devices: development/adr_nornir_create_hosts_from_netbox_devices.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
     - Netbox Service Tests: testing/netbox_service_tests.md

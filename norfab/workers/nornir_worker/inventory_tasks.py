@@ -8,6 +8,8 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .nornir_models import (
+    CreateHostFromNetboxInput,
+    CreateHostFromNetboxResult,
     GetInventoryInput,
     GetInventoryResult,
     GetNornirHostsInput,
@@ -22,9 +24,6 @@ from .nornir_models import (
 
 log = logging.getLogger(__name__)
 
-# -----------------------------------------------------------------------------------------
-# INVENTORY TASK MODELS
-# -----------------------------------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------------------
@@ -33,6 +32,165 @@ log = logging.getLogger(__name__)
 
 
 class InventoryTasks:
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=CreateHostFromNetboxInput,
+        output=CreateHostFromNetboxResult,
+        mcp={
+            "annotations": {
+                "title": "Create Nornir Hosts from NetBox Devices",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def create_host_from_netbox(
+        self,
+        job: Job,
+        devices: list[str],
+        instance: str | None = None,
+        netbox_workers: str | list[str] | None = "any",
+        timeout: int | None = 600,
+        interfaces: bool | dict | None = None,
+        connections: bool | dict | None = None,
+        circuits: bool | dict | None = None,
+        bgp_peerings: bool | dict | None = None,
+        nbdata: bool | None = None,
+        primary_ip: str | None = None,
+        cache: bool | str | None = True,
+        groups: list[str] | None = None,
+        dry_run: bool | None = False,
+        progress: bool | None = True,
+    ) -> Result:
+        """
+        Create or replace runtime Nornir hosts from explicit NetBox device names.
+
+        The task asks the NetBox service to build Nornir-compatible host data,
+        predicts which returned host names are new or existing, and delegates
+        the actual in-memory host replacement to ``runtime_inventory``.
+        """
+        # Normalize optional list inputs used later in simple list operations.
+        devices = devices or []
+        groups = groups or []
+        netbox_hosts = None
+        ret = Result(
+            task=f"{self.name}:create_host_from_netbox",
+            result={"created": [], "updated": [], "missing": []},
+        )
+
+        # Start with the worker's configured NetBox inventory options, when any.
+        if isinstance(self.nornir_worker_inventory.get("netbox"), dict):
+            nornir_netbox_options = self.nornir_worker_inventory["netbox"].copy()
+        else:
+            nornir_netbox_options = {}
+
+        # Task arguments that are present override worker inventory options.
+        if interfaces is not None:
+            nornir_netbox_options["interfaces"] = interfaces
+        if connections is not None:
+            nornir_netbox_options["connections"] = connections
+        if circuits is not None:
+            nornir_netbox_options["circuits"] = circuits
+        if bgp_peerings is not None:
+            nornir_netbox_options["bgp_peerings"] = bgp_peerings
+        if nbdata is not None:
+            nornir_netbox_options["nbdata"] = nbdata
+        if primary_ip is not None:
+            nornir_netbox_options["primary_ip"] = primary_ip
+        if cache is not None:
+            nornir_netbox_options["cache"] = cache
+        nornir_netbox_options["devices"] = devices
+        nornir_netbox_options["instance"] = instance
+
+        # NetBox owns host data construction; Nornir owns the runtime inventory write.
+        job.event(
+            f"fetching Nornir inventory for {len(devices)} NetBox device(s) "
+            f"from '{netbox_workers or 'any'}' worker(s)"
+        )
+        nb_inventory_data = self.client.run_job(
+            service="netbox",
+            task="get_nornir_inventory",
+            workers=netbox_workers,
+            kwargs=nornir_netbox_options,
+            timeout=timeout,
+        )
+
+        if nb_inventory_data is None:
+            msg = f"{self.name} - NetBox get_nornir_inventory returned no data"
+            log.error(msg)
+            ret.failed = True
+            ret.status = "failed"
+            ret.errors = [msg]
+            return ret
+
+        # Use the first NetBox worker that returns host inventory.
+        for wname, wdata in nb_inventory_data.items():
+            if wdata.get("failed") is False and wdata.get("result", {}).get("hosts"):
+                netbox_hosts = wdata["result"]["hosts"]
+                break
+
+        if not netbox_hosts:
+            msg = (
+                f"{self.name} - NetBox worker(s) "
+                f"'{', '.join(list(nb_inventory_data.keys()))}' returned no hosts data"
+            )
+            log.error(msg)
+            ret.failed = True
+            ret.status = "failed"
+            ret.errors = [msg]
+            return ret
+
+        # calculate devices that are missing from netbox
+        missing = sorted(set(devices) - set(netbox_hosts))
+        if missing:
+            msg = f"{self.name} - NetBox returned no host data for: {', '.join(missing)}"
+            log.warning(msg)
+            job.event(msg, severity="WARNING")
+
+        # add host groups
+        for host_data in netbox_hosts.values():
+            host_data["groups"] = host_data.get("groups", []) + groups
+
+        existing_hosts = set(self.nr.inventory.hosts)
+        created = sorted(set(netbox_hosts) - existing_hosts)
+        updated = sorted(set(netbox_hosts) & existing_hosts)
+        ret.result = {"created": created, "updated": updated, "missing": missing}
+
+        # Dry run stops after prediction and does not mutate Nornir runtime inventory.
+        if dry_run is True:
+            job.event("dry-run requested, Nornir runtime inventory not changed")
+            ret.dry_run = True
+            return ret
+
+        # Runtime inventory load calls create_host once for each returned NetBox host.
+        inventory_actions = [
+            {"call": "create_host", "name": host_name, **host_data}
+            for host_name, host_data in netbox_hosts.items()
+        ]
+        inventory_result = self.runtime_inventory(
+            job=job,
+            action="load",
+            data=inventory_actions,
+            progress=progress if progress is not None else False,
+        )
+        if inventory_result.failed:
+            # Keep this task's created/updated/missing prediction and attach runtime errors.
+            ret.failed = inventory_result.failed
+            ret.status = inventory_result.status
+            ret.errors.extend(inventory_result.errors)
+            ret.messages.extend(inventory_result.messages)
+            if inventory_result.result:
+                ret.messages.append(str(inventory_result.result))
+            return ret
+
+        job.event(
+            f"created {len(ret.result['created'])}, updated {len(ret.result['updated'])}, "
+            f"missing {len(ret.result['missing'])} Nornir host(s) from NetBox"
+        )
+        return ret
+
     @Task(
         fastapi={"methods": ["POST"]},
         input=NornirInventoryLoadNetboxInput,

@@ -880,6 +880,90 @@ class NornirInventoryLoadContainerlabResult(Result):
     )
 
 
+class NetboxInventoryCache(str, Enum):
+    refresh = "refresh"
+    force = "force"
+
+
+class CreateHostFromNetboxInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    devices: list[StrictStr] = Field(
+        ...,
+        min_length=1,
+        description="NetBox device names to fetch and add as Nornir hosts",
+    )
+    instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance name to target",
+    )
+    netbox_workers: Union[None, StrictStr, list[StrictStr]] = Field(
+        None,
+        description="NetBox worker or workers to query",
+        alias="netbox-workers",
+    )
+    timeout: Union[None, StrictInt] = Field(
+        None,
+        description="Timeout for the NetBox inventory request",
+    )
+    interfaces: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include interface data or provide interface task kwargs",
+        json_schema_extra={"presence": True},
+    )
+    connections: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include connection data or provide connection task kwargs",
+        json_schema_extra={"presence": True},
+    )
+    circuits: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include circuit data or provide circuit task kwargs",
+        json_schema_extra={"presence": True},
+    )
+    bgp_peerings: Union[dict[StrictStr, Any], StrictBool] = Field(
+        False,
+        description="Include BGP peering data or provide BGP task kwargs",
+        alias="bgp-peerings",
+        json_schema_extra={"presence": True},
+    )
+    nbdata: StrictBool = Field(
+        True,
+        description="Include NetBox device data in host data",
+        json_schema_extra={"presence": True},
+    )
+    primary_ip: StrictStr = Field(
+        "ip4",
+        description="Primary IP family to use for hostname",
+        alias="primary-ip",
+    )
+    cache: Union[None, StrictBool, NetboxInventoryCache] = Field(
+        None,
+        description="Cache usage mode",
+        json_schema_extra={"presence": True},
+    )
+    groups: Union[None, list[StrictStr]] = Field(
+        None,
+        description="Additional Nornir group names to attach to created hosts",
+    )
+    dry_run: Union[None, StrictBool] = Field(
+        None,
+        description="Return predicted changes without changing Nornir inventory",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    progress: Union[None, StrictBool] = Field(
+        None,
+        description="Emit progress events",
+        json_schema_extra={"presence": True},
+    )
+
+
+class CreateHostFromNetboxResult(Result):
+    result: dict[StrictStr, list[StrictStr]] = Field(
+        {},
+        description="Created, updated, and missing host or device names",
+    )
+
+
 class GetInventoryInput(
     NornirHostsFilters, use_enum_values=True, populate_by_name=True
 ):

@@ -5,6 +5,7 @@
 1. Added NFAPI `.env` detection and loading with `python-dotenv` before inventory initialization, making local variables available to NFCLI and inventory Jinja2 templates. Local `.env` values override existing process variables by default; `load_env_override=False` preserves existing values. NFAPI also exposes `list_environment_variables()` for inspecting its environment.
 2. Added FastMCP task result guardrails with ordered aggregate byte limits, recursive regex replacement, selective regex blocking, wildcard inventory selectors, and raw-result preservation in the FastMCP client database.
 3. Added the Nornir `netbox.filter` Jinja2 helper to retrieve filtered NetBox core and plugin objects for dynamic configuration and test-suite rendering.
+4. Added Nornir `create_host_from_netbox` runtime inventory task and NFCLI `nornir inventory create-host-from-netbox` command to create or replace in-memory Nornir hosts from explicit NetBox device names.
 
 ## ENHANCEMENTS
 

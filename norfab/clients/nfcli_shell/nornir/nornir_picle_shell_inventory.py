@@ -10,6 +10,7 @@ from pydantic import (
 )
 
 from norfab.workers.nornir_worker.nornir_models import (
+    CreateHostFromNetboxInput,
     NornirInventoryLoadContainerlabInput,
     RuntimeCreateHostInput,
     RuntimeDeleteHostInput,
@@ -63,6 +64,70 @@ class CreateHostModel(
 
     class PicleConfig:
         outputter = Outputters.outputter_nested
+
+
+class InventoryCreateHostFromNetboxModel(
+    CreateHostFromNetboxInput,
+    ClientRunJobArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    devices: Union[StrictStr, List[StrictStr]] = Field(
+        ...,
+        description="NetBox device names to fetch and add as Nornir hosts",
+    )
+    workers: Union[StrictStr, List[StrictStr]] = Field(
+        "any", description="Nornir workers to target"
+    )
+    groups: Union[StrictStr, List[StrictStr]] = Field(
+        None,
+        description="Additional Nornir group names to attach to created hosts",
+    )
+    timeout: int = Field(
+        None,
+        description="Timeout for the NetBox inventory request and Nornir job",
+    )
+
+    @staticmethod
+    def source_netbox_workers() -> list:
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "netbox"}
+        )
+        workers = [i["name"] for i in reply["results"]]
+
+        return ["all", "any"] + workers
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        workers = kwargs.pop("workers")
+        job_timeout = kwargs.get("timeout") or 600
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+
+        if kwargs.get("devices") and isinstance(kwargs["devices"], str):
+            kwargs["devices"] = [kwargs["devices"]]
+        if kwargs.get("groups") and isinstance(kwargs["groups"], str):
+            kwargs["groups"] = [kwargs["groups"]]
+
+        result = run_future_job(
+            "nornir",
+            "create_host_from_netbox",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=job_timeout,
+            nowait=nowait,
+        )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+        pipe = PipeFunctionsModel
 
 
 class UpdateHostModel(
@@ -279,6 +344,11 @@ class InventoryLoadModel(BaseModel):
 class NornirInventoryShell(BaseModel):
     create_host: CreateHostModel = Field(
         None, description="Create new host", alias="create-host"
+    )
+    create_host_from_netbox: InventoryCreateHostFromNetboxModel = Field(
+        None,
+        description="Create runtime hosts from NetBox devices",
+        alias="create-host-from-netbox",
     )
     update_host: UpdateHostModel = Field(
         None, description="Update existing host details", alias="update-host"

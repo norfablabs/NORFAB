@@ -125,7 +125,106 @@ class TestNornirRunTimeInventory:
             for h in ["r1", "r2", "r3"]
         ), "nornir-worker-1 inventory not refreshed"
 
+    def test_create_host_from_netbox_one_device(self, nfclient):
+        nfclient.run_job("nornir", "refresh_nornir", workers=["nornir-worker-1"])
 
-# ----------------------------------------------------------------------------
-# NORNIR NETBOX CREATE IP TESTS
-# ----------------------------------------------------------------------------
+        ret = nfclient.run_job(
+            "nornir",
+            "create_host_from_netbox",
+            workers=["nornir-worker-1"],
+            kwargs={"devices": ["fceos4"], "netbox_workers": "any"},
+        )
+        pprint.pprint(ret)
+
+        results = ret["nornir-worker-1"]
+        assert results["failed"] is False
+        assert results["result"]["created"] == ["fceos4"]
+        assert results["result"]["updated"] == []
+        assert results["result"]["missing"] == []
+
+    def test_create_host_from_netbox_multiple_devices(self, nfclient):
+        nfclient.run_job("nornir", "refresh_nornir", workers=["nornir-worker-1"])
+
+        ret = nfclient.run_job(
+            "nornir",
+            "create_host_from_netbox",
+            workers=["nornir-worker-1"],
+            kwargs={"devices": ["fceos4", "fceos5"], "netbox_workers": "any"},
+        )
+        pprint.pprint(ret)
+
+        results = ret["nornir-worker-1"]
+        assert results["failed"] is False
+        assert sorted(results["result"]["created"]) == ["fceos4", "fceos5"]
+        assert results["result"]["updated"] == []
+        assert results["result"]["missing"] == []
+
+    def test_create_host_from_netbox_dry_run_does_not_change_inventory(self, nfclient):
+        nfclient.run_job("nornir", "refresh_nornir", workers=["nornir-worker-1"])
+
+        ret = nfclient.run_job(
+            "nornir",
+            "create_host_from_netbox",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "devices": ["fceos4"],
+                "netbox_workers": "any",
+                "dry_run": True,
+            },
+        )
+        ret_hosts = nfclient.run_job(
+            "nornir",
+            "get_nornir_hosts",
+            workers=["nornir-worker-1"],
+        )
+        pprint.pprint(ret)
+        pprint.pprint(ret_hosts)
+
+        results = ret["nornir-worker-1"]
+        assert results["failed"] is False
+        assert results["dry_run"] is True
+        assert results["result"]["created"] == ["fceos4"]
+        assert "fceos4" not in ret_hosts["nornir-worker-1"]["result"]
+
+    def test_create_host_from_netbox_reports_updated_host(self, nfclient):
+        nfclient.run_job("nornir", "refresh_nornir", workers=["nornir-worker-1"])
+        nfclient.run_job(
+            "nornir",
+            "runtime_inventory",
+            workers=["nornir-worker-1"],
+            kwargs={"action": "create_host", "name": "fceos4", "hostname": "scratch"},
+        )
+
+        ret = nfclient.run_job(
+            "nornir",
+            "create_host_from_netbox",
+            workers=["nornir-worker-1"],
+            kwargs={"devices": ["fceos4"], "netbox_workers": "any"},
+        )
+        pprint.pprint(ret)
+
+        results = ret["nornir-worker-1"]
+        assert results["failed"] is False
+        assert results["result"]["created"] == []
+        assert results["result"]["updated"] == ["fceos4"]
+
+    def test_create_host_from_netbox_reports_missing_and_creates_valid(self, nfclient):
+        nfclient.run_job("nornir", "refresh_nornir", workers=["nornir-worker-1"])
+
+        ret = nfclient.run_job(
+            "nornir",
+            "create_host_from_netbox",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "devices": ["fceos4", "norfab-missing-device"],
+                "netbox_workers": "any",
+            },
+        )
+        pprint.pprint(ret)
+
+        results = ret["nornir-worker-1"]
+        assert results["failed"] is False
+        assert results["result"]["created"] == ["fceos4"]
+        assert results["result"]["missing"] == ["norfab-missing-device"]
+
+

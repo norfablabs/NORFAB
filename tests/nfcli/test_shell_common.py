@@ -9,6 +9,9 @@ from norfab.clients.nfcli_shell.nfcli_shell_client import (
 )
 from norfab.clients.nfcli_shell.common import ClientRunJobArgs
 from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_cfg import NornirCfgShell
+from norfab.clients.nfcli_shell.nornir.nornir_picle_shell_inventory import (
+    InventoryCreateHostFromNetboxModel,
+)
 
 pytestmark = pytest.mark.nfcli
 
@@ -164,3 +167,41 @@ def test_nornir_cfg_config_source_returns_entries_matching_choice(monkeypatch):
         "nf://cfg/templates/",
         "load-terminal",
     ]
+
+
+def test_nornir_inventory_create_host_from_netbox_shell_submission(monkeypatch):
+    calls = []
+
+    def fake_run_future_job(*args, **kwargs):
+        calls.append((args, kwargs))
+        return {
+            "nornir-worker-1": {
+                "failed": False,
+                "errors": [],
+                "messages": [],
+                "result": {"created": ["leaf-1"], "updated": [], "missing": []},
+            }
+        }
+
+    monkeypatch.setattr(
+        "norfab.clients.nfcli_shell.nornir.nornir_picle_shell_inventory.run_future_job",
+        fake_run_future_job,
+    )
+    monkeypatch.setattr(
+        "norfab.clients.nfcli_shell.nornir.nornir_picle_shell_inventory.log_error_or_result",
+        lambda result, **kwargs: result,
+    )
+
+    InventoryCreateHostFromNetboxModel.run(
+        devices="leaf-1",
+        groups="lab",
+        workers="nornir-worker-1",
+        netbox_workers="any",
+    )
+
+    args, kwargs = calls[0]
+    assert args[:2] == ("nornir", "create_host_from_netbox")
+    assert kwargs["workers"] == "nornir-worker-1"
+    assert kwargs["kwargs"]["devices"] == ["leaf-1"]
+    assert kwargs["kwargs"]["groups"] == ["lab"]
+    assert kwargs["kwargs"]["netbox_workers"] == "any"
