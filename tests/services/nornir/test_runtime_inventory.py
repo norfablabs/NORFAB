@@ -226,5 +226,3 @@ class TestNornirRunTimeInventory:
         assert results["failed"] is False
         assert results["result"]["created"] == ["fceos4"]
         assert results["result"]["missing"] == ["norfab-missing-device"]
-
-

@@ -23,9 +23,23 @@
 
 1. Renamed NetBox sync interactive confirmation argument from `with_review`/`with-review` to `with_approval`/`with-approval`.
 2. Reworked NorFab logging isolation so NFAPI no longer configures application logging by default, NorFab-owned broker and worker processes configure logging from their own inventories, and default file logs are written as per-process JSONL files under `__norfab__/logs`. NFCLI and TUI opt in to NFAPI process logging with distinct names, and `show norfab logging` now retrieves broker and worker logs through normal NorFab client calls with human-readable output by default and raw records with `details`.
-3. Dependencies update:
+3. Dependencies updates:
 
+  - ntc-templates 9.1.0 -> 9.2.0
+  - textual 8.2.7 -> 8.2.8
+  - mcp 1.27.2 -> 1.28.1
+  - langchain 1.3.4 -> 1.3.14
+  - Added langchain-core 1.5.1 optional dependency
+  - langchain-openai >=0.2 -> 1.4.1
+  - langchain-anthropic >=0.2 -> 1.5.2
+  - langchain-mcp-adapters >=0.1 -> 0.3.0
+  - langgraph >=0.2 -> 1.2.9
+  - Added fastembed 0.8.0 optional dependency
+  - Added qdrant-client 1.18.0 optional dependency
+  - datamodel-code-generator 0.61.0 -> 0.71.0
   - pynetbox 7.7.0 -> 7.8.0
+  - fastapi 0.136.3 -> 0.140.0
+  - uvicorn 0.49.0 -> 0.51.0
 
 4. Changing Nornir parse ttp logic to not mark results as failed if any of cli commands collection failed for any of the hosts
 

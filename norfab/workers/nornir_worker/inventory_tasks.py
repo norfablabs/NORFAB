@@ -25,7 +25,6 @@ from .nornir_models import (
 log = logging.getLogger(__name__)
 
 
-
 # -----------------------------------------------------------------------------------------
 # Tasks
 # -----------------------------------------------------------------------------------------
@@ -145,7 +144,9 @@ class InventoryTasks:
         # calculate devices that are missing from netbox
         missing = sorted(set(devices) - set(netbox_hosts))
         if missing:
-            msg = f"{self.name} - NetBox returned no host data for: {', '.join(missing)}"
+            msg = (
+                f"{self.name} - NetBox returned no host data for: {', '.join(missing)}"
+            )
             log.warning(msg)
             job.event(msg, severity="WARNING")
 
