@@ -95,7 +95,9 @@ print("nested")
 - End service task pages with the autodoc reference for the task method:
 
 ```markdown
-::: package.module.Class.task_method
+<!-- Write an mkdocstrings directive here, for example:
+     ::: package.module.Class.task_method
+-->
 ```
 
 - Prefer the concrete task mixin/class that defines the method over a broad worker class when possible.
@@ -104,11 +106,11 @@ print("nested")
 ```markdown
 ### SNMP Get
 
-::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_get
+<!-- ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_get -->
 
 ### SNMP Walk
 
-::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_walk
+<!-- ::: norfab.workers.nornir_worker.snmp_task.SnmpTask.snmp_walk -->
 ```
 
 ## Links

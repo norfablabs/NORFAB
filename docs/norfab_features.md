@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 21 July 2026*
+*Last updated: 26 July 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -135,11 +135,12 @@ time and should remain deterministic and reviewable.
 
 Detects and loads a project `.env` file before inventory rendering using the
 `python-dotenv` library. Local values override existing process variables by
-default, with an NFAPI option to preserve existing values instead. **Use cases:**
-local NFCLI configuration, environment-specific endpoints, and development
-credentials kept outside inventory YAML. **Limitations:** the `.env` file is
-local process configuration rather than a secret store; files containing
-secrets must be excluded from source control and protected appropriately.
+default, with an NFAPI option to preserve existing values instead, and NFAPI can
+list its visible environment variables for inspection. **Use cases:** local
+NFCLI configuration, environment-specific endpoints, and development credentials
+kept outside inventory YAML. **Limitations:** the `.env` file is local process
+configuration rather than a secret store; files containing secrets must be
+excluded from source control and protected appropriately.
 [NFAPI environment details](api_reference_core_norfab_nfapi.md#environment-file-loading)
 
 ### Topology dependencies and lifecycle hooks
@@ -183,9 +184,12 @@ the worker host and requires strict administrative access and auditing.
 Supports the Python `dictConfig` model: named formatters, filters, loggers,
 stream/file/rotating/timed/syslog/SMTP/buffer/queue-style handler parameters,
 per-logger levels and propagation, plus optional conversion of job events into
-logs. **Use cases:** local troubleshooting, centralized logging, SIEM ingestion,
-rotation, and environment-specific verbosity. **Limitations:** the selected
-handlers and destinations must be provisioned and secured by the deployment.
+logs. Broker and worker processes configure their own logging and default to
+per-process JSONL files under `__norfab__/logs`; NFCLI can retrieve broker and
+worker logs through normal client calls. **Use cases:** local troubleshooting,
+centralized logging, SIEM ingestion, rotation, and environment-specific
+verbosity. **Limitations:** the selected handlers and destinations must be
+provisioned and secured by the deployment.
 [Logging inventory details](reference_norfab_inventory.md#logging-inventory-section)
 
 ### Encrypted component communication
@@ -481,11 +485,13 @@ and requires compatible SCP or inline-transfer support.
 
 Creates, reads, updates, deletes, or loads Nornir hosts without restarting a
 worker; reads nested host data, manages group membership/defaults, and lists
-hosts/platforms. **Use cases:** ephemeral targets, dynamic discovery, per-job
-metadata, lab inventory injection, and debugging inventory resolution.
-**Limitations:** changes are worker-local runtime state, not durable
-source-of-truth updates.
-[Task details](workers/nornir/services_nornir_service_tasks_runtime_inventory.md)
+hosts/platforms. Runtime hosts can also be created or replaced directly from
+explicit NetBox device names. **Use cases:** ephemeral targets, dynamic
+discovery, per-job metadata, lab inventory injection, source-of-truth handoff,
+and debugging inventory resolution. **Limitations:** changes are worker-local
+runtime state, not durable source-of-truth updates.
+[Task details](workers/nornir/services_nornir_service_tasks_runtime_inventory.md) ·
+[Create from NetBox](workers/nornir/services_nornir_service_tasks_create_host_from_netbox.md)
 
 ### NetBox and Containerlab inventory loading
 
@@ -705,10 +711,10 @@ write runs should follow scoped dry-run review.
 ### Hardware inventory reconciliation
 
 Reconciles live chassis, module, and inventory records with NetBox and supports
-name mapping and trusted Python transformers. **Use cases:** asset audit, serial
-number capture, and module lifecycle. **Limitations:** platform parser coverage
-and NetBox module modelling are prerequisites; transformer files execute as
-trusted code.
+custom TTP parsing templates, name mapping, and trusted Python transformers.
+**Use cases:** asset audit, serial number capture, and module lifecycle.
+**Limitations:** platform parser coverage and NetBox module modelling are
+prerequisites; templates and transformer files execute as trusted code.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_device_inventory.md)
 
 ### BGP peering lifecycle
@@ -733,11 +739,12 @@ validated in dry-run mode.
 
 ### Drift assessment and coordinated synchronization
 
-Runs selected synchronizers in read-only dry-run mode for drift reporting, or
-executes the supported synchronizers in a fixed sequence. **Use cases:** audit
-evidence, change planning, and scheduled source-of-truth maintenance.
-**Limitations:** assessment is limited to implemented sync domains; `sync_all`
-can make broad changes and requires careful deletion/filter policy.
+Runs selected synchronizers in read-only dry-run mode for drift reporting,
+including inventory, interface, MAC, IP, and BGP peering state, or executes the
+supported synchronizers in a fixed sequence. **Use cases:** audit evidence,
+change planning, and scheduled source-of-truth maintenance. **Limitations:**
+assessment is limited to implemented sync domains; `sync_all` can make broad
+changes and requires careful deletion/filter policy.
 [Check sync](workers/netbox/services_netbox_service_tasks_check_device_sync.md) ·
 [Sync all](workers/netbox/services_netbox_service_tasks_sync_all.md)
 
@@ -1052,8 +1059,9 @@ itself performs no automation.
 
 Supports first-match ordered allow/reject rules with service and task globs;
 rejecting a task also hides its prompts. Tools/prompts can be rediscovered and
-inspected in full or filtered by service/name. **Use cases:** read-only agent
-profiles, service allow-lists, hiding configuration tasks, and integration
+inspected in full or filtered by service/name; NFCLI can show effective tool and
+result guardrails in separate sections. **Use cases:** read-only agent profiles,
+service allow-lists, hiding configuration tasks, and integration
 troubleshooting. **Limitations:** unmatched tasks are allowed by default, so a
 strict allow-list needs a final catch-all reject rule.
 [Tool details](workers/fastmcp/services_fastmcp_service_task_get_tools.md)
@@ -1081,7 +1089,10 @@ Oversized content is replaced by one bounded base result with job-UUID retrieval
 guidance, while regex blocking replaces only an affected worker field with its
 configured message. **Use cases:** model-context budgets, deterministic
 credential redaction, and deployment-specific indirect-prompt-injection
-deny-lists. **Limitations:** rules are pattern-based, metadata fields are not
+deny-lists. Built-in Nornir CLI MCP guardrails redact common network-device,
+Linux, HTTP header, URL credential, OAuth token, netrc, and PEM private-key
+secrets before delivery while preserving the raw stored job result.
+**Limitations:** rules are pattern-based, metadata fields are not
 content-inspected, and trusted retrieval by UUID returns the unsanitized raw
 database result.
 

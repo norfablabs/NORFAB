@@ -5702,14 +5702,14 @@ test = ["coverage"]
 
 [[package]]
 name = "pygments"
-version = "2.20.0"
+version = "2.19.2"
 description = "Pygments is a syntax highlighting package written in Python."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176"},
-    {file = "pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"},
+    {file = "pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b"},
+    {file = "pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"},
 ]
 markers = {main = "extra == \"nfcli\" or extra == \"full\" or extra == \"nornirservice\" or extra == \"tui\" or extra == \"fastapiservice\" or extra == \"docs\""}
 
@@ -8870,4 +8870,4 @@ tui = ["textual"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<=3.14"
-content-hash = "e10992af1fabc1ddc8541f16871a6c2dc1f863a2a3c77deee13a94b991ac174a"
+content-hash = "548652109cd217bbb00cabd624e53ee8efb1e4643a286165496f54482e5ab999"
