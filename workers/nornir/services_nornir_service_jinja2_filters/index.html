@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1827,6 +1827,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_nornir_service_tasks_snmp/" class="md-nav__link">
         
   
@@ -1927,6 +1955,17 @@
     <span class="md-ellipsis">
       
         network_hosts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#netboxfilter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        netbox.filter
       
     </span>
   </a>
@@ -5845,6 +5884,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -6021,6 +6088,34 @@
     
   
     Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
   
 
     
@@ -6225,6 +6320,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#netboxfilter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        netbox.filter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#netboxcreate_ip" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6360,6 +6466,45 @@
 <div class="highlight"><pre><span></span><code><span class="p">[</span><span class="s2">&quot;192.168.1.1/30&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.1.2/30&quot;</span><span class="p">]</span>
 
 <span class="p">[</span><span class="s2">&quot;192.168.2.1&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.2.2&quot;</span><span class="p">]</span>
+</code></pre></div>
+<h2 id="netboxfilter">netbox.filter<a class="headerlink" href="#netboxfilter" title="Permanent link">¤</a></h2>
+<p><code>netbox.filter</code> reads objects through the NetBox <code>crud_read</code> task and returns a
+list of matching object dictionaries. The first argument is an object type in
+<code>app.resource</code> format. Pass an optional list of returned <code>fields</code>, followed by
+NetBox filter arguments as keyword arguments.</p>
+<p>This configuration template retrieves <code>Loopback0</code> for the current host and
+renders its NetBox description:</p>
+<div class="highlight"><pre><span></span><code>{% set interfaces = netbox.filter(
+    &quot;dcim.interfaces&quot;, fields=[&quot;name&quot;, &quot;description&quot;],
+    device=host.name, name=&quot;Loopback0&quot;
+) -%}
+{% for interface in interfaces %}
+interface {{ interface.name }}
+  description {{ interface.description }}
+{% endfor %}
+</code></pre></div>
+<p>The helper can also generate a test suite dynamically. This example creates one
+test for every interface assigned to the current device:</p>
+<div class="highlight"><pre><span></span><code>{% set interfaces = netbox.filter(
+    &quot;dcim.interfaces&quot;, fields=[&quot;name&quot;], device=host.name
+) -%}
+{% for interface in interfaces %}
+- task: &quot;show interfaces {{ interface.name }}&quot;
+  test: contains
+  pattern: &quot;{{ interface.name }}&quot;
+  name: &quot;Check {{ interface.name }} status&quot;
+{% endfor %}
+</code></pre></div>
+<p>NetBox plugin resources use the three-part
+<code>plugins.&lt;plugin&gt;.&lt;resource&gt;</code> form. For example, the following retrieves BGP
+sessions assigned to the current host:</p>
+<div class="highlight"><pre><span></span><code>{% set sessions = netbox.filter(
+    &quot;plugins.bgp.session&quot;, device=host.name
+) -%}
+{% for session in sessions %}
+router bgp
+  neighbor {{ session.remote_address.address }} description {{ session.name }}
+{% endfor %}
 </code></pre></div>
 <h2 id="netboxcreate_ip">netbox.create_ip<a class="headerlink" href="#netboxcreate_ip" title="Permanent link">¤</a></h2>
 <p>This Jinja2 filter queries Netbox to get existing or create next available IP in prefix.</p>
@@ -8529,7 +8674,7 @@ automatically creates branch if it does not exist in Netbox.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -545,6 +545,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#local-environment-bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local environment bootstrap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#topology-dependencies-and-lifecycle-hooks" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -781,6 +792,17 @@
     <span class="md-ellipsis">
       
         Per-host command templating and previews
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netbox-backed-jinja2-object-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NetBox-backed Jinja2 object filtering
       
     </span>
   </a>
@@ -1759,6 +1781,17 @@
     <span class="md-ellipsis">
       
         Argument guardrails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#result-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result guardrails
       
     </span>
   </a>
@@ -3233,6 +3266,34 @@
     
   
     Runtime Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
   
 
     
@@ -7125,6 +7186,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -7301,6 +7390,34 @@
     
   
     Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
   
 
     
@@ -7638,6 +7755,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#local-environment-bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local environment bootstrap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#topology-dependencies-and-lifecycle-hooks" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7874,6 +8002,17 @@
     <span class="md-ellipsis">
       
         Per-host command templating and previews
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netbox-backed-jinja2-object-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NetBox-backed Jinja2 object filtering
       
     </span>
   </a>
@@ -8859,6 +8998,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#result-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result guardrails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#mcp-bearer-authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8913,7 +9063,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 9 July 2026</em></p>
+<p><em>Last updated: 26 July 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -8938,6 +9088,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 <li><a href="#runtime-task-discovery">Runtime task discovery</a></li>
 <li><a href="#inventory-composition">Inventory composition</a></li>
 <li><a href="#templated-inventory">Templated inventory</a></li>
+<li><a href="#local-environment-bootstrap">Local environment bootstrap</a></li>
 <li><a href="#topology-dependencies-and-lifecycle-hooks">Topology dependencies and lifecycle hooks</a></li>
 <li><a href="#worker-capacity-and-resource-controls">Worker capacity and resource controls</a></li>
 <li><a href="#worker-health-and-statistics">Worker health and statistics</a></li>
@@ -8963,6 +9114,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 <li><a href="#repeated-command-sampling-and-stop-conditions">Repeated command sampling and stop conditions</a></li>
 <li><a href="#output-based-failure-detection">Output-based failure detection</a></li>
 <li><a href="#per-host-command-templating-and-previews">Per-host command templating and previews</a></li>
+<li><a href="#netbox-backed-jinja2-object-filtering">NetBox-backed Jinja2 object filtering</a></li>
 <li><a href="#resilient-execution-with-retryrunner">Resilient execution with RetryRunner</a></li>
 <li><a href="#shared-result-processors">Shared result processors</a></li>
 <li><a href="#inline-cli-parsing">Inline CLI parsing</a></li>
@@ -9065,6 +9217,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 <li><a href="#task-authored-mcp-prompts">Task-authored MCP prompts</a></li>
 <li><a href="#tool-policy-and-discovery">Tool policy and discovery</a></li>
 <li><a href="#argument-guardrails">Argument guardrails</a></li>
+<li><a href="#result-guardrails">Result guardrails</a></li>
 <li><a href="#mcp-bearer-authentication">MCP bearer authentication</a></li>
 </ul>
 </li>
@@ -9186,6 +9339,16 @@ endpoints, environment-dependent values, reusable worker definitions, and
 reducing duplicated YAML. <strong>Limitations:</strong> templates execute at inventory load
 time and should remain deterministic and reviewable.
 <a href="../reference_norfab_inventory/#jinja2-support">Jinja2 inventory details</a></p>
+<h3 id="local-environment-bootstrap">Local environment bootstrap<a class="headerlink" href="#local-environment-bootstrap" title="Permanent link">¤</a></h3>
+<p>Detects and loads a project <code>.env</code> file before inventory rendering using the
+<code>python-dotenv</code> library. Local values override existing process variables by
+default, with an NFAPI option to preserve existing values instead, and NFAPI can
+list its visible environment variables for inspection. <strong>Use cases:</strong> local
+NFCLI configuration, environment-specific endpoints, and development credentials
+kept outside inventory YAML. <strong>Limitations:</strong> the <code>.env</code> file is local process
+configuration rather than a secret store; files containing secrets must be
+excluded from source control and protected appropriately.
+<a href="../api_reference_core_norfab_nfapi/#environment-file-loading">NFAPI environment details</a></p>
 <h3 id="topology-dependencies-and-lifecycle-hooks">Topology dependencies and lifecycle hooks<a class="headerlink" href="#topology-dependencies-and-lifecycle-hooks" title="Permanent link">¤</a></h3>
 <p>Starts an ordered selection of broker/workers, lets workers declare
 <code>depends_on</code> relationships, and runs configured startup, exit, Nornir-startup,
@@ -9218,9 +9381,12 @@ the worker host and requires strict administrative access and auditing.</p>
 <p>Supports the Python <code>dictConfig</code> model: named formatters, filters, loggers,
 stream/file/rotating/timed/syslog/SMTP/buffer/queue-style handler parameters,
 per-logger levels and propagation, plus optional conversion of job events into
-logs. <strong>Use cases:</strong> local troubleshooting, centralized logging, SIEM ingestion,
-rotation, and environment-specific verbosity. <strong>Limitations:</strong> the selected
-handlers and destinations must be provisioned and secured by the deployment.
+logs. Broker and worker processes configure their own logging and default to
+per-process JSONL files under <code>__norfab__/logs</code>; NFCLI can retrieve broker and
+worker logs through normal client calls. <strong>Use cases:</strong> local troubleshooting,
+centralized logging, SIEM ingestion, rotation, and environment-specific
+verbosity. <strong>Limitations:</strong> the selected handlers and destinations must be
+provisioned and secured by the deployment.
 <a href="../reference_norfab_inventory/#logging-inventory-section">Logging inventory details</a></p>
 <h3 id="encrypted-component-communication">Encrypted component communication<a class="headerlink" href="#encrypted-component-communication" title="Permanent link">¤</a></h3>
 <p>Supports ZeroMQ authentication and CurveZMQ encryption between the broker,
@@ -9324,6 +9490,15 @@ Dry-run returns rendered commands without connecting to devices. <strong>Use cas
 parameterized diagnostics, per-device VRF/interface commands, and reviewing
 target-specific intent before execution. <strong>Limitations:</strong> template inputs and
 host data are trusted automation content.</p>
+<h3 id="netbox-backed-jinja2-object-filtering">NetBox-backed Jinja2 object filtering<a class="headerlink" href="#netbox-backed-jinja2-object-filtering" title="Permanent link">¤</a></h3>
+<p>Exposes <code>netbox.filter</code> to Nornir Jinja2 templates for retrieving filtered
+NetBox core or plugin objects with optional field selection. Results are returned
+as a list for direct iteration when rendering commands, configuration, or test
+suites. <strong>Use cases:</strong> source-of-truth-driven interface configuration, dynamic
+per-object tests, and plugin-backed routing templates. <strong>Limitations:</strong> requires
+an available NetBox service and knowledge of the target object and filter
+fields; per-host rendering queries can add NetBox API load and latency.
+<a href="../workers/nornir/services_nornir_service_jinja2_filters/#netboxfilter">Jinja2 filter examples</a></p>
 <h3 id="resilient-execution-with-retryrunner">Resilient execution with RetryRunner<a class="headerlink" href="#resilient-execution-with-retryrunner" title="Permanent link">¤</a></h3>
 <p>Separately tunes task-worker and connection-worker pools, TCP connection
 pre-checks/timeouts, connection and task retry counts, reconnect-on-task-failure,
@@ -9441,11 +9616,13 @@ and requires compatible SCP or inline-transfer support.
 <h3 id="runtime-inventory-management">Runtime inventory management<a class="headerlink" href="#runtime-inventory-management" title="Permanent link">¤</a></h3>
 <p>Creates, reads, updates, deletes, or loads Nornir hosts without restarting a
 worker; reads nested host data, manages group membership/defaults, and lists
-hosts/platforms. <strong>Use cases:</strong> ephemeral targets, dynamic discovery, per-job
-metadata, lab inventory injection, and debugging inventory resolution.
-<strong>Limitations:</strong> changes are worker-local runtime state, not durable
-source-of-truth updates.
-<a href="../workers/nornir/services_nornir_service_tasks_runtime_inventory/">Task details</a></p>
+hosts/platforms. Runtime hosts can also be created or replaced directly from
+explicit NetBox device names. <strong>Use cases:</strong> ephemeral targets, dynamic
+discovery, per-job metadata, lab inventory injection, source-of-truth handoff,
+and debugging inventory resolution. <strong>Limitations:</strong> changes are worker-local
+runtime state, not durable source-of-truth updates.
+<a href="../workers/nornir/services_nornir_service_tasks_runtime_inventory/">Task details</a> ·
+<a href="../workers/nornir/services_nornir_service_tasks_create_host_from_netbox/">Create from NetBox</a></p>
 <h3 id="netbox-and-containerlab-inventory-loading">NetBox and Containerlab inventory loading<a class="headerlink" href="#netbox-and-containerlab-inventory-loading" title="Permanent link">¤</a></h3>
 <p>Can merge Nornir inventory from a configured NetBox instance at startup/runtime,
 or pull hosts from selected Containerlab workers with optional groups, default
@@ -9615,10 +9792,10 @@ write runs should follow scoped dry-run review.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/">MAC sync</a></p>
 <h3 id="hardware-inventory-reconciliation">Hardware inventory reconciliation<a class="headerlink" href="#hardware-inventory-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles live chassis, module, and inventory records with NetBox and supports
-name mapping and trusted Python transformers. <strong>Use cases:</strong> asset audit, serial
-number capture, and module lifecycle. <strong>Limitations:</strong> platform parser coverage
-and NetBox module modelling are prerequisites; transformer files execute as
-trusted code.
+custom TTP parsing templates, name mapping, and trusted Python transformers.
+<strong>Use cases:</strong> asset audit, serial number capture, and module lifecycle.
+<strong>Limitations:</strong> platform parser coverage and NetBox module modelling are
+prerequisites; templates and transformer files execute as trusted code.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_inventory/">Task details</a></p>
 <h3 id="bgp-peering-lifecycle">BGP peering lifecycle<a class="headerlink" href="#bgp-peering-lifecycle" title="Permanent link">¤</a></h3>
 <p>Creates or updates individual and bulk BGP sessions, and reconciles live BGP
@@ -9637,11 +9814,12 @@ console ports, console server ports, and power outlet ports; templates should be
 validated in dry-run mode.
 <a href="../workers/netbox/services_netbox_service_tasks_update_interfaces_description/">Task details</a></p>
 <h3 id="drift-assessment-and-coordinated-synchronization">Drift assessment and coordinated synchronization<a class="headerlink" href="#drift-assessment-and-coordinated-synchronization" title="Permanent link">¤</a></h3>
-<p>Runs selected synchronizers in read-only dry-run mode for drift reporting, or
-executes the supported synchronizers in a fixed sequence. <strong>Use cases:</strong> audit
-evidence, change planning, and scheduled source-of-truth maintenance.
-<strong>Limitations:</strong> assessment is limited to implemented sync domains; <code>sync_all</code>
-can make broad changes and requires careful deletion/filter policy.
+<p>Runs selected synchronizers in read-only dry-run mode for drift reporting,
+including inventory, interface, MAC, IP, and BGP peering state, or executes the
+supported synchronizers in a fixed sequence. <strong>Use cases:</strong> audit evidence,
+change planning, and scheduled source-of-truth maintenance. <strong>Limitations:</strong>
+assessment is limited to implemented sync domains; <code>sync_all</code> can make broad
+changes and requires careful deletion/filter policy.
 <a href="../workers/netbox/services_netbox_service_tasks_check_device_sync/">Check sync</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_sync_all/">Sync all</a></p>
 <h2 id="containerlab-service">Containerlab service<a class="headerlink" href="#containerlab-service" title="Permanent link">¤</a></h2>
@@ -9878,8 +10056,9 @@ itself performs no automation.
 <h3 id="tool-policy-and-discovery">Tool policy and discovery<a class="headerlink" href="#tool-policy-and-discovery" title="Permanent link">¤</a></h3>
 <p>Supports first-match ordered allow/reject rules with service and task globs;
 rejecting a task also hides its prompts. Tools/prompts can be rediscovered and
-inspected in full or filtered by service/name. <strong>Use cases:</strong> read-only agent
-profiles, service allow-lists, hiding configuration tasks, and integration
+inspected in full or filtered by service/name; NFCLI can show effective tool and
+result guardrails in separate sections. <strong>Use cases:</strong> read-only agent profiles,
+service allow-lists, hiding configuration tasks, and integration
 troubleshooting. <strong>Limitations:</strong> unmatched tasks are allowed by default, so a
 strict allow-list needs a final catch-all reject rule.
 <a href="../workers/fastmcp/services_fastmcp_service_task_get_tools/">Tool details</a></p>
@@ -9894,6 +10073,21 @@ sessions. Nornir configuration defaults reject reload/restart, operational
 tailoring prohibited commands to local policy. <strong>Limitations:</strong>
 guardrails inspect inline arguments only and do not inspect content later loaded
 from <code>nf://</code> files; they complement rather than replace authorization.</p>
+<h3 id="result-guardrails">Result guardrails<a class="headerlink" href="#result-guardrails" title="Permanent link">¤</a></h3>
+<p>Applies <code>limit</code>, <code>replace</code>, and blocking regex rules in their configured order
+to each completed MCP task result. Limit rules measure
+the compact JSON aggregate at the point where they appear. Content rules
+recursively inspect string values below each worker's <code>result</code> and <code>diff</code>.
+Oversized content is replaced by one bounded base result with job-UUID retrieval
+guidance, while regex blocking replaces only an affected worker field with its
+configured message. <strong>Use cases:</strong> model-context budgets, deterministic
+credential redaction, and deployment-specific indirect-prompt-injection
+deny-lists. Built-in Nornir CLI MCP guardrails redact common network-device,
+Linux, HTTP header, URL credential, OAuth token, netrc, and PEM private-key
+secrets before delivery while preserving the raw stored job result.
+<strong>Limitations:</strong> rules are pattern-based, metadata fields are not
+content-inspected, and trusted retrieval by UUID returns the unsanitized raw
+database result.</p>
 <h3 id="mcp-bearer-authentication">MCP bearer authentication<a class="headerlink" href="#mcp-bearer-authentication" title="Permanent link">¤</a></h3>
 <p>Optionally protects the MCP endpoint with expiring bearer tokens.
 <strong>Interfaces:</strong> token administration is deliberately excluded from REST and MCP
@@ -10027,7 +10221,7 @@ protection must be designed as part of deployment.
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

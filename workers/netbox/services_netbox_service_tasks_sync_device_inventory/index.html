@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1825,6 +1825,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
         
   
@@ -2513,6 +2541,17 @@
   
     <nav class="md-nav" aria-label="Parsed Inventory Records">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-inventory-parsing-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Inventory Parsing Template
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#device-serial-number" class="md-nav__link">
@@ -5892,6 +5931,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -6068,6 +6135,34 @@
     
   
     Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
   
 
     
@@ -6273,6 +6368,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#custom-inventory-parsing-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Inventory Parsing Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#device-serial-number" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6441,25 +6547,53 @@
 </blockquote>
 <p>The <code>sync_device_inventory</code> task reconciles live hardware inventory collected
 from the Nornir service with NetBox device and module data.</p>
-<p>Live inventory is collected with Nornir <code>parse_ttp</code> using <code>get="inventory"</code>.
+<p>Live inventory is collected with Nornir <code>parse_ttp</code> using <code>get="inventory"</code> by
+default. Set <code>inventory_parse_template</code> to use a custom TTP template instead.
 The chassis inventory record updates <code>dcim.device.serial</code>. Non-chassis
 inventory records, including optics and transceivers, are managed as NetBox
 <code>dcim.modules</code> installed in device-level <code>dcim.module_bays</code>.</p>
 <h2 id="parsed-inventory-records">Parsed Inventory Records<a class="headerlink" href="#parsed-inventory-records" title="Permanent link">¤</a></h2>
 <p>The Nornir inventory parser and optional inventory transformer must return one
-list of records per device. Every record has exactly these fields:</p>
+list of dictionaries per device. Every dictionary has exactly these keys:</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR9K</span><span class="nv"> </span><span class="s">Route</span><span class="nv"> </span><span class="s">Switch</span><span class="nv"> </span><span class="s">Processor</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">440G/slot</span><span class="nv"> </span><span class="s">Fabric</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">6GB&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">0/RSP0/CPU0&quot;</span>
 <span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A9K-RSP440-TR&quot;</span>
 <span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;M9YXCZV9QF&quot;</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;module</span><span class="nv"> </span><span class="s">0/RSP0/CPU0&quot;</span>
 </code></pre></div>
-<p>Each field value must be a string or <code>null</code>.</p>
+<p>Each field value must be a string.</p>
+<h3 id="custom-inventory-parsing-template">Custom Inventory Parsing Template<a class="headerlink" href="#custom-inventory-parsing-template" title="Permanent link">¤</a></h3>
+<p><code>inventory_parse_template</code> accepts an inline TTP template or a template URL
+such as <code>nf://netbox/inventory_parse.ttp</code>. The template must return a list of
+dictionaries with the keys <code>description</code>, <code>module</code>, <code>serial</code>, and <code>slot</code> for
+each device. For example, this Cisco IOS XR template parses <code>show inventory</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;input&gt;</span>
+commands<span class="w"> </span>=<span class="w"> </span>[&quot;show<span class="w"> </span>inventory&quot;]
+platform<span class="w"> </span>=<span class="w"> </span>[&quot;cisco_xr&quot;]
+<span class="nt">&lt;/input&gt;</span>
+
+<span class="nt">&lt;group&gt;</span>
+NAME:<span class="w"> </span>&quot;{{<span class="w"> </span>slot<span class="w"> </span>|<span class="w"> </span>ORPHRASE<span class="w"> </span>}}&quot;,<span class="w"> </span>DESCR:<span class="w"> </span>&quot;{{<span class="w"> </span>description<span class="w"> </span>|<span class="w"> </span>ORPHRASE<span class="w"> </span>}}&quot;
+PID:<span class="w"> </span>{{<span class="w"> </span>module<span class="w"> </span>|<span class="w"> </span>strip(&quot;,&quot;)<span class="w"> </span>}}{{<span class="w"> </span>ignore(&quot;.+&quot;)<span class="w"> </span>}}SN:<span class="w"> </span>{{<span class="w"> </span>serial<span class="w"> </span>}}
+<span class="nt">&lt;/group&gt;</span>
+</code></pre></div>
+<p>Use the template with the task:</p>
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_device_inventory&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;iosxr1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;inventory_parse_template&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://netbox/inventory_parse.ttp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
 <h3 id="device-serial-number">Device Serial Number<a class="headerlink" href="#device-serial-number" title="Permanent link">¤</a></h3>
 <p>A record whose trimmed <code>slot</code> value is <code>chassis</code>, case-insensitive, is the device chassis record:</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Cisco</span><span class="nv"> </span><span class="s">ASR</span><span class="nv"> </span><span class="s">9006</span><span class="nv"> </span><span class="s">Router&quot;</span>
-<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;chassis&quot;</span>
 <span class="w">  </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ASR-9006&quot;</span>
 <span class="w">  </span><span class="nt">serial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;JCY98XR393D&quot;</span>
+<span class="w">  </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;chassis&quot;</span>
 </code></pre></div>
 <p>For this record, the task:</p>
 <ol>
@@ -6611,7 +6745,8 @@ through the NorFab File Service:</p>
 <p>The arguments are:</p>
 <ul>
 <li><code>device_name</code>: current NetBox and Nornir device name.</li>
-<li><code>parsed_data</code>: parsed records for that device, list of dictionaries with <code>slot</code>, <code>serial</code>, <code>description</code>, <code>module</code> keys.</li>
+<li><code>parsed_data</code>: parsed records for that device, a list of dictionaries with
+  <code>description</code>, <code>module</code>, <code>serial</code>, and <code>slot</code> keys.</li>
 <li><code>worker</code>: active NetBox worker object, including its configuration and
   all worker helper methods.</li>
 <li><code>device_platform</code>: NetBox device platform <code>name</code>, or <code>None</code> when no platform
@@ -6620,10 +6755,10 @@ through the NorFab File Service:</p>
 <li><code>device_type</code>: NetBox device type <code>model</code>.</li>
 </ul>
 <p>The return value must be a list of dictionaries. Every dictionary must contain
-exactly <code>description</code>, <code>slot</code>, <code>module</code>, and <code>serial</code>, with each value set to a
-string or <code>None</code>. Returning an empty list means there is no usable inventory
-for that device. Invalid output or an exception skips that device and records
-the validation or execution error in result's <code>errors</code>.</p>
+exactly <code>description</code>, <code>module</code>, <code>serial</code>, and <code>slot</code>, with every value set
+to a string. Returning an empty list means there is no usable inventory for
+that device. Invalid output or an exception skips that device and records the
+validation or execution error in result's <code>errors</code>.</p>
 <p>The transformer is loaded once per task and called once per device. It runs
 before <code>inventory_map</code>, so pattern conditions test the transformed <code>module</code>
 and <code>slot</code> values. The device metadata arguments are read from NetBox before
@@ -6938,6 +7073,7 @@ root
             ├── process-deletions:    Delete NetBox modules present in module bays but absent from live inventory
             ├── create-module-types:    Create missing NetBox module types from live inventory model data
             ├── create-module-bays:    Create missing NetBox module bays using the live inventory slot names
+            ├── inventory-parse-template:    TTP template string or URL used to parse live inventory
             ├── inventory-map:    Pattern mappings or nf:// YAML file reference
             ├── inventory-transform:    nf:// Python transformer file containing a transform function
             ├── filter-by-module:    Glob patterns selecting normalized module type names
@@ -7173,6 +7309,23 @@ inventory slot names.</p>
             </td>
             <td>
                   <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>inventory_parse_template</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>TTP template string or URL to use instead
+of the default <code>get="inventory"</code> template.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -8177,7 +8330,11 @@ to <code>parse_ttp</code>.</p>
 <span class="normal">1144</span>
 <span class="normal">1145</span>
 <span class="normal">1146</span>
-<span class="normal">1147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1147</span>
+<span class="normal">1148</span>
+<span class="normal">1149</span>
+<span class="normal">1150</span>
+<span class="normal">1151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInventoryResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -8203,6 +8360,7 @@ to <code>parse_ttp</code>.</p>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">create_module_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">create_module_bays</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">inventory_parse_template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inventory_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">InventoryPatternMap</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inventory_transform</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_module</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8256,6 +8414,8 @@ to <code>parse_ttp</code>.</p>
 <span class="sd">            module model data.</span>
 <span class="sd">        create_module_bays: Create missing NetBox module bays from live</span>
 <span class="sd">            inventory slot names.</span>
+<span class="sd">        inventory_parse_template: TTP template string or URL to use instead</span>
+<span class="sd">            of the default ``get=&quot;inventory&quot;`` template.</span>
 <span class="sd">        inventory_map: Manufacturer and device type scoped pattern mappings,</span>
 <span class="sd">            or an ``nf://`` YAML file containing them.</span>
 <span class="sd">        inventory_transform: ``nf://`` Python file containing</span>
@@ -8422,7 +8582,10 @@ to <code>parse_ttp</code>.</p>
     <span class="c1"># Collect live inventory data from Network.</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving live inventory for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
     <span class="n">nornir_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;get&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;inventory&quot;</span>
+    <span class="k">if</span> <span class="n">inventory_parse_template</span><span class="p">:</span>
+        <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;template&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inventory_parse_template</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;get&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;inventory&quot;</span>
     <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;strict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">nornir_kwargs</span><span class="p">[</span><span class="s2">&quot;FL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">devices</span>
     <span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
@@ -8505,12 +8668,10 @@ to <code>parse_ttp</code>.</p>
         <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="n">raw_slot</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;slot&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">raw_module_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">slot</span> <span class="o">=</span> <span class="n">raw_slot</span>
-            <span class="n">module_name</span> <span class="o">=</span> <span class="n">raw_module_name</span>
-            <span class="n">serial</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;serial&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">slot</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;slot&quot;</span><span class="p">]</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span>
+            <span class="n">serial</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;serial&quot;</span><span class="p">]</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
             <span class="n">is_chassis</span> <span class="o">=</span> <span class="n">slot</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;chassis&quot;</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_chassis</span><span class="p">:</span>
@@ -8552,7 +8713,7 @@ to <code>parse_ttp</code>.</p>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">module_type_matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">skipped_slots</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">raw_slot</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;unknown&#39;</span><span class="si">}</span><span class="s2"> - live module &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">slot</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;unknown&#39;</span><span class="si">}</span><span class="s2"> - live module &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&#39; matches multiple NetBox module types: &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">module_type_matches</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="p">)</span>
@@ -8563,7 +8724,7 @@ to <code>parse_ttp</code>.</p>
                 <span class="k">if</span> <span class="n">module_type_matches</span><span class="p">:</span>
                     <span class="n">module_name</span> <span class="o">=</span> <span class="n">module_type_matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="n">ignored_slot</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">raw_slot</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">slot</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">raw_slot</span> <span class="o">!=</span> <span class="n">slot</span> <span class="k">else</span> <span class="n">slot</span>
+            <span class="n">ignored_slot</span> <span class="o">=</span> <span class="n">slot</span>
             <span class="n">ignored_reason</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
             <span class="k">if</span> <span class="n">serial</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;BUILTIN&quot;</span><span class="p">:</span>
@@ -9134,7 +9295,7 @@ to <code>parse_ttp</code>.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

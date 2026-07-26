@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1803,6 +1803,34 @@
     
   
     Runtime Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
   
 
     
@@ -3964,6 +3992,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFCLI Shell Client
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -3980,6 +4026,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#local-environment-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local environment file
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -5707,6 +5783,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -5896,6 +6000,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -6069,6 +6201,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#local-environment-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local environment file
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -6110,6 +6261,23 @@ are available in this mode. For example, to configure a router interface, you
 must be in Nornir configuration mode. All configurations that you enter in 
 configuration mode apply only to this function.</p>
 <p>NORFAB CLI build using <a href="https://github.com/dmulyalin/picle">PICLE package</a>.</p>
+<h2 id="local-environment-file">Local environment file<a class="headerlink" href="#local-environment-file" title="Permanent link">¤</a></h2>
+<p>At startup, NFCLI uses NFAPI to detect a <code>.env</code> file in the directory that
+contains <code>inventory.yaml</code>. Variables are loaded before inventory Jinja2
+rendering and are inherited by locally started broker and worker processes.
+Values in <code>.env</code> override variables already exported by the shell or supplied
+by CI.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># .env</span>
+<span class="nv">LAB_USERNAME</span><span class="o">=</span>operator
+<span class="nv">LAB_PASSWORD</span><span class="o">=</span><span class="s2">&quot;local development password&quot;</span>
+</code></pre></div>
+<p>Reference the values from inventory with the <code>env</code> Jinja2 dictionary:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">defaults</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">env.get(&quot;LAB_USERNAME&quot;)</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">  </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">env.get(&quot;LAB_PASSWORD&quot;)</span><span class="nv"> </span><span class="s">}}&#39;</span>
+</code></pre></div>
+<p>See the <a href="../api_reference_core_norfab_nfapi/#environment-file-loading">NFAPI environment file reference</a>
+for the supported file syntax and API controls.</p>
 <p>It is important to remember that in PICLE Shell, when you enter a command, the 
 command is executed. If you enter an incorrect command in a production environment, 
 it can negatively impact it.</p>
@@ -6237,7 +6405,7 @@ it can negatively impact it.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

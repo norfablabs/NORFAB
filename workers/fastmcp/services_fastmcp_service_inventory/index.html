@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1825,6 +1825,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
         
   
@@ -3314,6 +3342,17 @@
     <span class="md-ellipsis">
       
         Tool Call Guardrails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-result-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Result Guardrails
       
     </span>
   </a>
@@ -5779,6 +5818,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -5955,6 +6022,34 @@
     
   
     Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
   
 
     
@@ -6174,6 +6269,17 @@
     <span class="md-ellipsis">
       
         Tool Call Guardrails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-result-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Result Guardrails
       
     </span>
   </a>
@@ -6555,9 +6661,85 @@ state-changing commands such as <code>commit</code>, <code>delete</code>, <code>
 It also rejects shell-mode commands such as <code>bash</code>, <code>shell</code>, <code>start shell</code>,
 <code>request system shell</code>, and <code>guestshell</code>, OS/image/package operations, and
 outbound session commands such as <code>ssh</code> and <code>telnet</code>.
+Its built-in result guardrails also redact common network-platform and Linux
+passwords, secrets, authentication keys, shadow hashes, and PEM private keys
+from MCP-delivered CLI output.
 The Nornir <code>cfg</code> task includes default MCP guardrails that reject operational
 command escapes in configuration input, such as <code>do ...</code> and <code>run ...</code>, plus
 reboot, reload, restart, delete, erase, zeroize, <code>ssh</code>, and <code>telnet</code> commands.</p>
+<hr />
+<h2 id="task-result-guardrails">Task Result Guardrails<a class="headerlink" href="#task-result-guardrails" title="Permanent link">¤</a></h2>
+<p>FastMCP result guardrails inspect the aggregate result after the NorFab job has
+completed but before the result is returned to the MCP client. The raw result
+stored in the FastMCP client's job database is not changed. Configure
+deployment rules under <code>tools.result_guardrails</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">tools</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">result_guardrails</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Keep MCP task results below 256 KiB.</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">limit</span>
+<span class="w">      </span><span class="nt">limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">262144</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">The task result is too large to return through MCP.</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nornir</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cli</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Redact labelled passwords.</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replace</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?i)(password\\s*[=:]\\s*)\\S+&quot;</span>
+<span class="w">      </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\\1[REDACTED:PASSWORD]&quot;</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">      </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Withhold known instruction-injection content.</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(?i)ignore</span><span class="nv"> </span><span class="s">(all</span><span class="nv"> </span><span class="s">|the</span><span class="nv"> </span><span class="s">)?previous</span><span class="nv"> </span><span class="s">instructions&quot;</span>
+<span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Task result content was withheld for safety.</span>
+</code></pre></div>
+<p>Result guardrail selectors use glob (<code>fnmatch</code>) matching. Task-owned rules from
+<code>mcp.result_guardrails</code> run first in their declared order, followed by matching
+inventory rules in inventory order. <code>tools.disable_builtin_guardrails: true</code>
+disables both task-owned call and result guardrails while leaving inventory
+rules enabled.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Required keys</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>limit</code></td>
+<td><code>limit</code> (positive byte count)</td>
+<td>Measures the compact JSON aggregate. If exceeded, returns one bounded base result containing <code>message</code> and the existing job UUID.</td>
+</tr>
+<tr>
+<td><code>replace</code></td>
+<td><code>match</code>, <code>replace</code></td>
+<td>Recursively replaces matching string values below each worker's <code>result</code> and <code>diff</code>.</td>
+</tr>
+<tr>
+<td><code>regex</code></td>
+<td><code>match</code></td>
+<td>Recursively detects matching string values below <code>result</code> and <code>diff</code> and replaces only the affected worker field with <code>message</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Guardrails run once in authored order. A limit rule measures the delivery copy
+at the point where the rule appears. Dictionary keys and result metadata such as
+<code>errors</code>, <code>messages</code>, and <code>resources</code> are not regex-inspected, although the
+complete aggregate counts toward a <code>limit</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A job UUID locates the original database record; it is not an authorization
+credential. Raw stored results have not been sanitized and may be large or
+sensitive. Do not expose unrestricted raw-result retrieval to a model.</p>
+</div>
+<p>Effective result guardrails are included by <code>get_tools</code>, <code>show fastmcp tools</code>
+when detailed tool data is requested, and <code>show fastmcp guardrails</code> under the
+<code>result_guardrails</code> section for each matching tool.</p>
 
 
 
@@ -6679,7 +6861,7 @@ reboot, reload, restart, delete, erase, zeroize, <code>ssh</code>, and <code>tel
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

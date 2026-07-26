@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1946,6 +1946,34 @@
     
   
     Runtime Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
   
 
     
@@ -5838,6 +5866,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -6014,6 +6070,34 @@
     
   
     Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
   
 
     
@@ -6429,7 +6513,15 @@ in that case NorFab inventory (<code>inventory.yaml</code>) file could have this
 <h2 id="topology-inventory-section">Topology Inventory Section<a class="headerlink" href="#topology-inventory-section" title="Permanent link">¤</a></h2>
 <p>Topology section of NorFab inventory identifies the components that need to be started on the given node.</p>
 <h2 id="logging-inventory-section">Logging Inventory Section<a class="headerlink" href="#logging-inventory-section" title="Permanent link">¤</a></h2>
-<p>Logging inventory section allows to configure logging parameters such as file retention options, logging to remote hosts, logging levels etc. using Python logging <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema">configuration dictionary schema</a>. </p>
+<p>Logging inventory section allows to configure logging parameters such as file retention options, logging to remote hosts, logging levels etc. using Python logging <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema">configuration dictionary schema</a>.</p>
+<p>NorFab treats the handler named <code>file</code> as its default local file sink. When
+NorFab-owned applications and child processes configure logging, this handler is
+resolved to a per-process JSONL file under <code>__norfab__/logs</code>, for example
+<code>nfapi-nfcli.jsonl</code>, <code>nfapi-tui.jsonl</code>, <code>broker-NFPBroker.jsonl</code>, or
+<code>worker-nornir-worker-1.jsonl</code>. The handler's <code>level</code>, <code>maxBytes</code>, and
+<code>backupCount</code> can still be controlled from inventory, while its <code>filename</code> and
+JSON formatter are managed by NorFab. Custom file handlers with other names are
+preserved as user-managed Python logging handlers.</p>
 <p>Additional <code>logging</code> section supported attributes:</p>
 <ul>
 <li><code>log_events</code> - boolean, if True emit events copy as log messages</li>
@@ -6471,6 +6563,19 @@ in that case NorFab inventory (<code>inventory.yaml</code>) file could have this
 <p>Function import path is a dot separated path used to import module file that contains hook functions, where individual function name is a last item in dot separated path definition. For example <code>hooks.functions.do_on_startup</code> path is equivalent of running Python import <code>from hooks.functions import do_on_startup</code>.</p>
 <h2 id="jinja2-support">Jinja2 Support<a class="headerlink" href="#jinja2-support" title="Permanent link">¤</a></h2>
 <p>Starting with version 0.3.0 NorFab supports Jinja2 syntax rendering of inventory files, in addition, <code>env</code> dictionary variable available to source environment variables:</p>
+<p>NFAPI and NFCLI automatically load a <code>.env</code> file from the directory containing
+<code>inventory.yaml</code> before rendering it. Existing process environment variables
+are overridden by <code>.env</code> values by default. Pass <code>load_env_override=False</code> to
+<code>NorFab</code> to preserve existing process values instead. For dictionary
+inventories, detection uses <code>base_dir</code>, or the current directory when
+<code>base_dir</code> is omitted.</p>
+<div class="highlight"><span class="filename">.env</span><pre><span></span><code><span class="nv">TERMINAL_LOGGING_LEVEL</span><span class="o">=</span>INFO
+<span class="nv">FILE_LOGGING_LEVEL</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
+</code></pre></div>
+<p>The <code>python-dotenv</code> loader accepts Bash-like assignments, comments, quoted and
+multiline values, the optional <code>export</code> directive, and <code>${VAR}</code> expansion. See the
+<a href="../api_reference_core_norfab_nfapi/#environment-file-loading">NFAPI reference</a>
+for details.</p>
 <div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">logging</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">handlers</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">terminal</span><span class="p">:</span>
@@ -6660,7 +6765,7 @@ in that case NorFab inventory (<code>inventory.yaml</code>) file could have this
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

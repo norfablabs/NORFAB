@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1805,6 +1805,34 @@
     
   
     Runtime Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
   
 
     
@@ -5825,6 +5853,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
         
   
@@ -6001,6 +6057,34 @@
     
   
     Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
   
 
     
@@ -6309,6 +6393,7 @@
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <p><code>check_device_sync</code> can run these read-only sub-checks:</p>
 <ul>
+<li><strong>inventory</strong> — calls <code>sync_device_inventory(dry_run=True)</code></li>
 <li><strong>interfaces</strong> — calls <code>sync_device_interfaces(dry_run=True)</code></li>
 <li><strong>mac_addresses</strong> — calls <code>sync_mac_addresses(dry_run=True)</code></li>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip(dry_run=True)</code></li>
@@ -6346,6 +6431,11 @@
 <td>Timeout in seconds for Nornir parse jobs</td>
 </tr>
 <tr>
+<td><code>check_inventory</code></td>
+<td style="text-align: right;">No</td>
+<td>Check device inventory sync state, default <code>True</code></td>
+</tr>
+<tr>
 <td><code>check_interfaces</code></td>
 <td style="text-align: right;">No</td>
 <td>Check interface sync state, default <code>True</code></td>
@@ -6378,6 +6468,7 @@
     <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
@@ -6385,6 +6476,7 @@
         <span class="p">},</span>
     <span class="p">},</span>
     <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">{},</span>
@@ -6407,7 +6499,7 @@
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>ceos-leaf-2
 </code></pre></div>
 <p>Check only interface and IP address sync:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>check-mac-addresses<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-peerings<span class="w"> </span><span class="nb">false</span>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>check-inventory<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-mac-addresses<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-peerings<span class="w"> </span><span class="nb">false</span>
 </code></pre></div>
 <p>Resolve devices using a Nornir group filter:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>FG<span class="w"> </span>leafs
@@ -6446,6 +6538,7 @@
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;check_inventory&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;check_mac_addresses&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;check_bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">},</span>
@@ -6479,6 +6572,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>NetBox<span class="w"> </span>devices<span class="w"> </span>to<span class="w"> </span>check<span class="w"> </span>sync<span class="w"> </span>state<span class="w"> </span><span class="k">for</span>
+<span class="w">            </span>├──<span class="w"> </span>check-inventory:<span class="w">    </span>Check<span class="w"> </span>device<span class="w"> </span>inventory<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-interfaces:<span class="w">    </span>Check<span class="w"> </span>interfaces<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-mac-addresses:<span class="w">    </span>Check<span class="w"> </span>MAC<span class="w"> </span>addresses<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-ip-addresses:<span class="w">    </span>Check<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
@@ -6506,12 +6600,13 @@ nf#
     <div class="doc doc-contents first">
 
         <p>Check if NetBox device data is in sync with live device data.</p>
-<p>Calls <code>sync_device_interfaces</code>, <code>sync_mac_addresses</code>, <code>sync_device_ip</code>,
-and <code>sync_bgp_peerings</code> in dry-run mode and produces a per-device report
-indicating which items are in sync and which are not.</p>
+<p>Calls <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
+<code>sync_mac_addresses</code>, <code>sync_device_ip</code>, and <code>sync_bgp_peerings</code> in
+dry-run mode and produces a per-device report indicating which items are
+in sync and which are not.</p>
 <p><code>Result.diff</code> contains the full dry-run detail from each sub-task, keyed by
-sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_addresses</code>,
-<code>bgp_peerings</code>).</p>
+sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>mac_addresses</code>,
+<code>ip_addresses</code>, <code>bgp_peerings</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -6603,6 +6698,22 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>check_inventory</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Check device inventory sync state. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6708,6 +6819,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 <p>{
     "<device>": {
         "in_sync": True | False,
+        "inventory":     True | False,
         "interfaces":    True | False,
         "mac_addresses": True | False,
         "ip_addresses":  True | False,
@@ -6723,11 +6835,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1149</span>
-<span class="normal">1150</span>
-<span class="normal">1151</span>
-<span class="normal">1152</span>
-<span class="normal">1153</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1153</span>
 <span class="normal">1154</span>
 <span class="normal">1155</span>
 <span class="normal">1156</span>
@@ -6919,7 +7027,38 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 <span class="normal">1342</span>
 <span class="normal">1343</span>
 <span class="normal">1344</span>
-<span class="normal">1345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1345</span>
+<span class="normal">1346</span>
+<span class="normal">1347</span>
+<span class="normal">1348</span>
+<span class="normal">1349</span>
+<span class="normal">1350</span>
+<span class="normal">1351</span>
+<span class="normal">1352</span>
+<span class="normal">1353</span>
+<span class="normal">1354</span>
+<span class="normal">1355</span>
+<span class="normal">1356</span>
+<span class="normal">1357</span>
+<span class="normal">1358</span>
+<span class="normal">1359</span>
+<span class="normal">1360</span>
+<span class="normal">1361</span>
+<span class="normal">1362</span>
+<span class="normal">1363</span>
+<span class="normal">1364</span>
+<span class="normal">1365</span>
+<span class="normal">1366</span>
+<span class="normal">1367</span>
+<span class="normal">1368</span>
+<span class="normal">1369</span>
+<span class="normal">1370</span>
+<span class="normal">1371</span>
+<span class="normal">1372</span>
+<span class="normal">1373</span>
+<span class="normal">1374</span>
+<span class="normal">1375</span>
+<span class="normal">1376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CheckDeviceSyncInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CheckDeviceSyncResult</span><span class="p">,</span>
@@ -6940,6 +7079,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
     <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">check_inventory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_interfaces</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_mac_addresses</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_ip_addresses</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -6949,13 +7089,14 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if NetBox device data is in sync with live device data.</span>
 
-<span class="sd">    Calls ``sync_device_interfaces``, ``sync_mac_addresses``, ``sync_device_ip``,</span>
-<span class="sd">    and ``sync_bgp_peerings`` in dry-run mode and produces a per-device report</span>
-<span class="sd">    indicating which items are in sync and which are not.</span>
+<span class="sd">    Calls ``sync_device_inventory``, ``sync_device_interfaces``,</span>
+<span class="sd">    ``sync_mac_addresses``, ``sync_device_ip``, and ``sync_bgp_peerings`` in</span>
+<span class="sd">    dry-run mode and produces a per-device report indicating which items are</span>
+<span class="sd">    in sync and which are not.</span>
 
 <span class="sd">    ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by</span>
-<span class="sd">    sub-task name (``interfaces``, ``mac_addresses``, ``ip_addresses``,</span>
-<span class="sd">    ``bgp_peerings``).</span>
+<span class="sd">    sub-task name (``inventory``, ``interfaces``, ``mac_addresses``,</span>
+<span class="sd">    ``ip_addresses``, ``bgp_peerings``).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object.</span>
@@ -6963,6 +7104,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 <span class="sd">        timeout (int): Timeout in seconds for Nornir jobs. Defaults to 60.</span>
 <span class="sd">        devices (list, optional): List of device names to check.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name.</span>
+<span class="sd">        check_inventory (bool): Check device inventory sync state. Defaults to True.</span>
 <span class="sd">        check_interfaces (bool): Check interface sync state. Defaults to True.</span>
 <span class="sd">        check_mac_addresses (bool): Check MAC address sync state. Defaults to True.</span>
 <span class="sd">        check_ip_addresses (bool): Check IP address sync state. Defaults to True.</span>
@@ -6975,6 +7117,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
 <span class="sd">            {</span>
 <span class="sd">                &quot;&lt;device&gt;&quot;: {</span>
 <span class="sd">                    &quot;in_sync&quot;: True | False,</span>
+<span class="sd">                    &quot;inventory&quot;:     True | False,</span>
 <span class="sd">                    &quot;interfaces&quot;:    True | False,</span>
 <span class="sd">                    &quot;mac_addresses&quot;: True | False,</span>
 <span class="sd">                    &quot;ip_addresses&quot;:  True | False,</span>
@@ -7018,6 +7161,28 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
     <span class="c1"># initialize per-device result structure</span>
     <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># --- check inventory ---</span>
+    <span class="k">if</span> <span class="n">check_inventory</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking device inventory sync state&quot;</span><span class="p">)</span>
+        <span class="n">inventory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_device_inventory</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">in_sync</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;update&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;delete&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_sync</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">result</span>
 
     <span class="c1"># --- check interfaces ---</span>
     <span class="k">if</span> <span class="n">check_interfaces</span><span class="p">:</span>
@@ -7100,6 +7265,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
         <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">result</span>
 
     <span class="n">checked_categories</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="n">check_inventory</span><span class="p">,</span>
         <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">check_interfaces</span><span class="p">,</span>
         <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="n">check_mac_addresses</span><span class="p">,</span>
         <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="n">check_ip_addresses</span><span class="p">,</span>
@@ -7245,7 +7411,7 @@ sub-task name (<code>interfaces</code>, <code>mac_addresses</code>, <code>ip_add
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
