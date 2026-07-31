@@ -1,0 +1,88 @@
+x-test-runner-build: &test-runner-build
+  context: ../..
+  dockerfile: docker/norfab-docker-tests/Dockerfile.norfab.test-runner
+  args:
+    PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
+
+x-test-runner-env: &test-runner-env
+  PYTHONPATH: /workspace
+
+x-test-runner-entrypoint: &test-runner-entrypoint
+  - python
+  - -c
+  - |
+    import os
+    import sys
+
+    os.chdir("/workspace/tests")
+
+    args = [arg[6:] if arg.startswith("tests/") else arg for arg in sys.argv[1:]]
+    os.execvp(
+        "python",
+        [
+            "python",
+            "-m",
+            "pytest",
+            "-vv",
+            "-c",
+            "/workspace/pyproject.toml",
+            "-o",
+            "cache_dir=/tmp/pytest-cache",
+            f"--junitxml={os.environ['PYTEST_JUNIT_XML']}",
+        ]
+        + args,
+    )
+
+x-workspace-volume: &workspace-volume
+  type: bind
+  source: ../..
+  target: /workspace
+  read_only: true
+
+x-inventory-volume: &inventory-volume
+  type: bind
+  source: ../../tests/nf_tests_inventory
+  target: /workspace/tests/nf_tests_inventory
+  read_only: false
+
+x-test-runner-common: &test-runner-common
+  build: *test-runner-build
+  working_dir: /workspace/tests
+  entrypoint: *test-runner-entrypoint
+
+services:
+  core-tests:
+    <<: *test-runner-common
+    image: norfab:core-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./core-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/core-junit.xml
+    command:
+      - -m
+      - core
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./core-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  nornir-service-tests:
+    <<: *test-runner-common
+    image: norfab:nornir-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./nornir-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/nornir-service-junit.xml
+    command:
+      - -m
+      - nornir
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./nornir-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__

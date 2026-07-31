@@ -2,7 +2,7 @@ import pprint
 
 import pytest
 
-pytestmark = [pytest.mark.netbox, pytest.mark.task_get_inventory]
+pytestmark = [pytest.mark.nornir, pytest.mark.netbox, pytest.mark.task_get_inventory]
 
 
 @pytest.mark.task_get_inventory

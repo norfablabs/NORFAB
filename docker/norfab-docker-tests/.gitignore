@@ -1,0 +1,8 @@
+*-tests/*
+!*-tests/.env
+!*-tests/__norfab__/
+*-tests/__norfab__/*
+!*-tests/__norfab__/.gitkeep
+!*-tests/__norfab__/artifacts/
+*-tests/__norfab__/artifacts/*
+!*-tests/__norfab__/artifacts/.gitkeep

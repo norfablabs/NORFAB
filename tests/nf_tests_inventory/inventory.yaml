@@ -1,6 +1,7 @@
 broker:
-  endpoint: tcp://192.168.1.24:5555
-  shared_key: D>[[2]NH9#dN5?!o5DtibYYvV)ev?oRl}#P[>(q3
+  # endpoint: tcp://192.168.1.24:5555
+  endpoint: tcp://127.0.0.1:5555
+  # shared_key: D>[[2]NH9#dN5?!o5DtibYYvV)ev?oRl}#P[>(q3
   zmq_auth: true
 
 client:
@@ -68,7 +69,7 @@ topology:
   - dummy-worker-1
   - workflow-worker-1
   - fastmcp-worker-1
-  - fakenos-worker-1
+  # - fakenos-worker-1
 workers:
   agent-worker-1:
   - agents/common.yaml

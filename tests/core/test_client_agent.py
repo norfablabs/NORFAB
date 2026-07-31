@@ -1,6 +1,6 @@
 import pytest
 
-pytestmark = pytest.mark.core
+pytestmark = pytest.mark.clientagent
 
 
 class TestClientApi:

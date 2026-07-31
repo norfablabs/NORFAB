@@ -1,0 +1,39 @@
+ARG PYTHON_VERSION=3.12
+
+FROM python:${PYTHON_VERSION}-slim-trixie
+
+# Test harness image.
+#
+# This intentionally does not reuse Dockerfile.norfab.aio:
+# - the AIO image installs the latest published NorFab package from PyPI;
+# - core tests must run against the source mounted at /workspace;
+# - pytest and test-only OS tools should not be added to runtime images;
+# - Compose overrides CMD, while the AIO image is built to enter nfcli.
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/workspace \
+    TERMINAL_LOGGING_LEVEL=INFO
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+        git \
+        iputils-ping \
+        openssh-client \
+        procps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip install --no-cache-dir pip setuptools wheel --upgrade
+
+WORKDIR /build-src
+
+COPY pyproject.toml poetry.lock README.md ./
+COPY norfab ./norfab
+
+# Install dependencies from this checkout, then pytest as the test runner.
+# PYTHONPATH=/workspace makes the mounted source tree take precedence at runtime.
+RUN pip install --no-cache-dir ".[full]" pytest
+
+WORKDIR /workspace/tests
+
+CMD ["python", "-m", "pytest"]

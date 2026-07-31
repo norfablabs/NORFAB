@@ -42,6 +42,7 @@ python-dotenv = "1.2.2"
 picle = { version = "0.12.2", optional = true }
 rich = { version = "15.0.0", optional = true }
 tabulate = { version = "0.10.0", optional = true }
+prompt_toolkit = { version = "3.0.53", optional = true }
 pyreadline3 = {version = "3.5.6", platform = "win32", optional = true }
 
 # Nornir Service Dependencies
@@ -141,6 +142,7 @@ nfcli = [
     "picle",
     "rich",
     "tabulate",
+    "prompt_toolkit",
     "pydantic",
     "pyreadline3"
 ]
@@ -220,6 +222,7 @@ full = [
     "picle",
     "rich",
     "tabulate",
+    "prompt_toolkit",
     "pydantic",
     "pyreadline3",
     "nornir",
@@ -354,6 +357,7 @@ markers = [
     "filesharing: FileSharing service tests",
     "workflow: Workflow service tests",
     "dummy: dummy plugin service tests",
+    "clientagent: Client agent tests",
     "nfcli: NFCLI shell client tests",
     "worker: service worker health and inventory tests",
     "task: generic task execution tests",
@@ -390,6 +394,7 @@ markers = [
     "task_nornir_task: Nornir task execution tests",
     "task_nornir_cfg: Nornir cfg task tests",
     "task_nornir_tests: Nornir test task tests",
+    "network: network task tests",
     "task_nornir_network: Nornir network task tests",
     "task_nornir_parse: Nornir parse task tests",
     "task_nornir_jinja2: Nornir Jinja2 tests",
