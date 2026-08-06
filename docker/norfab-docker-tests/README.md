@@ -26,6 +26,24 @@ docker/norfab-docker-tests/
   netbox-service-tests/
     .env
     __norfab__/       # writable runtime output
+  fakenos-service-tests/
+    .env
+    __norfab__/       # writable runtime output
+  containerlab-service-tests/
+    .env
+    __norfab__/       # writable runtime output
+  workflow-service-tests/
+    .env
+    __norfab__/       # writable runtime output
+  agent-tests/
+    .env
+    __norfab__/       # writable runtime output
+  fastmcp-service-tests/
+    .env
+    __norfab__/       # writable runtime output
+  fastapi-service-tests/
+    .env
+    __norfab__/       # writable runtime output
 ```
 
 ## Build
@@ -62,6 +80,17 @@ Run all netbox-marked tests:
 docker compose run --rm netbox-service-tests
 ```
 
+Run other service-marked tests:
+
+```bash
+docker compose run --rm fakenos-service-tests
+docker compose run --rm containerlab-service-tests
+docker compose run --rm workflow-service-tests
+docker compose run --rm agent-tests
+docker compose run --rm fastmcp-service-tests
+docker compose run --rm fastapi-service-tests
+```
+
 The service entrypoint already contains `python -m pytest` and common pytest
 flags:
 
@@ -78,6 +107,12 @@ Compose supplies only the marker selector:
 core-tests             -m core
 nornir-service-tests   -m nornir
 netbox-service-tests   -m netbox
+fakenos-service-tests  -m fakenos
+containerlab-service-tests -m containerlab
+workflow-service-tests -m workflow
+agent-tests            -m clientagent
+fastmcp-service-tests  -m fastmcp
+fastapi-service-tests  -m fastapi
 ```
 
 ## Run Individual Tests
@@ -96,6 +131,24 @@ docker compose run --rm nornir-service-tests -m "nornir and nornir_cli"
 docker compose run --rm netbox-service-tests tests/services/netbox/test_worker.py
 docker compose run --rm netbox-service-tests tests/services/netbox/test_worker.py::TestNetboxWorker::test_get_netbox_status
 docker compose run --rm netbox-service-tests -m "netbox and netbox_get_devices"
+
+docker compose run --rm fakenos-service-tests tests/services/fakenos/test_start.py
+docker compose run --rm fakenos-service-tests -m "fakenos and fakenos_start"
+
+docker compose run --rm containerlab-service-tests tests/services/containerlab/test_inspect.py
+docker compose run --rm containerlab-service-tests -m "containerlab and containerlab_inspect"
+
+docker compose run --rm workflow-service-tests tests/services/workflow/test_run.py
+docker compose run --rm workflow-service-tests -m "workflow and workflow_run"
+
+docker compose run --rm agent-tests tests/core/test_client_agent.py
+docker compose run --rm agent-tests -m clientagent
+
+docker compose run --rm fastmcp-service-tests tests/services/fastmcp/test_tools.py
+docker compose run --rm fastmcp-service-tests -m "fastmcp and fastmcp_get_tools"
+
+docker compose run --rm fastapi-service-tests tests/services/fastapi/test_server.py
+docker compose run --rm fastapi-service-tests -m fastapi
 ```
 
 Selectors can use repository-root paths like `tests/services/nornir/test_task.py`
@@ -120,6 +173,36 @@ docker/norfab-docker-tests/netbox-service-tests/
   __norfab__/artifacts/netbox-service-junit.xml
   __norfab__/files/
   __norfab__/logs/
+
+docker/norfab-docker-tests/fakenos-service-tests/
+  __norfab__/artifacts/fakenos-service-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/containerlab-service-tests/
+  __norfab__/artifacts/containerlab-service-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/workflow-service-tests/
+  __norfab__/artifacts/workflow-service-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/agent-tests/
+  __norfab__/artifacts/agent-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/fastmcp-service-tests/
+  __norfab__/artifacts/fastmcp-service-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/fastapi-service-tests/
+  __norfab__/artifacts/fastapi-service-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
 ```
 
 Because each service gets its own `__norfab__` overlay, client keys, worker
@@ -139,6 +222,12 @@ Remove local runtime output:
 rm -rf core-tests/__norfab__/*
 rm -rf nornir-service-tests/__norfab__/*
 rm -rf netbox-service-tests/__norfab__/*
+rm -rf fakenos-service-tests/__norfab__/*
+rm -rf containerlab-service-tests/__norfab__/*
+rm -rf workflow-service-tests/__norfab__/*
+rm -rf agent-tests/__norfab__/*
+rm -rf fastmcp-service-tests/__norfab__/*
+rm -rf fastapi-service-tests/__norfab__/*
 ```
 
 ## Inventory Endpoint

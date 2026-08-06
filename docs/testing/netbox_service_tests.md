@@ -91,6 +91,14 @@ cd tests
 poetry run pytest -s -v services/netbox/test_worker.py::TestNetboxWorker
 ```
 
+Run the NetBox suite in Docker from `docker/norfab-docker-tests/`:
+
+```bash
+docker compose run --rm netbox-service-tests
+docker compose run --rm netbox-service-tests -m "netbox and netbox_get_interfaces"
+docker compose run --rm netbox-service-tests tests/services/netbox/test_worker.py
+```
+
 ## Configuration
 
 NetBox tests depend on:

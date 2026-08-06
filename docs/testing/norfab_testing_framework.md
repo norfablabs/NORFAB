@@ -244,6 +244,50 @@ cd tests
 poetry run pytest -s -v services/netbox/test_worker.py::TestNetboxWorker
 ```
 
+## Docker Test Environments
+
+Docker test runners live under `docker/norfab-docker-tests/`. Each runner reuses
+the canonical `tests/nf_tests_inventory` tree and mounts a service-local
+`__norfab__` runtime folder for logs, artifacts, keys, and generated files.
+
+Run from `docker/norfab-docker-tests/`:
+
+```bash
+docker compose build
+docker compose run --rm core-tests
+docker compose run --rm nornir-service-tests
+docker compose run --rm netbox-service-tests
+docker compose run --rm fakenos-service-tests
+docker compose run --rm containerlab-service-tests
+docker compose run --rm workflow-service-tests
+docker compose run --rm agent-tests
+docker compose run --rm fastmcp-service-tests
+docker compose run --rm fastapi-service-tests
+```
+
+Docker runners use these service markers by default:
+
+```text
+core-tests                 -m core
+nornir-service-tests       -m nornir
+netbox-service-tests       -m netbox
+fakenos-service-tests      -m fakenos
+containerlab-service-tests -m containerlab
+workflow-service-tests     -m workflow
+agent-tests                -m clientagent
+fastmcp-service-tests      -m fastmcp
+fastapi-service-tests      -m fastapi
+```
+
+Pass pytest selectors after the Compose service name to run narrower slices:
+
+```bash
+docker compose run --rm nornir-service-tests -m "nornir and nornir_cli"
+docker compose run --rm netbox-service-tests -m "netbox and netbox_get_devices"
+docker compose run --rm containerlab-service-tests tests/services/containerlab/test_inspect.py
+docker compose run --rm fastmcp-service-tests tests/services/fastmcp/test_tools.py::TestGetTools::test_get_tools
+```
+
 ## Markers
 
 Markers are registered in `pyproject.toml` under `[tool.pytest.ini_options]`.

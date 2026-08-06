@@ -104,3 +104,111 @@ services:
       - type: bind
         source: ./netbox-service-tests/__norfab__
         target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  fakenos-service-tests:
+    <<: *test-runner-common
+    image: norfab:fakenos-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./fakenos-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/fakenos-service-junit.xml
+    command:
+      - -m
+      - fakenos
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./fakenos-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  containerlab-service-tests:
+    <<: *test-runner-common
+    image: norfab:containerlab-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./containerlab-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/containerlab-service-junit.xml
+    command:
+      - -m
+      - containerlab
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./containerlab-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  workflow-service-tests:
+    <<: *test-runner-common
+    image: norfab:workflow-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./workflow-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/workflow-service-junit.xml
+    command:
+      - -m
+      - workflow
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./workflow-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  agent-tests:
+    <<: *test-runner-common
+    image: norfab:agent-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./agent-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/agent-junit.xml
+    command:
+      - -m
+      - clientagent
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./agent-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  fastmcp-service-tests:
+    <<: *test-runner-common
+    image: norfab:fastmcp-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./fastmcp-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/fastmcp-service-junit.xml
+    command:
+      - -m
+      - fastmcp
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./fastmcp-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  fastapi-service-tests:
+    <<: *test-runner-common
+    image: norfab:fastapi-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./fastapi-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/fastapi-service-junit.xml
+    command:
+      - -m
+      - fastapi
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./fastapi-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
