@@ -18,10 +18,12 @@ except ModuleNotFoundError as exc:
         cache_options,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.devices]
+pytestmark = [
+    pytest.mark.netbox,
+    pytest.mark.netbox_get_devices,
+]
 
 
-@pytest.mark.task_get_devices
 class TestGetDevices:
     nb_version = None
     device_data_keys = [

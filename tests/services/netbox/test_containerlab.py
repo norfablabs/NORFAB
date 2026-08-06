@@ -20,10 +20,12 @@ except ModuleNotFoundError as exc:
         get_nb_version,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.containerlab]
+pytestmark = [
+    pytest.mark.netbox,
+    pytest.mark.netbox_get_containerlab_inventory,
+]
 
 
-@pytest.mark.task_get_containerlab_inventory
 class TestGetContainerlabInventory:
     nb_version = None
 

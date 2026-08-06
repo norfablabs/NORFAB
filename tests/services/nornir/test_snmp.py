@@ -1,10 +1,12 @@
 import pprint
 import pytest
 
-pytestmark = [pytest.mark.nornir, pytest.mark.snmp, pytest.mark.task_nornir_snmp]
+pytestmark = [
+    pytest.mark.nornir,
+    pytest.mark.nornir_snmp,
+]
 
 
-@pytest.mark.task_nornir_snmp
 class TestSnmpWorker:
     """cEOS integration tests for SNMP tasks."""
 

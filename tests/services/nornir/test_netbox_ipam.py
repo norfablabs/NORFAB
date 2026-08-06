@@ -13,14 +13,9 @@ except ModuleNotFoundError as exc:
         raise
     from services.netbox.common import delete_ips
 
-pytestmark = [
-    pytest.mark.nornir,
-    pytest.mark.netbox_ipam,
-    pytest.mark.task_nornir_netbox_ipam,
-]
+pytestmark = pytest.mark.nornir
 
 
-@pytest.mark.task_nornir_netbox_ipam
 class TestNBCreateIp:
     def delete_ips(self, prefix, nfclient):
         resp = nfclient.run_job(

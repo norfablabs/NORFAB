@@ -2,10 +2,9 @@ import pprint
 
 import pytest
 
-pytestmark = [pytest.mark.netbox, pytest.mark.task_get_inventory]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_get_inventory
 class TestNetboxWorker:
     def test_get_netbox_inventory(self, nfclient):
         ret = nfclient.run_job(

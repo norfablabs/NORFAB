@@ -25,12 +25,10 @@ except ModuleNotFoundError as exc:
 
 pytestmark = [
     pytest.mark.fakenos,
-    pytest.mark.inspect,
-    pytest.mark.task_fakenos_inspect,
+    pytest.mark.fakenos_inspect_networks,
 ]
 
 
-@pytest.mark.task_fakenos_inspect
 class TestInspectNetworks:
     def test_inspect_networks_all_details(self, nfclient):
         _stop_all_networks(nfclient)

@@ -38,7 +38,7 @@ except ModuleNotFoundError as exc:
         mcp_url,  # noqa: F401 - imported pytest fixture
     )
 
-pytestmark = [pytest.mark.fastmcp, pytest.mark.guardrails]
+pytestmark = pytest.mark.fastmcp
 
 
 def worker_result(result, diff=None):

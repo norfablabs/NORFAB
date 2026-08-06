@@ -1,14 +1,9 @@
 import pprint
 import pytest
 
-pytestmark = [
-    pytest.mark.workflow,
-    pytest.mark.worker,
-    pytest.mark.task_workflow_worker,
-]
+pytestmark = pytest.mark.workflow
 
 
-@pytest.mark.task_workflow_worker
 class TestWorkflowWorker:
     def test_get_inventory(self, nfclient):
         ret = nfclient.run_job("workflow", "get_inventory")

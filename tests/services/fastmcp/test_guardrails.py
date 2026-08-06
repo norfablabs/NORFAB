@@ -27,13 +27,9 @@ except ModuleNotFoundError as exc:
         raise
     from services.fastmcp.common import ensure_tool_discovered, mcp_url  # noqa: F401
 
-pytestmark = [
-    pytest.mark.fastmcp,
-    pytest.mark.guardrails,
-]
+pytestmark = pytest.mark.fastmcp
 
 
-@pytest.mark.task_fastmcp_guardrails
 class TestFastMCPGuardrails:
     tools_discovered = {}
 

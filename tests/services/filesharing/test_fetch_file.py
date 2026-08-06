@@ -5,12 +5,10 @@ import pytest
 
 pytestmark = [
     pytest.mark.filesharing,
-    pytest.mark.fetch_file,
-    pytest.mark.task_filesharing_fetch_file,
+    pytest.mark.filesharing_fetch_file,
 ]
 
 
-@pytest.mark.task_filesharing_fetch_file
 class TestFetchFile:
     """Test fetch_file task functionality"""
 

@@ -6,12 +6,10 @@ import pytest
 
 pytestmark = [
     pytest.mark.filesharing,
-    pytest.mark.file_details,
-    pytest.mark.task_filesharing_file_details,
+    pytest.mark.filesharing_file_details,
 ]
 
 
-@pytest.mark.task_filesharing_file_details
 class TestFileDetails:
     """Test file_details task functionality"""
 

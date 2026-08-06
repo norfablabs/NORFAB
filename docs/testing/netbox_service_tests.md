@@ -35,24 +35,21 @@ poetry run pytest services/netbox
 
 ## Markers
 
-Every NetBox test file should have a file-level `netbox` marker and an area marker:
+Every NetBox test file should have a file-level `netbox` marker:
 
 ```python
-pytestmark = [pytest.mark.netbox, pytest.mark.interfaces]
+pytestmark = pytest.mark.netbox
 ```
 
-Every task-oriented class should have a task marker:
+Tests tied to a specific NorFab task should also have a `<service>_<task>` marker:
 
 ```python
-@pytest.mark.task_get_interfaces
+@pytest.mark.netbox_get_interfaces
 class TestGetInterfaces:
     ...
 ```
 
-Registered NetBox markers include:
-
-- Area markers: `netbox`, `graphql`, `interfaces`, `devices`, `connections`, `inventory`, `circuits`, `bgp`, `ipam`, `cache`, `containerlab`, `designs`, `sync`, `crud`.
-- Task markers: `task_get_inventory`, `task_graphql`, `task_get_interfaces`, `task_update_interfaces_description`, `task_get_devices`, `task_get_connections`, `task_get_topology`, `task_get_nornir_inventory`, `task_get_circuits`, `task_get_bgp_peerings`, `task_inventory_models`, `task_sync_device_inventory`, `task_sync_device_interfaces`, `task_create_device_interfaces`, `task_sync_device_ip`, `task_create_ip`, `task_cache`, `task_get_containerlab_inventory`, `task_create_prefix`, `task_create_ip_bulk`, `task_create_design`, `task_sync_bgp_peerings`, `task_create_bgp_peering`, `task_update_bgp_peering`, `task_sync_mac_addresses`, `task_check_device_sync`, `task_sync_all`, `task_crud_list_objects`, `task_crud_search`, `task_crud_read`, `task_crud_create`, `task_crud_update`, `task_crud_delete`, `task_crud_get_changelogs`.
+Registered NetBox task markers include names such as `netbox_get_interfaces`, `netbox_sync_device_interfaces`, `netbox_create_ip`, `netbox_graphql`, and `netbox_crud_create`.
 
 Add new markers to `pyproject.toml` before using them.
 
@@ -65,12 +62,12 @@ cd tests
 poetry run pytest services/netbox
 ```
 
-Run one area:
+Run one task group:
 
 ```bash
 cd tests
 poetry run pytest services/netbox/test_interfaces.py
-poetry run pytest services/netbox -m interfaces
+poetry run pytest services/netbox -m netbox_get_interfaces
 ```
 
 Run one class:
@@ -85,15 +82,6 @@ Run one method:
 ```bash
 cd tests
 poetry run pytest services/netbox/test_interfaces.py::TestGetInterfaces::test_get_interfaces
-```
-
-Run one task marker:
-
-```bash
-cd tests
-poetry run pytest services/netbox -m task_get_interfaces
-poetry run pytest services/netbox -m task_sync_bgp_peerings
-poetry run pytest services/netbox -m task_inventory_models
 ```
 
 Run with output while debugging worker behavior:
@@ -159,9 +147,9 @@ Follow this pattern:
 1. Put the test in the file that matches the task area.
 2. Create a new file only when the area is new or the existing file is becoming hard to navigate.
 3. Keep or create a `Test...` class named after the NORFAB task or behavior.
-4. Add a file-level `pytestmark` with `netbox` and an area marker.
-5. Add a class-level task marker.
-6. Register new markers in `pyproject.toml`.
+4. Add a file-level `pytestmark` with `netbox`.
+5. Add a `<service>_<task>` marker only when the tests map to a specific NorFab task.
+6. Register new task markers in `pyproject.toml`.
 7. Put reusable cleanup and NetBox API helpers in `tests/services/netbox/common.py`.
 8. Import helper names explicitly.
 9. Make cleanup idempotent and safe to run after partial failures.
@@ -180,10 +168,10 @@ except ModuleNotFoundError as exc:
         raise
     from services.netbox.common import clear_nb_cache
 
-pytestmark = [pytest.mark.netbox, pytest.mark.interfaces]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_get_interfaces
+@pytest.mark.netbox_get_interfaces
 class TestGetInterfaces:
     def test_get_interfaces(self, nfclient):
         clear_nb_cache("get_interfaces*", nfclient)
@@ -205,7 +193,7 @@ class TestGetInterfaces:
 Use the NetBox split as the model for future large service refactors:
 
 - Keep small service suites as flat `tests/test_<service>_service.py` files.
-- Split only when a file is large enough that task-level navigation and marker runs are valuable.
+- Split only when a file is large enough that class-level navigation and task marker runs are valuable.
 - Split by user-facing task area, not by arbitrary unit/integration labels.
 - Preserve class names when they already describe behavior well.
 - Keep shared helpers in one common module per service.
@@ -219,7 +207,7 @@ Use the NetBox split as the model for future large service refactors:
 - If NetBox connection tests fail, verify `NB_URL`, `NB_API_TOKEN`, and worker inventory settings.
 - If a test is order-sensitive, add explicit setup/cleanup instead of relying on existing NetBox state.
 - If cache-related tests fail unexpectedly, clear cache keys with `clear_nb_cache()` before asserting.
-- If marker selection returns no tests, check both the class marker and `pyproject.toml` marker registration.
+- If marker selection returns no tests, check both the file-level `pytestmark` and `pyproject.toml` marker registration.
 
 ## Related Documentation
 

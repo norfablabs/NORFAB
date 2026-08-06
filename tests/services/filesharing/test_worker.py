@@ -1,14 +1,9 @@
 import pprint
 import pytest
 
-pytestmark = [
-    pytest.mark.filesharing,
-    pytest.mark.worker,
-    pytest.mark.task_filesharing_worker,
-]
+pytestmark = pytest.mark.filesharing
 
 
-@pytest.mark.task_filesharing_worker
 class TestFileSharingWorker:
     """Test basic FileSharingWorker functionality"""
 

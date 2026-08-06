@@ -38,24 +38,22 @@ poetry run pytest -m fastmcp
 poetry run pytest -m nfcli
 ```
 
-Run by task or area marker:
+Run by task marker:
 
 ```bash
-poetry run pytest -m task_nornir_cli
-poetry run pytest -m task_get_interfaces
-poetry run pytest -m task_containerlab_deploy
-poetry run pytest -m task_fastmcp_tools_call
-poetry run pytest -m interfaces
-poetry run pytest -m bgp
+poetry run pytest -m nornir_cli
+poetry run pytest -m netbox_get_interfaces
+poetry run pytest -m containerlab_deploy
+poetry run pytest -m filesharing_fetch_file
 ```
 
 Combine markers:
 
 ```bash
-poetry run pytest -m "netbox and interfaces"
-poetry run pytest -m "nornir and not juniper"
-poetry run pytest -m "containerlab and deploy"
-poetry run pytest services/netbox -m "not crud"
+poetry run pytest -m "netbox and netbox_get_interfaces"
+poetry run pytest -m "nornir and not nornir_snmp"
+poetry run pytest -m "containerlab and containerlab_deploy"
+poetry run pytest services/netbox -m "not netbox_crud_create"
 ```
 
 List available markers:
@@ -204,7 +202,7 @@ cd tests
 poetry run pytest services/nornir
 ```
 
-Run one service area:
+Run one task marker:
 
 ```bash
 cd tests
@@ -234,9 +232,8 @@ Run by marker:
 ```bash
 cd tests
 poetry run pytest services/netbox -m netbox
-poetry run pytest services/netbox -m interfaces
-poetry run pytest services/netbox -m task_get_interfaces
-poetry run pytest services/netbox -m "netbox and not crud"
+poetry run pytest services/netbox -m netbox_get_interfaces
+poetry run pytest services/netbox -m "netbox and not netbox_crud_create"
 poetry run pytest nfcli -m nfcli
 ```
 
@@ -251,16 +248,16 @@ poetry run pytest -s -v services/netbox/test_worker.py::TestNetboxWorker
 
 Markers are registered in `pyproject.toml` under `[tool.pytest.ini_options]`.
 
-Use service or area markers on whole files:
+Use service markers on whole files:
 
 ```python
-pytestmark = [pytest.mark.netbox, pytest.mark.interfaces]
+pytestmark = pytest.mark.netbox
 ```
 
-Use task markers on classes:
+Use `<service>_<task>` markers for tests associated with a specific NorFab task:
 
 ```python
-@pytest.mark.task_get_interfaces
+@pytest.mark.netbox_get_interfaces
 class TestGetInterfaces:
     ...
 ```
@@ -269,7 +266,7 @@ This gives three stable ways to run tests:
 
 - By path, such as `services/netbox/test_interfaces.py`.
 - By class, such as `::TestGetInterfaces`.
-- By task marker, such as `-m task_get_interfaces`.
+- By service or task marker, such as `-m "netbox and netbox_get_interfaces"`.
 
 ## Writing Service Tests
 
@@ -278,10 +275,10 @@ Keep test classes grouped by NORFAB task or closely related behavior.
 ```python
 import pytest
 
-pytestmark = [pytest.mark.netbox, pytest.mark.interfaces]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_get_interfaces
+@pytest.mark.netbox_get_interfaces
 class TestGetInterfaces:
     def test_get_interfaces(self, nfclient):
         ret = nfclient.run_job(
@@ -327,9 +324,9 @@ When splitting a service suite:
 1. Keep existing `Test...` classes when they already group behavior well.
 2. Move shared helpers into a service common module, such as `tests/services/netbox/common.py`.
 3. Keep helper imports explicit.
-4. Add a file-level service/area marker.
-5. Add a class-level task marker.
-6. Register new markers in `pyproject.toml`.
+4. Add a file-level service marker.
+5. Add `<service>_<task>` markers only to tests tied to a specific NorFab task.
+6. Register new service or task markers in `pyproject.toml`.
 7. Preserve `cd tests && poetry run pytest ...` compatibility.
 8. Update the related document in `docs/testing/`.
 

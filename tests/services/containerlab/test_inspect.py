@@ -19,12 +19,10 @@ except ModuleNotFoundError as exc:
 
 pytestmark = [
     pytest.mark.containerlab,
-    pytest.mark.inspect,
-    pytest.mark.task_containerlab_inspect,
+    pytest.mark.containerlab_inspect,
 ]
 
 
-@pytest.mark.task_containerlab_inspect
 class TestInspectTask:
     def test_inspect_all(self, nfclient):
         wait_for_containerlab_worker(nfclient)

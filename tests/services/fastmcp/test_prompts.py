@@ -33,14 +33,9 @@ except ModuleNotFoundError as exc:
         mcp_url,
     )
 
-pytestmark = [
-    pytest.mark.fastmcp,
-    pytest.mark.prompts,
-    pytest.mark.task_fastmcp_prompts,
-]
+pytestmark = pytest.mark.fastmcp
 
 
-@pytest.mark.task_fastmcp_prompts
 class TestPromptMetadata:
     @staticmethod
     def make_discovery_task():
@@ -204,6 +199,7 @@ class TestPromptMetadata:
         assert worker.norfab_services_prompts == {}
 
 
+@pytest.mark.fastmcp_get_prompts
 class TestGetPrompts:
     collect_prompt = "service_nornir__task_cli__prompt_collect_operational_data"
     troubleshoot_prompt = "service_nornir__task_cli__prompt_troubleshoot"

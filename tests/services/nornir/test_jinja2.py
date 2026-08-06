@@ -2,10 +2,9 @@ import pprint
 
 import pytest
 
-pytestmark = [pytest.mark.nornir, pytest.mark.jinja2, pytest.mark.task_nornir_jinja2]
+pytestmark = pytest.mark.nornir
 
 
-@pytest.mark.task_nornir_jinja2
 class TestNornirJinja2Filters:
     def test_network_hosts(self, nfclient):
         ret = nfclient.run_job(

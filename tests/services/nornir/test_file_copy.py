@@ -3,12 +3,10 @@ import pytest
 
 pytestmark = [
     pytest.mark.nornir,
-    pytest.mark.file_copy,
-    pytest.mark.task_nornir_file_copy,
+    pytest.mark.nornir_file_copy,
 ]
 
 
-@pytest.mark.task_nornir_file_copy
 class TestNornirFileCopy:
     def test_file_copy_dry_run(self, nfclient):
         ret = nfclient.run_job(

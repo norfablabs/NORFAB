@@ -22,10 +22,10 @@ except ModuleNotFoundError as exc:
         get_pynetbox,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.sync]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_sync_mac_addresses
+@pytest.mark.netbox_sync_mac_addresses
 class TestSyncMacAddresses:
     # MAC addresses present in interfaces_parse_data.json per device:
     #   ceos-spine-1  : 02:00:00:11:00:09 on Ethernet9  (description TEST_SYNC_ROUTED_WITH_MAC)
@@ -612,9 +612,7 @@ class TestSyncMacAddresses:
                 assert (
                     self.RESULT_KEYS <= device_data.keys()
                 ), f"{worker}:{device} missing keys in branch-run result"
-
-
-@pytest.mark.task_check_device_sync
+@pytest.mark.netbox_check_device_sync
 class TestCheckDeviceSync:
     """Test suite for check_device_sync task."""
 
@@ -840,9 +838,7 @@ class TestCheckDeviceSync:
         for worker, res in ret.items():
             assert res["failed"], f"{worker} should fail when no devices specified"
             assert res["errors"], f"{worker} should report errors"
-
-
-@pytest.mark.task_sync_all
+@pytest.mark.netbox_sync_all
 class TestSyncAll:
     """Verify sync_all calls all five sync tasks in sequence.
 

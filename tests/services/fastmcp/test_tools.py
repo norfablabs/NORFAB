@@ -4,12 +4,10 @@ import pytest
 
 pytestmark = [
     pytest.mark.fastmcp,
-    pytest.mark.tools,
-    pytest.mark.task_fastmcp_get_tools,
+    pytest.mark.fastmcp_get_tools,
 ]
 
 
-@pytest.mark.task_fastmcp_get_tools
 class TestGetTools:
 
     def test_get_tools(self, nfclient):

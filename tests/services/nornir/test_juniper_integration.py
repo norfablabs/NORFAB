@@ -3,7 +3,7 @@ import socket
 
 import pytest
 
-pytestmark = [pytest.mark.nornir, pytest.mark.juniper, pytest.mark.task_nornir_juniper]
+pytestmark = pytest.mark.nornir
 
 # check if has access to juniper device
 vmx_1_ip = "192.168.1.130"
@@ -20,9 +20,6 @@ skip_if_not_has_vmx_1 = pytest.mark.skipif(
     has_vmx_1 == False,
     reason=f"Has no connection to juniper router {vmx_1_ip}:{vmx_1_port}",
 )
-
-
-@pytest.mark.task_nornir_juniper
 class TestJunipervMX:
     cli_plugins = ["netmiko", "scrapli", "napalm"]
 

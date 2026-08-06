@@ -1,10 +1,9 @@
 import pprint
 import pytest
 
-pytestmark = [pytest.mark.dummy, pytest.mark.plugin, pytest.mark.task_dummy_plugin]
+pytestmark = pytest.mark.dummy
 
 
-@pytest.mark.task_dummy_plugin
 class TestDummyPluginLocal:
     def test_dummy_worker_running(self, nfclient):
         ret = nfclient.mmi("mmi.service.broker", "show_workers")

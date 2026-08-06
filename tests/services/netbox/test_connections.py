@@ -4,10 +4,10 @@ from time import perf_counter
 
 import pytest
 
-pytestmark = [pytest.mark.netbox, pytest.mark.connections]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_get_connections
+@pytest.mark.netbox_get_connections
 class TestGetConnections:
     def test_get_connections_eth101_remote_mac_addresses(self, nfclient):
         ret = nfclient.run_job(
@@ -457,9 +457,7 @@ class TestGetConnections:
             assert (
                 total_connections == 600
             ), f"{worker} returned {total_connections} connections, expected 600"
-
-
-@pytest.mark.task_get_topology
+@pytest.mark.netbox_get_topology
 class TestGetTopology:
     devices = ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03"]
 

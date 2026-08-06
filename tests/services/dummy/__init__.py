@@ -17,14 +17,9 @@ except ModuleNotFoundError as exc:
         wait_for_containerlab_worker,
     )
 
-pytestmark = [
-    pytest.mark.containerlab,
-    pytest.mark.worker,
-    pytest.mark.task_containerlab_worker,
-]
+pytestmark = pytest.mark.containerlab
 
 
-@pytest.mark.task_containerlab_worker
 class TestWorker:
     def test_get_inventory(self, nfclient):
         wait_for_containerlab_worker(nfclient)

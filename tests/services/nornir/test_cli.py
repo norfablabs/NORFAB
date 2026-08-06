@@ -2,10 +2,12 @@ import pprint
 
 import pytest
 
-pytestmark = [pytest.mark.nornir, pytest.mark.cli, pytest.mark.task_nornir_cli]
+pytestmark = [
+    pytest.mark.nornir,
+    pytest.mark.nornir_cli,
+]
 
 
-@pytest.mark.task_nornir_cli
 class TestNornirCli:
     def test_commands_list(self, nfclient):
         ret = nfclient.run_job(

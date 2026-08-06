@@ -3,12 +3,10 @@ import pytest
 
 pytestmark = [
     pytest.mark.nornir,
-    pytest.mark.runtime_inventory,
-    pytest.mark.task_nornir_runtime_inventory,
+    pytest.mark.nornir_runtime_inventory,
 ]
 
 
-@pytest.mark.task_nornir_runtime_inventory
 class TestNornirRunTimeInventory:
     def test_runtime_inventory_create_host(self, nfclient):
         ret = nfclient.run_job(

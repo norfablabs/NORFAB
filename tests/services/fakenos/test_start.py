@@ -23,10 +23,12 @@ except ModuleNotFoundError as exc:
         _stop_all_networks,
     )
 
-pytestmark = [pytest.mark.fakenos, pytest.mark.start, pytest.mark.task_fakenos_start]
+pytestmark = [
+    pytest.mark.fakenos,
+    pytest.mark.fakenos_start,
+]
 
 
-@pytest.mark.task_fakenos_start
 class TestStartTask:
     def test_start_task_net1(self, nfclient):
         _stop_all_networks(nfclient)

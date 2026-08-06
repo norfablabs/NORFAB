@@ -1,10 +1,9 @@
 import pprint
 import pytest
 
-pytestmark = [pytest.mark.fastapi, pytest.mark.worker, pytest.mark.task_fastapi_worker]
+pytestmark = pytest.mark.fastapi
 
 
-@pytest.mark.task_fastapi_worker
 class TestFastAPIWorker:
     def test_get_fastapi_inventory(self, nfclient):
         ret = nfclient.run_job("fastapi", "get_inventory")

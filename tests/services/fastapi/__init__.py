@@ -17,10 +17,9 @@ except ModuleNotFoundError as exc:
         _stop_all_networks,
     )
 
-pytestmark = [pytest.mark.fakenos, pytest.mark.worker, pytest.mark.task_fakenos_worker]
+pytestmark = pytest.mark.fakenos
 
 
-@pytest.mark.task_fakenos_worker
 class TestFakenosWorker:
     def test_get_inventory(self, nfclient):
         _stop_all_networks(nfclient)

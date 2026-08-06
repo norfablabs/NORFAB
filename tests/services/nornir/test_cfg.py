@@ -2,10 +2,12 @@ import pprint
 import random
 import pytest
 
-pytestmark = [pytest.mark.nornir, pytest.mark.cfg, pytest.mark.task_nornir_cfg]
+pytestmark = [
+    pytest.mark.nornir,
+    pytest.mark.nornir_cfg,
+]
 
 
-@pytest.mark.task_nornir_cfg
 class TestNornirCfg:
     def test_config_list(self, nfclient):
         ret = nfclient.run_job(

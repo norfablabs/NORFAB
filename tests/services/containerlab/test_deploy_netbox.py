@@ -22,11 +22,10 @@ except ModuleNotFoundError as exc:
 pytestmark = [
     pytest.mark.containerlab,
     pytest.mark.netbox,
-    pytest.mark.task_containerlab_deploy_netbox,
+    pytest.mark.containerlab_deploy_netbox,
 ]
 
 
-@pytest.mark.task_containerlab_deploy_netbox
 class TestDeployNetboxTask:
     def test_deploy_netbox(self, nfclient):
         wait_for_containerlab_worker(nfclient)

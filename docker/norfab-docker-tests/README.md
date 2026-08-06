@@ -7,7 +7,7 @@ their own inventory or test asset copies.
 Each service mounts:
 
 - repository source at `/workspace`, read-only;
-- `tests/nf_tests_inventory` at `/workspace/tests/nf_tests_inventory`, read-only;
+- `tests/nf_tests_inventory` at `/workspace/tests/nf_tests_inventory`, writable;
 - a service-local writable `__norfab__` folder over the inventory runtime path.
 
 That keeps inventory and tests single-sourced while isolating broker, worker,
@@ -21,6 +21,9 @@ docker/norfab-docker-tests/
     .env
     __norfab__/       # writable runtime output
   nornir-service-tests/
+    .env
+    __norfab__/       # writable runtime output
+  netbox-service-tests/
     .env
     __norfab__/       # writable runtime output
 ```
@@ -53,6 +56,12 @@ Run all nornir-marked tests:
 docker compose run --rm nornir-service-tests
 ```
 
+Run all netbox-marked tests:
+
+```bash
+docker compose run --rm netbox-service-tests
+```
+
 The service entrypoint already contains `python -m pytest` and common pytest
 flags:
 
@@ -68,6 +77,7 @@ Compose supplies only the marker selector:
 ```text
 core-tests             -m core
 nornir-service-tests   -m nornir
+netbox-service-tests   -m netbox
 ```
 
 ## Run Individual Tests
@@ -81,7 +91,11 @@ docker compose run --rm core-tests -m core -k test_mmi_show_broker
 
 docker compose run --rm nornir-service-tests tests/services/nornir/test_worker.py
 docker compose run --rm nornir-service-tests tests/services/nornir/test_task.py::TestNornirTask::test_task_nornir_salt_nr_test
-docker compose run --rm nornir-service-tests -m "nornir and cli"
+docker compose run --rm nornir-service-tests -m "nornir and nornir_cli"
+
+docker compose run --rm netbox-service-tests tests/services/netbox/test_worker.py
+docker compose run --rm netbox-service-tests tests/services/netbox/test_worker.py::TestNetboxWorker::test_get_netbox_status
+docker compose run --rm netbox-service-tests -m "netbox and netbox_get_devices"
 ```
 
 Selectors can use repository-root paths like `tests/services/nornir/test_task.py`
@@ -99,6 +113,11 @@ docker/norfab-docker-tests/core-tests/
 
 docker/norfab-docker-tests/nornir-service-tests/
   __norfab__/artifacts/nornir-service-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/netbox-service-tests/
+  __norfab__/artifacts/netbox-service-junit.xml
   __norfab__/files/
   __norfab__/logs/
 ```
@@ -119,6 +138,7 @@ Remove local runtime output:
 ```bash
 rm -rf core-tests/__norfab__/*
 rm -rf nornir-service-tests/__norfab__/*
+rm -rf netbox-service-tests/__norfab__/*
 ```
 
 ## Inventory Endpoint

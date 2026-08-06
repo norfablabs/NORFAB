@@ -1,10 +1,12 @@
 import pprint
 import pytest
 
-pytestmark = [pytest.mark.workflow, pytest.mark.run, pytest.mark.task_workflow_run]
+pytestmark = [
+    pytest.mark.workflow,
+    pytest.mark.workflow_run,
+]
 
 
-@pytest.mark.task_workflow_run
 class TestWorkflowRunTask:
     def test_workflow_1(self, nfclient):
         ret = nfclient.run_job(

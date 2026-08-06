@@ -4,12 +4,10 @@ import pytest
 
 pytestmark = [
     pytest.mark.filesharing,
-    pytest.mark.walk,
-    pytest.mark.task_filesharing_walk,
+    pytest.mark.filesharing_walk,
 ]
 
 
-@pytest.mark.task_filesharing_walk
 class TestWalk:
     """Test walk task functionality"""
 

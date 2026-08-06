@@ -1,10 +1,12 @@
 import pprint
 import pytest
 
-pytestmark = [pytest.mark.nornir, pytest.mark.parse, pytest.mark.task_nornir_parse]
+pytestmark = [
+    pytest.mark.nornir,
+    pytest.mark.nornir_parse,
+]
 
 
-@pytest.mark.task_nornir_parse
 class TestNornirParseTasks:
 
     def test_nornir_parse_napalm_get_facts(self, nfclient):

@@ -1,10 +1,12 @@
 import pprint
 import pytest
 
-pytestmark = [pytest.mark.nornir, pytest.mark.task, pytest.mark.task_nornir_task]
+pytestmark = [
+    pytest.mark.nornir,
+    pytest.mark.nornir_task,
+]
 
 
-@pytest.mark.task_nornir_task
 class TestNornirTask:
     def test_task_nornir_salt_nr_test(self, nfclient):
         ret = nfclient.run_job(

@@ -30,10 +30,10 @@ except ModuleNotFoundError as exc:
         get_pynetbox,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.interfaces]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_get_interfaces
+@pytest.mark.netbox_get_interfaces
 class TestGetInterfaces:
     nb_version = None
 
@@ -313,9 +313,7 @@ class TestGetInterfaces:
                         assert "mac_addresses" in intf_data
                     else:
                         assert "mac_address" in intf_data
-
-
-@pytest.mark.task_update_interfaces_description
+@pytest.mark.netbox_update_interfaces_description
 class TestUpdateInterfacesDescription:
     DEVICE = "fceos4"
     INTERFACE = "loopback0"
@@ -517,9 +515,7 @@ class TestUpdateInterfacesDescription:
             self._set_interface_description(
                 nfclient, self.DEVICE, self.CONNECTED_INTERFACE, ""
             )
-
-
-@pytest.mark.task_sync_device_interfaces
+@pytest.mark.netbox_sync_device_interfaces
 class TestSyncDeviceInterfaces:
     # Parse data provides these TEST_SYNC_ interfaces on all ceos devices.
     # Live state comes from interfaces_parse_data.json served by the Nornir parse_ttp mock.
@@ -1347,9 +1343,7 @@ class TestSyncDeviceInterfaces:
                 assert (
                     self.LIVE_RUN_KEYS <= device_data.keys()
                 ), f"{worker}:{device} missing keys in branch-run result"
-
-
-@pytest.mark.task_create_device_interfaces
+@pytest.mark.netbox_create_device_interfaces
 class TestCreateDeviceInterfaces:
     def test_create_device_interfaces_single(self, nfclient):
         """Test creating a single interface on a device"""

@@ -14,10 +14,9 @@ except ModuleNotFoundError as exc:
         raise
     from services.fastmcp.common import ensure_tool_discovered
 
-pytestmark = [pytest.mark.fastmcp, pytest.mark.worker, pytest.mark.task_fastmcp_worker]
+pytestmark = pytest.mark.fastmcp
 
 
-@pytest.mark.task_fastmcp_worker
 class TestFastMCPWorker:
     tools_discovered = {}
 

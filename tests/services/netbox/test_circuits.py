@@ -20,10 +20,12 @@ except ModuleNotFoundError as exc:
         get_nb_version,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.circuits]
+pytestmark = [
+    pytest.mark.netbox,
+    pytest.mark.netbox_get_circuits,
+]
 
 
-@pytest.mark.task_get_circuits
 class TestGetCircuits:
     nb_version = None
 

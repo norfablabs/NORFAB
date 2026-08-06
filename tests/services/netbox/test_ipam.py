@@ -31,10 +31,10 @@ except ModuleNotFoundError as exc:
         get_pynetbox,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.ipam]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_sync_device_ip
+@pytest.mark.netbox_sync_device_ip
 class TestSyncDeviceIP:
     SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
     ALL_DEVICES = [
@@ -930,9 +930,7 @@ class TestSyncDeviceIP:
         )
 
         self._cleanup(nfclient, ["ceos-spine-1"])
-
-
-@pytest.mark.task_create_ip
+@pytest.mark.netbox_create_ip
 class TestCreateIP:
     nb_version = None
 
@@ -1704,9 +1702,7 @@ class TestCreateIP:
 
         assert res1["result"]["address"] == "10.0.0.1/24", "Wrong ip allocated"
         assert res2["result"]["address"] == "10.0.0.2/24", "Wrong ip allocated"
-
-
-@pytest.mark.task_create_prefix
+@pytest.mark.netbox_create_prefix
 class TestCreatePrefix:
     nb_version = None
 
@@ -2406,9 +2402,7 @@ class TestCreatePrefix:
                 assert (
                     res1["result"]["branch"] == "create_prefix_1"
                 ), "No branch details in result"
-
-
-@pytest.mark.task_create_ip_bulk
+@pytest.mark.netbox_create_ip_bulk
 class TestCreateIPBulk:
     nb_version = None
 

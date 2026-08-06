@@ -86,3 +86,21 @@ services:
       - type: bind
         source: ./nornir-service-tests/__norfab__
         target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  netbox-service-tests:
+    <<: *test-runner-common
+    image: norfab:netbox-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./netbox-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/netbox-service-junit.xml
+    command:
+      - -m
+      - netbox
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./netbox-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__

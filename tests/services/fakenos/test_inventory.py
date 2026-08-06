@@ -25,12 +25,10 @@ except ModuleNotFoundError as exc:
 
 pytestmark = [
     pytest.mark.fakenos,
-    pytest.mark.inventory,
-    pytest.mark.task_fakenos_get_nornir_inventory,
+    pytest.mark.fakenos_get_nornir_inventory,
 ]
 
 
-@pytest.mark.task_fakenos_get_nornir_inventory
 class TestGetNornirInventory:
     def test_get_nornir_inventory_single_network(self, nfclient):
         _stop_all_networks(nfclient)

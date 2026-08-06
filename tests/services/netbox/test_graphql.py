@@ -18,10 +18,12 @@ except ModuleNotFoundError as exc:
         get_nb_version,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.graphql]
+pytestmark = [
+    pytest.mark.netbox,
+    pytest.mark.netbox_graphql,
+]
 
 
-@pytest.mark.task_graphql
 class TestNetboxGrapQL:
     nb_version = None
 

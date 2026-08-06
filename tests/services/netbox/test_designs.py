@@ -2,10 +2,12 @@ import pprint
 
 import pytest
 
-pytestmark = [pytest.mark.netbox, pytest.mark.designs]
+pytestmark = [
+    pytest.mark.netbox,
+    pytest.mark.netbox_create_design,
+]
 
 
-@pytest.mark.task_create_design
 class TestCreateDesign:
     nb_version = None
 

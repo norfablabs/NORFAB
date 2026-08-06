@@ -6,10 +6,9 @@ from diskcache import FanoutCache
 
 from norfab.workers.fastmcp_worker.fastmcp_worker import DiskcacheBearerTokenVerifier
 
-pytestmark = [pytest.mark.fastmcp, pytest.mark.auth, pytest.mark.task_fastmcp_auth]
+pytestmark = pytest.mark.fastmcp
 
 
-@pytest.mark.task_fastmcp_auth
 class TestFastMCPBearerVerifier:
     def test_diskcache_bearer_token_verifier(self, tmp_path):
         cache = FanoutCache(directory=str(tmp_path / "cache"))

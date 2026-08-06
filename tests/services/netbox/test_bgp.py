@@ -20,10 +20,10 @@ except ModuleNotFoundError as exc:
         get_pynetbox,
     )
 
-pytestmark = [pytest.mark.netbox, pytest.mark.bgp]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_get_bgp_peerings
+@pytest.mark.netbox_get_bgp_peerings
 class TestGetBgpPeerings:
     """Test suite for get_bgp_peerings function"""
 
@@ -309,9 +309,7 @@ def delete_bgp_sessions(devices=BGP_CREATE_SESSIONS_TEST_DEVICES):
         for session in sessions:
             session.delete()
     print(f"Deleted BGP sessions for devices: {devices}")
-
-
-@pytest.mark.task_sync_bgp_peerings
+@pytest.mark.netbox_sync_bgp_peerings
 class TestSyncBgpPeerings:
 
     def setup_method(self):
@@ -1365,9 +1363,7 @@ def _cleanup_test_asns(nb):
     for asn in [int(_TEST_LOCAL_AS), int(_TEST_REMOTE_AS), 64997, 64996]:
         for obj in list(nb.ipam.asns.filter(asn=asn)):
             obj.delete()
-
-
-@pytest.mark.task_create_bgp_peering
+@pytest.mark.netbox_create_bgp_peering
 class TestCreateBgpPeering:
 
     def setup_method(self):
@@ -2103,9 +2099,7 @@ class TestCreateBgpPeering:
 # ---------------------------------------------------------------------------
 # UPDATE BGP PEERING TESTS
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_update_bgp_peering
+@pytest.mark.netbox_update_bgp_peering
 class TestUpdateBgpPeering:
 
     def setup_method(self):

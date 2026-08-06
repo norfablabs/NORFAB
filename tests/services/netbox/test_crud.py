@@ -1,6 +1,6 @@
 import pytest
 
-pytestmark = [pytest.mark.netbox, pytest.mark.crud]
+pytestmark = pytest.mark.netbox
 
 """Integration tests for NetBox CRUD tasks (netbox_crud.py).
 
@@ -64,9 +64,7 @@ def test_manufacturer(nfclient):
 # ---------------------------------------------------------------------------
 # crud_list_objects
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_crud_list_objects
+@pytest.mark.netbox_crud_list_objects
 class TestCrudListObjects:
     def test_all_apps(self, nfclient):
         """Returns all NetBox apps with their object types and metadata."""
@@ -191,9 +189,7 @@ class TestCrudListObjects:
 # ---------------------------------------------------------------------------
 # crud_search
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_crud_search
+@pytest.mark.netbox_crud_search
 class TestCrudSearch:
     def test_default_object_types(self, nfclient):
         """Search across default object types finds ceos1 device."""
@@ -340,9 +336,7 @@ class TestCrudSearch:
 # ---------------------------------------------------------------------------
 # crud_read
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_crud_read
+@pytest.mark.netbox_crud_read
 class TestCrudRead:
     def test_by_filters_dict(self, nfclient):
         """Read a device by name filter dict."""
@@ -628,9 +622,7 @@ class TestCrudRead:
 # ---------------------------------------------------------------------------
 # crud_create
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_crud_create
+@pytest.mark.netbox_crud_create
 class TestCrudCreate:
     def test_dry_run(self, nfclient):
         """dry_run=True returns preview without creating the object in NetBox."""
@@ -737,9 +729,7 @@ class TestCrudCreate:
 # ---------------------------------------------------------------------------
 # crud_update
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_crud_update
+@pytest.mark.netbox_crud_update
 class TestCrudUpdate:
     def test_dry_run_diffs(self, nfclient, test_manufacturer):
         """dry_run=True computes diffs without modifying the object."""
@@ -829,9 +819,7 @@ class TestCrudUpdate:
 # ---------------------------------------------------------------------------
 # crud_delete
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_crud_delete
+@pytest.mark.netbox_crud_delete
 class TestCrudDelete:
     def test_dry_run(self, nfclient, test_manufacturer):
         """dry_run=True returns what would be deleted without deleting."""
@@ -944,9 +932,7 @@ class TestCrudDelete:
 # ---------------------------------------------------------------------------
 # crud_get_changelogs
 # ---------------------------------------------------------------------------
-
-
-@pytest.mark.task_crud_get_changelogs
+@pytest.mark.netbox_crud_get_changelogs
 class TestCrudGetChangelogs:
     def test_no_filters(self, nfclient):
         """Get recent changelogs without any filter."""

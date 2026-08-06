@@ -22,10 +22,9 @@ except ModuleNotFoundError as exc:
         wait_for_endpoint,
     )
 
-pytestmark = [pytest.mark.fastapi, pytest.mark.server, pytest.mark.task_fastapi_server]
+pytestmark = pytest.mark.fastapi
 
 
-@pytest.mark.task_fastapi_server
 class TestFastAPIServer:
     def test_job_post(self, nfclient):
         token = get_token(nfclient)

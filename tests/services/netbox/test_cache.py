@@ -2,10 +2,12 @@ import pprint
 
 import pytest
 
-pytestmark = [pytest.mark.netbox, pytest.mark.cache]
+pytestmark = pytest.mark.netbox
 
 
-@pytest.mark.task_cache
+@pytest.mark.netbox_cache_clear
+@pytest.mark.netbox_cache_get
+@pytest.mark.netbox_cache_list
 class TestNetboxCache:
     def test_cache_list(self, nfclient):
         # populate the cache

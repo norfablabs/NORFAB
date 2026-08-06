@@ -25,14 +25,9 @@ except ModuleNotFoundError as exc:
         mcp_url,
     )
 
-pytestmark = [
-    pytest.mark.fastmcp,
-    pytest.mark.tools_call,
-    pytest.mark.task_fastmcp_tools_call,
-]
+pytestmark = pytest.mark.fastmcp
 
 
-@pytest.mark.task_fastmcp_tools_call
 class TestToolsCallNornir:
     """Test MCP tool calls for Nornir service"""
 

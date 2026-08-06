@@ -23,12 +23,10 @@ except ModuleNotFoundError as exc:
 
 pytestmark = [
     pytest.mark.fakenos,
-    pytest.mark.restart,
-    pytest.mark.task_fakenos_restart,
+    pytest.mark.fakenos_restart,
 ]
 
 
-@pytest.mark.task_fakenos_restart
 class TestRestartTask:
     def test_restart_task(self, nfclient):
         _stop_all_networks(nfclient)
