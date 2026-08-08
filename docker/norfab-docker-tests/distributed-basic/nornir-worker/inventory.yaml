@@ -1,0 +1,27 @@
+broker:
+  endpoint: "{{ env.get('NORFAB_BROKER_ENDPOINT', 'tcp://distributed-broker:5555') }}"
+  shared_key: "{{ env.get('NORFAB_BROKER_PUBLIC_KEY') }}"
+  zmq_auth: true
+
+logging:
+  handlers:
+    file:
+      level: "{{ env.get('FILE_LOGGING_LEVEL', 'INFO') }}"
+    terminal:
+      level: "{{ env.get('TERMINAL_LOGGING_LEVEL', 'INFO') }}"
+  log_events: true
+
+topology:
+  broker: false
+  workers:
+    - nornir-worker-1
+    - nornir-worker-2
+
+workers:
+  nornir-*:
+    - /workspace/tests/nf_tests_inventory/nornir/common.yaml
+  nornir-worker-1*:
+    - /workspace/tests/nf_tests_inventory/nornir/nornir-worker-1.yaml
+  nornir-worker-2:
+    - /workspace/tests/nf_tests_inventory/nornir/nornir-worker-2.yaml
+    - /workspace/tests/nf_tests_inventory/nornir/nornir-worker-2-extra.yaml

@@ -1,0 +1,28 @@
+broker:
+  endpoint: "{{ env.get('NORFAB_BROKER_ENDPOINT', 'tcp://distributed-broker:5555') }}"
+  shared_key: "{{ env.get('NORFAB_BROKER_PUBLIC_KEY') }}"
+  zmq_auth: true
+
+logging:
+  handlers:
+    file:
+      level: "{{ env.get('FILE_LOGGING_LEVEL', 'INFO') }}"
+    terminal:
+      level: "{{ env.get('TERMINAL_LOGGING_LEVEL', 'INFO') }}"
+  log_events: true
+
+plugins:
+  DummyService:
+    nfcli:
+      mount_path: dummy
+      shell_model: plugins.dummy_service:DummyServiceNfcliShell
+    worker: plugins.dummy_service:DummyServiceWorker
+
+topology:
+  broker: false
+  workers:
+    - dummy-worker-1
+
+workers:
+  dummy-worker-1:
+    - /workspace/tests/nf_tests_inventory/plugins/dummy_worker_inventory.yaml

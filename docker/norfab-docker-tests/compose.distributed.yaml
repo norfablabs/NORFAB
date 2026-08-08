@@ -1,0 +1,156 @@
+x-test-runner-build: &test-runner-build
+  context: ../..
+  dockerfile: docker/norfab-docker-tests/Dockerfile.norfab.test-runner
+  args:
+    PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
+
+x-test-runner-env: &test-runner-env
+  PYTHONPATH: /workspace:/workspace/tests/nf_tests_inventory
+
+x-distributed-env-file: &distributed-env-file
+  - ./distributed-basic/.env
+
+x-distributed-connect-env: &distributed-connect-env
+  <<: *test-runner-env
+  NORFAB_BROKER_ENDPOINT: tcp://distributed-broker:5555
+
+x-workspace-volume: &workspace-volume
+  type: bind
+  source: ../..
+  target: /workspace
+  read_only: true
+
+services:
+  distributed-broker:
+    build: *test-runner-build
+    image: norfab:distributed-basic-py${PYTHON_VERSION:-3.12}
+    working_dir: /norfab-env
+    entrypoint:
+      - nfcli
+    env_file: *distributed-env-file
+    environment:
+      <<: *test-runner-env
+      NORFAB_BROKER_ENDPOINT: tcp://0.0.0.0:5555
+    command:
+      - -i
+      - inventory.yaml
+      - -b
+      - -l
+      - INFO
+    ports:
+      - "5555:5555/tcp"
+    volumes:
+      - *workspace-volume
+      - type: bind
+        source: ./distributed-basic/broker
+        target: /norfab-env
+
+  distributed-netbox-worker:
+    build: *test-runner-build
+    image: norfab:distributed-basic-py${PYTHON_VERSION:-3.12}
+    working_dir: /norfab-env
+    entrypoint:
+      - nfcli
+    env_file: *distributed-env-file
+    environment: *distributed-connect-env
+    command:
+      - -i
+      - inventory.yaml
+      - -wl
+      - netbox-worker-1.1
+      - -l
+      - INFO
+    depends_on:
+      - distributed-broker
+    volumes:
+      - *workspace-volume
+      - type: bind
+        source: ./distributed-basic/netbox-worker
+        target: /norfab-env
+
+  distributed-nornir-worker:
+    build: *test-runner-build
+    image: norfab:distributed-basic-py${PYTHON_VERSION:-3.12}
+    working_dir: /norfab-env
+    entrypoint:
+      - nfcli
+    env_file: *distributed-env-file
+    environment: *distributed-connect-env
+    command:
+      - -i
+      - inventory.yaml
+      - -wl
+      - nornir-worker-1,nornir-worker-2
+      - -l
+      - INFO
+    depends_on:
+      - distributed-broker
+      - distributed-netbox-worker
+    volumes:
+      - *workspace-volume
+      - type: bind
+        source: ./distributed-basic/nornir-worker
+        target: /norfab-env
+
+  distributed-dummy-worker:
+    build: *test-runner-build
+    image: norfab:distributed-basic-py${PYTHON_VERSION:-3.12}
+    working_dir: /norfab-env
+    entrypoint:
+      - nfcli
+    env_file: *distributed-env-file
+    environment: *distributed-connect-env
+    command:
+      - -i
+      - inventory.yaml
+      - -wl
+      - dummy-worker-1
+      - -l
+      - INFO
+    depends_on:
+      - distributed-broker
+    volumes:
+      - *workspace-volume
+      - type: bind
+        source: ./distributed-basic/dummy-worker
+        target: /norfab-env
+
+  distributed-client:
+    build: *test-runner-build
+    image: norfab:distributed-basic-py${PYTHON_VERSION:-3.12}
+    working_dir: /norfab-env
+    entrypoint:
+      - python
+      - -m
+      - pytest
+      - -vv
+      - -c
+      - /workspace/pyproject.toml
+      - --rootdir=/norfab-env
+      - -o
+      - cache_dir=/tmp/pytest-cache
+      - --junitxml=/norfab-env/__norfab__/artifacts/distributed-core-junit.xml
+    env_file: *distributed-env-file
+    environment: *distributed-connect-env
+    command:
+      - -m
+      - core
+      - core
+    depends_on:
+      - distributed-broker
+      - distributed-netbox-worker
+      - distributed-nornir-worker
+      - distributed-dummy-worker
+    volumes:
+      - *workspace-volume
+      - type: bind
+        source: ./distributed-basic/client
+        target: /norfab-env
+      - type: bind
+        source: ../../tests/core
+        target: /norfab-env/core
+        read_only: true
+      - type: bind
+        source: ../../tests/nf_tests_inventory
+        target: /norfab-env/nf_tests_inventory
+        read_only: true

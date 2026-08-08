@@ -1,0 +1,18 @@
+broker:
+  endpoint: "{{ env.get('NORFAB_BROKER_ENDPOINT', 'tcp://distributed-broker:5555') }}"
+  shared_key: "{{ env.get('NORFAB_BROKER_PUBLIC_KEY') }}"
+  zmq_auth: true
+
+logging:
+  handlers:
+    file:
+      level: "{{ env.get('FILE_LOGGING_LEVEL', 'INFO') }}"
+    terminal:
+      level: "{{ env.get('TERMINAL_LOGGING_LEVEL', 'INFO') }}"
+  log_events: true
+
+topology:
+  broker: false
+  workers: []
+
+workers: {}

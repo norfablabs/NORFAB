@@ -16,6 +16,7 @@ and client runtime files per Docker test service.
 ```text
 docker/norfab-docker-tests/
   compose.yaml
+  compose.distributed.yaml
   Dockerfile.norfab.test-runner
   core-tests/
     .env
@@ -44,6 +45,24 @@ docker/norfab-docker-tests/
   fastapi-service-tests/
     .env
     __norfab__/       # writable runtime output
+  distributed-basic/
+    .env              # common distributed env, including broker public key
+    broker/
+      inventory.yaml
+      __norfab__/     # broker runtime, including broker private key
+    netbox-worker/
+      inventory.yaml
+      __norfab__/     # netbox worker runtime
+    nornir-worker/
+      inventory.yaml
+      __norfab__/     # nornir worker runtime
+    dummy-worker/
+      inventory.yaml
+      __norfab__/     # dummy worker runtime
+    client/
+      inventory.yaml
+      conftest.py     # distributed client pytest fixtures
+      __norfab__/     # client runtime
 ```
 
 ## Build
@@ -91,6 +110,19 @@ docker compose run --rm fastmcp-service-tests
 docker compose run --rm fastapi-service-tests
 ```
 
+Run the basic distributed setup:
+
+```bash
+docker compose -f compose.distributed.yaml up -d distributed-broker distributed-netbox-worker distributed-nornir-worker distributed-dummy-worker
+docker compose -f compose.distributed.yaml run --rm distributed-client
+```
+
+Stop the distributed services:
+
+```bash
+docker compose -f compose.distributed.yaml stop distributed-broker distributed-netbox-worker distributed-nornir-worker distributed-dummy-worker
+```
+
 The service entrypoint already contains `python -m pytest` and common pytest
 flags:
 
@@ -113,6 +145,17 @@ workflow-service-tests -m workflow
 agent-tests            -m clientagent
 fastmcp-service-tests  -m fastmcp
 fastapi-service-tests  -m fastapi
+```
+
+The distributed services are not marker-based pytest runners. They start
+separate NorFab processes with separate mounted runtime folders:
+
+```text
+distributed-broker         nfcli -i inventory.yaml -b -l INFO
+distributed-netbox-worker  nfcli -i inventory.yaml -wl netbox-worker-1.1 -l INFO
+distributed-nornir-worker  nfcli -i inventory.yaml -wl nornir-worker-1,nornir-worker-2 -l INFO
+distributed-dummy-worker   nfcli -i inventory.yaml -wl dummy-worker-1 -l INFO
+distributed-client         pytest -m core core
 ```
 
 ## Run Individual Tests
@@ -149,10 +192,15 @@ docker compose run --rm fastmcp-service-tests -m "fastmcp and fastmcp_get_tools"
 
 docker compose run --rm fastapi-service-tests tests/services/fastapi/test_server.py
 docker compose run --rm fastapi-service-tests -m fastapi
+
+docker compose -f compose.distributed.yaml run --rm distributed-client core/test_client.py::TestClientApi::test_mmi_show_broker
+docker compose -f compose.distributed.yaml run --rm distributed-client -k test_list_tasks
 ```
 
 Selectors can use repository-root paths like `tests/services/nornir/test_task.py`
 or tests-local paths like `services/nornir/test_task.py`.
+For `distributed-client`, selectors use the mounted client-local path, such as
+`core/test_client.py`.
 
 ## Runtime Output
 
@@ -203,12 +251,40 @@ docker/norfab-docker-tests/fastapi-service-tests/
   __norfab__/artifacts/fastapi-service-junit.xml
   __norfab__/files/
   __norfab__/logs/
+
+docker/norfab-docker-tests/distributed-basic/broker/
+  __norfab__/files/broker/private_keys/broker.key_secret
+  __norfab__/files/broker/public_keys/broker.key
+  __norfab__/logs/
+
+docker/norfab-docker-tests/distributed-basic/netbox-worker/
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/distributed-basic/nornir-worker/
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/distributed-basic/dummy-worker/
+  __norfab__/files/
+  __norfab__/logs/
+
+docker/norfab-docker-tests/distributed-basic/client/
+  __norfab__/artifacts/distributed-core-junit.xml
+  __norfab__/files/
+  __norfab__/logs/
 ```
 
 Because each service gets its own `__norfab__` overlay, client keys, worker
 keys, SQLite files, fetched files, artifacts, and logs do not collide between
 test environments. Broker keys are generated or reused by NorFab inside that
 writable runtime tree.
+
+For `distributed-basic`, the broker keypair is pre-generated and kept in the
+broker runtime folder. The broker public key value is also stored in
+`distributed-basic/.env` as `NORFAB_BROKER_PUBLIC_KEY`; worker and client
+inventories render that value into `broker.shared_key`. The broker private key
+is not mounted into worker or client containers.
 
 Clean containers and the default Compose network:
 
@@ -228,7 +304,15 @@ rm -rf workflow-service-tests/__norfab__/*
 rm -rf agent-tests/__norfab__/*
 rm -rf fastmcp-service-tests/__norfab__/*
 rm -rf fastapi-service-tests/__norfab__/*
+rm -rf distributed-basic/client/__norfab__/*
+rm -rf distributed-basic/netbox-worker/__norfab__/*
+rm -rf distributed-basic/nornir-worker/__norfab__/*
+rm -rf distributed-basic/dummy-worker/__norfab__/*
 ```
+
+Do not remove `distributed-basic/broker/__norfab__/files/broker/private_keys` or
+`distributed-basic/broker/__norfab__/files/broker/public_keys` unless you also
+regenerate `NORFAB_BROKER_PUBLIC_KEY` in `distributed-basic/.env`.
 
 ## Inventory Endpoint
 
