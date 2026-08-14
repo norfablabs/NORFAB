@@ -17,7 +17,7 @@ NB_URL_SSL = "https://netbox.lab:443/"
 NB_USERNAME = "admin"
 NB_PASSWORD = "admin"
 # NB_API_TOKEN = "0123456789abcdef0123456789abcdef01234567"
-NB_API_TOKEN = "nbt_cgxqWN26HAT7.mZXez4QM08SO7G2hwlntAAlQqKhV3CBjble8YmXR"
+NB_API_TOKEN = "nbt_KPcm4NdP9p6H.jt0LgAi6HD2ZubMDQ02syQDZz7Rb2MfJe7JuI8gz"
 NB_SECRETS_PRIVATE_KEY = """
 -----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAqlYAwxqIYx1rE3ZHfbSVKpVQXdvjkDYvFAIzApenoGZMr95u
@@ -225,6 +225,7 @@ manufacturers = [
     {"name": "Arista"},
     {"name": "Cisco"},
     {"name": "Generic"},
+    {"name": "Juniper"},
 ]
 
 tags = [

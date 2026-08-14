@@ -5,16 +5,13 @@ instances:
   prod:
     default: True
     url: "http://netbox.lab:8000"
-    #token: "0123456789abcdef0123456789abcdef01234567"
-    token: "nbt_cgxqWN26HAT7.mZXez4QM08SO7G2hwlntAAlQqKhV3CBjble8YmXR"
+    token: "nbt_KPcm4NdP9p6H.jt0LgAi6HD2ZubMDQ02syQDZz7Rb2MfJe7JuI8gz"
     ssl_verify: False
   dev:
     url: "http://netbox.lab:8000"
-    #token: "0123456789abcdef0123456789abcdef01234567"
-    token: "nbt_cgxqWN26HAT7.mZXez4QM08SO7G2hwlntAAlQqKhV3CBjble8YmXR"
+    token: "nbt_KPcm4NdP9p6H.jt0LgAi6HD2ZubMDQ02syQDZz7Rb2MfJe7JuI8gz"
     ssl_verify: False
   preprod:
     url: "http://netbox.lab:8000"
-    #token: "0123456789abcdef0123456789abcdef01234567"
-    token: "nbt_cgxqWN26HAT7.mZXez4QM08SO7G2hwlntAAlQqKhV3CBjble8YmXR"
+    token: "nbt_KPcm4NdP9p6H.jt0LgAi6HD2ZubMDQ02syQDZz7Rb2MfJe7JuI8gz"
     ssl_verify: False

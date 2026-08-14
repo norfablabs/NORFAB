@@ -1,12 +1,101 @@
 import pprint
+import shutil
 import time
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
 
 from norfab.core.client import JobStatus
+from norfab.core.nfapi import NorFab
 
 pytestmark = pytest.mark.core
+
+
+class TestDedicatedNfApiClient:
+    def test_standalone_client(self, nfclient):
+        inventory_data = {"broker": dict(nfclient.inventory.broker)}
+        client_name = f"test_dedicated_client_{uuid4().hex}"
+        client_base_dir = Path(__file__).resolve().parent / "temp"
+        if client_base_dir.exists():
+            shutil.rmtree(client_base_dir)
+        client_base_dir.mkdir()
+
+        nf = NorFab(
+            inventory_data=inventory_data,
+            base_dir=str(client_base_dir),
+            run_broker=False,
+            run_workers=False,
+        )
+        client = None
+
+        try:
+            client = nf.make_client(name=client_name)
+
+            ret = client.run_job(
+                "nornir",
+                "echo",
+                workers="nornir-worker-1",
+                kwargs={"source": "dedicated nfapi client"},
+                timeout=30,
+            )
+
+            pprint.pprint(ret)
+            assert client is not nfclient
+            assert client.name == client_name
+            assert "nornir-worker-1" in ret
+
+            result = ret["nornir-worker-1"]
+            assert result["failed"] is False
+            assert result["result"]["client_address"] == client_name
+            assert result["result"]["task"] == "echo"
+            assert result["result"]["kwargs"] == {"source": "dedicated nfapi client"}
+        finally:
+            if client is not None:
+                client.destroy()
+                nf.client = None
+                client = None
+
+
+class TestRemoteBrokerClient:
+    def test_list_workers_mmi(self):
+        inventory_data = {
+            "broker": {
+                "endpoint": "tcp://192.168.1.220:5555",
+                "shared_key": "!P#yCKn52*Wz#pJuXh!CVdNin^L*&=>IY#/f/DNr",
+                "zmq_auth": True,
+            }
+        }
+        client_name = f"test_remote_broker_client_{uuid4().hex}"
+        client_base_dir = Path(__file__).resolve().parent / "temp"
+        if client_base_dir.exists():
+            shutil.rmtree(client_base_dir)
+        client_base_dir.mkdir()
+
+        nf = NorFab(
+            inventory_data=inventory_data,
+            base_dir=str(client_base_dir),
+            run_broker=False,
+            run_workers=False,
+        )
+        client = None
+
+        try:
+            client = nf.make_client(name=client_name)
+            reply = client.mmi("mmi.service.broker", "show_workers", timeout=30)
+
+            pprint.pprint(reply)
+            assert client.name == client_name
+            assert reply["status"] == "200"
+            assert reply["errors"] == []
+            assert reply["results"], "No workers status returned"
+            for worker in reply["results"]:
+                assert all(k in worker for k in ["holdtime", "name", "service", "status"])
+        finally:
+            if client is not None:
+                client.destroy()
+                nf.client = None
+                client = None
 
 
 class TestClientApi:

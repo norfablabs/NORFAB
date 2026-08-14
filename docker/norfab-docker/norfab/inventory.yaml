@@ -1,7 +1,7 @@
 
 # broker settings
 broker:
-  endpoint: "tcp://127.0.0.1:5555"
+  endpoint: "tcp://0.0.0.0:5555"
   
 # workers inventory section
 workers:
