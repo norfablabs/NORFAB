@@ -1072,6 +1072,11 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         json_schema_extra={"presence": True},
         alias="ip-create-prefixes",
     )
+    ip_ignore_vrf: StrictBool = Field(
+        True,
+        description="Ignore discovered interface VRFs during IP and prefix sync",
+        alias="ip-ignore-vrf",
+    )
     ip_filter_by_name: Union[None, StrictStr] = Field(
         None,
         description="Glob pattern to filter IP sync interfaces by name",
@@ -1638,6 +1643,11 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         description="Create missing IP prefixes in NetBox for each discovered IP address",
         json_schema_extra={"presence": True},
         alias="create-prefixes",
+    )
+    ignore_vrf: StrictBool = Field(
+        True,
+        description="Ignore discovered interface VRFs during IP and prefix sync",
+        alias="ignore-vrf",
     )
     filter_by_name: Union[None, StrictStr] = Field(
         None,

@@ -57,6 +57,11 @@ class TestSyncDeviceIP:
         "10.3.250.250/32"  # Loopback250 on all devices (TEST_SYNC_ANYCAST_IPV4)
     )
     ANYCAST_RANGE = "10.3.250.0/24"
+    CONTROL_PLANE_INTF = "Ethernet2.101"
+    CONTROL_PLANE_IP = "10.101.0.0/31"
+    CONTROL_PLANE_PREFIX = "10.101.0.0/31"
+    CONTROL_PLANE_VRF = "CONTROL_PLANE"
+    WRONG_VRF = "VRF1"
 
     # ------------------------------------------------------------------ #
     # Class-level helpers                                                  #
@@ -82,6 +87,22 @@ class TestSyncDeviceIP:
         """Return a list of NetBox IP address records for the given device interface."""
         pynb = get_pynetbox(nfclient)
         return list(pynb.ipam.ip_addresses.filter(device=device, interface=interface))
+
+    @staticmethod
+    def _delete_ip_addresses(nfclient, *addresses):
+        """Delete exact IP address records from NetBox."""
+        pynb = get_pynetbox(nfclient)
+        for address in addresses:
+            for ip in list(pynb.ipam.ip_addresses.filter(address=address)):
+                ip.delete()
+
+    @staticmethod
+    def _delete_exact_prefixes(nfclient, *prefixes):
+        """Delete exact prefix records from NetBox."""
+        pynb = get_pynetbox(nfclient)
+        for prefix in prefixes:
+            for pfx in list(pynb.ipam.prefixes.filter(prefix=prefix)):
+                pfx.delete()
 
     @pytest.fixture(autouse=True, scope="class")
     def ensure_test_sync_interfaces(self, nfclient):
@@ -453,6 +474,135 @@ class TestSyncDeviceIP:
         )
 
         self._cleanup(nfclient, self.SPINE_DEVICES)
+
+    # ------------------------------------------------------------------ #
+    # VRF selection scenarios                                             #
+    # ------------------------------------------------------------------ #
+
+    def test_sync_device_ip_ignore_vrf_reuses_vrf_scoped_ip_and_prefix(self, nfclient):
+        """Default ignore_vrf=True must match by address/prefix only and leave the
+        existing NetBox VRF unchanged."""
+        self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+        self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
+
+        pynb = get_pynetbox(nfclient)
+        wrong_vrf = pynb.ipam.vrfs.get(name=self.WRONG_VRF)
+        assert wrong_vrf is not None, f"VRF {self.WRONG_VRF!r} not found in NetBox"
+
+        try:
+            existing_ip = pynb.ipam.ip_addresses.create(
+                address=self.CONTROL_PLANE_IP,
+                vrf=wrong_vrf.id,
+            )
+            existing_prefix = pynb.ipam.prefixes.create(
+                prefix=self.CONTROL_PLANE_PREFIX,
+                vrf=wrong_vrf.id,
+            )
+
+            ret = self._sync(
+                nfclient,
+                ["ceos-spine-1"],
+                create_prefixes=True,
+                filter_by_name=self.CONTROL_PLANE_INTF,
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed - {res}"
+                device_data = res["result"]["ceos-spine-1"]
+                assert self.CONTROL_PLANE_IP in device_data["updated"]
+                assert self.CONTROL_PLANE_IP not in device_data["created"]
+
+            ips = list(pynb.ipam.ip_addresses.filter(address=self.CONTROL_PLANE_IP))
+            assert len(ips) == 1, f"Expected one IP, got {len(ips)}: {ips}"
+            assert ips[0].id == existing_ip.id
+            assert ips[0].vrf.name == self.WRONG_VRF
+            assert ips[0].assigned_object.device.name == "ceos-spine-1"
+            assert ips[0].assigned_object.name == self.CONTROL_PLANE_INTF
+
+            prefixes = list(pynb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
+            assert len(prefixes) == 1, (
+                f"Expected one prefix, got {len(prefixes)}: "
+                f"{[str(pfx) for pfx in prefixes]}"
+            )
+            assert prefixes[0].id == existing_prefix.id
+            assert prefixes[0].vrf.name == self.WRONG_VRF
+        finally:
+            self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+            self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
+
+    def test_sync_device_ip_vrf_aware_creates_when_matches_are_not_in_vrf(
+        self, nfclient
+    ):
+        """ignore_vrf=False must create a new IP/prefix in the discovered VRF when
+        only global or wrong-VRF NetBox objects exist."""
+        self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+        self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
+
+        pynb = get_pynetbox(nfclient)
+        wrong_vrf = pynb.ipam.vrfs.get(name=self.WRONG_VRF)
+        assert wrong_vrf is not None, f"VRF {self.WRONG_VRF!r} not found in NetBox"
+
+        try:
+            global_ip = pynb.ipam.ip_addresses.create(address=self.CONTROL_PLANE_IP)
+            wrong_vrf_ip = pynb.ipam.ip_addresses.create(
+                address=self.CONTROL_PLANE_IP,
+                vrf=wrong_vrf.id,
+            )
+            global_prefix = pynb.ipam.prefixes.create(prefix=self.CONTROL_PLANE_PREFIX)
+            wrong_vrf_prefix = pynb.ipam.prefixes.create(
+                prefix=self.CONTROL_PLANE_PREFIX,
+                vrf=wrong_vrf.id,
+            )
+
+            ret = self._sync(
+                nfclient,
+                ["ceos-spine-1"],
+                create_prefixes=True,
+                filter_by_name=self.CONTROL_PLANE_INTF,
+                ignore_vrf=False,
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed - {res}"
+                device_data = res["result"]["ceos-spine-1"]
+                assert self.CONTROL_PLANE_IP in device_data["created"]
+                assert self.CONTROL_PLANE_IP not in device_data["updated"]
+
+            control_vrf = pynb.ipam.vrfs.get(name=self.CONTROL_PLANE_VRF)
+            assert (
+                control_vrf is not None
+            ), f"Discovered VRF {self.CONTROL_PLANE_VRF!r} was not created"
+
+            ips = list(pynb.ipam.ip_addresses.filter(address=self.CONTROL_PLANE_IP))
+            by_vrf = {ip.vrf.name if ip.vrf else None: ip for ip in ips}
+            assert set(by_vrf) == {None, self.WRONG_VRF, self.CONTROL_PLANE_VRF}
+            assert by_vrf[None].id == global_ip.id
+            assert by_vrf[None].assigned_object is None
+            assert by_vrf[self.WRONG_VRF].id == wrong_vrf_ip.id
+            assert by_vrf[self.WRONG_VRF].assigned_object is None
+            assert (
+                by_vrf[self.CONTROL_PLANE_VRF].assigned_object.device.name
+                == "ceos-spine-1"
+            )
+            assert (
+                by_vrf[self.CONTROL_PLANE_VRF].assigned_object.name
+                == self.CONTROL_PLANE_INTF
+            )
+
+            prefixes = list(pynb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
+            prefixes_by_vrf = {
+                pfx.vrf.name if pfx.vrf else None: pfx for pfx in prefixes
+            }
+            assert set(prefixes_by_vrf) == {
+                None,
+                self.WRONG_VRF,
+                self.CONTROL_PLANE_VRF,
+            }
+            assert prefixes_by_vrf[None].id == global_prefix.id
+            assert prefixes_by_vrf[self.WRONG_VRF].id == wrong_vrf_prefix.id
+        finally:
+            self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+            self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
 
     # ------------------------------------------------------------------ #
     # Edge-case / error scenarios                                          #
@@ -930,6 +1080,8 @@ class TestSyncDeviceIP:
         )
 
         self._cleanup(nfclient, ["ceos-spine-1"])
+
+
 @pytest.mark.netbox_create_ip
 class TestCreateIP:
     nb_version = None
@@ -1702,6 +1854,8 @@ class TestCreateIP:
 
         assert res1["result"]["address"] == "10.0.0.1/24", "Wrong ip allocated"
         assert res2["result"]["address"] == "10.0.0.2/24", "Wrong ip allocated"
+
+
 @pytest.mark.netbox_create_prefix
 class TestCreatePrefix:
     nb_version = None
@@ -2402,6 +2556,8 @@ class TestCreatePrefix:
                 assert (
                     res1["result"]["branch"] == "create_prefix_1"
                 ), "No branch details in result"
+
+
 @pytest.mark.netbox_create_ip_bulk
 class TestCreateIPBulk:
     nb_version = None

@@ -56,6 +56,27 @@ inventory, interfaces, and BGP peerings.
 The shared `message` argument is used as the NetBox changelog message for both
 inventory and BGP write operations.
 
+## IP Arguments
+
+IP-specific options use an `ip_` prefix in the Python API and an `ip-` prefix in
+NFCLI:
+
+| Python argument | Purpose |
+|---|---|
+| `ip_anycast_ranges` | Prefixes used to classify IP addresses as anycast. |
+| `ip_ignore_ranges` | Prefixes excluded from IP sync. |
+| `ip_create_prefixes` | Create missing prefixes during IP sync. |
+| `ip_ignore_vrf` | Ignore discovered interface VRFs during IP and prefix sync. Defaults to `True`. |
+| `ip_filter_by_name` | Include only matching interface names during IP sync. |
+| `ip_filter_by_description` | Include only matching interface descriptions during IP sync. |
+| `ip_filter_by_prefix` | Include only IP addresses within a CIDR prefix. |
+| `ip_filter_by_ip` | Include only IP host addresses matching a glob pattern. |
+
+Set `ip_ignore_vrf=False` to associate discovered IP addresses and prefixes with
+interface VRFs. The wrapped `sync_device_ip` task searches IPs and prefixes
+without VRF filters, prefers matching-VRF objects, and otherwise creates a new
+object in the discovered VRF.
+
 ## Output
 
 The result structure aggregates the outcomes of all five subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox.
@@ -142,6 +163,12 @@ When `dry_run=True` the same structure is returned but no changes are written to
     nf#netbox sync all devices iosxr1 process-deletions
     ```
 
+    Sync IP addresses and prefixes with discovered interface VRFs:
+
+    ```
+    nf#netbox sync all devices ceos-spine-1 ip-ignore-vrf false
+    ```
+
 === "Python"
 
     ```python
@@ -162,6 +189,7 @@ When `dry_run=True` the same structure is returned but no changes are written to
             "inventory_filter_by_slot": ["module 0/*"],
             "inventory_ignore_modules": ["SFP-*"],
             "inventory_ignore_slots": ["power-module *"],
+            "ip_ignore_vrf": False,
             "message": "sync all device data",
         },
     )
@@ -196,6 +224,7 @@ root
             ├── inventory-filter-by-slot:    Glob patterns selecting normalized module bay names
             ├── inventory-ignore-modules:    Glob patterns excluding normalized module type names
             ├── inventory-ignore-slots:    Glob patterns excluding normalized module bay names
+            ├── ip-ignore-vrf:    Ignore discovered interface VRFs during IP and prefix sync
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
             ├── FH:    Filter hosts by hostname

@@ -43,6 +43,13 @@ def make_prefix_from_ip(address: Union[None, str]) -> Union[None, str]:
         return None
 
 
+def _ip_payload(ip_data: dict, ignore_vrf: bool) -> dict:
+    payload = dict(ip_data)
+    if ignore_vrf:
+        payload.pop("vrf", None)
+    return payload
+
+
 class NetboxIpTasks:
 
     @Task(
@@ -615,6 +622,7 @@ class NetboxIpTasks:
         anycast_ranges: Union[None, list] = None,
         ignore_ranges: Union[None, list] = None,
         create_prefixes: bool = True,
+        ignore_vrf: bool = True,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         filter_by_prefix: Union[None, str] = None,
@@ -667,6 +675,9 @@ class NetboxIpTasks:
                 by default 127.0.0.0/8, 224.0.0.0/24 and others
             create_prefixes (bool, optional): If True, create missing IP prefixes in
                 NetBox for each discovered IP address. No updates or deletions are done.
+            ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored
+                for IP and prefix writes. Existing VRF-scoped IPs/prefixes are still
+                matched by address/prefix and their VRF is left unchanged. Defaults to True.
             filter_by_name (str, optional): Glob pattern to restrict which interfaces
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
@@ -886,7 +897,11 @@ class NetboxIpTasks:
                 for ip in (intf_data.get("ipv4_addresses") or []) + (
                     intf_data.get("ipv6_addresses") or []
                 ):
-                    vrf = resolve_vrf(intf_data["vrf"], nb, job, ret, self.name)
+                    vrf = (
+                        None
+                        if ignore_vrf
+                        else resolve_vrf(intf_data["vrf"], nb, job, ret, self.name)
+                    )
                     all_ip_live.append(
                         {
                             "device": device_name,
@@ -954,9 +969,16 @@ class NetboxIpTasks:
             matching_nb_ips = [
                 i for i in nb_ips if i["address"].startswith(f"{ip_live_no_mask}/")
             ]
+            if ignore_vrf:
+                if ip_live["role"] != "anycast":
+                    matching_nb_ips = matching_nb_ips[:1]
+            else:
+                matching_nb_ips = [
+                    i for i in matching_nb_ips if i["vrf"] == ip_live["vrf"]
+                ]
             # no existing IP found, create it
             if not matching_nb_ips:
-                bulk_create_ip[key] = ip_live
+                bulk_create_ip[key] = _ip_payload(ip_live, ignore_vrf)
                 continue
             # check if existing IP already assigned to same interface
             for nb_ip in matching_nb_ips:
@@ -973,10 +995,11 @@ class NetboxIpTasks:
                         if any(
                             nb_ip[k] != ip_live[k]
                             for k in ["role", "vrf"]
-                            if ip_live[k]
+                            if (k == "vrf" and not ignore_vrf) or ip_live[k]
                         ):
-                            ip_live["id"] = nb_ip["id"]
-                            bulk_update_ip[key] = ip_live
+                            payload = _ip_payload(ip_live, ignore_vrf)
+                            payload["id"] = nb_ip["id"]
+                            bulk_update_ip[key] = payload
                         else:
                             device_results[device_name]["in_sync"].append(
                                 ip_live["address"]
@@ -984,6 +1007,17 @@ class NetboxIpTasks:
                         break
             # no IP assigned to same interface
             else:
+                # if an unassigned IP exists, update it instead of creating a duplicate
+                nb_ip = next(
+                    (i for i in matching_nb_ips if not i["assigned_object_id"]),
+                    None,
+                )
+                if nb_ip:
+                    payload = _ip_payload(ip_live, ignore_vrf)
+                    payload["id"] = nb_ip["id"]
+                    bulk_update_ip[key] = payload
+                    continue
+
                 for nb_ip in matching_nb_ips:
                     # existing NB IP already assigned to an interface
                     if nb_ip["assigned_object_id"]:
@@ -1015,7 +1049,7 @@ class NetboxIpTasks:
                             }
                         # create anycast ip if existing and discovered IPs are anycast
                         if nb_ip_resolved_role == ip_live["role"] == "anycast":
-                            bulk_create_ip[key] = ip_live
+                            bulk_create_ip[key] = _ip_payload(ip_live, ignore_vrf)
                             break
                         # existing ip role did not resolve to anycast - report conflict
                         if nb_ip_resolved_role != "anycast":
@@ -1027,10 +1061,6 @@ class NetboxIpTasks:
                             ret.errors.append(msg)
                             job.event(msg, severity="ERROR")
                             break
-                    # ip exists but not assigned to any interface - update it
-                    else:
-                        ip_live["id"] = nb_ip["id"]
-                        bulk_update_ip[key] = ip_live
 
         job.event(
             f"IP address sync actions: {len(bulk_create_ip)} create, "
@@ -1134,31 +1164,46 @@ class NetboxIpTasks:
         else:
             job.event("no IP addresses to create")
 
-        # process prefixes - create only, no updates or deletions
+        # process prefixes - create missing prefixes, optionally scoped by VRF
         if create_prefixes and all_prefixes_live:
             job.event(f"checking {len(all_prefixes_live)} prefix candidate(s)")
-            nb_prefixes = {
-                (pfx.prefix, pfx.vrf.id if pfx.vrf else None)
-                for pfx in self.bulk_filter(
-                    endpoint=nb.ipam.prefixes,
-                    prefix=[p["prefix"] for p in all_prefixes_live if p["prefix"]],
-                    fields="id,prefix,vrf",
-                )
-            }
+            nb_prefixes = self.bulk_filter(
+                endpoint=nb.ipam.prefixes,
+                prefix=[p["prefix"] for p in all_prefixes_live if p["prefix"]],
+                fields="id,prefix,vrf",
+            )
             bulk_create_prefixes = []
-            seen_prefixes = set(nb_prefixes)
+            seen_prefixes = set()
             for pfx_data in all_prefixes_live:
                 if not pfx_data["prefix"]:
                     continue
-                pfx_key = (pfx_data["prefix"], pfx_data["vrf"])
-                if pfx_key not in seen_prefixes:
-                    payload = {"prefix": pfx_data["prefix"]}
-                    if pfx_data["vrf"] is not None:
-                        payload["vrf"] = pfx_data["vrf"]
-                    if pfx_data["site"] is not None:
-                        payload["site"] = pfx_data["site"]
-                    bulk_create_prefixes.append(payload)
+                pfx_key = (
+                    pfx_data["prefix"]
+                    if ignore_vrf
+                    else (pfx_data["prefix"], pfx_data["vrf"])
+                )
+                if pfx_key in seen_prefixes:
+                    continue
+                matching_pfxs = [
+                    pfx for pfx in nb_prefixes if pfx.prefix == pfx_data["prefix"]
+                ]
+                if ignore_vrf and matching_pfxs:
                     seen_prefixes.add(pfx_key)
+                    continue
+                if not ignore_vrf and any(
+                    (pfx.vrf.id if pfx.vrf else None) == pfx_data["vrf"]
+                    for pfx in matching_pfxs
+                ):
+                    seen_prefixes.add(pfx_key)
+                    continue
+
+                payload = {"prefix": pfx_data["prefix"]}
+                if not ignore_vrf and pfx_data["vrf"] is not None:
+                    payload["vrf"] = pfx_data["vrf"]
+                if pfx_data["site"] is not None:
+                    payload["site"] = pfx_data["site"]
+                bulk_create_prefixes.append(payload)
+                seen_prefixes.add(pfx_key)
             if bulk_create_prefixes:
                 job.event(f"creating {len(bulk_create_prefixes)} prefix(es)")
                 try:

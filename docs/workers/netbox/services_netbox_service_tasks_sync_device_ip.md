@@ -20,6 +20,11 @@ The task follows a three-step pipeline:
     - **update** — address exists in NetBox but is unassigned or has a stale role/VRF; the record is updated
     - **in_sync** — address already assigned to the correct interface with the correct role and VRF; no change needed
 
+By default `ignore_vrf=True`, so discovered interface VRFs are not written to IP
+addresses or prefixes. Existing IPs and prefixes are matched by address/prefix
+only; the first matching object returned by NetBox is reused and its VRF value is
+left unchanged.
+
 Roles are assigned automatically:
 
 - Interfaces whose name starts with `loopback` or `lo` → role `loopback`
@@ -84,7 +89,45 @@ anycast_ranges = ["10.0.250.0/24", "2001:db8:ffff::/48"]
 
 ### Process Prefixes
 
-When `create_prefixes=True` the task also creates a NetBox prefix record for the network of each discovered IP address (e.g. `10.0.1.0/31` for `10.0.1.1/31`). Existing prefixes are never updated or deleted — this is a create-only, idempotent operation. Site and VRF are propagated from the device and interface context.
+When `create_prefixes=True` the task also creates a NetBox prefix record for the network of each discovered IP address (e.g. `10.0.1.0/31` for `10.0.1.1/31`). With the default `ignore_vrf=True`, an existing prefix is considered a match regardless of VRF and no VRF is written to newly created prefixes.
+
+When `ignore_vrf=False`, site and VRF are propagated from the device and interface context. If no matching-VRF prefix exists, a new prefix is created in the discovered VRF.
+
+### VRF Handling
+
+Existing IP addresses and prefixes are always searched by address or prefix only;
+VRF is not added to NetBox filters. The `ignore_vrf` setting only controls how
+matches are selected and whether the discovered VRF is written back.
+
+When `ignore_vrf=True` (default):
+
+- The first matching IP address returned by NetBox is reused.
+- The first matching prefix returned by NetBox is treated as existing.
+- Existing VRF values are left unchanged.
+- New IP addresses and prefixes are created without a VRF.
+
+Example:
+
+| Discovered | Existing NetBox objects | Result |
+|---|---|---|
+| IP `10.0.0.1/31` in VRF `BLUE` | `10.0.0.1/31` in VRF `RED` | Reuse the `RED` IP object, update assignment/role if needed, leave VRF as `RED` |
+| Prefix `10.0.0.0/31` in VRF `BLUE` | `10.0.0.0/31` in VRF `RED` | Treat prefix as existing, leave VRF as `RED` |
+| IP `10.0.0.2/31` in VRF `BLUE` | No matching IP | Create IP without VRF |
+
+When `ignore_vrf=False`:
+
+- Matching IPs/prefixes already in the discovered VRF are preferred.
+- If no matching-VRF object exists, a new IP or prefix is created with the
+  discovered VRF. Objects in other VRFs are left unchanged.
+
+Example:
+
+| Discovered | Existing NetBox objects | Result |
+|---|---|---|
+| IP `10.0.0.1/31` in VRF `BLUE` | `10.0.0.1/31` in VRF `BLUE`, `10.0.0.1/31` in VRF `RED` | Reuse the `BLUE` IP object |
+| IP `10.0.0.1/31` in VRF `BLUE` | `10.0.0.1/31` in VRF `RED` | Create a new IP in VRF `BLUE`; leave the `RED` IP unchanged |
+| Prefix `10.0.0.0/31` in VRF `BLUE` | `10.0.0.0/31` in VRF `RED` | Create a new prefix in VRF `BLUE`; leave the `RED` prefix unchanged |
+| Prefix `10.0.0.0/31` in VRF `BLUE` | No matching prefix | Create prefix in VRF `BLUE` |
 
 ### Duplicate IP Guard
 
@@ -136,6 +179,12 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
 
     ```
     nf#netbox sync ip-addresses devices ceos-spine-1 create-prefixes
+    ```
+
+    Sync IPs and prefixes with discovered interface VRFs:
+
+    ```
+    nf#netbox sync ip-addresses devices ceos-spine-1 ignore-vrf false
     ```
 
     Sync into a NetBox branch:
@@ -257,6 +306,17 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
         },
     )
 
+    # associate IPs and prefixes with discovered interface VRFs
+    result = client.run_job(
+        "netbox",
+        "sync_device_ip",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-spine-1"],
+            "ignore_vrf": False,
+        },
+    )
+
     # sync into a NetBox branch
     result = client.run_job(
         "netbox",
@@ -313,6 +373,7 @@ root
             ├── devices:    List of NetBox device names to sync
             ├── anycast-ranges:    IP prefix(es) used to classify addresses as anycast role
             ├── create-prefixes:    Create missing IP prefix records for each discovered address
+            ├── ignore-vrf:    Ignore discovered interface VRFs during IP and prefix sync
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
             ├── filter-by-prefix:    CIDR prefix to restrict sync to addresses within it, e.g. '10.0.0.0/8'
