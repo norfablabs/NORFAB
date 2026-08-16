@@ -924,7 +924,7 @@ class NetboxBgpPeeringsTasks:
             )
             return ret
 
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
 
         for device_name in devices:
             # Skip devices not found in NetBox
@@ -1167,7 +1167,7 @@ class NetboxBgpPeeringsTasks:
             ret.failed = True
             return ret
 
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         if message:
             job.event("setting NetBox changelog message for BGP session create")
@@ -1682,7 +1682,7 @@ class NetboxBgpPeeringsTasks:
             ret.failed = True
             return ret
 
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         if message:
             job.event("setting NetBox changelog message for BGP session update")
@@ -1990,7 +1990,7 @@ class NetboxBgpPeeringsTasks:
 
         # Validate VRF custom field
         job.event("validating BGP session VRF custom field")
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
         vrf_custom_field = _resolve_vrf_custom_field(
             vrf_custom_field, nb, job, self.name
         )
@@ -2331,7 +2331,7 @@ class NetboxBgpPeeringsTasks:
         # Deletion — batch-fetch all candidate sessions then delete individually
         if process_deletions:
             job.event("processing BGP session deletions")
-            nb = self._get_pynetbox(instance, branch=branch)
+            nb = self._get_pynetbox(instance, branch=branch, job=job)
             if message:
                 nb.http_session.headers["X-Changelog-Message"] = message
             # Map session name → device name for all sessions to delete across devices

@@ -477,7 +477,7 @@ class NetboxDesignTasks:
             f"{self.name} - Create design: Processing design data for '{instance}'"
         )
         ret = Result(task=f"{self.name}:design_create", result={})
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         job.event(f"processing NetBox design data for '{instance}', dry_run={dry_run}")
 
         if self.is_url(context):

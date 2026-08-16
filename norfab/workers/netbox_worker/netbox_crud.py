@@ -139,7 +139,7 @@ class NetboxCrudTasks:
             job.event(
                 f"extracting object types from OpenAPI schema for instance '{instance}'"
             )
-            nb = self._get_pynetbox(instance)
+            nb = self._get_pynetbox(instance, job=job)
             schema = nb.openapi()
             schema_data: Dict[str, Dict[str, Any]] = {}
 
@@ -254,7 +254,7 @@ class NetboxCrudTasks:
 
         job.event(f"searching '{query}' across {len(object_types)} object type(s)")
 
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
 
         for object_type in object_types:
             try:
@@ -331,7 +331,7 @@ class NetboxCrudTasks:
             resources=[instance],
         )
 
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         # build common params
@@ -457,7 +457,7 @@ class NetboxCrudTasks:
 
         job.event(f"creating {len(data_list)} {object_type}(s)")
 
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         created = accessor.create(data_list)
@@ -533,7 +533,7 @@ class NetboxCrudTasks:
                     f"crud_update: each data item must contain 'id', got: {item}"
                 )
 
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         if dry_run is True:
@@ -642,7 +642,7 @@ class NetboxCrudTasks:
         else:
             id_list = list(object_id)
 
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         if dry_run is True:
@@ -735,7 +735,7 @@ class NetboxCrudTasks:
         )
         job.event(f"retrieving changelogs with {filter_count} filter(s)")
 
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
 
         # build base params
         base_params: Dict[str, Any] = {"limit": limit, "offset": offset}

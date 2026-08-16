@@ -504,7 +504,7 @@ class NetboxWorker(
 
         return params
 
-    def _get_pynetbox(self, instance, branch: str = None):
+    def _get_pynetbox(self, instance, branch: str = None, job: Job = None):
         """
         Helper function to instantiate a pynetbox API object.
 
@@ -512,6 +512,7 @@ class NetboxWorker(
             instance (str): The instance name for which to get the pynetbox API object.
             branch (str, optional): Branch name to use, need to have branching plugin installed.
                 Creates branch if it does not exist in Netbox.
+            job (Job, optional): NorFab Job object for progress events.
 
         Returns:
             pynetbox.core.api.Api: An instantiated pynetbox API object.
@@ -554,9 +555,13 @@ class NetboxWorker(
 
             # wait for branch provisioning to complete
             if not nb_branch.status.value.lower() == "ready":
-                log.info(
-                    f"{self.name} - Waiting for branch '{branch}' to become ready (timeout: {self.branch_create_timeout}s)"
+                msg = (
+                    f"provisioning branch '{branch}' in instance '{instance}' "
+                    f"(timeout: {self.branch_create_timeout}s)"
                 )
+                log.info(f"{self.name} - {msg}")
+                if job is not None:
+                    job.event(msg)
                 retries = 0
                 while retries < self.branch_create_timeout:
                     nb_branch = nb.plugins.branching.branches.get(name=branch)
@@ -565,7 +570,11 @@ class NetboxWorker(
                     time.sleep(1)
                     retries += 1
                 else:
-                    raise RuntimeError(f"Branch '{branch}' was created but not ready")
+                    raise TimeoutError(f"Branch '{branch}' was created but not ready")
+                msg = f"branch provisioning finished for '{branch}' in instance '{instance}'"
+                log.info(f"{self.name} - {msg}")
+                if job is not None:
+                    job.event(msg)
 
             nb.http_session.headers["X-NetBox-Branch"] = nb_branch.schema_id
 

@@ -257,7 +257,7 @@ class NetboxTopologyTasks:
             }
             return ret
 
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         # --- step 1: fetch device data for nodes via pynetbox REST ---
         job.event(

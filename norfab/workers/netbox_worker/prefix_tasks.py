@@ -97,7 +97,7 @@ class NetboxPrefixTasks:
         )
         tags = tags or []
         nb_prefix = None
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         job.event(
             f"processing prefix create request within '{parent}' for '/{prefixlen}' subnet"

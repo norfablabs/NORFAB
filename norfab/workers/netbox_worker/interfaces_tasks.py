@@ -319,7 +319,7 @@ class NetboxInterfacesTasks:
         results in  certain format.
         """
         instance = instance or self.default_instance
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         devices = devices or []
         cache = self.cache_use if cache is None else cache
         log.info(
@@ -548,7 +548,7 @@ class NetboxInterfacesTasks:
             result=result,
             resources=[instance],
         )
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         log.info(
             f"{self.name} - Create device interfaces: Creating interfaces for {len(devices)} device(s) in '{instance}'"
         )
@@ -716,7 +716,7 @@ class NetboxInterfacesTasks:
             resources=[instance],
             dry_run=dry_run,
         )
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         update_action = "would update" if dry_run else "updating"
         apply_action = "would apply" if dry_run else "applying"
         log.info(
@@ -993,7 +993,7 @@ class NetboxInterfacesTasks:
             dry_run=dry_run,
             diff={},
         )
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         log.info(
             f"{self.name} - Sync device interfaces: Processing {len(devices)} device(s) in '{instance}'"
         )
@@ -1572,7 +1572,7 @@ class NetboxInterfacesTasks:
             resources=[instance],
             dry_run=dry_run,
         )
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         log.info(
             f"{self.name} - Sync MAC addresses: Processing {len(devices)} device(s) in '{instance}'"
         )

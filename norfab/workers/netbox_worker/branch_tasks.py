@@ -55,7 +55,7 @@ class NetboxBranchTasks:
             result=None,
             resources=[instance],
         )
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
         log.info(
             f"{self.name} - Delete branch: Deleting '{branch}' from '{instance}' Netbox"
         )

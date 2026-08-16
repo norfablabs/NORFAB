@@ -162,7 +162,7 @@ class NetboxIpTasks:
         nb_ip = None
         nb_device = None
         create_peer_ip_data = {}
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         job.event(
             f"creating IP address in '{instance}' for "
             f"'{device}:{interface}' from prefix '{prefix}', dry_run={dry_run}"
@@ -701,7 +701,7 @@ class NetboxIpTasks:
             resources=[instance],
             dry_run=dry_run,
         )
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         log.info(
             f"{self.name} - Sync device IP: Processing {len(devices)} device(s) in '{instance}'"
         )

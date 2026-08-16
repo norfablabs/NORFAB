@@ -225,7 +225,7 @@ class NetboxDevicesTasks:
         devices = devices or []
         devices_to_fetch = []
         sites_data = {}
-        nb = self._get_pynetbox(instance)
+        nb = self._get_pynetbox(instance, job=job)
 
         # merge named devices into filters as a name filter
         if devices:
@@ -283,7 +283,7 @@ class NetboxDevicesTasks:
         # fetch full device data from Netbox
         if filters_to_fetch:
             job.event(f"fetching device data from NetBox instance '{instance}'")
-            nb = self._get_pynetbox(instance)
+            nb = self._get_pynetbox(instance, job=job)
             all_devices_raw = {}
 
             for filter_item in filters_to_fetch:
@@ -482,7 +482,7 @@ class NetboxDevicesTasks:
             exec(function_text, globals_dict, globals_dict)  # nosec B102
             transform_function = globals_dict["transform"]
 
-        nb = self._get_pynetbox(instance, branch=branch)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         if message:
             job.event("setting NetBox changelog message for inventory sync")

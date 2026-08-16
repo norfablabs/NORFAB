@@ -9,6 +9,7 @@
 
 1. Added FakeNOS-backed cEOS coverage for Nornir CLI and NetBox `sync_device_interfaces` tests.
 2. Changed NetBox sync task FastAPI endpoints to use `POST`.
+3. Added NetBox branch provisioning progress events when branch-aware tasks wait for a branch to become ready.
 
 ---
 
