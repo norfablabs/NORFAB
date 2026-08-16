@@ -6534,29 +6534,25 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 </tbody>
 </table>
 <h2 id="markers">Markers<a class="headerlink" href="#markers" title="Permanent link">¤</a></h2>
-<p>Every NetBox test file should have a file-level <code>netbox</code> marker and an area marker:</p>
-<div class="highlight"><pre><span></span><code><span class="n">pytestmark</span> <span class="o">=</span> <span class="p">[</span><span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span><span class="p">,</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">interfaces</span><span class="p">]</span>
+<p>Every NetBox test file should have a file-level <code>netbox</code> marker:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span>
 </code></pre></div>
-<p>Every task-oriented class should have a task marker:</p>
-<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">task_get_interfaces</span>
+<p>Tests tied to a specific NorFab task should also have a <code>&lt;service&gt;_&lt;task&gt;</code> marker:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox_get_interfaces</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TestGetInterfaces</span><span class="p">:</span>
     <span class="o">...</span>
 </code></pre></div>
-<p>Registered NetBox markers include:</p>
-<ul>
-<li>Area markers: <code>netbox</code>, <code>graphql</code>, <code>interfaces</code>, <code>devices</code>, <code>connections</code>, <code>inventory</code>, <code>circuits</code>, <code>bgp</code>, <code>ipam</code>, <code>cache</code>, <code>containerlab</code>, <code>designs</code>, <code>sync</code>, <code>crud</code>.</li>
-<li>Task markers: <code>task_get_inventory</code>, <code>task_graphql</code>, <code>task_get_interfaces</code>, <code>task_update_interfaces_description</code>, <code>task_get_devices</code>, <code>task_get_connections</code>, <code>task_get_topology</code>, <code>task_get_nornir_inventory</code>, <code>task_get_circuits</code>, <code>task_get_bgp_peerings</code>, <code>task_inventory_models</code>, <code>task_sync_device_inventory</code>, <code>task_sync_device_interfaces</code>, <code>task_create_device_interfaces</code>, <code>task_sync_device_ip</code>, <code>task_create_ip</code>, <code>task_cache</code>, <code>task_get_containerlab_inventory</code>, <code>task_create_prefix</code>, <code>task_create_ip_bulk</code>, <code>task_create_design</code>, <code>task_sync_bgp_peerings</code>, <code>task_create_bgp_peering</code>, <code>task_update_bgp_peering</code>, <code>task_sync_mac_addresses</code>, <code>task_check_device_sync</code>, <code>task_sync_all</code>, <code>task_crud_list_objects</code>, <code>task_crud_search</code>, <code>task_crud_read</code>, <code>task_crud_create</code>, <code>task_crud_update</code>, <code>task_crud_delete</code>, <code>task_crud_get_changelogs</code>.</li>
-</ul>
+<p>Registered NetBox task markers include names such as <code>netbox_get_interfaces</code>, <code>netbox_sync_device_interfaces</code>, <code>netbox_create_ip</code>, <code>netbox_graphql</code>, and <code>netbox_crud_create</code>.</p>
 <p>Add new markers to <code>pyproject.toml</code> before using them.</p>
 <h2 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">¤</a></h2>
 <p>Run all NetBox tests:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox
 </code></pre></div>
-<p>Run one area:</p>
+<p>Run one task group:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>interfaces
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>netbox_get_interfaces
 </code></pre></div>
 <p>Run one class:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
@@ -6566,15 +6562,14 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py::TestGetInterfaces::test_get_interfaces
 </code></pre></div>
-<p>Run one task marker:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>task_get_interfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>task_sync_bgp_peerings
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>task_inventory_models
-</code></pre></div>
 <p>Run with output while debugging worker behavior:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-v<span class="w"> </span>services/netbox/test_worker.py::TestNetboxWorker
+</code></pre></div>
+<p>Run the NetBox suite in Docker from <code>docker/norfab-docker-tests/</code>:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>netbox-service-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>netbox-service-tests<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and netbox_get_interfaces&quot;</span>
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>netbox-service-tests<span class="w"> </span>tests/services/netbox/test_worker.py
 </code></pre></div>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">¤</a></h2>
 <p>NetBox tests depend on:</p>
@@ -6622,9 +6617,9 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <li>Put the test in the file that matches the task area.</li>
 <li>Create a new file only when the area is new or the existing file is becoming hard to navigate.</li>
 <li>Keep or create a <code>Test...</code> class named after the NORFAB task or behavior.</li>
-<li>Add a file-level <code>pytestmark</code> with <code>netbox</code> and an area marker.</li>
-<li>Add a class-level task marker.</li>
-<li>Register new markers in <code>pyproject.toml</code>.</li>
+<li>Add a file-level <code>pytestmark</code> with <code>netbox</code>.</li>
+<li>Add a <code>&lt;service&gt;_&lt;task&gt;</code> marker only when the tests map to a specific NorFab task.</li>
+<li>Register new task markers in <code>pyproject.toml</code>.</li>
 <li>Put reusable cleanup and NetBox API helpers in <code>tests/services/netbox/common.py</code>.</li>
 <li>Import helper names explicitly.</li>
 <li>Make cleanup idempotent and safe to run after partial failures.</li>
@@ -6641,10 +6636,10 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
         <span class="k">raise</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">services.netbox.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_nb_cache</span>
 
-<span class="n">pytestmark</span> <span class="o">=</span> <span class="p">[</span><span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span><span class="p">,</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">interfaces</span><span class="p">]</span>
+<span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span>
 
 
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">task_get_interfaces</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox_get_interfaces</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TestGetInterfaces</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_get_interfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nfclient</span><span class="p">):</span>
         <span class="n">clear_nb_cache</span><span class="p">(</span><span class="s2">&quot;get_interfaces*&quot;</span><span class="p">,</span> <span class="n">nfclient</span><span class="p">)</span>
@@ -6664,7 +6659,7 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <p>Use the NetBox split as the model for future large service refactors:</p>
 <ul>
 <li>Keep small service suites as flat <code>tests/test_&lt;service&gt;_service.py</code> files.</li>
-<li>Split only when a file is large enough that task-level navigation and marker runs are valuable.</li>
+<li>Split only when a file is large enough that class-level navigation and task marker runs are valuable.</li>
 <li>Split by user-facing task area, not by arbitrary unit/integration labels.</li>
 <li>Preserve class names when they already describe behavior well.</li>
 <li>Keep shared helpers in one common module per service.</li>
@@ -6678,7 +6673,7 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <li>If NetBox connection tests fail, verify <code>NB_URL</code>, <code>NB_API_TOKEN</code>, and worker inventory settings.</li>
 <li>If a test is order-sensitive, add explicit setup/cleanup instead of relying on existing NetBox state.</li>
 <li>If cache-related tests fail unexpectedly, clear cache keys with <code>clear_nb_cache()</code> before asserting.</li>
-<li>If marker selection returns no tests, check both the class marker and <code>pyproject.toml</code> marker registration.</li>
+<li>If marker selection returns no tests, check both the file-level <code>pytestmark</code> and <code>pyproject.toml</code> marker registration.</li>
 </ul>
 <h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">¤</a></h2>
 <ul>

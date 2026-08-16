@@ -6859,7 +6859,7 @@ nf#
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">devices_to_fetch</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">sites_data</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="c1"># merge named devices into filters as a name filter</span>
     <span class="k">if</span> <span class="n">devices</span><span class="p">:</span>
@@ -6917,7 +6917,7 @@ nf#
     <span class="c1"># fetch full device data from Netbox</span>
     <span class="k">if</span> <span class="n">filters_to_fetch</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching device data from NetBox instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-        <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+        <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
         <span class="n">all_devices_raw</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">filter_item</span> <span class="ow">in</span> <span class="n">filters_to_fetch</span><span class="p">:</span>

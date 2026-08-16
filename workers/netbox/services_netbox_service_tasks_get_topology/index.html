@@ -7763,7 +7763,7 @@ inventory. Resolved hosts are merged with the <code>devices</code> list.</p>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="c1"># --- step 1: fetch device data for nodes via pynetbox REST ---</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>

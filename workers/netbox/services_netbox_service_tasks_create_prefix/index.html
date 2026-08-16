@@ -7173,7 +7173,7 @@ automatically creates branch if it does not exist in Netbox.</p>
     <span class="p">)</span>
     <span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">nb_prefix</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;processing prefix create request within &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; for &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; subnet&quot;</span>

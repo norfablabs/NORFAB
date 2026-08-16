@@ -7928,7 +7928,7 @@ VRF object reference read from and written into
 
     <span class="c1"># Validate VRF custom field</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;validating BGP session VRF custom field&quot;</span><span class="p">)</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">vrf_custom_field</span> <span class="o">=</span> <span class="n">_resolve_vrf_custom_field</span><span class="p">(</span>
         <span class="n">vrf_custom_field</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="p">)</span>
@@ -8269,7 +8269,7 @@ VRF object reference read from and written into
     <span class="c1"># Deletion — batch-fetch all candidate sessions then delete individually</span>
     <span class="k">if</span> <span class="n">process_deletions</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;processing BGP session deletions&quot;</span><span class="p">)</span>
-        <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+        <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">http_session</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-Changelog-Message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>
         <span class="c1"># Map session name → device name for all sessions to delete across devices</span>

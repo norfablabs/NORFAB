@@ -6199,6 +6199,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#docker-test-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Test Environments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#markers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6486,6 +6497,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#docker-test-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Test Environments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#markers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6609,19 +6631,17 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>fastmcp
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>nfcli
 </code></pre></div>
-<p>Run by task or area marker:</p>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>task_nornir_cli
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>task_get_interfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>task_containerlab_deploy
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>task_fastmcp_tools_call
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>interfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>bgp
+<p>Run by task marker:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>nornir_cli
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>netbox_get_interfaces
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>containerlab_deploy
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>filesharing_fetch_file
 </code></pre></div>
 <p>Combine markers:</p>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and interfaces&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;nornir and not juniper&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;containerlab and deploy&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;not crud&quot;</span>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and netbox_get_interfaces&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;nornir and not nornir_snmp&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;containerlab and containerlab_deploy&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;not netbox_crud_create&quot;</span>
 </code></pre></div>
 <p>List available markers:</p>
 <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--markers
@@ -6745,7 +6765,7 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/nornir
 </code></pre></div>
-<p>Run one service area:</p>
+<p>Run one task marker:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/containerlab/test_deploy.py
@@ -6764,22 +6784,54 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <p>Run by marker:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>netbox
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>interfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>task_get_interfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and not crud&quot;</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>netbox_get_interfaces
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and not netbox_crud_create&quot;</span>
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>nfcli<span class="w"> </span>-m<span class="w"> </span>nfcli
 </code></pre></div>
 <p>Use verbose output when diagnosing worker behavior:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-v<span class="w"> </span>services/netbox/test_worker.py::TestNetboxWorker
 </code></pre></div>
+<h2 id="docker-test-environments">Docker Test Environments<a class="headerlink" href="#docker-test-environments" title="Permanent link">¤</a></h2>
+<p>Docker test runners live under <code>docker/norfab-docker-tests/</code>. Each runner reuses
+the canonical <code>tests/nf_tests_inventory</code> tree and mounts a service-local
+<code>__norfab__</code> runtime folder for logs, artifacts, keys, and generated files.</p>
+<p>Run from <code>docker/norfab-docker-tests/</code>:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>build
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>core-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nornir-service-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>netbox-service-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fakenos-service-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>containerlab-service-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>workflow-service-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>agent-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fastmcp-service-tests
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fastapi-service-tests
+</code></pre></div>
+<p>Docker runners use these service markers by default:</p>
+<div class="highlight"><pre><span></span><code>core-tests                 -m core
+nornir-service-tests       -m nornir
+netbox-service-tests       -m netbox
+fakenos-service-tests      -m fakenos
+containerlab-service-tests -m containerlab
+workflow-service-tests     -m workflow
+agent-tests                -m clientagent
+fastmcp-service-tests      -m fastmcp
+fastapi-service-tests      -m fastapi
+</code></pre></div>
+<p>Pass pytest selectors after the Compose service name to run narrower slices:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nornir-service-tests<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;nornir and nornir_cli&quot;</span>
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>netbox-service-tests<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and netbox_get_devices&quot;</span>
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>containerlab-service-tests<span class="w"> </span>tests/services/containerlab/test_inspect.py
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fastmcp-service-tests<span class="w"> </span>tests/services/fastmcp/test_tools.py::TestGetTools::test_get_tools
+</code></pre></div>
 <h2 id="markers">Markers<a class="headerlink" href="#markers" title="Permanent link">¤</a></h2>
 <p>Markers are registered in <code>pyproject.toml</code> under <code>[tool.pytest.ini_options]</code>.</p>
-<p>Use service or area markers on whole files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">pytestmark</span> <span class="o">=</span> <span class="p">[</span><span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span><span class="p">,</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">interfaces</span><span class="p">]</span>
+<p>Use service markers on whole files:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span>
 </code></pre></div>
-<p>Use task markers on classes:</p>
-<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">task_get_interfaces</span>
+<p>Use <code>&lt;service&gt;_&lt;task&gt;</code> markers for tests associated with a specific NorFab task:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox_get_interfaces</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TestGetInterfaces</span><span class="p">:</span>
     <span class="o">...</span>
 </code></pre></div>
@@ -6787,16 +6839,16 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <ul>
 <li>By path, such as <code>services/netbox/test_interfaces.py</code>.</li>
 <li>By class, such as <code>::TestGetInterfaces</code>.</li>
-<li>By task marker, such as <code>-m task_get_interfaces</code>.</li>
+<li>By service or task marker, such as <code>-m "netbox and netbox_get_interfaces"</code>.</li>
 </ul>
 <h2 id="writing-service-tests">Writing Service Tests<a class="headerlink" href="#writing-service-tests" title="Permanent link">¤</a></h2>
 <p>Keep test classes grouped by NORFAB task or closely related behavior.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
 
-<span class="n">pytestmark</span> <span class="o">=</span> <span class="p">[</span><span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span><span class="p">,</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">interfaces</span><span class="p">]</span>
+<span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span>
 
 
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">task_get_interfaces</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox_get_interfaces</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TestGetInterfaces</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_get_interfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nfclient</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
@@ -6836,9 +6888,9 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 <li>Keep existing <code>Test...</code> classes when they already group behavior well.</li>
 <li>Move shared helpers into a service common module, such as <code>tests/services/netbox/common.py</code>.</li>
 <li>Keep helper imports explicit.</li>
-<li>Add a file-level service/area marker.</li>
-<li>Add a class-level task marker.</li>
-<li>Register new markers in <code>pyproject.toml</code>.</li>
+<li>Add a file-level service marker.</li>
+<li>Add <code>&lt;service&gt;_&lt;task&gt;</code> markers only to tests tied to a specific NorFab task.</li>
+<li>Register new service or task markers in <code>pyproject.toml</code>.</li>
 <li>Preserve <code>cd tests &amp;&amp; poetry run pytest ...</code> compatibility.</li>
 <li>Update the related document in <code>docs/testing/</code>.</li>
 </ol>

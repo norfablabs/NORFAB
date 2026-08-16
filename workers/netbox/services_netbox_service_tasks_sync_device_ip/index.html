@@ -2682,6 +2682,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#vrf-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VRF Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#duplicate-ip-guard" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6406,6 +6417,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#vrf-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VRF Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#duplicate-ip-guard" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6524,6 +6546,10 @@
 </ul>
 </li>
 </ol>
+<p>By default <code>ignore_vrf=True</code>, so discovered interface VRFs are not written to IP
+addresses or prefixes. Existing IPs and prefixes are matched by address/prefix
+only; the first matching object returned by NetBox is reused and its VRF value is
+left unchanged.</p>
 <p>Roles are assigned automatically:</p>
 <ul>
 <li>Interfaces whose name starts with <code>loopback</code> or <code>lo</code> → role <code>loopback</code></li>
@@ -6572,7 +6598,84 @@
 anycast_ranges = [&quot;10.0.250.0/24&quot;, &quot;2001:db8:ffff::/48&quot;]
 </code></pre></div>
 <h3 id="process-prefixes">Process Prefixes<a class="headerlink" href="#process-prefixes" title="Permanent link">¤</a></h3>
-<p>When <code>create_prefixes=True</code> the task also creates a NetBox prefix record for the network of each discovered IP address (e.g. <code>10.0.1.0/31</code> for <code>10.0.1.1/31</code>). Existing prefixes are never updated or deleted — this is a create-only, idempotent operation. Site and VRF are propagated from the device and interface context.</p>
+<p>When <code>create_prefixes=True</code> the task also creates a NetBox prefix record for the network of each discovered IP address (e.g. <code>10.0.1.0/31</code> for <code>10.0.1.1/31</code>). With the default <code>ignore_vrf=True</code>, an existing prefix is considered a match regardless of VRF and no VRF is written to newly created prefixes.</p>
+<p>When <code>ignore_vrf=False</code>, site and VRF are propagated from the device and interface context. If no matching-VRF prefix exists, a new prefix is created in the discovered VRF.</p>
+<h3 id="vrf-handling">VRF Handling<a class="headerlink" href="#vrf-handling" title="Permanent link">¤</a></h3>
+<p>Existing IP addresses and prefixes are always searched by address or prefix only;
+VRF is not added to NetBox filters. The <code>ignore_vrf</code> setting only controls how
+matches are selected and whether the discovered VRF is written back.</p>
+<p>When <code>ignore_vrf=True</code> (default):</p>
+<ul>
+<li>The first matching IP address returned by NetBox is reused.</li>
+<li>The first matching prefix returned by NetBox is treated as existing.</li>
+<li>Existing VRF values are left unchanged.</li>
+<li>New IP addresses and prefixes are created without a VRF.</li>
+</ul>
+<p>Example:</p>
+<table>
+<thead>
+<tr>
+<th>Discovered</th>
+<th>Existing NetBox objects</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IP <code>10.0.0.1/31</code> in VRF <code>BLUE</code></td>
+<td><code>10.0.0.1/31</code> in VRF <code>RED</code></td>
+<td>Reuse the <code>RED</code> IP object, update assignment/role if needed, leave VRF as <code>RED</code></td>
+</tr>
+<tr>
+<td>Prefix <code>10.0.0.0/31</code> in VRF <code>BLUE</code></td>
+<td><code>10.0.0.0/31</code> in VRF <code>RED</code></td>
+<td>Treat prefix as existing, leave VRF as <code>RED</code></td>
+</tr>
+<tr>
+<td>IP <code>10.0.0.2/31</code> in VRF <code>BLUE</code></td>
+<td>No matching IP</td>
+<td>Create IP without VRF</td>
+</tr>
+</tbody>
+</table>
+<p>When <code>ignore_vrf=False</code>:</p>
+<ul>
+<li>Matching IPs/prefixes already in the discovered VRF are preferred.</li>
+<li>If no matching-VRF object exists, a new IP or prefix is created with the
+  discovered VRF. Objects in other VRFs are left unchanged.</li>
+</ul>
+<p>Example:</p>
+<table>
+<thead>
+<tr>
+<th>Discovered</th>
+<th>Existing NetBox objects</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IP <code>10.0.0.1/31</code> in VRF <code>BLUE</code></td>
+<td><code>10.0.0.1/31</code> in VRF <code>BLUE</code>, <code>10.0.0.1/31</code> in VRF <code>RED</code></td>
+<td>Reuse the <code>BLUE</code> IP object</td>
+</tr>
+<tr>
+<td>IP <code>10.0.0.1/31</code> in VRF <code>BLUE</code></td>
+<td><code>10.0.0.1/31</code> in VRF <code>RED</code></td>
+<td>Create a new IP in VRF <code>BLUE</code>; leave the <code>RED</code> IP unchanged</td>
+</tr>
+<tr>
+<td>Prefix <code>10.0.0.0/31</code> in VRF <code>BLUE</code></td>
+<td><code>10.0.0.0/31</code> in VRF <code>RED</code></td>
+<td>Create a new prefix in VRF <code>BLUE</code>; leave the <code>RED</code> prefix unchanged</td>
+</tr>
+<tr>
+<td>Prefix <code>10.0.0.0/31</code> in VRF <code>BLUE</code></td>
+<td>No matching prefix</td>
+<td>Create prefix in VRF <code>BLUE</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="duplicate-ip-guard">Duplicate IP Guard<a class="headerlink" href="#duplicate-ip-guard" title="Permanent link">¤</a></h3>
 <p>Before executing bulk writes the task checks that no non-anycast IP address appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.</p>
 <h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
@@ -6600,6 +6703,9 @@ anycast_ranges = [&quot;10.0.250.0/24&quot;, &quot;2001:db8:ffff::/48&quot;]
 </code></pre></div>
 <p>Also create prefix records for each discovered IP subnet:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 create-prefixes
+</code></pre></div>
+<p>Sync IPs and prefixes with discovered interface VRFs:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 ignore-vrf false
 </code></pre></div>
 <p>Sync into a NetBox branch:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 ceos-spine-2 branch sprint-42-ips
@@ -6713,6 +6819,17 @@ anycast_ranges = [&quot;10.0.250.0/24&quot;, &quot;2001:db8:ffff::/48&quot;]
     <span class="p">},</span>
 <span class="p">)</span>
 
+<span class="c1"># associate IPs and prefixes with discovered interface VRFs</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;ignore_vrf&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
 <span class="c1"># sync into a NetBox branch</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
     <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
@@ -6768,6 +6885,7 @@ root
             ├── devices:    List of NetBox device names to sync
             ├── anycast-ranges:    IP prefix(es) used to classify addresses as anycast role
             ├── create-prefixes:    Create missing IP prefix records for each discovered address
+            ├── ignore-vrf:    Ignore discovered interface VRFs during IP and prefix sync
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Loopback*&#39;
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
             ├── filter-by-prefix:    CIDR prefix to restrict sync to addresses within it, e.g. &#39;10.0.0.0/8&#39;
@@ -6999,6 +7117,24 @@ NetBox for each discovered IP address. No updates or deletions are done.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>ignore_vrf</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, discovered interface VRFs are ignored
+for IP and prefix writes. Existing VRF-scoped IPs/prefixes are still
+matched by address/prefix and their VRF is left unchanged. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>filter_by_name</code>
             </td>
             <td>
@@ -7112,14 +7248,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 592</span>
-<span class="normal"> 593</span>
-<span class="normal"> 594</span>
-<span class="normal"> 595</span>
-<span class="normal"> 596</span>
-<span class="normal"> 597</span>
-<span class="normal"> 598</span>
-<span class="normal"> 599</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 599</span>
 <span class="normal"> 600</span>
 <span class="normal"> 601</span>
 <span class="normal"> 602</span>
@@ -7699,8 +7828,53 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="normal">1176</span>
 <span class="normal">1177</span>
 <span class="normal">1178</span>
-<span class="normal">1179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
-    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PATCH&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+<span class="normal">1179</span>
+<span class="normal">1180</span>
+<span class="normal">1181</span>
+<span class="normal">1182</span>
+<span class="normal">1183</span>
+<span class="normal">1184</span>
+<span class="normal">1185</span>
+<span class="normal">1186</span>
+<span class="normal">1187</span>
+<span class="normal">1188</span>
+<span class="normal">1189</span>
+<span class="normal">1190</span>
+<span class="normal">1191</span>
+<span class="normal">1192</span>
+<span class="normal">1193</span>
+<span class="normal">1194</span>
+<span class="normal">1195</span>
+<span class="normal">1196</span>
+<span class="normal">1197</span>
+<span class="normal">1198</span>
+<span class="normal">1199</span>
+<span class="normal">1200</span>
+<span class="normal">1201</span>
+<span class="normal">1202</span>
+<span class="normal">1203</span>
+<span class="normal">1204</span>
+<span class="normal">1205</span>
+<span class="normal">1206</span>
+<span class="normal">1207</span>
+<span class="normal">1208</span>
+<span class="normal">1209</span>
+<span class="normal">1210</span>
+<span class="normal">1211</span>
+<span class="normal">1212</span>
+<span class="normal">1213</span>
+<span class="normal">1214</span>
+<span class="normal">1215</span>
+<span class="normal">1216</span>
+<span class="normal">1217</span>
+<span class="normal">1218</span>
+<span class="normal">1219</span>
+<span class="normal">1220</span>
+<span class="normal">1221</span>
+<span class="normal">1222</span>
+<span class="normal">1223</span>
+<span class="normal">1224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
     <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
@@ -7725,6 +7899,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
     <span class="n">anycast_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">create_prefixes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">ignore_vrf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7777,6 +7952,9 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="sd">            by default 127.0.0.0/8, 224.0.0.0/24 and others</span>
 <span class="sd">        create_prefixes (bool, optional): If True, create missing IP prefixes in</span>
 <span class="sd">            NetBox for each discovered IP address. No updates or deletions are done.</span>
+<span class="sd">        ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored</span>
+<span class="sd">            for IP and prefix writes. Existing VRF-scoped IPs/prefixes are still</span>
+<span class="sd">            matched by address/prefix and their VRF is left unchanged. Defaults to True.</span>
 <span class="sd">        filter_by_name (str, optional): Glob pattern to restrict which interfaces</span>
 <span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
 <span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
@@ -7800,7 +7978,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device IP: Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
     <span class="p">)</span>
@@ -7996,7 +8174,11 @@ are included, e.g. <code>'10.0.*'</code>.</p>
             <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="p">(</span><span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">(</span>
                 <span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv6_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
             <span class="p">):</span>
-                <span class="n">vrf</span> <span class="o">=</span> <span class="n">resolve_vrf</span><span class="p">(</span><span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">],</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">vrf</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">ignore_vrf</span>
+                    <span class="k">else</span> <span class="n">resolve_vrf</span><span class="p">(</span><span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">],</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
                 <span class="n">all_ip_live</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
                         <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
@@ -8064,9 +8246,16 @@ are included, e.g. <code>'10.0.*'</code>.</p>
         <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ip_live_no_mask</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
         <span class="p">]</span>
+        <span class="k">if</span> <span class="n">ignore_vrf</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
+                <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="n">matching_nb_ips</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+            <span class="p">]</span>
         <span class="c1"># no existing IP found, create it</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
-            <span class="n">bulk_create_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span>
+            <span class="n">bulk_create_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="c1"># check if existing IP already assigned to same interface</span>
         <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
@@ -8083,10 +8272,11 @@ are included, e.g. <code>'10.0.*'</code>.</p>
                     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
                         <span class="n">nb_ip</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ip_live</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
                         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="n">ip_live</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;vrf&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_vrf</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ip_live</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
                     <span class="p">):</span>
-                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-                        <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span>
+                        <span class="n">payload</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
+                        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                        <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                             <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
@@ -8094,6 +8284,17 @@ are included, e.g. <code>'10.0.*'</code>.</p>
                     <span class="k">break</span>
         <span class="c1"># no IP assigned to same interface</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if an unassigned IP exists, update it instead of creating a duplicate</span>
+            <span class="n">nb_ip</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]),</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">nb_ip</span><span class="p">:</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
+                <span class="k">continue</span>
+
             <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
                 <span class="c1"># existing NB IP already assigned to an interface</span>
                 <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
@@ -8125,7 +8326,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
                         <span class="p">}</span>
                     <span class="c1"># create anycast ip if existing and discovered IPs are anycast</span>
                     <span class="k">if</span> <span class="n">nb_ip_resolved_role</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
-                        <span class="n">bulk_create_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span>
+                        <span class="n">bulk_create_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
                         <span class="k">break</span>
                     <span class="c1"># existing ip role did not resolve to anycast - report conflict</span>
                     <span class="k">if</span> <span class="n">nb_ip_resolved_role</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
@@ -8137,10 +8338,6 @@ are included, e.g. <code>'10.0.*'</code>.</p>
                         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
                         <span class="k">break</span>
-                <span class="c1"># ip exists but not assigned to any interface - update it</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-                    <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;IP address sync actions: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, &quot;</span>
@@ -8244,31 +8441,46 @@ are included, e.g. <code>'10.0.*'</code>.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no IP addresses to create&quot;</span><span class="p">)</span>
 
-    <span class="c1"># process prefixes - create only, no updates or deletions</span>
+    <span class="c1"># process prefixes - create missing prefixes, optionally scoped by VRF</span>
     <span class="k">if</span> <span class="n">create_prefixes</span> <span class="ow">and</span> <span class="n">all_prefixes_live</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checking </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_prefixes_live</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix candidate(s)&quot;</span><span class="p">)</span>
-        <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="p">(</span><span class="n">pfx</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">pfx</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">pfx</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-                <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_prefixes_live</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]],</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,prefix,vrf&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span>
+            <span class="n">prefix</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_prefixes_live</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]],</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,prefix,vrf&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">bulk_create_prefixes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">seen_prefixes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nb_prefixes</span><span class="p">)</span>
+        <span class="n">seen_prefixes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">pfx_data</span> <span class="ow">in</span> <span class="n">all_prefixes_live</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]:</span>
                 <span class="k">continue</span>
-            <span class="n">pfx_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">],</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">pfx_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_prefixes</span><span class="p">:</span>
-                <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]}</span>
-                <span class="k">if</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
-                <span class="n">bulk_create_prefixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">pfx_key</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">ignore_vrf</span>
+                <span class="k">else</span> <span class="p">(</span><span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">],</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">pfx_key</span> <span class="ow">in</span> <span class="n">seen_prefixes</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">matching_pfxs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">pfx</span> <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="n">nb_prefixes</span> <span class="k">if</span> <span class="n">pfx</span><span class="o">.</span><span class="n">prefix</span> <span class="o">==</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">ignore_vrf</span> <span class="ow">and</span> <span class="n">matching_pfxs</span><span class="p">:</span>
                 <span class="n">seen_prefixes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pfx_key</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_vrf</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">pfx</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">pfx</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="n">matching_pfxs</span>
+            <span class="p">):</span>
+                <span class="n">seen_prefixes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pfx_key</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">]}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_vrf</span> <span class="ow">and</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pfx_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+            <span class="n">bulk_create_prefixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">seen_prefixes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pfx_key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bulk_create_prefixes</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_prefixes</span><span class="p">)</span><span class="si">}</span><span class="s2"> prefix(es)&quot;</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>

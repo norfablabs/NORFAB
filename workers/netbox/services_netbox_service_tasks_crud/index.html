@@ -7468,7 +7468,7 @@ methods (GET/POST/PATCH/PUT/DELETE), schema_name, description</p>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;extracting object types from OpenAPI schema for instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
         <span class="p">)</span>
-        <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+        <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">openapi</span><span class="p">()</span>
         <span class="n">schema_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -7920,7 +7920,7 @@ sensible default set when omitted</p>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;searching &#39;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&#39; across </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">object_types</span><span class="p">)</span><span class="si">}</span><span class="s2"> object type(s)&quot;</span><span class="p">)</span>
 
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">object_type</span> <span class="ow">in</span> <span class="n">object_types</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -8401,7 +8401,7 @@ nf#
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
     <span class="p">)</span>
 
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">accessor</span> <span class="o">=</span> <span class="n">_get_pynetbox_accessor</span><span class="p">(</span><span class="n">nb</span><span class="p">,</span> <span class="n">object_type</span><span class="p">)</span>
 
     <span class="c1"># build common params</span>
@@ -8853,7 +8853,7 @@ nf#
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;creating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">object_type</span><span class="si">}</span><span class="s2">(s)&quot;</span><span class="p">)</span>
 
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">accessor</span> <span class="o">=</span> <span class="n">_get_pynetbox_accessor</span><span class="p">(</span><span class="n">nb</span><span class="p">,</span> <span class="n">object_type</span><span class="p">)</span>
 
     <span class="n">created</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
@@ -9306,7 +9306,7 @@ nf#
                 <span class="sa">f</span><span class="s2">&quot;crud_update: each data item must contain &#39;id&#39;, got: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">accessor</span> <span class="o">=</span> <span class="n">_get_pynetbox_accessor</span><span class="p">(</span><span class="n">nb</span><span class="p">,</span> <span class="n">object_type</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -9744,7 +9744,7 @@ nf#
     <span class="k">else</span><span class="p">:</span>
         <span class="n">id_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">object_id</span><span class="p">)</span>
 
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">accessor</span> <span class="o">=</span> <span class="n">_get_pynetbox_accessor</span><span class="p">(</span><span class="n">nb</span><span class="p">,</span> <span class="n">object_type</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -10207,7 +10207,7 @@ time_before, time_after (ISO-8601), q</p>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieving changelogs with </span><span class="si">{</span><span class="n">filter_count</span><span class="si">}</span><span class="s2"> filter(s)&quot;</span><span class="p">)</span>
 
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="c1"># build base params</span>
     <span class="n">base_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">limit</span><span class="p">,</span> <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">offset</span><span class="p">}</span>
