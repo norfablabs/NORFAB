@@ -320,7 +320,7 @@ class NetboxDevicesTasks:
     @Task(
         input=SyncDeviceInventoryInput,
         output=SyncDeviceInventoryResult,
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         mcp={
             "annotations": {
                 "title": "Sync Device Inventory",
@@ -1151,7 +1151,7 @@ class NetboxDevicesTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=CheckDeviceSyncInput,
         output=CheckDeviceSyncResult,
         mcp={
@@ -1376,7 +1376,7 @@ class NetboxDevicesTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncAllInput,
         output=SyncAllResult,
         mcp={

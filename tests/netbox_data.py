@@ -233,6 +233,7 @@ tags = [
     {"name": "ACCESS"},
     {"name": "nornir-worker-1"},
     {"name": "nornir-worker-2"},
+    {"name": "nornir-worker-4"},
     {"name": "NORFAB"},
 ]
 
@@ -605,6 +606,31 @@ interfaces.extend(
         for intf in ["Management0", "Ethernet1", "Ethernet2", "Ethernet3", "Ethernet4"]
         for host in ["ceos-spine-1", "ceos-spine-2"]
     ]
+)
+
+# add FakeNOS cEOS baseline interfaces
+interfaces.extend(
+    [
+        {
+            "name": "Loopback0",
+            "device": {"name": host},
+            "type": "virtual",
+        }
+        for host in [
+            "fn-ceos-sp-1",
+            "fn-ceos-sp-2",
+            "fn-ceos-lf-1",
+            "fn-ceos-lf-2",
+            "fn-ceos-lf-3",
+        ]
+    ]
+)
+interfaces.append(
+    {
+        "name": "Ethernet2",
+        "device": {"name": "fn-ceos-sp-1"},
+        "type": "1000base-t",
+    }
 )
 
 
@@ -1733,6 +1759,103 @@ devices = [
         "site": {"name": "NORFAB-LAB"},
         "tags": [{"name": "nornir-worker-1"}, {"name": "NORFAB"}],
         "platform": {"name": "arista_eos"},
+    },
+    {
+        "name": "fn-ceos-sp-1",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "rack": {"name": "R123"},
+        "position": 42,
+        "face": "front",
+        "serial": "FN-FNS12345678",
+        "asset_tag": "FN-UUID-FNS12345678",
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "domain_name": "norfablab.io",
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6200,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
+    },
+    {
+        "name": "fn-ceos-sp-2",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "rack": {"name": "R123"},
+        "position": 43,
+        "face": "front",
+        "serial": "FN-FNS123456789",
+        "asset_tag": "FN-UUID-FNS123456789",
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "domain_name": "norfablab.io",
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6201,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
+    },
+    {
+        "name": "fn-ceos-lf-1",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6202,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
+    },
+    {
+        "name": "fn-ceos-lf-2",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6203,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
+    },
+    {
+        "name": "fn-ceos-lf-3",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6204,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
     },
     {
         "name": "vmx-1",

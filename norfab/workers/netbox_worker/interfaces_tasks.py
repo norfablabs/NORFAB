@@ -860,7 +860,7 @@ class NetboxInterfacesTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncDeviceInterfacesInput,
         output=SyncDeviceInterfacesResult,
         mcp={
@@ -1489,7 +1489,7 @@ class NetboxInterfacesTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncMacAddressesInput,
         output=SyncMacAddressesResult,
         mcp={

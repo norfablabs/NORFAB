@@ -1,47 +1,54 @@
-hosts: 
-  # router0:
-  #   hostname: 127.0.0.1
-  #   platform: arista_eos
-  #   username: admin
-  #   password: admin
-  #   port: 6000
-  #   groups:
-  #     - eos_params
-  # router1:
-  #   hostname: 127.0.0.1
-  #   platform: arista_eos
-  #   username: admin
-  #   password: admin
-  #   port: 6001
-  #   groups:
-  #     - eos_params
-  # router2:
-  #   hostname: 127.0.0.1
-  #   platform: arista_eos
-  #   username: admin
-  #   password: admin
-  #   port: 6002
-  #   groups:
-  #     - eos_params
-  # router3:
-  #   hostname: 127.0.0.1
-  #   platform: arista_eos
-  #   username: admin
-  #   password: admin
-  #   port: 6003
-  #   groups:
-  #     - eos_params
-  # router4:
-  #   hostname: 127.0.0.1
-  #   platform: arista_eos
-  #   username: admin
-  #   password: admin
-  #   port: 6004
-  #   groups:
-  #     - eos_params
+hosts:
   cisco_ios_xr1:
     hostname: 127.0.0.1
     platform: cisco_xr
     username: admin
     password: admin
     port: 6003
+  fn-ceos-sp-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6200
+    data:
+      interfaces:
+        - loopback0
+        - ethernet1
+    groups:
+      - eos_params
+  fn-ceos-sp-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6201
+    data:
+      interfaces:
+        - ethernet1
+    groups:
+      - eos_params
+  fn-ceos-lf-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6202
+    groups:
+      - eos_params
+  fn-ceos-lf-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6203
+    groups:
+      - eos_params
+  fn-ceos-lf-3:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6204
+    groups:
+      - eos_params

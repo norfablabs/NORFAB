@@ -151,6 +151,7 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         self.init_done_event = init_done_event
         self.fakenos_inventory = self.load_inventory()
         self.nos_plugins = self.load_nos_plugins()
+        self.auto_start_networks()
 
         log.info(f"{self.name} - Initialization completed")
         self.init_done_event.set()
@@ -208,6 +209,15 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
             except Exception as e:
                 log.error(f"{name} - Plugin load failed, error: {e}", exc_info=True)
         return ret
+
+    def auto_start_networks(self) -> None:
+        """
+        Start inventory-defined FakeNOS networks with ``auto_start`` enabled.
+        """
+        for network, params in (self.fakenos_inventory.get("networks") or {}).items():
+            params = params or {}
+            if params.get("auto_start") is True:
+                self.start(job=None, network=network, inventory=params.get("inventory"))
 
     @Task(
         input=GetVersionInput,
@@ -358,12 +368,14 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
 
         # fetch inventory
         if self.is_url(inventory):
-            job.event(f"{network} fetching inventory")
+            if job:
+                job.event(f"{network} fetching inventory")
             inventory = self.fetch_file(inventory, raise_on_fail=True)
             inventory = yaml.safe_load(inventory)
 
         log.info(f"{self.name} - Start: Starting '{network}' FakeNOS network")
-        job.event(f"{network} starting network")
+        if job:
+            job.event(f"{network} starting network")
 
         stop_event = multiprocessing.Event()
         cmd_queue = multiprocessing.Queue()

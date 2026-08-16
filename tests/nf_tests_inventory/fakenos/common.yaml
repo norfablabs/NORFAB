@@ -1,4 +1,15 @@
 service: fakenos
-
+networks:
+  nornir-cli-ceos-spine-leaf:
+    inventory: nf://fakenos/nornir_cli_ceos_spine_leaf.yaml
+    auto_start: true
+  manual-net2:
+    inventory: nf://fakenos/net2.yaml
+    auto_start: false
 nos_plugins:
   NFIOSXR: nf://fakenos/custom_nos/norfab_ios_xr.yaml
+  NFCEOS_CEOS_SPINE_1: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_spine_1.yaml
+  NFCEOS_CEOS_SPINE_2: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_spine_2.yaml
+  NFCEOS_CEOS_LEAF_1: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_leaf_1.yaml
+  NFCEOS_CEOS_LEAF_2: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_leaf_2.yaml
+  NFCEOS_CEOS_LEAF_3: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_leaf_3.yaml

@@ -597,7 +597,7 @@ class NetboxIpTasks:
         return ret
 
     @Task(
-        fastapi={"methods": ["PATCH"], "schema": NetboxFastApiArgs.model_json_schema()},
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncDeviceIpInput,
         output=SyncDeviceIpResult,
         mcp={

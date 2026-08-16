@@ -38,6 +38,10 @@ service: fakenos
 networks:
   lab-network-1:
     inventory: fakenos/lab-network-1-inventory.yaml
+    auto_start: true
+  lab-network-2:
+    inventory: fakenos/lab-network-2-inventory.yaml
+    auto_start: false
 
 nos_plugins:
   my_custom_nos: fakenos/plugins/my_custom_nos.yaml
@@ -45,11 +49,14 @@ nos_plugins:
 
 ### `networks`
 
-Optional mapping of named FakeNOS networks to start automatically when the worker initialises. Each key is a unique network name; each value must provide:
+Optional mapping of named FakeNOS networks. Each key is a unique network name; each value may provide:
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `inventory` | `str` or `dict` | No | Path or URL to a FakeNOS inventory YAML file, or an inline inventory dict. If omitted, FakeNOS defaults are used. |
+| `auto_start` | `bool` | No | Start this network automatically when the FakeNOS worker initialises. Defaults to `false`. |
+
+Networks with `auto_start: false` remain available in inventory but are not started until the `start` task is called.
 
 ### `nos_plugins`
 

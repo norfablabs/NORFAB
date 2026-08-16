@@ -1,3 +1,17 @@
+# 0.20.5
+
+## FEATURES
+
+1. Added NetBox `sync_device_ip` `ignore_vrf` option to control VRF-aware matching and creation for IP addresses and prefixes.
+2. Added FakeNOS worker inventory `networks.<name>.auto_start` support to start selected virtual networks automatically when the worker initialises.
+
+## CHANGES
+
+1. Added FakeNOS-backed cEOS coverage for Nornir CLI and NetBox `sync_device_interfaces` tests.
+2. Changed NetBox sync task FastAPI endpoints to use `POST`.
+
+---
+
 # 0.20.4
 
 ## FEATURES

@@ -1,0 +1,36 @@
+hosts:
+  fn-ceos-sp-1:
+    username: nornir
+    password: nornir
+    port: 6200
+    platform: arista_eos
+    nos:
+      plugin: NFCEOS_CEOS_SPINE_1
+  fn-ceos-sp-2:
+    username: nornir
+    password: nornir
+    port: 6201
+    platform: arista_eos
+    nos:
+      plugin: NFCEOS_CEOS_SPINE_2
+  fn-ceos-lf-1:
+    username: nornir
+    password: nornir
+    port: 6202
+    platform: arista_eos
+    nos:
+      plugin: NFCEOS_CEOS_LEAF_1
+  fn-ceos-lf-2:
+    username: nornir
+    password: nornir
+    port: 6203
+    platform: arista_eos
+    nos:
+      plugin: NFCEOS_CEOS_LEAF_2
+  fn-ceos-lf-3:
+    username: nornir
+    password: nornir
+    port: 6204
+    platform: arista_eos
+    nos:
+      plugin: NFCEOS_CEOS_LEAF_3

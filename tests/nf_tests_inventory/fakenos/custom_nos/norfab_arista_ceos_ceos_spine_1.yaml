@@ -1,0 +1,1137 @@
+name: NFCEOS_CEOS_SPINE_1
+initial_prompt: '{base_prompt}>'
+commands:
+  enable:
+    output: null
+    new_prompt: '{base_prompt}#'
+    prompt: '{base_prompt}>'
+    help: enter privileged exec mode
+  terminal width 511:
+    output: |
+      Width set to 511 columns.
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: set terminal width
+  term width 0:
+    alias: terminal width 511
+  terminal length 0:
+    output: |
+      Pagination disabled.
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: disable pagination
+  term length 0:
+    alias: terminal length 0
+  show running-config section interface:
+    alias: show run section interface
+  configure terminal:
+    output: null
+    new_prompt: '{base_prompt}(config)#'
+    prompt: '{base_prompt}#'
+    help: enter configuration mode
+  config term:
+    alias: configure terminal
+  conf t:
+    alias: configure terminal
+  end:
+    output: |2+
+
+    new_prompt: '{base_prompt}#'
+    prompt: '{base_prompt}(config)#'
+    help: leave configuration mode
+  delete file_copy_test.txt:
+    output: |2+
+
+    prompt: '{base_prompt}#'
+    help: delete copied test file
+  exit:
+    output: true
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    - '{base_prompt}(config)#'
+    help: exit shell
+  _default_:
+    output: |
+      % Invalid input
+    help: output for unknown commands
+  show version:
+    output: |
+      Arista cEOSLab
+      Hardware version:
+      Serial number: C4889628D19280228439023C4F0C3EE4
+      Hardware MAC address: 001c.73a9.7d04
+      System MAC address: 001c.73a9.7d04
+
+      Software image version: 4.35.2F-46221466.4352F (engineering build)
+      Architecture: x86_64
+      Internal build version: 4.35.2F-46221466.4352F
+      Internal build ID: 6f39e5bb-e6c7-4637-b931-ecb30d43e034
+      Image format version: 1.0
+      Image optimization: None
+
+      Kernel version: 5.15.0-181-generic
+
+      Uptime: 1 day, 0 hours and 10 minutes
+      Total memory: 32827124 kB
+      Free memory: 15139244 kB
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show clock:
+    output: |
+      Sun Aug 16 01:12:53 2026
+      Timezone: UTC
+      Clock source: local
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show hostname:
+    output: |
+      Hostname: ceos-spine-1
+      FQDN:     ceos-spine-1
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ntp associations:
+    output: |
+      NTP is disabled.
+           remote          refid      st t when  poll reach   delay   offset  jitter
+      ==============================================================================
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ntp status:
+    output: |
+      NTP is disabled.
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface management0:
+    output: |
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640a (bia 0242.ac64.640a)
+        Internet address is 172.100.100.10/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 10 minutes, 15 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 641 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 550 bps (0.0% with framing overhead), 0 packets/sec
+           26475 packets input, 3777510 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           26413 packets output, 9207361 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface Management0:
+    output: |
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640a (bia 0242.ac64.640a)
+        Internet address is 172.100.100.10/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 10 minutes, 17 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 644 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 589 bps (0.0% with framing overhead), 0 packets/sec
+           26479 packets input, 3777806 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           26418 packets output, 9208959 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ip int brief:
+    output: |2
+                                                                                                Address
+      Interface           IP Address              Status       Protocol                  MTU    Owner
+      ------------------- ----------------------- ------------ -------------------- ----------- -------
+      Ethernet2           10.10.0.0/31            up           up                       1500
+      Ethernet2.101       10.101.0.0/31           up           up                       1500
+      Ethernet3           10.10.0.4/31            up           up                       1500
+      Ethernet3.101       10.101.0.4/31           up           up                       1500
+      Ethernet4           10.10.0.8/31            up           up                       1500
+      Ethernet4.101       10.101.0.8/31           up           up                       1500
+      Ethernet9.610       10.3.16.37/30           down         lowerlayerdown              0
+      Loopback0           10.10.10.1/32           up           up                      65535
+      Loopback10          10.3.4.1/32             up           up                      65535
+      Loopback11          unassigned              up           up                      65535
+      Loopback123         unassigned              up           up                      65535
+      Loopback250         10.3.250.250/32         up           up                      65535
+      Management0         172.100.100.10/24       up           up                       1500
+      Vlan510             10.3.14.33/29           down         lowerlayerdown           1500
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ip interface brief:
+    output: |2
+                                                                                                Address
+      Interface           IP Address              Status       Protocol                  MTU    Owner
+      ------------------- ----------------------- ------------ -------------------- ----------- -------
+      Ethernet2           10.10.0.0/31            up           up                       1500
+      Ethernet2.101       10.101.0.0/31           up           up                       1500
+      Ethernet3           10.10.0.4/31            up           up                       1500
+      Ethernet3.101       10.101.0.4/31           up           up                       1500
+      Ethernet4           10.10.0.8/31            up           up                       1500
+      Ethernet4.101       10.101.0.8/31           up           up                       1500
+      Ethernet9.610       10.3.16.37/30           down         lowerlayerdown              0
+      Loopback0           10.10.10.1/32           up           up                      65535
+      Loopback10          10.3.4.1/32             up           up                      65535
+      Loopback11          unassigned              up           up                      65535
+      Loopback123         unassigned              up           up                      65535
+      Loopback250         10.3.250.250/32         up           up                      65535
+      Management0         172.100.100.10/24       up           up                       1500
+      Vlan510             10.3.14.33/29           down         lowerlayerdown           1500
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abfe.eda0 (bia aac1.abfe.eda0)
+        Ethernet MTU 9214 bytes, BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 22 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 545 bps (0.0% with framing overhead), 1 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           45380 packets input, 5935662 bytes
+           Received 0 broadcasts, 45380 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet2 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abb9.056f (bia aac1.abb9.056f)
+        Description: P2P to ceos-leaf-1 Ethernet1
+        Internet address is 10.10.0.0/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 22 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 144 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13148 packets input, 1626806 bytes
+           Received 10 broadcasts, 2902 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 673 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet2.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.abb9.056f
+        Description: Control Plane P2P to ceos-leaf-1 Ethernet1.101
+        Internet address is 10.101.0.0/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 10 minutes, 21 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet3 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abac.c085 (bia aac1.abac.c085)
+        Description: P2P to ceos-leaf-2 Ethernet1
+        Internet address is 10.10.0.4/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 22 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 147 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13168 packets input, 1627969 bytes
+           Received 10 broadcasts, 2901 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet3.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.abac.c085
+        Description: Control Plane P2P to ceos-leaf-2 Ethernet1.101
+        Internet address is 10.101.0.4/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 10 minutes, 21 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet4 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abfc.3263 (bia aac1.abfc.3263)
+        Description: P2P to ceos-leaf-3 Ethernet1
+        Internet address is 10.10.0.8/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 22 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 146 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13173 packets input, 1628332 bytes
+           Received 8 broadcasts, 2901 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 953 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet4.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.abfc.3263
+        Description: Control Plane P2P to ceos-leaf-3 Ethernet1.101
+        Internet address is 10.101.0.8/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 10 minutes, 21 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet9.610 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Subinterface, address is 0000.0000.0000
+        Description: TEST_SYNC_SUBINTERFACE
+        IP MTU 0 bytes (default)
+        Down 1 day, 10 minutes, 21 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.10.10.1/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 24 seconds
+      Loopback10 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV4
+        Internet address is 10.3.4.1/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:beef:10:4::1, subnet is 2001:beef:10:4::1/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 24 seconds
+      Loopback11 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV6
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:beef:10:4::11, subnet is 2001:beef:10:4::11/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 24 seconds
+      Loopback123 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID 887
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 24 seconds
+      Loopback250 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_ANYCAST_IPV4
+        Internet address is 10.3.250.250/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:beef:250::250, subnet is 2001:beef:250::250/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 24 seconds
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640a (bia 0242.ac64.640a)
+        Internet address is 172.100.100.10/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 10 minutes, 23 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 651 bps (0.0% with framing overhead), 1 packets/sec
+        5 minutes output rate 725 bps (0.0% with framing overhead), 0 packets/sec
+           26488 packets input, 3778532 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           26428 packets output, 9214539 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Port-Channel41 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Port-Channel, address is 0000.0000.0000
+        Description: TEST_SYNC_LAG_TRUNK
+        Ethernet MTU 9214 bytes
+        Full-duplex, Unconfigured
+        Active members in this channel: 0
+        Fallback mode is: off
+        Down 1 day, 10 minutes, 11 seconds
+        1 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 0 bps (- with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (- with framing overhead), 0 packets/sec
+           0 packets input, 0 bytes
+           Received 0 broadcasts, 0 multicast
+           0 input errors, 0 input discards
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 output discards
+      Vlan510 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Vlan, address is 001c.73a9.7d04 (bia 001c.73a9.7d04)
+        Description: TEST_SYNC_SVI_PRIMARY_SECONDARY
+        Internet address is 10.3.14.33/29
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default)
+        Down 1 day, 10 minutes, 25 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abfe.eda0 (bia aac1.abfe.eda0)
+        Ethernet MTU 9214 bytes, BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 24 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 543 bps (0.0% with framing overhead), 1 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           45381 packets input, 5935785 bytes
+           Received 0 broadcasts, 45381 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet2 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abb9.056f (bia aac1.abb9.056f)
+        Description: P2P to ceos-leaf-1 Ethernet1
+        Internet address is 10.10.0.0/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 24 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 143 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13148 packets input, 1626806 bytes
+           Received 10 broadcasts, 2902 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 673 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet2.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.abb9.056f
+        Description: Control Plane P2P to ceos-leaf-1 Ethernet1.101
+        Internet address is 10.101.0.0/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 10 minutes, 23 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet3 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abac.c085 (bia aac1.abac.c085)
+        Description: P2P to ceos-leaf-2 Ethernet1
+        Internet address is 10.10.0.4/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 24 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 146 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13168 packets input, 1627969 bytes
+           Received 10 broadcasts, 2901 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet3.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.abac.c085
+        Description: Control Plane P2P to ceos-leaf-2 Ethernet1.101
+        Internet address is 10.101.0.4/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 10 minutes, 23 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet4 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abfc.3263 (bia aac1.abfc.3263)
+        Description: P2P to ceos-leaf-3 Ethernet1
+        Internet address is 10.10.0.8/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 24 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 145 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13173 packets input, 1628332 bytes
+           Received 8 broadcasts, 2901 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 953 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet4.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.abfc.3263
+        Description: Control Plane P2P to ceos-leaf-3 Ethernet1.101
+        Internet address is 10.101.0.8/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 10 minutes, 23 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet9.610 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Subinterface, address is 0000.0000.0000
+        Description: TEST_SYNC_SUBINTERFACE
+        IP MTU 0 bytes (default)
+        Down 1 day, 10 minutes, 24 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.10.10.1/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 26 seconds
+      Loopback10 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV4
+        Internet address is 10.3.4.1/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:beef:10:4::1, subnet is 2001:beef:10:4::1/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 26 seconds
+      Loopback11 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV6
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:beef:10:4::11, subnet is 2001:beef:10:4::11/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 26 seconds
+      Loopback123 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID 887
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 26 seconds
+      Loopback250 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_ANYCAST_IPV4
+        Internet address is 10.3.250.250/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:beef:250::250, subnet is 2001:beef:250::250/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 26 seconds
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640a (bia 0242.ac64.640a)
+        Internet address is 172.100.100.10/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 10 minutes, 26 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 778 bps (0.0% with framing overhead), 1 packets/sec
+        5 minutes output rate 1.50 kbps (0.0% with framing overhead), 1 packets/sec
+           26580 packets input, 3783580 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           26610 packets output, 9244239 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Port-Channel41 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Port-Channel, address is 0000.0000.0000
+        Description: TEST_SYNC_LAG_TRUNK
+        Ethernet MTU 9214 bytes
+        Full-duplex, Unconfigured
+        Active members in this channel: 0
+        Fallback mode is: off
+        Down 1 day, 10 minutes, 13 seconds
+        1 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 0 bps (- with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (- with framing overhead), 0 packets/sec
+           0 packets input, 0 bytes
+           Received 0 broadcasts, 0 multicast
+           0 input errors, 0 input discards
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 output discards
+      Vlan510 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Vlan, address is 001c.73a9.7d04 (bia 001c.73a9.7d04)
+        Description: TEST_SYNC_SVI_PRIMARY_SECONDARY
+        Internet address is 10.3.14.33/29
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default)
+        Down 1 day, 10 minutes, 27 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface Ethernet1:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abfe.eda0 (bia aac1.abfe.eda0)
+        Ethernet MTU 9214 bytes, BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 26 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 550 bps (0.0% with framing overhead), 1 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           45383 packets input, 5936153 bytes
+           Received 0 broadcasts, 45383 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface ethernet1:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abfe.eda0 (bia aac1.abfe.eda0)
+        Ethernet MTU 9214 bytes, BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 28 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 549 bps (0.0% with framing overhead), 1 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           45384 packets input, 5936276 bytes
+           Received 0 broadcasts, 45384 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface Loopback0:
+    output: |
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.10.10.1/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 32 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface loopback0:
+    output: |
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.10.10.1/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 35 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces Loopback0:
+    output: |
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.10.10.1/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 10 minutes, 37 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces Ethernet2:
+    output: |
+      Ethernet2 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.abb9.056f (bia aac1.abb9.056f)
+        Description: P2P to ceos-leaf-1 Ethernet1
+        Internet address is 10.10.0.0/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 10 minutes, 37 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 149 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13151 packets input, 1627263 bytes
+           Received 10 broadcasts, 2903 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 673 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show int description:
+    output: |
+      Interface                      Status         Protocol           Description
+      Et1                            up             up
+      Et2                            up             up                 P2P to ceos-leaf-1 Ethernet1
+      Et2.101                        up             up                 Control Plane P2P to ceos-leaf-1 Ethernet1.101
+      Et3                            up             up                 P2P to ceos-leaf-2 Ethernet1
+      Et3.101                        up             up                 Control Plane P2P to ceos-leaf-2 Ethernet1.101
+      Et4                            up             up                 P2P to ceos-leaf-3 Ethernet1
+      Et4.101                        up             up                 Control Plane P2P to ceos-leaf-3 Ethernet1.101
+      Et9.610                        down           lowerlayerdown     TEST_SYNC_SUBINTERFACE
+      Lo0                            up             up                 RID
+      Lo10                           up             up                 TEST_SYNC_LOOPBACK_IPV4
+      Lo11                           up             up                 TEST_SYNC_LOOPBACK_IPV6
+      Lo123                          up             up                 RID 887
+      Lo250                          up             up                 TEST_SYNC_ANYCAST_IPV4
+      Ma0                            up             up
+      Po41                           down           lowerlayerdown     TEST_SYNC_LAG_TRUNK
+      Vl510                          down           lowerlayerdown     TEST_SYNC_SVI_PRIMARY_SECONDARY
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces description:
+    output: |
+      Interface                      Status         Protocol           Description
+      Et1                            up             up
+      Et2                            up             up                 P2P to ceos-leaf-1 Ethernet1
+      Et2.101                        up             up                 Control Plane P2P to ceos-leaf-1 Ethernet1.101
+      Et3                            up             up                 P2P to ceos-leaf-2 Ethernet1
+      Et3.101                        up             up                 Control Plane P2P to ceos-leaf-2 Ethernet1.101
+      Et4                            up             up                 P2P to ceos-leaf-3 Ethernet1
+      Et4.101                        up             up                 Control Plane P2P to ceos-leaf-3 Ethernet1.101
+      Et9.610                        down           lowerlayerdown     TEST_SYNC_SUBINTERFACE
+      Lo0                            up             up                 RID
+      Lo10                           up             up                 TEST_SYNC_LOOPBACK_IPV4
+      Lo11                           up             up                 TEST_SYNC_LOOPBACK_IPV6
+      Lo123                          up             up                 RID 887
+      Lo250                          up             up                 TEST_SYNC_ANYCAST_IPV4
+      Ma0                            up             up
+      Po41                           down           lowerlayerdown     TEST_SYNC_LAG_TRUNK
+      Vl510                          down           lowerlayerdown     TEST_SYNC_SVI_PRIMARY_SECONDARY
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show run section interface:
+    output: |
+      no service interface inactive port-id allocation disabled
+      interface Port-Channel41
+         description TEST_SYNC_LAG_TRUNK
+         switchport trunk native vlan 410
+         switchport trunk allowed vlan 410-411,510
+         switchport mode trunk
+      interface Ethernet1
+      interface Ethernet2
+         description P2P to ceos-leaf-1 Ethernet1
+         no switchport
+         ip address 10.10.0.0/31
+      interface Ethernet2.101
+         description Control Plane P2P to ceos-leaf-1 Ethernet1.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.101.0.0/31
+      interface Ethernet3
+         description P2P to ceos-leaf-2 Ethernet1
+         no switchport
+         ip address 10.10.0.4/31
+      interface Ethernet3.101
+         description Control Plane P2P to ceos-leaf-2 Ethernet1.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.101.0.4/31
+      interface Ethernet4
+         description P2P to ceos-leaf-3 Ethernet1
+         no switchport
+         ip address 10.10.0.8/31
+      interface Ethernet4.101
+         description Control Plane P2P to ceos-leaf-3 Ethernet1.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.101.0.8/31
+      interface Ethernet6
+         description TEST_SYNC_LAG_MEMBER_A
+         channel-group 41 mode active
+      interface Ethernet7
+         description TEST_SYNC_LAG_MEMBER_B
+         channel-group 41 mode active
+      interface Ethernet8
+         description TEST_SYNC_ACCESS_PORT
+         switchport access vlan 510
+      interface Ethernet9
+         description TEST_SYNC_ROUTED_WITH_MAC
+         mac-address 02:00:00:11:00:09
+         no switchport
+         ip address 10.3.15.33/30
+      interface Ethernet9.610
+         description TEST_SYNC_SUBINTERFACE
+         encapsulation dot1q vlan 610
+         ip address 10.3.16.37/30
+      interface Loopback0
+         description RID
+         ip address 10.10.10.1/32
+      interface Loopback10
+         description TEST_SYNC_LOOPBACK_IPV4
+         ip address 10.3.4.1/32
+         ipv6 address 2001:beef:10:4::1/128
+      interface Loopback11
+         description TEST_SYNC_LOOPBACK_IPV6
+         ipv6 address 2001:beef:10:4::11/128
+      interface Loopback123
+         description RID 887
+      interface Loopback250
+         description TEST_SYNC_ANYCAST_IPV4
+         ip address 10.3.250.250/32
+         ipv6 address 2001:beef:250::250/128
+      interface Management0
+         ip address 172.100.100.10/24
+      interface Vlan510
+         description TEST_SYNC_SVI_PRIMARY_SECONDARY
+         ip address 10.3.14.33/29
+         ipv6 address 2001:beef:11:4::32/64
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show running-config:
+    output: |
+      ! Command: show running-config
+      ! device: ceos-spine-1 (cEOSLab, EOS-4.35.2F-46221466.4352F (engineering build))
+      !
+      no aaa root
+      !
+      username admin privilege 15 role network-admin secret sha512 $6$rkWqX83gU7xi1gUp$SBZBBh3Ve3hjQUUryi3AagBs3tmqCYREHfK0.a3C7xGRWjLwEWJTKp0HrnQAnY8Xs8rb8Qd1JqSbhw7Kz4D4W0
+      !
+      management api http-commands
+         protocol https ssl profile selfSignedSSLProfile
+         no shutdown
+      !
+      no service interface inactive port-id allocation disabled
+      !
+      transceiver qsfp default-mode 4x10G
+      !
+      service routing protocols model multi-agent
+      !
+      hostname ceos-spine-1
+      !
+      snmp-server contact norfab@test.local
+      snmp-server location NorFab SNMP test
+      snmp-server community norfab rw
+      !
+      spanning-tree mode mstp
+      !
+      system l1
+         unsupported speed action error
+         unsupported error-correction action error
+      !
+      vlan 410
+         name TEST_S1_TRUNK_A
+      !
+      vlan 411
+         name TEST_S1_TRUNK_B
+      !
+      vlan 510
+         name TEST_S1_ACCESS
+      !
+      vlan 610
+         name TEST_S1_SUBIF
+      !
+      vrf instance CONTROL_PLANE
+      !
+      management api gnmi
+         transport grpc default
+      !
+      management api netconf
+         transport ssh default
+      !
+      management security
+         ssl profile selfSignedSSLProfile
+            certificate self-signed.crt key self-signed.key
+      !
+      aaa authentication enable default none
+      aaa authorization exec default local
+      aaa authorization commands all default local
+      !
+      interface Port-Channel41
+         description TEST_SYNC_LAG_TRUNK
+         switchport trunk native vlan 410
+         switchport trunk allowed vlan 410-411,510
+         switchport mode trunk
+      !
+      interface Ethernet1
+      !
+      interface Ethernet2
+         description P2P to ceos-leaf-1 Ethernet1
+         no switchport
+         ip address 10.10.0.0/31
+      !
+      interface Ethernet2.101
+         description Control Plane P2P to ceos-leaf-1 Ethernet1.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.101.0.0/31
+      !
+      interface Ethernet3
+         description P2P to ceos-leaf-2 Ethernet1
+         no switchport
+         ip address 10.10.0.4/31
+      !
+      interface Ethernet3.101
+         description Control Plane P2P to ceos-leaf-2 Ethernet1.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.101.0.4/31
+      !
+      interface Ethernet4
+         description P2P to ceos-leaf-3 Ethernet1
+         no switchport
+         ip address 10.10.0.8/31
+      !
+      interface Ethernet4.101
+         description Control Plane P2P to ceos-leaf-3 Ethernet1.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.101.0.8/31
+      !
+      interface Ethernet6
+         description TEST_SYNC_LAG_MEMBER_A
+         channel-group 41 mode active
+      !
+      interface Ethernet7
+         description TEST_SYNC_LAG_MEMBER_B
+         channel-group 41 mode active
+      !
+      interface Ethernet8
+         description TEST_SYNC_ACCESS_PORT
+         switchport access vlan 510
+      !
+      interface Ethernet9
+         description TEST_SYNC_ROUTED_WITH_MAC
+         mac-address 02:00:00:11:00:09
+         no switchport
+         ip address 10.3.15.33/30
+      !
+      interface Ethernet9.610
+         description TEST_SYNC_SUBINTERFACE
+         encapsulation dot1q vlan 610
+         ip address 10.3.16.37/30
+      !
+      interface Loopback0
+         description RID
+         ip address 10.10.10.1/32
+      !
+      interface Loopback10
+         description TEST_SYNC_LOOPBACK_IPV4
+         ip address 10.3.4.1/32
+         ipv6 address 2001:beef:10:4::1/128
+      !
+      interface Loopback11
+         description TEST_SYNC_LOOPBACK_IPV6
+         ipv6 address 2001:beef:10:4::11/128
+      !
+      interface Loopback123
+         description RID 887
+      !
+      interface Loopback250
+         description TEST_SYNC_ANYCAST_IPV4
+         ip address 10.3.250.250/32
+         ipv6 address 2001:beef:250::250/128
+      !
+      interface Management0
+         ip address 172.100.100.10/24
+      !
+      interface Vlan510
+         description TEST_SYNC_SVI_PRIMARY_SECONDARY
+         ip address 10.3.14.33/29
+         ipv6 address 2001:beef:11:4::32/64
+      !
+      ip routing
+      ip routing vrf CONTROL_PLANE
+      !
+      ip route 0.0.0.0/0 172.100.100.1
+      !
+      route-map ALLOW-ALL permit 10
+      !
+      router bgp 65001
+         router-id 10.10.10.1
+         neighbor EVPN-OVERLAY peer group
+         neighbor EVPN-OVERLAY update-source Loopback0
+         neighbor EVPN-OVERLAY ebgp-multihop 3
+         neighbor EVPN-OVERLAY send-community standard extended
+         neighbor 10.10.0.1 remote-as 65101
+         neighbor 10.10.0.1 description ceos-leaf-1 Ethernet1
+         neighbor 10.10.0.1 route-map ALLOW-ALL in
+         neighbor 10.10.0.1 route-map ALLOW-ALL out
+         neighbor 10.10.0.5 remote-as 65102
+         neighbor 10.10.0.5 description ceos-leaf-2 Ethernet1
+         neighbor 10.10.0.5 route-map ALLOW-ALL in
+         neighbor 10.10.0.5 route-map ALLOW-ALL out
+         neighbor 10.10.0.9 remote-as 65103
+         neighbor 10.10.0.9 description ceos-leaf-3 Ethernet1
+         neighbor 10.10.0.9 route-map ALLOW-ALL in
+         neighbor 10.10.0.9 route-map ALLOW-ALL out
+         neighbor 10.10.10.11 peer group EVPN-OVERLAY
+         neighbor 10.10.10.11 remote-as 65101
+         neighbor 10.10.10.11 description ceos-leaf-1 Loopback0 EVPN
+         neighbor 10.10.10.12 peer group EVPN-OVERLAY
+         neighbor 10.10.10.12 remote-as 65102
+         neighbor 10.10.10.12 description ceos-leaf-2 Loopback0 EVPN
+         neighbor 10.10.10.13 peer group EVPN-OVERLAY
+         neighbor 10.10.10.13 remote-as 65103
+         neighbor 10.10.10.13 description ceos-leaf-3 Loopback0 EVPN
+         !
+         address-family evpn
+            neighbor EVPN-OVERLAY activate
+         !
+         address-family ipv4
+            network 10.10.10.1/32
+         !
+         vrf CONTROL_PLANE
+            neighbor 10.101.0.1 remote-as 65101
+            neighbor 10.101.0.1 description ceos-leaf-1 Ethernet1.101
+            neighbor 10.101.0.5 remote-as 65102
+            neighbor 10.101.0.5 description ceos-leaf-2 Ethernet1.101
+            neighbor 10.101.0.9 remote-as 65103
+            neighbor 10.101.0.9 description ceos-leaf-3 Ethernet1.101
+      !
+      end
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  dir:
+    output: |
+      Directory of flash:/
+
+             -rw-       25179           Aug 15 01:02  AsuFastPktTransmit.log
+             drwx        4096           Dec 13  2025  Fossil
+             -rw-       15478           Aug 15 01:02  SsuRestore.log
+             -rw-       15478           Aug 15 01:02  SsuRestoreLegacy.log
+             drwx        4096           Jun 14 07:56  aboot
+             -rw-           0           Dec 13  2025  boot-config
+             drwx        4096           Aug 15 01:12  debug
+             drwx        4096           Dec 13  2025  fastpkttx.backup
+             -rw-          28           Aug 15 03:07  file_copy_test.txt
+             -rwx        1673           Aug 15 01:02  if-wait.sh
+             -rw-         161           Aug 15 01:02  kickstart-config
+             drwx        4096           Aug 16 01:13  persist
+             -rw-        5366           Aug 15 03:04  rollback-0
+             drwx        4096           Dec 13  2025  schedule
+             -rw-        5367           Aug 15 03:04  startup-config
+             -rw-          18           Dec 13  2025  system_mac_address
+             drwx        4096           Jun 14 07:56  tpm-data
+
+      103240073216 bytes total (30540042240 bytes free) on flash:
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
