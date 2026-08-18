@@ -148,6 +148,9 @@ class CfgTask:
         nr = self._add_processors(filtered_nornir, kwargs, job)  # add processors
 
         # render config using Jinja2 on a per-host basis
+        jinja2_filters = self.add_jinja2_filters()
+        jinja2_netbox = self.add_jinja2_netbox()
+        jinja2_template_cache = {}
         for host in nr.inventory.hosts.values():
             rendered = self.jinja2_render_templates(
                 templates=config,
@@ -155,9 +158,10 @@ class CfgTask:
                     "host": host,
                     "norfab": self.client,
                     "job_data": job_data,
-                    "netbox": self.add_jinja2_netbox(),
+                    "netbox": jinja2_netbox,
                 },
-                filters=self.add_jinja2_filters(),
+                filters=jinja2_filters,
+                template_cache=jinja2_template_cache,
             )
             host.data["__task__"] = {"config": rendered}
 

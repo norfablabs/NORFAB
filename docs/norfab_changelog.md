@@ -7,6 +7,7 @@
 ## ENHANCEMENTS
 
 1. Enhanced NetBox `sync_device_interfaces` with `ignore_vlans` and `ignore_vrf` options, plus ordered interface-name and VLAN-ID-range mappings for dynamic `vlan_group` selection.
+2. Improved Jinja2 template rendering for Nornir `cli`, `cfg`, and `test` tasks by reusing fetched and compiled `nf://` templates across per-host rendering loops while preserving dynamic per-host template URLs and include support.
 
 ---
 

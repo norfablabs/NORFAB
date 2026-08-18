@@ -1967,7 +1967,11 @@ class NFPWorker:
             return None
 
     def jinja2_render_templates(
-        self, templates: list[str], context: dict = None, filters: dict = None
+        self,
+        templates: list[str],
+        context: dict = None,
+        filters: dict = None,
+        template_cache: dict = None,
     ) -> str:
         """
         Download (if needed) and render a list of Jinja2 templates with the given context and optional filters.
@@ -1976,6 +1980,8 @@ class NFPWorker:
             templates (list[str]): A list of Jinja2 template strings or NorFab file paths.
             context (dict): A dictionary containing the context variables for rendering the templates.
             filters (dict, optional): A dictionary of custom Jinja2 filters to be used during rendering.
+            template_cache (dict, optional): Cache of compiled Jinja2 file templates
+                keyed by resolved NorFab file URL.
 
         Returns:
             str: The rendered templates concatenated into a single string.
@@ -1983,18 +1989,23 @@ class NFPWorker:
         rendered = []
         filters = filters or {}
         context = context or {}
+        template_cache = template_cache if template_cache is not None else {}
         for template in templates:
-            j2env = Environment(loader="BaseLoader")
-            j2env.filters.update(filters)  # add custom filters
-            renderer = j2env.from_string(template)
-            template = renderer.render(**context)
+            if any(marker in template for marker in ("{{", "{%", "{#")):
+                j2env = Environment(loader="BaseLoader")
+                j2env.filters.update(filters)  # add custom filters
+                renderer = j2env.from_string(template)
+                template = renderer.render(**context)
             # download template file and render it again
             if template.startswith("nf://"):
-                filepath = self.jinja2_fetch_template(template)
-                searchpath, filename = os.path.split(filepath)
-                j2env = Environment(loader=FileSystemLoader(searchpath))
-                j2env.filters.update(filters)  # add custom filters
-                renderer = j2env.get_template(filename)
+                renderer = template_cache.get(template)
+                if renderer is None:
+                    filepath = self.jinja2_fetch_template(template)
+                    searchpath, filename = os.path.split(filepath)
+                    j2env = Environment(loader=FileSystemLoader(searchpath))
+                    j2env.filters.update(filters)  # add custom filters
+                    renderer = j2env.get_template(filename)
+                    template_cache[template] = renderer
                 rendered.append(renderer.render(**context))
             # template content is fully rendered
             else:
@@ -2022,8 +2033,9 @@ class NFPWorker:
             msg = f"{self.name} - file download failed '{url}'"
             raise FileNotFoundError(msg)
 
-        # download Jinja2 template "include"-ed files
-        content = self.fetch_file(url, read=True)
+        # load Jinja2 template content to parse "include"-ed files
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
         j2env = Environment(loader="BaseLoader")
         try:
             parsed_content = j2env.parse(content)

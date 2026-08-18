@@ -256,6 +256,29 @@ class TestNornirCfg:
                     host_name in res["dry_run"]
                 ), f"{worker}:{host_name} cfg dry run output is not rendered"
 
+    def test_config_from_dynamic_file_template_per_host(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "cfg",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "config": "nf://cfg/{{ host.name }}_config.j2",
+                "dry_run": True,
+                "FL": ["ceos-spine-1", "ceos-spine-2"],
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            for host_name, res in results["result"].items():
+                assert "dry_run" in res, f"{worker}:{host_name} no cfg dry run output"
+                assert (
+                    f"description dynamic config for {host_name}" in res["dry_run"]
+                ), f"{worker}:{host_name} dynamic config template fetch is wrong"
+                assert (
+                    f"description rendered config for {host_name}" in res["dry_run"]
+                ), f"{worker}:{host_name} dynamic config template rendering is wrong"
+
     def test_config_plugin_napalm(self, nfclient):
         ret = nfclient.run_job(
             "nornir",

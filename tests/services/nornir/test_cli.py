@@ -247,6 +247,26 @@ class TestNornirCli:
                 ), f"{worker}:{host} show clock output is wrong"
 
     @pytest.mark.nornir_fakenos
+    def test_commands_inline_template_per_host_dry_run(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "cli",
+            workers=["nornir-worker-4"],
+            kwargs={
+                "commands": "show hostname {{ host.name }}",
+                "dry_run": True,
+                "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            for host, res in results["result"].items():
+                assert (
+                    res["dry_run"] == f"show hostname {host}"
+                ), f"{worker}:{host} per-host command rendering is wrong"
+
+    @pytest.mark.nornir_fakenos
     def test_commands_from_file_dry_run(self, nfclient):
         ret = nfclient.run_job(
             "nornir",
@@ -311,6 +331,29 @@ class TestNornirCli:
 
         assert found_fn_ceos_sp_1, "No results for fn-ceos-sp-1"
         assert found_fn_ceos_sp_2, "No results for fn-ceos-sp-2"
+
+    @pytest.mark.nornir_fakenos
+    def test_commands_from_dynamic_file_template_per_host(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "cli",
+            workers=["nornir-worker-4"],
+            kwargs={
+                "commands": "nf://cli/{{ host.name }}_commands.j2",
+                "dry_run": True,
+                "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            for host, res in results["result"].items():
+                assert (
+                    f"show dynamic command for {host}" in res["dry_run"]
+                ), f"{worker}:{host} dynamic command template fetch is wrong"
+                assert (
+                    f"show rendered command for {host}" in res["dry_run"]
+                ), f"{worker}:{host} dynamic command template rendering is wrong"
 
     @pytest.mark.nornir_fakenos
     def test_run_ttp(self, nfclient):

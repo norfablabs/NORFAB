@@ -394,6 +394,9 @@ class CliTask:
         # render commands using Jinja2 on a per-host basis
         if commands:
             commands = commands if isinstance(commands, list) else [commands]
+            jinja2_filters = self.add_jinja2_filters()
+            jinja2_netbox = self.add_jinja2_netbox()
+            jinja2_template_cache = {}
             for host in nr.inventory.hosts.values():
                 rendered = self.jinja2_render_templates(
                     templates=commands,
@@ -401,9 +404,10 @@ class CliTask:
                         "host": host,
                         "norfab": self.client,
                         "job_data": job_data,
-                        "netbox": self.add_jinja2_netbox(),
+                        "netbox": jinja2_netbox,
                     },
-                    filters=self.add_jinja2_filters(),
+                    filters=jinja2_filters,
+                    template_cache=jinja2_template_cache,
                 )
                 host.data["__task__"] = {"commands": rendered}
 

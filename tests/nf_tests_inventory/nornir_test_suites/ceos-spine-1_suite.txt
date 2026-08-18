@@ -1,0 +1,4 @@
+- task: "show hostname"
+  test: contains
+  pattern: "{{ host.name }}"
+  name: check dynamic suite for ceos-spine-1

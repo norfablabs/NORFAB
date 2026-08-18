@@ -114,6 +114,9 @@ class TestTask:
         job_data = self.load_job_data(job_data)
 
         # generate per-host test suites
+        jinja2_filters = self.add_jinja2_filters()
+        jinja2_netbox = self.add_jinja2_netbox()
+        jinja2_template_cache = {}
         for host_name, host in filtered_nornir.inventory.hosts.items():
             # render suite using Jinja2
             try:
@@ -123,9 +126,10 @@ class TestTask:
                         "host": host,
                         "norfab": self.client,
                         "job_data": job_data,
-                        "netbox": self.add_jinja2_netbox(),
+                        "netbox": jinja2_netbox,
                     },
-                    filters=self.add_jinja2_filters(),
+                    filters=jinja2_filters,
+                    template_cache=jinja2_template_cache,
                 )
             except Exception as e:
                 msg = f"{self.name} - '{suite}' Jinja2 rendering failed: '{type(e).__name__}:{e}'"

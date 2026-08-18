@@ -207,6 +207,34 @@ class TestNornirTest:
                         "FAIL",
                     ], f"{worker}:{host}:{test_name} unexpected test result"
 
+    def test_nornir_test_dynamic_suite_template_per_host_dry_run(self, nfclient):
+        ret = nfclient.run_job(
+            "nornir",
+            "test",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "suite": "nf://nornir_test_suites/{{ host.name }}_suite.txt",
+                "dry_run": True,
+                "FL": ["ceos-spine-1", "ceos-spine-2"],
+            },
+        )
+        pprint.pprint(ret)
+
+        for worker, results in ret.items():
+            assert results["failed"] is False, f"{worker} results failed"
+            for host, res in results["result"].items():
+                assert (
+                    "tests_dry_run" in res
+                ), f"{worker}:{host} no tests_dry_run results"
+                assert len(res["tests_dry_run"]) == 1
+                test = res["tests_dry_run"][0]
+                assert (
+                    test["name"] == f"check dynamic suite for {host}"
+                ), f"{worker}:{host} dynamic suite template fetch is wrong"
+                assert (
+                    test["pattern"] == host
+                ), f"{worker}:{host} dynamic suite template rendering is wrong"
+
     def test_nornir_test_suite_subset(self, nfclient):
         ret = nfclient.run_job(
             "nornir",
