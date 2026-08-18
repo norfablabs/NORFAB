@@ -944,6 +944,11 @@ class CreateHostFromNetboxInput(BaseModel, use_enum_values=True, populate_by_nam
         None,
         description="Additional Nornir group names to attach to created hosts",
     )
+    replace: StrictBool = Field(
+        False,
+        description="Replace all current Nornir hosts with the returned NetBox hosts",
+        json_schema_extra={"presence": True},
+    )
     dry_run: Union[None, StrictBool] = Field(
         None,
         description="Return predicted changes without changing Nornir inventory",

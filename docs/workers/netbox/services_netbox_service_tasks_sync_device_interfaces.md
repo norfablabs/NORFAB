@@ -84,6 +84,28 @@ Both filters are applied before the diff, so interfaces that do not match are co
 
 By default `process_deletions=False` — interfaces present in NetBox but absent in live data are left untouched. Set `process_deletions=True` to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.
 
+## Ignoring VLANs and VRFs
+
+By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Set `ignore_vlans=True` to skip VLAN creation and leave all interface VLAN associations unchanged. Set `ignore_vrf=True` to skip VRF creation and leave interface VRF associations unchanged.
+
+## VLAN Group Selection
+
+`vlan_group` accepts a single VLAN group name, slug, or ID, or an ordered mapping keyed by VLAN group name. Each mapped group can match interface names using case-sensitive glob patterns, VLAN IDs using range strings, or both:
+
+```python
+{
+    "ACCESS_VLANS": {
+        "interface_names": ["Ethernet*"],
+        "vlan_ids": ["100-199", "300"],
+    },
+    "INFRA_VLANS": {
+        "vlan_ids": ["400-499"],
+    },
+}
+```
+
+Values within one criterion use OR logic. When both `interface_names` and `vlan_ids` are present they use AND logic. Groups are checked in mapping order and the first match wins. VLANs that do not match any group use the existing device-site behavior. VLAN ranges use plain strings such as `100-199`; bracket notation is not accepted.
+
 ## Branching Support
 
 The task is branch-aware and can push changes into a NetBox branch. The [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) must be installed. Specify the `branch` parameter; the branch is created automatically if it does not already exist.
@@ -120,6 +142,12 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
 
     ```
     nf#netbox sync interfaces devices ceos-spine-1 filter-by-description "TEST_SYNC_*"
+    ```
+
+    Sync interfaces without creating or associating VLANs and VRFs:
+
+    ```
+    nf#netbox sync interfaces devices ceos-spine-1 ignore-vlans ignore-vrf
     ```
 
     Sync interfaces into a NetBox branch:
@@ -198,6 +226,37 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
         },
     )
 
+    # sync interfaces without creating or associating VLANs and VRFs
+    result = client.run_job(
+        "netbox",
+        "sync_device_interfaces",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-spine-1"],
+            "ignore_vlans": True,
+            "ignore_vrf": True,
+        },
+    )
+
+    # dynamically select VLAN groups by interface name and VLAN ID ranges
+    result = client.run_job(
+        "netbox",
+        "sync_device_interfaces",
+        workers="any",
+        kwargs={
+            "devices": ["ceos-spine-1"],
+            "vlan_group": {
+                "ACCESS_VLANS": {
+                    "interface_names": ["Ethernet*"],
+                    "vlan_ids": ["100-199", "300"],
+                },
+                "INFRA_VLANS": {
+                    "vlan_ids": ["400-499"],
+                },
+            },
+        },
+    )
+
     # sync into a NetBox branch
     result = client.run_job(
         "netbox",
@@ -242,6 +301,9 @@ root
             ├── process-deletions:    Delete interfaces present in NetBox but absent in live data
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
+            ├── vlan-group:    VLAN group name, slug, ID, or ordered criteria mapping
+            ├── ignore-vlans:    Ignore discovered VLANs and leave interface VLAN associations unchanged
+            ├── ignore-vrf:    Ignore discovered VRFs and leave interface VRF associations unchanged
             ├── branch:    Branching plugin branch name to push changes into
             ├── FO:    Filter Nornir hosts using Filter Object
             ├── FB:    Filter Nornir hosts by name using Glob Patterns

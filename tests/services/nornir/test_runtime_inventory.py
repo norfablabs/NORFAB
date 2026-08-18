@@ -224,3 +224,27 @@ class TestNornirRunTimeInventory:
         assert results["failed"] is False
         assert results["result"]["created"] == ["fceos4"]
         assert results["result"]["missing"] == ["norfab-missing-device"]
+
+    def test_create_host_from_netbox_replace_inventory(self, nfclient):
+        nfclient.run_job("nornir", "refresh_nornir", workers=["nornir-worker-1"])
+
+        ret = nfclient.run_job(
+            "nornir",
+            "create_host_from_netbox",
+            workers=["nornir-worker-1"],
+            kwargs={
+                "devices": ["fceos4"],
+                "netbox_workers": "any",
+                "replace": True,
+            },
+        )
+        ret_hosts = nfclient.run_job(
+            "nornir",
+            "get_nornir_hosts",
+            workers=["nornir-worker-1"],
+        )
+        pprint.pprint(ret)
+        pprint.pprint(ret_hosts)
+
+        assert ret["nornir-worker-1"]["failed"] is False
+        assert ret_hosts["nornir-worker-1"]["result"] == ["fceos4"]

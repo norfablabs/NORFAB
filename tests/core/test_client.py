@@ -17,8 +17,8 @@ class TestDedicatedNfApiClient:
         inventory_data = {"broker": dict(nfclient.inventory.broker)}
         client_name = f"test_dedicated_client_{uuid4().hex}"
         client_base_dir = Path(__file__).resolve().parent / "temp"
-        if client_base_dir.exists():
-            shutil.rmtree(client_base_dir)
+        # if client_base_dir.exists():
+        #     shutil.rmtree(client_base_dir)
         client_base_dir.mkdir()
 
         nf = NorFab(
@@ -58,7 +58,7 @@ class TestDedicatedNfApiClient:
 
 
 class TestRemoteBrokerClient:
-    def test_list_workers_mmi(self):
+    def test_list_workers_mmi_remote_broker(self):
         inventory_data = {
             "broker": {
                 "endpoint": "tcp://192.168.1.220:5555",
@@ -68,8 +68,8 @@ class TestRemoteBrokerClient:
         }
         client_name = f"test_remote_broker_client_{uuid4().hex}"
         client_base_dir = Path(__file__).resolve().parent / "temp"
-        if client_base_dir.exists():
-            shutil.rmtree(client_base_dir)
+        # if client_base_dir.exists():
+        #     shutil.rmtree(client_base_dir)
         client_base_dir.mkdir()
 
         nf = NorFab(

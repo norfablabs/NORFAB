@@ -18,6 +18,7 @@ from .netbox_models import (
     SyncMacAddressesResult,
     UpdateInterfacesDescriptionInput,
     UpdateInterfacesDescriptionResult,
+    VlanGroupMap,
 )
 from .netbox_worker_utilities import (
     review_sync_task_result,
@@ -26,6 +27,42 @@ from .netbox_worker_utilities import (
 )
 
 log = logging.getLogger(__name__)
+
+
+def _select_vlan_group(
+    vlan_group: Union[None, str, int, VlanGroupMap],
+    interface_name: str,
+    vlan_id: Union[None, int],
+    lookup_cache: Union[None, dict] = None,
+) -> Union[None, str, int]:
+    """Return the first VLAN group whose configured criteria all match."""
+    if not isinstance(vlan_group, dict):
+        return vlan_group
+
+    for group_name, criteria in vlan_group.items():
+        if hasattr(criteria, "model_dump"):
+            criteria = criteria.model_dump()
+        interface_names = criteria.get("interface_names") or []
+        vlan_ranges = criteria.get("vlan_ids") or []
+        interface_match = not interface_names or any(
+            fnmatch.fnmatchcase(interface_name, pattern) for pattern in interface_names
+        )
+        cache_key = ("vlan_group_ranges", group_name, tuple(vlan_ranges))
+        if lookup_cache is not None and cache_key in lookup_cache:
+            expanded_vlan_ids = lookup_cache[cache_key]
+        else:
+            expanded_vlan_ids = {
+                int(expanded_vlan_id)
+                for vlan_range in vlan_ranges
+                for expanded_vlan_id in expand_alphanumeric_range(f"[{vlan_range}]")
+            }
+            if lookup_cache is not None:
+                lookup_cache[cache_key] = expanded_vlan_ids
+        vlan_match = not vlan_ranges or vlan_id in expanded_vlan_ids
+        if interface_match and vlan_match:
+            return group_name
+
+    return None
 
 
 def _empty_interface_connection_context(interface: object) -> dict:
@@ -147,7 +184,7 @@ def _build_interface_payload(
     intf_name: str = None,
     nb: object = None,
     _lookup_cache: Union[None, dict] = None,
-    vlan_group: Union[None, str, int] = None,
+    vlan_group: Union[None, str, int, VlanGroupMap] = None,
 ) -> dict:
     """Build a NetBox interface API payload from desired state and changed fields.
 
@@ -172,6 +209,20 @@ def _build_interface_payload(
     }
     payload["name"] = intf_name
 
+    def resolve_interface_vlan(vid: Union[None, int]) -> Union[int, None]:
+        return resolve_vlan(
+            vid=vid,
+            nb=nb,
+            job=job,
+            ret=ret,
+            worker_name=worker_name,
+            site_id=device["site_id"],
+            vlan_group=_select_vlan_group(
+                vlan_group, intf_name, vid, lookup_cache=_lookup_cache
+            ),
+            _lookup_cache=_lookup_cache,
+        )
+
     if "parent" in changed_fields:
         parent_name = desired["parent"]
         payload["parent"] = name_to_id.get(parent_name) if parent_name else None
@@ -182,16 +233,7 @@ def _build_interface_payload(
 
     if "untagged_vlan" in changed_fields:
         vid = desired["untagged_vlan"]
-        vlan_id = resolve_vlan(
-            vid=vid,
-            nb=nb,
-            job=job,
-            ret=ret,
-            worker_name=worker_name,
-            site_id=device["site_id"],
-            vlan_group=vlan_group,
-            _lookup_cache=_lookup_cache,
-        )
+        vlan_id = resolve_interface_vlan(vid)
         if vlan_id:
             payload["untagged_vlan"] = vlan_id
         else:
@@ -202,16 +244,7 @@ def _build_interface_payload(
 
     if "qinq_svlan" in changed_fields:
         vid = desired["qinq_svlan"]
-        vlan_id = resolve_vlan(
-            vid=vid,
-            nb=nb,
-            job=job,
-            ret=ret,
-            worker_name=worker_name,
-            site_id=device["site_id"],
-            vlan_group=vlan_group,
-            _lookup_cache=_lookup_cache,
-        )
+        vlan_id = resolve_interface_vlan(vid)
         if vlan_id:
             payload["qinq_svlan"] = vlan_id
         else:
@@ -223,16 +256,7 @@ def _build_interface_payload(
     if "tagged_vlans" in changed_fields:
         payload["tagged_vlans"] = []
         for vid in desired["tagged_vlans"]:
-            vlan_id = resolve_vlan(
-                vid=vid,
-                nb=nb,
-                job=job,
-                ret=ret,
-                worker_name=worker_name,
-                site_id=device["site_id"],
-                vlan_group=vlan_group,
-                _lookup_cache=_lookup_cache,
-            )
+            vlan_id = resolve_interface_vlan(vid)
             if vlan_id:
                 payload["tagged_vlans"].append(vlan_id)
             else:
@@ -886,7 +910,9 @@ class NetboxInterfacesTasks:
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         update_type: Union[None, bool] = False,
-        vlan_group: Union[None, str, int] = None,
+        vlan_group: Union[None, str, int, VlanGroupMap] = None,
+        ignore_vlans: bool = False,
+        ignore_vrf: bool = False,
         **kwargs: Any,
     ) -> Result:
         """
@@ -907,8 +933,10 @@ class NetboxInterfacesTasks:
 
         **Side-Effects**
 
-        - Sync interfaces task creates VRFs if they do not exist in Netbox
-        - Sync interfaces task creates VLANs if they do not exist in Netbox
+        - Sync interfaces task creates VRFs if they do not exist in Netbox unless
+          ``ignore_vrf=True``
+        - Sync interfaces task creates VLANs if they do not exist in Netbox unless
+          ``ignore_vlans=True``
 
         **Prerequisites**
 
@@ -973,9 +1001,14 @@ class NetboxInterfacesTasks:
                 sync interfaces task unable to fully resolve interface types and
                 defaults to interface type `other` for most interfaces, this knob
                 allows to keep existing Netbox interfaces type intact.
-            vlan_group (str, int, optional): VLAN group name, slug, or ID to use
-                when resolving interface VLANs. Missing VLANs are created in this
-                group; otherwise they are created in the device site.
+            vlan_group (str, int, dict, optional): VLAN group name, slug, ID, or
+                ordered mapping of group names to interface name and VLAN ID range
+                criteria. Missing VLANs are created in the selected group; unmatched
+                VLANs are created in the device site.
+            ignore_vlans (bool, optional): If True, ignore discovered VLANs and
+                leave interface VLAN associations unchanged. Defaults to False.
+            ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave
+                interface VRF associations unchanged. Defaults to False.
             **kwargs: Additional Nornir host filter keyword arguments passed to
                 ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).
 
@@ -1171,6 +1204,19 @@ class NetboxInterfacesTasks:
         job.event(
             f"normalised {live_interface_count} live interface(s) after applying filters"
         )
+
+        # Remove ignored associations from both sides so existing values stay untouched.
+        ignored_fields = []
+        if ignore_vlans:
+            ignored_fields.extend(("untagged_vlan", "tagged_vlans", "qinq_svlan"))
+        if ignore_vrf:
+            ignored_fields.append("vrf")
+        if ignored_fields:
+            for state in (normalised_nb_all, normalised_live_all):
+                for interfaces in state.values():
+                    for interface in interfaces.values():
+                        for field in ignored_fields:
+                            interface.pop(field, None)
 
         # remove devices that returned no parsing results
         for device_name in devices:

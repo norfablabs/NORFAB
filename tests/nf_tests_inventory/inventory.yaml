@@ -1,7 +1,7 @@
 broker:
-  endpoint: tcp://192.168.1.24:5555
+  endpoint: '{{ env.get("BROKER_ENDPOINT", "tcp://192.168.1.24:5555") }}'
   shared_key: D>[[2]NH9#dN5?!o5DtibYYvV)ev?oRl}#P[>(q3
-  zmq_auth: true
+  zmq_auth: false
 
 client:
   nfapi_test_variable: '{{ env.get("NFAPI_TEST_VARIABLE") }}'

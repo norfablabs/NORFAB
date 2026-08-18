@@ -32,6 +32,7 @@ or NetBox-backed refresh also includes them.
 | `primary_ip` | No | Primary IP family to use for hostname. CLI alias: `primary-ip`. When omitted, the worker `netbox` inventory option is used if configured. |
 | `cache` | No | Cache usage mode passed to NetBox retrieval tasks. Defaults to `True` in the task. |
 | `groups` | No | Additional Nornir group names to attach to created hosts. |
+| `replace` | No | Delete all current runtime hosts before loading the returned NetBox hosts. Defaults to `False`. |
 | `dry_run` | No | Preview created, updated, and missing hosts without changing Nornir. CLI alias: `dry-run`. |
 | `progress` | No | Emit progress events. Defaults to `True`. |
 
@@ -73,6 +74,10 @@ calculated by comparing requested device names with returned host names.
     ```
 
     ```bash
+    nf# nornir inventory create-host-from-netbox devices leaf-1 leaf-2 replace workers nornir-worker-1
+    ```
+
+    ```bash
     nf# nornir inventory create-host-from-netbox devices leaf-1 dry-run workers nornir-worker-1
     ```
 
@@ -110,6 +115,8 @@ calculated by comparing requested device names with returned host names.
   `created` and `updated` using returned Nornir host names.
 - If some requested devices are missing, the task emits a warning and still
   creates or updates hosts for the devices NetBox returned.
+- `replace=True` deletes all current runtime hosts with `InventoryFun` before
+  loading the hosts returned by NetBox.
 - `dry_run=True` sets the top-level result `dry_run` flag and does not mutate
   runtime inventory.
 - Runtime inventory writes are delegated to `runtime_inventory` with a `load`

@@ -1,6 +1,6 @@
 hosts: 
   vmx-1:
-    hostname: 192.168.1.130
+    hostname: containerlab.lab
     platform: juniper_junos
     username: admin
     password: admin@123

@@ -60,6 +60,7 @@ class InventoryTasks:
         primary_ip: str | None = None,
         cache: bool | str | None = True,
         groups: list[str] | None = None,
+        replace: bool | None = False,
         dry_run: bool | None = False,
         progress: bool | None = True,
     ) -> Result:
@@ -164,6 +165,11 @@ class InventoryTasks:
             job.event("dry-run requested, Nornir runtime inventory not changed")
             ret.dry_run = True
             return ret
+
+        if replace is True:
+            InventoryFun(
+                self.nr, call="delete_host", name=list(self.nr.inventory.hosts)
+            )
 
         # Runtime inventory load calls create_host once for each returned NetBox host.
         inventory_actions = [

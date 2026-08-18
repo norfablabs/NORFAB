@@ -14,6 +14,7 @@ from pydantic import (
 )
 
 from norfab.models import NorFabClientRunJob, Result
+from norfab.utils.text import expand_alphanumeric_range
 
 # --------------------------------------------------------------------------
 # NETBOX WORKER CONFIGURATION MODEL
@@ -812,6 +813,35 @@ class InventoryPatternMap(BaseModel, extra="forbid"):
                 )
 
 
+class VlanGroupCriteria(BaseModel, extra="forbid"):
+    """Criteria used to select a VLAN group for a discovered interface VLAN."""
+
+    interface_names: Union[None, List[StrictStr]] = None
+    vlan_ids: Union[None, List[StrictStr]] = None
+
+    @model_validator(mode="after")
+    def validate_criteria(self) -> "VlanGroupCriteria":
+        if not self.interface_names and not self.vlan_ids:
+            raise ValueError("at least one VLAN group criterion is required")
+        if self.interface_names and any(
+            not pattern.strip() for pattern in self.interface_names
+        ):
+            raise ValueError("interface name patterns cannot be empty")
+        for vlan_range in self.vlan_ids or []:
+            if "[" in vlan_range or "]" in vlan_range:
+                raise ValueError(f"invalid VLAN ID range '{vlan_range}'")
+            expanded = expand_alphanumeric_range(f"[{vlan_range}]")
+            if any(
+                not vlan_id.isdigit() or not 1 <= int(vlan_id) <= 4094
+                for vlan_id in expanded
+            ):
+                raise ValueError(f"invalid VLAN ID range '{vlan_range}'")
+        return self
+
+
+VlanGroupMap = Dict[StrictStr, VlanGroupCriteria]
+
+
 class DeviceInventoryRecord(BaseModel, extra="forbid"):
     """Parsed live device inventory record."""
 
@@ -1532,10 +1562,22 @@ class SyncDeviceInterfacesInput(
         alias="update-type",
         json_schema_extra={"presence": True},
     )
-    vlan_group: Union[None, StrictStr, StrictInt] = Field(
+    vlan_group: Union[None, StrictStr, StrictInt, VlanGroupMap] = Field(
         None,
-        description="VLAN group name, slug, or ID to use when resolving or creating interface VLANs",
+        description="VLAN group name, slug, ID, or ordered criteria mapping to use when resolving or creating interface VLANs",
         alias="vlan-group",
+    )
+    ignore_vlans: StrictBool = Field(
+        False,
+        description="Ignore discovered VLANs and leave interface VLAN associations unchanged",
+        alias="ignore-vlans",
+        json_schema_extra={"presence": True},
+    )
+    ignore_vrf: StrictBool = Field(
+        False,
+        description="Ignore discovered VRFs and leave interface VRF associations unchanged",
+        alias="ignore-vrf",
+        json_schema_extra={"presence": True},
     )
 
 
