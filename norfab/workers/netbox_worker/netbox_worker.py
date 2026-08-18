@@ -539,7 +539,7 @@ class NetboxWorker(
             try:
                 nb_branch = nb.plugins.branching.branches.get(name=branch)
             except Exception:
-                msg = "Failed to retrieve branch '{branch}' from Netbox"
+                msg = f"Failed to retrieve branch '{branch}' from Netbox"
                 raise RuntimeError(msg)
 
             # create new branch
@@ -552,6 +552,13 @@ class NetboxWorker(
                 log.info(
                     f"{self.name} - Using existing branch '{branch}' in instance '{instance}'"
                 )
+
+            if nb_branch.status.value.lower() == "merged":
+                msg = f"'{instance}' NetBox branch '{branch}' is merged and cannot be used."
+                log.error(f"{self.name} - {msg}")
+                if job is not None:
+                    job.event(msg, severity="ERROR")
+                raise RuntimeError(msg)
 
             # wait for branch provisioning to complete
             if not nb_branch.status.value.lower() == "ready":

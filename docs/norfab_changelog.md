@@ -3,12 +3,17 @@
 ## FEATURES
 
 1. Added a Nornir `create_host_from_netbox` `replace` option to delete all current runtime hosts with `InventoryFun` before loading the requested NetBox hosts.
+2. Enhanced NetBox `sync_device_interfaces` with `ignore_vlans` and `ignore_vrf` options, plus ordered interface-name and VLAN-ID-range mappings for dynamic `vlan_group` selection.
 
 ## ENHANCEMENTS
 
-1. Enhanced NetBox `sync_device_interfaces` with `ignore_vlans` and `ignore_vrf` options, plus ordered interface-name and VLAN-ID-range mappings for dynamic `vlan_group` selection.
-2. Improved Jinja2 template rendering for Nornir `cli`, `cfg`, and `test` tasks by reusing fetched and compiled `nf://` templates across per-host rendering loops while preserving dynamic per-host template URLs and include support.
-3. Added NFCLI Nornir `test` `markdown` presence flag to emit rich markdown test reports.
+
+1. Improved Jinja2 template rendering for Nornir `cli`, `cfg`, and `test` tasks by reusing fetched and compiled `nf://` templates across per-host rendering loops while preserving dynamic per-host template URLs and include support.
+2. Added NFCLI Nornir `test` `markdown` presence flag to emit rich markdown test reports.
+
+## BUGS
+
+1. Fixed NetBox branch-aware tasks to reject merged branches before using them.
 
 ---
 
