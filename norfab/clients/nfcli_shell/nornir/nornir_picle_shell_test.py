@@ -46,6 +46,11 @@ class NornirTestShell(
         None,
         description="Test groups to run",
     )
+    markdown: StrictBool = Field(
+        False,
+        description="Emit markdown report results",
+        json_schema_extra={"presence": True},
+    )
 
     @staticmethod
     def source_suite(choice: str = None) -> list:
@@ -61,6 +66,7 @@ class NornirTestShell(
         timeout = kwargs.pop("timeout", 600)
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
+        markdown = kwargs.pop("markdown", False)
         dry_run = kwargs.get("dry_run", False)
 
         # extract job_data
@@ -77,9 +83,12 @@ class NornirTestShell(
         sortby = kwargs.pop("sortby", "host")  # tabulate
         reverse = kwargs.pop("reverse", False)  # tabulate
 
-        if table and not (verbose_result or dry_run):
+        if table and not (verbose_result or dry_run or markdown):
             kwargs["add_details"] = True
             kwargs["to_dict"] = False
+
+        if markdown:
+            kwargs["extensive"] = True
 
         result = run_future_job(
             "nornir",
@@ -88,11 +97,15 @@ class NornirTestShell(
             args=args,
             kwargs=kwargs,
             timeout=timeout,
+            markdown=markdown,
             nowait=nowait,
         )
 
         if nowait:
             return result, Outputters.outputter_nested
+
+        if markdown:
+            return result, Outputters.outputter_rich_markdown
 
         result = log_error_or_result(
             result, verbose_result=verbose_result, verbose_on_fail=False
