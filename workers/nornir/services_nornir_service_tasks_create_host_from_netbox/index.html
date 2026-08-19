@@ -6429,6 +6429,11 @@ or NetBox-backed refresh also includes them.</p>
 <td>Additional Nornir group names to attach to created hosts.</td>
 </tr>
 <tr>
+<td><code>replace</code></td>
+<td style="text-align: right;">No</td>
+<td>Delete all current runtime hosts before loading the returned NetBox hosts. Defaults to <code>False</code>.</td>
+</tr>
+<tr>
 <td><code>dry_run</code></td>
 <td style="text-align: right;">No</td>
 <td>Preview created, updated, and missing hosts without changing Nornir. CLI alias: <code>dry-run</code>.</td>
@@ -6464,6 +6469,8 @@ calculated by comparing requested device names with returned host names.</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>inventory<span class="w"> </span>create-host-from-netbox<span class="w"> </span>devices<span class="w"> </span>leaf-1<span class="w"> </span>instance<span class="w"> </span>prod<span class="w"> </span>cache<span class="w"> </span>refresh<span class="w"> </span>workers<span class="w"> </span>nornir-worker-1
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>inventory<span class="w"> </span>create-host-from-netbox<span class="w"> </span>devices<span class="w"> </span>leaf-1<span class="w"> </span>interfaces<span class="w"> </span>connections<span class="w"> </span>workers<span class="w"> </span>nornir-worker-1
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>inventory<span class="w"> </span>create-host-from-netbox<span class="w"> </span>devices<span class="w"> </span>leaf-1<span class="w"> </span>leaf-2<span class="w"> </span>replace<span class="w"> </span>workers<span class="w"> </span>nornir-worker-1
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>nornir<span class="w"> </span>inventory<span class="w"> </span>create-host-from-netbox<span class="w"> </span>devices<span class="w"> </span>leaf-1<span class="w"> </span>dry-run<span class="w"> </span>workers<span class="w"> </span>nornir-worker-1
 </code></pre></div>
@@ -6502,6 +6509,8 @@ calculated by comparing requested device names with returned host names.</p>
   <code>created</code> and <code>updated</code> using returned Nornir host names.</li>
 <li>If some requested devices are missing, the task emits a warning and still
   creates or updates hosts for the devices NetBox returned.</li>
+<li><code>replace=True</code> deletes all current runtime hosts with <code>InventoryFun</code> before
+  loading the hosts returned by NetBox.</li>
 <li><code>dry_run=True</code> sets the top-level result <code>dry_run</code> flag and does not mutate
   runtime inventory.</li>
 <li>Runtime inventory writes are delegated to <code>runtime_inventory</code> with a <code>load</code>
@@ -6685,7 +6694,13 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
-<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateHostFromNetboxInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateHostFromNetboxResult</span><span class="p">,</span>
@@ -6714,6 +6729,7 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
     <span class="n">primary_ip</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
@@ -6818,6 +6834,11 @@ the actual in-memory host replacement to <code>runtime_inventory</code>.</p>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, Nornir runtime inventory not changed&quot;</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="k">if</span> <span class="n">replace</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">InventoryFun</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="p">,</span> <span class="n">call</span><span class="o">=</span><span class="s2">&quot;delete_host&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="c1"># Runtime inventory load calls create_host once for each returned NetBox host.</span>
     <span class="n">inventory_actions</span> <span class="o">=</span> <span class="p">[</span>

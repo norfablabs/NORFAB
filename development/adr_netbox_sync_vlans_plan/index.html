@@ -1,0 +1,7574 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Network Automations Fabric documentation">
+      
+      
+        <meta name="author" content="Denis Mulyalin">
+      
+      
+        <link rel="canonical" href="https://docs.norfablabs.com/development/adr_netbox_sync_vlans_plan/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/logo.jpg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>ADR - NetBox sync_vlans Task Plan - Network Automations Fabric [NORFAB]</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="brown" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-netbox-sync_vlans-task-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+      
+  <img src="../../images/logo.jpg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Network Automations Fabric [NORFAB]
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR - NetBox sync_vlans Task Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="brown" data-md-color-accent="deep-orange"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/norfablabs/NORFAB" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+  </div>
+  <div class="md-source__repository">
+    norfablabs/norfab
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+      
+  <img src="../../images/logo.jpg" alt="logo">
+
+    </a>
+    Network Automations Fabric [NORFAB]
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/norfablabs/NORFAB" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+  </div>
+  <div class="md-source__repository">
+    norfablabs/norfab
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_why_use_norfab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why use NORFAB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/norfab_docker_deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distributed Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VSCode MCP Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containerlab
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containerlab
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_3" id="__nav_4_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy Netbox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Destroy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Save
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inspect
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Nornir Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FakeNOS
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FakeNOS
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_3" id="__nav_4_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_stop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_restart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_inspect_networks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inspect Networks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_get_nornir_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Nornir Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Nornir
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4_3" id="__nav_4_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CFG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagram
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Copy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SNMP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jinja2 Filters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Netbox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_3" id="__nav_4_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GraphQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Connections
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Circuits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get BGP Peerings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Nornir Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Containerlab Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Topology Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP Bulk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Prefix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Device Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync MAC Addresses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Peerings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_check_device_sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Check Device Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_all/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync All
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_bgp_peering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_bgp_peering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update Interfaces Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_crud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agent
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/services_agent_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/services_agent_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_3" id="__nav_4_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_7" id="__nav_4_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FastAPI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/services_fastapi_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_7_3" id="__nav_4_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_8" id="__nav_4_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FastMCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_8_3" id="__nav_4_8_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_8_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_8_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_9" id="__nav_4_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflow
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/services_workflow_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_9_3" id="__nav_4_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_10" id="__nav_4_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filesharing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Filesharing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_10_3" id="__nav_4_10_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_10_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_10_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    List Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fetch File
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Clients
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_nfcli_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFCLI Shell Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_python_api_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_robot_client_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ROBOT Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Customization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Customization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/norfab_hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Hooks System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Plugins
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service Plugins
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/service_plugin_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/service_plugin_local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/service_plugin_module/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Module Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_architecture_norfab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_architecture_nfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Protocol (NFP) RFC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4_1" id="__nav_7_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_nfapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI (Python API)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_broker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Worker Base
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simple Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4_2" id="__nav_7_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Workers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Built-in Workers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containerlab Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/api_reference_workers_fakenos_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FakeNOS Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filesharing Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4_3" id="__nav_7_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Clients
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Built-in Clients
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_clients_nfcli_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFCLI Client API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_clients_robot_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ROBOT Client API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Subsystems
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    NORFAB Subsystems
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_mmi_subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MMI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_jobs_subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jobs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_events_subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../norfab_docker_development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documentation_style_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Style Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_tasks_pydantic_models_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task Pydantic Models Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file_streaming_fetch_file/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Streaming (fetch_file)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Design Records
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Design Records
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox BGP Create/Update Tasks Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Sync devices interfaces Task plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_check_sync_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Device Check Sync Task Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_fastmcp_bearer_authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Bearer Auth plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_mcp_tool_annotations_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Tools Annotations plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_fastmcp_task_call_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Call Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Sync Devices Inventory plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_norfab_interactive_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Interactive Client Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_nfapi_client_first_startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI Client First Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_mcp_task_prompts_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Task Prompt Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_norfab_aaa_security_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab AAA Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_norfab_logging_isolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Logging Isolation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_nornir_snmp_tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/norfab_testing_framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Testing Framework
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/netbox_service_tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Service Tests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_help_with_norfab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact Us
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-and-class-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File and Class Layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-task-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public Task Contract
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Public Task Contract">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deletion-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deletion Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pydantic-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pydantic Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pydantic Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vlanrecord" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VlanRecord
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syncvlansinput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SyncVlansInput
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syncvlansresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SyncVlansResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Registration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope-and-object-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope and Object Identity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scope and Object Identity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#explicit-vlan-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explicit VLAN group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#site-compatibility-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Site compatibility mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-data-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Data Collection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalization-and-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalization and Aggregation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Normalization and Aggregation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cross-device-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-device aggregation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#netbox-data-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NetBox Data Collection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diff-and-result-shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diff and Result Shapes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Diff and Result Shapes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dry-run-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dry-run result
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-run-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live-run result
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#write-payloads-and-execution-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Write Payloads and Execution Order
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Write Payloads and Execution Order">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordering-and-transaction-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordering and transaction isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-and-event-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error and Event Handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nfcli-shell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NFCLI Shell
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-file-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned File Changes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acceptance-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acceptance Criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trade-offs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trade-offs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives Considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alternatives Considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extend-sync_device_interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extend sync_device_interfaces
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-napalm-get_vlans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use NAPALM get_vlans
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-the-diff-by-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key the diff by device
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-every-absent-vlan-in-a-selected-site-or-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete every absent VLAN in a selected site or group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatically-create-vlan-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatically create VLAN groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolved-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolved Decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adr-netbox-sync_vlans-task-plan">ADR - NetBox <code>sync_vlans</code> Task Plan<a class="headerlink" href="#adr-netbox-sync_vlans-task-plan" title="Permanent link">¤</a></h1>
+<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">¤</a></h2>
+<p>Proposed — ready for implementation review.</p>
+<p>Date: 19 August 2026</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">¤</a></h2>
+<p>The NetBox service can discover VLAN IDs while synchronizing interfaces, but
+<code>sync_device_interfaces</code> only resolves missing VLAN objects as a side effect. It
+creates placeholder names such as <code>VLAN_410</code>; it does not reconcile the VLAN name
+or description configured on a live device.</p>
+<p>NORFAB already has the required live-data parser. The TTP getter
+<code>get="vlans"</code> returns a normalized list for supported platforms:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">vid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USERS</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">User access VLAN</span>
+</code></pre></div>
+<p>The current getter supports Arista EOS, Cisco IOS, Cisco NX-OS, and Juniper
+Junos. The FakeNOS cEOS fixtures under
+<code>tests/nf_tests_inventory/fakenos/custom_nos/</code> already implement the required
+<code>show running-config section vlan</code> command and contain distinct VLAN datasets.</p>
+<p>VLAN reconciliation cannot be copied literally from interface reconciliation.
+An interface belongs to one device, while a NetBox VLAN is shared within a site
+or VLAN group. Multiple selected devices can therefore report the same desired
+VLAN. They can also report conflicting names or descriptions for the same VID.
+The task must aggregate and validate live observations by NetBox scope before it
+calculates or applies a diff.</p>
+<p>NetBox 4.4 also deprecates direct site assignment for VLANs in favor of scoped
+VLAN groups. NORFAB must retain site-scoped behavior for compatibility with the
+current <code>sync_device_interfaces</code> implementation, while making VLAN groups the
+recommended mode for new deployments.</p>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">¤</a></h2>
+<p>Add a standalone NetBox worker task named <code>sync_vlans</code> in a dedicated
+<code>vlans_tasks.py</code> module. It will:</p>
+<ol>
+<li>resolve devices from an explicit list and/or Nornir host filters;</li>
+<li>collect live VLAN configuration with Nornir <code>parse_ttp</code>, using
+   <code>get="vlans"</code>;</li>
+<li>assign every selected device to one reconciliation scope:</li>
+<li>the explicitly selected VLAN group; or</li>
+<li>the device site when no group is supplied;</li>
+<li>merge identical observations from devices in the same scope;</li>
+<li>reject ambiguous live or NetBox records without choosing a winner;</li>
+<li>compare normalized live and NetBox state with <code>self.make_diff</code>;</li>
+<li>create and update VLANs in deterministic scope/VID order;</li>
+<li>delete VLANs only when explicitly enabled and restricted to explicit VLAN ID
+   ranges;</li>
+<li>support dry-run, interactive approval, NetBox branches, NFCLI, FastAPI, and
+   MCP in the same style as <code>sync_device_interfaces</code>.</li>
+</ol>
+<p>The first implementation is standalone. It must not automatically add
+<code>sync_vlans</code> to <code>sync_all</code> or <code>check_device_sync</code>; shared-scope deletion and
+cross-device conflicts need operational experience before those workflows are
+expanded.</p>
+<h2 id="goals">Goals<a class="headerlink" href="#goals" title="Permanent link">¤</a></h2>
+<ol>
+<li>Make live VLAN name and description authoritative within an explicitly
+   derived NetBox scope.</li>
+<li>Preserve the normalized diff and result conventions used by current NetBox
+   synchronization tasks.</li>
+<li>Make repeated runs idempotent.</li>
+<li>Prevent device ordering from deciding a shared VLAN's final state.</li>
+<li>Keep deletion disabled by default and bounded when enabled.</li>
+<li>Isolate failures to one scope or VID where possible.</li>
+<li>Expose one consistent task contract through the Python API, FastAPI, MCP, and
+   NFCLI.</li>
+</ol>
+<h2 id="non-goals">Non-goals<a class="headerlink" href="#non-goals" title="Permanent link">¤</a></h2>
+<p>The first version will not:</p>
+<ul>
+<li>configure VLANs on network devices;</li>
+<li>create, update, or delete VLAN groups;</li>
+<li>infer a different VLAN group for each VID or device;</li>
+<li>manage VLAN status, role, tenant, tags, custom fields, Q-in-Q role, or Q-in-Q
+  service VLAN;</li>
+<li>change interface tagged/untagged VLAN assignments;</li>
+<li>replace the VLAN resolution used by <code>sync_device_interfaces</code>;</li>
+<li>accept arbitrary custom parsers or transformer code;</li>
+<li>reconcile global, unscoped VLANs;</li>
+<li>join <code>sync_all</code> or <code>check_device_sync</code> in this change.</li>
+</ul>
+<h2 id="file-and-class-layout">File and Class Layout<a class="headerlink" href="#file-and-class-layout" title="Permanent link">¤</a></h2>
+<p>Create the task implementation in:</p>
+<div class="highlight"><pre><span></span><code>norfab/workers/netbox_worker/vlans_tasks.py
+</code></pre></div>
+<p>The module should contain:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NetboxVlansTasks</span><span class="p">:</span>
+    <span class="nd">@Task</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sync_vlans</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+        <span class="o">...</span>
+</code></pre></div>
+<p>Keep non-trivial reusable logic as plain module-level functions. Suggested
+helpers are:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">expand_vlan_id_ranges</span><span class="p">(</span><span class="n">vlan_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_live_vlan</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_netbox_vlan</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_vlan_group</span><span class="p">(</span><span class="n">nb</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">vlan_group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<p>Do not define Pydantic models in <code>vlans_tasks.py</code>. Per the repository model
+guide, all task models belong in <code>netbox_models.py</code>.</p>
+<p>Wire the mixin into <code>netbox_worker.py</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">.vlans_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">NetboxVlansTasks</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">NetboxWorker</span><span class="p">(</span>
+    <span class="n">NFPWorker</span><span class="p">,</span>
+    <span class="o">...</span><span class="p">,</span>
+    <span class="n">NetboxVlansTasks</span><span class="p">,</span>
+    <span class="o">...</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="o">...</span>
+</code></pre></div>
+<h2 id="public-task-contract">Public Task Contract<a class="headerlink" href="#public-task-contract" title="Permanent link">¤</a></h2>
+<p>The public task signature is:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sync_vlans</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">job</span><span class="p">:</span> <span class="n">Job</span><span class="p">,</span>
+    <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_approval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
+    <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
+    <span class="o">...</span>
+</code></pre></div>
+<p>Arguments:</p>
+<ul>
+<li><code>instance</code>: NetBox instance; default to <code>self.default_instance</code>.</li>
+<li><code>dry_run</code>: calculate and return the plan without NetBox writes.</li>
+<li><code>with_approval</code>: present the complete plan through
+  <code>review_sync_task_result</code> before writing.</li>
+<li><code>timeout</code>: timeout in seconds for host resolution and Nornir parsing.</li>
+<li><code>devices</code>: explicit NetBox/Nornir device names.</li>
+<li><code>process_deletions</code>: allow deletion of NetBox VLANs absent from live data.</li>
+<li><code>branch</code>: NetBox Branching plugin branch name.</li>
+<li><code>vlan_group</code>: one VLAN group name, slug, or numeric ID. When set, all
+  selected devices contribute to that group.</li>
+<li><code>vlan_ids</code>: VLAN IDs or inclusive range strings such as <code>100</code>, <code>200-299</code>.
+  Apply the same expanded set to live and NetBox state.</li>
+<li><code>kwargs</code>: Nornir <code>FFun</code> host filters (<code>FO</code>, <code>FB</code>, <code>FH</code>, <code>FC</code>, <code>FR</code>, <code>FG</code>,
+  <code>FP</code>, <code>FL</code>, <code>FM</code>, <code>FX</code>, and <code>FN</code>). The input model must expose these fields
+  explicitly even though the implementation receives them through <code>**kwargs</code>.</li>
+</ul>
+<p>At least one device selector must be supplied: <code>devices</code> or a non-empty Nornir
+host filter.</p>
+<h3 id="deletion-contract">Deletion Contract<a class="headerlink" href="#deletion-contract" title="Permanent link">¤</a></h3>
+<p><code>process_deletions=True</code> is valid only when <code>vlan_ids</code> is non-empty. The
+explicit VID set is the task's deletion boundary. This prevents a selected
+device subset from accidentally treating every VLAN in a site or group as
+managed.</p>
+<p>The VID boundary does not prove that the selected devices represent every use
+of those VLANs. Operators enabling deletion are responsible for selecting the
+authoritative device set for the scope and reviewing a dry-run first.</p>
+<p>The task must also suppress deletion for an entire scope when any selected
+device assigned to that scope:</p>
+<ul>
+<li>failed live collection;</li>
+<li>is missing from the Nornir result; or</li>
+<li>returned a malformed result that could not be validated.</li>
+</ul>
+<p>Create and update actions from valid observations may still proceed. The result
+must list suppressed candidates under <code>delete_skipped</code> and explain why in
+<code>messages</code> or <code>errors</code>.</p>
+<p>An empty, successfully parsed list is authoritative only for the requested
+<code>vlan_ids</code>. A missing host result is not equivalent to an empty list.</p>
+<h2 id="pydantic-models">Pydantic Models<a class="headerlink" href="#pydantic-models" title="Permanent link">¤</a></h2>
+<p>Add the following models to the IPAM section of
+<code>norfab/workers/netbox_worker/netbox_models.py</code>.</p>
+<h3 id="vlanrecord"><code>VlanRecord</code><a class="headerlink" href="#vlanrecord" title="Permanent link">¤</a></h3>
+<p>Use this model to validate the normalized TTP contract before aggregation:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">VlanRecord</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">):</span>
+    <span class="n">vid</span><span class="p">:</span> <span class="n">StrictInt</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">4094</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;IEEE 802.1Q VLAN ID&quot;</span><span class="p">)</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">StrictStr</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN name&quot;</span><span class="p">)</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN description&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>The implementation should convert the model to the canonical comparison shape
+after validation.</p>
+<h3 id="syncvlansinput"><code>SyncVlansInput</code><a class="headerlink" href="#syncvlansinput" title="Permanent link">¤</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SyncVlansInput</span><span class="p">(</span>
+    <span class="n">NetboxNornirHostsFilters</span><span class="p">,</span>
+    <span class="n">NetboxCommonArgs</span><span class="p">,</span>
+    <span class="n">use_enum_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">populate_by_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Calculate the VLAN diff without writing to NetBox&quot;</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;dry-run&quot;</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;presence&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List of NetBox device names to collect VLANs from&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="n">StrictInt</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="mi">600</span><span class="p">,</span>
+        <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Timeout in seconds for Nornir host resolution and VLAN parsing&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">with_approval</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Preview VLAN changes and ask for review before writing to NetBox&quot;</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;with-approval&quot;</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;presence&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">process_deletions</span><span class="p">:</span> <span class="n">StrictBool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Delete in-range NetBox VLANs absent from successfully collected live state&quot;</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;process-deletions&quot;</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;presence&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">StrictStr</span><span class="p">,</span> <span class="n">StrictInt</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN group name, slug, or ID used as the reconciliation scope&quot;</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;vlan-group&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN IDs or inclusive ranges to reconcile, for example 100 or 200-299&quot;</span><span class="p">,</span>
+        <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;vlan-ids&quot;</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;100&quot;</span><span class="p">,</span> <span class="s2">&quot;200-299&quot;</span><span class="p">]],</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Add <code>model_validator(mode="after")</code> validation that:</p>
+<ol>
+<li>requires <code>devices</code> or at least one Nornir host filter;</li>
+<li>requires <code>vlan_ids</code> when <code>process_deletions=True</code>;</li>
+<li>rejects brackets, descending ranges, non-numeric values, and values outside
+   <code>1..4094</code>;</li>
+<li>accepts overlapping input ranges but normalizes them to one set in the task;</li>
+<li>does not reject <code>dry_run=True</code> with <code>with_approval=True</code>; runtime dry-run
+   behavior takes precedence and must not prompt.</li>
+</ol>
+<p>Use <code>expand_alphanumeric_range(f"[{value}]")</code> only after the model has rejected
+embedded brackets. Do not duplicate a second, subtly different VLAN-range
+grammar.</p>
+<h3 id="syncvlansresult"><code>SyncVlansResult</code><a class="headerlink" href="#syncvlansresult" title="Permanent link">¤</a></h3>
+<p>Dry-run and live-run payloads intentionally use different action verbs, matching
+current sync task conventions. Keep the output broad but documented:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SyncVlansResult</span><span class="p">(</span><span class="n">Result</span><span class="p">):</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="p">{},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN sync actions keyed by NetBox VLAN scope&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>Do not claim a per-device result: one VLAN action can represent observations
+from several devices.</p>
+<h2 id="task-registration">Task Registration<a class="headerlink" href="#task-registration" title="Permanent link">¤</a></h2>
+<p>Register the task with the same API and MCP posture as other mutating,
+idempotent sync tasks:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+    <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
+    <span class="nb">input</span><span class="o">=</span><span class="n">SyncVlansInput</span><span class="p">,</span>
+    <span class="n">output</span><span class="o">=</span><span class="n">SyncVlansResult</span><span class="p">,</span>
+    <span class="n">mcp</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sync VLANs&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;readOnlyHint&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;destructiveHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;idempotentHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;openWorldHint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The task must return a <code>Result</code> initialized with:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Result</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_vlans&quot;</span><span class="p">,</span>
+    <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+    <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
+    <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="scope-and-object-identity">Scope and Object Identity<a class="headerlink" href="#scope-and-object-identity" title="Permanent link">¤</a></h2>
+<h3 id="explicit-vlan-group">Explicit VLAN group<a class="headerlink" href="#explicit-vlan-group" title="Permanent link">¤</a></h3>
+<p>When <code>vlan_group</code> is set:</p>
+<ol>
+<li>resolve by numeric ID first when the value is an integer or numeric string;</li>
+<li>otherwise try exact name, then exact slug;</li>
+<li>fail before live collection if no group is found;</li>
+<li>use that group for every selected device;</li>
+<li>fetch and create VLANs with <code>group_id</code>/<code>group</code> respectively.</li>
+</ol>
+<p>The result scope key should be deterministic and human-readable:</p>
+<div class="highlight"><pre><span></span><code>group:&lt;id&gt;:&lt;name&gt;
+</code></pre></div>
+<h3 id="site-compatibility-mode">Site compatibility mode<a class="headerlink" href="#site-compatibility-mode" title="Permanent link">¤</a></h3>
+<p>When <code>vlan_group</code> is not set:</p>
+<ol>
+<li>fetch each selected NetBox device's <code>id</code>, <code>name</code>, and <code>site</code>;</li>
+<li>reject a device that has no usable site;</li>
+<li>group devices by site ID;</li>
+<li>fetch and create VLANs with <code>site_id</code>/<code>site</code> respectively.</li>
+</ol>
+<p>The result scope key should be:</p>
+<div class="highlight"><pre><span></span><code>site:&lt;id&gt;:&lt;name&gt;
+</code></pre></div>
+<p>Task documentation must label this as compatibility behavior and recommend a
+scoped VLAN group because direct site assignment is deprecated in NetBox 4.4.</p>
+<p>Within a scope, the reconciliation identity is <code>vid</code>. Internally use:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;group:12:CAMPUS&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="mi">100</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;USERS&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;User access&quot;</span><span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>NetBox permits duplicate VIDs outside a VLAN group. If more than one current
+NetBox VLAN has the same VID in a site compatibility scope, record a target
+conflict and omit that VID from create, update, and delete processing. Never
+select the first record returned by the API.</p>
+<h2 id="live-data-collection">Live Data Collection<a class="headerlink" href="#live-data-collection" title="Permanent link">¤</a></h2>
+<p>Use one Nornir job for the complete resolved device set:</p>
+<div class="highlight"><pre><span></span><code><span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;get&quot;</span><span class="p">:</span> <span class="s2">&quot;vlans&quot;</span><span class="p">,</span> <span class="s2">&quot;FL&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">},</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Do not use NAPALM <code>get_vlans</code> in this task. The TTP getter is already normalized,
+matches the current interface sync architecture, and is covered by the FakeNOS
+fixtures.</p>
+<p>Multiple Nornir workers may return data. Track host names already accepted. If
+two workers return the same host with different VLAN data, treat the host as
+ambiguous and exclude it; do not let worker iteration order choose the source.
+Identical duplicate host results may be collapsed.</p>
+<h2 id="normalization-and-aggregation">Normalization and Aggregation<a class="headerlink" href="#normalization-and-aggregation" title="Permanent link">¤</a></h2>
+<p>Normalize both sources to exactly these managed fields:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;USERS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Rules:</p>
+<ul>
+<li><code>vid</code> is an integer in <code>1..4094</code>;</li>
+<li>trim leading and trailing whitespace from <code>name</code> and <code>description</code>;</li>
+<li>reject an empty name after trimming;</li>
+<li>normalize a missing or null description to <code>""</code>;</li>
+<li>preserve name and description case;</li>
+<li>do not compare NetBox IDs or display fields;</li>
+<li>apply the expanded <code>vlan_ids</code> set to both live and NetBox data before diffing;</li>
+<li>sort scopes lexically and VIDs numerically for payloads, events, and results.</li>
+</ul>
+<p>The bundled TTP getter supplies a default name such as <code>VLAN100</code> when a
+platform configuration has no explicit name. Treat that parser output as the
+desired name. Do not replace it with the interface task's <code>VLAN_100</code> convention.</p>
+<h3 id="cross-device-aggregation">Cross-device aggregation<a class="headerlink" href="#cross-device-aggregation" title="Permanent link">¤</a></h3>
+<p>For each <code>(scope, vid)</code>:</p>
+<ul>
+<li>one observation is authoritative;</li>
+<li>multiple identical observations collapse to one desired record;</li>
+<li>observations that differ in <code>name</code> or <code>description</code> form a source conflict.</li>
+</ul>
+<p>A conflict entry must include every contributing device and normalized record:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;100&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;device&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;USERS&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User access&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">&quot;device&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leaf-2&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CLIENTS&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User access&quot;</span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Omit a conflicting VID from both sides before calling <code>self.make_diff</code>. This
+prevents a conflict from being misclassified as a create, update, or delete.
+Continue processing non-conflicting VIDs in the same scope.</p>
+<h2 id="netbox-data-collection">NetBox Data Collection<a class="headerlink" href="#netbox-data-collection" title="Permanent link">¤</a></h2>
+<p>Use <code>self.bulk_filter(nb.ipam.vlans, ...)</code> once per scope and request only the
+fields needed for identity, comparison, and writes:</p>
+<div class="highlight"><pre><span></span><code>id,vid,name,description,group,site
+</code></pre></div>
+<p>Use <code>group_id=&lt;id&gt;</code> for group scopes and <code>site_id=&lt;id&gt;</code> for site scopes. Do not
+silently include global VLANs or VLANs from another scope.</p>
+<p>The task is an authoritative comparison and must not use disk-cached VLAN data.
+Use the branch-aware client returned by:</p>
+<div class="highlight"><pre><span></span><code><span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="diff-and-result-shapes">Diff and Result Shapes<a class="headerlink" href="#diff-and-result-shapes" title="Permanent link">¤</a></h2>
+<p>Call:</p>
+<div class="highlight"><pre><span></span><code><span class="n">full_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span><span class="n">normalized_live</span><span class="p">,</span> <span class="n">normalized_netbox</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="dry-run-result">Dry-run result<a class="headerlink" href="#dry-run-result" title="Permanent link">¤</a></h3>
+<p>Dry-run returns the planned diff with scope metadata and conflicts:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;site:1:NORFAB-LAB&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;devices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">110</span><span class="p">,</span><span class="w"> </span><span class="mi">111</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;210&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;old_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VLAN210&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;new_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TEST_L1_ACCESS&quot;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">999</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;delete_skipped&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">310</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;conflicts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>dry_run=True</code> always performs zero writes and never requests approval, even if
+<code>with_approval=True</code> was also supplied.</p>
+<h3 id="live-run-result">Live-run result<a class="headerlink" href="#live-run-result" title="Permanent link">¤</a></h3>
+<p>Live-run returns applied and skipped actions:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;site:1:NORFAB-LAB&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;devices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">110</span><span class="p">,</span><span class="w"> </span><span class="mi">111</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">210</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;deleted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">&quot;delete_skipped&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">999</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">310</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;conflicts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Set <code>ret.diff</code> to the complete prepared diff for live runs. If approval is
+declined, set <code>ret.status = "skipped"</code>, return the dry-run shape, set
+<code>ret.dry_run = True</code>, and append <code>review declined; changes were not applied</code>.</p>
+<h2 id="write-payloads-and-execution-order">Write Payloads and Execution Order<a class="headerlink" href="#write-payloads-and-execution-order" title="Permanent link">¤</a></h2>
+<h3 id="create">Create<a class="headerlink" href="#create" title="Permanent link">¤</a></h3>
+<p>Create payload:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;vid&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="n">group_id</span><span class="p">,</span>  <span class="c1"># group scope only</span>
+    <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site_id</span><span class="p">,</span>    <span class="c1"># site compatibility scope only</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Do not set fields the live parser cannot authoritatively supply. NetBox should
+apply its default VLAN status.</p>
+<h3 id="update">Update<a class="headerlink" href="#update" title="Permanent link">¤</a></h3>
+<p>Update payload contains the NetBox object <code>id</code> and only changed managed fields:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">current</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>       <span class="c1"># only when changed</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>  <span class="c1"># only when changed</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Never move an existing VLAN between a site and group or between groups. Scope
+selection is an identity boundary, not a mutable field.</p>
+<h3 id="delete">Delete<a class="headerlink" href="#delete" title="Permanent link">¤</a></h3>
+<p>Delete by NetBox object ID only when all deletion contract checks pass.
+Otherwise record the VID under <code>delete_skipped</code>.</p>
+<h3 id="ordering-and-transaction-isolation">Ordering and transaction isolation<a class="headerlink" href="#ordering-and-transaction-isolation" title="Permanent link">¤</a></h3>
+<p>Execute in this order:</p>
+<ol>
+<li>create VLANs;</li>
+<li>update VLANs;</li>
+<li>delete VLANs.</li>
+</ol>
+<p>Batch writes per scope, not across all scopes. NetBox REST bulk update and bulk
+delete operations are all-or-none. Per-scope batching prevents one invalid
+scope from blocking unrelated sites or groups. Catch each scope operation,
+record the error, and continue with later scopes where safe.</p>
+<p>Do not send an empty bulk request.</p>
+<h2 id="error-and-event-handling">Error and Event Handling<a class="headerlink" href="#error-and-event-handling" title="Permanent link">¤</a></h2>
+<p>Follow repository casing rules:</p>
+<ul>
+<li><code>job.event</code> messages start with lowercase letters;</li>
+<li><code>log.*</code> messages start with uppercase letters.</li>
+</ul>
+<p>Expected per-device or per-VID errors include:</p>
+<ul>
+<li>selected device is absent from NetBox;</li>
+<li>selected device has no site in compatibility mode;</li>
+<li>VLAN group cannot be resolved;</li>
+<li>Nornir worker or host collection failure;</li>
+<li>malformed TTP record;</li>
+<li>duplicate host data differs across Nornir workers;</li>
+<li>live devices disagree on name or description for one scoped VID;</li>
+<li>duplicate current NetBox VLANs make a site-scoped VID ambiguous;</li>
+<li>create, update, or delete request fails.</li>
+</ul>
+<p>Set <code>ret.failed = True</code> when no valid scope can be processed or live collection
+fails for every selected device. Partial conflicts should populate
+<code>ret.errors</code> but should not discard successful actions for unrelated VIDs.</p>
+<p>Events should report at least:</p>
+<ul>
+<li>selected and validated device counts;</li>
+<li>resolved scope count;</li>
+<li>parsed live record count;</li>
+<li>source and target conflict counts;</li>
+<li>create/update/delete/in-sync counts;</li>
+<li>deletion suppression reason;</li>
+<li>per-scope write start and completion;</li>
+<li>task completion.</li>
+</ul>
+<h2 id="nfcli-shell">NFCLI Shell<a class="headerlink" href="#nfcli-shell" title="Permanent link">¤</a></h2>
+<p>Create:</p>
+<div class="highlight"><pre><span></span><code>norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py
+</code></pre></div>
+<p>Define:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SyncVlansShell</span><span class="p">(</span>
+    <span class="n">NetboxClientRunJobArgs</span><span class="p">,</span>
+    <span class="n">SyncVlansInput</span><span class="p">,</span>
+    <span class="n">use_enum_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">populate_by_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="o">...</span>
+</code></pre></div>
+<p>CLI-specific behavior:</p>
+<ul>
+<li>override <code>devices</code> to accept <code>Union[List[StrictStr], StrictStr]</code>;</li>
+<li>override <code>vlan_ids</code> to accept <code>Union[List[StrictStr], StrictStr]</code>;</li>
+<li>convert either string to a one-item list in <code>run</code>;</li>
+<li>default outer timeout to 600 seconds and pass <code>int(timeout * 0.9)</code> to the
+  worker task;</li>
+<li>reject <code>nowait</code> with <code>with_approval</code>;</li>
+<li>call <code>run_future_job("netbox", "sync_vlans", ...)</code>;</li>
+<li>return nested output and preserve the existing <code>verbose_result</code> behavior;</li>
+<li>optionally expose <code>source_FL</code> by delegating to
+  <code>NorniHostsFilters.source_hosts</code> without redeclaring all filter fields.</li>
+</ul>
+<p>Match the other sync shells' output and pipe behavior:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PicleConfig</span><span class="p">:</span>
+    <span class="n">outputter</span> <span class="o">=</span> <span class="n">Outputters</span><span class="o">.</span><span class="n">outputter_nested</span>
+    <span class="n">pipe</span> <span class="o">=</span> <span class="n">PipeFunctionsModel</span>
+</code></pre></div>
+<p>Import <code>SyncVlansShell</code> in <code>netbox_picle_shell.py</code> and add:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SyncCommands</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="n">vlans</span><span class="p">:</span> <span class="n">SyncVlansShell</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Sync live VLAN configuration with NetBox&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>The command path is:</p>
+<div class="highlight"><pre><span></span><code>netbox sync vlans
+</code></pre></div>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vlans<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>dry-run
+nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vlans<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>vlan-group<span class="w"> </span>CAMPUS
+nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vlans<span class="w"> </span>FC<span class="w"> </span>leaf<span class="w"> </span>vlan-ids<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="m">200</span>-299
+nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vlans<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>vlan-ids<span class="w"> </span><span class="m">900</span>-999<span class="w"> </span>process-deletions
+</code></pre></div>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">¤</a></h2>
+<p>Create:</p>
+<div class="highlight"><pre><span></span><code>docs/workers/netbox/services_netbox_service_tasks_sync_vlans.md
+</code></pre></div>
+<p>Follow <code>docs/development/documentation_style_guide.md</code> and include:</p>
+<ol>
+<li>purpose and the site/group scope distinction;</li>
+<li>complete inputs and defaults;</li>
+<li>live parser support and normalized fields;</li>
+<li>dry-run and live output examples keyed by scope;</li>
+<li>cross-device deduplication and conflict behavior;</li>
+<li>deletion requirements and incomplete-collection suppression;</li>
+<li>VLAN group recommendation and site assignment deprecation;</li>
+<li>branch behavior;</li>
+<li>tabbed CLI and Python examples;</li>
+<li>troubleshooting for missing parser data, conflicts, duplicate site VLANs,
+    group resolution, and NetBox bulk failures;</li>
+<li><code>nf# man tree netbox.sync.vlans</code> command reference;</li>
+<li>the concrete API directive:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>::: norfab.workers.netbox_worker.vlans_tasks.NetboxVlansTasks.sync_vlans
+</code></pre></div>
+<p>Add the page to the NetBox task list in <code>mkdocs.yml</code> as <code>Sync VLANs</code>.</p>
+<p>Update <code>docs/norfab_features.md</code> with a concise <strong>Live VLAN reconciliation</strong>
+entry, link the new task page, and update the page's <code>Last updated</code> date.</p>
+<p>The task doc must distinguish this task from <code>sync_device_interfaces</code>:</p>
+<ul>
+<li><code>sync_vlans</code> manages VLAN object names and descriptions;</li>
+<li><code>sync_device_interfaces</code> manages interface objects and their VLAN
+  associations, and may still create placeholder VLANs as a side effect.</li>
+</ul>
+<p>Recommended operator order is <code>sync_vlans</code> followed by
+<code>sync_device_interfaces</code>. If <code>sync_device_interfaces</code> created placeholders
+first, a later <code>sync_vlans</code> run should update their names and descriptions.</p>
+<h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">¤</a></h2>
+<p>Create a dedicated test module:</p>
+<div class="highlight"><pre><span></span><code>tests/services/netbox/test_vlans.py
+</code></pre></div>
+<p>Set:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span>
+</code></pre></div>
+<p>Register and use <code>netbox_sync_vlans</code> in <code>pyproject.toml</code>.</p>
+<p>Integration tests should use the existing FakeNOS cEOS VLAN command output.
+The current fixtures cover parsed names and null descriptions. Cover synthetic
+conflicts, malformed records, non-null descriptions, duplicate worker results,
+and API failures with focused helper tests or mocked Nornir/NetBox responses;
+do not distort the shared device fixtures solely to manufacture error states.
+Use idempotent setup and <code>try/finally</code> cleanup for every NetBox mutation. Never
+depend on test execution order.</p>
+<p>Required coverage:</p>
+<ol>
+<li>model defaults and aliases;</li>
+<li>model accepts a device selector or Nornir filter;</li>
+<li>model rejects no selector;</li>
+<li>VLAN range expansion accepts single IDs and ascending ranges;</li>
+<li>VLAN range validation rejects brackets, descending ranges, non-numeric
+   values, zero, and values above 4094;</li>
+<li><code>process_deletions=True</code> requires <code>vlan_ids</code>;</li>
+<li>dry-run reports create actions and performs no writes;</li>
+<li>live run creates VLANs with parsed names and descriptions;</li>
+<li>live run updates a placeholder VLAN name and description;</li>
+<li>a null live description normalizes to an empty string and clears a stale
+    NetBox description;</li>
+<li>a second run reports VLANs in sync;</li>
+<li><code>vlan_ids</code> applies to both live and NetBox data;</li>
+<li>deletion is skipped by default;</li>
+<li>deletion runs only for explicit in-range VIDs;</li>
+<li>an out-of-range NetBox VLAN is never deleted;</li>
+<li>deletion is suppressed when one device in the scope fails collection;</li>
+<li>identical observations from multiple devices are deduplicated;</li>
+<li>conflicting live names for one scoped VID skip that VID and report every
+    contributing device;</li>
+<li>conflicting live descriptions behave the same way;</li>
+<li>two sites are reconciled independently;</li>
+<li>a VLAN group is resolved by name;</li>
+<li>a VLAN group is resolved by slug;</li>
+<li>a VLAN group is resolved by ID;</li>
+<li>an unknown VLAN group fails before writes;</li>
+<li>duplicate current VIDs in site compatibility mode are reported as
+    ambiguous and skipped;</li>
+<li>a non-existent NetBox device is reported without blocking valid devices;</li>
+<li>malformed parser data is rejected without producing a write payload;</li>
+<li>differing duplicate host results from Nornir workers are rejected;</li>
+<li>branch is passed to <code>_get_pynetbox</code> and changes remain branch-scoped;</li>
+<li>approval decline returns a skipped dry-run result;</li>
+<li>approval acceptance applies the prepared plan without recollecting live
+    data;</li>
+<li><code>dry_run=True</code> with <code>with_approval=True</code> performs no prompt and no writes;</li>
+<li>create failure in one scope does not block another scope;</li>
+<li>update failure in one scope does not block another scope;</li>
+<li>delete failure is reported and does not claim the VLAN was deleted;</li>
+<li>task decorator uses <code>SyncVlansInput</code> and <code>SyncVlansResult</code>;</li>
+<li>NFCLI converts scalar <code>devices</code> and <code>vlan-ids</code> values to lists;</li>
+<li>NFCLI submits service <code>netbox</code>, task <code>sync_vlans</code>;</li>
+<li>NFCLI rejects <code>nowait</code> with <code>with-approval</code>;</li>
+<li>NFCLI command tree exposes <code>netbox sync vlans</code>.</li>
+</ol>
+<p>Focused commands:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-v<span class="w"> </span>services/netbox/test_vlans.py
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>netbox_sync_vlans
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>nfcli
+</code></pre></div>
+<p>Static and documentation verification:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>compileall<span class="w"> </span>-q<span class="w"> </span>norfab/workers/netbox_worker<span class="w"> </span>norfab/clients/nfcli_shell/netbox
+poetry<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>norfab/workers/netbox_worker/vlans_tasks.py<span class="w"> </span>norfab/workers/netbox_worker/netbox_models.py<span class="w"> </span>norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py<span class="w"> </span>tests/services/netbox/test_vlans.py
+poetry<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>build
+</code></pre></div>
+<p>Do not leave new <code>__pycache__</code> artifacts after verification.</p>
+<h2 id="planned-file-changes">Planned File Changes<a class="headerlink" href="#planned-file-changes" title="Permanent link">¤</a></h2>
+<p>Implementation should be limited to:</p>
+<ul>
+<li><code>norfab/workers/netbox_worker/vlans_tasks.py</code> — new task and helpers;</li>
+<li><code>norfab/workers/netbox_worker/netbox_models.py</code> — VLAN record, input, and
+  result models;</li>
+<li><code>norfab/workers/netbox_worker/netbox_worker.py</code> — import and mix in
+  <code>NetboxVlansTasks</code>;</li>
+<li><code>norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py</code> — new
+  NFCLI model;</li>
+<li><code>norfab/clients/nfcli_shell/netbox/netbox_picle_shell.py</code> — register the
+  <code>vlans</code> sync command;</li>
+<li><code>tests/services/netbox/test_vlans.py</code> — task, model, and shell coverage;</li>
+<li><code>pyproject.toml</code> — register <code>netbox_sync_vlans</code> marker;</li>
+<li><code>docs/workers/netbox/services_netbox_service_tasks_sync_vlans.md</code> — user
+  documentation;</li>
+<li><code>docs/norfab_features.md</code> — feature catalogue entry and date;</li>
+<li><code>mkdocs.yml</code> — user documentation navigation.</li>
+</ul>
+<p>The implementation should not modify the current FakeNOS VLAN outputs unless a
+test identifies an actual fixture defect.</p>
+<p>This ADR is the only file created by the planning change.</p>
+<h2 id="acceptance-criteria">Acceptance Criteria<a class="headerlink" href="#acceptance-criteria" title="Permanent link">¤</a></h2>
+<p>Implementation is complete when:</p>
+<ol>
+<li><code>sync_vlans</code> is callable through the Python client, FastAPI/MCP task schema,
+   and <code>netbox sync vlans</code> NFCLI path;</li>
+<li>model defaults match the task signature and every public argument is modeled;</li>
+<li>one parse request collects VLANs from all resolved devices;</li>
+<li>results and diffs are keyed by NetBox scope, not device;</li>
+<li>identical observations deduplicate and conflicting observations never use a
+   last-writer-wins rule;</li>
+<li>only <code>name</code> and <code>description</code> are updated on existing VLANs;</li>
+<li>deletion is disabled by default, requires explicit VID ranges, and is
+   suppressed for incomplete scopes;</li>
+<li>dry-run and declined approval perform no NetBox writes;</li>
+<li>create, update, delete, conflict, failure, branch, idempotency, model, and
+   shell tests pass;</li>
+<li>focused Ruff, compile, and MkDocs checks pass;</li>
+<li>the feature catalogue and task documentation accurately describe the
+    shipped behavior.</li>
+</ol>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">¤</a></h2>
+<h3 id="positive">Positive<a class="headerlink" href="#positive" title="Permanent link">¤</a></h3>
+<ul>
+<li>VLAN names and descriptions can be synchronized independently of interfaces.</li>
+<li>Shared VLANs have deterministic, auditable conflict handling.</li>
+<li>Existing TTP templates and FakeNOS data are reused.</li>
+<li>Group-scoped operation aligns with current NetBox modeling direction.</li>
+<li>Deletion has an explicit, narrow management boundary.</li>
+</ul>
+<h3 id="trade-offs">Trade-offs<a class="headerlink" href="#trade-offs" title="Permanent link">¤</a></h3>
+<ul>
+<li>Results are scope-keyed, which differs from device-keyed interface results.</li>
+<li>Site compatibility mode must handle ambiguous duplicate VIDs.</li>
+<li>Requiring <code>vlan_ids</code> for deletion is less convenient than deleting every
+  absent VLAN, but it materially reduces risk.</li>
+<li>Status, role, tenant, tags, and other NetBox-only policy fields remain manual.</li>
+<li>The task will not automatically run as part of <code>sync_all</code> in its first
+  release.</li>
+</ul>
+<h2 id="alternatives-considered">Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Permanent link">¤</a></h2>
+<h3 id="extend-sync_device_interfaces">Extend <code>sync_device_interfaces</code><a class="headerlink" href="#extend-sync_device_interfaces" title="Permanent link">¤</a></h3>
+<p>Rejected. VLAN objects are shared across interfaces and devices, so embedding
+full VLAN reconciliation in an already large interface task would obscure
+scope aggregation, conflicts, and deletion safety.</p>
+<h3 id="use-napalm-get_vlans">Use NAPALM <code>get_vlans</code><a class="headerlink" href="#use-napalm-get_vlans" title="Permanent link">¤</a></h3>
+<p>Rejected for this task. NORFAB already ships a multi-platform TTP <code>vlans</code>
+getter with the exact desired normalized fields and matching FakeNOS commands.</p>
+<h3 id="key-the-diff-by-device">Key the diff by device<a class="headerlink" href="#key-the-diff-by-device" title="Permanent link">¤</a></h3>
+<p>Rejected. It would generate duplicate writes and allow device processing order
+to decide shared VLAN names and descriptions.</p>
+<h3 id="delete-every-absent-vlan-in-a-selected-site-or-group">Delete every absent VLAN in a selected site or group<a class="headerlink" href="#delete-every-absent-vlan-in-a-selected-site-or-group" title="Permanent link">¤</a></h3>
+<p>Rejected. A partial device selection does not prove that an unused or
+unobserved shared VLAN is stale.</p>
+<h3 id="automatically-create-vlan-groups">Automatically create VLAN groups<a class="headerlink" href="#automatically-create-vlan-groups" title="Permanent link">¤</a></h3>
+<p>Rejected. VLAN group scope and ID ranges are NetBox design policy, not facts
+that can be derived safely from the live three-field parser output.</p>
+<h2 id="resolved-decisions">Resolved Decisions<a class="headerlink" href="#resolved-decisions" title="Permanent link">¤</a></h2>
+<ol>
+<li>Public task name: <code>sync_vlans</code>.</li>
+<li>Implementation file: <code>vlans_tasks.py</code>.</li>
+<li>Worker mixin: <code>NetboxVlansTasks</code>.</li>
+<li>Live source: Nornir <code>parse_ttp</code> with <code>get="vlans"</code>.</li>
+<li>Managed fields: <code>vid</code> identity plus authoritative <code>name</code> and <code>description</code>.</li>
+<li>Preferred scope: one caller-selected VLAN group.</li>
+<li>Compatibility scope: each selected device's NetBox site.</li>
+<li>Diff key: NetBox scope and VID, not device and VID.</li>
+<li>Identical cross-device observations are deduplicated.</li>
+<li>Conflicting observations are reported and skipped.</li>
+<li>Duplicate target VIDs in a site scope are reported and skipped.</li>
+<li>VLAN groups must already exist.</li>
+<li>Site/global/group moves are outside the task.</li>
+<li>Deletions default to disabled.</li>
+<li>Enabled deletion requires explicit <code>vlan_ids</code>.</li>
+<li>Incomplete live collection suppresses deletion for the affected scope.</li>
+<li>Dry-run takes precedence over approval and never prompts.</li>
+<li>Bulk operations are isolated per scope.</li>
+<li>The first version does not join <code>sync_all</code> or <code>check_device_sync</code>.</li>
+<li>The task gets a dedicated NFCLI file, user documentation page, and test
+    module.</li>
+</ol>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">¤</a></h2>
+<ul>
+<li><code>CLAUDE.md</code></li>
+<li><code>docs/development/adr_tasks_pydantic_models_guide.md</code></li>
+<li><code>docs/development/documentation_style_guide.md</code></li>
+<li><code>docs/testing/netbox_service_tests.md</code></li>
+<li><code>docs/development/adr_netbox_sync_device_interfaces_plan.md</code></li>
+<li><code>norfab/workers/netbox_worker/interfaces_tasks.py</code></li>
+<li><code>norfab/workers/netbox_worker/netbox_models.py</code></li>
+<li><code>norfab/workers/netbox_worker/netbox_worker_utilities.py</code></li>
+<li><code>norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_interfaces.py</code></li>
+<li><code>tests/services/netbox/test_interfaces.py</code></li>
+<li><a href="https://netboxlabs.com/docs/netbox/v4.4/models/ipam/vlan/">NetBox 4.4 VLAN model</a></li>
+<li><a href="https://netboxlabs.com/docs/netbox/v4.4/models/ipam/vlangroup/">NetBox 4.4 VLAN group model</a></li>
+<li><a href="https://netboxlabs.com/docs/netbox/v4.4/integrations/rest-api/">NetBox 4.4 REST API bulk operations</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/dmulyalin" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/DMulyalin" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

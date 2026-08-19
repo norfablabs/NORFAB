@@ -12702,7 +12702,7 @@ version report of the worker.</p>
 
 
 <h3 id="norfab.core.worker.NFPWorker.jinja2_render_templates" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">jinja2_render_templates</span><span class="p">(</span><span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span></code>
+            <code class="highlight language-python"><span class="n">jinja2_render_templates</span><span class="p">(</span><span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">template_cache</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span></code>
 
 <a href="#norfab.core.worker.NFPWorker.jinja2_render_templates" class="headerlink" title="Permanent link">¤</a></h3>
 
@@ -12765,6 +12765,23 @@ version report of the worker.</p>
             <td>
               <div class="doc-md-description">
                 <p>A dictionary of custom Jinja2 filters to be used during rendering.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>template_cache</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cache of compiled Jinja2 file templates
+keyed by resolved NorFab file URL.</p>
               </div>
             </td>
             <td>
@@ -12834,8 +12851,23 @@ version report of the worker.</p>
 <span class="normal">2000</span>
 <span class="normal">2001</span>
 <span class="normal">2002</span>
-<span class="normal">2003</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_render_templates</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="normal">2003</span>
+<span class="normal">2004</span>
+<span class="normal">2005</span>
+<span class="normal">2006</span>
+<span class="normal">2007</span>
+<span class="normal">2008</span>
+<span class="normal">2009</span>
+<span class="normal">2010</span>
+<span class="normal">2011</span>
+<span class="normal">2012</span>
+<span class="normal">2013</span>
+<span class="normal">2014</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_render_templates</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">template_cache</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download (if needed) and render a list of Jinja2 templates with the given context and optional filters.</span>
@@ -12844,6 +12876,8 @@ version report of the worker.</p>
 <span class="sd">        templates (list[str]): A list of Jinja2 template strings or NorFab file paths.</span>
 <span class="sd">        context (dict): A dictionary containing the context variables for rendering the templates.</span>
 <span class="sd">        filters (dict, optional): A dictionary of custom Jinja2 filters to be used during rendering.</span>
+<span class="sd">        template_cache (dict, optional): Cache of compiled Jinja2 file templates</span>
+<span class="sd">            keyed by resolved NorFab file URL.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: The rendered templates concatenated into a single string.</span>
@@ -12851,18 +12885,23 @@ version report of the worker.</p>
     <span class="n">rendered</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">template_cache</span> <span class="o">=</span> <span class="n">template_cache</span> <span class="k">if</span> <span class="n">template_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">template</span> <span class="ow">in</span> <span class="n">templates</span><span class="p">:</span>
-        <span class="n">j2env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="s2">&quot;BaseLoader&quot;</span><span class="p">)</span>
-        <span class="n">j2env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>  <span class="c1"># add custom filters</span>
-        <span class="n">renderer</span> <span class="o">=</span> <span class="n">j2env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">marker</span> <span class="ow">in</span> <span class="n">template</span> <span class="k">for</span> <span class="n">marker</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;{{&quot;</span><span class="p">,</span> <span class="s2">&quot;{%&quot;</span><span class="p">,</span> <span class="s2">&quot;{#&quot;</span><span class="p">)):</span>
+            <span class="n">j2env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="s2">&quot;BaseLoader&quot;</span><span class="p">)</span>
+            <span class="n">j2env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>  <span class="c1"># add custom filters</span>
+            <span class="n">renderer</span> <span class="o">=</span> <span class="n">j2env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">)</span>
         <span class="c1"># download template file and render it again</span>
         <span class="k">if</span> <span class="n">template</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;nf://&quot;</span><span class="p">):</span>
-            <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_fetch_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
-            <span class="n">searchpath</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-            <span class="n">j2env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">searchpath</span><span class="p">))</span>
-            <span class="n">j2env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>  <span class="c1"># add custom filters</span>
-            <span class="n">renderer</span> <span class="o">=</span> <span class="n">j2env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">renderer</span> <span class="o">=</span> <span class="n">template_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">renderer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_fetch_template</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+                <span class="n">searchpath</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                <span class="n">j2env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">searchpath</span><span class="p">))</span>
+                <span class="n">j2env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>  <span class="c1"># add custom filters</span>
+                <span class="n">renderer</span> <span class="o">=</span> <span class="n">j2env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">template_cache</span><span class="p">[</span><span class="n">template</span><span class="p">]</span> <span class="o">=</span> <span class="n">renderer</span>
             <span class="n">rendered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">))</span>
         <span class="c1"># template content is fully rendered</span>
         <span class="k">else</span><span class="p">:</span>
@@ -12979,18 +13018,7 @@ other templates referenced using "include" statements.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2005</span>
-<span class="normal">2006</span>
-<span class="normal">2007</span>
-<span class="normal">2008</span>
-<span class="normal">2009</span>
-<span class="normal">2010</span>
-<span class="normal">2011</span>
-<span class="normal">2012</span>
-<span class="normal">2013</span>
-<span class="normal">2014</span>
-<span class="normal">2015</span>
-<span class="normal">2016</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2016</span>
 <span class="normal">2017</span>
 <span class="normal">2018</span>
 <span class="normal">2019</span>
@@ -13014,7 +13042,19 @@ other templates referenced using "include" statements.</p>
 <span class="normal">2037</span>
 <span class="normal">2038</span>
 <span class="normal">2039</span>
-<span class="normal">2040</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_fetch_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">2040</span>
+<span class="normal">2041</span>
+<span class="normal">2042</span>
+<span class="normal">2043</span>
+<span class="normal">2044</span>
+<span class="normal">2045</span>
+<span class="normal">2046</span>
+<span class="normal">2047</span>
+<span class="normal">2048</span>
+<span class="normal">2049</span>
+<span class="normal">2050</span>
+<span class="normal">2051</span>
+<span class="normal">2052</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">jinja2_fetch_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function to recursively download a Jinja2 template along with</span>
 <span class="sd">    other templates referenced using &quot;include&quot; statements.</span>
@@ -13034,8 +13074,9 @@ other templates referenced using "include" statements.</p>
         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - file download failed &#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="c1"># download Jinja2 template &quot;include&quot;-ed files</span>
-    <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># load Jinja2 template content to parse &quot;include&quot;-ed files</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="n">j2env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="s2">&quot;BaseLoader&quot;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">parsed_content</span> <span class="o">=</span> <span class="n">j2env</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
@@ -13174,19 +13215,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2042</span>
-<span class="normal">2043</span>
-<span class="normal">2044</span>
-<span class="normal">2045</span>
-<span class="normal">2046</span>
-<span class="normal">2047</span>
-<span class="normal">2048</span>
-<span class="normal">2049</span>
-<span class="normal">2050</span>
-<span class="normal">2051</span>
-<span class="normal">2052</span>
-<span class="normal">2053</span>
-<span class="normal">2054</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2054</span>
 <span class="normal">2055</span>
 <span class="normal">2056</span>
 <span class="normal">2057</span>
@@ -13241,7 +13270,19 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">2106</span>
 <span class="normal">2107</span>
 <span class="normal">2108</span>
-<span class="normal">2109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">event</span><span class="p">(</span>
+<span class="normal">2109</span>
+<span class="normal">2110</span>
+<span class="normal">2111</span>
+<span class="normal">2112</span>
+<span class="normal">2113</span>
+<span class="normal">2114</span>
+<span class="normal">2115</span>
+<span class="normal">2116</span>
+<span class="normal">2117</span>
+<span class="normal">2118</span>
+<span class="normal">2119</span>
+<span class="normal">2120</span>
+<span class="normal">2121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">event</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">juuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -13417,19 +13458,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2111</span>
-<span class="normal">2112</span>
-<span class="normal">2113</span>
-<span class="normal">2114</span>
-<span class="normal">2115</span>
-<span class="normal">2116</span>
-<span class="normal">2117</span>
-<span class="normal">2118</span>
-<span class="normal">2119</span>
-<span class="normal">2120</span>
-<span class="normal">2121</span>
-<span class="normal">2122</span>
-<span class="normal">2123</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2123</span>
 <span class="normal">2124</span>
 <span class="normal">2125</span>
 <span class="normal">2126</span>
@@ -13445,7 +13474,19 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">2136</span>
 <span class="normal">2137</span>
 <span class="normal">2138</span>
-<span class="normal">2139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+<span class="normal">2139</span>
+<span class="normal">2140</span>
+<span class="normal">2141</span>
+<span class="normal">2142</span>
+<span class="normal">2143</span>
+<span class="normal">2144</span>
+<span class="normal">2145</span>
+<span class="normal">2146</span>
+<span class="normal">2147</span>
+<span class="normal">2148</span>
+<span class="normal">2149</span>
+<span class="normal">2150</span>
+<span class="normal">2151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">job_details</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -13630,19 +13671,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2141</span>
-<span class="normal">2142</span>
-<span class="normal">2143</span>
-<span class="normal">2144</span>
-<span class="normal">2145</span>
-<span class="normal">2146</span>
-<span class="normal">2147</span>
-<span class="normal">2148</span>
-<span class="normal">2149</span>
-<span class="normal">2150</span>
-<span class="normal">2151</span>
-<span class="normal">2152</span>
-<span class="normal">2153</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2153</span>
 <span class="normal">2154</span>
 <span class="normal">2155</span>
 <span class="normal">2156</span>
@@ -13677,7 +13706,19 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">2185</span>
 <span class="normal">2186</span>
 <span class="normal">2187</span>
-<span class="normal">2188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+<span class="normal">2188</span>
+<span class="normal">2189</span>
+<span class="normal">2190</span>
+<span class="normal">2191</span>
+<span class="normal">2192</span>
+<span class="normal">2193</span>
+<span class="normal">2194</span>
+<span class="normal">2195</span>
+<span class="normal">2196</span>
+<span class="normal">2197</span>
+<span class="normal">2198</span>
+<span class="normal">2199</span>
+<span class="normal">2200</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">job_list</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">pending</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -13865,19 +13906,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2190</span>
-<span class="normal">2191</span>
-<span class="normal">2192</span>
-<span class="normal">2193</span>
-<span class="normal">2194</span>
-<span class="normal">2195</span>
-<span class="normal">2196</span>
-<span class="normal">2197</span>
-<span class="normal">2198</span>
-<span class="normal">2199</span>
-<span class="normal">2200</span>
-<span class="normal">2201</span>
-<span class="normal">2202</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2202</span>
 <span class="normal">2203</span>
 <span class="normal">2204</span>
 <span class="normal">2205</span>
@@ -13903,7 +13932,19 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">2225</span>
 <span class="normal">2226</span>
 <span class="normal">2227</span>
-<span class="normal">2228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+<span class="normal">2228</span>
+<span class="normal">2229</span>
+<span class="normal">2230</span>
+<span class="normal">2231</span>
+<span class="normal">2232</span>
+<span class="normal">2233</span>
+<span class="normal">2234</span>
+<span class="normal">2235</span>
+<span class="normal">2236</span>
+<span class="normal">2237</span>
+<span class="normal">2238</span>
+<span class="normal">2239</span>
+<span class="normal">2240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_logs</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">last</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
@@ -14105,19 +14146,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2230</span>
-<span class="normal">2231</span>
-<span class="normal">2232</span>
-<span class="normal">2233</span>
-<span class="normal">2234</span>
-<span class="normal">2235</span>
-<span class="normal">2236</span>
-<span class="normal">2237</span>
-<span class="normal">2238</span>
-<span class="normal">2239</span>
-<span class="normal">2240</span>
-<span class="normal">2241</span>
-<span class="normal">2242</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2242</span>
 <span class="normal">2243</span>
 <span class="normal">2244</span>
 <span class="normal">2245</span>
@@ -14147,7 +14176,19 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">2269</span>
 <span class="normal">2270</span>
 <span class="normal">2271</span>
-<span class="normal">2272</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2272</span>
+<span class="normal">2273</span>
+<span class="normal">2274</span>
+<span class="normal">2275</span>
+<span class="normal">2276</span>
+<span class="normal">2277</span>
+<span class="normal">2278</span>
+<span class="normal">2279</span>
+<span class="normal">2280</span>
+<span class="normal">2281</span>
+<span class="normal">2282</span>
+<span class="normal">2283</span>
+<span class="normal">2284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">WorkerEchoIn</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">WorkerEchoOut</span><span class="p">,</span>
@@ -14282,19 +14323,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2274</span>
-<span class="normal">2275</span>
-<span class="normal">2276</span>
-<span class="normal">2277</span>
-<span class="normal">2278</span>
-<span class="normal">2279</span>
-<span class="normal">2280</span>
-<span class="normal">2281</span>
-<span class="normal">2282</span>
-<span class="normal">2283</span>
-<span class="normal">2284</span>
-<span class="normal">2285</span>
-<span class="normal">2286</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2286</span>
 <span class="normal">2287</span>
 <span class="normal">2288</span>
 <span class="normal">2289</span>
@@ -14333,7 +14362,19 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">2322</span>
 <span class="normal">2323</span>
 <span class="normal">2324</span>
-<span class="normal">2325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2325</span>
+<span class="normal">2326</span>
+<span class="normal">2327</span>
+<span class="normal">2328</span>
+<span class="normal">2329</span>
+<span class="normal">2330</span>
+<span class="normal">2331</span>
+<span class="normal">2332</span>
+<span class="normal">2333</span>
+<span class="normal">2334</span>
+<span class="normal">2335</span>
+<span class="normal">2336</span>
+<span class="normal">2337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="n">mcp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
@@ -14505,19 +14546,7 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2327</span>
-<span class="normal">2328</span>
-<span class="normal">2329</span>
-<span class="normal">2330</span>
-<span class="normal">2331</span>
-<span class="normal">2332</span>
-<span class="normal">2333</span>
-<span class="normal">2334</span>
-<span class="normal">2335</span>
-<span class="normal">2336</span>
-<span class="normal">2337</span>
-<span class="normal">2338</span>
-<span class="normal">2339</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2339</span>
 <span class="normal">2340</span>
 <span class="normal">2341</span>
 <span class="normal">2342</span>
@@ -14533,7 +14562,19 @@ It also saves the event data to the database for future reference.</p>
 <span class="normal">2352</span>
 <span class="normal">2353</span>
 <span class="normal">2354</span>
-<span class="normal">2355</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+<span class="normal">2355</span>
+<span class="normal">2356</span>
+<span class="normal">2357</span>
+<span class="normal">2358</span>
+<span class="normal">2359</span>
+<span class="normal">2360</span>
+<span class="normal">2361</span>
+<span class="normal">2362</span>
+<span class="normal">2363</span>
+<span class="normal">2364</span>
+<span class="normal">2365</span>
+<span class="normal">2366</span>
+<span class="normal">2367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">list_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">brief</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Lists tasks supported by worker.</span>
@@ -14607,15 +14648,15 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2361</span>
-<span class="normal">2362</span>
-<span class="normal">2363</span>
-<span class="normal">2364</span>
-<span class="normal">2365</span>
-<span class="normal">2366</span>
-<span class="normal">2367</span>
-<span class="normal">2368</span>
-<span class="normal">2369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2373</span>
+<span class="normal">2374</span>
+<span class="normal">2375</span>
+<span class="normal">2376</span>
+<span class="normal">2377</span>
+<span class="normal">2378</span>
+<span class="normal">2379</span>
+<span class="normal">2380</span>
+<span class="normal">2381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve worker statistics from the watchdog.</span>
@@ -14669,15 +14710,15 @@ It also saves the event data to the database for future reference.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2371</span>
-<span class="normal">2372</span>
-<span class="normal">2373</span>
-<span class="normal">2374</span>
-<span class="normal">2375</span>
-<span class="normal">2376</span>
-<span class="normal">2377</span>
-<span class="normal">2378</span>
-<span class="normal">2379</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2383</span>
+<span class="normal">2384</span>
+<span class="normal">2385</span>
+<span class="normal">2386</span>
+<span class="normal">2387</span>
+<span class="normal">2388</span>
+<span class="normal">2389</span>
+<span class="normal">2390</span>
+<span class="normal">2391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span><span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span> <span class="n">agent</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_watchdog_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieves the current configuration of the watchdog.</span>
@@ -14743,19 +14784,7 @@ including queues and events as required.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2381</span>
-<span class="normal">2382</span>
-<span class="normal">2383</span>
-<span class="normal">2384</span>
-<span class="normal">2385</span>
-<span class="normal">2386</span>
-<span class="normal">2387</span>
-<span class="normal">2388</span>
-<span class="normal">2389</span>
-<span class="normal">2390</span>
-<span class="normal">2391</span>
-<span class="normal">2392</span>
-<span class="normal">2393</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2393</span>
 <span class="normal">2394</span>
 <span class="normal">2395</span>
 <span class="normal">2396</span>
@@ -14806,7 +14835,19 @@ including queues and events as required.</p>
 <span class="normal">2441</span>
 <span class="normal">2442</span>
 <span class="normal">2443</span>
-<span class="normal">2444</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2444</span>
+<span class="normal">2445</span>
+<span class="normal">2446</span>
+<span class="normal">2447</span>
+<span class="normal">2448</span>
+<span class="normal">2449</span>
+<span class="normal">2450</span>
+<span class="normal">2451</span>
+<span class="normal">2452</span>
+<span class="normal">2453</span>
+<span class="normal">2454</span>
+<span class="normal">2455</span>
+<span class="normal">2456</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_threads</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Starts multiple daemon threads required for the worker&#39;s operation.</span>
 
@@ -14955,19 +14996,7 @@ including queues and events as required.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2446</span>
-<span class="normal">2447</span>
-<span class="normal">2448</span>
-<span class="normal">2449</span>
-<span class="normal">2450</span>
-<span class="normal">2451</span>
-<span class="normal">2452</span>
-<span class="normal">2453</span>
-<span class="normal">2454</span>
-<span class="normal">2455</span>
-<span class="normal">2456</span>
-<span class="normal">2457</span>
-<span class="normal">2458</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2458</span>
 <span class="normal">2459</span>
 <span class="normal">2460</span>
 <span class="normal">2461</span>
@@ -15067,7 +15096,19 @@ including queues and events as required.</p>
 <span class="normal">2555</span>
 <span class="normal">2556</span>
 <span class="normal">2557</span>
-<span class="normal">2558</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_next_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2558</span>
+<span class="normal">2559</span>
+<span class="normal">2560</span>
+<span class="normal">2561</span>
+<span class="normal">2562</span>
+<span class="normal">2563</span>
+<span class="normal">2564</span>
+<span class="normal">2565</span>
+<span class="normal">2566</span>
+<span class="normal">2567</span>
+<span class="normal">2568</span>
+<span class="normal">2569</span>
+<span class="normal">2570</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_next_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processes the next job from the database.</span>
 
@@ -15211,19 +15252,7 @@ including queues and events as required.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2560</span>
-<span class="normal">2561</span>
-<span class="normal">2562</span>
-<span class="normal">2563</span>
-<span class="normal">2564</span>
-<span class="normal">2565</span>
-<span class="normal">2566</span>
-<span class="normal">2567</span>
-<span class="normal">2568</span>
-<span class="normal">2569</span>
-<span class="normal">2570</span>
-<span class="normal">2571</span>
-<span class="normal">2572</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2572</span>
 <span class="normal">2573</span>
 <span class="normal">2574</span>
 <span class="normal">2575</span>
@@ -15252,7 +15281,19 @@ including queues and events as required.</p>
 <span class="normal">2598</span>
 <span class="normal">2599</span>
 <span class="normal">2600</span>
-<span class="normal">2601</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">work</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2601</span>
+<span class="normal">2602</span>
+<span class="normal">2603</span>
+<span class="normal">2604</span>
+<span class="normal">2605</span>
+<span class="normal">2606</span>
+<span class="normal">2607</span>
+<span class="normal">2608</span>
+<span class="normal">2609</span>
+<span class="normal">2610</span>
+<span class="normal">2611</span>
+<span class="normal">2612</span>
+<span class="normal">2613</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">work</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Executes the main worker loop, managing job execution using a thread pool.</span>
 

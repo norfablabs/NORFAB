@@ -2603,6 +2603,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ignoring-vlans-and-vrfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ignoring VLANs and VRFs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vlan-group-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VLAN Group Selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6333,6 +6355,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ignoring-vlans-and-vrfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ignoring VLANs and VRFs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vlan-group-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VLAN Group Selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#branching-support" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6475,6 +6519,21 @@
 <p>Both filters are applied before the diff, so interfaces that do not match are completely ignored by the sync — they are neither created, updated, nor deleted.</p>
 <h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
 <p>By default <code>process_deletions=False</code> — interfaces present in NetBox but absent in live data are left untouched. Set <code>process_deletions=True</code> to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.</p>
+<h2 id="ignoring-vlans-and-vrfs">Ignoring VLANs and VRFs<a class="headerlink" href="#ignoring-vlans-and-vrfs" title="Permanent link">¤</a></h2>
+<p>By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Set <code>ignore_vlans=True</code> to skip VLAN creation and leave all interface VLAN associations unchanged. Set <code>ignore_vrf=True</code> to skip VRF creation and leave interface VRF associations unchanged.</p>
+<h2 id="vlan-group-selection">VLAN Group Selection<a class="headerlink" href="#vlan-group-selection" title="Permanent link">¤</a></h2>
+<p><code>vlan_group</code> accepts a single VLAN group name, slug, or ID, or an ordered mapping keyed by VLAN group name. Each mapped group can match interface names using case-sensitive glob patterns, VLAN IDs using range strings, or both:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;ACCESS_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;interface_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet*&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-199&quot;</span><span class="p">,</span> <span class="s2">&quot;300&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;INFRA_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;400-499&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Values within one criterion use OR logic. When both <code>interface_names</code> and <code>vlan_ids</code> are present they use AND logic. Groups are checked in mapping order and the first match wins. VLANs that do not match any group use the existing device-site behavior. VLAN ranges use plain strings such as <code>100-199</code>; bracket notation is not accepted.</p>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
 <p>The task is branch-aware and can push changes into a NetBox branch. The <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> must be installed. Specify the <code>branch</code> parameter; the branch is created automatically if it does not already exist.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -6495,6 +6554,9 @@
 </code></pre></div>
 <p>Restrict sync to interfaces whose description matches a glob pattern:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 filter-by-description &quot;TEST_SYNC_*&quot;
+</code></pre></div>
+<p>Sync interfaces without creating or associating VLANs and VRFs:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 ignore-vlans ignore-vrf
 </code></pre></div>
 <p>Sync interfaces into a NetBox branch:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 ceos-spine-2 branch sprint-42-interfaces
@@ -6565,6 +6627,37 @@
     <span class="p">},</span>
 <span class="p">)</span>
 
+<span class="c1"># sync interfaces without creating or associating VLANs and VRFs</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;ignore_vlans&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;ignore_vrf&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># dynamically select VLAN groups by interface name and VLAN ID ranges</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;ACCESS_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;interface_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet*&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-199&quot;</span><span class="p">,</span> <span class="s2">&quot;300&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;INFRA_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;400-499&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
 <span class="c1"># sync into a NetBox branch</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
     <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
@@ -6608,6 +6701,9 @@ root
             ├── process-deletions:    Delete interfaces present in NetBox but absent in live data
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Loopback*&#39;
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
+            ├── vlan-group:    VLAN group name, slug, ID, or ordered criteria mapping
+            ├── ignore-vlans:    Ignore discovered VLANs and leave interface VLAN associations unchanged
+            ├── ignore-vrf:    Ignore discovered VRFs and leave interface VRF associations unchanged
             ├── branch:    Branching plugin branch name to push changes into
             ├── FO:    Filter Nornir hosts using Filter Object
             ├── FB:    Filter Nornir hosts by name using Glob Patterns
@@ -6647,8 +6743,10 @@ normalized state model and DeepDiff-based reconciliation.</p>
 </ol>
 <p><strong>Side-Effects</strong></p>
 <ul>
-<li>Sync interfaces task creates VRFs if they do not exist in Netbox</li>
-<li>Sync interfaces task creates VLANs if they do not exist in Netbox</li>
+<li>Sync interfaces task creates VRFs if they do not exist in Netbox unless
+  <code>ignore_vrf=True</code></li>
+<li>Sync interfaces task creates VLANs if they do not exist in Netbox unless
+  <code>ignore_vlans=True</code></li>
 </ul>
 <p><strong>Prerequisites</strong></p>
 <ul>
@@ -6888,17 +6986,52 @@ allows to keep existing Netbox interfaces type intact.</p>
                 <code>vlan_group</code>
             </td>
             <td>
-                  <code>(<span title="str">str</span>, <span title="int">int</span>)</code>
+                  <code>(<span title="str">str</span>, <span title="int">int</span>, <span title="dict">dict</span>)</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>VLAN group name, slug, or ID to use
-when resolving interface VLANs. Missing VLANs are created in this
-group; otherwise they are created in the device site.</p>
+                <p>VLAN group name, slug, ID, or
+ordered mapping of group names to interface name and VLAN ID range
+criteria. Missing VLANs are created in the selected group; unmatched
+VLANs are created in the device site.</p>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ignore_vlans</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, ignore discovered VLANs and
+leave interface VLAN associations unchanged. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ignore_vrf</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, ignore discovered VRFs and leave
+interface VRF associations unchanged. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6949,31 +7082,7 @@ dry-run mode.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 862</span>
-<span class="normal"> 863</span>
-<span class="normal"> 864</span>
-<span class="normal"> 865</span>
-<span class="normal"> 866</span>
-<span class="normal"> 867</span>
-<span class="normal"> 868</span>
-<span class="normal"> 869</span>
-<span class="normal"> 870</span>
-<span class="normal"> 871</span>
-<span class="normal"> 872</span>
-<span class="normal"> 873</span>
-<span class="normal"> 874</span>
-<span class="normal"> 875</span>
-<span class="normal"> 876</span>
-<span class="normal"> 877</span>
-<span class="normal"> 878</span>
-<span class="normal"> 879</span>
-<span class="normal"> 880</span>
-<span class="normal"> 881</span>
-<span class="normal"> 882</span>
-<span class="normal"> 883</span>
-<span class="normal"> 884</span>
-<span class="normal"> 885</span>
-<span class="normal"> 886</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 886</span>
 <span class="normal"> 887</span>
 <span class="normal"> 888</span>
 <span class="normal"> 889</span>
@@ -7576,7 +7685,53 @@ dry-run mode.</p>
 <span class="normal">1486</span>
 <span class="normal">1487</span>
 <span class="normal">1488</span>
-<span class="normal">1489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1489</span>
+<span class="normal">1490</span>
+<span class="normal">1491</span>
+<span class="normal">1492</span>
+<span class="normal">1493</span>
+<span class="normal">1494</span>
+<span class="normal">1495</span>
+<span class="normal">1496</span>
+<span class="normal">1497</span>
+<span class="normal">1498</span>
+<span class="normal">1499</span>
+<span class="normal">1500</span>
+<span class="normal">1501</span>
+<span class="normal">1502</span>
+<span class="normal">1503</span>
+<span class="normal">1504</span>
+<span class="normal">1505</span>
+<span class="normal">1506</span>
+<span class="normal">1507</span>
+<span class="normal">1508</span>
+<span class="normal">1509</span>
+<span class="normal">1510</span>
+<span class="normal">1511</span>
+<span class="normal">1512</span>
+<span class="normal">1513</span>
+<span class="normal">1514</span>
+<span class="normal">1515</span>
+<span class="normal">1516</span>
+<span class="normal">1517</span>
+<span class="normal">1518</span>
+<span class="normal">1519</span>
+<span class="normal">1520</span>
+<span class="normal">1521</span>
+<span class="normal">1522</span>
+<span class="normal">1523</span>
+<span class="normal">1524</span>
+<span class="normal">1525</span>
+<span class="normal">1526</span>
+<span class="normal">1527</span>
+<span class="normal">1528</span>
+<span class="normal">1529</span>
+<span class="normal">1530</span>
+<span class="normal">1531</span>
+<span class="normal">1532</span>
+<span class="normal">1533</span>
+<span class="normal">1534</span>
+<span class="normal">1535</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -7603,7 +7758,9 @@ dry-run mode.</p>
     <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">update_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">VlanGroupMap</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ignore_vlans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">ignore_vrf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -7624,8 +7781,10 @@ dry-run mode.</p>
 
 <span class="sd">    **Side-Effects**</span>
 
-<span class="sd">    - Sync interfaces task creates VRFs if they do not exist in Netbox</span>
-<span class="sd">    - Sync interfaces task creates VLANs if they do not exist in Netbox</span>
+<span class="sd">    - Sync interfaces task creates VRFs if they do not exist in Netbox unless</span>
+<span class="sd">      ``ignore_vrf=True``</span>
+<span class="sd">    - Sync interfaces task creates VLANs if they do not exist in Netbox unless</span>
+<span class="sd">      ``ignore_vlans=True``</span>
 
 <span class="sd">    **Prerequisites**</span>
 
@@ -7690,9 +7849,14 @@ dry-run mode.</p>
 <span class="sd">            sync interfaces task unable to fully resolve interface types and</span>
 <span class="sd">            defaults to interface type `other` for most interfaces, this knob</span>
 <span class="sd">            allows to keep existing Netbox interfaces type intact.</span>
-<span class="sd">        vlan_group (str, int, optional): VLAN group name, slug, or ID to use</span>
-<span class="sd">            when resolving interface VLANs. Missing VLANs are created in this</span>
-<span class="sd">            group; otherwise they are created in the device site.</span>
+<span class="sd">        vlan_group (str, int, dict, optional): VLAN group name, slug, ID, or</span>
+<span class="sd">            ordered mapping of group names to interface name and VLAN ID range</span>
+<span class="sd">            criteria. Missing VLANs are created in the selected group; unmatched</span>
+<span class="sd">            VLANs are created in the device site.</span>
+<span class="sd">        ignore_vlans (bool, optional): If True, ignore discovered VLANs and</span>
+<span class="sd">            leave interface VLAN associations unchanged. Defaults to False.</span>
+<span class="sd">        ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave</span>
+<span class="sd">            interface VRF associations unchanged. Defaults to False.</span>
 <span class="sd">        **kwargs: Additional Nornir host filter keyword arguments passed to</span>
 <span class="sd">            ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).</span>
 
@@ -7888,6 +8052,19 @@ dry-run mode.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;normalised </span><span class="si">{</span><span class="n">live_interface_count</span><span class="si">}</span><span class="s2"> live interface(s) after applying filters&quot;</span>
     <span class="p">)</span>
+
+    <span class="c1"># Remove ignored associations from both sides so existing values stay untouched.</span>
+    <span class="n">ignored_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">ignore_vlans</span><span class="p">:</span>
+        <span class="n">ignored_fields</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s2">&quot;untagged_vlan&quot;</span><span class="p">,</span> <span class="s2">&quot;tagged_vlans&quot;</span><span class="p">,</span> <span class="s2">&quot;qinq_svlan&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">ignore_vrf</span><span class="p">:</span>
+        <span class="n">ignored_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;vrf&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ignored_fields</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">(</span><span class="n">normalised_nb_all</span><span class="p">,</span> <span class="n">normalised_live_all</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">interfaces</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">ignored_fields</span><span class="p">:</span>
+                        <span class="n">interface</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="c1"># remove devices that returned no parsing results</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>

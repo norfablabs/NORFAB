@@ -7796,7 +7796,11 @@ URL that resolves to a file.</p>
 <span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
-<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CfgInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CfgResult</span><span class="p">,</span>
@@ -7870,6 +7874,9 @@ URL that resolves to a file.</p>
     <span class="n">nr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_processors</span><span class="p">(</span><span class="n">filtered_nornir</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">job</span><span class="p">)</span>  <span class="c1"># add processors</span>
 
     <span class="c1"># render config using Jinja2 on a per-host basis</span>
+    <span class="n">jinja2_filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_filters</span><span class="p">()</span>
+    <span class="n">jinja2_netbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_netbox</span><span class="p">()</span>
+    <span class="n">jinja2_template_cache</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">nr</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">rendered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinja2_render_templates</span><span class="p">(</span>
             <span class="n">templates</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
@@ -7877,9 +7884,10 @@ URL that resolves to a file.</p>
                 <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
                 <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
                 <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
-                <span class="s2">&quot;netbox&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_netbox</span><span class="p">(),</span>
+                <span class="s2">&quot;netbox&quot;</span><span class="p">:</span> <span class="n">jinja2_netbox</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_filters</span><span class="p">(),</span>
+            <span class="n">filters</span><span class="o">=</span><span class="n">jinja2_filters</span><span class="p">,</span>
+            <span class="n">template_cache</span><span class="o">=</span><span class="n">jinja2_template_cache</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">host</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;__task__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">rendered</span><span class="p">}</span>
 

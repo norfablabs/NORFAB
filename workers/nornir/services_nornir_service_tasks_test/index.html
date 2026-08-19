@@ -8918,7 +8918,11 @@ the dictionary will contain both the test results and the rendered test suite.</
 <span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span>
-<span class="normal">234</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">TestInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">TestResult</span><span class="p">,</span>
@@ -9006,6 +9010,9 @@ the dictionary will contain both the test results and the rendered test suite.</
     <span class="n">job_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_job_data</span><span class="p">(</span><span class="n">job_data</span><span class="p">)</span>
 
     <span class="c1"># generate per-host test suites</span>
+    <span class="n">jinja2_filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_filters</span><span class="p">()</span>
+    <span class="n">jinja2_netbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_netbox</span><span class="p">()</span>
+    <span class="n">jinja2_template_cache</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">host_name</span><span class="p">,</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">filtered_nornir</span><span class="o">.</span><span class="n">inventory</span><span class="o">.</span><span class="n">hosts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># render suite using Jinja2</span>
         <span class="k">try</span><span class="p">:</span>
@@ -9015,9 +9022,10 @@ the dictionary will contain both the test results and the rendered test suite.</
                     <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
                     <span class="s2">&quot;norfab&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
                     <span class="s2">&quot;job_data&quot;</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
-                    <span class="s2">&quot;netbox&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_netbox</span><span class="p">(),</span>
+                    <span class="s2">&quot;netbox&quot;</span><span class="p">:</span> <span class="n">jinja2_netbox</span><span class="p">,</span>
                 <span class="p">},</span>
-                <span class="n">filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">add_jinja2_filters</span><span class="p">(),</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">jinja2_filters</span><span class="p">,</span>
+                <span class="n">template_cache</span><span class="o">=</span><span class="n">jinja2_template_cache</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - &#39;</span><span class="si">{</span><span class="n">suite</span><span class="si">}</span><span class="s2">&#39; Jinja2 rendering failed: &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
