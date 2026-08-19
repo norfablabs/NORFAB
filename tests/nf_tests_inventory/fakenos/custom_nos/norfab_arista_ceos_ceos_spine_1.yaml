@@ -26,6 +26,10 @@ commands:
     alias: terminal length 0
   show running-config section interface:
     alias: show run section interface
+  show running-config section vlan:
+    alias: show run section vlan
+  show running-config section vrf:
+    alias: show run section vrf
   configure terminal:
     output: null
     new_prompt: '{base_prompt}(config)#'
@@ -822,6 +826,75 @@ commands:
     - '{base_prompt}>'
     - '{base_prompt}#'
     help: collected from live cEOS
+  show run section vlan:
+    output: |
+      vlan 410
+         name TEST_S1_TRUNK_A
+      !
+      vlan 411
+         name TEST_S1_TRUNK_B
+      !
+      vlan 510
+         name TEST_S1_ACCESS
+      !
+      vlan 610
+         name TEST_S1_SUBIF
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show run section vrf:
+    output: |
+      vrf instance CONTROL_PLANE
+         description Control plane VRF for ceos-spine-1
+      !
+      vrf instance TENANT_A
+         description Tenant A services
+      !
+      vrf instance TENANT_B
+         description Tenant B services
+      !
+      ip routing vrf CONTROL_PLANE
+      ip routing vrf TENANT_A
+      ip routing vrf TENANT_B
+      !
+      router bgp 65001
+         vrf CONTROL_PLANE
+            rd 65001:101
+            route-target import vpn-ipv6 65000:101
+            route-target import vpn-ipv4 65000:101
+            route-target export vpn-ipv6 65000:101
+            route-target export vpn-ipv4 65000:101
+            route-target import vpn-ipv4 route-map CONTROL_PLANE_IMPORT
+            route-target export vpn-ipv4 route-map CONTROL_PLANE_EXPORT
+         !
+         vrf TENANT_A
+            rd 65001:201
+            route-target import vpn-ipv6 65000:201
+            route-target import vpn-ipv4 65000:201
+            route-target import vpn-ipv6 65000:301
+            route-target import vpn-ipv4 65000:301
+            route-target export vpn-ipv6 65000:201
+            route-target export vpn-ipv4 65000:201
+            route-target export vpn-ipv6 65000:302
+            route-target export vpn-ipv4 65000:302
+            route-target import vpn-ipv4 route-map TENANT_A_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_A_EXPORT
+            redistribute connected
+         !
+         vrf TENANT_B
+            rd 65001:202
+            route-target import vpn-ipv6 65000:202
+            route-target import vpn-ipv4 65000:202
+            route-target export vpn-ipv6 65000:202
+            route-target export vpn-ipv4 65000:202
+            route-target import vpn-ipv4 route-map TENANT_B_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_B_EXPORT
+            redistribute connected
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
   show run section interface:
     output: |
       no service interface inactive port-id allocation disabled
@@ -946,6 +1019,13 @@ commands:
          name TEST_S1_SUBIF
       !
       vrf instance CONTROL_PLANE
+         description Control plane VRF for ceos-spine-1
+      !
+      vrf instance TENANT_A
+         description Tenant A services
+      !
+      vrf instance TENANT_B
+         description Tenant B services
       !
       management api gnmi
          transport grpc default
@@ -1056,6 +1136,8 @@ commands:
       !
       ip routing
       ip routing vrf CONTROL_PLANE
+      ip routing vrf TENANT_A
+      ip routing vrf TENANT_B
       !
       ip route 0.0.0.0/0 172.100.100.1
       !
@@ -1096,12 +1178,43 @@ commands:
             network 10.10.10.1/32
          !
          vrf CONTROL_PLANE
+            rd 65001:101
+            route-target import vpn-ipv6 65000:101
+            route-target import vpn-ipv4 65000:101
+            route-target export vpn-ipv6 65000:101
+            route-target export vpn-ipv4 65000:101
+            route-target import vpn-ipv4 route-map CONTROL_PLANE_IMPORT
+            route-target export vpn-ipv4 route-map CONTROL_PLANE_EXPORT
             neighbor 10.101.0.1 remote-as 65101
             neighbor 10.101.0.1 description ceos-leaf-1 Ethernet1.101
             neighbor 10.101.0.5 remote-as 65102
             neighbor 10.101.0.5 description ceos-leaf-2 Ethernet1.101
             neighbor 10.101.0.9 remote-as 65103
             neighbor 10.101.0.9 description ceos-leaf-3 Ethernet1.101
+         !
+         vrf TENANT_A
+            rd 65001:201
+            route-target import vpn-ipv6 65000:201
+            route-target import vpn-ipv4 65000:201
+            route-target import vpn-ipv6 65000:301
+            route-target import vpn-ipv4 65000:301
+            route-target export vpn-ipv6 65000:201
+            route-target export vpn-ipv4 65000:201
+            route-target export vpn-ipv6 65000:302
+            route-target export vpn-ipv4 65000:302
+            route-target import vpn-ipv4 route-map TENANT_A_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_A_EXPORT
+            redistribute connected
+         !
+         vrf TENANT_B
+            rd 65001:202
+            route-target import vpn-ipv6 65000:202
+            route-target import vpn-ipv4 65000:202
+            route-target export vpn-ipv6 65000:202
+            route-target export vpn-ipv4 65000:202
+            route-target import vpn-ipv4 route-map TENANT_B_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_B_EXPORT
+            redistribute connected
       !
       end
     prompt:
