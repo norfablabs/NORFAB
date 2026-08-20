@@ -9,6 +9,12 @@
 
 1. Enhanced VLAN group mapping to use each NetBox VLAN group's configured `vid_ranges`, with explicit rule `vlan_ids` acting as a narrower boundary. Unmatched VLANs use the scalar `vlan_group` when supplied, otherwise they retain device-site fallback behavior.
 
+## BUGS
+
+1. Fixed NetBox `sync_device_ip` duplicate detection to compare canonical host addresses without prefix lengths, preventing identical non-anycast IPs with different masks from being created in the same synchronization payload.
+2. Fixed NetBox `sync_bgp_peerings` to validate parsed source IP addresses and skip peerings with invalid values, such as `undefined` when a BGP session is down.
+3. Added `textual` into `full` extras for norfab installtion.
+
 ---
 
 # 0.20.6

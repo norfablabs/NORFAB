@@ -372,6 +372,10 @@ platforms = [
     {
         "name": "cisco_xr",
     },
+    {
+        "name": "juniper_junos",
+        "manufacturer": {"name": "Juniper"},
+    },
 ]
 
 prefixes = [
@@ -1869,6 +1873,23 @@ devices = [
         "device_role": {"name": "VirtualRouter"},
         "tenant": {"name": "NORFAB"},
         "site": {"name": "NORFAB-LAB"},
+    },
+    {
+        "name": "fn-junos-1",
+        "device_type": {"slug": slugify("vMX")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "juniper_junos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6205,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
     },
 ]
 # add fceos3_390-fceos3_399 devices to test multi-threading retrieval

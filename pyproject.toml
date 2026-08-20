@@ -273,7 +273,8 @@ full = [
     "langgraph-checkpoint-sqlite",
     "ollama",
     "mcp",
-    "fakenos"
+    "fakenos",
+    "textual"
 ]
 tui = [
     "textual"

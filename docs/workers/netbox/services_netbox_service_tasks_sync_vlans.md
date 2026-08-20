@@ -224,21 +224,38 @@ aborts the task and is not reported as an applied action.
 ## Task command shell reference
 
 ```bash
-nf# man tree netbox.sync.vlans
-```
+nf#man tree netbox.sync.vlans
 
-```bash
-netbox sync vlans
-├── devices
-├── dry-run
-├── with-approval
-├── vlan-group
-├── vlan-map
-├── vlan-ids
-├── branch
-├── instance
-├── timeout
-└── FO | FB | FH | FC | FR | FG | FP | FL | FM | FX | FN
+R - required field, M - supports multiline input, D - dynamic key
+
+root
+└── netbox:    Netbox service
+    └── sync:    Sync Netbox data
+        └── vlans:    Sync live VLAN configuration with NetBox
+            ├── instance:    Netbox instance name to target
+            ├── dry-run:    Calculate the VLAN diff without writing to NetBox, default 'False'
+            ├── branch:    NetBox branching plugin branch name to use
+            ├── FO:    Filter hosts using Filter Object
+            ├── FB:    Filter hosts by name using Glob Patterns
+            ├── FH:    Filter hosts by hostname
+            ├── FC:    Filter hosts containment of pattern in name
+            ├── FR:    Filter hosts by name using Regular Expressions
+            ├── FG:    Filter hosts by group
+            ├── FP:    Filter hosts by hostname using IP Prefix
+            ├── FL:    Filter hosts by names list
+            ├── FM:    Filter hosts by platform
+            ├── FX:    Filter hosts excluding them by name
+            ├── FN:    Negate the match
+            ├── devices:    List of NetBox devices to collect VLANs from
+            ├── timeout:    Job timeout
+            ├── with-approval:    Preview VLAN changes and ask for review before writing to NetBox, default 'False'
+            ├── vlan-group:    Exact group name for live VLANs not matched by vlan-map
+            ├── vlan-map:    Ordered rules mapping live VLANs to NetBox VLAN groups
+            ├── vlan-ids:    VLAN IDs or inclusive ranges to reconcile
+            ├── workers:    Filter worker to target, default 'any'
+            ├── verbose-result:    Control output details, default 'False'
+            └── nowait:    Do not wait for job to complete, default 'False'
+nf#
 ```
 
 ## Python API reference

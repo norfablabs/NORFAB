@@ -34,3 +34,10 @@ hosts:
     platform: arista_eos
     nos:
       plugin: NFCEOS_CEOS_LEAF_3
+  fn-junos-1:
+    username: nornir
+    password: nornir
+    port: 6205
+    platform: juniper_junos
+    nos:
+      plugin: fn-junos-1

@@ -713,6 +713,7 @@ class NetboxIpTasks:
             "fe80::/10",
             "ff02::/16",
             "::ffff:0:0/96",
+            "::1/128",
         ]
         if isinstance(anycast_ranges, str):
             anycast_ranges = [anycast_ranges]
@@ -1083,7 +1084,7 @@ class NetboxIpTasks:
         job.event("checking IP address payloads for duplicate non-anycast addresses")
         ip_address_seen = {}  # {address: [key, ...]}
         for key, ip_data in {**bulk_create_ip, **bulk_update_ip}.items():
-            addr = key[2]
+            addr = str(ipaddress.ip_interface(key[2]).ip)
             role = ip_data.get("role") or ""
             if role != "anycast":
                 ip_address_seen.setdefault(addr, []).append(key)

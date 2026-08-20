@@ -908,6 +908,7 @@ commands:
          description P2P to ceos-leaf-1 Ethernet1
          no switchport
          ip address 10.10.0.0/31
+         ip address 10.3.254.1/24 secondary
       interface Ethernet2.101
          description Control Plane P2P to ceos-leaf-1 Ethernet1.101
          encapsulation dot1q vlan 101
@@ -952,6 +953,7 @@ commands:
       interface Loopback0
          description RID
          ip address 10.10.10.1/32
+         ip address 10.3.254.1/32 secondary
       interface Loopback10
          description TEST_SYNC_LOOPBACK_IPV4
          ip address 10.3.4.1/32

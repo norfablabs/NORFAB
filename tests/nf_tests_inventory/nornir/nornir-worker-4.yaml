@@ -52,3 +52,11 @@ hosts:
     port: 6204
     groups:
       - eos_params
+  fn-junos-1:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    username: nornir
+    password: nornir
+    port: 6205
+    groups:
+      - junos_params

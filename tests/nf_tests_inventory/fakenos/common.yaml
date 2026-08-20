@@ -13,3 +13,4 @@ nos_plugins:
   NFCEOS_CEOS_LEAF_1: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_leaf_1.yaml
   NFCEOS_CEOS_LEAF_2: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_leaf_2.yaml
   NFCEOS_CEOS_LEAF_3: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_leaf_3.yaml
+  NFJUNOS-1: nf://fakenos/custom_nos/norfab_juniper_junos_fn_junos_1.yaml

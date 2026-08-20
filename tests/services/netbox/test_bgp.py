@@ -340,6 +340,36 @@ class TestSyncBgpPeerings:
                             name=sname
                         ), f"session '{sname}' not found in NetBox after creation"
 
+    def test_sync_bgp_peerings_skips_undefined_source_ip_from_fakenos(
+        self, nfclient
+    ):
+        """A down FakeNOS peering with an undefined source IP must be skipped."""
+        device = "fn-junos-1"
+        valid_session = f"{device}_default_192.0.2.2"
+        undefined_session = f"{device}_default_192.0.2.3"
+
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [device],
+                "dry_run": True,
+                "filter_by_description": "TEST_SYNC_SOURCE_IP_*",
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            actions = res["result"][device]
+            assert actions["create"] == [valid_session]
+            assert undefined_session not in (
+                actions["create"]
+                + actions["delete"]
+                + actions["in_sync"]
+                + list(actions["update"])
+            )
+
     def test_sync_bgp_peerings_idempotent(self, nfclient):
         """Run twice; second run returns empty created/updated and non-empty in_sync."""
         kwargs = {"devices": BGP_CREATE_SESSIONS_TEST_DEVICES, "rir": "lab"}

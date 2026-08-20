@@ -2119,6 +2119,17 @@ class NetboxBgpPeeringsTasks:
                     parsed_name = s.get("name")
                     description = s.get("description") or ""
                     local_address = s.get("local_address")
+                    if local_address:
+                        try:
+                            ipaddress.ip_address(local_address)
+                        except ValueError:
+                            msg = (
+                                f"{parsed_name or 'unknown'} - skipping, parsed local ip "
+                                f"'{local_address}' is not a valid IP address"
+                            )
+                            log.warning(msg)
+                            job.event(msg, severity="WARNING")
+                            continue
                     local_as = _normalise_bgp_identity_asn(s["local_as"])
                     remote_address = s["remote_address"]
                     remote_as = _normalise_bgp_identity_asn(s["remote_as"])

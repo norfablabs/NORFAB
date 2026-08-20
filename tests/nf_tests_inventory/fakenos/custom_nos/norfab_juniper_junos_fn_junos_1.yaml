@@ -1,0 +1,44 @@
+name: fn-junos-1
+initial_prompt: 'nornir@{base_prompt}>'
+
+commands:
+  set cli screen-length 0:
+    output: Screen length set to 0
+    prompt: 'nornir@{base_prompt}>'
+  set cli screen-width 511:
+    output: Screen width set to 511
+    prompt: 'nornir@{base_prompt}>'
+  set cli complete-on-space off:
+    output: Disabling complete-on-space
+    prompt: 'nornir@{base_prompt}>'
+  'show bgp neighbor | display json':
+    output: |
+      {
+        "bgp-information": [
+          {
+            "bgp-peer": [
+              {
+                "peer-address": [{"data": "192.0.2.2+179"}],
+                "local-address": [{"data": "192.0.2.1+54721"}],
+                "local-as": [{"data": "65001"}],
+                "peer-as": [{"data": "65002"}],
+                "peer-state": [{"data": "Established"}],
+                "description": [{"data": "TEST_SYNC_SOURCE_IP_VALID"}]
+              },
+              {
+                "peer-address": [{"data": "192.0.2.3+179"}],
+                "local-address": [{"data": "undefined"}],
+                "local-as": [{"data": "65001"}],
+                "peer-as": [{"data": "65003"}],
+                "peer-state": [{"data": "Idle"}],
+                "description": [{"data": "TEST_SYNC_SOURCE_IP_UNDEFINED"}]
+              }
+            ]
+          }
+        ]
+      }
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted BGP sync test data
+  exit:
+    output: true
+    prompt: 'nornir@{base_prompt}>'

@@ -391,7 +391,7 @@ class NetboxVlansTasks:
             scope: {
                 "create": sorted(entity_vid(scope, key) for key in actions["create"]),
                 "update": {
-                    entity_vid(scope, key): actions["update"][key]
+                    str(entity_vid(scope, key)): actions["update"][key]
                     for key in sorted(actions["update"])
                 },
                 "delete": [],

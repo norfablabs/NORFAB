@@ -475,6 +475,35 @@ class TestSyncDeviceIP:
 
         self._cleanup(nfclient, self.SPINE_DEVICES)
 
+    def test_sync_device_ip_duplicate_masks_from_fakenos(self, nfclient):
+        """The same FakeNOS host IP with different masks must be rejected."""
+        device = "fn-ceos-sp-1"
+        addresses = ["10.3.254.1/24", "10.3.254.1/32"]
+        pynb = get_pynetbox(nfclient)
+
+        self._delete_ip_addresses(nfclient, *addresses)
+
+        try:
+            ret = self._sync(nfclient, [device], filter_by_ip="10.3.254.1")
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                duplicate_errors = [
+                    error
+                    for error in res["errors"]
+                    if "found duplicate non-anycast IP 10.3.254.1" in error
+                ]
+                assert len(duplicate_errors) == 2, (
+                    f"{worker} did not reject both differently masked IPs: {res}"
+                )
+                device_data = res["result"][device]
+                assert device_data["created"] == []
+                assert device_data["updated"] == []
+
+            for address in addresses:
+                assert list(pynb.ipam.ip_addresses.filter(address=address)) == []
+        finally:
+            self._delete_ip_addresses(nfclient, *addresses)
+
     # ------------------------------------------------------------------ #
     # VRF selection scenarios                                             #
     # ------------------------------------------------------------------ #
