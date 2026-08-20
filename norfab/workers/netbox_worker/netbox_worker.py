@@ -52,6 +52,7 @@ from .netbox_models import (
 from .nornir_inventory_tasks import NetboxNornirInventoryTasks
 from .prefix_tasks import NetboxPrefixTasks
 from .topology_tasks import NetboxTopologyTasks
+from .vlan_tasks import NetboxVlansTasks
 
 SERVICE = "netbox"
 
@@ -74,6 +75,7 @@ class NetboxWorker(
     NetboxIpTasks,
     NetboxBranchTasks,
     NetboxCrudTasks,
+    NetboxVlansTasks,
 ):
     """
     NetboxWorker class for interacting with Netbox API and managing inventory.

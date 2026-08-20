@@ -427,7 +427,13 @@ ip_addresses = [
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
 
-vlan_groups = [{"name": "VLAN_GROUP_1"}]
+vlan_groups = [
+    {"name": "VLAN_GROUP_1"},
+    {"name": "SYNC_VLANS_GROUP_1", "vid_ranges": [[100, 199]]},
+    {"name": "SYNC_VLANS_GROUP_2", "vid_ranges": [[100, 399]]},
+    {"name": "SYNC_INTERFACES_GROUP_1", "vid_ranges": [[500, 599]]},
+    {"name": "SYNC_INTERFACES_GROUP_2", "vid_ranges": [[500, 699]]},
+]
 
 vlans = [{"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)]
 vlans.extend(

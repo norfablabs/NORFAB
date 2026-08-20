@@ -1,6 +1,17 @@
-# ADR - NetBox `sync_vlans` Task Plan
+# Historical ADR - NetBox `sync_vlans` Task Plan
 
 ## Status
+
+Superseded by the implemented task and its
+[`sync_vlans` documentation](../workers/netbox/services_netbox_service_tasks_sync_vlans.md).
+
+This file preserves the original design discussion and is not the current task
+contract. In particular, the implemented task uses ordered `vlan_map` rules,
+an exact-name scalar `vlan_group` fallback, device-site fallback, and no VLAN
+deletion. Current input, output, matching, and safety behavior is documented in
+the task reference linked above.
+
+Original proposal status and date:
 
 Proposed — ready for implementation review.
 
@@ -42,7 +53,7 @@ recommended mode for new deployments.
 ## Decision
 
 Add a standalone NetBox worker task named `sync_vlans` in a dedicated
-`vlans_tasks.py` module. It will:
+`vlan_tasks.py` module. It will:
 
 1. resolve devices from an explicit list and/or Nornir host filters;
 2. collect live VLAN configuration with Nornir `parse_ttp`, using
@@ -97,7 +108,7 @@ The first version will not:
 Create the task implementation in:
 
 ```text
-norfab/workers/netbox_worker/vlans_tasks.py
+norfab/workers/netbox_worker/vlan_tasks.py
 ```
 
 The module should contain:
@@ -113,19 +124,21 @@ Keep non-trivial reusable logic as plain module-level functions. Suggested
 helpers are:
 
 ```python
-def expand_vlan_id_ranges(vlan_ids: list[str] | None) -> set[int]: ...
 def normalize_live_vlan(record: dict) -> dict: ...
 def normalize_netbox_vlan(record: object) -> dict: ...
 def resolve_vlan_group(nb: object, vlan_group: str | int) -> object | None: ...
 ```
 
-Do not define Pydantic models in `vlans_tasks.py`. Per the repository model
+Expand VLAN ID strings with the existing
+`norfab.utils.text.expand_alphanumeric_range` utility.
+
+Do not define Pydantic models in `vlan_tasks.py`. Per the repository model
 guide, all task models belong in `netbox_models.py`.
 
 Wire the mixin into `netbox_worker.py`:
 
 ```python
-from .vlans_tasks import NetboxVlansTasks
+from .vlan_tasks import NetboxVlansTasks
 
 
 class NetboxWorker(
@@ -153,7 +166,7 @@ def sync_vlans(
     process_deletions: bool = False,
     branch: Union[None, str] = None,
     vlan_group: Union[None, str, int] = None,
-    vlan_ids: Union[None, list[str]] = None,
+    filter_by_vlan_ids: Union[None, list[str]] = None,
     **kwargs: Any,
 ) -> Result:
     ...
@@ -169,9 +182,8 @@ Arguments:
 - `devices`: explicit NetBox/Nornir device names.
 - `process_deletions`: allow deletion of NetBox VLANs absent from live data.
 - `branch`: NetBox Branching plugin branch name.
-- `vlan_group`: one VLAN group name, slug, or numeric ID. When set, all
-  selected devices contribute to that group.
-- `vlan_ids`: VLAN IDs or inclusive range strings such as `100`, `200-299`.
+- `vlan_group`: one VLAN group name
+- `filter_by_vlan_ids`: VLAN IDs or inclusive range strings such as `100`, `200-299`.
   Apply the same expanded set to live and NetBox state.
 - `kwargs`: Nornir `FFun` host filters (`FO`, `FB`, `FH`, `FC`, `FR`, `FG`,
   `FP`, `FL`, `FM`, `FX`, and `FN`). The input model must expose these fields
@@ -182,7 +194,7 @@ host filter.
 
 ### Deletion Contract
 
-`process_deletions=True` is valid only when `vlan_ids` is non-empty. The
+`process_deletions=True` is valid only when `filter_by_vlan_ids` is non-empty. The
 explicit VID set is the task's deletion boundary. This prevents a selected
 device subset from accidentally treating every VLAN in a site or group as
 managed.
@@ -203,29 +215,12 @@ must list suppressed candidates under `delete_skipped` and explain why in
 `messages` or `errors`.
 
 An empty, successfully parsed list is authoritative only for the requested
-`vlan_ids`. A missing host result is not equivalent to an empty list.
+`filter_by_vlan_ids`. A missing host result is not equivalent to an empty list.
 
 ## Pydantic Models
 
 Add the following models to the IPAM section of
 `norfab/workers/netbox_worker/netbox_models.py`.
-
-### `VlanRecord`
-
-Use this model to validate the normalized TTP contract before aggregation:
-
-```python
-class VlanRecord(BaseModel, extra="forbid"):
-    vid: StrictInt = Field(..., ge=1, le=4094, description="IEEE 802.1Q VLAN ID")
-    name: StrictStr = Field(..., min_length=1, description="VLAN name")
-    description: Union[None, StrictStr] = Field(
-        None,
-        description="VLAN description",
-    )
-```
-
-The implementation should convert the model to the canonical comparison shape
-after validation.
 
 ### `SyncVlansInput`
 
@@ -268,7 +263,7 @@ class SyncVlansInput(
         description="VLAN group name, slug, or ID used as the reconciliation scope",
         alias="vlan-group",
     )
-    vlan_ids: Union[None, List[StrictStr]] = Field(
+    filter_by_vlan_ids: Union[None, List[StrictStr]] = Field(
         None,
         description="VLAN IDs or inclusive ranges to reconcile, for example 100 or 200-299",
         alias="vlan-ids",
@@ -279,7 +274,7 @@ class SyncVlansInput(
 Add `model_validator(mode="after")` validation that:
 
 1. requires `devices` or at least one Nornir host filter;
-2. requires `vlan_ids` when `process_deletions=True`;
+2. requires `filter_by_vlan_ids` when `process_deletions=True`;
 3. rejects brackets, descending ranges, non-numeric values, and values outside
    `1..4094`;
 4. accepts overlapping input ranges but normalizes them to one set in the task;
@@ -434,7 +429,7 @@ Rules:
 - normalize a missing or null description to `""`;
 - preserve name and description case;
 - do not compare NetBox IDs or display fields;
-- apply the expanded `vlan_ids` set to both live and NetBox data before diffing;
+- apply the expanded `filter_by_vlan_ids` set to both live and NetBox data before diffing;
 - sort scopes lexically and VIDs numerically for payloads, events, and results.
 
 The bundled TTP getter supplies a default name such as `VLAN100` when a
@@ -652,7 +647,7 @@ class SyncVlansShell(
 CLI-specific behavior:
 
 - override `devices` to accept `Union[List[StrictStr], StrictStr]`;
-- override `vlan_ids` to accept `Union[List[StrictStr], StrictStr]`;
+- override `filter_by_vlan_ids` to accept `Union[List[StrictStr], StrictStr]`;
 - convert either string to a one-item list in `run`;
 - default outer timeout to 600 seconds and pass `int(timeout * 0.9)` to the
   worker task;
@@ -721,7 +716,7 @@ Follow `docs/development/documentation_style_guide.md` and include:
 12. the concrete API directive:
 
 ```markdown
-::: norfab.workers.netbox_worker.vlans_tasks.NetboxVlansTasks.sync_vlans
+::: norfab.workers.netbox_worker.vlan_tasks.NetboxVlansTasks.sync_vlans
 ```
 
 Add the page to the NetBox task list in `mkdocs.yml` as `Sync VLANs`.
@@ -771,14 +766,14 @@ Required coverage:
 4. VLAN range expansion accepts single IDs and ascending ranges;
 5. VLAN range validation rejects brackets, descending ranges, non-numeric
    values, zero, and values above 4094;
-6. `process_deletions=True` requires `vlan_ids`;
+6. `process_deletions=True` requires `filter_by_vlan_ids`;
 7. dry-run reports create actions and performs no writes;
 8. live run creates VLANs with parsed names and descriptions;
 9. live run updates a placeholder VLAN name and description;
 10. a null live description normalizes to an empty string and clears a stale
     NetBox description;
 11. a second run reports VLANs in sync;
-12. `vlan_ids` applies to both live and NetBox data;
+12. `filter_by_vlan_ids` applies to both live and NetBox data;
 13. deletion is skipped by default;
 14. deletion runs only for explicit in-range VIDs;
 15. an out-of-range NetBox VLAN is never deleted;
@@ -824,7 +819,7 @@ Static and documentation verification:
 
 ```bash
 poetry run python -m compileall -q norfab/workers/netbox_worker norfab/clients/nfcli_shell/netbox
-poetry run ruff check norfab/workers/netbox_worker/vlans_tasks.py norfab/workers/netbox_worker/netbox_models.py norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py tests/services/netbox/test_vlans.py
+poetry run ruff check norfab/workers/netbox_worker/vlan_tasks.py norfab/workers/netbox_worker/netbox_models.py norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py tests/services/netbox/test_vlans.py
 poetry run mkdocs build
 ```
 
@@ -834,7 +829,7 @@ Do not leave new `__pycache__` artifacts after verification.
 
 Implementation should be limited to:
 
-- `norfab/workers/netbox_worker/vlans_tasks.py` — new task and helpers;
+- `norfab/workers/netbox_worker/vlan_tasks.py` — new task and helpers;
 - `norfab/workers/netbox_worker/netbox_models.py` — VLAN record, input, and
   result models;
 - `norfab/workers/netbox_worker/netbox_worker.py` — import and mix in
@@ -890,7 +885,7 @@ Implementation is complete when:
 
 - Results are scope-keyed, which differs from device-keyed interface results.
 - Site compatibility mode must handle ambiguous duplicate VIDs.
-- Requiring `vlan_ids` for deletion is less convenient than deleting every
+- Requiring `filter_by_vlan_ids` for deletion is less convenient than deleting every
   absent VLAN, but it materially reduces risk.
 - Status, role, tenant, tags, and other NetBox-only policy fields remain manual.
 - The task will not automatically run as part of `sync_all` in its first
@@ -927,7 +922,7 @@ that can be derived safely from the live three-field parser output.
 ## Resolved Decisions
 
 1. Public task name: `sync_vlans`.
-2. Implementation file: `vlans_tasks.py`.
+2. Implementation file: `vlan_tasks.py`.
 3. Worker mixin: `NetboxVlansTasks`.
 4. Live source: Nornir `parse_ttp` with `get="vlans"`.
 5. Managed fields: `vid` identity plus authoritative `name` and `description`.
@@ -940,7 +935,7 @@ that can be derived safely from the live three-field parser output.
 12. VLAN groups must already exist.
 13. Site/global/group moves are outside the task.
 14. Deletions default to disabled.
-15. Enabled deletion requires explicit `vlan_ids`.
+15. Enabled deletion requires explicit `filter_by_vlan_ids`.
 16. Incomplete live collection suppresses deletion for the affected scope.
 17. Dry-run takes precedence over approval and never prompts.
 18. Bulk operations are isolated per scope.

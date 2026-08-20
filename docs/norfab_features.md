@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 26 July 2026*
+*Last updated: 20 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -697,6 +697,17 @@ source-of-truth maintenance and drift remediation. **Limitations:** parser
 coverage determines live-state quality; deletion is opt-in and should be
 reviewed with dry-run first.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md)
+
+### Live VLAN reconciliation
+
+Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
+NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
+an optional scalar VLAN-group fallback.
+**Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
+layer-two source-of-truth drift. **Limitations:** parser coverage determines
+live-state quality; the task does not delete VLANs because live data cannot
+reliably identify stale NetBox objects.
+[Task details](workers/netbox/services_netbox_service_tasks_sync_vlans.md)
 
 ### Live IP and MAC reconciliation
 

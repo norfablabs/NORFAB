@@ -813,35 +813,6 @@ class InventoryPatternMap(BaseModel, extra="forbid"):
                 )
 
 
-class VlanGroupCriteria(BaseModel, extra="forbid"):
-    """Criteria used to select a VLAN group for a discovered interface VLAN."""
-
-    interface_names: Union[None, List[StrictStr]] = None
-    vlan_ids: Union[None, List[StrictStr]] = None
-
-    @model_validator(mode="after")
-    def validate_criteria(self) -> "VlanGroupCriteria":
-        if not self.interface_names and not self.vlan_ids:
-            raise ValueError("at least one VLAN group criterion is required")
-        if self.interface_names and any(
-            not pattern.strip() for pattern in self.interface_names
-        ):
-            raise ValueError("interface name patterns cannot be empty")
-        for vlan_range in self.vlan_ids or []:
-            if "[" in vlan_range or "]" in vlan_range:
-                raise ValueError(f"invalid VLAN ID range '{vlan_range}'")
-            expanded = expand_alphanumeric_range(f"[{vlan_range}]")
-            if any(
-                not vlan_id.isdigit() or not 1 <= int(vlan_id) <= 4094
-                for vlan_id in expanded
-            ):
-                raise ValueError(f"invalid VLAN ID range '{vlan_range}'")
-        return self
-
-
-VlanGroupMap = Dict[StrictStr, VlanGroupCriteria]
-
-
 class DeviceInventoryRecord(BaseModel, extra="forbid"):
     """Parsed live device inventory record."""
 
@@ -1066,9 +1037,9 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         json_schema_extra={"presence": True},
         alias="interfaces-update-type",
     )
-    interfaces_vlan_group: Union[None, StrictStr, StrictInt] = Field(
+    interfaces_vlan_group: Union[None, StrictStr] = Field(
         None,
-        description="VLAN group name, slug, or ID for interface VLAN resolution",
+        description="Exact VLAN group name for interface VLAN resolution",
         alias="interfaces-vlan-group",
     )
     mac_filter_by_name: Union[None, StrictStr] = Field(
@@ -1523,6 +1494,64 @@ class GetInterfacesInput(
     )
 
 
+# --------------------------------------------------------------------------
+# SHARED VLAN MAP MODELS
+# --------------------------------------------------------------------------
+
+
+class VlanMapRule(BaseModel, extra="forbid", populate_by_name=True):
+    vlan_group: StrictStr = Field(
+        ...,
+        min_length=1,
+        description="Exact NetBox VLAN group name for matching VLANs",
+        alias="vlan-group",
+    )
+    vlan_ids: Union[None, List[StrictStr]] = Field(
+        None,
+        description="VLAN IDs or inclusive ranges narrowing the group VID ranges",
+        alias="vlan-ids",
+    )
+    vlan_names: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns matched against VLAN names",
+        alias="vlan-names",
+    )
+    device_names: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns matched against device names",
+        alias="device-names",
+    )
+    interface_names: Union[None, List[StrictStr]] = Field(
+        None,
+        description="Glob patterns matched against interface names",
+        alias="interface-names",
+    )
+
+    @model_validator(mode="after")
+    def validate_rule(self) -> "VlanMapRule":
+        for vlan_range in self.vlan_ids or []:
+            values = expand_alphanumeric_range(f"[{vlan_range}]")
+            parts = vlan_range.split("-")
+            if (
+                "[" in vlan_range
+                or "]" in vlan_range
+                or any(not vlan_id.isdigit() for vlan_id in values)
+                or any(not 1 <= int(vlan_id) <= 4094 for vlan_id in values)
+                or (
+                    len(parts) == 2
+                    and all(part.isdigit() for part in parts)
+                    and int(parts[0]) > int(parts[1])
+                )
+            ):
+                raise ValueError(f"invalid VLAN ID range '{vlan_range}'")
+        for patterns in (self.vlan_names, self.device_names, self.interface_names):
+            if patterns and any(not pattern.strip() for pattern in patterns):
+                raise ValueError("VLAN map glob patterns cannot be empty")
+        if not self.vlan_group.strip():
+            raise ValueError("VLAN group name cannot be empty")
+        return self
+
+
 class SyncDeviceInterfacesInput(
     NetboxCommonArgs, use_enum_values=True, populate_by_name=True  # ignore aliases
 ):
@@ -1562,10 +1591,15 @@ class SyncDeviceInterfacesInput(
         alias="update-type",
         json_schema_extra={"presence": True},
     )
-    vlan_group: Union[None, StrictStr, StrictInt, VlanGroupMap] = Field(
+    vlan_group: Union[None, StrictStr] = Field(
         None,
-        description="VLAN group name, slug, ID, or ordered criteria mapping to use when resolving or creating interface VLANs",
+        description="Exact VLAN group name used for interface VLANs not matched by vlan-map",
         alias="vlan-group",
+    )
+    vlan_map: Union[None, List[VlanMapRule]] = Field(
+        None,
+        description="Ordered rules mapping interface VLANs to NetBox VLAN groups",
+        alias="vlan-map",
     )
     ignore_vlans: StrictBool = Field(
         False,
@@ -2234,6 +2268,83 @@ class GetNornirInventoryResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
         description="Nornir inventory data",
+    )
+
+
+# --------------------------------------------------------------------------
+# VLAN TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class SyncVlansInput(
+    NetboxNornirHostsFilters,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    dry_run: StrictBool = Field(
+        False,
+        description="Calculate the VLAN diff without writing to NetBox",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox device names to collect VLANs from",
+    )
+    timeout: StrictInt = Field(
+        600,
+        gt=0,
+        description="Timeout in seconds for Nornir host resolution and VLAN parsing",
+    )
+    with_approval: StrictBool = Field(
+        False,
+        description="Preview VLAN changes and ask for review before writing to NetBox",
+        alias="with-approval",
+        json_schema_extra={"presence": True},
+    )
+    vlan_group: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        description="Exact group name for live VLANs not matched by vlan-map",
+        alias="vlan-group",
+    )
+    vlan_map: Union[None, List[VlanMapRule]] = Field(
+        None,
+        description="Ordered rules mapping live VLANs to NetBox VLAN groups",
+        alias="vlan-map",
+    )
+    filter_by_vlan_ids: Union[None, List[StrictStr]] = Field(
+        None,
+        description="VLAN IDs or inclusive ranges to reconcile",
+        alias="vlan-ids",
+        examples=[["100", "200-299"]],
+    )
+
+    @model_validator(mode="after")
+    def validate_sync_vlans(self) -> "SyncVlansInput":
+        for vlan_range in self.filter_by_vlan_ids or []:
+            values = expand_alphanumeric_range(f"[{vlan_range}]")
+            parts = vlan_range.split("-")
+            if (
+                "[" in vlan_range
+                or "]" in vlan_range
+                or any(not vlan_id.isdigit() for vlan_id in values)
+                or any(not 1 <= int(vlan_id) <= 4094 for vlan_id in values)
+                or (
+                    len(parts) == 2
+                    and all(part.isdigit() for part in parts)
+                    and int(parts[0]) > int(parts[1])
+                )
+            ):
+                raise ValueError(f"invalid VLAN ID range '{vlan_range}'")
+        return self
+
+
+class SyncVlansResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="VLAN sync actions keyed by NetBox VLAN scope",
     )
 
 

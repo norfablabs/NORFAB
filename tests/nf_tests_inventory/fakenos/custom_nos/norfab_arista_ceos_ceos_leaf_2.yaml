@@ -728,6 +728,12 @@ commands:
       vlan 121
          name TEST_L2_TRUNK_B
       !
+      vlan 190
+         name TEST_SYNC_CONFLICT_L2
+      !
+      vlan 191
+         name TEST_SYNC_SHARED
+      !
       vlan 220
          name TEST_L2_ACCESS
       !
@@ -898,6 +904,12 @@ commands:
       !
       vlan 121
          name TEST_L2_TRUNK_B
+      !
+      vlan 190
+         name TEST_SYNC_CONFLICT_L2
+      !
+      vlan 191
+         name TEST_SYNC_SHARED
       !
       vlan 220
          name TEST_L2_ACCESS

@@ -39,7 +39,7 @@ orjson = "3.11.9"
 python-dotenv = "1.2.2"
 
 # PICLE NFCLI Shell Dependencies
-picle = { version = "0.12.2", optional = true }
+picle = { version = "0.13.0", optional = true }
 rich = { version = "15.0.0", optional = true }
 tabulate = { version = "0.10.0", optional = true }
 prompt_toolkit = { version = "3.0.53", optional = true }
@@ -351,6 +351,7 @@ markers = [
     "netbox_sync_all: NetBox sync_all task tests",
     "netbox_sync_bgp_peerings: NetBox sync_bgp_peerings task tests",
     "netbox_sync_device_interfaces: NetBox sync_device_interfaces task tests",
+    "netbox_sync_vlans: NetBox sync_vlans task tests",
     "netbox_sync_device_inventory: NetBox sync_device_inventory task tests",
     "netbox_sync_device_ip: NetBox sync_device_ip task tests",
     "netbox_sync_mac_addresses: NetBox sync_mac_addresses task tests",

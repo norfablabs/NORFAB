@@ -1,10 +1,130 @@
+import fnmatch
 import ipaddress
 import logging
-from typing import Any, Dict, List, Union
+from collections.abc import Iterable
+from typing import Any, Union
+
 from norfab.core.worker import Job
 from norfab.models import Result
+from norfab.utils.text import expand_alphanumeric_range
 
 log = logging.getLogger(__name__)
+
+
+def prepare_vlan_map(
+    vlan_map: Union[None, list],
+    vlan_groups: Union[None, dict] = None,
+) -> list[dict]:
+    """Normalize VLAN map rules and resolve their effective VLAN IDs."""
+    rules = []
+    for rule in vlan_map or []:
+        rule_data = rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
+        explicit_vlan_ids = {
+            int(vlan_id)
+            for vlan_range in rule_data.get("vlan_ids") or []
+            for vlan_id in expand_alphanumeric_range(f"[{vlan_range}]")
+        }
+        if vlan_groups is None:
+            rule_data["expanded_vlan_ids"] = explicit_vlan_ids or None
+        else:
+            group = vlan_groups[rule_data["vlan_group"]]
+            group_ranges = getattr(group, "vid_ranges", None)
+            if group_ranges is None:
+                group_ranges = [[1, 4094]]
+            group_vlan_ids = set()
+            for bounds in group_ranges:
+                if (
+                    not isinstance(bounds, (list, tuple))
+                    or len(bounds) != 2
+                    or not all(isinstance(value, int) for value in bounds)
+                    or not 1 <= bounds[0] <= bounds[1] <= 4094
+                ):
+                    raise ValueError(
+                        f"invalid vid_ranges for VLAN group '{rule_data['vlan_group']}'"
+                    )
+                group_vlan_ids.update(range(bounds[0], bounds[1] + 1))
+            rule_data["expanded_vlan_ids"] = (
+                group_vlan_ids & explicit_vlan_ids
+                if explicit_vlan_ids
+                else group_vlan_ids
+            )
+        rules.append(rule_data)
+    return rules
+
+
+def match_vlan_map(
+    rules: list[dict],
+    vlan_id: Union[None, int],
+    vlan_name: Union[None, str],
+    device_name: str,
+    interface_name: Union[None, str],
+) -> Union[None, str]:
+    """Return the first matching group, ignoring unavailable name contexts."""
+    for rule in rules:
+        vlan_id_match = (
+            rule.get("expanded_vlan_ids") is None
+            or vlan_id in rule["expanded_vlan_ids"]
+        )
+        vlan_name_match = (
+            vlan_name is None
+            or not rule.get("vlan_names")
+            or any(
+                fnmatch.fnmatchcase(vlan_name, pattern)
+                for pattern in rule["vlan_names"]
+            )
+        )
+        device_name_match = not rule.get("device_names") or any(
+            fnmatch.fnmatchcase(device_name, pattern)
+            for pattern in rule["device_names"]
+        )
+        interface_name_match = (
+            interface_name is None
+            or not rule.get("interface_names")
+            or any(
+                fnmatch.fnmatchcase(interface_name, pattern)
+                for pattern in rule["interface_names"]
+            )
+        )
+        if (
+            vlan_id_match
+            and vlan_name_match
+            and device_name_match
+            and interface_name_match
+        ):
+            return rule["vlan_group"]
+    return None
+
+
+def find_vlan(
+    vlans: Iterable,
+    vid: int,
+    name: Union[None, str] = None,
+    excluded_ids: Union[None, set] = None,
+) -> Any:
+    """Return the first available VLAN matching VID and, when supplied, name."""
+    excluded_ids = excluded_ids or set()
+    for vlan in vlans:
+        if vlan.id in excluded_ids or int(vlan.vid) != vid:
+            continue
+        if name is None or str(vlan.name).strip() == name:
+            return vlan
+    return None
+
+
+def build_vlan_payload(
+    vid: int,
+    name: str,
+    description: str,
+    site_id: Union[None, int] = None,
+    group_id: Union[None, int] = None,
+) -> dict:
+    """Build a VLAN create payload for a group or site scope."""
+    payload = {"vid": vid, "name": name, "description": description}
+    if group_id:
+        payload["group"] = group_id
+    if site_id:
+        payload["site"] = site_id
+    return payload
 
 
 def review_sync_task_result(
@@ -108,25 +228,25 @@ def resolve_vlan(
     if cache_key in _lookup_cache:
         return _lookup_cache[cache_key]
 
-    # fetch vlans from Netbox
+    # Fetch scoped candidates and consistently select the first matching VID.
     filter_kwargs = {"vid": vid}
     try:
         if group_id:
             filter_kwargs["group_id"] = group_id
-            nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
-            if nb_vlan:
-                _lookup_cache[cache_key] = nb_vlan.id
+            vlan_candidates = nb.ipam.vlans.filter(**filter_kwargs)
         elif site_id:
             filter_kwargs["site_id"] = site_id
-            nb_vlan = nb.ipam.vlans.get(**filter_kwargs)
-            if nb_vlan:
-                _lookup_cache[cache_key] = nb_vlan.id
-        # try to source global vlan - not assigned to site or group
+            vlan_candidates = nb.ipam.vlans.filter(**filter_kwargs)
+        # Try to source a global VLAN not assigned to a site or group.
         else:
-            for nb_vlan in nb.ipam.vlans.filter(**filter_kwargs):
-                if not nb_vlan.site and not nb_vlan.group:
-                    _lookup_cache[cache_key] = nb_vlan.id
-                    break
+            vlan_candidates = (
+                vlan
+                for vlan in nb.ipam.vlans.filter(**filter_kwargs)
+                if not vlan.site and not vlan.group
+            )
+        nb_vlan = find_vlan(vlan_candidates, vid)
+        if nb_vlan:
+            _lookup_cache[cache_key] = nb_vlan.id
     except Exception as e:
         msg = f"Failed to fetch Netbox vlan using filters '{filter_kwargs}', error: {e}"
         log.error(msg)
@@ -139,11 +259,13 @@ def resolve_vlan(
         return _lookup_cache[cache_key]
 
     # create new vlan if no existing vlan found
-    payload = {"vid": vid, "name": f"VLAN_{vid}", "description": f"VLAN_{vid}"}
-    if site_id:
-        payload["site"] = site_id
-    if group_id:
-        payload["group"] = group_id
+    payload = build_vlan_payload(
+        vid=vid,
+        name=f"VLAN_{vid}",
+        description=f"VLAN_{vid}",
+        site_id=site_id,
+        group_id=group_id,
+    )
 
     try:
         new_vlan = nb.ipam.vlans.create(**payload)

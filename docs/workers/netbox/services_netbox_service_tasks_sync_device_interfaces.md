@@ -90,21 +90,34 @@ By default, discovered VLANs and VRFs are resolved or created in NetBox and asso
 
 ## VLAN Group Selection
 
-`vlan_group` accepts a single VLAN group name, slug, or ID, or an ordered mapping keyed by VLAN group name. Each mapped group can match interface names using case-sensitive glob patterns, VLAN IDs using range strings, or both:
+`vlan_group` accepts one exact VLAN group name and acts as the fallback for
+VLANs not matched by `vlan_map`. Slugs and numeric IDs are not resolved. When
+neither argument selects a group, the device site is used.
+
+`vlan_map` accepts the same ordered list of rules as VLAN sync:
 
 ```python
-{
-    "ACCESS_VLANS": {
+[
+    {
+        "vlan_group": "ACCESS_VLANS",
         "interface_names": ["Ethernet*"],
         "vlan_ids": ["100-199", "300"],
+        "device_names": ["leaf-*"],
     },
-    "INFRA_VLANS": {
+    {
+        "vlan_group": "INFRA_VLANS",
         "vlan_ids": ["400-499"],
     },
-}
+]
 ```
 
-Values within one criterion use OR logic. When both `interface_names` and `vlan_ids` are present they use AND logic. Groups are checked in mapping order and the first match wins. VLANs that do not match any group use the existing device-site behavior. VLAN ranges use plain strings such as `100-199`; bracket notation is not accepted.
+Values within one criterion use OR logic and populated criteria use AND logic.
+Rules are checked in list order and the first match wins. Interface and device
+names use case-sensitive glob matching. VLAN ranges use plain strings such as
+`100-199`; bracket notation is not accepted. Interface sync ignores
+`vlan_names` because interface parsing does not provide VLAN names. Each rule
+also uses the referenced NetBox group's `vid_ranges`; explicit `vlan_ids`
+narrow those group ranges. A rule containing only `vlan_group` is valid.
 
 ## Branching Support
 
@@ -118,6 +131,12 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
 
     ```
     nf#netbox sync interfaces devices ceos-spine-1 ceos-spine-2
+    ```
+
+    Select VLAN groups with ordered rules and a fallback group:
+
+    ```
+    nf#netbox sync interfaces devices leaf-1 vlan-group DEFAULT_VLANS vlan-map '[{"vlan_group":"ACCESS_VLANS","vlan_ids":["100-199"],"interface_names":["Ethernet*"]}]'
     ```
 
     Preview changes without writing to NetBox (dry run):
@@ -238,22 +257,25 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
         },
     )
 
-    # dynamically select VLAN groups by interface name and VLAN ID ranges
+    # dynamically select VLAN groups, with DEFAULT_VLANS as the fallback
     result = client.run_job(
         "netbox",
         "sync_device_interfaces",
         workers="any",
         kwargs={
             "devices": ["ceos-spine-1"],
-            "vlan_group": {
-                "ACCESS_VLANS": {
+            "vlan_group": "DEFAULT_VLANS",
+            "vlan_map": [
+                {
+                    "vlan_group": "ACCESS_VLANS",
                     "interface_names": ["Ethernet*"],
                     "vlan_ids": ["100-199", "300"],
                 },
-                "INFRA_VLANS": {
+                {
+                    "vlan_group": "INFRA_VLANS",
                     "vlan_ids": ["400-499"],
                 },
-            },
+            ],
         },
     )
 
@@ -301,7 +323,8 @@ root
             ├── process-deletions:    Delete interfaces present in NetBox but absent in live data
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
-            ├── vlan-group:    VLAN group name, slug, ID, or ordered criteria mapping
+            ├── vlan-group:    Fallback VLAN group exact name
+            ├── vlan-map:    Ordered VLAN-to-group mapping rules
             ├── ignore-vlans:    Ignore discovered VLANs and leave interface VLAN associations unchanged
             ├── ignore-vrf:    Ignore discovered VRFs and leave interface VRF associations unchanged
             ├── branch:    Branching plugin branch name to push changes into

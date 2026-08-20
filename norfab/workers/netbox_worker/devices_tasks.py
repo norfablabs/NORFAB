@@ -1411,7 +1411,7 @@ class NetboxDevicesTasks:
         interfaces_filter_by_name: Union[None, str] = None,
         interfaces_filter_by_description: Union[None, str] = None,
         interfaces_update_type: Union[None, bool] = False,
-        interfaces_vlan_group: Union[None, str, int] = None,
+        interfaces_vlan_group: Union[None, str] = None,
         mac_filter_by_name: Union[None, str] = None,
         mac_filter_by_description: Union[None, str] = None,
         mac_filter_by_mac: Union[None, str] = None,
@@ -1477,7 +1477,7 @@ class NetboxDevicesTasks:
             interfaces_filter_by_name (str, optional): Glob pattern to filter interfaces by name.
             interfaces_filter_by_description (str, optional): Glob pattern to filter interfaces by description.
             interfaces_update_type (bool, optional): Update existing NetBox interface types.
-            interfaces_vlan_group (str, int, optional): VLAN group name, slug, or ID for interface VLAN resolution.
+            interfaces_vlan_group (str, optional): Exact VLAN group name for interface VLAN resolution.
             mac_filter_by_name (str, optional): Glob pattern to filter MAC sync interfaces by name.
             mac_filter_by_description (str, optional): Glob pattern to filter MAC sync interfaces by description.
             mac_filter_by_mac (str, optional): Glob pattern to filter MAC addresses.
