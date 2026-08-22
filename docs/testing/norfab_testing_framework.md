@@ -75,10 +75,12 @@ tests/
   core/
     test_broker.py
     test_client.py
-    test_client_agent.py
     test_nfapi.py
     test_simple_inventory_datastore.py
     test_worker.py
+  clients/
+    agent/
+      test_client_agent.py
   services/
     containerlab/
       common.py

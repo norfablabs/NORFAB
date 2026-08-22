@@ -103,7 +103,28 @@ poetry run pip install norfab[nornirservice]
 poetry run pip install norfab[full]
 
 # Development (using Poetry)
-poetry install
+poetry install -E docs
+```
+
+### Developer Task Automation
+
+Use Invoke from the repository root for common development tasks:
+
+```bash
+poetry run inv --list
+poetry run inv checks
+poetry run inv docs-build
+poetry run inv docs-serve
+poetry run inv docker-tests-core
+poetry run inv docker-tests-nornir
+```
+
+Docker suite tasks use the canonical `docker-tests-<suite>` form and also
+accept `docker-test-<suite>` aliases. Use task help to see selectors, marker,
+keyword, Python-version, build, and file-parallel options:
+
+```bash
+poetry run inv --help docker-tests-nornir
 ```
 
 ### Running
@@ -117,6 +138,40 @@ poetry run nfcli --create-env norfab
 ```
 
 ### Testing
+
+```bash
+# Run pytest suites in isolated Docker runners
+poetry run inv docker-tests-core
+poetry run inv docker-tests-nornir
+poetry run inv docker-tests-netbox
+
+# Run one test or select a marker subset
+poetry run inv docker-tests-nornir --selector=tests/services/nornir/test_worker.py
+poetry run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
+
+# Discover test_*.py and run one isolated container per file, two at a time
+poetry run inv docker-tests-netbox --parallel-runs=2
+
+# Validate/build all Docker test services or run the distributed topology
+poetry run inv docker-tests-config
+poetry run inv docker-tests-build
+poetry run inv docker-tests-distributed
+```
+
+Docker runtime files and JUnit reports are stored under the selected service's
+ignored `docker/norfab-docker-tests/<service>/__norfab__/` directory.
+With `--parallel-runs=N`, test roots are derived from `tests/services/<suite>`,
+`tests/clients/<suite>`, or `tests/<suite>` and per-file runtimes are stored
+under `<service>/parallel/<test-file>/__norfab__/`. At most `N` per-file
+containers run concurrently.
+Individual `docker-tests-<suite>` tasks report the container exit status but
+do not fail Invoke; `docker-tests-all` still returns non-zero after summarizing
+all failed suites.
+The distributed task validates the client's cached broker public certificate;
+if an older runtime key is present, rerun it with `--force-certificates` to
+replace that public certificate. It never copies the broker private key.
+
+Direct pytest remains available for focused local debugging:
 
 ```bash
 # Run all tests (from repo root, requires a running/startable NorFab)
@@ -136,14 +191,20 @@ cd tests && poetry run pytest -s -v
 ### Linting & Formatting
 
 ```bash
+# Run all non-mutating checks (Black, Ruff, and Vulture)
+poetry run inv checks
+
 # Format with Black
-poetry run black .
+poetry run inv format
 
 # Lint with Ruff
-poetry run ruff check .
+poetry run inv lint
 
 # Ruff auto-fix
 poetry run ruff check . --fix
+
+# Report dead code; findings are not suppressed or auto-fixed
+poetry run inv dead-code
 ```
 
 ### Important formatting Rules
@@ -156,10 +217,10 @@ poetry run ruff check . --fix
 
 ```bash
 # Serve docs locally
-poetry run mkdocs serve
+poetry run inv docs-serve
 
 # Build docs
-poetry run mkdocs build
+poetry run inv docs-build
 ```
 
 #### Feature Documentation Maintenance
@@ -275,3 +336,5 @@ Selected rule sets: `E`, `F`, `I`, `ANN`
 - Feature catalogue: `docs/norfab_features.md`
 - Testing framework: `docs/testing/norfab_testing_framework.md`
 - NetBox service tests and refactoring guidance: `docs/testing/netbox_service_tests.md`
+- Invoke developer automation ADR: `docs/development/adr_invoke_developer_automation.md`
+- Docker test commands: `docker/norfab-docker-tests/README.md`

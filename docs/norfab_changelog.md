@@ -9,12 +9,14 @@
 
 1. Enhanced VLAN group mapping to use each NetBox VLAN group's configured `vid_ranges`, with explicit rule `vlan_ids` acting as a narrower boundary. Unmatched VLANs use the scalar `vlan_group` when supplied, otherwise they retain device-site fallback behavior.
 2. Added ordered `interface_map` rules to NetBox `sync_device_interfaces` to rename live interfaces by device-name glob, device-type model glob, and literal match/replace values before filtering and comparison.
+3. Added Invoke developer tasks for documentation, checks, linting, and Docker-based tests, including opt-in per-file parallel containers with isolated runtimes, and added Vulture dead-code detection to the project checks.
 
 ## BUGS
 
 1. Fixed NetBox `sync_device_ip` duplicate detection to compare canonical host addresses without prefix lengths, preventing identical non-anycast IPs with different masks from being created in the same synchronization payload.
 2. Fixed NetBox `sync_bgp_peerings` to validate parsed source IP addresses and skip peerings with invalid values, such as `undefined` when a BGP session is down.
 3. Added `textual` into `full` extras for norfab installtion.
+4. Fixed NFAPI startup consuming excessive CPU by yielding while waiting for worker initialization events instead of busy-waiting.
 
 ---
 

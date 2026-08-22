@@ -262,6 +262,7 @@ nav:
     - MCP Task Prompt Plan: development\adr_mcp_task_prompts_plan.md
     - Norfab AAA Security Architecture: development\adr_norfab_aaa_security_architecture.md
     - Norfab Logging Isolation: development/adr_norfab_logging_isolation.md
+    - Invoke Developer Automation: development/adr_invoke_developer_automation.md
     - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
     - Nornir Create Hosts from NetBox Devices: development/adr_nornir_create_hosts_from_netbox_devices.md
   - Testing:

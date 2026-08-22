@@ -212,3 +212,57 @@ services:
       - type: bind
         source: ./fastapi-service-tests/__norfab__
         target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  filesharing-service-tests:
+    <<: *test-runner-common
+    image: norfab:filesharing-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./nornir-service-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/filesharing-service-junit.xml
+    command:
+      - -m
+      - filesharing
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./filesharing-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  dummy-service-tests:
+    <<: *test-runner-common
+    image: norfab:dummy-service-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./core-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/dummy-service-junit.xml
+    command:
+      - -m
+      - dummy
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./dummy-service-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  nfcli-tests:
+    <<: *test-runner-common
+    image: norfab:nfcli-tests-py${PYTHON_VERSION:-3.12}
+    env_file:
+      - ./core-tests/.env
+    environment:
+      <<: *test-runner-env
+      PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/nfcli-junit.xml
+    command:
+      - -m
+      - nfcli
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./nfcli-tests/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__

@@ -570,6 +570,8 @@ class NorFab:
         while self.workers_init_timeout > time.time() - start_time:
             if all(w["init_done"].is_set() for w in self.workers_processes.values()):
                 break
+            # Yield while workers initialize instead of busy-waiting on events.
+            time.sleep(0.1)
         else:
             log.error(
                 f"TimeoutError - {self.workers_init_timeout}s workers init timeout expired"

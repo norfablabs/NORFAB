@@ -27,7 +27,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 # Core Libs
-python = ">=3.10,<=3.14"
+python = ">=3.10,<3.15"
 pyyaml = "6.0.3"
 pyzmq = "27.1.0"
 psutil = "7.2.2"
@@ -117,7 +117,10 @@ pymdown-extensions = { version = "11.0.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
+invoke = "*"
 pytest = "*"
+ruff = "*"
+vulture = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -298,6 +301,10 @@ select = ["E", "F", "I", "ANN"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true
+
+[tool.vulture]
+paths = ["norfab", "tasks.py"]
+min_confidence = 60
 
 [tool.pytest.ini_options]
 markers = [

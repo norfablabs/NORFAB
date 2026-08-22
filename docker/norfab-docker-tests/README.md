@@ -4,6 +4,26 @@ This folder contains Docker runners for the repository test suite. The runners
 use the canonical inventory in `tests/nf_tests_inventory`; they do not maintain
 their own inventory or test asset copies.
 
+From the repository root, use Invoke for normal development runs:
+
+```bash
+poetry run inv docker-tests-config
+poetry run inv docker-tests-build
+poetry run inv docker-tests-core
+poetry run inv docker-tests-nornir
+poetry run inv docker-tests-netbox --parallel-runs=2
+poetry run inv docker-tests-all
+poetry run inv docker-tests-distributed
+```
+
+Run `poetry run inv --help docker-tests-nornir` for test selector, marker,
+keyword, image build, Python-version, and file-parallel options. Direct Compose
+commands below remain useful for troubleshooting.
+
+Individual suite tasks print but ignore a non-zero pytest container status so
+the command can remain part of an interactive workflow. `docker-tests-all`
+retains those statuses and fails after listing every failed suite.
+
 Each service mounts:
 
 - repository source at `/workspace`, read-only;
@@ -44,6 +64,12 @@ docker/norfab-docker-tests/
     __norfab__/       # writable runtime output
   fastapi-service-tests/
     .env
+    __norfab__/       # writable runtime output
+  filesharing-service-tests/
+    __norfab__/       # writable runtime output
+  dummy-service-tests/
+    __norfab__/       # writable runtime output
+  nfcli-tests/
     __norfab__/       # writable runtime output
   distributed-basic/
     .env              # common distributed env, including broker public key
@@ -108,13 +134,16 @@ docker compose run --rm workflow-service-tests
 docker compose run --rm agent-tests
 docker compose run --rm fastmcp-service-tests
 docker compose run --rm fastapi-service-tests
+docker compose run --rm filesharing-service-tests
+docker compose run --rm dummy-service-tests
+docker compose run --rm nfcli-tests
 ```
 
 Run the basic distributed setup:
 
 ```bash
 docker compose -f compose.distributed.yaml up -d distributed-broker distributed-netbox-worker distributed-nornir-worker distributed-dummy-worker
-docker compose -f compose.distributed.yaml run --rm distributed-client
+docker compose -f compose.distributed.yaml run --rm --no-deps distributed-client
 ```
 
 Stop the distributed services:
@@ -145,6 +174,9 @@ workflow-service-tests -m workflow
 agent-tests            -m clientagent
 fastmcp-service-tests  -m fastmcp
 fastapi-service-tests  -m fastapi
+filesharing-service-tests -m filesharing
+dummy-service-tests    -m dummy
+nfcli-tests            -m nfcli
 ```
 
 The distributed services are not marker-based pytest runners. They start
@@ -184,7 +216,7 @@ docker compose run --rm containerlab-service-tests -m "containerlab and containe
 docker compose run --rm workflow-service-tests tests/services/workflow/test_run.py
 docker compose run --rm workflow-service-tests -m "workflow and workflow_run"
 
-docker compose run --rm agent-tests tests/core/test_client_agent.py
+docker compose run --rm agent-tests tests/clients/agent/test_client_agent.py
 docker compose run --rm agent-tests -m clientagent
 
 docker compose run --rm fastmcp-service-tests tests/services/fastmcp/test_tools.py
@@ -193,14 +225,37 @@ docker compose run --rm fastmcp-service-tests -m "fastmcp and fastmcp_get_tools"
 docker compose run --rm fastapi-service-tests tests/services/fastapi/test_server.py
 docker compose run --rm fastapi-service-tests -m fastapi
 
-docker compose -f compose.distributed.yaml run --rm distributed-client core/test_client.py::TestClientApi::test_mmi_show_broker
-docker compose -f compose.distributed.yaml run --rm distributed-client -k test_list_tasks
+docker compose -f compose.distributed.yaml run --rm --no-deps distributed-client core/test_client.py::TestClientApi::test_mmi_show_broker
+docker compose -f compose.distributed.yaml run --rm --no-deps distributed-client -k test_list_tasks
 ```
 
 Selectors can use repository-root paths like `tests/services/nornir/test_task.py`
 or tests-local paths like `services/nornir/test_task.py`.
 For `distributed-client`, selectors use the mounted client-local path, such as
 `core/test_client.py`.
+
+## Parallel Test Files
+
+Add `--parallel-runs=N` to any individual Invoke suite task to discover its
+`test_*.py` files and run one container per file, with no more than `N`
+containers running concurrently:
+
+```bash
+poetry run inv docker-tests-netbox --parallel-runs=2
+poetry run inv docker-tests-nornir --parallel-runs=2
+poetry run inv docker-tests-nfcli --parallel-runs=2
+```
+
+Invoke derives suite roots from `tests/services/<suite>`,
+`tests/clients/<suite>`, or `tests/<suite>`. A directory supplied with
+`--selector` becomes the discovery root; a selected test file creates one
+isolated container. Pytest node IDs are supported only without
+`--parallel-runs=N`.
+
+Each file overrides the service's writable runtime mount and JUnit destination
+without adding another Compose service. The image is built once before startup
+when `--build` is used. Container output can interleave, followed by an Invoke
+summary with each file's status.
 
 ## Runtime Output
 
@@ -221,6 +276,11 @@ docker/norfab-docker-tests/netbox-service-tests/
   __norfab__/artifacts/netbox-service-junit.xml
   __norfab__/files/
   __norfab__/logs/
+
+  parallel/test_vlans/__norfab__/
+    artifacts/test_vlans-junit.xml
+    files/
+    logs/
 
 docker/norfab-docker-tests/fakenos-service-tests/
   __norfab__/artifacts/fakenos-service-junit.xml
@@ -285,6 +345,12 @@ broker runtime folder. The broker public key value is also stored in
 `distributed-basic/.env` as `NORFAB_BROKER_PUBLIC_KEY`; worker and client
 inventories render that value into `broker.shared_key`. The broker private key
 is not mounted into worker or client containers.
+
+`poetry run inv docker-tests-distributed` checks the cached public certificate
+for the `distributed-core-tests` client before startup. If it differs from the
+checked-in broker public certificate, rerun with `--force-certificates`. Only
+the two explicitly named client-runtime public-key files are replaced; the
+private key is never copied.
 
 Clean containers and the default Compose network:
 

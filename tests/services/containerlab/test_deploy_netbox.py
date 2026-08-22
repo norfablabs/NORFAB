@@ -21,7 +21,6 @@ except ModuleNotFoundError as exc:
 
 pytestmark = [
     pytest.mark.containerlab,
-    pytest.mark.netbox,
     pytest.mark.containerlab_deploy_netbox,
 ]
 
