@@ -882,6 +882,7 @@ class NetboxInterfacesTasks:
         devices: Union[None, list] = None,
         process_deletions: bool = False,
         branch: str = None,
+        interface_map: Union[None, list] = None,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         update_type: Union[None, bool] = False,
@@ -969,6 +970,9 @@ class NetboxInterfacesTasks:
             branch (str, optional): NetBox branch name to use. The branching plugin
                 must be installed. The branch is created automatically if it does
                 not exist.
+            interface_map (list, optional): Ordered interface rename rules matched
+                by device name glob, device type model glob, and a literal live
+                interface name substring. The first matching rule wins.
             filter_by_name (str, optional): Glob pattern to restrict which interfaces
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
@@ -996,6 +1000,10 @@ class NetboxInterfacesTasks:
                 dry-run mode.
         """
         devices = devices or []
+        interface_map = [
+            rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
+            for rule in interface_map or []
+        ]
         vlan_map = prepare_vlan_map(vlan_map)
         instance = instance or self.default_instance
         ret = Result(
@@ -1048,9 +1056,14 @@ class NetboxInterfacesTasks:
         # filter out devices not define in Netbox
         job.event(f"validating {len(devices)} device(s) exist in NetBox")
         nb_devices_data = {
-            d.name: {"id": d.id, "site_id": d.site.id, "name": d.name}
+            d.name: {
+                "id": d.id,
+                "site_id": d.site.id,
+                "name": d.name,
+                "device_type": d.device_type.model,
+            }
             for d in self.bulk_filter(
-                nb.dcim.devices, name=devices, fields="id,name,site"
+                nb.dcim.devices, name=devices, fields="id,name,site,device_type"
             )
         }
         for d in list(devices):
@@ -1165,8 +1178,27 @@ class NetboxInterfacesTasks:
                 continue
             for device_name, host_interfaces in wdata["result"].items():
                 normalised_live_all.setdefault(device_name, {})
+                device_interface_map = [
+                    rule
+                    for rule in interface_map
+                    if fnmatch.fnmatchcase(device_name, rule["device_name"])
+                    and fnmatch.fnmatchcase(
+                        nb_devices_data[device_name]["device_type"],
+                        rule["device_type"],
+                    )
+                ]
                 for data in host_interfaces or []:
-                    intf_name = data["name"]
+                    mapped_names = {
+                        field: data.get(field) for field in ("name", "parent", "lag")
+                    }
+                    for field, live_name in mapped_names.items():
+                        for rule in device_interface_map:
+                            if live_name and rule["match"] in live_name:
+                                mapped_names[field] = live_name.replace(
+                                    rule["match"], rule["replace"]
+                                )
+                                break
+                    intf_name = mapped_names["name"]
                     if filter_by_name and not fnmatch.fnmatch(
                         intf_name, filter_by_name
                     ):
@@ -1181,8 +1213,8 @@ class NetboxInterfacesTasks:
                         "enabled": bool(
                             data.get("enabled", data.get("is_enabled", True))
                         ),
-                        "parent": data.get("parent"),
-                        "lag": data.get("lag"),
+                        "parent": mapped_names["parent"],
+                        "lag": mapped_names["lag"],
                         "mtu": data.get("mtu"),
                         "speed": data.get("speed"),
                         "duplex": data.get("duplex"),

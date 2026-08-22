@@ -8,6 +8,7 @@
 ## ENHANCEMENTS
 
 1. Enhanced VLAN group mapping to use each NetBox VLAN group's configured `vid_ranges`, with explicit rule `vlan_ids` acting as a narrower boundary. Unmatched VLANs use the scalar `vlan_group` when supplied, otherwise they retain device-site fallback behavior.
+2. Added ordered `interface_map` rules to NetBox `sync_device_interfaces` to rename live interfaces by device-name glob, device-type model glob, and literal match/replace values before filtering and comparison.
 
 ## BUGS
 

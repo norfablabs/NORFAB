@@ -1552,6 +1552,30 @@ class VlanMapRule(BaseModel, extra="forbid", populate_by_name=True):
         return self
 
 
+class InterfaceMapRule(BaseModel, extra="forbid", populate_by_name=True):
+    device_name: StrictStr = Field(
+        ...,
+        min_length=1,
+        description="Glob pattern matched against the NetBox device name",
+        alias="device-name",
+    )
+    device_type: StrictStr = Field(
+        ...,
+        min_length=1,
+        description="Glob pattern matched against the NetBox device type model",
+        alias="device-type",
+    )
+    match: StrictStr = Field(
+        ...,
+        min_length=1,
+        description="Literal substring to match in the live interface name",
+    )
+    replace: StrictStr = Field(
+        ...,
+        description="Replacement for the matched live interface name substring",
+    )
+
+
 class SyncDeviceInterfacesInput(
     NetboxCommonArgs, use_enum_values=True, populate_by_name=True  # ignore aliases
 ):
@@ -1574,6 +1598,11 @@ class SyncDeviceInterfacesInput(
         description="Delete interfaces present in NetBox but absent in live data",
         json_schema_extra={"presence": True},
         alias="process-deletions",
+    )
+    interface_map: Union[None, List[InterfaceMapRule]] = Field(
+        None,
+        description="Ordered rules mapping live interface names to preferred NetBox names",
+        alias="interface-map",
     )
     filter_by_name: Union[None, StrictStr] = Field(
         None,

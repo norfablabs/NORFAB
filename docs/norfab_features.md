@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 20 August 2026*
+*Last updated: 21 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -692,7 +692,8 @@ inputs must match the NetBox model.
 ### Live interface reconciliation
 
 Collects live interface data through Nornir, computes a desired/current diff,
-and applies ordered create, update, and optional delete actions. **Use cases:**
+optionally maps live interface names through ordered device- and model-aware
+rename rules, and applies ordered create, update, and optional delete actions. **Use cases:**
 source-of-truth maintenance and drift remediation. **Limitations:** parser
 coverage determines live-state quality; deletion is opt-in and should be
 reviewed with dry-run first.

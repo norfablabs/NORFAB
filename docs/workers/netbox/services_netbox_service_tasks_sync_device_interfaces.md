@@ -15,7 +15,7 @@ The task follows a four-step pipeline:
 
 1. **Fetch** — Pull current interface state from NetBox for the target devices.
 2. **Collect live state** — Run a Nornir [`parse_ttp`](../nornir/services_nornir_service_tasks_parse.md) job against the devices to collect real interface attributes (type, enabled, MTU, VLANs, VRF, mode, parent, LAG membership, etc.).
-3. **Diff** — Normalize both sides to a common schema and compare using DeepDiff to classify each interface as `create`, `update`, `delete`, or `in_sync`.
+3. **Diff** — Normalize both sides to a common schema, apply `interface_map` to live interface names, and compare using DeepDiff to classify each interface as `create`, `update`, `delete`, or `in_sync`.
 4. **Reconcile** — Apply changes to NetBox in dependency order to avoid constraint errors:
     1. Create LAG interfaces first
     2. Create parent (non-child) interfaces
@@ -79,6 +79,27 @@ Interfaces can be scoped using glob patterns so that only a subset is considered
 - `filter_by_description` — match interface descriptions, e.g. `"uplink*"` or `"TEST_SYNC_*"`
 
 Both filters are applied before the diff, so interfaces that do not match are completely ignored by the sync — they are neither created, updated, nor deleted.
+
+## Interface Name Mapping
+
+`interface_map` accepts an ordered list of rename rules:
+
+```yaml
+- device_name: leaf-*
+  device_type: cEOS-*-CA
+  match: Ethernet
+  replace: Et
+```
+
+`device_name` and `device_type` are case-sensitive glob patterns. Device type
+matches the NetBox device type model. `match` is a case-sensitive literal
+substring in the live interface name and `replace` is its replacement, so the
+example renames `Ethernet12` to `Et12`. All three match criteria must succeed.
+Rules are evaluated in list order and the first match wins. Interfaces that do
+not match a rule keep their live names.
+
+Mapping is also applied to live parent and LAG interface references before
+name filtering and DeepDiff comparison.
 
 ## Deletion Behavior
 
@@ -157,6 +178,12 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
     nf#netbox sync interfaces devices ceos-spine-1 filter-by-name "Loopback*"
     ```
 
+    Map a live interface name to the preferred NetBox name:
+
+    ```bash
+    nf#netbox sync interfaces devices leaf-1 interface-map '[{"device_name":"leaf-*","device_type":"cEOS-*-CA","match":"Ethernet","replace":"Et"}]'
+    ```
+
     Restrict sync to interfaces whose description matches a glob pattern:
 
     ```
@@ -230,6 +257,24 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
         kwargs={
             "devices": ["ceos-spine-1"],
             "filter_by_name": "Loopback*",
+        },
+    )
+
+    # map live interface names to preferred NetBox names before comparison
+    result = client.run_job(
+        "netbox",
+        "sync_device_interfaces",
+        workers="any",
+        kwargs={
+            "devices": ["leaf-1"],
+            "interface_map": [
+                {
+                    "device_name": "leaf-*",
+                    "device_type": "cEOS-*-CA",
+                    "match": "Ethernet",
+                    "replace": "Et",
+                }
+            ],
         },
     )
 
@@ -321,6 +366,7 @@ root
             ├── dry-run:    Return diff plan without pushing changes to NetBox
             ├── devices:    List of NetBox device names to sync
             ├── process-deletions:    Delete interfaces present in NetBox but absent in live data
+            ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
             ├── vlan-group:    Fallback VLAN group exact name

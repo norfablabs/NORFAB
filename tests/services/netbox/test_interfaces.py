@@ -1514,6 +1514,73 @@ class TestSyncDeviceInterfaces:
                 "Loopback11" in device_data["create"]
             ), f"{worker} Loopback11 not in create after cleanup + filter_by_name='Loopback*'"
 
+    def test_sync_device_interfaces_interface_map(self, nfclient):
+        """Apply the first matching rename rule before filtering and comparison."""
+        device = "fn-ceos-sp-1"
+        mapped_name = "NetBoxLoopback10"
+        interface_map = [
+            {
+                "device_name": "fn-ceos-lf-*",
+                "device_type": "Arista *",
+                "match": "Loopback",
+                "replace": "WrongDevice",
+            },
+            {
+                "device_name": "fn-ceos-sp-*",
+                "device_type": "Wrong Model",
+                "match": "Loopback",
+                "replace": "WrongDeviceType",
+            },
+            {
+                "device_name": "fn-ceos-sp-*",
+                "device_type": "Arista *",
+                "match": "Loopback",
+                "replace": "NetBoxLoopback",
+            },
+            {
+                "device_name": "fn-ceos-sp-*",
+                "device_type": "Arista *",
+                "match": "Loopback",
+                "replace": "LaterRule",
+            },
+        ]
+        self._cleanup(nfclient, [device])
+        delete_interfaces(nfclient, device, mapped_name)
+
+        try:
+            ret = self._sync(
+                nfclient,
+                [device],
+                interface_map=interface_map,
+                filter_by_name="NetBoxLoopback*",
+                filter_by_description="TEST_SYNC_LOOPBACK_IPV4",
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed - {res}"
+                device_data = res["result"][device]
+                assert mapped_name in device_data["created"]
+                assert "Loopback10" not in device_data["created"]
+
+            nb_interface = self._get_nb_intf(nfclient, device, mapped_name)
+            assert nb_interface is not None
+            assert nb_interface.description == "TEST_SYNC_LOOPBACK_IPV4"
+            assert self._get_nb_intf(nfclient, device, "Loopback10") is None
+
+            ret = self._sync(
+                nfclient,
+                [device],
+                dry_run=True,
+                interface_map=interface_map,
+                filter_by_name="NetBoxLoopback*",
+                filter_by_description="TEST_SYNC_LOOPBACK_IPV4",
+            )
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed - {res}"
+                assert mapped_name in res["result"][device]["in_sync"]
+        finally:
+            delete_interfaces(nfclient, device, mapped_name)
+
     def test_sync_device_interfaces_filter_by_description(self, nfclient):
         """Clean TEST_SYNC from spine-1 then run dry_run with filter_by_description='TEST_SYNC_*'.
         All known TEST_SYNC interfaces must appear in create (they were cleaned).
