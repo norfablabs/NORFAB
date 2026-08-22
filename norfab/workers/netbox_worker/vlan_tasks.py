@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Any, Union
 
@@ -13,7 +12,6 @@ from .netbox_models import (
 )
 from .netbox_worker_utilities import (
     build_vlan_payload,
-    find_vlan,
     match_vlan_map,
     prepare_vlan_map,
     review_sync_task_result,
@@ -84,18 +82,6 @@ class NetboxVlansTasks:
             dry_run=dry_run,
             diff={},
         )
-
-        def vlan_identity(metadata: dict, vid: int, name: str) -> str:
-            if metadata["type"] == "group":
-                return f"{vid}:{metadata['name']}"
-            return f"{vid}:{name}:{metadata['name']}"
-
-        def normalize_netbox_vlan(vlan: Any) -> dict:
-            return {
-                "vid": int(vlan.vid),
-                "name": str(vlan.name).strip(),
-                "description": str(getattr(vlan, "description", None) or "").strip(),
-            }
 
         job.event(
             f"starting VLAN sync using NetBox instance '{instance}' for "
@@ -174,7 +160,7 @@ class NetboxVlansTasks:
         group_scopes = {}
         for device_name in devices:
             device = nb_devices[device_name]
-            scope = f"site:{device.site.id}:{device.site.name}"
+            scope = f"site:{device.site.name}"
             site_scopes[device_name] = scope
             scope_metadata[scope] = {
                 "type": "site",
@@ -182,7 +168,7 @@ class NetboxVlansTasks:
                 "name": device.site.name,
             }
         for group in vlan_groups.values():
-            scope = f"group:{group.id}:{group.name}"
+            scope = f"group:{group.name}"
             group_scopes[group.name] = scope
             scope_metadata[scope] = {
                 "type": "group",
@@ -254,9 +240,8 @@ class NetboxVlansTasks:
             f"{len(live_by_device)} device(s)"
         )
 
-        # Map live observations to a group or site identity. Group identities use
-        # VID because groups enforce VID uniqueness. Site identities include the
-        # VLAN name because a site may contain multiple VLANs with the same VID.
+        # Map live observations to a group or site. A VID uniquely identifies a
+        # VLAN within either scope; name and description are synchronized fields.
         observations = {scope: {} for scope in scope_metadata}
         for device_name in sorted(live_by_device):
             for vlan in live_by_device[device_name]:
@@ -274,56 +259,45 @@ class NetboxVlansTasks:
                     scope = group_scopes[selected_group_name]
                 else:
                     scope = site_scopes[device_name]
-                metadata = scope_metadata[scope]
-                identity = vlan_identity(
-                    metadata,
-                    vlan["vid"],
-                    vlan["name"],
-                )
-                observations[scope].setdefault(identity, []).append(
+                observations[scope].setdefault(vlan["vid"], []).append(
                     {"device": device_name, **vlan}
                 )
 
-        # Collapse identical observations. A conflict is limited to one complete
-        # identity, so differently named site VLANs with the same VID remain valid.
+        # Collapse identical observations. The first device in sorted order is
+        # authoritative; conflicting values from later devices are reported.
         normalized_live = {scope: {} for scope in scope_metadata}
-        conflicting_identities = {scope: set() for scope in scope_metadata}
         source_conflict_count = 0
         for scope in sorted(observations):
-            for identity in sorted(observations[scope]):
-                records = observations[scope][identity]
-                desired_values = {
-                    (record["name"], record["description"]) for record in records
-                }
-                if len(desired_values) > 1:
-                    conflict = [
-                        {
-                            "device": record["device"],
-                            "name": record["name"],
-                            "description": record["description"],
-                        }
-                        for record in sorted(records, key=lambda item: item["device"])
-                    ]
+            for vid in sorted(observations[scope]):
+                records = observations[scope][vid]
+                desired = records[0]
+                desired_values = (desired["name"], desired["description"])
+                for conflicting in records[1:]:
+                    if (
+                        conflicting["name"],
+                        conflicting["description"],
+                    ) == desired_values:
+                        continue
                     msg = (
-                        f"{scope} VLAN {records[0]['vid']} source conflict: "
-                        f"{json.dumps(conflict)}"
+                        f"{scope} VLAN {vid} source conflict: using VLAN name "
+                        f"'{desired['name']}' from device '{desired['device']}'; "
+                        f"conflicting device '{conflicting['device']}' reports "
+                        f"VLAN name '{conflicting['name']}'"
                     )
                     job.event(msg, severity="ERROR")
                     log.error(f"{self.name} - Sync VLANs: {msg}")
                     ret.errors.append(msg)
-                    conflicting_identities[scope].add(identity)
                     source_conflict_count += 1
-                    continue
-                normalized_live[scope][identity] = {
-                    "vid": records[0]["vid"],
-                    "name": records[0]["name"],
-                    "description": records[0]["description"],
+                normalized_live[scope][vid] = {
+                    "vid": desired["vid"],
+                    "name": desired["name"],
+                    "description": desired["description"],
                 }
 
-        # Load current NetBox VLANs once. Matching happens in two passes below so
-        # exact VID/name/scope matches are reserved before broader VID/scope matches.
+        # Load current NetBox VLANs once, keyed only by VID within each scope.
         job.event(f"loading NetBox VLANs from {len(scope_metadata)} scope(s)")
-        netbox_by_vid = {scope: {} for scope in scope_metadata}
+        normalized_netbox = {scope: {} for scope in scope_metadata}
+        netbox_objects = {scope: {} for scope in scope_metadata}
         netbox_vlan_count = 0
         for scope in sorted(scope_metadata):
             metadata = scope_metadata[scope]
@@ -336,66 +310,30 @@ class NetboxVlansTasks:
                 vid = int(vlan.vid)
                 if expanded_filter and vid not in expanded_filter:
                     continue
-                name = str(vlan.name).strip()
-                if vlan_identity(metadata, vid, name) in conflicting_identities[scope]:
-                    continue
                 netbox_vlan_count += 1
-                netbox_by_vid[scope].setdefault(vid, []).append(vlan)
+                normalized_netbox[scope][vid] = {
+                    "vid": vid,
+                    "name": str(vlan.name).strip(),
+                    "description": str(
+                        getattr(vlan, "description", None) or ""
+                    ).strip(),
+                }
+                netbox_objects[scope][vid] = vlan
         job.event(f"loaded {netbox_vlan_count} in-scope NetBox VLAN record(s)")
 
-        normalized_netbox = {scope: {} for scope in scope_metadata}
-        netbox_objects = {scope: {} for scope in scope_metadata}
-        used_netbox_ids = set()
-        exact_match_count = 0
-        fallback_match_count = 0
-
-        # Resolve all exact matches before falling back to VID and scope only.
-        for exact_match in (True, False):
-            for scope in sorted(normalized_live):
-                for identity, desired in sorted(normalized_live[scope].items()):
-                    if identity in normalized_netbox[scope]:
-                        continue
-                    match = find_vlan(
-                        netbox_by_vid[scope].get(desired["vid"], []),
-                        vid=desired["vid"],
-                        name=desired["name"] if exact_match else None,
-                        excluded_ids=used_netbox_ids,
-                    )
-                    if match is None:
-                        continue
-                    normalized_netbox[scope][identity] = normalize_netbox_vlan(match)
-                    netbox_objects[scope][identity] = match
-                    used_netbox_ids.add(match.id)
-                    if exact_match:
-                        exact_match_count += 1
-                    else:
-                        fallback_match_count += 1
-        job.event(
-            f"resolved {exact_match_count} exact and "
-            f"{fallback_match_count} fallback NetBox VLAN match(es)"
-        )
-        log.info(
-            f"{self.name} - Sync VLANs: {exact_match_count} exact, "
-            f"{fallback_match_count} fallback NetBox match(es)"
-        )
-
-        # DeepDiff compares only the normalized compound-key structures. Convert
-        # entity identities back to VIDs before exposing the standard task result.
+        # Compare the normalized VID-keyed structures.
         job.event("calculating VLAN sync diff")
         internal_diff = self.make_diff(normalized_live, normalized_netbox)
 
-        def entity_vid(scope: str, identity: str) -> int:
-            return normalized_live[scope][identity]["vid"]
-
         full_diff = {
             scope: {
-                "create": sorted(entity_vid(scope, key) for key in actions["create"]),
+                "create": sorted(actions["create"]),
                 "update": {
-                    str(entity_vid(scope, key)): actions["update"][key]
-                    for key in sorted(actions["update"])
+                    str(vid): actions["update"][vid]
+                    for vid in sorted(actions["update"])
                 },
                 "delete": [],
-                "in_sync": sorted(entity_vid(scope, key) for key in actions["in_sync"]),
+                "in_sync": sorted(actions["in_sync"]),
             }
             for scope, actions in sorted(internal_diff.items())
         }
@@ -439,46 +377,38 @@ class NetboxVlansTasks:
         for scope in sorted(internal_diff):
             actions = internal_diff[scope]
             metadata = scope_metadata[scope]
-            create_identities = sorted(
-                actions["create"], key=lambda key: (entity_vid(scope, key), key)
-            )
-            update_identities = sorted(
-                actions["update"], key=lambda key: (entity_vid(scope, key), key)
-            )
+            create_vids = sorted(actions["create"])
+            update_vids = sorted(actions["update"])
             job.event(
-                f"applying {scope}: {len(create_identities)} create, "
-                f"{len(update_identities)} update"
+                f"applying {scope}: {len(create_vids)} create, "
+                f"{len(update_vids)} update"
             )
 
             scope_arg = {f"{metadata['type']}_id": metadata["id"]}
             create_payloads = [
                 build_vlan_payload(
-                    **normalized_live[scope][identity],
+                    **normalized_live[scope][vid],
                     **scope_arg,
                 )
-                for identity in create_identities
+                for vid in create_vids
             ]
             if create_payloads:
                 nb.ipam.vlans.create(create_payloads)
-                ret.result[scope]["created"].extend(
-                    entity_vid(scope, identity) for identity in create_identities
-                )
+                ret.result[scope]["created"].extend(create_vids)
                 job.event(f"{scope}: created {len(create_payloads)} VLAN(s)")
 
             update_payloads = []
-            for identity in update_identities:
-                field_changes = actions["update"][identity]
-                desired = normalized_live[scope][identity]
-                payload = {"id": netbox_objects[scope][identity].id}
+            for vid in update_vids:
+                field_changes = actions["update"][vid]
+                desired = normalized_live[scope][vid]
+                payload = {"id": netbox_objects[scope][vid].id}
                 for field in ("name", "description"):
                     if field in field_changes:
                         payload[field] = desired[field]
                 update_payloads.append(payload)
             if update_payloads:
                 nb.ipam.vlans.update(update_payloads)
-                ret.result[scope]["updated"].extend(
-                    entity_vid(scope, identity) for identity in update_identities
-                )
+                ret.result[scope]["updated"].extend(update_vids)
                 job.event(f"{scope}: updated {len(update_payloads)} VLAN(s)")
             job.event(f"completed VLAN changes for {scope}")
 

@@ -3,10 +3,8 @@
 The `sync_vlans` task reconciles VLAN object names and descriptions from live
 devices into NetBox. It requests the normalized TTP `vlans` getter once for the
 validated device set, aggregates all successful worker results, then compares
-VLANs using scope-aware identities.
-VLAN groups use `vid:vlan_group_name`; sites use
-`vid:vlan_name:site_name`, allowing differently named VLANs with the same VID
-to coexist at one site.
+VLANs by VID within each VLAN-group or site scope. Names and descriptions are
+synchronized values and do not form part of a VLAN's identity.
 
 Ordered `vlan_map` rules place matching VLANs into existing VLAN groups. VLANs
 which match no rule use the scalar `vlan_group` when supplied, otherwise they
@@ -84,23 +82,23 @@ trimmed, null descriptions become an empty string, and case is preserved.
 device dataset and NetBox before comparison.
 
 Identical observations from multiple devices in one scope are collapsed. VLAN
-group observations with the same VID but different names or descriptions are
-reported as a source conflict. Site observations with the same VID and
-different names remain separate VLAN identities; a description disagreement
-for the same VID and name is a source conflict. Results returned for the same
-device by multiple Nornir workers are aggregated before identical observations
-are collapsed.
+observations with the same VID but different names or descriptions are reported
+as source conflicts. The first device in sorted device-name order supplies the
+values to synchronize; each later conflicting device is identified in
+`errors`. A conflict does not fail or skip that VLAN: the task still creates or
+updates it using the first device's values. Results returned for the same device
+by multiple Nornir workers are aggregated before identical observations are
+collapsed.
 
 ## Output
 
-Results are keyed by scope, for example `group:12:CAMPUS` or
-`site:1:NORFAB-LAB`.
+Results are keyed by scope, for example `group:CAMPUS` or `site:NORFAB-LAB`.
 
 Dry-run returns the standard sync diff shape:
 
 ```json
 {
-  "site:1:NORFAB-LAB": {
+  "site:NORFAB-LAB": {
     "create": [110],
     "update": {
       "210": {
@@ -121,7 +119,7 @@ the top-level `diff` field:
 
 ```json
 {
-  "site:1:NORFAB-LAB": {
+  "site:NORFAB-LAB": {
     "created": [110],
     "updated": [210],
     "deleted": [],
@@ -130,10 +128,10 @@ the top-level `diff` field:
 }
 ```
 
-NetBox VLANs are resolved in multiple passes from most to least specific. The
-task first reserves matches by VID, name, and group or site. Remaining live
-VLANs fall back to VID and group or site, allowing an existing VLAN with a stale
-name to be updated. VLAN groups already enforce VID uniqueness.
+NetBox VLANs are matched only by VID and group or site scope. An existing VLAN
+with a stale name is therefore updated directly. The task assumes each scope
+contains at most one VLAN for a given VID; VLAN groups already enforce this
+uniqueness.
 
 ## Deletions
 
@@ -208,7 +206,9 @@ reported as errors; valid results from other devices and workers still proceed.
 ### Live VLAN conflicts
 
 Select devices that share one authoritative VLAN definition or correct their
-name and description differences. The error lists every conflicting device.
+name and description differences. The first device in sorted order is used and
+each later conflicting device is listed in `errors`. The task continues to
+synchronize the first device's values.
 
 ### VLAN group resolution
 
@@ -224,7 +224,7 @@ aborts the task and is not reported as an applied action.
 ## Task command shell reference
 
 ```bash
-nf#man tree netbox.sync.vlans
+nf# man tree netbox.sync.vlans
 
 R - required field, M - supports multiline input, D - dynamic key
 

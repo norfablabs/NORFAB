@@ -60,11 +60,11 @@ class TestSyncVlans:
         return results
 
     def _site_scope(self) -> str:
-        return f"site:{self.site.id}:{self.site.name}"
+        return f"site:{self.site.name}"
 
     @staticmethod
     def _group_scope(group: Any) -> str:
-        return f"group:{group.id}:{group.name}"
+        return f"group:{group.name}"
 
     def _site_vlan(self, vid: int) -> Any:
         return self.nb.ipam.vlans.get(vid=vid, site_id=self.site.id)
@@ -245,15 +245,26 @@ class TestSyncVlans:
         assert self._site_vlan(121).name == "TEST_L2_TRUNK_B"
         assert self._group_vlan(self.group_1, 121) is None
 
-    def test_site_vlan_identity_supports_duplicate_vids(self, nfclient: Any) -> None:
+    def test_site_scope_uses_first_device_for_conflicting_vid(
+        self, nfclient: Any
+    ) -> None:
         response = self._sync(
             nfclient,
             [self.DEVICE_1, self.DEVICE_2],
             filter_by_vlan_ids=["190-191"],
         )
 
-        for result in self._successful_results(response):
-            assert result["result"][self._site_scope()]["created"] == [190, 190, 191]
+        assert response
+        for worker, result in response.items():
+            assert result["failed"] is False, f"{worker} failed: {result}"
+            assert result["result"][self._site_scope()]["created"] == [190, 191]
+            conflict = next(
+                error
+                for error in result["errors"]
+                if "VLAN 190 source conflict" in error
+            )
+            assert self.DEVICE_1 in conflict
+            assert self.DEVICE_2 in conflict
         site_vlans = [
             vlan
             for vid in (190, 191)
@@ -261,17 +272,8 @@ class TestSyncVlans:
         ]
         assert sorted((vlan.vid, vlan.name) for vlan in site_vlans) == [
             (190, "TEST_SYNC_CONFLICT_L1"),
-            (190, "TEST_SYNC_CONFLICT_L2"),
             (191, "TEST_SYNC_SHARED"),
         ]
-
-        second_sync = self._sync(
-            nfclient,
-            [self.DEVICE_1, self.DEVICE_2],
-            filter_by_vlan_ids=["190-191"],
-        )
-        for result in self._successful_results(second_sync):
-            assert result["result"][self._site_scope()]["in_sync"] == [190, 190, 191]
 
     def test_group_identity_reports_conflicting_names(self, nfclient: Any) -> None:
         response = self._sync(
@@ -290,7 +292,7 @@ class TestSyncVlans:
         assert response
         for worker, result in response.items():
             assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"][self._group_scope(self.group_1)]["create"] == []
+            assert result["result"][self._group_scope(self.group_1)]["create"] == [190]
             conflict = next(
                 error
                 for error in result["errors"]

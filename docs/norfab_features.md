@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 21 August 2026*
+*Last updated: 23 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -703,7 +703,8 @@ reviewed with dry-run first.
 
 Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
 NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
-an optional scalar VLAN-group fallback.
+an optional scalar VLAN-group fallback. VLANs are identified by VID per scope;
+the first device supplies values when later devices report a conflict.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines
 live-state quality; the task does not delete VLANs because live data cannot
