@@ -18,7 +18,7 @@
         <link rel="prev" href="../services_netbox_service_tasks_sync_device_inventory/">
       
       
-        <link rel="next" href="../services_netbox_service_tasks_sync_mac_addresses/">
+        <link rel="next" href="../services_netbox_service_tasks_sync_vlans/">
       
       
         
@@ -2592,6 +2592,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#interface-name-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Name Mapping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#deletion-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2684,6 +2695,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_vlans/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VLANs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_vrfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRFs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -2720,6 +2787,34 @@
     
   
     Sync Device IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_device_prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Prefixes
   
 
     
@@ -6082,6 +6177,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_invoke_developer_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke Developer Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -6344,6 +6467,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#interface-name-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Name Mapping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#deletion-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6461,7 +6595,7 @@
 <ol>
 <li><strong>Fetch</strong> — Pull current interface state from NetBox for the target devices.</li>
 <li><strong>Collect live state</strong> — Run a Nornir <a href="../../nornir/services_nornir_service_tasks_parse/"><code>parse_ttp</code></a> job against the devices to collect real interface attributes (type, enabled, MTU, VLANs, VRF, mode, parent, LAG membership, etc.).</li>
-<li><strong>Diff</strong> — Normalize both sides to a common schema and compare using DeepDiff to classify each interface as <code>create</code>, <code>update</code>, <code>delete</code>, or <code>in_sync</code>.</li>
+<li><strong>Diff</strong> — Normalize both sides to a common schema, apply <code>interface_map</code> to live interface names, and compare using DeepDiff to classify each interface as <code>create</code>, <code>update</code>, <code>delete</code>, or <code>in_sync</code>.</li>
 <li><strong>Reconcile</strong> — Apply changes to NetBox in dependency order to avoid constraint errors:<ol>
 <li>Create LAG interfaces first</li>
 <li>Create parent (non-child) interfaces</li>
@@ -6517,23 +6651,50 @@
 <li><code>filter_by_description</code> — match interface descriptions, e.g. <code>"uplink*"</code> or <code>"TEST_SYNC_*"</code></li>
 </ul>
 <p>Both filters are applied before the diff, so interfaces that do not match are completely ignored by the sync — they are neither created, updated, nor deleted.</p>
+<h2 id="interface-name-mapping">Interface Name Mapping<a class="headerlink" href="#interface-name-mapping" title="Permanent link">¤</a></h2>
+<p><code>interface_map</code> accepts an ordered list of rename rules:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">device_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">leaf-*</span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cEOS-*-CA</span>
+<span class="w">  </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet</span>
+<span class="w">  </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Et</span>
+</code></pre></div>
+<p><code>device_name</code> and <code>device_type</code> are case-sensitive glob patterns. Device type
+matches the NetBox device type model. <code>match</code> is a case-sensitive literal
+substring in the live interface name and <code>replace</code> is its replacement, so the
+example renames <code>Ethernet12</code> to <code>Et12</code>. All three match criteria must succeed.
+Rules are evaluated in list order and the first match wins. Interfaces that do
+not match a rule keep their live names.</p>
+<p>Mapping is also applied to live parent and LAG interface references before
+name filtering and DeepDiff comparison.</p>
 <h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
 <p>By default <code>process_deletions=False</code> — interfaces present in NetBox but absent in live data are left untouched. Set <code>process_deletions=True</code> to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.</p>
 <h2 id="ignoring-vlans-and-vrfs">Ignoring VLANs and VRFs<a class="headerlink" href="#ignoring-vlans-and-vrfs" title="Permanent link">¤</a></h2>
 <p>By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Set <code>ignore_vlans=True</code> to skip VLAN creation and leave all interface VLAN associations unchanged. Set <code>ignore_vrf=True</code> to skip VRF creation and leave interface VRF associations unchanged.</p>
 <h2 id="vlan-group-selection">VLAN Group Selection<a class="headerlink" href="#vlan-group-selection" title="Permanent link">¤</a></h2>
-<p><code>vlan_group</code> accepts a single VLAN group name, slug, or ID, or an ordered mapping keyed by VLAN group name. Each mapped group can match interface names using case-sensitive glob patterns, VLAN IDs using range strings, or both:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;ACCESS_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+<p><code>vlan_group</code> accepts one exact VLAN group name and acts as the fallback for
+VLANs not matched by <code>vlan_map</code>. Slugs and numeric IDs are not resolved. When
+neither argument selects a group, the device site is used.</p>
+<p><code>vlan_map</code> accepts the same ordered list of rules as VLAN sync:</p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;ACCESS_VLANS&quot;</span><span class="p">,</span>
         <span class="s2">&quot;interface_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet*&quot;</span><span class="p">],</span>
         <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-199&quot;</span><span class="p">,</span> <span class="s2">&quot;300&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;device_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-*&quot;</span><span class="p">],</span>
     <span class="p">},</span>
-    <span class="s2">&quot;INFRA_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;INFRA_VLANS&quot;</span><span class="p">,</span>
         <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;400-499&quot;</span><span class="p">],</span>
     <span class="p">},</span>
-<span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div>
-<p>Values within one criterion use OR logic. When both <code>interface_names</code> and <code>vlan_ids</code> are present they use AND logic. Groups are checked in mapping order and the first match wins. VLANs that do not match any group use the existing device-site behavior. VLAN ranges use plain strings such as <code>100-199</code>; bracket notation is not accepted.</p>
+<p>Values within one criterion use OR logic and populated criteria use AND logic.
+Rules are checked in list order and the first match wins. Interface and device
+names use case-sensitive glob matching. VLAN ranges use plain strings such as
+<code>100-199</code>; bracket notation is not accepted. Interface sync ignores
+<code>vlan_names</code> because interface parsing does not provide VLAN names. Each rule
+also uses the referenced NetBox group's <code>vid_ranges</code>; explicit <code>vlan_ids</code>
+narrow those group ranges. A rule containing only <code>vlan_group</code> is valid.</p>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
 <p>The task is branch-aware and can push changes into a NetBox branch. The <a href="https://github.com/netboxlabs/netbox-branching">Netbox Branching Plugin</a> must be installed. Specify the <code>branch</code> parameter; the branch is created automatically if it does not already exist.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -6543,6 +6704,9 @@
 <p>Sync interfaces for a list of devices:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 ceos-spine-2
 </code></pre></div>
+<p>Select VLAN groups with ordered rules and a fallback group:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices leaf-1 vlan-group DEFAULT_VLANS vlan-map &#39;[{&quot;vlan_group&quot;:&quot;ACCESS_VLANS&quot;,&quot;vlan_ids&quot;:[&quot;100-199&quot;],&quot;interface_names&quot;:[&quot;Ethernet*&quot;]}]&#39;
+</code></pre></div>
 <p>Preview changes without writing to NetBox (dry run):</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 dry-run
 </code></pre></div>
@@ -6551,6 +6715,9 @@
 </code></pre></div>
 <p>Restrict sync to loopback interfaces only:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 filter-by-name &quot;Loopback*&quot;
+</code></pre></div>
+<p>Map a live interface name to the preferred NetBox name:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>sync<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>leaf-1<span class="w"> </span>interface-map<span class="w"> </span><span class="s1">&#39;[{&quot;device_name&quot;:&quot;leaf-*&quot;,&quot;device_type&quot;:&quot;cEOS-*-CA&quot;,&quot;match&quot;:&quot;Ethernet&quot;,&quot;replace&quot;:&quot;Et&quot;}]&#39;</span>
 </code></pre></div>
 <p>Restrict sync to interfaces whose description matches a glob pattern:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 filter-by-description &quot;TEST_SYNC_*&quot;
@@ -6615,6 +6782,24 @@
     <span class="p">},</span>
 <span class="p">)</span>
 
+<span class="c1"># map live interface names to preferred NetBox names before comparison</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;leaf-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;interface_map&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;device_name&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-*&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;device_type&quot;</span><span class="p">:</span> <span class="s2">&quot;cEOS-*-CA&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;match&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;replace&quot;</span><span class="p">:</span> <span class="s2">&quot;Et&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
 <span class="c1"># restrict sync to interfaces with a specific description pattern</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
     <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
@@ -6639,22 +6824,25 @@
     <span class="p">},</span>
 <span class="p">)</span>
 
-<span class="c1"># dynamically select VLAN groups by interface name and VLAN ID ranges</span>
+<span class="c1"># dynamically select VLAN groups, with DEFAULT_VLANS as the fallback</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
     <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
     <span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">,</span>
     <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
     <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;ACCESS_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;DEFAULT_VLANS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vlan_map&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;ACCESS_VLANS&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;interface_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ethernet*&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-199&quot;</span><span class="p">,</span> <span class="s2">&quot;300&quot;</span><span class="p">],</span>
             <span class="p">},</span>
-            <span class="s2">&quot;INFRA_VLANS&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;INFRA_VLANS&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;400-499&quot;</span><span class="p">],</span>
             <span class="p">},</span>
-        <span class="p">},</span>
+        <span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -6699,9 +6887,11 @@ root
             ├── dry-run:    Return diff plan without pushing changes to NetBox
             ├── devices:    List of NetBox device names to sync
             ├── process-deletions:    Delete interfaces present in NetBox but absent in live data
+            ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Loopback*&#39;
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
-            ├── vlan-group:    VLAN group name, slug, ID, or ordered criteria mapping
+            ├── vlan-group:    Fallback VLAN group exact name
+            ├── vlan-map:    Ordered VLAN-to-group mapping rules
             ├── ignore-vlans:    Ignore discovered VLANs and leave interface VLAN associations unchanged
             ├── ignore-vrf:    Ignore discovered VRFs and leave interface VRF associations unchanged
             ├── branch:    Branching plugin branch name to push changes into
@@ -6930,6 +7120,24 @@ not exist.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>interface_map</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ordered interface rename rules matched
+by device name glob, device type model glob, and a literal live
+interface name substring. The first matching rule wins.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>filter_by_name</code>
             </td>
             <td>
@@ -6986,14 +7194,31 @@ allows to keep existing Netbox interfaces type intact.</p>
                 <code>vlan_group</code>
             </td>
             <td>
-                  <code>(<span title="str">str</span>, <span title="int">int</span>, <span title="dict">dict</span>)</code>
+                  <code><span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>VLAN group name, slug, ID, or
-ordered mapping of group names to interface name and VLAN ID range
-criteria. Missing VLANs are created in the selected group; unmatched
-VLANs are created in the device site.</p>
+                <p>Exact VLAN group name used for interface
+VLANs not matched by <code>vlan_map</code>. When omitted, unmatched VLANs
+use the device site.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vlan_map</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ordered VLAN group mapping rules using VLAN
+ID, device name, and interface name criteria. VLAN name criteria
+are ignored because interface parsing does not supply VLAN names.</p>
               </div>
             </td>
             <td>
@@ -7082,7 +7307,32 @@ dry-run mode.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 886</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 861</span>
+<span class="normal"> 862</span>
+<span class="normal"> 863</span>
+<span class="normal"> 864</span>
+<span class="normal"> 865</span>
+<span class="normal"> 866</span>
+<span class="normal"> 867</span>
+<span class="normal"> 868</span>
+<span class="normal"> 869</span>
+<span class="normal"> 870</span>
+<span class="normal"> 871</span>
+<span class="normal"> 872</span>
+<span class="normal"> 873</span>
+<span class="normal"> 874</span>
+<span class="normal"> 875</span>
+<span class="normal"> 876</span>
+<span class="normal"> 877</span>
+<span class="normal"> 878</span>
+<span class="normal"> 879</span>
+<span class="normal"> 880</span>
+<span class="normal"> 881</span>
+<span class="normal"> 882</span>
+<span class="normal"> 883</span>
+<span class="normal"> 884</span>
+<span class="normal"> 885</span>
+<span class="normal"> 886</span>
 <span class="normal"> 887</span>
 <span class="normal"> 888</span>
 <span class="normal"> 889</span>
@@ -7731,7 +7981,40 @@ dry-run mode.</p>
 <span class="normal">1532</span>
 <span class="normal">1533</span>
 <span class="normal">1534</span>
-<span class="normal">1535</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1535</span>
+<span class="normal">1536</span>
+<span class="normal">1537</span>
+<span class="normal">1538</span>
+<span class="normal">1539</span>
+<span class="normal">1540</span>
+<span class="normal">1541</span>
+<span class="normal">1542</span>
+<span class="normal">1543</span>
+<span class="normal">1544</span>
+<span class="normal">1545</span>
+<span class="normal">1546</span>
+<span class="normal">1547</span>
+<span class="normal">1548</span>
+<span class="normal">1549</span>
+<span class="normal">1550</span>
+<span class="normal">1551</span>
+<span class="normal">1552</span>
+<span class="normal">1553</span>
+<span class="normal">1554</span>
+<span class="normal">1555</span>
+<span class="normal">1556</span>
+<span class="normal">1557</span>
+<span class="normal">1558</span>
+<span class="normal">1559</span>
+<span class="normal">1560</span>
+<span class="normal">1561</span>
+<span class="normal">1562</span>
+<span class="normal">1563</span>
+<span class="normal">1564</span>
+<span class="normal">1565</span>
+<span class="normal">1566</span>
+<span class="normal">1567</span>
+<span class="normal">1568</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -7755,10 +8038,12 @@ dry-run mode.</p>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">interface_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">update_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">VlanGroupMap</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vlan_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_vlans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">ignore_vrf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -7841,6 +8126,9 @@ dry-run mode.</p>
 <span class="sd">        branch (str, optional): NetBox branch name to use. The branching plugin</span>
 <span class="sd">            must be installed. The branch is created automatically if it does</span>
 <span class="sd">            not exist.</span>
+<span class="sd">        interface_map (list, optional): Ordered interface rename rules matched</span>
+<span class="sd">            by device name glob, device type model glob, and a literal live</span>
+<span class="sd">            interface name substring. The first matching rule wins.</span>
 <span class="sd">        filter_by_name (str, optional): Glob pattern to restrict which interfaces</span>
 <span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
 <span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
@@ -7849,10 +8137,12 @@ dry-run mode.</p>
 <span class="sd">            sync interfaces task unable to fully resolve interface types and</span>
 <span class="sd">            defaults to interface type `other` for most interfaces, this knob</span>
 <span class="sd">            allows to keep existing Netbox interfaces type intact.</span>
-<span class="sd">        vlan_group (str, int, dict, optional): VLAN group name, slug, ID, or</span>
-<span class="sd">            ordered mapping of group names to interface name and VLAN ID range</span>
-<span class="sd">            criteria. Missing VLANs are created in the selected group; unmatched</span>
-<span class="sd">            VLANs are created in the device site.</span>
+<span class="sd">        vlan_group (str, optional): Exact VLAN group name used for interface</span>
+<span class="sd">            VLANs not matched by ``vlan_map``. When omitted, unmatched VLANs</span>
+<span class="sd">            use the device site.</span>
+<span class="sd">        vlan_map (list, optional): Ordered VLAN group mapping rules using VLAN</span>
+<span class="sd">            ID, device name, and interface name criteria. VLAN name criteria</span>
+<span class="sd">            are ignored because interface parsing does not supply VLAN names.</span>
 <span class="sd">        ignore_vlans (bool, optional): If True, ignore discovered VLANs and</span>
 <span class="sd">            leave interface VLAN associations unchanged. Defaults to False.</span>
 <span class="sd">        ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave</span>
@@ -7866,6 +8156,11 @@ dry-run mode.</p>
 <span class="sd">            dry-run mode.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">interface_map</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">rule</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">interface_map</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="p">]</span>
+    <span class="n">vlan_map</span> <span class="o">=</span> <span class="n">prepare_vlan_map</span><span class="p">(</span><span class="n">vlan_map</span><span class="p">)</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_interfaces&quot;</span><span class="p">,</span>
@@ -7875,6 +8170,20 @@ dry-run mode.</p>
         <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
+    <span class="n">vlan_groups</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">group_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule</span><span class="p">[</span><span class="s2">&quot;vlan_group&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">vlan_map</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">vlan_group</span><span class="p">:</span>
+        <span class="n">group_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vlan_group</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">group_names</span><span class="p">):</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlan_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">group_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;VLAN group &#39;</span><span class="si">{</span><span class="n">group_name</span><span class="si">}</span><span class="s2">&#39; does not exist in NetBox&quot;</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="n">vlan_groups</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+    <span class="n">vlan_map</span> <span class="o">=</span> <span class="n">prepare_vlan_map</span><span class="p">(</span><span class="n">vlan_map</span><span class="p">,</span> <span class="n">vlan_groups</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync device interfaces: Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
     <span class="p">)</span>
@@ -7903,9 +8212,14 @@ dry-run mode.</p>
     <span class="c1"># filter out devices not define in Netbox</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) exist in NetBox&quot;</span><span class="p">)</span>
     <span class="n">nb_devices_data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;site_id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;site_id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;device_type&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+        <span class="p">}</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,site&quot;</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,site,device_type&quot;</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
@@ -8020,8 +8334,27 @@ dry-run mode.</p>
             <span class="k">continue</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_interfaces</span> <span class="ow">in</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">normalised_live_all</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">device_interface_map</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">rule</span>
+                <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">interface_map</span>
+                <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatchcase</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">rule</span><span class="p">[</span><span class="s2">&quot;device_name&quot;</span><span class="p">])</span>
+                <span class="ow">and</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatchcase</span><span class="p">(</span>
+                    <span class="n">nb_devices_data</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;device_type&quot;</span><span class="p">],</span>
+                    <span class="n">rule</span><span class="p">[</span><span class="s2">&quot;device_type&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
             <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">host_interfaces</span> <span class="ow">or</span> <span class="p">[]:</span>
-                <span class="n">intf_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="n">mapped_names</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">field</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;lag&quot;</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">live_name</span> <span class="ow">in</span> <span class="n">mapped_names</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">device_interface_map</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">live_name</span> <span class="ow">and</span> <span class="n">rule</span><span class="p">[</span><span class="s2">&quot;match&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">live_name</span><span class="p">:</span>
+                            <span class="n">mapped_names</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">live_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                                <span class="n">rule</span><span class="p">[</span><span class="s2">&quot;match&quot;</span><span class="p">],</span> <span class="n">rule</span><span class="p">[</span><span class="s2">&quot;replace&quot;</span><span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="k">break</span>
+                <span class="n">intf_name</span> <span class="o">=</span> <span class="n">mapped_names</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">filter_by_name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span>
                     <span class="n">intf_name</span><span class="p">,</span> <span class="n">filter_by_name</span>
                 <span class="p">):</span>
@@ -8036,8 +8369,8 @@ dry-run mode.</p>
                     <span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span>
                         <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_enabled&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
                     <span class="p">),</span>
-                    <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">),</span>
-                    <span class="s2">&quot;lag&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lag&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">mapped_names</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;lag&quot;</span><span class="p">:</span> <span class="n">mapped_names</span><span class="p">[</span><span class="s2">&quot;lag&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;mtu&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mtu&quot;</span><span class="p">),</span>
                     <span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;speed&quot;</span><span class="p">),</span>
                     <span class="s2">&quot;duplex&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duplex&quot;</span><span class="p">),</span>
@@ -8160,6 +8493,8 @@ dry-run mode.</p>
                     <span class="n">nb</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span>
                     <span class="n">_lookup_cache</span><span class="o">=</span><span class="n">_lookup_cache</span><span class="p">,</span>
                     <span class="n">vlan_group</span><span class="o">=</span><span class="n">vlan_group</span><span class="p">,</span>
+                    <span class="n">vlan_map</span><span class="o">=</span><span class="n">vlan_map</span><span class="p">,</span>
+                    <span class="n">vlan_groups</span><span class="o">=</span><span class="n">vlan_groups</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">bulk_create_lag_interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
@@ -8214,6 +8549,8 @@ dry-run mode.</p>
                     <span class="n">nb</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span>
                     <span class="n">_lookup_cache</span><span class="o">=</span><span class="n">_lookup_cache</span><span class="p">,</span>
                     <span class="n">vlan_group</span><span class="o">=</span><span class="n">vlan_group</span><span class="p">,</span>
+                    <span class="n">vlan_map</span><span class="o">=</span><span class="n">vlan_map</span><span class="p">,</span>
+                    <span class="n">vlan_groups</span><span class="o">=</span><span class="n">vlan_groups</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">bulk_create_parent_interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
@@ -8270,6 +8607,8 @@ dry-run mode.</p>
                     <span class="n">nb</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span>
                     <span class="n">_lookup_cache</span><span class="o">=</span><span class="n">_lookup_cache</span><span class="p">,</span>
                     <span class="n">vlan_group</span><span class="o">=</span><span class="n">vlan_group</span><span class="p">,</span>
+                    <span class="n">vlan_map</span><span class="o">=</span><span class="n">vlan_map</span><span class="p">,</span>
+                    <span class="n">vlan_groups</span><span class="o">=</span><span class="n">vlan_groups</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">bulk_create_child_interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
@@ -8316,6 +8655,8 @@ dry-run mode.</p>
                 <span class="n">nb</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span>
                 <span class="n">_lookup_cache</span><span class="o">=</span><span class="n">_lookup_cache</span><span class="p">,</span>
                 <span class="n">vlan_group</span><span class="o">=</span><span class="n">vlan_group</span><span class="p">,</span>
+                <span class="n">vlan_map</span><span class="o">=</span><span class="n">vlan_map</span><span class="p">,</span>
+                <span class="n">vlan_groups</span><span class="o">=</span><span class="n">vlan_groups</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="c1"># skip if nothing else to update</span>
             <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">}:</span>
@@ -8435,13 +8776,13 @@ dry-run mode.</p>
         
         
           
-          <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-footer__link md-footer__link--next" aria-label="Next: Sync MAC Addresses">
+          <a href="../services_netbox_service_tasks_sync_vlans/" class="md-footer__link md-footer__link--next" aria-label="Next: Sync VLANs">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Sync MAC Addresses
+                Sync VLANs
               </div>
             </div>
             <div class="md-footer__button md-icon">

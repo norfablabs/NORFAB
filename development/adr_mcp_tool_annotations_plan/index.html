@@ -2521,6 +2521,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_vlans/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VLANs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_vrfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRFs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -2557,6 +2613,34 @@
     
   
     Sync Device IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Prefixes
   
 
     
@@ -6130,6 +6214,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../adr_invoke_developer_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke Developer Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -7435,6 +7547,16 @@ from MCP and are documented here as not applicable.</p>
 <td>true</td>
 <td>true</td>
 <td>Updates NetBox IP assignments from live device data.</td>
+</tr>
+<tr>
+<td><code>netbox_worker/ip_tasks.py</code></td>
+<td><code>sync_device_prefixes</code></td>
+<td>Sync Device Prefixes</td>
+<td>false</td>
+<td>true</td>
+<td>true</td>
+<td>true</td>
+<td>Creates or updates NetBox prefixes derived from live device interface addresses.</td>
 </tr>
 <tr>
 <td><code>netbox_worker/netbox_crud.py</code></td>

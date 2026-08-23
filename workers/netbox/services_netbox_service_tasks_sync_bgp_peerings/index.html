@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://docs.norfablabs.com/workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/">
       
       
-        <link rel="prev" href="../services_netbox_service_tasks_sync_device_ip/">
+        <link rel="prev" href="../services_netbox_service_tasks_sync_device_prefixes/">
       
       
         <link rel="next" href="../services_netbox_service_tasks_check_device_sync/">
@@ -2527,6 +2527,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_vlans/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VLANs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_vrfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRFs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -2563,6 +2619,34 @@
     
   
     Sync Device IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_device_prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Prefixes
   
 
     
@@ -6104,6 +6188,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_invoke_developer_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke Developer Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -7786,7 +7898,18 @@ VRF object reference read from and written into
 <span class="normal">2372</span>
 <span class="normal">2373</span>
 <span class="normal">2374</span>
-<span class="normal">2375</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2375</span>
+<span class="normal">2376</span>
+<span class="normal">2377</span>
+<span class="normal">2378</span>
+<span class="normal">2379</span>
+<span class="normal">2380</span>
+<span class="normal">2381</span>
+<span class="normal">2382</span>
+<span class="normal">2383</span>
+<span class="normal">2384</span>
+<span class="normal">2385</span>
+<span class="normal">2386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpPeeringsResult</span><span class="p">,</span>
@@ -8057,6 +8180,17 @@ VRF object reference read from and written into
                 <span class="n">parsed_name</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
                 <span class="n">local_address</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_address&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">local_address</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">local_address</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parsed_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;unknown&#39;</span><span class="si">}</span><span class="s2"> - skipping, parsed local ip &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">local_address</span><span class="si">}</span><span class="s2">&#39; is not a valid IP address&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
                 <span class="n">local_as</span> <span class="o">=</span> <span class="n">_normalise_bgp_identity_asn</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;local_as&quot;</span><span class="p">])</span>
                 <span class="n">remote_address</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;remote_address&quot;</span><span class="p">]</span>
                 <span class="n">remote_as</span> <span class="o">=</span> <span class="n">_normalise_bgp_identity_asn</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;remote_as&quot;</span><span class="p">])</span>
@@ -8348,7 +8482,7 @@ VRF object reference read from and written into
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../services_netbox_service_tasks_sync_device_ip/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Sync Device IP">
+          <a href="../services_netbox_service_tasks_sync_device_prefixes/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Sync Device Prefixes">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -8358,7 +8492,7 @@ VRF object reference read from and written into
                 Previous
               </span>
               <div class="md-ellipsis">
-                Sync Device IP
+                Sync Device Prefixes
               </div>
             </div>
           </a>

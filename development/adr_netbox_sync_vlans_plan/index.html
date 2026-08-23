@@ -25,7 +25,7 @@
     
     
       
-        <title>ADR - NetBox sync_vlans Task Plan - Network Automations Fabric [NORFAB]</title>
+        <title>Historical ADR - NetBox sync_vlans Task Plan - Network Automations Fabric [NORFAB]</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#adr-netbox-sync_vlans-task-plan" class="md-skip">
+        <a href="#historical-adr-netbox-sync_vlans-task-plan" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ADR - NetBox sync_vlans Task Plan
+              Historical ADR - NetBox sync_vlans Task Plan
             
           </span>
         </div>
@@ -2517,6 +2517,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_vlans/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VLANs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_vrfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRFs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -2553,6 +2609,34 @@
     
   
     Sync Device IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Prefixes
   
 
     
@@ -5915,6 +5999,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../adr_invoke_developer_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke Developer Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -6248,17 +6360,6 @@
   
     <nav class="md-nav" aria-label="Pydantic Models">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#vlanrecord" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        VlanRecord
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#syncvlansinput" class="md-nav__link">
@@ -6706,8 +6807,16 @@
   
 
 
-<h1 id="adr-netbox-sync_vlans-task-plan">ADR - NetBox <code>sync_vlans</code> Task Plan<a class="headerlink" href="#adr-netbox-sync_vlans-task-plan" title="Permanent link">¤</a></h1>
+<h1 id="historical-adr-netbox-sync_vlans-task-plan">Historical ADR - NetBox <code>sync_vlans</code> Task Plan<a class="headerlink" href="#historical-adr-netbox-sync_vlans-task-plan" title="Permanent link">¤</a></h1>
 <h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">¤</a></h2>
+<p>Superseded by the implemented task and its
+<a href="../../workers/netbox/services_netbox_service_tasks_sync_vlans/"><code>sync_vlans</code> documentation</a>.</p>
+<p>This file preserves the original design discussion and is not the current task
+contract. In particular, the implemented task uses ordered <code>vlan_map</code> rules,
+an exact-name scalar <code>vlan_group</code> fallback, device-site fallback, and no VLAN
+deletion. Current input, output, matching, and safety behavior is documented in
+the task reference linked above.</p>
+<p>Original proposal status and date:</p>
 <p>Proposed — ready for implementation review.</p>
 <p>Date: 19 August 2026</p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">¤</a></h2>
@@ -6737,7 +6846,7 @@ current <code>sync_device_interfaces</code> implementation, while making VLAN gr
 recommended mode for new deployments.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">¤</a></h2>
 <p>Add a standalone NetBox worker task named <code>sync_vlans</code> in a dedicated
-<code>vlans_tasks.py</code> module. It will:</p>
+<code>vlan_tasks.py</code> module. It will:</p>
 <ol>
 <li>resolve devices from an explicit list and/or Nornir host filters;</li>
 <li>collect live VLAN configuration with Nornir <code>parse_ttp</code>, using
@@ -6787,7 +6896,7 @@ expanded.</p>
 </ul>
 <h2 id="file-and-class-layout">File and Class Layout<a class="headerlink" href="#file-and-class-layout" title="Permanent link">¤</a></h2>
 <p>Create the task implementation in:</p>
-<div class="highlight"><pre><span></span><code>norfab/workers/netbox_worker/vlans_tasks.py
+<div class="highlight"><pre><span></span><code>norfab/workers/netbox_worker/vlan_tasks.py
 </code></pre></div>
 <p>The module should contain:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">NetboxVlansTasks</span><span class="p">:</span>
@@ -6797,15 +6906,16 @@ expanded.</p>
 </code></pre></div>
 <p>Keep non-trivial reusable logic as plain module-level functions. Suggested
 helpers are:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">expand_vlan_id_ranges</span><span class="p">(</span><span class="n">vlan_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span> <span class="o">...</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">normalize_live_vlan</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span> <span class="o">...</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">normalize_live_vlan</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span> <span class="o">...</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">normalize_netbox_vlan</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span> <span class="o">...</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_vlan_group</span><span class="p">(</span><span class="n">nb</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">vlan_group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
-<p>Do not define Pydantic models in <code>vlans_tasks.py</code>. Per the repository model
+<p>Expand VLAN ID strings with the existing
+<code>norfab.utils.text.expand_alphanumeric_range</code> utility.</p>
+<p>Do not define Pydantic models in <code>vlan_tasks.py</code>. Per the repository model
 guide, all task models belong in <code>netbox_models.py</code>.</p>
 <p>Wire the mixin into <code>netbox_worker.py</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">.vlans_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">NetboxVlansTasks</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">.vlan_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">NetboxVlansTasks</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">NetboxWorker</span><span class="p">(</span>
@@ -6829,7 +6939,7 @@ guide, all task models belong in <code>netbox_models.py</code>.</p>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_by_vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
     <span class="o">...</span>
@@ -6844,9 +6954,8 @@ guide, all task models belong in <code>netbox_models.py</code>.</p>
 <li><code>devices</code>: explicit NetBox/Nornir device names.</li>
 <li><code>process_deletions</code>: allow deletion of NetBox VLANs absent from live data.</li>
 <li><code>branch</code>: NetBox Branching plugin branch name.</li>
-<li><code>vlan_group</code>: one VLAN group name, slug, or numeric ID. When set, all
-  selected devices contribute to that group.</li>
-<li><code>vlan_ids</code>: VLAN IDs or inclusive range strings such as <code>100</code>, <code>200-299</code>.
+<li><code>vlan_group</code>: one VLAN group name</li>
+<li><code>filter_by_vlan_ids</code>: VLAN IDs or inclusive range strings such as <code>100</code>, <code>200-299</code>.
   Apply the same expanded set to live and NetBox state.</li>
 <li><code>kwargs</code>: Nornir <code>FFun</code> host filters (<code>FO</code>, <code>FB</code>, <code>FH</code>, <code>FC</code>, <code>FR</code>, <code>FG</code>,
   <code>FP</code>, <code>FL</code>, <code>FM</code>, <code>FX</code>, and <code>FN</code>). The input model must expose these fields
@@ -6855,7 +6964,7 @@ guide, all task models belong in <code>netbox_models.py</code>.</p>
 <p>At least one device selector must be supplied: <code>devices</code> or a non-empty Nornir
 host filter.</p>
 <h3 id="deletion-contract">Deletion Contract<a class="headerlink" href="#deletion-contract" title="Permanent link">¤</a></h3>
-<p><code>process_deletions=True</code> is valid only when <code>vlan_ids</code> is non-empty. The
+<p><code>process_deletions=True</code> is valid only when <code>filter_by_vlan_ids</code> is non-empty. The
 explicit VID set is the task's deletion boundary. This prevents a selected
 device subset from accidentally treating every VLAN in a site or group as
 managed.</p>
@@ -6873,22 +6982,10 @@ device assigned to that scope:</p>
 must list suppressed candidates under <code>delete_skipped</code> and explain why in
 <code>messages</code> or <code>errors</code>.</p>
 <p>An empty, successfully parsed list is authoritative only for the requested
-<code>vlan_ids</code>. A missing host result is not equivalent to an empty list.</p>
+<code>filter_by_vlan_ids</code>. A missing host result is not equivalent to an empty list.</p>
 <h2 id="pydantic-models">Pydantic Models<a class="headerlink" href="#pydantic-models" title="Permanent link">¤</a></h2>
 <p>Add the following models to the IPAM section of
 <code>norfab/workers/netbox_worker/netbox_models.py</code>.</p>
-<h3 id="vlanrecord"><code>VlanRecord</code><a class="headerlink" href="#vlanrecord" title="Permanent link">¤</a></h3>
-<p>Use this model to validate the normalized TTP contract before aggregation:</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">VlanRecord</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">):</span>
-    <span class="n">vid</span><span class="p">:</span> <span class="n">StrictInt</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">4094</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;IEEE 802.1Q VLAN ID&quot;</span><span class="p">)</span>
-    <span class="n">name</span><span class="p">:</span> <span class="n">StrictStr</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN name&quot;</span><span class="p">)</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">StrictStr</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN description&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-</code></pre></div>
-<p>The implementation should convert the model to the canonical comparison shape
-after validation.</p>
 <h3 id="syncvlansinput"><code>SyncVlansInput</code><a class="headerlink" href="#syncvlansinput" title="Permanent link">¤</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SyncVlansInput</span><span class="p">(</span>
     <span class="n">NetboxNornirHostsFilters</span><span class="p">,</span>
@@ -6928,7 +7025,7 @@ after validation.</p>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN group name, slug, or ID used as the reconciliation scope&quot;</span><span class="p">,</span>
         <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;vlan-group&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">filter_by_vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">StrictStr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;VLAN IDs or inclusive ranges to reconcile, for example 100 or 200-299&quot;</span><span class="p">,</span>
         <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;vlan-ids&quot;</span><span class="p">,</span>
@@ -6938,7 +7035,7 @@ after validation.</p>
 <p>Add <code>model_validator(mode="after")</code> validation that:</p>
 <ol>
 <li>requires <code>devices</code> or at least one Nornir host filter;</li>
-<li>requires <code>vlan_ids</code> when <code>process_deletions=True</code>;</li>
+<li>requires <code>filter_by_vlan_ids</code> when <code>process_deletions=True</code>;</li>
 <li>rejects brackets, descending ranges, non-numeric values, and values outside
    <code>1..4094</code>;</li>
 <li>accepts overlapping input ranges but normalizes them to one set in the task;</li>
@@ -7056,7 +7153,7 @@ Identical duplicate host results may be collapsed.</p>
 <li>normalize a missing or null description to <code>""</code>;</li>
 <li>preserve name and description case;</li>
 <li>do not compare NetBox IDs or display fields;</li>
-<li>apply the expanded <code>vlan_ids</code> set to both live and NetBox data before diffing;</li>
+<li>apply the expanded <code>filter_by_vlan_ids</code> set to both live and NetBox data before diffing;</li>
 <li>sort scopes lexically and VIDs numerically for payloads, events, and results.</li>
 </ul>
 <p>The bundled TTP getter supplies a default name such as <code>VLAN100</code> when a
@@ -7221,7 +7318,7 @@ fails for every selected device. Partial conflicts should populate
 <p>CLI-specific behavior:</p>
 <ul>
 <li>override <code>devices</code> to accept <code>Union[List[StrictStr], StrictStr]</code>;</li>
-<li>override <code>vlan_ids</code> to accept <code>Union[List[StrictStr], StrictStr]</code>;</li>
+<li>override <code>filter_by_vlan_ids</code> to accept <code>Union[List[StrictStr], StrictStr]</code>;</li>
 <li>convert either string to a one-item list in <code>run</code>;</li>
 <li>default outer timeout to 600 seconds and pass <code>int(timeout * 0.9)</code> to the
   worker task;</li>
@@ -7273,7 +7370,7 @@ nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </
 <li><code>nf# man tree netbox.sync.vlans</code> command reference;</li>
 <li>the concrete API directive:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>::: norfab.workers.netbox_worker.vlans_tasks.NetboxVlansTasks.sync_vlans
+<div class="highlight"><pre><span></span><code>::: norfab.workers.netbox_worker.vlan_tasks.NetboxVlansTasks.sync_vlans
 </code></pre></div>
 <p>Add the page to the NetBox task list in <code>mkdocs.yml</code> as <code>Sync VLANs</code>.</p>
 <p>Update <code>docs/norfab_features.md</code> with a concise <strong>Live VLAN reconciliation</strong>
@@ -7310,14 +7407,14 @@ depend on test execution order.</p>
 <li>VLAN range expansion accepts single IDs and ascending ranges;</li>
 <li>VLAN range validation rejects brackets, descending ranges, non-numeric
    values, zero, and values above 4094;</li>
-<li><code>process_deletions=True</code> requires <code>vlan_ids</code>;</li>
+<li><code>process_deletions=True</code> requires <code>filter_by_vlan_ids</code>;</li>
 <li>dry-run reports create actions and performs no writes;</li>
 <li>live run creates VLANs with parsed names and descriptions;</li>
 <li>live run updates a placeholder VLAN name and description;</li>
 <li>a null live description normalizes to an empty string and clears a stale
     NetBox description;</li>
 <li>a second run reports VLANs in sync;</li>
-<li><code>vlan_ids</code> applies to both live and NetBox data;</li>
+<li><code>filter_by_vlan_ids</code> applies to both live and NetBox data;</li>
 <li>deletion is skipped by default;</li>
 <li>deletion runs only for explicit in-range VIDs;</li>
 <li>an out-of-range NetBox VLAN is never deleted;</li>
@@ -7358,14 +7455,14 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 </code></pre></div>
 <p>Static and documentation verification:</p>
 <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>compileall<span class="w"> </span>-q<span class="w"> </span>norfab/workers/netbox_worker<span class="w"> </span>norfab/clients/nfcli_shell/netbox
-poetry<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>norfab/workers/netbox_worker/vlans_tasks.py<span class="w"> </span>norfab/workers/netbox_worker/netbox_models.py<span class="w"> </span>norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py<span class="w"> </span>tests/services/netbox/test_vlans.py
+poetry<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>norfab/workers/netbox_worker/vlan_tasks.py<span class="w"> </span>norfab/workers/netbox_worker/netbox_models.py<span class="w"> </span>norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_vlans.py<span class="w"> </span>tests/services/netbox/test_vlans.py
 poetry<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>build
 </code></pre></div>
 <p>Do not leave new <code>__pycache__</code> artifacts after verification.</p>
 <h2 id="planned-file-changes">Planned File Changes<a class="headerlink" href="#planned-file-changes" title="Permanent link">¤</a></h2>
 <p>Implementation should be limited to:</p>
 <ul>
-<li><code>norfab/workers/netbox_worker/vlans_tasks.py</code> — new task and helpers;</li>
+<li><code>norfab/workers/netbox_worker/vlan_tasks.py</code> — new task and helpers;</li>
 <li><code>norfab/workers/netbox_worker/netbox_models.py</code> — VLAN record, input, and
   result models;</li>
 <li><code>norfab/workers/netbox_worker/netbox_worker.py</code> — import and mix in
@@ -7417,7 +7514,7 @@ test identifies an actual fixture defect.</p>
 <ul>
 <li>Results are scope-keyed, which differs from device-keyed interface results.</li>
 <li>Site compatibility mode must handle ambiguous duplicate VIDs.</li>
-<li>Requiring <code>vlan_ids</code> for deletion is less convenient than deleting every
+<li>Requiring <code>filter_by_vlan_ids</code> for deletion is less convenient than deleting every
   absent VLAN, but it materially reduces risk.</li>
 <li>Status, role, tenant, tags, and other NetBox-only policy fields remain manual.</li>
 <li>The task will not automatically run as part of <code>sync_all</code> in its first
@@ -7443,7 +7540,7 @@ that can be derived safely from the live three-field parser output.</p>
 <h2 id="resolved-decisions">Resolved Decisions<a class="headerlink" href="#resolved-decisions" title="Permanent link">¤</a></h2>
 <ol>
 <li>Public task name: <code>sync_vlans</code>.</li>
-<li>Implementation file: <code>vlans_tasks.py</code>.</li>
+<li>Implementation file: <code>vlan_tasks.py</code>.</li>
 <li>Worker mixin: <code>NetboxVlansTasks</code>.</li>
 <li>Live source: Nornir <code>parse_ttp</code> with <code>get="vlans"</code>.</li>
 <li>Managed fields: <code>vid</code> identity plus authoritative <code>name</code> and <code>description</code>.</li>
@@ -7456,7 +7553,7 @@ that can be derived safely from the live three-field parser output.</p>
 <li>VLAN groups must already exist.</li>
 <li>Site/global/group moves are outside the task.</li>
 <li>Deletions default to disabled.</li>
-<li>Enabled deletion requires explicit <code>vlan_ids</code>.</li>
+<li>Enabled deletion requires explicit <code>filter_by_vlan_ids</code>.</li>
 <li>Incomplete live collection suppresses deletion for the affected scope.</li>
 <li>Dry-run takes precedence over approval and never prompts.</li>
 <li>Bulk operations are isolated per scope.</li>

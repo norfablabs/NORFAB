@@ -1245,6 +1245,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#live-vlan-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live VLAN reconciliation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-vrf-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live VRF reconciliation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#live-ip-and-mac-reconciliation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3984,6 +4006,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_vlans/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VLANs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_vrfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRFs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4020,6 +4098,34 @@
     
   
     Sync Device IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_device_prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Prefixes
   
 
     
@@ -7382,6 +7488,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_invoke_developer_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke Developer Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -8455,6 +8589,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#live-vlan-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live VLAN reconciliation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-vrf-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live VRF reconciliation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#live-ip-and-mac-reconciliation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -9063,7 +9219,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 26 July 2026</em></p>
+<p><em>Last updated: 23 August 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -9156,6 +9312,8 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 <li><a href="#ip-address-and-prefix-allocation">IP address and prefix allocation</a></li>
 <li><a href="#interface-provisioning">Interface provisioning</a></li>
 <li><a href="#live-interface-reconciliation">Live interface reconciliation</a></li>
+<li><a href="#live-vlan-reconciliation">Live VLAN reconciliation</a></li>
+<li><a href="#live-vrf-reconciliation">Live VRF reconciliation</a></li>
 <li><a href="#live-ip-and-mac-reconciliation">Live IP and MAC reconciliation</a></li>
 <li><a href="#hardware-inventory-reconciliation">Hardware inventory reconciliation</a></li>
 <li><a href="#bgp-peering-lifecycle">BGP peering lifecycle</a></li>
@@ -9777,18 +9935,40 @@ inputs must match the NetBox model.
 <a href="../workers/netbox/services_netbox_service_tasks_create_device_interfaces/">Task details</a></p>
 <h3 id="live-interface-reconciliation">Live interface reconciliation<a class="headerlink" href="#live-interface-reconciliation" title="Permanent link">¤</a></h3>
 <p>Collects live interface data through Nornir, computes a desired/current diff,
-and applies ordered create, update, and optional delete actions. <strong>Use cases:</strong>
+optionally maps live interface names through ordered device- and model-aware
+rename rules, and applies ordered create, update, and optional delete actions. <strong>Use cases:</strong>
 source-of-truth maintenance and drift remediation. <strong>Limitations:</strong> parser
 coverage determines live-state quality; deletion is opt-in and should be
 reviewed with dry-run first.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/">Task details</a></p>
+<h3 id="live-vlan-reconciliation">Live VLAN reconciliation<a class="headerlink" href="#live-vlan-reconciliation" title="Permanent link">¤</a></h3>
+<p>Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
+NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
+an optional scalar VLAN-group fallback. VLANs are identified by VID per scope;
+the first device supplies values when later devices report a conflict.
+<strong>Use cases:</strong> correct placeholder VLANs, maintain shared VLAN naming, and audit
+layer-two source-of-truth drift. <strong>Limitations:</strong> parser coverage determines
+live-state quality; the task does not delete VLANs because live data cannot
+reliably identify stale NetBox objects.
+<a href="../workers/netbox/services_netbox_service_tasks_sync_vlans/">Task details</a></p>
+<h3 id="live-vrf-reconciliation">Live VRF reconciliation<a class="headerlink" href="#live-vrf-reconciliation" title="Permanent link">¤</a></h3>
+<p>Reconciles global VRFs and descriptions from live devices, and adds all observed
+import/export route targets to the existing NetBox associations. Missing route
+targets are created, and an optional multi-object custom field records the
+devices on which each VRF was observed. <strong>Use cases:</strong> VRF inventory,
+route-target aggregation, and device-to-VRF inventory. <strong>Limitations:</strong> route
+distinguishers and route policies are not stored; VRF objects, route-target
+objects, route-target associations, and device associations are not removed
+automatically.
+<a href="../workers/netbox/services_netbox_service_tasks_sync_vrfs/">Task details</a></p>
 <h3 id="live-ip-and-mac-reconciliation">Live IP and MAC reconciliation<a class="headerlink" href="#live-ip-and-mac-reconciliation" title="Permanent link">¤</a></h3>
-<p>Reconciles device IP assignments and interface MAC addresses with NetBox,
-including filters, anycast handling, optional prefix creation, and controlled
-deletion behavior. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
+<p>Reconciles device IP assignments, derived prefixes, and interface MAC addresses
+with NetBox, including filters, anycast handling, VRF/site association, and
+controlled deletion behavior. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
 <strong>Limitations:</strong> requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_ip/">IP sync</a> ·
+<a href="../workers/netbox/services_netbox_service_tasks_sync_device_prefixes/">Prefix sync</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/">MAC sync</a></p>
 <h3 id="hardware-inventory-reconciliation">Hardware inventory reconciliation<a class="headerlink" href="#hardware-inventory-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles live chassis, module, and inventory records with NetBox and supports
