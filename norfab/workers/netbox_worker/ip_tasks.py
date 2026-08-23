@@ -1,7 +1,7 @@
+import copy
 import fnmatch
 import ipaddress
 import logging
-import copy
 from typing import Any, Union
 
 from norfab.core.worker import Job, Task
@@ -16,10 +16,21 @@ from .netbox_models import (
     NetboxFastApiArgs,
     SyncDeviceIpInput,
     SyncDeviceIpResult,
+    SyncDevicePrefixesInput,
+    SyncDevicePrefixesResult,
 )
 from .netbox_worker_utilities import resolve_vrf, review_sync_task_result
 
 log = logging.getLogger(__name__)
+
+DEFAULT_IGNORE_RANGES = [
+    "127.0.0.0/8",
+    "224.0.0.0/24",
+    "fe80::/10",
+    "ff02::/16",
+    "::ffff:0:0/96",
+    "::1/128",
+]
 
 
 def resolve_ip_role(ip: str, intf_name: str, anycast_nets: list):
@@ -36,18 +47,62 @@ def resolve_ip_role(ip: str, intf_name: str, anycast_nets: list):
     return None
 
 
-def make_prefix_from_ip(address: Union[None, str]) -> Union[None, str]:
-    try:
-        return str(ipaddress.ip_interface(str(address)).network)
-    except Exception:
-        return None
-
-
 def _ip_payload(ip_data: dict, ignore_vrf: bool) -> dict:
     payload = dict(ip_data)
     if ignore_vrf:
         payload.pop("vrf", None)
     return payload
+
+
+def collect_live_interface_ip_data(
+    client,
+    job: Job,
+    devices: list,
+    timeout: int,
+    filter_by_name: Union[None, str] = None,
+    filter_by_description: Union[None, str] = None,
+) -> dict:
+    """Collect interface IP data using the TTP interfaces getter."""
+    job.event(f"retrieving live interfaces for {len(devices)} devices")
+    parse_data = client.run_job(
+        "nornir",
+        "parse_ttp",
+        kwargs={"get": "interfaces", "FL": devices},
+        workers="all",
+        timeout=timeout,
+    )
+
+    normalised_live_all = {}
+    for worker_name, worker_data in parse_data.items():
+        if worker_data.get("failed"):
+            msg = f"{worker_name} - failed to parse interface data from devices"
+            log.warning(msg)
+            job.event(msg, severity="WARNING")
+            continue
+        for device_name, host_interfaces in worker_data["result"].items():
+            filtered = {}
+            for interface in host_interfaces:
+                interface_name = interface["name"]
+                interface_description = interface.get("description") or ""
+                if filter_by_name and not fnmatch.fnmatch(
+                    interface_name, filter_by_name
+                ):
+                    continue
+                if filter_by_description and not fnmatch.fnmatch(
+                    interface_description, filter_by_description
+                ):
+                    continue
+
+                if not (
+                    interface.get("ipv4_addresses") or interface.get("ipv6_addresses")
+                ):
+                    continue
+                filtered[interface_name] = interface
+            normalised_live_all[device_name] = filtered
+
+    live_interface_count = sum(len(v) for v in normalised_live_all.values())
+    job.event(f"normalised IP data from {live_interface_count} live interface(s)")
+    return normalised_live_all
 
 
 class NetboxIpTasks:
@@ -620,8 +675,7 @@ class NetboxIpTasks:
         devices: Union[None, list] = None,
         branch: str = None,
         anycast_ranges: Union[None, list] = None,
-        ignore_ranges: Union[None, list] = None,
-        create_prefixes: bool = True,
+        ignore_ranges: Union[None, str, list] = None,
         ignore_vrf: bool = True,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
@@ -673,11 +727,9 @@ class NetboxIpTasks:
                 IP addresses as anycast role, e.g. ``'10.3.250.0/24'``.
             ignore_ranges (list, optional): Prefixes to ignore IP addresses for, includes
                 by default 127.0.0.0/8, 224.0.0.0/24 and others
-            create_prefixes (bool, optional): If True, create missing IP prefixes in
-                NetBox for each discovered IP address. No updates or deletions are done.
             ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored
-                for IP and prefix writes. Existing VRF-scoped IPs/prefixes are still
-                matched by address/prefix and their VRF is left unchanged. Defaults to True.
+                for IP writes. Existing VRF-scoped IPs are still matched by address
+                and their VRF is left unchanged. Defaults to True.
             filter_by_name (str, optional): Glob pattern to restrict which interfaces
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
@@ -706,25 +758,17 @@ class NetboxIpTasks:
             f"{self.name} - Sync device IP: Processing {len(devices)} device(s) in '{instance}'"
         )
 
-        # pre-process ranges
-        ignore_ranges = ignore_ranges or [
-            "127.0.0.0/8",
-            "224.0.0.0/24",
-            "fe80::/10",
-            "ff02::/16",
-            "::ffff:0:0/96",
-            "::1/128",
-        ]
+        # pre-process anycast ranges
         if isinstance(anycast_ranges, str):
             anycast_ranges = [anycast_ranges]
-        if isinstance(ignore_ranges, str):
-            ignore_ranges = [ignore_ranges]
-        # convert prefix ranges to IP address objects
         anycast_nets = [
             ipaddress.ip_network(str(pfx), strict=False) for pfx in anycast_ranges or []
         ]
+        ignore_ranges = ignore_ranges or DEFAULT_IGNORE_RANGES
+        if isinstance(ignore_ranges, str):
+            ignore_ranges = [ignore_ranges]
         ignore_nets = [
-            ipaddress.ip_network(str(pfx), strict=False) for pfx in ignore_ranges or []
+            ipaddress.ip_network(str(prefix), strict=False) for prefix in ignore_ranges
         ]
         filter_prefix_net = (
             ipaddress.ip_network(filter_by_prefix, strict=False)
@@ -759,11 +803,8 @@ class NetboxIpTasks:
             d.name: {
                 "id": d.id,
                 "name": d.name,
-                "site_id": d.site.id if d.site else None,
             }
-            for d in self.bulk_filter(
-                nb.dcim.devices, name=devices, fields="id,name,site"
-            )
+            for d in self.bulk_filter(nb.dcim.devices, name=devices, fields="id,name")
         }
         for d in list(devices):
             if d not in nb_devices_data:
@@ -780,81 +821,15 @@ class NetboxIpTasks:
             return ret
         job.event(f"validated {len(devices)} device(s) in NetBox")
 
-        # gather live interface data from Nornir parse_ttp
-        job.event(f"retrieving live interfaces for {len(devices)} devices")
-        parse_data = self.client.run_job(
-            "nornir",
-            "parse_ttp",
-            kwargs={"get": "interfaces", "FL": devices},
-            workers="all",
+        # gather and filter live interface data from Nornir parse_ttp
+        normalised_live_all = collect_live_interface_ip_data(
+            client=self.client,
+            job=job,
+            devices=devices,
             timeout=timeout,
+            filter_by_name=filter_by_name,
+            filter_by_description=filter_by_description,
         )
-
-        # normalise live data from Nornir parse_ttp results into {device: {intf: intf_data}}
-        # applying interface name and description filters at collection phase
-        job.event("normalising live interface IP data")
-        normalised_live_all = {}
-        for wname, wdata in parse_data.items():
-            if wdata.get("failed"):
-                msg = f"{wname} - failed to parse interface data from devices"
-                log.warning(msg)
-                job.event(msg, severity="WARNING")
-                continue
-            for device_name, host_interfaces in wdata["result"].items():
-                filtered = {}
-                for intf in host_interfaces:
-                    intf_name = intf["name"]
-                    intf_description = intf.get("description") or ""
-                    if filter_by_name and not fnmatch.fnmatch(
-                        intf_name, filter_by_name
-                    ):
-                        continue
-                    if filter_by_description and not fnmatch.fnmatch(
-                        intf_description, filter_by_description
-                    ):
-                        continue
-                    # apply IP-level filters if needed
-                    if filter_prefix_net or filter_by_ip or ignore_nets:
-                        filtered_ipv4 = []
-                        filtered_ipv6 = []
-                        for ip in intf.get("ipv4_addresses") or []:
-                            ip_addr = ipaddress.ip_interface(str(ip)).ip
-                            if filter_prefix_net and ip_addr not in filter_prefix_net:
-                                continue
-                            if filter_by_ip and not fnmatch.fnmatch(
-                                str(ip_addr), filter_by_ip
-                            ):
-                                continue
-                            if ignore_nets and any(
-                                ip_addr in net for net in ignore_nets
-                            ):
-                                continue
-                            filtered_ipv4.append(ip)
-                        for ip in intf.get("ipv6_addresses") or []:
-                            ip_addr = ipaddress.ip_interface(str(ip)).ip
-                            if filter_prefix_net and ip_addr not in filter_prefix_net:
-                                continue
-                            if filter_by_ip and not fnmatch.fnmatch(
-                                str(ip_addr), filter_by_ip
-                            ):
-                                continue
-                            if ignore_nets and any(
-                                ip_addr in net for net in ignore_nets
-                            ):
-                                continue
-                            filtered_ipv6.append(ip)
-                        # skip interface entirely if all IPs were filtered out
-                        if not filtered_ipv4 and not filtered_ipv6:
-                            continue
-                        intf = {
-                            **intf,
-                            "ipv4_addresses": filtered_ipv4,
-                            "ipv6_addresses": filtered_ipv6,
-                        }
-                    filtered[intf_name] = intf
-                normalised_live_all[device_name] = filtered
-        live_interface_count = sum(len(v) for v in normalised_live_all.values())
-        job.event(f"normalised IP data from {live_interface_count} live interface(s)")
 
         # fetch interfaces data from NetBox to resolve interface IDs
         job.event("fetching NetBox interfaces to resolve IP assignments")
@@ -883,14 +858,12 @@ class NetboxIpTasks:
         }
         ret.result = device_results
 
-        # collect all discovered IP addresses and prefixes
-        job.event("collecting live IP address and prefix candidates")
+        # collect all discovered IP addresses
+        job.event("collecting live IP address candidates")
         all_ip_live = []
-        all_prefixes_live = []
         for device_name, interfaces in normalised_live_all.items():
             if device_name not in nb_devices_data:
                 continue
-            nb_device = nb_devices_data[device_name]
             nb_raw = nb_interfaces_result.result.get(device_name, {})
             for intf_name, intf_data in interfaces.items():
                 if intf_name not in nb_raw:
@@ -898,6 +871,15 @@ class NetboxIpTasks:
                 for ip in (intf_data.get("ipv4_addresses") or []) + (
                     intf_data.get("ipv6_addresses") or []
                 ):
+                    host_address = ipaddress.ip_interface(str(ip)).ip
+                    if filter_prefix_net and host_address not in filter_prefix_net:
+                        continue
+                    if filter_by_ip and not fnmatch.fnmatch(
+                        str(host_address), filter_by_ip
+                    ):
+                        continue
+                    if any(host_address in network for network in ignore_nets):
+                        continue
                     vrf = (
                         None
                         if ignore_vrf
@@ -914,14 +896,6 @@ class NetboxIpTasks:
                             "assigned_object_id": nb_raw[intf_name]["id"],
                         }
                     )
-                    if create_prefixes:
-                        all_prefixes_live.append(
-                            {
-                                "prefix": make_prefix_from_ip(ip),
-                                "vrf": vrf,
-                                "site": nb_device["site_id"],
-                            }
-                        )
 
         if not all_ip_live:
             log.info(
@@ -955,7 +929,7 @@ class NetboxIpTasks:
         ]
         job.event(f"retrieved {len(nb_ips)} matching IP address object(s) from NetBox")
 
-        # process IP and Prefixes
+        # process IP addresses
         job.event("calculating IP address sync actions")
         bulk_update_ip = {}  # {(device, intf, ip): {ip data}}
         bulk_create_ip = {}  # {(device, intf, ip): {ip data}}
@@ -1165,61 +1139,255 @@ class NetboxIpTasks:
         else:
             job.event("no IP addresses to create")
 
-        # process prefixes - create missing prefixes, optionally scoped by VRF
-        if create_prefixes and all_prefixes_live:
-            job.event(f"checking {len(all_prefixes_live)} prefix candidate(s)")
-            nb_prefixes = self.bulk_filter(
-                endpoint=nb.ipam.prefixes,
-                prefix=[p["prefix"] for p in all_prefixes_live if p["prefix"]],
-                fields="id,prefix,vrf",
-            )
-            bulk_create_prefixes = []
-            seen_prefixes = set()
-            for pfx_data in all_prefixes_live:
-                if not pfx_data["prefix"]:
-                    continue
-                pfx_key = (
-                    pfx_data["prefix"]
-                    if ignore_vrf
-                    else (pfx_data["prefix"], pfx_data["vrf"])
-                )
-                if pfx_key in seen_prefixes:
-                    continue
-                matching_pfxs = [
-                    pfx for pfx in nb_prefixes if pfx.prefix == pfx_data["prefix"]
-                ]
-                if ignore_vrf and matching_pfxs:
-                    seen_prefixes.add(pfx_key)
-                    continue
-                if not ignore_vrf and any(
-                    (pfx.vrf.id if pfx.vrf else None) == pfx_data["vrf"]
-                    for pfx in matching_pfxs
-                ):
-                    seen_prefixes.add(pfx_key)
-                    continue
-
-                payload = {"prefix": pfx_data["prefix"]}
-                if not ignore_vrf and pfx_data["vrf"] is not None:
-                    payload["vrf"] = pfx_data["vrf"]
-                if pfx_data["site"] is not None:
-                    payload["site"] = pfx_data["site"]
-                bulk_create_prefixes.append(payload)
-                seen_prefixes.add(pfx_key)
-            if bulk_create_prefixes:
-                job.event(f"creating {len(bulk_create_prefixes)} prefix(es)")
-                try:
-                    nb.ipam.prefixes.create(bulk_create_prefixes)
-                    job.event(f"created {len(bulk_create_prefixes)} prefixes")
-                except Exception as e:
-                    msg = f"failed to bulk create prefixes: {e}"
-                    ret.errors.append(msg)
-                    log.error(msg)
-                    job.event(msg, severity="ERROR")
-            else:
-                job.event("no prefixes to create")
-        elif create_prefixes:
-            job.event("no prefix candidates found")
-
         job.event("IP address sync complete")
 
+        return ret
+
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=SyncDevicePrefixesInput,
+        output=SyncDevicePrefixesResult,
+        mcp={
+            "annotations": {
+                "title": "Sync Device Prefixes",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def sync_device_prefixes(
+        self,
+        job: Job,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        with_approval: bool = False,
+        timeout: int = 600,
+        devices: Union[None, list] = None,
+        branch: str = None,
+        ignore_ranges: Union[None, str, list] = None,
+        ignore_vrf: bool = True,
+        ignore_site: bool = True,
+        filter_by_name: Union[None, str] = None,
+        filter_by_description: Union[None, str] = None,
+        filter_by_prefix: Union[None, str] = None,
+        **kwargs: Any,
+    ) -> Result:
+        """Synchronize prefixes derived from live interface addresses into NetBox.
+
+        Prefixes are collected from the Nornir TTP ``interfaces`` getter without
+        requiring corresponding NetBox interfaces. Existing prefixes are matched
+        by prefix alone when ``ignore_vrf=True`` and by prefix plus VRF otherwise.
+        Site association is left unchanged by default. When ``ignore_site=False``,
+        the site of the alphabetically first device reporting a prefix is used.
+
+        Args:
+            job: NorFab Job object containing relevant metadata.
+            instance: NetBox instance name.
+            dry_run: Return the reconciliation plan without writing to NetBox.
+            with_approval: Preview changes and ask for review before applying them.
+            timeout: Timeout in seconds for Nornir parsing and host resolution.
+            devices: Explicit device names to collect prefixes from.
+            branch: NetBox Branching plugin branch name.
+            ignore_ranges: Exclude derived prefixes fully contained in these ranges.
+            ignore_vrf: Ignore live VRFs and preserve existing prefix VRFs.
+            ignore_site: Ignore device sites and preserve existing prefix scopes.
+            filter_by_name: Interface-name glob filter.
+            filter_by_description: Interface-description glob filter.
+            filter_by_prefix: Include prefixes within this network only.
+            **kwargs: Nornir host filter arguments.
+
+        Returns:
+            Result: Global ``created``, ``updated``, and ``in_sync`` prefix lists.
+        """
+        devices = list(devices or [])
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:sync_device_prefixes",
+            result={"created": [], "updated": [], "in_sync": []},
+            resources=[instance],
+            dry_run=dry_run,
+        )
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
+
+        if kwargs:
+            job.event("resolving devices from Nornir filters")
+            devices.extend(self.get_nornir_hosts(kwargs, timeout))
+        devices = sorted(set(devices))
+        if not devices:
+            msg = "no devices specified"
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
+            ret.failed = True
+            return ret
+
+        nb_devices = {
+            device.name: device.site.id
+            for device in self.bulk_filter(
+                nb.dcim.devices,
+                name=devices,
+                fields="name,site",
+            )
+        }
+        for device_name in [name for name in devices if name not in nb_devices]:
+            msg = f"{device_name} - device not found in Netbox"
+            log.error(msg)
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
+        devices = [name for name in devices if name in nb_devices]
+        if not devices:
+            ret.failed = True
+            return ret
+
+        normalised_live_all = collect_live_interface_ip_data(
+            client=self.client,
+            job=job,
+            devices=devices,
+            timeout=timeout,
+            filter_by_name=filter_by_name,
+            filter_by_description=filter_by_description,
+        )
+
+        job.event("collecting live prefix candidates")
+        ignore_ranges = ignore_ranges or DEFAULT_IGNORE_RANGES
+        if isinstance(ignore_ranges, str):
+            ignore_ranges = [ignore_ranges]
+        ignore_nets = [
+            ipaddress.ip_network(str(prefix), strict=False) for prefix in ignore_ranges
+        ]
+        filter_prefix_net = (
+            ipaddress.ip_network(filter_by_prefix, strict=False)
+            if filter_by_prefix
+            else None
+        )
+        desired_prefixes = {}
+        for device_name in sorted(normalised_live_all):
+            if device_name not in nb_devices:
+                continue
+            site_id = nb_devices[device_name]
+            for interface_data in normalised_live_all[device_name].values():
+                vrf_name = interface_data["vrf"]
+                if ignore_vrf:
+                    vrf_name = None
+                elif vrf_name and vrf_name.lower() in ["global", "default"]:
+                    vrf_name = None
+                for address in (interface_data.get("ipv4_addresses") or []) + (
+                    interface_data.get("ipv6_addresses") or []
+                ):
+                    prefix_net = ipaddress.ip_interface(str(address)).network
+                    if any(
+                        prefix_net.version == ignore_net.version
+                        and prefix_net.subnet_of(ignore_net)
+                        for ignore_net in ignore_nets
+                    ):
+                        continue
+                    if filter_prefix_net and (
+                        prefix_net.version != filter_prefix_net.version
+                        or not prefix_net.subnet_of(filter_prefix_net)
+                    ):
+                        continue
+                    prefix = str(prefix_net)
+                    key = prefix if ignore_vrf else (prefix, vrf_name)
+                    desired_prefixes.setdefault(
+                        key,
+                        {"prefix": prefix, "vrf": vrf_name, "site": site_id},
+                    )
+
+        if not desired_prefixes:
+            job.event("no prefixes found in live data")
+            return ret
+        job.event(f"collected {len(desired_prefixes)} unique prefix candidate(s)")
+
+        nb_prefixes = self.bulk_filter(
+            nb.ipam.prefixes,
+            prefix=sorted({item["prefix"] for item in desired_prefixes.values()}),
+            fields="id,prefix,vrf,scope_type,scope_id",
+        )
+        create_prefixes = {}
+        update_prefixes = {}
+        for key, desired in desired_prefixes.items():
+            matching = [
+                prefix
+                for prefix in nb_prefixes
+                if prefix.prefix == desired["prefix"]
+                and (
+                    ignore_vrf
+                    or (prefix.vrf.name if prefix.vrf else None) == desired["vrf"]
+                )
+            ]
+            if not matching:
+                payload = {"prefix": desired["prefix"]}
+                if not ignore_site:
+                    payload.update(
+                        {"scope_type": "dcim.site", "scope_id": desired["site"]}
+                    )
+                create_prefixes[key] = payload
+                continue
+
+            current = min(matching, key=lambda prefix: prefix.id)
+            current_site = (
+                getattr(current, "scope_id", None)
+                if getattr(current, "scope_type", None) == "dcim.site"
+                else None
+            )
+            if not ignore_site and current_site != desired["site"]:
+                update_prefixes[key] = {
+                    "id": current.id,
+                    "scope_type": "dcim.site",
+                    "scope_id": desired["site"],
+                }
+            else:
+                ret.result["in_sync"].append(desired["prefix"])
+
+        preview = copy.deepcopy(ret.result)
+        preview["created"].extend(
+            desired_prefixes[key]["prefix"] for key in create_prefixes
+        )
+        preview["updated"].extend(
+            desired_prefixes[key]["prefix"] for key in update_prefixes
+        )
+        for action in preview:
+            preview[action] = sorted(set(preview[action]))
+        if with_approval:
+            if not review_sync_task_result(job, "prefix sync", preview):
+                ret.status = "skipped"
+                ret.result = preview
+                ret.dry_run = True
+                ret.messages.append("review declined; changes were not applied")
+                return ret
+        elif dry_run:
+            ret.result = preview
+            ret.dry_run = True
+            return ret
+
+        vrf_ids = {}
+        for key in list(create_prefixes):
+            vrf_name = desired_prefixes[key]["vrf"]
+            if vrf_name is None:
+                continue
+            if vrf_name not in vrf_ids:
+                vrf_ids[vrf_name] = resolve_vrf(vrf_name, nb, job, ret, self.name)
+            if vrf_ids[vrf_name] is None:
+                create_prefixes.pop(key)
+                continue
+            create_prefixes[key]["vrf"] = vrf_ids[vrf_name]
+
+        if update_prefixes:
+            nb.ipam.prefixes.update(list(update_prefixes.values()))
+            ret.result["updated"].extend(
+                desired_prefixes[key]["prefix"] for key in update_prefixes
+            )
+            job.event(f"updated {len(update_prefixes)} prefix(es)")
+        if create_prefixes:
+            nb.ipam.prefixes.create(list(create_prefixes.values()))
+            ret.result["created"].extend(
+                desired_prefixes[key]["prefix"] for key in create_prefixes
+            )
+            job.event(f"created {len(create_prefixes)} prefix(es)")
+
+        for action in ret.result:
+            ret.result[action] = sorted(set(ret.result[action]))
+
+        job.event("device prefix sync complete")
         return ret

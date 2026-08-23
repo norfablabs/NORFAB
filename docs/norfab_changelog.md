@@ -2,15 +2,21 @@
 
 ## FEATURES
 
-1. Added the NetBox `sync_vlans` task and NFCLI `netbox sync vlans` command to reconcile live VLAN names and descriptions with site- or VLAN-group-scoped NetBox VLANs. The task supports Nornir device selection, dry-run and approval workflows, branch-aware operations, scalar VLAN-group fallback, and VLAN ID filtering. VLAN deletion is intentionally excluded because live parsing cannot reliably identify stale NetBox VLANs.
-2. Added shared ordered `vlan_map` rules to NetBox VLAN and interface synchronization. Rules support VLAN ID ranges, device-name globs, VLAN-name globs for VLAN sync, and interface-name globs for interface sync; the first matching rule selects an existing VLAN group by exact name.
-3. Added the NetBox `sync_vrfs` task and NFCLI `netbox sync vrfs` command to collect global VRFs with the Nornir TTP `vrfs` getter and synchronize them by name. 
+1. Added the independent NetBox `sync_device_prefixes` task and NFCLI `netbox sync prefixes` command to derive canonical prefixes from FakeNOS-backed live interface data, reconcile creates and site updates, optionally associate VRFs and sites, and support filters, dry-run, approval, and branching workflows.
+2. Added the NetBox `sync_vlans` task and NFCLI `netbox sync vlans` command to reconcile live VLAN names and descriptions with site- or VLAN-group-scoped NetBox VLANs. The task supports Nornir device selection, dry-run and approval workflows, branch-aware operations, scalar VLAN-group fallback, and VLAN ID filtering. VLAN deletion is intentionally excluded because live parsing cannot reliably identify stale NetBox VLANs.
+3. Added shared ordered `vlan_map` rules to NetBox VLAN and interface synchronization. Rules support VLAN ID ranges, device-name globs, VLAN-name globs for VLAN sync, and interface-name globs for interface sync; the first matching rule selects an existing VLAN group by exact name.
+4. Added the NetBox `sync_vrfs` task and NFCLI `netbox sync vrfs` command to collect global VRFs with the Nornir TTP `vrfs` getter and synchronize them by name.
 
 ## ENHANCEMENTS
 
 1. Enhanced VLAN group mapping to use each NetBox VLAN group's configured `vid_ranges`, with explicit rule `vlan_ids` acting as a narrower boundary. Unmatched VLANs use the scalar `vlan_group` when supplied, otherwise they retain device-site fallback behavior.
 2. Added ordered `interface_map` rules to NetBox `sync_device_interfaces` to rename live interfaces by device-name glob, device-type model glob, and literal match/replace values before filtering and comparison.
 3. Added Invoke developer tasks for documentation, checks, linting, and Docker-based tests, including opt-in per-file parallel containers with isolated runtimes, and added Vulture dead-code detection to the project checks.
+
+## CHANGES
+
+1. Refactored NetBox `sync_device_ip` to synchronize IP addresses only. Prefix collection, matching, and writes now belong exclusively to `sync_device_prefixes`; `sync_all` no longer creates prefixes implicitly.
+2. Changed NetBox `sync_device_prefixes` `ignore_ranges` filtering to compare canonical live prefixes and exclude only prefixes fully contained within an ignored network.
 
 ## BUGS
 

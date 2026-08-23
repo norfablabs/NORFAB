@@ -363,6 +363,7 @@ markers = [
     "netbox_sync_vrfs: NetBox sync_vrfs task tests",
     "netbox_sync_device_inventory: NetBox sync_device_inventory task tests",
     "netbox_sync_device_ip: NetBox sync_device_ip task tests",
+    "netbox_sync_device_prefixes: NetBox sync_device_prefixes task tests",
     "netbox_sync_mac_addresses: NetBox sync_mac_addresses task tests",
     "netbox_update_bgp_peering: NetBox update_bgp_peering task tests",
     "netbox_update_interfaces_description: NetBox update_interfaces_description task tests",

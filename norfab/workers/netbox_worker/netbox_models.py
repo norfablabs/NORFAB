@@ -1067,15 +1067,9 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         description="IP prefix(es) to exclude from IP sync",
         alias="ip-ignore-ranges",
     )
-    ip_create_prefixes: StrictBool = Field(
-        True,
-        description="Create missing prefixes during IP sync",
-        json_schema_extra={"presence": True},
-        alias="ip-create-prefixes",
-    )
     ip_ignore_vrf: StrictBool = Field(
         True,
-        description="Ignore discovered interface VRFs during IP and prefix sync",
+        description="Ignore discovered interface VRFs during IP sync",
         alias="ip-ignore-vrf",
     )
     ip_filter_by_name: Union[None, StrictStr] = Field(
@@ -1743,15 +1737,9 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         description="Prefix(es) to exclude IP addresses",
         alias="ignore-ranges",
     )
-    create_prefixes: StrictBool = Field(
-        True,
-        description="Create missing IP prefixes in NetBox for each discovered IP address",
-        json_schema_extra={"presence": True},
-        alias="create-prefixes",
-    )
     ignore_vrf: StrictBool = Field(
         True,
-        description="Ignore discovered interface VRFs during IP and prefix sync",
+        description="Ignore discovered interface VRFs during IP sync",
         alias="ignore-vrf",
     )
     filter_by_name: Union[None, StrictStr] = Field(
@@ -1773,6 +1761,55 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         None,
         description="Glob pattern to restrict which IP addresses are included, e.g. '10.0.*'",
         alias="filter-by-ip",
+    )
+
+
+class SyncDevicePrefixesInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
+    devices: Union[None, list[StrictStr]] = Field(
+        None,
+        description="List of NetBox devices to collect prefixes from",
+    )
+    timeout: StrictInt = Field(
+        60,
+        description="Timeout in seconds for Nornir parse_ttp job",
+    )
+    with_approval: StrictBool = Field(
+        False,
+        description="Preview changes and ask for review before writing to NetBox",
+        alias="with-approval",
+        json_schema_extra={"presence": True},
+    )
+    ignore_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
+        None,
+        description="Exclude derived prefixes fully contained in these ranges",
+        alias="ignore-ranges",
+    )
+    ignore_vrf: StrictBool = Field(
+        True,
+        description="Ignore discovered interface VRFs during prefix sync",
+        alias="ignore-vrf",
+    )
+    ignore_site: StrictBool = Field(
+        True,
+        description="Ignore device sites during prefix sync",
+        alias="ignore-site",
+    )
+    filter_by_name: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to restrict source interfaces by name",
+        alias="filter-by-name",
+    )
+    filter_by_description: Union[None, StrictStr] = Field(
+        None,
+        description="Glob pattern to restrict source interfaces by description",
+        alias="filter-by-description",
+    )
+    filter_by_prefix: Union[None, StrictStr] = Field(
+        None,
+        description="IP network containing prefixes to include",
+        alias="filter-by-prefix",
     )
 
 
@@ -1935,6 +1972,13 @@ class SyncDeviceIpResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
         description="IP address sync result keyed by device name",
+    )
+
+
+class SyncDevicePrefixesResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Global prefix synchronization action lists",
     )
 
 

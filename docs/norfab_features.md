@@ -725,12 +725,13 @@ automatically.
 
 ### Live IP and MAC reconciliation
 
-Reconciles device IP assignments and interface MAC addresses with NetBox,
-including filters, anycast handling, optional prefix creation, and controlled
-deletion behavior. **Use cases:** IPAM accuracy and address/MAC drift correction.
+Reconciles device IP assignments, derived prefixes, and interface MAC addresses
+with NetBox, including filters, anycast handling, VRF/site association, and
+controlled deletion behavior. **Use cases:** IPAM accuracy and address/MAC drift correction.
 **Limitations:** requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 [IP sync](workers/netbox/services_netbox_service_tasks_sync_device_ip.md) ·
+[Prefix sync](workers/netbox/services_netbox_service_tasks_sync_device_prefixes.md) ·
 [MAC sync](workers/netbox/services_netbox_service_tasks_sync_mac_addresses.md)
 
 ### Hardware inventory reconciliation

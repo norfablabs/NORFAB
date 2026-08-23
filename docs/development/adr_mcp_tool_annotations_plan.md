@@ -170,6 +170,7 @@ from MCP and are documented here as not applicable.
 | `netbox_worker/ip_tasks.py` | `create_ip` | Create IP Address | false | false | false | true | Creates NetBox IP address data. |
 | `netbox_worker/ip_tasks.py` | `create_ip_bulk` | Create IP Addresses Bulk | false | false | false | true | Creates NetBox IP address data in bulk. |
 | `netbox_worker/ip_tasks.py` | `sync_device_ip` | Sync Device IP Addresses | false | true | true | true | Updates NetBox IP assignments from live device data. |
+| `netbox_worker/ip_tasks.py` | `sync_device_prefixes` | Sync Device Prefixes | false | true | true | true | Creates or updates NetBox prefixes derived from live device interface addresses. |
 | `netbox_worker/netbox_crud.py` | `crud_list_objects` | List NetBox Object Types | true | false | true | true | Reads available NetBox object metadata. |
 | `netbox_worker/netbox_crud.py` | `crud_search` | Search NetBox Objects | true | false | true | true | Reads NetBox object data. |
 | `netbox_worker/netbox_crud.py` | `crud_read` | Read NetBox Object | true | false | true | true | Reads a NetBox object. |

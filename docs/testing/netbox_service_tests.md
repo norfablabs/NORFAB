@@ -26,7 +26,7 @@ poetry run pytest services/netbox
 | `services/netbox/test_inventory.py` | Nornir inventory and inventory models | `TestGetNornirInventory`, `TestInventoryPatternMap`, `TestDeviceInventoryRecords`, `TestSyncDeviceInventoryInput`, `TestSyncAllInput`, `TestInventoryRecordFilters`, `TestSyncDeviceInventory` |
 | `services/netbox/test_circuits.py` | Circuit queries | `TestGetCircuits` |
 | `services/netbox/test_bgp.py` | BGP query/create/update/sync tasks | `TestGetBgpPeerings`, `TestSyncBgpPeerings`, `TestCreateBgpPeering`, `TestUpdateBgpPeering` |
-| `services/netbox/test_ipam.py` | IP and prefix tasks | `TestSyncDeviceIP`, `TestCreateIP`, `TestCreatePrefix`, `TestCreateIPBulk` |
+| `services/netbox/test_ipam.py` | IP allocation and synchronization tasks | `TestSyncDeviceIP`, `TestSyncDevicePrefixes`, `TestCreateIP`, `TestCreatePrefix`, `TestCreateIPBulk` |
 | `services/netbox/test_cache.py` | Cache tasks | `TestNetboxCache` |
 | `services/netbox/test_containerlab.py` | Containerlab inventory generation | `TestGetContainerlabInventory` |
 | `services/netbox/test_designs.py` | Design creation | `TestCreateDesign` |

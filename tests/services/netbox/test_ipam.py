@@ -34,9 +34,315 @@ except ModuleNotFoundError as exc:
 pytestmark = pytest.mark.netbox
 
 
+@pytest.mark.netbox_sync_device_prefixes
+class TestSyncDevicePrefixes:
+    DEVICE = "fn-ceos-sp-1"
+    PREFIX_ONLY_INTERFACE = "Loopback251"
+    PREFIX_ONLY_IP = "10.3.251.1/32"
+    PREFIX_ONLY_PREFIX = "10.3.251.1/32"
+    NEW_VRF_INTERFACE = "Loopback252"
+    NEW_VRF_PREFIX = "10.3.252.1/32"
+    NEW_VRF = "TEST_SYNC_PREFIX_VRF"
+    CONTROL_PLANE_INTERFACE = "Ethernet2.101"
+    CONTROL_PLANE_PREFIX = "10.101.0.0/31"
+    CONTROL_PLANE_VRF = "CONTROL_PLANE"
+    WRONG_VRF = "VRF1"
+    ANYCAST_PREFIX = "10.3.250.250/32"
+    ROUTED_INTERFACE = "Ethernet9"
+    ROUTED_PREFIX = "10.3.15.32/30"
+
+    @pytest.fixture(autouse=True)
+    def cleanup(self):
+        self._cleanup()
+        yield
+        self._cleanup()
+
+    @classmethod
+    def _cleanup(cls):
+        nb = get_pynetbox(None)
+        for prefix in [
+            cls.PREFIX_ONLY_PREFIX,
+            cls.NEW_VRF_PREFIX,
+            cls.CONTROL_PLANE_PREFIX,
+            cls.ANYCAST_PREFIX,
+            cls.ROUTED_PREFIX,
+        ]:
+            for record in list(nb.ipam.prefixes.filter(prefix=prefix)):
+                record.delete()
+        for record in list(nb.ipam.ip_addresses.filter(address=cls.PREFIX_ONLY_IP)):
+            record.delete()
+        interface = nb.dcim.interfaces.get(
+            device=cls.DEVICE,
+            name=cls.PREFIX_ONLY_INTERFACE,
+        )
+        if interface:
+            interface.delete()
+        vrf = nb.ipam.vrfs.get(name=cls.NEW_VRF)
+        if vrf:
+            vrf.delete()
+
+    @staticmethod
+    def _sync(nfclient, devices, **kwargs):
+        return nfclient.run_job(
+            "netbox",
+            "sync_device_prefixes",
+            workers="any",
+            kwargs={"devices": devices, **kwargs},
+        )
+
+    def test_create_without_netbox_interface_or_ip(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.PREFIX_ONLY_INTERFACE,
+        )
+        pprint.pprint(ret)
+
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"] == {
+                "created": [self.PREFIX_ONLY_PREFIX],
+                "updated": [],
+                "in_sync": [],
+            }
+
+        nb = get_pynetbox(nfclient)
+        assert nb.ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX) is not None
+        assert (
+            nb.dcim.interfaces.get(
+                device=self.DEVICE,
+                name=self.PREFIX_ONLY_INTERFACE,
+            )
+            is None
+        )
+        assert not list(nb.ipam.ip_addresses.filter(address=self.PREFIX_ONLY_IP))
+
+    def test_dry_run_does_not_create_prefix(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.PREFIX_ONLY_INTERFACE,
+            dry_run=True,
+        )
+        pprint.pprint(ret)
+
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"]["created"] == [self.PREFIX_ONLY_PREFIX]
+        assert (
+            get_pynetbox(nfclient).ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)
+            is None
+        )
+
+    def test_filter_by_prefix_requires_prefix_containment(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.ROUTED_INTERFACE,
+            filter_by_prefix="10.3.15.33/32",
+            dry_run=True,
+        )
+        pprint.pprint(ret)
+
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"] == {
+                "created": [],
+                "updated": [],
+                "in_sync": [],
+            }
+
+    def test_ignore_ranges_requires_prefix_containment(self, nfclient):
+        included = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.ROUTED_INTERFACE,
+            ignore_ranges="10.3.15.33/32",
+            dry_run=True,
+        )
+        excluded = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.ROUTED_INTERFACE,
+            ignore_ranges=self.ROUTED_PREFIX,
+            dry_run=True,
+        )
+
+        for worker, result in included.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"]["created"] == [self.ROUTED_PREFIX]
+        for worker, result in excluded.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"] == {
+                "created": [],
+                "updated": [],
+                "in_sync": [],
+            }
+
+    def test_second_run_reports_prefix_in_sync(self, nfclient):
+        first = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.PREFIX_ONLY_INTERFACE,
+        )
+        for worker, result in first.items():
+            assert not result["failed"], f"{worker} setup failed - {result}"
+
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.PREFIX_ONLY_INTERFACE,
+        )
+        pprint.pprint(ret)
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"]["created"] == []
+            assert result["result"]["updated"] == []
+            assert result["result"]["in_sync"] == [self.PREFIX_ONLY_PREFIX]
+
+    def test_ignore_vrf_reuses_prefix_in_other_vrf(self, nfclient):
+        nb = get_pynetbox(nfclient)
+        wrong_vrf = nb.ipam.vrfs.get(name=self.WRONG_VRF)
+        existing = nb.ipam.prefixes.create(
+            prefix=self.CONTROL_PLANE_PREFIX,
+            vrf=wrong_vrf.id,
+        )
+
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.CONTROL_PLANE_INTERFACE,
+        )
+        pprint.pprint(ret)
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"]["in_sync"] == [self.CONTROL_PLANE_PREFIX]
+
+        prefixes = list(nb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
+        assert len(prefixes) == 1
+        assert prefixes[0].id == existing.id
+        assert prefixes[0].vrf.name == self.WRONG_VRF
+
+    def test_vrf_aware_creates_prefix_in_live_vrf(self, nfclient):
+        nb = get_pynetbox(nfclient)
+        wrong_vrf = nb.ipam.vrfs.get(name=self.WRONG_VRF)
+        wrong_prefix = nb.ipam.prefixes.create(
+            prefix=self.CONTROL_PLANE_PREFIX,
+            vrf=wrong_vrf.id,
+        )
+
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.CONTROL_PLANE_INTERFACE,
+            ignore_vrf=False,
+        )
+        pprint.pprint(ret)
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"]["created"] == [self.CONTROL_PLANE_PREFIX]
+
+        prefixes = list(nb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
+        by_vrf = {
+            prefix.vrf.name if prefix.vrf else None: prefix for prefix in prefixes
+        }
+        assert set(by_vrf) == {self.WRONG_VRF, self.CONTROL_PLANE_VRF}
+        assert by_vrf[self.WRONG_VRF].id == wrong_prefix.id
+
+    def test_vrf_aware_creates_missing_live_vrf(self, nfclient):
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.NEW_VRF_INTERFACE,
+            ignore_vrf=False,
+        )
+        pprint.pprint(ret)
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"]["created"] == [self.NEW_VRF_PREFIX]
+
+        nb = get_pynetbox(nfclient)
+        vrf = nb.ipam.vrfs.get(name=self.NEW_VRF)
+        assert vrf is not None
+        prefix = nb.ipam.prefixes.get(prefix=self.NEW_VRF_PREFIX, vrf_id=vrf.id)
+        assert prefix is not None
+
+    def test_ignore_site_false_updates_prefix_to_device_site(self, nfclient):
+        nb = get_pynetbox(nfclient)
+        nb.ipam.prefixes.create(prefix=self.PREFIX_ONLY_PREFIX)
+
+        ret = self._sync(
+            nfclient,
+            [self.DEVICE],
+            filter_by_name=self.PREFIX_ONLY_INTERFACE,
+            ignore_site=False,
+        )
+        pprint.pprint(ret)
+        for worker, result in ret.items():
+            assert not result["failed"], f"{worker} failed - {result}"
+            assert result["result"]["updated"] == [self.PREFIX_ONLY_PREFIX]
+
+        prefix = nb.ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)
+        assert prefix.scope.name == nb.dcim.devices.get(name=self.DEVICE).site.name
+
+    def test_shared_prefix_uses_alphabetically_first_device_site(self, nfclient):
+        nb = get_pynetbox(nfclient)
+        first = nb.dcim.devices.get(name="fn-ceos-sp-1")
+        second = nb.dcim.devices.get(name="fn-ceos-sp-2")
+        first_original_site = first.site.id if first.site else None
+        second_original_site = second.site.id if second.site else None
+        first_site = nb.dcim.sites.get(name="NORFAB-LAB")
+        second_site = nb.dcim.sites.get(name="SALTNORNIR-LAB")
+        assert first_site is not None and second_site is not None
+
+        try:
+            first.update({"site": first_site.id})
+            second.update({"site": second_site.id})
+            ret = self._sync(
+                nfclient,
+                ["fn-ceos-sp-2", "fn-ceos-sp-1"],
+                filter_by_prefix=self.ANYCAST_PREFIX,
+                ignore_site=False,
+            )
+            pprint.pprint(ret)
+            for worker, result in ret.items():
+                assert not result["failed"], f"{worker} failed - {result}"
+                assert result["result"]["created"] == [self.ANYCAST_PREFIX]
+
+            prefix = nb.ipam.prefixes.get(prefix=self.ANYCAST_PREFIX)
+            assert prefix.scope.name == first_site.name
+        finally:
+            first.update({"site": first_original_site})
+            second.update({"site": second_original_site})
+
+    def test_sync_device_prefixes_with_branch(self, nfclient):
+        branch = "sync_device_prefixes_branch_1"
+        delete_branch(branch, nfclient)
+        try:
+            ret = self._sync(
+                nfclient,
+                [self.DEVICE],
+                filter_by_name=self.PREFIX_ONLY_INTERFACE,
+                branch=branch,
+            )
+            pprint.pprint(ret)
+            for worker, result in ret.items():
+                assert not result["failed"], f"{worker} failed - {result}"
+                assert result["result"]["created"] == [self.PREFIX_ONLY_PREFIX]
+
+            assert (
+                get_pynetbox(nfclient).ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)
+                is None
+            )
+        finally:
+            delete_branch(branch, nfclient)
+
+
 @pytest.mark.netbox_sync_device_ip
 class TestSyncDeviceIP:
     SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    FAKENOS_SPINE1 = "fn-ceos-sp-1"
+    FAKENOS_DEVICES = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
     ALL_DEVICES = [
         "ceos-spine-1",
         "ceos-spine-2",
@@ -113,10 +419,14 @@ class TestSyncDeviceIP:
             "netbox",
             "sync_device_interfaces",
             workers="any",
-            kwargs={"devices": self.ALL_DEVICES},
+            kwargs={"devices": self.ALL_DEVICES + self.FAKENOS_DEVICES},
         )
         yield
-        delete_interfaces_with_description(nfclient, self.ALL_DEVICES, "TEST_SYNC")
+        delete_interfaces_with_description(
+            nfclient,
+            self.ALL_DEVICES + self.FAKENOS_DEVICES,
+            "TEST_SYNC",
+        )
 
     # ------------------------------------------------------------------ #
     # Basic smoke tests                                                    #
@@ -508,11 +818,9 @@ class TestSyncDeviceIP:
     # VRF selection scenarios                                             #
     # ------------------------------------------------------------------ #
 
-    def test_sync_device_ip_ignore_vrf_reuses_vrf_scoped_ip_and_prefix(self, nfclient):
-        """Default ignore_vrf=True must match by address/prefix only and leave the
-        existing NetBox VRF unchanged."""
+    def test_sync_device_ip_ignore_vrf_reuses_vrf_scoped_ip(self, nfclient):
+        """Default ignore_vrf=True matches by address and leaves VRF unchanged."""
         self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
-        self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
 
         pynb = get_pynetbox(nfclient)
         wrong_vrf = pynb.ipam.vrfs.get(name=self.WRONG_VRF)
@@ -523,21 +831,15 @@ class TestSyncDeviceIP:
                 address=self.CONTROL_PLANE_IP,
                 vrf=wrong_vrf.id,
             )
-            existing_prefix = pynb.ipam.prefixes.create(
-                prefix=self.CONTROL_PLANE_PREFIX,
-                vrf=wrong_vrf.id,
-            )
-
             ret = self._sync(
                 nfclient,
-                ["ceos-spine-1"],
-                create_prefixes=True,
+                [self.FAKENOS_SPINE1],
                 filter_by_name=self.CONTROL_PLANE_INTF,
             )
             pprint.pprint(ret)
             for worker, res in ret.items():
                 assert res["failed"] == False, f"{worker} failed - {res}"
-                device_data = res["result"]["ceos-spine-1"]
+                device_data = res["result"][self.FAKENOS_SPINE1]
                 assert self.CONTROL_PLANE_IP in device_data["updated"]
                 assert self.CONTROL_PLANE_IP not in device_data["created"]
 
@@ -545,27 +847,17 @@ class TestSyncDeviceIP:
             assert len(ips) == 1, f"Expected one IP, got {len(ips)}: {ips}"
             assert ips[0].id == existing_ip.id
             assert ips[0].vrf.name == self.WRONG_VRF
-            assert ips[0].assigned_object.device.name == "ceos-spine-1"
+            assert ips[0].assigned_object.device.name == self.FAKENOS_SPINE1
             assert ips[0].assigned_object.name == self.CONTROL_PLANE_INTF
 
-            prefixes = list(pynb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
-            assert len(prefixes) == 1, (
-                f"Expected one prefix, got {len(prefixes)}: "
-                f"{[str(pfx) for pfx in prefixes]}"
-            )
-            assert prefixes[0].id == existing_prefix.id
-            assert prefixes[0].vrf.name == self.WRONG_VRF
         finally:
             self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
-            self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
 
     def test_sync_device_ip_vrf_aware_creates_when_matches_are_not_in_vrf(
         self, nfclient
     ):
-        """ignore_vrf=False must create a new IP/prefix in the discovered VRF when
-        only global or wrong-VRF NetBox objects exist."""
+        """ignore_vrf=False creates an IP in the discovered VRF when needed."""
         self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
-        self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
 
         pynb = get_pynetbox(nfclient)
         wrong_vrf = pynb.ipam.vrfs.get(name=self.WRONG_VRF)
@@ -577,23 +869,16 @@ class TestSyncDeviceIP:
                 address=self.CONTROL_PLANE_IP,
                 vrf=wrong_vrf.id,
             )
-            global_prefix = pynb.ipam.prefixes.create(prefix=self.CONTROL_PLANE_PREFIX)
-            wrong_vrf_prefix = pynb.ipam.prefixes.create(
-                prefix=self.CONTROL_PLANE_PREFIX,
-                vrf=wrong_vrf.id,
-            )
-
             ret = self._sync(
                 nfclient,
-                ["ceos-spine-1"],
-                create_prefixes=True,
+                [self.FAKENOS_SPINE1],
                 filter_by_name=self.CONTROL_PLANE_INTF,
                 ignore_vrf=False,
             )
             pprint.pprint(ret)
             for worker, res in ret.items():
                 assert res["failed"] == False, f"{worker} failed - {res}"
-                device_data = res["result"]["ceos-spine-1"]
+                device_data = res["result"][self.FAKENOS_SPINE1]
                 assert self.CONTROL_PLANE_IP in device_data["created"]
                 assert self.CONTROL_PLANE_IP not in device_data["updated"]
 
@@ -611,27 +896,15 @@ class TestSyncDeviceIP:
             assert by_vrf[self.WRONG_VRF].assigned_object is None
             assert (
                 by_vrf[self.CONTROL_PLANE_VRF].assigned_object.device.name
-                == "ceos-spine-1"
+                == self.FAKENOS_SPINE1
             )
             assert (
                 by_vrf[self.CONTROL_PLANE_VRF].assigned_object.name
                 == self.CONTROL_PLANE_INTF
             )
 
-            prefixes = list(pynb.ipam.prefixes.filter(prefix=self.CONTROL_PLANE_PREFIX))
-            prefixes_by_vrf = {
-                pfx.vrf.name if pfx.vrf else None: pfx for pfx in prefixes
-            }
-            assert set(prefixes_by_vrf) == {
-                None,
-                self.WRONG_VRF,
-                self.CONTROL_PLANE_VRF,
-            }
-            assert prefixes_by_vrf[None].id == global_prefix.id
-            assert prefixes_by_vrf[self.WRONG_VRF].id == wrong_vrf_prefix.id
         finally:
             self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
-            self._delete_exact_prefixes(nfclient, self.CONTROL_PLANE_PREFIX)
 
     # ------------------------------------------------------------------ #
     # Edge-case / error scenarios                                          #
@@ -647,75 +920,32 @@ class TestSyncDeviceIP:
                 len(res["errors"]) > 0
             ), f"{worker} should have errors for nonexistent device"
 
-    # ------------------------------------------------------------------ #
-    # Process prefixes scenarios                                           #
-    # ------------------------------------------------------------------ #
+    def test_sync_device_ip_does_not_create_prefixes(self, nfclient):
+        """IP synchronization must not query or create derived prefixes."""
+        self._cleanup(nfclient, [self.FAKENOS_SPINE1])
+        self._delete_exact_prefixes(nfclient, "10.3.15.32/30")
 
-    def test_sync_device_ip_create_prefixes(self, nfclient):
-        """Sync spine-1 with create_prefixes=True. Verify Ethernet9 IP prefix
-        is created in NetBox."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
-        delete_prefixes_within("10.3.15.32/30", nfclient)
-
-        ret = self._sync(nfclient, ["ceos-spine-1"], create_prefixes=True)
+        ret = self._sync(
+            nfclient,
+            [self.FAKENOS_SPINE1],
+            filter_by_name=self.SPINE1_INTF,
+        )
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
 
-        # Verify the prefix for spine-1 Ethernet9 IP (10.3.15.33/30) was created
         pynb = get_pynetbox(nfclient)
-        # 10.3.15.33/30 network is 10.3.15.32/30
-        nb_pfx = pynb.ipam.prefixes.get(prefix="10.3.15.32/30")
-        assert (
-            nb_pfx is not None
-        ), "Prefix 10.3.15.32/30 was not created in NetBox after sync with create_prefixes=True"
-        # Also validate the IP itself was created and assigned to the correct interface
+        assert not list(pynb.ipam.prefixes.filter(prefix="10.3.15.32/30"))
         nb_ips = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(
+                address=self.SPINE1_IP,
+                device=self.FAKENOS_SPINE1,
+            )
         )
-        assert (
-            nb_ips
-        ), f"{self.SPINE1_IP} not found in NetBox after sync with create_prefixes=True"
-        assert (
-            nb_ips[0].assigned_object is not None
-        ), f"{self.SPINE1_IP} not assigned to any interface"
-        assert (
-            nb_ips[0].assigned_object.name == self.SPINE1_INTF
-        ), f"{self.SPINE1_IP} assigned to {nb_ips[0].assigned_object.name!r}, expected {self.SPINE1_INTF!r}"
+        assert nb_ips, f"{self.SPINE1_IP} was not synchronized"
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
-        delete_prefixes_within("10.3.15.32/30", nfclient)
-
-    def test_sync_device_ip_create_prefixes_idempotent(self, nfclient):
-        """Run sync_device_ip with create_prefixes=True twice on spine-1.
-        The second run must not fail even though the prefix already exists."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
-        delete_prefixes_within("10.3.15.32/30", nfclient)
-
-        self._sync(nfclient, ["ceos-spine-1"], create_prefixes=True)
-        ret = self._sync(nfclient, ["ceos-spine-1"], create_prefixes=True)
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed on second run - {res}"
-
-        # Validate prefix was not duplicated and IP is still correctly assigned
-        pynb = get_pynetbox(nfclient)
-        nb_pfxs = list(pynb.ipam.prefixes.filter(prefix="10.3.15.32/30"))
-        assert (
-            len(nb_pfxs) == 1
-        ), f"Expected exactly 1 prefix 10.3.15.32/30 after two syncs, got {len(nb_pfxs)}"
-        nb_ips = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
-        )
-        assert (
-            nb_ips
-        ), f"{self.SPINE1_IP} not found in NetBox after idempotent create_prefixes sync"
-        assert (
-            nb_ips[0].assigned_object is not None
-        ), f"{self.SPINE1_IP} not assigned to any interface after idempotent sync"
-
-        self._cleanup(nfclient, ["ceos-spine-1"])
-        delete_prefixes_within("10.3.15.32/30", nfclient)
+        self._cleanup(nfclient, [self.FAKENOS_SPINE1])
+        self._delete_exact_prefixes(nfclient, "10.3.15.32/30")
 
     # ------------------------------------------------------------------ #
     # Branch scenario                                                      #

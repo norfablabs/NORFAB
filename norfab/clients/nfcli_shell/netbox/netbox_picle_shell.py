@@ -44,6 +44,7 @@ from .netbox_picle_shell_sync_device import SyncDeviceInventoryShell
 from .netbox_picle_shell_sync_interfaces import SyncInterfacesShell
 from .netbox_picle_shell_sync_ip_addresses import SyncIpAddressesShell
 from .netbox_picle_shell_sync_mac_addresses import SyncMacAddressesShell
+from .netbox_picle_shell_sync_prefixes import SyncPrefixesShell
 from .netbox_picle_shell_sync_vlans import SyncVlansShell
 from .netbox_picle_shell_sync_vrfs import SyncVrfsShell
 from .netbox_picle_shell_update_bgp_peering import UpdateBgpPeeringShell
@@ -293,6 +294,10 @@ class SyncCommands(BaseModel):
         None,
         description="Sync device interface IP addresses with NetBox",
         alias="ip-addresses",
+    )
+    prefixes: SyncPrefixesShell = Field(
+        None,
+        description="Sync prefixes derived from live device interface addresses",
     )
     mac_addresses: SyncMacAddressesShell = Field(
         None,

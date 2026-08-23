@@ -1417,7 +1417,6 @@ class NetboxDevicesTasks:
         mac_filter_by_mac: Union[None, str] = None,
         ip_anycast_ranges: Union[None, list] = None,
         ip_ignore_ranges: Union[None, list] = None,
-        ip_create_prefixes: bool = True,
         ip_ignore_vrf: bool = True,
         ip_filter_by_name: Union[None, str] = None,
         ip_filter_by_description: Union[None, str] = None,
@@ -1483,8 +1482,7 @@ class NetboxDevicesTasks:
             mac_filter_by_mac (str, optional): Glob pattern to filter MAC addresses.
             ip_anycast_ranges (list, optional): IP prefixes to classify as anycast.
             ip_ignore_ranges (list, optional): IP prefixes to exclude from IP sync.
-            ip_create_prefixes (bool): Create missing prefixes during IP sync.
-            ip_ignore_vrf (bool): Ignore discovered interface VRFs during IP and prefix sync.
+            ip_ignore_vrf (bool): Ignore discovered interface VRFs during IP sync.
             ip_filter_by_name (str, optional): Glob pattern to filter IP sync interfaces by name.
             ip_filter_by_description (str, optional): Glob pattern to filter IP sync interfaces by description.
             ip_filter_by_prefix (str, optional): IP prefix to restrict synced IP addresses.
@@ -1629,7 +1627,6 @@ class NetboxDevicesTasks:
             with_approval=with_approval,
             anycast_ranges=ip_anycast_ranges,
             ignore_ranges=ip_ignore_ranges,
-            create_prefixes=ip_create_prefixes,
             ignore_vrf=ip_ignore_vrf,
             filter_by_name=ip_filter_by_name,
             filter_by_description=ip_filter_by_description,

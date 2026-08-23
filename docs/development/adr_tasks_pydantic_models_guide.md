@@ -82,11 +82,10 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         None,
         description="List of NetBox device names to sync IP addresses for",
     )
-    create_prefixes: StrictBool = Field(
+    ignore_vrf: StrictBool = Field(
         True,
-        description="Create missing NetBox prefixes for discovered IP addresses",
-        alias="create-prefixes",
-        json_schema_extra={"presence": True},
+        description="Ignore discovered interface VRFs during IP sync",
+        alias="ignore-vrf",
     )
     filter_by_name: Union[None, StrictStr] = Field(
         None,
