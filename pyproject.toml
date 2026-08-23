@@ -360,6 +360,7 @@ markers = [
     "netbox_sync_bgp_peerings: NetBox sync_bgp_peerings task tests",
     "netbox_sync_device_interfaces: NetBox sync_device_interfaces task tests",
     "netbox_sync_vlans: NetBox sync_vlans task tests",
+    "netbox_sync_vrfs: NetBox sync_vrfs task tests",
     "netbox_sync_device_inventory: NetBox sync_device_inventory task tests",
     "netbox_sync_device_ip: NetBox sync_device_ip task tests",
     "netbox_sync_mac_addresses: NetBox sync_mac_addresses task tests",

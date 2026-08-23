@@ -457,6 +457,8 @@ class TestGetConnections:
             assert (
                 total_connections == 600
             ), f"{worker} returned {total_connections} connections, expected 600"
+
+
 @pytest.mark.netbox_get_topology
 class TestGetTopology:
     devices = ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03"]

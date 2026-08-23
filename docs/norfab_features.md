@@ -711,6 +711,18 @@ live-state quality; the task does not delete VLANs because live data cannot
 reliably identify stale NetBox objects.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vlans.md)
 
+### Live VRF reconciliation
+
+Reconciles global VRFs and descriptions from live devices, and adds all observed
+import/export route targets to the existing NetBox associations. Missing route
+targets are created, and an optional multi-object custom field records the
+devices on which each VRF was observed. **Use cases:** VRF inventory,
+route-target aggregation, and device-to-VRF inventory. **Limitations:** route
+distinguishers and route policies are not stored; VRF objects, route-target
+objects, route-target associations, and device associations are not removed
+automatically.
+[Task details](workers/netbox/services_netbox_service_tasks_sync_vrfs.md)
+
 ### Live IP and MAC reconciliation
 
 Reconciles device IP assignments and interface MAC addresses with NetBox,

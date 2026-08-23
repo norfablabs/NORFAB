@@ -774,6 +774,7 @@ commands:
             route-target import vpn-ipv4 65000:201
             route-target import vpn-ipv6 65000:301
             route-target import vpn-ipv4 65000:301
+            route-target import vpn-ipv4 65000:303
             route-target export vpn-ipv6 65000:201
             route-target export vpn-ipv4 65000:201
             route-target export vpn-ipv6 65000:302

@@ -309,6 +309,8 @@ def delete_bgp_sessions(devices=BGP_CREATE_SESSIONS_TEST_DEVICES):
         for session in sessions:
             session.delete()
     print(f"Deleted BGP sessions for devices: {devices}")
+
+
 @pytest.mark.netbox_sync_bgp_peerings
 class TestSyncBgpPeerings:
 
@@ -340,9 +342,7 @@ class TestSyncBgpPeerings:
                             name=sname
                         ), f"session '{sname}' not found in NetBox after creation"
 
-    def test_sync_bgp_peerings_skips_undefined_source_ip_from_fakenos(
-        self, nfclient
-    ):
+    def test_sync_bgp_peerings_skips_undefined_source_ip_from_fakenos(self, nfclient):
         """A down FakeNOS peering with an undefined source IP must be skipped."""
         device = "fn-junos-1"
         valid_session = f"{device}_default_192.0.2.2"
@@ -1393,6 +1393,8 @@ def _cleanup_test_asns(nb):
     for asn in [int(_TEST_LOCAL_AS), int(_TEST_REMOTE_AS), 64997, 64996]:
         for obj in list(nb.ipam.asns.filter(asn=asn)):
             obj.delete()
+
+
 @pytest.mark.netbox_create_bgp_peering
 class TestCreateBgpPeering:
 

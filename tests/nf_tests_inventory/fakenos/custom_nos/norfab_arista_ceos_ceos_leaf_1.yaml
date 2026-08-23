@@ -777,7 +777,6 @@ commands:
          description Tenant A services
       !
       vrf instance TENANT_B
-         description Tenant B services
       !
       ip routing vrf CONTROL_PLANE
       ip routing vrf TENANT_A

@@ -492,9 +492,9 @@ class TestSyncDeviceIP:
                     for error in res["errors"]
                     if "found duplicate non-anycast IP 10.3.254.1" in error
                 ]
-                assert len(duplicate_errors) == 2, (
-                    f"{worker} did not reject both differently masked IPs: {res}"
-                )
+                assert (
+                    len(duplicate_errors) == 2
+                ), f"{worker} did not reject both differently masked IPs: {res}"
                 device_data = res["result"][device]
                 assert device_data["created"] == []
                 assert device_data["updated"] == []

@@ -2378,6 +2378,53 @@ class SyncVlansResult(Result):
 
 
 # --------------------------------------------------------------------------
+# VRF TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class SyncVrfsInput(
+    NetboxNornirHostsFilters,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    dry_run: StrictBool = Field(
+        False,
+        description="Calculate the VRF diff without writing to NetBox",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox device names to collect VRFs from",
+    )
+    timeout: StrictInt = Field(
+        600,
+        gt=0,
+        description="Timeout in seconds for Nornir host resolution and VRF parsing",
+    )
+    with_approval: StrictBool = Field(
+        False,
+        description="Preview VRF changes and ask for review before writing to NetBox",
+        alias="with-approval",
+        json_schema_extra={"presence": True},
+    )
+    device_custom_field: StrictStr = Field(
+        "devices",
+        min_length=1,
+        description="VRF custom field that stores associated NetBox devices",
+        alias="device-custom-field",
+    )
+
+
+class SyncVrfsResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="VRF synchronization actions keyed by global scope",
+    )
+
+
+# --------------------------------------------------------------------------
 # PREFIX TASKS MODELS
 # --------------------------------------------------------------------------
 

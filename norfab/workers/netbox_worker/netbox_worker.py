@@ -53,6 +53,7 @@ from .nornir_inventory_tasks import NetboxNornirInventoryTasks
 from .prefix_tasks import NetboxPrefixTasks
 from .topology_tasks import NetboxTopologyTasks
 from .vlan_tasks import NetboxVlansTasks
+from .vrf_tasks import NetboxVrfsTasks
 
 SERVICE = "netbox"
 
@@ -76,6 +77,7 @@ class NetboxWorker(
     NetboxBranchTasks,
     NetboxCrudTasks,
     NetboxVlansTasks,
+    NetboxVrfsTasks,
 ):
     """
     NetboxWorker class for interacting with Netbox API and managing inventory.
@@ -714,6 +716,12 @@ class NetboxWorker(
                     "old_value": item.t1,
                     "new_value": item.t2,
                 }
+            elif len(path) == 4:
+                device_name, sname, field, _ = path
+                result[device_name]["update"].setdefault(sname, {})[field] = {
+                    "old_value": target_data[device_name][sname][field],
+                    "new_value": source_data[device_name][sname][field],
+                }
 
         for item in diff.get("type_changes", []):
             path = item.path(output_format="list")
@@ -723,11 +731,28 @@ class NetboxWorker(
                     "old_value": item.t1,
                     "new_value": item.t2,
                 }
+            elif len(path) == 4:
+                device_name, sname, field, _ = path
+                result[device_name]["update"].setdefault(sname, {})[field] = {
+                    "old_value": target_data[device_name][sname][field],
+                    "new_value": source_data[device_name][sname][field],
+                }
 
         for item in diff.get("iterable_item_added", []):
             path = item.path(output_format="list")
             if len(path) == 4:
                 # Item added to a list field within an existing entity
+                device_name, sname, field, _ = path
+                entity_updates = result[device_name]["update"].setdefault(sname, {})
+                if field not in entity_updates:
+                    entity_updates[field] = {
+                        "old_value": target_data[device_name][sname][field],
+                        "new_value": source_data[device_name][sname][field],
+                    }
+
+        for item in diff.get("iterable_item_removed", []):
+            path = item.path(output_format="list")
+            if len(path) == 4:
                 device_name, sname, field, _ = path
                 entity_updates = result[device_name]["update"].setdefault(sname, {})
                 if field not in entity_updates:

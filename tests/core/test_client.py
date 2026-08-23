@@ -90,7 +90,9 @@ class TestRemoteBrokerClient:
             assert reply["errors"] == []
             assert reply["results"], "No workers status returned"
             for worker in reply["results"]:
-                assert all(k in worker for k in ["holdtime", "name", "service", "status"])
+                assert all(
+                    k in worker for k in ["holdtime", "name", "service", "status"]
+                )
         finally:
             if client is not None:
                 client.destroy()

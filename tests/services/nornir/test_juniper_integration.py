@@ -20,6 +20,8 @@ skip_if_not_has_vmx_1 = pytest.mark.skipif(
     has_vmx_1 == False,
     reason=f"Has no connection to juniper router {vmx_1_ip}:{vmx_1_port}",
 )
+
+
 class TestJunipervMX:
     cli_plugins = ["netmiko", "scrapli", "napalm"]
 

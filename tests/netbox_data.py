@@ -923,7 +923,23 @@ custom_fields = [
         "description": "VRF associated with a BGP peering",
         "object_types": ["netbox_bgp.bgpsession"],
         "related_object_type": "ipam.vrf",
-    }
+    },
+    {
+        "name": "devices",
+        "label": "Devices",
+        "type": "multiobject",
+        "description": "Devices on which a VRF is configured",
+        "object_types": ["ipam.vrf"],
+        "related_object_type": "dcim.device",
+    },
+    {
+        "name": "vrf_devices",
+        "label": "VRF Devices",
+        "type": "multiobject",
+        "description": "Alternate device association field for VRF sync tests",
+        "object_types": ["ipam.vrf"],
+        "related_object_type": "dcim.device",
+    },
 ]
 
 # BGP peer groups data

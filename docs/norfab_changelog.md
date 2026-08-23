@@ -4,6 +4,7 @@
 
 1. Added the NetBox `sync_vlans` task and NFCLI `netbox sync vlans` command to reconcile live VLAN names and descriptions with site- or VLAN-group-scoped NetBox VLANs. The task supports Nornir device selection, dry-run and approval workflows, branch-aware operations, scalar VLAN-group fallback, and VLAN ID filtering. VLAN deletion is intentionally excluded because live parsing cannot reliably identify stale NetBox VLANs.
 2. Added shared ordered `vlan_map` rules to NetBox VLAN and interface synchronization. Rules support VLAN ID ranges, device-name globs, VLAN-name globs for VLAN sync, and interface-name globs for interface sync; the first matching rule selects an existing VLAN group by exact name.
+3. Added the NetBox `sync_vrfs` task and NFCLI `netbox sync vrfs` command to collect global VRFs with the Nornir TTP `vrfs` getter and synchronize them by name. 
 
 ## ENHANCEMENTS
 

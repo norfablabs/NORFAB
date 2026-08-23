@@ -261,6 +261,8 @@ class TestGetNornirInventory:
                             "name",
                         ]
                     ), f"{worker}:{device}:{peering} not all peerings data returned"
+
+
 class TestInventoryPatternMap:
     def test_rejects_nested_inventory_map_wrapper(self):
         with pytest.raises(ValidationError):
@@ -289,6 +291,8 @@ class TestInventoryPatternMap:
                     }
                 }
             )
+
+
 class TestDeviceInventoryRecords:
     def test_validates_inventory_records(self):
         records = DeviceInventoryRecords.model_validate(
@@ -337,6 +341,8 @@ class TestDeviceInventoryRecords:
     def test_rejects_invalid_inventory_records(self, records):
         with pytest.raises(ValidationError):
             DeviceInventoryRecords.model_validate(records)
+
+
 class TestSyncDeviceInventoryInput:
     def test_accepts_inventory_parse_template_alias(self):
         data = SyncDeviceInventoryInput.model_validate(
@@ -357,6 +363,8 @@ class TestSyncDeviceInventoryInput:
     def test_inventory_filters_require_pattern_lists(self, field):
         with pytest.raises(ValidationError):
             SyncDeviceInventoryInput.model_validate({field: "A9K-*"})
+
+
 class TestSyncAllInput:
     def test_validates_inventory_arguments(self):
         data = SyncAllInput.model_validate(
@@ -382,6 +390,8 @@ class TestSyncAllInput:
     def test_rejects_inventory_filter_string(self):
         with pytest.raises(ValidationError):
             SyncAllInput.model_validate({"inventory-filter-by-module": "A9K-*"})
+
+
 class TestInventoryRecordFilters:
     MODULE = {
         "slot": "module 0/RSP0/CPU0",
@@ -425,6 +435,8 @@ class TestInventoryRecordFilters:
             ignore_modules=["*"],
             ignore_slots=["*"],
         )
+
+
 @pytest.mark.netbox_sync_device_inventory
 class TestSyncDeviceInventory:
     DEVICE = "fakenos-iosxr1"
