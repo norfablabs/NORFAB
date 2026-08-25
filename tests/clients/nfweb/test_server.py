@@ -8,6 +8,7 @@ import pytest
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application
 
+from norfab.clients.nfweb.config import NFWebFooterConfig
 from norfab.clients.nfweb.server import make_nfweb_application
 from norfab.clients.nfweb.topology.application import TopologyApplication
 from norfab.clients.nfweb.topology.history import TopologyHistoryStore
@@ -84,7 +85,14 @@ class TestNFWebApplication(AsyncHTTPTestCase):
             self.topology_history,
             TopologySnapshotBroadcaster(),
         )
-        return make_nfweb_application([topology], static_path=self.static_path)
+        return make_nfweb_application(
+            [topology],
+            static_path=self.static_path,
+            footer=NFWebFooterConfig(
+                message="Test fabric",
+                fastapi_url="http://127.0.0.1:8000/docs",
+            ),
+        )
 
     def tearDown(self) -> None:
         super().tearDown()
@@ -99,6 +107,20 @@ class TestNFWebApplication(AsyncHTTPTestCase):
             json.loads(health.body)["applications"]["topology"]["collector_running"]
             is True
         )
+
+    def test_config_route_exposes_only_shared_footer_settings(self) -> None:
+        response = self.fetch("/api/v1/config")
+
+        assert response.code == 200
+        config = json.loads(response.body)
+        assert config == {
+            "footer": {
+                "message": "Test fabric",
+                "fastapi_url": "http://127.0.0.1:8000/docs",
+                "docs_url": "https://docs.norfablabs.com/",
+                "github_url": "https://github.com/norfablabs/NORFAB",
+            }
+        }
 
     def test_no_arbitrary_job_route_exists(self) -> None:
         response = self.fetch("/api/v1/job/run", method="POST", body=b"{}")
@@ -158,6 +180,20 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         log = json.loads(response.body)[0]
         assert log["message"] == "collection started"
         assert log["snapshot_id"] == self.snapshot.snapshot_id
+
+    def test_history_route_returns_timestamped_snapshots(self) -> None:
+        response = self.fetch("/api/v1/topology/history")
+
+        assert response.code == 200
+        history = json.loads(response.body)
+        assert history == [
+            {
+                "snapshot_id": self.snapshot.snapshot_id,
+                "collected_at": self.snapshot.collected_at.isoformat().replace(
+                    "+00:00", "Z"
+                ),
+            }
+        ]
 
     def test_selection_route_applies_scope(self) -> None:
         response = self.fetch(

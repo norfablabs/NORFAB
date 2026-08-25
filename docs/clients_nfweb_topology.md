@@ -24,7 +24,9 @@ NFWeb process is running.
 | `bgp` | Nornir `parse_ttp`, `get=bgp_neighbors` plus NetBox IP resolution | Peer sessions and state |
 | `interfaces` | Nornir `parse_ttp`, `get=interfaces_status` | Link state, counters, rates, and utilization when available |
 
-Each layer can be enabled independently. Static inventory data can refresh less
+Graph-producing layers can be enabled independently. Interface observations do
+not have a separate visibility button because they decorate matching links with
+health, counters, rates, and utilization. Static inventory data can refresh less
 frequently than live operational layers.
 
 ## Configure the Application
@@ -35,8 +37,11 @@ section. Only the listener and browser behavior are configured at the NFWeb leve
 ```yaml
 client:
   nfweb:
-    port: 8080
+    port: 9005
     open_browser: true
+    footer:
+      message: "Managed by the Network Automation team"
+      fastapi_url: "http://127.0.0.1:8000/docs"
     topology:
       collection_interval: 30
       inventory_refresh_interval: 300
@@ -85,7 +90,8 @@ The topology dashboard provides:
 
 - a top-bar multi-device selector populated from combined NetBox and Nornir
   discovery, with an empty initial scope by default;
-- independent NetBox, LLDP, BGP, and live-interface layer controls;
+- button-style checkbox controls for independently selecting NetBox, LLDP, and
+  BGP graph layers;
 - health and text filters across device metadata such as site, role, and address;
 - node and link inspection with source properties, state, and available metrics;
 - weather-map link colors and utilization-derived widths, with physical links
@@ -95,15 +101,21 @@ The topology dashboard provides:
   to restart or pause layout calculation without refreshes rearranging the graph;
 - independent view pause, camera rotation, node-distance, and node-size controls;
 - fixed, connection-count, or traffic-derived node sizing;
-- compact inspector tabs for status and utilisation, related NetBox/LLDP/BGP
-  connections, and complete source properties;
+- compact inspector tabs with search and column sorting for status and
+  utilisation, related NetBox/LLDP/BGP connections, and complete source
+  properties;
 - explicit partial, failed, disconnected, empty, and unsupported-WebGL states;
 - a persistent, scope-aware terminal log containing up to 300 entries and matching
   NFCLI's timestamp, severity, worker, status, task, resource, and message layout;
 - vertical and horizontal log scrolling so long terminal lines remain available
   without wrapping or truncation;
 - a manual refresh action that bypasses layer caches and collects fresh data;
-- a three-hour time scrubber and a clear return-to-live action;
+- a single-line, horizontally scrollable top toolbar containing live status, a
+  three-hour timestamp snapshot selector, and a clear return-to-live action;
+- an 80/20 topology-to-inspector desktop split, with the inspector extending into
+  the top-right corner;
+- a shared footer with an inventory-defined message and pictogram links to the
+  configured FastAPI service, NORFAB documentation, and GitHub repository;
 - automatic WebSocket reconnection without losing saved history.
 
 Unknown metrics remain unknown rather than being displayed as zero. Collection

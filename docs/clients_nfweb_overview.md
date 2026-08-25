@@ -11,10 +11,17 @@ operator's computer. It connects directly to an existing NORFAB broker through t
 native Python client and presents focused browser applications over a local,
 loopback-only web host.
 
-The application sidebar uses expandable Overview, Dashboards, and Admin sections.
-Topology is the first dashboard; the other sections are intentionally empty until
-additional NFWeb applications are introduced. Dashboard-specific controls belong
-to the center application header rather than the application sidebar.
+The application sidebar uses Mantine's nested-navbar pattern for Overview,
+Dashboards, and Admin. Topology is the first nested dashboard; the other sections
+are intentionally empty until additional NFWeb applications are introduced.
+Dashboard-specific controls belong to the center application header rather than
+the application sidebar.
+
+NFWeb uses Mantine's maintained React components and Tabler icons for its common
+interface controls. Selects, buttons, filters, accordions, sliders, tabs, badges,
+tooltips, and alerts therefore share one accessible component system. Custom CSS
+is reserved for the application grid, 3D topology stage, inspector data, and
+terminal event presentation.
 
 The 3D network topology dashboard is NFWeb's **first application**. It proves the
 local runtime, frontend packaging, live updates, bounded application storage, and
@@ -73,9 +80,18 @@ Add shared NFWeb settings below `client.nfweb` in `inventory.yaml`:
 ```yaml
 client:
   nfweb:
-    port: 8080
+    port: 9005
     open_browser: true
+    footer:
+      message: "Managed by the Network Automation team"
+      fastapi_url: "http://127.0.0.1:8000/docs"
+      docs_url: "https://docs.norfablabs.com/"
+      github_url: "https://github.com/norfablabs/NORFAB"
 ```
+
+The shared footer displays the optional `message` and pictogram links for the
+configured FastAPI service, NORFAB documentation, and repository. Set any footer
+URL to `null` to hide that link.
 
 Application settings are grouped by application below `client.nfweb`; see each
 application's documentation for its fields. NFWeb runtime data uses
@@ -91,9 +107,13 @@ applications separately. From the client computer, use NFCLI's web UI mode:
 nfcli --inventory inventory.yaml --web-ui
 ```
 
-The default address is `http://127.0.0.1:8080`. Configure `port` and
+The default address is `http://127.0.0.1:9005`. Configure `port` and
 `open_browser` under `client.nfweb`; NFWeb has no separate executable or
 command-specific configuration overrides.
+
+Press Ctrl+C once to stop accepting connections and release application storage
+and the native NORFAB client. If cleanup becomes stuck, press Ctrl+C a second time
+to force the NFWeb process to exit with status 130.
 
 The current release routes the root page to the topology application. As more
 applications are added, NFWeb can introduce a local application home and

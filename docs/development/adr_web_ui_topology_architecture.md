@@ -53,7 +53,7 @@ NFWeb client and deliver topology as its first built-in application.
 - **Local host:** Tornado in the dedicated `norfab.clients.nfweb` package. It serves
   only on loopback and provides the packaged frontend, application routing,
   lifecycle, and browser boundary shared by NFWeb applications.
-- **Frontend:** React, TypeScript, and Vite.
+- **Frontend:** React, TypeScript, Vite, Mantine components, and Tabler icons.
 - **Visualization:** Vasturiano `react-force-graph-3d` / `3d-force-graph` only.
   No 2D graph implementation or 2D/3D selector will remain.
 - **Production runtime:** Python only. Node.js is a development and release-build
@@ -115,8 +115,10 @@ NORFAB broker --> NetBox / Nornir / future telemetry workers
 ```
 
 The NFWeb runtime owns the NORFAB client, Tornado host, installed application
-services, and orderly shutdown. It constructs `NorFab` without calling `start()`,
-then calls `make_client(name="nfweb")` to connect to the existing broker. The
+services, and orderly shutdown. The first interrupt requests full cleanup and
+arms a second interrupt to force process exit if cleanup is stuck. It constructs
+`NorFab` without calling `start()`, then calls `make_client(name="nfweb")` to
+connect to the existing broker. The
 NFWeb owns the local database location, while the topology application owns its
 collector and namespaced table access. The collector uses `NFPClient.submit_job`
 and asynchronously waits for each returned future without blocking the Tornado I/O
@@ -247,8 +249,9 @@ database after the first application. Topology stores compressed JSON snapshots 
 Use one event-loop-owned SQLite connection through a repository class. The default
 30-second cadence produces at most 360 snapshots in a three-hour window. Cleanup
 deletes rows older than the retention cutoff after a successful insert. A startup
-cleanup handles downtime and clock changes. The history API returns ordered
-snapshot IDs, while selecting a point loads its corresponding full snapshot.
+cleanup handles downtime and clock changes. The history API returns ordered,
+timestamped snapshot entries, while selecting a timestamp loads its corresponding
+full snapshot.
 
 Do not store one history per browser filter. Collect one shared, explicitly
 selected topology scope, record that scope in each snapshot, then apply layer,
@@ -263,8 +266,9 @@ fabric on the shared NFWeb loopback listener:
 | Route | Purpose |
 | --- | --- |
 | `GET /api/v1/health` | NFWeb health with status grouped by installed application |
+| `GET /api/v1/config` | Display-safe shared footer message and resource links |
 | `GET /api/v1/topology/snapshots/{snapshot_id}` | One historical snapshot |
-| `GET /api/v1/topology/history` | Ordered retained snapshot IDs for the three-hour timeline |
+| `GET /api/v1/topology/history` | Ordered retained snapshot timestamps for the three-hour timeline |
 | `GET /api/v1/topology/logs` | Up to 300 persisted terminal entries for the active device scope |
 | `GET /api/v1/topology/devices` | Combined NetBox and Nornir device discovery plus current selection |
 | `POST /api/v1/topology/selection` | Validate and apply the shared device scope; collect it when non-empty |
@@ -290,7 +294,13 @@ The initial topology screen provides:
   applied;
 - live/paused state and last successful collection time;
 - a three-hour time scrubber with a clear return-to-live action;
-- independent layer visibility controls;
+- a fixed-width application navigation column, followed by an 80/20 topology and
+  inspector split on desktop, with the inspector occupying the top-right corner;
+- a shared footer with an inventory-defined message and pictogram links to the
+  configured FastAPI service, NORFAB documentation, and GitHub repository;
+- button-style checkbox controls for independently selecting graph-producing
+  layers; interface observations decorate matching links and do not have a
+  separate control;
 - health and metadata text filters, including device, site, role, and address data;
 - node and link detail panels with source, state, and available metrics;
 - weather-map styling: health controls color and utilization controls link width;
@@ -310,8 +320,10 @@ The initial topology screen provides:
 - a manual refresh action that bypasses layer caches without overlapping a cycle;
 - keyboard-accessible controls and non-color status labels.
 
-The frontend imports pinned npm packages and produces hashed local assets. It must
-not fetch executable JavaScript from a public CDN at runtime.
+The frontend imports pinned npm packages and produces hashed local assets. Mantine
+owns general-purpose controls and interaction states; custom CSS remains limited
+to the NFWeb shell and domain-specific topology, inspector, and terminal layouts.
+It must not fetch executable JavaScript from a public CDN at runtime.
 
 ## Configuration and Operation
 
@@ -320,8 +332,13 @@ Add a typed `client.nfweb` inventory section. Proposed defaults:
 ```yaml
 client:
   nfweb:
-    port: 8080
+    port: 9005
     open_browser: true
+    footer:
+      message: "Managed by the Network Automation team"
+      fastapi_url: "http://127.0.0.1:8000/docs"
+      docs_url: "https://docs.norfablabs.com/"
+      github_url: "https://github.com/norfablabs/NORFAB"
     topology:
       collection_interval: 30
       inventory_refresh_interval: 300
@@ -475,7 +492,7 @@ Costs:
   collection jobs;
 - the `topology_snapshots` table contains no snapshot older than the configured
   three-hour window after cleanup;
-- the timeline loads a selected stored snapshot and can return to live mode;
+- the timestamp history dropdown loads a selected stored snapshot and can return to live mode;
 - node and link status, freshness, and available metrics are visible without
   relying only on color;
 - multiple browser sessions share one collector and one history;
@@ -491,6 +508,8 @@ Costs:
 - [Streamlit execution model](https://docs.streamlit.io/develop/concepts/architecture)
 - [Tornado documentation](https://www.tornadoweb.org/en/stable/)
 - [Vite production build](https://vite.dev/guide/build)
+- [Mantine React components](https://mantine.dev/)
+- [Tabler Icons for React](https://tabler.io/icons)
 - [Vasturiano 3D Force Graph](https://github.com/vasturiano/3d-force-graph)
 - [Vasturiano React Force Graph](https://github.com/vasturiano/react-force-graph)
 

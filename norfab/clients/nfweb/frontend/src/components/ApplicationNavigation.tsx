@@ -1,11 +1,26 @@
+import { NavLink, ScrollArea, Stack, Text } from "@mantine/core";
+import {
+  IconGauge,
+  IconLayoutDashboard,
+  IconSettings,
+  IconTopologyStar3,
+} from "@tabler/icons-react";
+
 const NAVIGATION = [
-  { id: "overview", label: "Overview", items: [] },
+  { id: "overview", label: "Overview", icon: IconGauge, items: [] },
   {
     id: "dashboards",
     label: "Dashboards",
-    items: [{ label: "Topology", href: "#topology" }],
+    icon: IconLayoutDashboard,
+    items: [
+      {
+        label: "Topology",
+        href: "#topology",
+        icon: IconTopologyStar3,
+      },
+    ],
   },
-  { id: "admin", label: "Admin", items: [] },
+  { id: "admin", label: "Admin", icon: IconSettings, items: [] },
 ] as const;
 
 export type NavigationSection = (typeof NAVIGATION)[number]["id"];
@@ -20,44 +35,51 @@ export default function ApplicationNavigation({
   onToggle,
 }: ApplicationNavigationProps) {
   return (
-    <aside className="control-panel">
-      <nav className="sidebar-navigation" aria-label="NFWeb applications">
-        {NAVIGATION.map((section) => {
-          const expanded = open === section.id;
-          return (
-            <div className="navigation-group" key={section.id}>
-              <button
-                className="navigation-heading"
-                type="button"
-                aria-expanded={expanded}
-                aria-controls={`navigation-${section.id}`}
-                onClick={() => onToggle(expanded ? null : section.id)}
+    <aside className="control-panel" aria-label="NFWeb applications">
+      <ScrollArea h="100%" type="auto" scrollbarSize={6}>
+        <Text className="navigation-heading" fw={600} size="sm" mb="sm" px="sm">
+          Applications
+        </Text>
+        <Stack className="sidebar-navigation" gap={4}>
+          {NAVIGATION.map((section) => {
+            const SectionIcon = section.icon;
+            const hasChildren = section.items.length > 0;
+            return (
+              <NavLink
+                className="navigation-link"
+                component="button"
+                key={section.id}
+                label={section.label}
+                leftSection={<SectionIcon size={18} />}
+                opened={hasChildren ? open === section.id : undefined}
+                disabled={!hasChildren}
+                onChange={
+                  hasChildren
+                    ? (opened) => onToggle(opened ? section.id : null)
+                    : undefined
+                }
+                variant="light"
               >
-                <span>{section.label}</span>
-                <span className="navigation-chevron" aria-hidden="true" />
-              </button>
-              <div
-                className={`navigation-submenu ${expanded ? "expanded" : ""}`}
-                id={`navigation-${section.id}`}
-                aria-hidden={!expanded}
-              >
-                <div>
-                  {section.items.map((item) => (
-                    <a
+                {section.items.map((item) => {
+                  const ItemIcon = item.icon;
+                  return (
+                    <NavLink
+                      className="navigation-child-link"
+                      component="a"
                       href={item.href}
-                      aria-current="page"
-                      tabIndex={expanded ? 0 : -1}
                       key={item.href}
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </nav>
+                      label={item.label}
+                      leftSection={<ItemIcon size={16} />}
+                      active
+                      variant="light"
+                    />
+                  );
+                })}
+              </NavLink>
+            );
+          })}
+        </Stack>
+      </ScrollArea>
     </aside>
   );
 }

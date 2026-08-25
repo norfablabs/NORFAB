@@ -10,6 +10,7 @@ import orjson
 import tornado.web
 
 from norfab.clients.nfweb.application import NFWebApplicationModule
+from norfab.clients.nfweb.config import NFWebFooterConfig
 
 _LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
 
@@ -64,8 +65,7 @@ class NFWebHealthHandler(NFWebJSONHandler):
 
     def get(self) -> None:
         health = {
-            application.name: application.health()
-            for application in self.applications
+            application.name: application.health() for application in self.applications
         }
         status = (
             "ok"
@@ -73,6 +73,16 @@ class NFWebHealthHandler(NFWebJSONHandler):
             else "degraded"
         )
         self.write_json({"status": status, "applications": health})
+
+
+class NFWebConfigHandler(NFWebJSONHandler):
+    """Expose only display-safe shared configuration to the browser."""
+
+    def initialize(self, footer: NFWebFooterConfig) -> None:
+        self.footer = footer
+
+    def get(self) -> None:
+        self.write_json({"footer": self.footer})
 
 
 class NFWebStaticHandler(tornado.web.StaticFileHandler):
@@ -108,6 +118,7 @@ class NFWebStaticHandler(tornado.web.StaticFileHandler):
 def make_nfweb_application(
     applications: Iterable[NFWebApplicationModule],
     static_path: str | Path | None = None,
+    footer: NFWebFooterConfig | None = None,
 ) -> tornado.web.Application:
     """Build NFWeb without starting its loopback listener."""
     installed = tuple(applications)
@@ -124,7 +135,12 @@ def make_nfweb_application(
             r"/api/v1/health",
             NFWebHealthHandler,
             {"applications": installed},
-        )
+        ),
+        (
+            r"/api/v1/config",
+            NFWebConfigHandler,
+            {"footer": footer or NFWebFooterConfig()},
+        ),
     ]
     for application in installed:
         routes.extend(application.routes())

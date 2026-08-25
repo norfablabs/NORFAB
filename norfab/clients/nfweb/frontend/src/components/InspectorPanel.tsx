@@ -1,13 +1,29 @@
+import {
+  ActionIcon,
+  Badge,
+  Group,
+  ScrollArea,
+  Stack,
+  Tabs,
+  Text,
+  ThemeIcon,
+} from "@mantine/core";
+import {
+  IconActivityHeartbeat,
+  IconListDetails,
+  IconPlugConnected,
+  IconRadar,
+  IconX,
+} from "@tabler/icons-react";
+import { LAYER_LABELS, endpointId, numericMetric } from "../graphModel";
+import SearchableSortableTable from "./SearchableSortableTable";
+import type { InspectorTableRow } from "./SearchableSortableTable";
 import type {
+  Health,
   SelectedItem,
   TopologyLink,
   TopologyLogEntry,
 } from "../types";
-import {
-  LAYER_LABELS,
-  endpointId,
-  numericMetric,
-} from "../graphModel";
 
 export type InspectorTab = "status" | "connections" | "properties";
 
@@ -32,6 +48,13 @@ function eventResource(resource: TopologyLogEntry["resource"]): string {
   return Array.isArray(resource) ? resource.join(",") : resource;
 }
 
+function healthColor(health: Health): string {
+  if (health === "healthy") return "teal";
+  if (health === "warning") return "yellow";
+  if (health === "critical") return "red";
+  return "gray";
+}
+
 function statusProperties(value: Record<string, unknown>) {
   const terms = [
     "status",
@@ -51,29 +74,37 @@ function statusProperties(value: Record<string, unknown>) {
   );
 }
 
-export function DetailRows({ value }: { value: Record<string, unknown> }) {
-  const rows = Object.entries(value).filter(
-    ([, item]) => item !== null && item !== "",
-  );
-  if (!rows.length)
-    return <p className="detail-empty">No additional properties</p>;
-  return (
-    <dl className="detail-grid">
-      {rows.map(([key, item]) => (
-        <div key={key}>
-          <dt>{key.replaceAll("_", " ")}</dt>
-          <dd>
-            {Array.isArray(item)
-              ? item.join(", ")
-              : typeof item === "object"
-                ? JSON.stringify(item)
-                : String(item)}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
+export function formatDetailValue(value: unknown): string {
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "object" && value !== null) return JSON.stringify(value);
+  return String(value);
 }
+
+export function detailTableRows(
+  value: Record<string, unknown>,
+  prefix: string,
+): InspectorTableRow[] {
+  return Object.entries(value)
+    .filter(([, item]) => item !== null && item !== "")
+    .map(([key, item]) => {
+      const label = key.replaceAll("_", " ");
+      return {
+        id: `${prefix}-${key}`,
+        values: { field: label, value: formatDetailValue(item) },
+      };
+    });
+}
+
+const DETAIL_COLUMNS = [
+  { key: "field", label: "Field" },
+  { key: "value", label: "Value" },
+];
+
+const CONNECTION_COLUMNS = [
+  { key: "connection", label: "Connection" },
+  { key: "layer", label: "Layer" },
+  { key: "state", label: "State / metric" },
+];
 
 interface InspectorPanelProps {
   selected: SelectedItem;
@@ -92,134 +123,208 @@ export default function InspectorPanel({
   onTab,
   onClose,
 }: InspectorPanelProps) {
+  const title =
+    selected?.kind === "node"
+      ? selected.value.label
+      : selected?.kind === "link"
+        ? `${endpointId(selected.value.source)} ↔ ${endpointId(selected.value.target)}`
+        : "Select an object";
+  const sources = selected
+    ? selected.kind === "node"
+      ? selected.value.layers
+      : [selected.value.layer]
+    : [];
+  const statusRows = selected
+    ? detailTableRows(
+        {
+          health: selected.value.health,
+          sources,
+          connections: relatedConnections.length,
+          ...statusProperties(selected.value.attributes),
+          ...(selected.kind === "link"
+            ? Object.fromEntries(
+                Object.entries(selected.value.metrics).map(([key, value]) => [
+                  `metric_${key}`,
+                  value,
+                ]),
+              )
+            : {}),
+        },
+        "status",
+      ).map((row) =>
+        row.id === "status-health"
+          ? {
+              ...row,
+              cells: {
+                value: (
+                  <Badge
+                    color={healthColor(selected.value.health)}
+                    variant="light"
+                    size="sm"
+                  >
+                    {selected.value.health}
+                  </Badge>
+                ),
+              },
+            }
+          : row,
+      )
+    : [];
+  const connectionRows: InspectorTableRow[] = relatedConnections.map((link) => {
+    const source = endpointId(link.source);
+    const target = endpointId(link.target);
+    const sourceInterface = formatDetailValue(
+      link.attributes.source_interface ?? "-",
+    );
+    const targetInterface = formatDetailValue(
+      link.attributes.target_interface ?? "-",
+    );
+    const metric = numericMetric(link);
+    return {
+      id: link.id,
+      values: {
+        connection: `${source} ${sourceInterface} ${target} ${targetInterface}`,
+        layer: LAYER_LABELS[link.layer] ?? link.layer,
+        state: `${link.health} ${metric}`,
+      },
+      cells: {
+        connection: (
+          <Stack gap={1}>
+            <Text fw={600} size="xs">
+              {source} ↔ {target}
+            </Text>
+            <Text c="dimmed" size="xs">
+              {sourceInterface} ↔ {targetInterface}
+            </Text>
+          </Stack>
+        ),
+        layer: (
+          <Badge variant="default" size="sm">
+            {LAYER_LABELS[link.layer] ?? link.layer}
+          </Badge>
+        ),
+        state: (
+          <Stack gap={1}>
+            <Badge
+              color={healthColor(link.health)}
+              variant="light"
+              size="sm"
+            >
+              {link.health}
+            </Badge>
+            <Text c="dimmed" size="xs">
+              metric {metric.toLocaleString()}
+            </Text>
+          </Stack>
+        ),
+      },
+    };
+  });
+  const propertyRows = selected
+    ? detailTableRows(
+        {
+          id: selected.value.id,
+          ...(selected.kind === "node"
+            ? { kind: selected.value.kind, layers: selected.value.layers }
+            : { layer: selected.value.layer }),
+          ...selected.value.attributes,
+        },
+        "property",
+      )
+    : [];
+
   return (
     <aside className={`detail-panel ${selected ? "open" : ""}`}>
-      <div className="detail-header">
-        <div>
-          <span className="eyebrow">{selected?.kind ?? "Inspector"}</span>
-          <strong>
-            {selected?.kind === "node"
-              ? selected.value.label
-              : selected?.kind === "link"
-                ? `${endpointId(selected.value.source)} ↔ ${endpointId(selected.value.target)}`
-                : "Select an object"}
-          </strong>
-        </div>
+      <Group className="detail-header" justify="space-between" wrap="nowrap">
+        <Stack gap={1} className="detail-title">
+          <Text c="dimmed" size="xs">
+            {selected ? `${selected.kind} details` : "Inspector"}
+          </Text>
+          <Text fw={600} size="sm" truncate>
+            {title}
+          </Text>
+        </Stack>
         {selected && (
-          <button onClick={onClose} aria-label="Close details">
-            ×
-          </button>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={onClose}
+            aria-label="Close details"
+          >
+            <IconX size={17} />
+          </ActionIcon>
         )}
-      </div>
-      {selected && (
-        <div className="inspector-tabs" role="tablist">
-          {(
-            [
-              ["status", "Status & utilisation"],
-              ["connections", `Connections (${relatedConnections.length})`],
-              ["properties", "Properties"],
-            ] as const
-          ).map(([item, label]) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === item}
-              className={tab === item ? "active" : ""}
-              onClick={() => onTab(item)}
-              key={item}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      </Group>
+
+      {!selected ? (
+        <Stack className="inspector-empty" align="center" gap="sm">
+          <ThemeIcon variant="light" color="gray" size="xl" radius="sm">
+            <IconRadar size={25} />
+          </ThemeIcon>
+          <Text c="dimmed" size="sm" ta="center">
+            Choose a node or link to inspect its live state and provenance.
+          </Text>
+        </Stack>
+      ) : (
+        <Tabs
+          className="inspector-content"
+          value={tab}
+          onChange={(value) => value && onTab(value as InspectorTab)}
+        >
+          <Tabs.List grow>
+            <Tabs.Tab value="status" leftSection={<IconActivityHeartbeat size={14} />}>
+              Status
+            </Tabs.Tab>
+            <Tabs.Tab value="connections" leftSection={<IconPlugConnected size={14} />}>
+              Links ({relatedConnections.length})
+            </Tabs.Tab>
+            <Tabs.Tab value="properties" leftSection={<IconListDetails size={14} />}>
+              Properties
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <ScrollArea className="inspector-body" type="auto">
+            <Tabs.Panel value="status" p="sm">
+              <SearchableSortableTable
+                label="Status details"
+                columns={DETAIL_COLUMNS}
+                rows={statusRows}
+              />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="connections" p="sm">
+              <SearchableSortableTable
+                label="Related connections"
+                columns={CONNECTION_COLUMNS}
+                rows={connectionRows}
+                minWidth={520}
+              />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="properties" p="sm">
+              <SearchableSortableTable
+                label="Source properties"
+                columns={DETAIL_COLUMNS}
+                rows={propertyRows}
+              />
+            </Tabs.Panel>
+          </ScrollArea>
+        </Tabs>
       )}
-      <div className="inspector-body">
-        {!selected && (
-          <div className="inspector-empty">
-            <span className="radar-glyph">◎</span>
-            <p>Choose a node or link to inspect its live state and provenance.</p>
-          </div>
-        )}
-        {selected && tab === "status" && (
-          <div className="detail-content">
-            <div className={`health-badge ${selected.value.health}`}>
-              {selected.value.health}
-            </div>
-            <h3>Sources</h3>
-            <div className="source-tags">
-              {(selected.kind === "node"
-                ? selected.value.layers
-                : [selected.value.layer]
-              ).map((layer) => (
-                <span key={layer}>{LAYER_LABELS[layer] ?? layer}</span>
-              ))}
-            </div>
-            <h3>Status</h3>
-            <DetailRows
-              value={{
-                connections: relatedConnections.length,
-                ...statusProperties(selected.value.attributes),
-              }}
-            />
-            {selected.kind === "link" && (
-              <>
-                <h3>Utilisation and counters</h3>
-                <DetailRows value={selected.value.metrics} />
-              </>
-            )}
-          </div>
-        )}
-        {selected && tab === "connections" && (
-          <div className="connection-list">
-            {relatedConnections.length === 0 ? (
-              <p className="detail-empty">No related connections</p>
-            ) : (
-              relatedConnections.map((link) => (
-                <article className="connection-card" key={link.id}>
-                  <header>
-                    <strong>{LAYER_LABELS[link.layer] ?? link.layer}</strong>
-                    <span className={`health-badge ${link.health}`}>
-                      {link.health}
-                    </span>
-                  </header>
-                  <p>
-                    {endpointId(link.source)} ↔ {endpointId(link.target)}
-                  </p>
-                  <DetailRows
-                    value={{
-                      source_interface: link.attributes.source_interface,
-                      target_interface: link.attributes.target_interface,
-                      utilization: numericMetric(link),
-                    }}
-                  />
-                </article>
-              ))
-            )}
-          </div>
-        )}
-        {selected && tab === "properties" && (
-          <div className="detail-content">
-            <h3>Properties</h3>
-            <DetailRows
-              value={{
-                id: selected.value.id,
-                ...(selected.kind === "node"
-                  ? { kind: selected.value.kind, layers: selected.value.layers }
-                  : { layer: selected.value.layer }),
-                ...selected.value.attributes,
-              }}
-            />
-          </div>
-        )}
-      </div>
 
       <section className="collection-log event-log" aria-live="polite">
-        <div className="section-heading">
-          <span className="eyebrow">Collection events</span>
-          <span className="section-count">{collectionLog.length}/300</span>
-        </div>
+        <Group justify="space-between" mb="xs">
+          <Text c="dimmed" fw={600} size="xs">
+            Collection events
+          </Text>
+          <Badge variant="default" size="xs">
+            {collectionLog.length}/300
+          </Badge>
+        </Group>
         {collectionLog.length === 0 ? (
-          <p className="log-empty">No NORFAB collection events yet.</p>
+          <Text c="dimmed" size="xs">
+            No NORFAB collection events yet.
+          </Text>
         ) : (
           <ol className="terminal-log">
             {collectionLog.map((entry) => (

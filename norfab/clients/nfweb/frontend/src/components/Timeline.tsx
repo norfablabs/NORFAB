@@ -1,48 +1,76 @@
+import { ActionIcon, Group, Select, ThemeIcon, Tooltip } from "@mantine/core";
+import { IconBroadcast, IconHistory } from "@tabler/icons-react";
+import type { TopologyHistoryItem } from "../types";
+
 interface TimelineProps {
   live: boolean;
   collectedAt?: string;
-  historyLength: number;
-  index: number;
-  onSelect: (index: number) => void;
+  history: TopologyHistoryItem[];
+  snapshotId?: string;
+  onSelect: (snapshotId: string) => void;
   onLive: () => void;
+}
+
+function formatSnapshotTimestamp(value: string): string {
+  return new Date(value).toLocaleString(undefined, {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 export default function Timeline({
   live,
   collectedAt,
-  historyLength,
-  index,
+  history,
+  snapshotId,
   onSelect,
   onLive,
 }: TimelineProps) {
+  const historyLabel = live
+    ? "Topology history: live now"
+    : `Topology history: ${new Date(collectedAt ?? 0).toLocaleTimeString()}`;
+
   return (
-    <footer className="timeline-panel">
-      <div className="timeline-label">
-        <span className="eyebrow">Three-hour history</span>
-        <strong>
-          {live ? "NOW" : new Date(collectedAt ?? 0).toLocaleTimeString()}
-        </strong>
-      </div>
-      <div className="timeline-track">
-        <div className="timeline-times">
-          <span>-3h</span>
-          <span>-2h</span>
-          <span>-1h</span>
-          <span>Now</span>
-        </div>
-        <input
-          aria-label="Topology history"
-          type="range"
-          min={0}
-          max={Math.max(0, historyLength - 1)}
-          value={index}
-          disabled={!historyLength}
-          onChange={(event) => onSelect(Number(event.target.value))}
-        />
-      </div>
-      <button className={`live-button ${live ? "active" : ""}`} onClick={onLive}>
-        <span /> Return to live
-      </button>
-    </footer>
+    <Group
+      className="timeline-control toolbar-control"
+      aria-label="Topology history controls"
+      gap={6}
+      role="region"
+      wrap="nowrap"
+    >
+      <Tooltip label={historyLabel}>
+        <ThemeIcon aria-label={historyLabel} color="gray" size="sm" variant="light">
+          <IconHistory size={14} />
+        </ThemeIcon>
+      </Tooltip>
+      <Select
+        aria-label="Topology snapshot"
+        className="timeline-select"
+        data={history.map((item) => ({
+          value: item.snapshot_id,
+          label: formatSnapshotTimestamp(item.collected_at),
+        }))}
+        disabled={!history.length}
+        placeholder="No snapshots"
+        value={snapshotId ?? null}
+        onChange={(value) => value && onSelect(value)}
+        allowDeselect={false}
+        size="xs"
+      />
+      <Tooltip label="Return to live topology">
+        <ActionIcon
+          size="sm"
+          variant={live ? "filled" : "light"}
+          color="fabric"
+          onClick={onLive}
+          aria-label="Return to live topology"
+        >
+          <IconBroadcast size={14} />
+        </ActionIcon>
+      </Tooltip>
+    </Group>
   );
 }

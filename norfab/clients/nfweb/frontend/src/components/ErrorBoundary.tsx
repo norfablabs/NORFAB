@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Alert, Button, Center, Stack } from "@mantine/core";
+import { IconAlertTriangle } from "@tabler/icons-react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -25,13 +27,18 @@ export default class ErrorBoundary extends Component<
   render() {
     if (!this.state.error) return this.props.children;
     return (
-      <main className="fatal-error" role="alert">
-        <strong>NFWeb could not render this view</strong>
-        <span>{this.state.error.message}</span>
-        <button type="button" onClick={() => window.location.reload()}>
-          Reload NFWeb
-        </button>
-      </main>
+      <Center component="main" className="fatal-error">
+        <Stack maw={640}>
+          <Alert
+            color="red"
+            title="NFWeb could not render this view"
+            icon={<IconAlertTriangle size={18} />}
+          >
+            {this.state.error.message}
+          </Alert>
+          <Button onClick={() => window.location.reload()}>Reload NFWeb</Button>
+        </Stack>
+      </Center>
     );
   }
 }

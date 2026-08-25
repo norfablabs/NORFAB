@@ -7,33 +7,55 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  ActionIcon,
+  Alert,
+  Avatar,
+  Badge,
+  Group,
+  Loader,
+  ScrollArea,
+  Stack,
+  Text,
+  Tooltip,
+} from "@mantine/core";
+import {
+  IconAlertCircle,
+  IconHelpHexagon,
+} from "@tabler/icons-react";
 import { api, openTopologyStream } from "./api";
+import AppFooter from "./components/AppFooter";
 import ApplicationNavigation from "./components/ApplicationNavigation";
 import type { NavigationSection } from "./components/ApplicationNavigation";
 import InspectorPanel from "./components/InspectorPanel";
 import type { InspectorTab } from "./components/InspectorPanel";
-import Timeline from "./components/Timeline";
+import TopologyToolbar from "./components/TopologyToolbar";
+import type { NodeSizeMode } from "./components/TopologyToolbar";
 import {
-  HEALTH_COLORS,
-  LAYER_COLORS,
-  LAYER_LABELS,
   addParallelCurves,
   endpointId,
   numericMetric,
+  selectableLayers,
   trafficMetric,
 } from "./graphModel";
-import type { GraphHandle, GraphNode } from "./graphModel";
+import type {
+  GraphHandle,
+  GraphNode,
+  RenderedTopologyLink,
+} from "./graphModel";
 import type {
   DeviceOption,
   Health,
+  NFWebFooterConfig,
   SelectedItem,
+  TopologyHistoryItem,
   TopologyLink,
   TopologyLogEntry,
   TopologySnapshot,
 } from "./types";
 
 type NodeCoordinates = { x: number; y: number; z: number };
-type NodeSizeMode = "fixed" | "connections" | "traffic";
+type HistoryResponseItem = TopologyHistoryItem | string;
 
 const TopologyGraph = lazy(() => import("./TopologyGraph"));
 
@@ -44,18 +66,6 @@ function supportsWebGL(): boolean {
   } catch {
     return false;
   }
-}
-
-function relativeTime(value?: string): string {
-  if (!value) return "Waiting for first sample";
-  const seconds = Math.max(
-    0,
-    Math.round((Date.now() - Date.parse(value)) / 1000),
-  );
-  if (seconds < 5) return "Just now";
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  return minutes < 60 ? `${minutes}m ago` : `${Math.floor(minutes / 60)}h ago`;
 }
 
 function snapshotLogs(snapshot: TopologySnapshot): TopologyLogEntry[] {
@@ -84,6 +94,21 @@ function snapshotLogs(snapshot: TopologySnapshot): TopologyLogEntry[] {
   ];
 }
 
+function historyItem(snapshot: TopologySnapshot): TopologyHistoryItem {
+  return {
+    snapshot_id: snapshot.snapshot_id,
+    collected_at: snapshot.collected_at,
+  };
+}
+
+function normalizeHistory(items: HistoryResponseItem[]): TopologyHistoryItem[] {
+  return items.map((item) =>
+    typeof item === "string"
+      ? { snapshot_id: item, collected_at: item }
+      : item,
+  );
+}
+
 export default function App() {
   const graphRef = useRef<GraphHandle | undefined>(undefined);
   const renderedGraphData = useRef<{
@@ -97,7 +122,13 @@ export default function App() {
   const layersInitialized = useRef(false);
   const [availableLayers, setAvailableLayers] = useState<string[]>([]);
   const [snapshot, setSnapshot] = useState<TopologySnapshot | null>(null);
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<TopologyHistoryItem[]>([]);
+  const [footerConfig, setFooterConfig] = useState<NFWebFooterConfig>({
+    message: "",
+    fastapi_url: null,
+    docs_url: null,
+    github_url: null,
+  });
   const [collectionLog, setCollectionLog] = useState<TopologyLogEntry[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
   const [openNavigation, setOpenNavigation] =
@@ -122,8 +153,7 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [deviceOptions, setDeviceOptions] = useState<DeviceOption[]>([]);
   const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
-  const [draftDevices, setDraftDevices] = useState<Set<string>>(new Set());
-  const [deviceMenuOpen, setDeviceMenuOpen] = useState(false);
+  const [draftDevices, setDraftDevices] = useState<string[]>([]);
   const [discoveringDevices, setDiscoveringDevices] = useState(true);
   const [applyingDevices, setApplyingDevices] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -189,16 +219,17 @@ export default function App() {
     (next: TopologySnapshot) => {
       rememberNodePositions();
       newestSnapshot.current = next;
-      setAvailableLayers(next.layers);
+      const nextAvailableLayers = selectableLayers(next.layers);
+      setAvailableLayers(nextAvailableLayers);
       if (!layersInitialized.current) {
         layersInitialized.current = true;
-        setVisibleLayers(new Set(next.layers));
+        setVisibleLayers(new Set(nextAvailableLayers));
       }
       appendCollectionLog(snapshotLogs(next));
       setHistory((current) => {
         return [
-          ...current.filter((snapshotId) => snapshotId !== next.snapshot_id),
-          next.snapshot_id,
+          ...current.filter((item) => item.snapshot_id !== next.snapshot_id),
+          historyItem(next),
         ];
       });
       if (liveRef.current) setSnapshot(next);
@@ -209,10 +240,16 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     api
+      .config()
+      .then((config) => {
+        if (!cancelled) setFooterConfig(config.footer);
+      })
+      .catch((reason: Error) => setError(reason.message));
+    api
       .history()
       .then((nextHistory) => {
         if (cancelled) return;
-        setHistory(nextHistory);
+        setHistory(normalizeHistory(nextHistory));
       })
       .catch((reason: Error) => setError(reason.message))
       .finally(() => setLoading(false));
@@ -222,7 +259,7 @@ export default function App() {
         if (cancelled) return;
         setDeviceOptions(inventory.devices);
         setSelectedDevices(inventory.selected);
-        setDraftDevices(new Set(inventory.selected));
+        setDraftDevices(inventory.selected);
         if (inventory.errors.length) {
           setError(
             inventory.errors.map((item) => item.message).join("; "),
@@ -246,7 +283,7 @@ export default function App() {
 
   const graphData = useMemo(() => {
     if (!snapshot)
-      return { nodes: [] as GraphNode[], links: [] as TopologyLink[] };
+      return { nodes: [] as GraphNode[], links: [] as RenderedTopologyLink[] };
     const query = search.trim().toLowerCase();
     const allowedNodeIds = new Set(
       snapshot.nodes
@@ -346,23 +383,13 @@ export default function App() {
   useEffect(() => {
     if (hasFramedGraph.current || graphData.nodes.length === 0) return;
     const timer = window.setTimeout(() => {
-      graphRef.current?.zoomToFit(700, 90);
+      graphRef.current?.zoomToFit(700, 160);
       hasFramedGraph.current = true;
-    }, 250);
+    }, 900);
     return () => window.clearTimeout(timer);
   }, [graphData.nodes.length]);
 
-  const timelineIndex = snapshot
-    ? Math.max(
-        0,
-        history.findIndex(
-          (snapshotId) => snapshotId === snapshot.snapshot_id,
-        ),
-      )
-    : Math.max(0, history.length - 1);
-
-  const selectHistory = async (index: number) => {
-    const snapshotId = history[index];
+  const selectHistory = async (snapshotId: string) => {
     if (!snapshotId) return;
     setLive(false);
     setSelected(null);
@@ -395,15 +422,6 @@ export default function App() {
     }
   };
 
-  const toggleDevice = (device: string) => {
-    setDraftDevices((current) => {
-      const next = new Set(current);
-      if (next.has(device)) next.delete(device);
-      else next.add(device);
-      return next;
-    });
-  };
-
   const applyDeviceSelection = async () => {
     if (applyingDevices) return;
     setApplyingDevices(true);
@@ -412,14 +430,13 @@ export default function App() {
     liveRef.current = true;
     setSelected(null);
     try {
-      const result = await api.selectDevices([...draftDevices]);
+      const result = await api.selectDevices(draftDevices);
       setSelectedDevices(result.selected);
       setHistory([]);
       setCollectionLog([]);
       layersInitialized.current = false;
       setAvailableLayers([]);
       setVisibleLayers(new Set());
-      setDeviceMenuOpen(false);
       hasFramedGraph.current = false;
       if (result.snapshot) {
         acceptLiveSnapshot(result.snapshot);
@@ -432,9 +449,15 @@ export default function App() {
           api.history(),
           api.logs(),
         ]);
+        const normalizedScopeHistory = normalizeHistory(scopeHistory);
         setHistory((current) => [
-          ...scopeHistory,
-          ...current.filter((snapshotId) => !scopeHistory.includes(snapshotId)),
+          ...normalizedScopeHistory,
+          ...current.filter(
+            (item) =>
+              !normalizedScopeHistory.some(
+                (scopeItem) => scopeItem.snapshot_id === item.snapshot_id,
+              ),
+          ),
         ]);
         appendCollectionLog(scopeLogs);
       }
@@ -443,15 +466,6 @@ export default function App() {
     } finally {
       setApplyingDevices(false);
     }
-  };
-
-  const toggleLayer = (layer: string) => {
-    setVisibleLayers((current) => {
-      const next = new Set(current);
-      if (next.has(layer)) next.delete(layer);
-      else next.add(layer);
-      return next;
-    });
   };
 
   const startLayout = (distance = nodeDistance) => {
@@ -510,242 +524,91 @@ export default function App() {
     setSelected(item);
   };
 
+  const streamLabel = !live
+    ? "Historical"
+    : connection === "connected"
+      ? "Live"
+      : connection === "connecting"
+        ? "Connecting"
+        : "Offline";
+  const streamColor = !live
+    ? "gray"
+    : connection === "connected"
+      ? "fabric"
+      : connection === "connecting"
+        ? "yellow"
+        : "red";
+
   return (
     <main className="app-shell" id="topology">
       <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark">N</span>
+        <Group className="brand" gap="sm" wrap="nowrap">
+          <Avatar color="fabric" radius="sm">
+            N
+          </Avatar>
           <div>
-            <strong>NORFAB</strong>
-            <span>LOCAL WEB CLIENT</span>
+            <Text fw={800} size="sm">
+              NORFAB
+            </Text>
+            <Text c="dimmed" size="xs">
+              Network operations
+            </Text>
           </div>
-        </div>
-        <div className="topbar-title">
-          <div className="topology-controls">
-            <section className="device-control">
-              <span className="eyebrow">Devices</span>
-              <button
-                className="device-selector"
-                type="button"
-                aria-haspopup="listbox"
-                aria-expanded={deviceMenuOpen}
-                onClick={() => setDeviceMenuOpen((open) => !open)}
-              >
-                <span>
-                  {discoveringDevices
-                    ? "Discovering..."
-                    : selectedDevices.length
-                      ? `${selectedDevices.length} selected`
-                      : "Select devices"}
-                </span>
-                <span aria-hidden="true">⌄</span>
-              </button>
-              {deviceMenuOpen && (
-                <div className="device-menu" role="listbox" aria-multiselectable>
-                  <div className="device-menu-heading">
-                    <strong>{deviceOptions.length} discovered</strong>
-                    <button
-                      type="button"
-                      onClick={() => setDraftDevices(new Set())}
-                    >
-                      Clear
-                    </button>
-                  </div>
-                  <div className="device-options">
-                    {deviceOptions.length === 0 ? (
-                      <p>No devices reported by NetBox or Nornir.</p>
-                    ) : (
-                      deviceOptions.map((device) => (
-                        <label key={device.name}>
-                          <input
-                            type="checkbox"
-                            checked={draftDevices.has(device.name)}
-                            onChange={() => toggleDevice(device.name)}
-                          />
-                          <span>{device.name}</span>
-                          <small>{device.sources.join(" + ")}</small>
-                        </label>
-                      ))
-                    )}
-                  </div>
-                  <button
-                    className="device-apply"
-                    type="button"
-                    disabled={applyingDevices}
-                    onClick={applyDeviceSelection}
-                  >
-                    {applyingDevices
-                      ? "Collecting..."
-                      : draftDevices.size
-                        ? `Collect ${draftDevices.size} devices`
-                        : "Clear topology"}
-                  </button>
-                </div>
-              )}
-            </section>
-
-            <section className="search-control">
-              <label className="eyebrow" htmlFor="topology-search">
-                Find infrastructure
-              </label>
-              <div className="search-box">
-                <input
-                  id="topology-search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Device, site, role, IP..."
-                />
-                {search && (
-                  <button onClick={() => setSearch("")} aria-label="Clear search">
-                    Clear
-                  </button>
-                )}
-              </div>
-            </section>
-
-            <section className="layer-control">
-              <div className="section-heading">
-                <span className="eyebrow">Network layers</span>
-                <span className="section-count">
-                  {visibleLayers.size}/{availableLayers.length}
-                </span>
-              </div>
-              <div className="layer-list">
-                {availableLayers.map((layer) => (
-                  <button
-                    key={layer}
-                    className={`layer-button ${visibleLayers.has(layer) ? "active" : ""}`}
-                    onClick={() => toggleLayer(layer)}
-                  >
-                    <span
-                      className="layer-swatch"
-                      style={{ background: LAYER_COLORS[layer] ?? "#8b93a7" }}
-                    />
-                    <span>{LAYER_LABELS[layer] ?? layer}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="health-control">
-              <span className="eyebrow">Health filter</span>
-              <div className="health-grid">
-                {(
-                  ["all", "healthy", "warning", "critical", "unknown"] as const
-                ).map((item) => (
-                  <button
-                    key={item}
-                    className={health === item ? "active" : ""}
-                    onClick={() => setHealth(item)}
-                  >
-                    {item !== "all" && (
-                      <span style={{ background: HEALTH_COLORS[item] }} />
-                    )}
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="graph-control">
-              <span className="eyebrow">3D graph</span>
-              <div className="graph-control-row">
-                <button
-                  type="button"
-                  className={visualizationPaused ? "" : "active"}
-                  onClick={toggleVisualization}
-                  disabled={graphData.nodes.length === 0}
-                >
-                  {visualizationPaused ? "Start view" : "Pause view"}
-                </button>
-                <button
-                  type="button"
-                  className={layoutRunning ? "active" : ""}
-                  onClick={() =>
-                    layoutRunning ? pauseLayout() : startLayout()
-                  }
-                  disabled={graphData.nodes.length === 0}
-                >
-                  {layoutRunning ? "Pause layout" : "Start layout"}
-                </button>
-                <button
-                  type="button"
-                  className={rotationEnabled ? "active" : ""}
-                  onClick={toggleRotation}
-                  disabled={graphData.nodes.length === 0}
-                >
-                  Rotation {rotationEnabled ? "on" : "off"}
-                </button>
-                <label>
-                  <span>Rotation speed</span>
-                  <select
-                    value={rotationSpeed}
-                    onChange={(event) =>
-                      setRotationSpeed(Number(event.target.value))
-                    }
-                  >
-                    <option value="0.25">Slow</option>
-                    <option value="0.7">Normal</option>
-                    <option value="1.5">Fast</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Layout distance {nodeDistance}</span>
-                  <input
-                    type="range"
-                    min="40"
-                    max="180"
-                    step="5"
-                    value={nodeDistance}
-                    onChange={(event) =>
-                      changeNodeDistance(Number(event.target.value))
-                    }
-                  />
-                </label>
-                <label>
-                  <span>Node size</span>
-                  <select
-                    value={nodeSizeMode}
-                    onChange={(event) =>
-                      setNodeSizeMode(event.target.value as NodeSizeMode)
-                    }
-                  >
-                    <option value="fixed">Fixed</option>
-                    <option value="connections">Connections</option>
-                    <option value="traffic">Traffic</option>
-                  </select>
-                </label>
-              </div>
-            </section>
-
-            <section className="snapshot-summary">
-              <div className="section-heading">
-                <span className="eyebrow">Current frame</span>
-                <button
-                  className="refresh-button"
-                  type="button"
-                  onClick={refreshTopology}
-                  disabled={refreshing || selectedDevices.length === 0}
-                >
-                  {refreshing ? "Refreshing..." : "Refresh"}
-                </button>
-              </div>
-              <div className={`snapshot-status ${snapshot?.status ?? "empty"}`}>
-                <span>{snapshot?.status ?? "waiting"}</span>
-                <small>
-                  {graphData.nodes.length} nodes / {graphData.links.length} links
-                </small>
-              </div>
-            </section>
-          </div>
-        </div>
-        <div className="live-readout">
-          <span className={`connection-dot ${connection}`} />
-          <div>
-            <strong>{live ? "LIVE" : "HISTORICAL"}</strong>
-            <span>{relativeTime(snapshot?.collected_at)}</span>
-          </div>
-        </div>
+        </Group>
+        <ScrollArea
+          className="topbar-title toolbar-scroll"
+          offsetScrollbars="present"
+          scrollbarSize={5}
+          scrollbars="x"
+          type="auto"
+          viewportProps={{
+            "aria-label": "Topology toolbar",
+            role: "region",
+          }}
+        >
+          <TopologyToolbar
+            deviceOptions={deviceOptions}
+            selectedDevices={selectedDevices}
+            draftDevices={draftDevices}
+            discoveringDevices={discoveringDevices}
+            applyingDevices={applyingDevices}
+            onDraftDevices={setDraftDevices}
+            onApplyDevices={applyDeviceSelection}
+            search={search}
+            onSearch={setSearch}
+            availableLayers={availableLayers}
+            visibleLayers={[...visibleLayers]}
+            onVisibleLayers={(layers) => setVisibleLayers(new Set(layers))}
+            health={health}
+            onHealth={setHealth}
+            hasGraph={graphData.nodes.length > 0}
+            visualizationPaused={visualizationPaused}
+            layoutRunning={layoutRunning}
+            rotationEnabled={rotationEnabled}
+            rotationSpeed={rotationSpeed}
+            nodeDistance={nodeDistance}
+            nodeSizeMode={nodeSizeMode}
+            onToggleVisualization={toggleVisualization}
+            onToggleLayout={() =>
+              layoutRunning ? pauseLayout() : startLayout()
+            }
+            onToggleRotation={toggleRotation}
+            onRotationSpeed={setRotationSpeed}
+            onNodeDistance={changeNodeDistance}
+            onNodeSizeMode={setNodeSizeMode}
+            refreshing={refreshing}
+            canRefresh={selectedDevices.length > 0}
+            onRefresh={refreshTopology}
+            streamLabel={streamLabel}
+            streamColor={streamColor}
+            live={live}
+            collectedAt={snapshot?.collected_at}
+            history={history}
+            snapshotId={snapshot?.snapshot_id}
+            onSelectHistory={selectHistory}
+            onLive={returnToLive}
+          />
+        </ScrollArea>
       </header>
 
       <ApplicationNavigation
@@ -758,62 +621,104 @@ export default function App() {
         aria-label="3D network topology"
         ref={graphStageRef}
       >
-        {loading && (
-          <div className="stage-message">
-            <span className="loader" />
-            Connecting to the fabric
-          </div>
+        <Group className="graph-summary" gap={6} wrap="nowrap">
+          <Badge
+            color={
+              snapshot?.status === "complete"
+                ? "fabric"
+                : snapshot?.status === "failed"
+                  ? "red"
+                  : snapshot?.status === "partial"
+                    ? "yellow"
+                    : "gray"
+            }
+            variant="light"
+            size="sm"
+          >
+            {snapshot?.status ?? "waiting"}
+          </Badge>
+          <Text c="dimmed" size="xs">
+            {graphData.nodes.length}{" "}
+            {graphData.nodes.length === 1 ? "node" : "nodes"} /{" "}
+            {graphData.links.length}{" "}
+            {graphData.links.length === 1 ? "link" : "links"}
+          </Text>
+        </Group>
+        {loading && webglSupported && (
+          <Stack className="stage-message" align="center" gap="xs">
+            <Loader size="sm" />
+            <Text size="sm">Connecting to the fabric</Text>
+          </Stack>
         )}
-        {!loading && !snapshot && (
-          <div className="stage-message">
-            <strong>
+        {!loading && webglSupported && !snapshot && (
+          <Stack className="stage-message" align="center" gap="xs">
+            <Text fw={600} size="lg">
               {selectedDevices.length
                 ? "Waiting for topology data"
                 : "Select devices to build the topology"}
-            </strong>
-            <span>
+            </Text>
+            <Text c="dimmed" size="sm">
               {selectedDevices.length
                 ? "The local collector will publish a frame when workers respond."
                 : "Discovery does not start collection until a scope is applied."}
-            </span>
-          </div>
+            </Text>
+          </Stack>
         )}
-        {!loading && snapshot && snapshot.nodes.length === 0 && (
-          <div className="stage-message">
-            <strong>Collection returned no topology nodes</strong>
-            <span>
+        {!loading && webglSupported && snapshot && snapshot.nodes.length === 0 && (
+          <Stack className="stage-message" align="center" gap="xs">
+            <Text fw={600} size="lg">
+              Collection returned no topology nodes
+            </Text>
+            <Text c="dimmed" size="sm">
               Review Collection events for the NetBox query result and worker
               messages.
-            </span>
-          </div>
+            </Text>
+          </Stack>
         )}
         {!loading &&
+          webglSupported &&
           snapshot &&
           snapshot.nodes.length > 0 &&
-          graphData.nodes.length === 0 && (
-            <div className="stage-message">
-              <strong>No nodes match the active controls</strong>
-              <span>Clear the search or reset the layer and health filters.</span>
-            </div>
+            graphData.nodes.length === 0 && (
+            <Stack className="stage-message" align="center" gap="xs">
+              <Text fw={600} size="lg">
+                No nodes match the active controls
+              </Text>
+              <Text c="dimmed" size="sm">
+                Clear the search or reset the layer and health filters.
+              </Text>
+            </Stack>
           )}
-        {!webglSupported && (
-          <div className="stage-message">
-            <strong>3D rendering is unavailable</strong>
-            <span>
+        {!loading && !webglSupported && (
+          <Stack className="stage-message" align="center" gap="xs">
+            <Text fw={600} size="lg">
+              3D rendering is unavailable
+            </Text>
+            <Text c="dimmed" size="sm">
               Enable WebGL or open NFWeb in a browser with 3D acceleration.
-            </span>
-          </div>
+            </Text>
+          </Stack>
         )}
         {error && (
-          <button className="error-banner" onClick={() => setError(null)}>
-            <strong>Client warning</strong>
-            <span>{error}</span>
-            <span>×</span>
-          </button>
+          <Alert
+            className="error-banner"
+            color="red"
+            title="Client warning"
+            icon={<IconAlertCircle size={18} />}
+            withCloseButton
+            onClose={() => setError(null)}
+          >
+            {error}
+          </Alert>
         )}
         {webglSupported && (
           <Suspense
-            fallback={<div className="stage-message">Loading 3D renderer</div>}
+            fallback={
+              <Stack className="stage-message" align="center" gap="xs">
+                <Loader size="sm" />
+                <Text size="sm">Loading 3D renderer</Text>
+              </Stack>
+            }
           >
             <TopologyGraph
               graphRef={graphRef}
@@ -827,16 +732,23 @@ export default function App() {
                 rememberNodePositions();
                 if (data.nodes.length) setLayoutRunning(false);
                 if (!hasFramedGraph.current && data.nodes.length) {
-                  graphRef.current?.zoomToFit(700, 90);
+                  graphRef.current?.zoomToFit(700, 160);
                   hasFramedGraph.current = true;
                 }
               }}
             />
           </Suspense>
         )}
-        <div className="graph-hint">
-          DRAG TO ORBIT · SCROLL TO ZOOM · CLICK FOR DETAILS
-        </div>
+        <Tooltip label="Drag to orbit, scroll to zoom, select a node or link for details">
+          <ActionIcon
+            className="graph-help"
+            aria-label="Show topology interaction help"
+            color="gray"
+            variant="default"
+          >
+            <IconHelpHexagon size={16} />
+          </ActionIcon>
+        </Tooltip>
       </section>
 
       <InspectorPanel
@@ -848,14 +760,7 @@ export default function App() {
         onClose={() => setSelected(null)}
       />
 
-      <Timeline
-        live={live}
-        collectedAt={snapshot?.collected_at}
-        historyLength={history.length}
-        index={timelineIndex}
-        onSelect={selectHistory}
-        onLive={returnToLive}
-      />
+      <AppFooter config={footerConfig} />
     </main>
   );
 }

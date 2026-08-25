@@ -31,11 +31,12 @@ def test_history_round_trip(tmp_path: Path) -> None:
     assert store.count() == 2
     assert store.latest() == second
     assert store.get(first.snapshot_id) == first
-    assert store.history() == [
+    assert [entry.snapshot_id for entry in store.history()] == [
         first.snapshot_id,
         second.snapshot_id,
     ]
-    assert store.history(["r1"]) == [first.snapshot_id]
+    assert store.history()[0].collected_at == first.collected_at
+    assert [entry.snapshot_id for entry in store.history(["r1"])] == [first.snapshot_id]
     assert store.latest(["r1"]) == first
     store.close()
 

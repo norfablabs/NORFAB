@@ -35,8 +35,17 @@ export type GraphNode = TopologyNode & {
   displaySize?: number;
 };
 
-export type GraphData = { nodes: GraphNode[]; links: TopologyLink[] };
-export type GraphHandle = ForceGraphMethods<GraphNode, TopologyLink>;
+export function selectableLayers(layers: string[]): string[] {
+  return layers.filter((layer) => layer !== "interfaces");
+}
+
+export type RenderedTopologyLink = TopologyLink & {
+  curvature: number;
+  rotation: number;
+};
+
+export type GraphData = { nodes: GraphNode[]; links: RenderedTopologyLink[] };
+export type GraphHandle = ForceGraphMethods<GraphNode, RenderedTopologyLink>;
 
 export function endpointId(value: string | TopologyNode): string {
   return typeof value === "string" ? value : value.id;
@@ -69,7 +78,7 @@ export function trafficMetric(
   }, 0);
 }
 
-export function addParallelCurves(links: TopologyLink[]): TopologyLink[] {
+export function addParallelCurves(links: TopologyLink[]): RenderedTopologyLink[] {
   const groups = new Map<string, TopologyLink[]>();
   links.forEach((link) => {
     const pair = [endpointId(link.source), endpointId(link.target)]

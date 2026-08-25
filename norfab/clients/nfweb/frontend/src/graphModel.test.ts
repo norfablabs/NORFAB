@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { TopologyLink, TopologyNode } from "./types";
-import { addParallelCurves, endpointId, numericMetric } from "./graphModel";
+import {
+  addParallelCurves,
+  endpointId,
+  numericMetric,
+  selectableLayers,
+} from "./graphModel";
 
 function link(
   id: string,
@@ -20,6 +25,12 @@ function link(
 }
 
 describe("topology graph helpers", () => {
+  it("only exposes graph-producing layers as selectable controls", () => {
+    expect(selectableLayers(["inventory", "lldp", "bgp", "interfaces"])).toEqual(
+      ["inventory", "lldp", "bgp"],
+    );
+  });
+
   it("reads endpoints after ForceGraph replaces IDs with node objects", () => {
     const node: TopologyNode = {
       id: "spine-1",

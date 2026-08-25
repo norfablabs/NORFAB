@@ -95,6 +95,15 @@ class TopologyLogEntry(BaseModel):
     resource: str | list[str] | None = None
 
 
+class TopologyHistoryEntry(BaseModel):
+    """One retained topology snapshot listed in the browser timeline."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    snapshot_id: str
+    collected_at: datetime
+
+
 class TopologySnapshot(BaseModel):
     """One complete or partial point-in-time topology graph."""
 

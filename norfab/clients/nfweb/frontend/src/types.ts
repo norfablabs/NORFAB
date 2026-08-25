@@ -1,6 +1,17 @@
 export type Health = "healthy" | "warning" | "critical" | "unknown";
 export type SnapshotStatus = "complete" | "partial" | "empty" | "failed";
 
+export interface NFWebFooterConfig {
+  message: string;
+  fastapi_url: string | null;
+  docs_url: string | null;
+  github_url: string | null;
+}
+
+export interface NFWebBrowserConfig {
+  footer: NFWebFooterConfig;
+}
+
 export interface TopologyNode {
   id: string;
   label: string;
@@ -58,6 +69,11 @@ export interface TopologyLogEntry extends CollectionEvent {
   snapshot_id: string;
   collected_at: string;
   kind: "event" | "error";
+}
+
+export interface TopologyHistoryItem {
+  snapshot_id: string;
+  collected_at: string;
 }
 
 export interface TopologySnapshot {

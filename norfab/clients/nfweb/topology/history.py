@@ -7,7 +7,11 @@ from pathlib import Path
 
 import orjson
 
-from norfab.clients.nfweb.topology.models import TopologyLogEntry, TopologySnapshot
+from norfab.clients.nfweb.topology.models import (
+    TopologyHistoryEntry,
+    TopologyLogEntry,
+    TopologySnapshot,
+)
 
 
 class TopologyHistoryStore:
@@ -71,12 +75,12 @@ class TopologyHistoryStore:
         ).fetchone()
         return self._decode(row) if row else None
 
-    def history(self, devices: list[str] | None = None) -> list[str]:
-        """Return retained IDs, optionally for one exact device scope."""
+    def history(self, devices: list[str] | None = None) -> list[TopologyHistoryEntry]:
+        """Return retained snapshot timestamps, optionally for one exact device scope."""
         cutoff = datetime.now(timezone.utc) - timedelta(minutes=self.retention_minutes)
         rows = self._connection.execute(
             """
-            SELECT snapshot_id, payload
+            SELECT snapshot_id, collected_ts, payload
             FROM topology_snapshots
             WHERE collected_ts >= ?
             ORDER BY collected_ts ASC
@@ -84,9 +88,11 @@ class TopologyHistoryStore:
             (cutoff.timestamp(),),
         ).fetchall()
         if devices is None:
-            return [row["snapshot_id"] for row in rows]
+            return [self._history_entry(row) for row in rows]
         return [
-            row["snapshot_id"] for row in rows if self._decode(row).devices == devices
+            self._history_entry(row)
+            for row in rows
+            if self._decode(row).devices == devices
         ]
 
     def logs(self, devices: list[str], limit: int = 300) -> list[TopologyLogEntry]:
@@ -162,3 +168,10 @@ class TopologyHistoryStore:
     def _decode(row: sqlite3.Row) -> TopologySnapshot:
         payload = orjson.loads(zlib.decompress(row["payload"]))
         return TopologySnapshot.model_validate(payload)
+
+    @staticmethod
+    def _history_entry(row: sqlite3.Row) -> TopologyHistoryEntry:
+        return TopologyHistoryEntry(
+            snapshot_id=row["snapshot_id"],
+            collected_at=datetime.fromtimestamp(row["collected_ts"], timezone.utc),
+        )

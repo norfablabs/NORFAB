@@ -5,6 +5,11 @@ broker:
 
 client:
   nfapi_test_variable: '{{ env.get("NFAPI_TEST_VARIABLE") }}'
+  nfweb:
+    port: 9005
+    footer:
+      message: NORFAB test environment
+      fastapi_url: http://127.0.0.1:8000/docs
   agent_profiles:
     default:
       llm:

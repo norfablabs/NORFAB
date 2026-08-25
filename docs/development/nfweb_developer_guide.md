@@ -54,6 +54,9 @@ explicitly replaces them:
 - Production requires Python only. Node.js is a frontend development and release
   build tool.
 - Frontend dependencies are pinned and bundled. Do not add runtime CDN assets.
+- Use Mantine components and Tabler icons for general-purpose controls. Do not
+  create bespoke buttons, selects, dropdowns, tabs, sliders, badges, or tooltips.
+  Keep custom CSS focused on NFWeb layout and domain-specific visualization.
 - The topology application uses Vasturiano 3D visualization only. Do not add a 2D
   renderer or a 2D/3D mode.
 - An empty device selection performs no topology collection.
@@ -90,8 +93,8 @@ norfab/clients/nfweb/
 |       |-- api.ts            Typed HTTP and WebSocket client
 |       |-- graphModel.ts     Graph identities, styling, and curve helpers
 |       |-- types.ts          Manual TypeScript mirror of Python contracts
-|       |-- components/       Navigation, inspector, timeline, error boundary
-|       `-- styles.css        Complete NFWeb visual layout
+|       |-- components/       Mantine toolbar, navigation, inspector, timeline
+|       `-- styles.css        NFWeb layout, topology stage, inspector, event log
 `-- static/                   Generated production assets served by Tornado
 
 tests/clients/nfweb/
@@ -123,7 +126,8 @@ nfcli --web-ui
   -> listen on 127.0.0.1 only
   -> start periodic collection when a scope exists
   -> optionally open the browser
-  -> on shutdown: stop HTTP, modules, SQLite, and native client
+  -> on first Ctrl+C: stop HTTP, modules, SQLite, and native client
+  -> on second Ctrl+C: force process exit if graceful cleanup is stuck
 ```
 
 The `NorFab` object is used to load inventory and create the client. NFWeb does not
@@ -137,8 +141,13 @@ nested configuration model:
 ```yaml
 client:
   nfweb:
-    port: 8080
+    port: 9005
     open_browser: true
+    footer:
+      message: "Managed by the Network Automation team"
+      fastapi_url: "http://127.0.0.1:8000/docs"
+      docs_url: "https://docs.norfablabs.com/"
+      github_url: "https://github.com/norfablabs/NORFAB"
     topology:
       devices: []
       collection_interval: 30
@@ -154,8 +163,12 @@ client:
         interfaces: true
 ```
 
-Both models use `extra="forbid"`. Do not silently accept unknown settings. The
-listener host is intentionally not configurable.
+All configuration models use `extra="forbid"`. Do not silently accept unknown
+settings. The listener host is intentionally not configurable.
+
+`footer` is shared shell configuration. Only these display-safe fields are
+returned by `/api/v1/config`; application configuration and broker details must
+not be exposed to the browser. A `null` footer URL hides its pictogram link.
 
 ## Follow Topology Data Through the System
 
@@ -259,7 +272,8 @@ change is incomplete until both sides and their tests are updated.
   names are part of the ID.
 - The interfaces adapter creates observations, not standalone graph links. During
   merge, an observation decorates a matching link endpoint with health,
-  attributes, and metrics.
+  attributes, and metrics. The frontend therefore excludes `interfaces` from the
+  graph-layer visibility controls.
 
 The frontend currently groups all links between the same two node IDs and gives
 them parallel curves. Link colour represents the discovery layer. Node colour and
@@ -306,10 +320,11 @@ Current routes are:
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `GET` | `/api/v1/health` | Shared runtime and application health |
+| `GET` | `/api/v1/config` | Display-safe shared footer configuration |
 | `GET` | `/api/v1/topology/devices` | Combined device discovery and active scope |
 | `POST` | `/api/v1/topology/selection` | Apply a scope and collect when non-empty |
 | `POST` | `/api/v1/topology/refresh` | Force a cache-bypassing collection |
-| `GET` | `/api/v1/topology/history` | Snapshot IDs for the active scope |
+| `GET` | `/api/v1/topology/history` | Timestamped snapshot entries for the active scope |
 | `GET` | `/api/v1/topology/snapshots/{id}` | One stored snapshot |
 | `GET` | `/api/v1/topology/logs` | Up to 300 retained terminal entries |
 | WebSocket | `/api/v1/topology/stream` | Latest and newly completed snapshots |
@@ -323,29 +338,66 @@ frontend method, TypeScript response type, and server test in one change.
 
 ## Understand the Current Frontend
 
-The current frontend is deliberately small:
+The current frontend has one shared component system:
 
-- `main.tsx` mounts one React application in strict mode behind a fatal error
-  boundary.
+- `main.tsx` mounts one React application in strict mode inside `MantineProvider`
+  and behind a fatal error boundary.
 - `api.ts` owns JSON requests and WebSocket reconnection.
 - `types.ts` mirrors the Pydantic browser contracts.
-- `App.tsx` owns topology state and composes focused shell, graph, inspector,
-  timeline, and navigation components.
+- `App.tsx` owns topology state and composes the shell, graph, inspector, timeline,
+  navigation, and `TopologyToolbar` components.
 - `TopologyGraph.tsx` isolates the imperative Vasturiano/Three.js integration and
   is loaded only when the topology view is rendered.
 - `graphModel.ts` contains renderer-independent graph identities and calculations.
-- `styles.css` owns both the shell and dashboard presentation.
+- Mantine supplies common controls and interaction states; `styles.css` owns the
+  shell grid and domain-specific graph, inspector, and terminal presentation. Do
+  not target Mantine's internal class names from this stylesheet.
 
-The left navigation is an accordion for generic NFWeb applications. Topology
-controls belong in the application header, not the navigation panel. Overview and
+### Frontend Stack
+
+`frontend/package.json` and `frontend/package-lock.json` are the source of truth
+for frontend versions. The current stack is:
+
+| Concern | Technology | Responsibility |
+| --- | --- | --- |
+| UI runtime | React and React DOM `19.2.8` | Component rendering, state, and browser mounting |
+| Language | TypeScript `7.0.2` | Static checking for components, graph models, and API contracts |
+| Component system | Mantine Core and Hooks `9.5.2` | Standard controls, layout primitives, overlays, themes, and interaction hooks |
+| Icons | Tabler Icons React `3.46.0` | Consistent application and footer pictograms |
+| Topology renderer | React Force Graph 3D `1.29.1` | React integration for the interactive 3D topology |
+| 3D engine | Three.js `0.185.1` | WebGL rendering and graph scene objects |
+| Build tooling | Vite `8.2.2` with the React plugin `6.1.0` | Development server, module bundling, and hashed production assets |
+| Unit tests | Vitest `4.1.11` | Component, graph-model, and regression tests without a browser |
+| Browser tests | Playwright `1.62.1` | Chromium end-to-end tests for the rendered application and its controls |
+
+The browser entry point imports Mantine's base stylesheet before NFWeb's
+`styles.css`. Use Mantine components and their public props for general-purpose
+controls. Use Tabler icons for application actions. Reserve custom CSS and React
+components for NFWeb-specific layout, topology, inspector, and terminal behavior.
+
+Vite writes the production bundle to `norfab/clients/nfweb/static`. The Python
+server serves those committed assets directly, so production does not require
+Node.js or a CDN. The topology renderer is lazy-loaded to keep its Three.js code
+out of the initial application bundle.
+
+The left navigation follows Mantine UI's nested-navbar pattern for generic NFWeb
+applications and remains a fixed-width shell column. Topology controls, including
+the live status and history selector, belong in one non-wrapping, horizontally
+scrollable application toolbar, not the navigation panel. Graph-producing layers
+use Mantine button-style checkbox chips for direct multi-selection. The remaining
+desktop content width is split 80% for the topology stage and 20% for the
+inspector, and the inspector spans into the top-right corner above its content.
+Every inspector tab uses the same Mantine searchable, sortable table composition;
+add domain columns and row adapters instead of another details layout. A shared
+footer owns the configured message and external resource pictograms. Overview and
 Admin are intentionally empty placeholders.
 
 ### Live and Historical State
 
 The frontend retains the newest WebSocket snapshot separately from the frame being
-displayed. In live mode, new frames update the graph. Selecting history disables
-live display without stopping collection. Return to live selects the newest known
-snapshot.
+displayed. In live mode, new frames update the graph. Selecting history from the
+top bar's timestamp dropdown disables live display without stopping collection.
+Return to live selects the newest known snapshot.
 
 Collection logs are merged by stable entry ID and bounded to 300 lines in browser
 memory. The initial `/logs` request restores retained events after page reload.
@@ -390,7 +442,7 @@ Start those processes separately, then run from the repository root:
 poetry run nfcli --inventory tests/nf_tests_inventory/inventory.yaml --web-ui
 ```
 
-NFWeb normally opens `http://127.0.0.1:8080`. Use `open_browser: false` while
+NFWeb normally opens `http://127.0.0.1:9005`. Use `open_browser: false` while
 restarting the backend frequently.
 
 For frontend dependencies and a production-style build:
@@ -399,15 +451,22 @@ For frontend dependencies and a production-style build:
 cd norfab/clients/nfweb/frontend
 npm ci
 npm test
+npx playwright install chromium
+npm run test:e2e
 npm run typecheck
 npm run build
 ```
+
+Playwright starts an isolated Vite server on `127.0.0.1:4173`. Its checked-in
+fixtures mock the browser API and topology WebSocket, so browser tests do not
+require a running broker or worker. Run `npm run test:e2e:headed` to observe the
+same tests in a visible Chromium window.
 
 The build output goes directly to `../static`. A backend restart is required for
 Python changes. A hard browser refresh loads a newly hashed frontend bundle after a
 frontend build.
 
-Vite development mode runs on `127.0.0.1:5173` and proxies `/api` to port 8080:
+Vite development mode runs on `127.0.0.1:5173` and proxies `/api` to port 9005:
 
 ```bash
 cd norfab/clients/nfweb/frontend

@@ -57,7 +57,7 @@ function nodeLabelSprite(node: GraphNode): Sprite {
   const sprite = new Sprite(
     new SpriteMaterial({ map: texture, transparent: true, depthWrite: false }),
   );
-  const scale = 0.16;
+  const scale = 0.07;
   const nodeRadius = 4 * Math.cbrt(Math.max(node.displaySize ?? 1, 1));
   sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
   sprite.position.y = nodeRadius + (canvas.height * scale) / 2 + 2;
@@ -95,11 +95,12 @@ export default function TopologyGraph({
       cooldownTicks={160}
       nodeLabel={(node) => {
         const item = node as GraphNode;
-        return `<b>${escapeHtml(item.label)}</b><br>${escapeHtml(item.health)} · ${escapeHtml(item.kind)}`;
+        return `<b>${escapeHtml(item.label)}</b><br>${escapeHtml(item.health)} / ${escapeHtml(item.kind)}`;
       }}
       nodeColor={(node) => HEALTH_COLORS[(node as GraphNode).health]}
       nodeOpacity={0.92}
       nodeResolution={12}
+      nodeRelSize={2.2}
       nodeVal={(node) => (node as GraphNode).displaySize ?? 5}
       nodeThreeObject={(node) => nodeLabelSprite(node as GraphNode)}
       nodeThreeObjectExtend

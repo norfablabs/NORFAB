@@ -27,4 +27,6 @@ docs/Makefile
 site
 *ipynb_checkpoints*
 node_modules/
+playwright-report/
+test-results/
 tests/nf_tests_inventory/agents/common.yaml

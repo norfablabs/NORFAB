@@ -6,16 +6,23 @@
   "scripts": {
     "build": "npm run typecheck && vite build",
     "dev": "vite --host 127.0.0.1",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json"
+    "test": "vitest run src",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.e2e.json"
   },
   "dependencies": {
+    "@mantine/core": "9.5.2",
+    "@mantine/hooks": "9.5.2",
+    "@tabler/icons-react": "3.46.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-force-graph-3d": "1.29.1",
     "three": "0.185.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "26.3.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
     "@types/three": "0.185.4",

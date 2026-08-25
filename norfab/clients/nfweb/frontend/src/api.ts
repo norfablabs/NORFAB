@@ -1,6 +1,8 @@
 import type {
   DeviceInventory,
   DeviceSelection,
+  NFWebBrowserConfig,
+  TopologyHistoryItem,
   TopologyLogEntry,
   TopologySnapshot,
 } from "./types";
@@ -31,11 +33,12 @@ async function request<T>(
 }
 
 export const api = {
+  config: () => request<NFWebBrowserConfig>("/api/v1/config"),
   snapshot: (id: string) =>
     request<TopologySnapshot>(
       `/api/v1/topology/snapshots/${encodeURIComponent(id)}`,
     ),
-  history: () => request<string[]>("/api/v1/topology/history"),
+  history: () => request<TopologyHistoryItem[]>("/api/v1/topology/history"),
   logs: () => request<TopologyLogEntry[]>("/api/v1/topology/logs"),
   devices: () => request<DeviceInventory>("/api/v1/topology/devices"),
   selectDevices: (devices: string[]) =>
