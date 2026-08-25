@@ -57,7 +57,7 @@ norfab/
 │   ├── nfcli_shell/nfcli_shell_client.py  # Interactive CLI (nfcli)
 │   ├── robot_client.py        # Robot Framework library
 │   ├── textual_client.py      # TUI client (Textual)
-│   └── streamlit_client.py    # Web UI client (Streamlit)
+│   └── nfweb/                 # Local web client; topology is its first application
 ├── models/
 │   ├── norfab_configuration.py          # Pydantic models for inventory config
 │   ├── norfab_configuration_logging.py  # Logging config models
@@ -78,6 +78,8 @@ tests/
 │   ├── netbox/                       # NetBox service tests by task area plus common.py helpers
 │   ├── nornir/                       # Nornir service tests by task area
 │   └── workflow/                     # Workflow service tests by task area
+├── clients/
+│   └── nfweb/                         # NFWeb API, storage, and collector tests
 └── nfcli/                            # Interactive CLI shell tests
     ├── test_shell_client.py
     └── test_shell_common.py
@@ -331,6 +333,7 @@ Selected rule sets: `E`, `F`, `I`, `ANN`
 
 ## References
 
+- NFWeb developer guide: `docs/development/nfweb_developer_guide.md`
 - Task Pydantic models: `docs/development/tasks_pydantic_models_guide.md`
 - Documentation style guide for docs changes: `docs/development/documentation_style_guide.md`
 - Feature catalogue: `docs/norfab_features.md`

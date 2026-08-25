@@ -1,8 +1,7 @@
 import argparse
+import asyncio
 import logging
 import os
-import subprocess
-import sys
 
 from norfab.core.nfapi import NorFab
 
@@ -148,7 +147,7 @@ def nfcli() -> str | None:
         action="store_true",
         dest="WEB_UI",
         default=False,
-        help="Start WEB UI Client",
+        help="Start the local NFWeb client",
     )
     run_options.add_argument(
         "--tui",
@@ -258,25 +257,9 @@ def nfcli() -> str | None:
         nf.run()
     # start WEB UI Application
     elif WEB_UI:
-        script_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "clients", "streamlit_client.py"
-        )
-        cmd = [
-            sys.executable,
-            "-m",
-            "streamlit",
-            "run",
-            script_path,
-            "--server.address",
-            "127.0.0.1",
-            "--server.port",
-            "8501",
-            "--server.headless",
-            "true",
-        ]
-        proc = subprocess.Popen(cmd, stdout=None, stderr=None, stdin=None, shell=False)
-        log.info("Starting Streamlit server: %s", " ".join(cmd))
-        proc.wait()
+        from norfab.clients.nfweb.runtime import serve
+
+        asyncio.run(serve(inventory=INVENTORY, log_level=LOGLEVEL))
     # start interactive client shell only
     elif CLIENT:
         from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell

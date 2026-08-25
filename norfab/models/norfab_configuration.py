@@ -11,6 +11,7 @@ from pydantic import (
     StrictStr,
 )
 
+from norfab.clients.nfweb.config import NFWebConfig
 from norfab.models.norfab_configuration_logging import (
     LoggingConfig,
 )
@@ -137,6 +138,10 @@ class AgentProfile(BaseModel):
 class ClientConfig(BaseModel):
     """NorFab client-side configuration."""
 
+    nfweb: NFWebConfig = Field(
+        default_factory=NFWebConfig,
+        description="Local NFWeb client configuration",
+    )
     agent_profiles: Dict[StrictStr, AgentProfile] = Field(
         None,
         description="Named agent profiles for NFPClient.get_agent()",

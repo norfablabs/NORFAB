@@ -2,7 +2,22 @@
 
 NORFAB provides multiple client interfaces to interact with automation fabric, catering to different use cases and user preferences. These clients include:
 
-## 1. Robot Framework Client
+## NFWeb Local Web Client
+
+NFWeb is NORFAB's generic browser-based client for applications that run locally
+on an operator's computer. It connects to an existing broker through the native
+Python client and provides a shared local web runtime for visual operations,
+observability, troubleshooting, reporting, and future workflow-oriented tools.
+
+The first built-in NFWeb application is the live and historical 3D network
+topology dashboard. Topology is the initial use case, not the boundary of NFWeb as
+a client. NFWeb requires neither a FastAPI worker nor a Node.js runtime in
+production.
+
+Refer to [NFWeb Local Web Client](clients_nfweb_overview.md) for the client model,
+current applications, configuration, and operating details.
+
+## Robot Framework Client
 
 The Robot Framework Client integrates NORFAB with the Robot Framework, enabling users to define and execute workflows using a domain-specific language (DSL). It is ideal for users who prefer a keyword-driven approach to automation.
 
@@ -14,7 +29,7 @@ Refer to [Robot Client Documentation](clients_robot_client_overview.md) for more
 
 ---
 
-## 2. FastAPI REST API Client
+## FastAPI REST API Client
 
 The FastAPI Service provides a RESTful API interface to interact with NORFAB. It is designed for developers who prefer using HTTP-based APIs for automation and integration with other systems.
 
@@ -27,7 +42,7 @@ Refer to [FastAPI Service Documentation](workers/fastapi/services_fastapi_servic
 
 ---
 
-## 3. Command Line Interface (CLI)
+## Command Line Interface (CLI)
 
 The NORFAB CLI (`nfcli`) is an interactive shell interface for managing and automating network operations. It is suitable for users who prefer a command-line approach.
 
@@ -39,7 +54,7 @@ Refer to [CLI Documentation](clients_nfcli_overview.md) for more details.
 
 ---
 
-## 4. Python API Client
+## Python API Client
 
 The Python API Client provides a programmatic interface for developers to integrate NORFAB capabilities into their Python applications. It is ideal for advanced automation and custom integrations.
 
