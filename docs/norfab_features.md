@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 23 August 2026*
+*Last updated: 24 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -27,6 +27,7 @@ NORFAB service tasks use the same brokered job model across these interfaces:
 | Interface | Support | Best suited to |
 |-----------|---------|----------------|
 | **NFCLI** | Interactive commands for supported service tasks, inventory, workers, jobs, and results | Operators, troubleshooting, and ad-hoc changes |
+| **NFWeb** | Generic local browser client using native NORFAB access; the first application is live and historical 3D topology | Visual operations, observability, troubleshooting, reporting, and future web-based tools |
 | **Python API** | Direct task submission, synchronous results, futures, events, and worker input | Applications, scripts, and custom integrations |
 | **REST API** | FastAPI-generated endpoints for tasks that declare REST exposure | OSS/BSS integration, portals, and language-neutral automation |
 | **MCP** | FastMCP-generated tools and task-authored prompts for tasks that declare MCP exposure | AI assistants and agentic automation |
@@ -39,6 +40,26 @@ exceptions are called out below. REST requires a
 be deployed. The Python API is the complete native task interface. Task
 exposure metadata can exclude a REST endpoint or MCP tool, while FastMCP tool
 policy can further allow or reject published MCP tools.
+
+### NFWeb local web client
+
+Runs a browser-based NORFAB client on the operator's computer and connects it to an
+existing broker through the native Python API. NFWeb provides the local web host,
+packaged frontend, browser boundary, and application-specific services without
+requiring a FastAPI worker or a central web deployment. It is intended to grow into
+a collection of focused web applications for visual operations, observability,
+troubleshooting, reporting, and guided workflows.
+
+The first built-in application is the **3D topology observatory**. Its persistent
+Vasturiano scene combines intended NetBox cabling with observed LLDP, BGP, and
+interface state, makes partial collection failures visible, and stores compressed
+snapshots in a rolling three-hour local SQLite history. **Topology use cases:**
+weather-map dashboards, topology exploration, current-state windows, incident
+timelines, and intended-versus-observed context. **Current limitations:** the first
+release contains only the topology application and is read-only, local-only, and
+polling-based. Unknown telemetry is not inferred.
+[NFWeb client details](clients_nfweb_overview.md) ·
+[Topology application details](clients_nfweb_topology.md)
 
 ## Core platform
 

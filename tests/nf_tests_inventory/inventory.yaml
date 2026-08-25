@@ -1,5 +1,5 @@
 broker:
-  endpoint: '{{ env.get("BROKER_ENDPOINT", "tcp://192.168.1.24:5555") }}'
+  endpoint: '{{ env.get("BROKER_ENDPOINT", "tcp://127.0.0.1:5555") }}'
   shared_key: D>[[2]NH9#dN5?!o5DtibYYvV)ev?oRl}#P[>(q3
   zmq_auth: false
 
@@ -53,22 +53,22 @@ topology:
   broker: true
   workers:
   - netbox-worker-1.1
-  - netbox-worker-1.2
+  # - netbox-worker-1.2
   - nornir-worker-1
   - nornir-worker-2
-  - nornir-worker-3
-  - nornir-worker-4
-  - nornir-worker-5: # fetches inventory from Netbox
-      depends_on:
-      - netbox-worker-1.1
-      - netbox-worker-1.2
-  - nornir-worker-6 # vMX
-  - agent-worker-1
-  - fastapi-worker-1
-  - dummy-worker-1
-  - workflow-worker-1
-  - fastmcp-worker-1
-  - fakenos-worker-1
+  # - nornir-worker-3
+  # - nornir-worker-4
+  # - nornir-worker-5: # fetches inventory from Netbox
+  #     depends_on:
+  #     - netbox-worker-1.1
+  #     - netbox-worker-1.2
+  # - nornir-worker-6 # vMX
+  # - agent-worker-1
+  # - fastapi-worker-1
+  # - dummy-worker-1
+  # - workflow-worker-1
+  # - fastmcp-worker-1
+  # - fakenos-worker-1
 workers:
   agent-worker-1:
   - agents/common.yaml

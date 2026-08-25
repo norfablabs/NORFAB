@@ -202,6 +202,9 @@ nav:
 
 - Clients:
   - Clients Overview: clients_overview.md
+  - NFWeb Local Web Client:
+    - Overview: clients_nfweb_overview.md
+    - 3D Network Topology Application: clients_nfweb_topology.md
   - NFCLI Shell Client: clients_nfcli_overview.md
   - Python API Client: clients_python_api_overview.md
   - ROBOT Client: clients_robot_client_overview.md
@@ -246,6 +249,7 @@ nav:
     - Events: reference_norfab_events_subsystem.md
 
 - Development:
+  - NFWeb Developer Guide: development/nfweb_developer_guide.md
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md
   - Task Pydantic Models Guide: development/adr_tasks_pydantic_models_guide.md
@@ -265,6 +269,7 @@ nav:
     - Norfab AAA Security Architecture: development\adr_norfab_aaa_security_architecture.md
     - Norfab Logging Isolation: development/adr_norfab_logging_isolation.md
     - Invoke Developer Automation: development/adr_invoke_developer_automation.md
+    - NFWeb Platform and First 3D Topology: development/adr_web_ui_topology_architecture.md
     - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
     - Nornir Create Hosts from NetBox Devices: development/adr_nornir_create_hosts_from_netbox_devices.md
   - Testing:

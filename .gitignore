@@ -26,4 +26,5 @@ docs/Makefile
 !docker/norfab-docker-tests/distributed-basic/broker/__norfab__/files/broker/private_keys/broker.key_secret
 site
 *ipynb_checkpoints*
+node_modules/
 tests/nf_tests_inventory/agents/common.yaml
