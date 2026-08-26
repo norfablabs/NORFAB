@@ -699,22 +699,26 @@ def recv(client) -> None:
                          poller, job_db, and configuration.
     """
     while not client.exit_event.is_set() and not client.destroy_event.is_set():
-        # Poll socket for messages every 500ms interval
+        msg = None
         try:
-            items = client.poller.poll(500)
+            # Serialize polling and receiving with sends performed by the
+            # dispatcher and API threads. ZeroMQ sockets are not thread-safe.
+            with client.socket_lock:
+                items = client.poller.poll(100)
+                if items:
+                    try:
+                        msg = client.broker_socket.recv_multipart(zmq.NOBLOCK)
+                    except zmq.Again:
+                        # Readiness can become stale; resume polling instead of
+                        # blocking while holding the socket lock.
+                        pass
         except KeyboardInterrupt:
             break
         except Exception:
             continue
 
-        if not items:
+        if msg is None:
             continue
-
-        with client.socket_lock:
-            try:
-                msg = client.broker_socket.recv_multipart(zmq.NOBLOCK)
-            except zmq.Again:
-                continue
 
         client.stats_recv_from_broker += 1
 

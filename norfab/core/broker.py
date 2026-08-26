@@ -319,13 +319,24 @@ class NFPBroker:
         """
         while True:
             try:
-                items = self.poller.poll(1000)
+                msg = None
+                # ZeroMQ sockets are not thread-safe. Keep polling and receiving
+                # under the same lock used by the worker keepalive threads so the
+                # ROUTER socket is never accessed concurrently. Use a short poll
+                # interval to avoid delaying keepalive sends for up to a second.
+                with self.socket_lock:
+                    items = self.poller.poll(100)
+                    if items:
+                        try:
+                            msg = self.socket.recv_multipart(zmq.NOBLOCK)
+                        except zmq.Again:
+                            # The readiness notification can become stale before
+                            # recv; resume polling instead of blocking the lock.
+                            pass
             except KeyboardInterrupt:
                 break  # Interrupted
 
-            if items:
-                with self.socket_lock:
-                    msg = self.socket.recv_multipart()
+            if msg is not None:
                 log.debug(f"NFPBroker - received '{msg}'")
 
                 if len(msg) < 3:

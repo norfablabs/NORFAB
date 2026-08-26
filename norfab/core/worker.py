@@ -1528,14 +1528,23 @@ def recv(worker, destroy_event) -> None:
         - Other: Logs an invalid input message.
     """
     while not destroy_event.is_set():
-        # Poll socket for messages every 1000ms
+        msg = None
         try:
-            items = worker.poller.poll(1000)
+            # Serialize polling and receiving with keepalive and job-thread
+            # sends. ZeroMQ sockets are not thread-safe.
+            with worker.socket_lock:
+                items = worker.poller.poll(100)
+                if items:
+                    try:
+                        msg = worker.broker_socket.recv_multipart(zmq.NOBLOCK)
+                    except zmq.Again:
+                        # Readiness can become stale; resume polling instead of
+                        # blocking while holding the socket lock.
+                        pass
         except KeyboardInterrupt:
             break  # Interrupted
-        if items:
-            with worker.socket_lock:
-                msg = worker.broker_socket.recv_multipart()
+
+        if msg is not None:
             log.debug(f"{worker.name} - received '{msg}'")
             empty = msg.pop(0)  # noqa
             header = msg.pop(0)
@@ -1607,9 +1616,9 @@ class NFPWorker:
         self.broker_socket = None
         self.multiplier = multiplier
         self.keepalive = keepalive
-        self.socket_lock = (
-            threading.Lock()
-        )  # used for keepalives to protect socket object
+        # Re-entrant because reconnect holds this lock while using the normal
+        # send path to emit DISCONNECT and READY messages.
+        self.socket_lock = threading.RLock()
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.build_message = NFP.MessageBuilder()
 
@@ -1719,54 +1728,57 @@ class NFPWorker:
         9. Increments the reconnect statistics counter.
         10. Logs the successful registration to the broker.
         """
-        if self.broker_socket:
-            self.send_to_broker(NFP.DISCONNECT)
-            self.poller.unregister(self.broker_socket)
-            self.broker_socket.close()
+        with self.socket_lock:
+            if self.broker_socket:
+                self.send_to_broker(NFP.DISCONNECT)
+                self.poller.unregister(self.broker_socket)
+                self.broker_socket.close()
 
-        self.broker_socket = self.ctx.socket(zmq.DEALER)
-        self.broker_socket.setsockopt_unicode(zmq.IDENTITY, self.name, "utf8")
-        self.broker_socket.linger = 0
+            self.broker_socket = self.ctx.socket(zmq.DEALER)
+            self.broker_socket.setsockopt_unicode(zmq.IDENTITY, self.name, "utf8")
+            self.broker_socket.linger = 0
 
-        if self.zmq_auth is not False:
-            # We need two certificates, one for the client and one for
-            # the server. The client must know the server's public key
-            # to make a CURVE connection.
-            client_secret_file = os.path.join(
-                self.secret_keys_dir, f"{self.name}.key_secret"
-            )
-            client_public, client_secret = zmq.auth.load_certificate(client_secret_file)
-            self.broker_socket.curve_secretkey = client_secret
-            self.broker_socket.curve_publickey = client_public
+            if self.zmq_auth is not False:
+                # We need two certificates, one for the client and one for
+                # the server. The client must know the server's public key
+                # to make a CURVE connection.
+                client_secret_file = os.path.join(
+                    self.secret_keys_dir, f"{self.name}.key_secret"
+                )
+                client_public, client_secret = zmq.auth.load_certificate(
+                    client_secret_file
+                )
+                self.broker_socket.curve_secretkey = client_secret
+                self.broker_socket.curve_publickey = client_public
 
-            # The client must know the server's public key to make a CURVE connection.
-            server_public_file = os.path.join(self.public_keys_dir, "broker.key")
-            server_public, _ = zmq.auth.load_certificate(server_public_file)
-            self.broker_socket.curve_serverkey = server_public
+                # The client must know the server's public key to make a CURVE connection.
+                server_public_file = os.path.join(self.public_keys_dir, "broker.key")
+                server_public, _ = zmq.auth.load_certificate(server_public_file)
+                self.broker_socket.curve_serverkey = server_public
 
-        self.broker_socket.connect(self.broker)
-        self.poller.register(self.broker_socket, zmq.POLLIN)
+            self.broker_socket.connect(self.broker)
+            self.poller.register(self.broker_socket, zmq.POLLIN)
 
-        # Register service with broker
-        self.send_to_broker(NFP.READY)
-        log.debug(f"{self.name} - NFP.READY sent to broker '{self.broker}'")
+            # Register service with broker
+            self.send_to_broker(NFP.READY)
+            log.debug(f"{self.name} - NFP.READY sent to broker '{self.broker}'")
 
-        # start keepalives
-        if self.keepaliver is not None:
-            self.keepaliver.restart(self.broker_socket)
-        else:
-            self.keepaliver = KeepAliver(
-                address=None,
-                socket=self.broker_socket,
-                multiplier=self.multiplier,
-                keepalive=self.keepalive,
-                exit_event=self.destroy_event,
-                service=self.service,
-                whoami=NFP.WORKER,
-                name=self.name,
-                socket_lock=self.socket_lock,
-            )
-            self.keepaliver.start()
+            # Start or retarget keepalives while socket replacement is locked.
+            if self.keepaliver is not None:
+                self.keepaliver.restart(self.broker_socket)
+            else:
+                self.keepaliver = KeepAliver(
+                    address=None,
+                    socket=self.broker_socket,
+                    multiplier=self.multiplier,
+                    keepalive=self.keepalive,
+                    exit_event=self.destroy_event,
+                    service=self.service,
+                    whoami=NFP.WORKER,
+                    name=self.name,
+                    socket_lock=self.socket_lock,
+                )
+                self.keepaliver.start()
 
         self.stats_reconnect_to_broker += 1
         log.info(
