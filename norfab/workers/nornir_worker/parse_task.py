@@ -145,6 +145,8 @@ class ParseTask:
         ret.result = result.result
         ret.failed = result.failed
         ret.errors = result.errors
+        ret.resources = result.resources
+        ret.resources_failed = result.resources_failed
 
         return ret
 
@@ -248,6 +250,10 @@ class ParseTask:
                 cli_run_kwargs["FM"] = cli_run["params"]["platform"]
             result = self.cli(
                 job=job, commands=cli_run["commands"], **cli_run_kwargs, plugin=plugin
+            )
+            ret.resources = sorted(set(ret.resources + result.resources))
+            ret.resources_failed = sorted(
+                set(ret.resources_failed + result.resources_failed)
             )
             if result.failed:
                 log.error(

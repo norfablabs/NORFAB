@@ -34,6 +34,7 @@ class TestJunipervMX:
             "cli",
             workers=["nornir-worker-6"],
             kwargs={
+                "on_failed": True,
                 "commands": commands,
                 "plugin": plugin,
             },
@@ -56,6 +57,7 @@ class TestJunipervMX:
             "cfg",
             workers=["nornir-worker-6"],
             kwargs={
+                "on_failed": True,
                 "config": config,
                 "plugin": "netmiko",
                 "commit": {"confirm": True, "confirm_delay": 5, "comment": "foo"},

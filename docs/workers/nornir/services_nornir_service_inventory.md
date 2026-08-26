@@ -36,6 +36,8 @@ Sample Nornir worker inventory definition
         service: nornir
         watchdog_interval: 30
         connections_idle_timeout: null
+        failed_hosts_recovery_timeout: 60
+        reset_failed_hosts_before_task: false
 
         # these parameters mapped to Nornir inventory
         # https://nornir.readthedocs.io/en/latest/tutorial/inventory.html
@@ -85,6 +87,45 @@ Watchdog run interval in seconds, default is 30
 **connections_idle_timeout**
 
 Watchdog connection idle timeout, default is ``None`` - no timeout, connection always kept alive, if set to 0, connections disconnected right after task completed, if positive number, connection disconnected after not being used for over ``connections_idle_timeout``
+
+**failed_hosts_recovery_timeout**
+
+Time in seconds before the watchdog recovers hosts marked as failed by Nornir.
+The default is `60`. This setting is used only when
+`reset_failed_hosts_before_task` is `false`.
+
+While a host is errdisabled, later Nornir tasks skip it by default. Set
+`on_failed=True` in the Python API, or use `on-failed` in NFCLI, to include
+errdisabled hosts in one specific task execution. This does not clear their
+failed-host state.
+
+Use the `errdisabled_hosts_list` task or `show nornir errdisabled-hosts` to
+inspect recovery timing. Use the `errdisabled_hosts_clear` task or
+`nornir clear errdisabled-hosts` to recover all hosts immediately. See
+[Errdisabled Hosts Tasks](services_nornir_service_tasks_errdisabled_hosts.md)
+for the complete workflow.
+
+**reset_failed_hosts_before_task**
+
+Reset Nornir's failed-host state before each task. The default is `false`,
+which enables errdisabled-host tracking and recovery. Set this to `true` only
+to retain the earlier behavior where every task starts with all matched hosts
+enabled.
+
+!!! warning "Mutually exclusive recovery modes"
+
+    When `reset_failed_hosts_before_task: true`, persistent errdisabled-host
+    behavior is disabled. `failed_hosts_recovery_timeout` does not control host
+    eligibility because failed hosts are reset before the next task. The
+    `on_failed`/`on-failed` override and watchdog recovery timer are therefore
+    unnecessary in this mode.
+
+    When `reset_failed_hosts_before_task: false`, failed hosts remain
+    errdisabled until the watchdog timeout expires, they are cleared on demand,
+    or a particular run includes them with `on_failed=True`.
+
+Nornir task results include hosts executed during the current job in
+`resources`, and hosts that failed during that job in `resources_failed`.
 
 ## Netbox Inventory Integration
 

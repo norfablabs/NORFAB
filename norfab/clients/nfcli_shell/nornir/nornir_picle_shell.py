@@ -178,6 +178,28 @@ class NornirShowInventoryModel(
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
+class NornirErrdisabledHostsListModel(ClientRunJobArgs):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> Any:
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600) or 600
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+        result = run_future_job(
+            "nornir",
+            "errdisabled_hosts_list",
+            workers=workers,
+            timeout=timeout,
+            nowait=nowait,
+        )
+        if nowait:
+            return result, Outputters.outputter_nested
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
 class NornirShowCommandsModel(BaseModel):
     inventory: NornirShowInventoryModel = Field(
         None,
@@ -199,6 +221,11 @@ class NornirShowCommandsModel(BaseModel):
     watchdog: ShowWatchDogModel = Field(
         None,
         description="show Nornir service version report",
+    )
+    errdisabled_hosts: NornirErrdisabledHostsListModel = Field(
+        None,
+        description="show Nornir errdisabled hosts",
+        alias="errdisabled-hosts",
     )
 
     class PicleConfig:
@@ -264,6 +291,36 @@ class RefreshNornirModel(
         return log_error_or_result(result, verbose_result=verbose_result)
 
 
+class NornirErrdisabledHostsClearModel(ClientRunJobArgs):
+    @staticmethod
+    def run(*args: object, **kwargs: object) -> Any:
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600) or 600
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+        result = run_future_job(
+            "nornir",
+            "errdisabled_hosts_clear",
+            workers=workers,
+            timeout=timeout,
+            nowait=nowait,
+        )
+        if nowait:
+            return result, Outputters.outputter_nested
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+    class PicleConfig:
+        outputter = Outputters.outputter_nested
+
+
+class NornirClearCommandsModel(BaseModel):
+    errdisabled_hosts: NornirErrdisabledHostsClearModel = Field(
+        None,
+        description="recover all Nornir errdisabled hosts",
+        alias="errdisabled-hosts",
+    )
+
+
 # ---------------------------------------------------------------------------------------------
 # NORNIR SERVICE MAIN SHELL MODEL
 # ---------------------------------------------------------------------------------------------
@@ -292,6 +349,9 @@ class NornirServiceCommands(BaseModel):
         None, description="Manage devices using NETCONF"
     )
     snmp: NornirSnmpShell = Field(None, description="Interact with devices using SNMP")
+    clear: NornirClearCommandsModel = Field(
+        None, description="Clear Nornir service state"
+    )
 
     class PicleConfig:
         subshell = True

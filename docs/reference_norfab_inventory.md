@@ -270,6 +270,8 @@ data = {
             {
                 "service": "nornir",
                 "watchdog_interval": 30,
+                "failed_hosts_recovery_timeout": 60,
+                "reset_failed_hosts_before_task": False,
                 "runner": {
                     "plugin": "RetryRunner",
                     "options": {
@@ -304,5 +306,39 @@ if __name__ == "__main__":
 
     nf.destroy()
 ```
+
+### Nornir failed-host recovery settings
+
+Nornir workers support two mutually exclusive failed-host modes:
+
+| Setting | Default | Usage |
+|---|---:|---|
+| `failed_hosts_recovery_timeout` | `60` | Number of seconds a failed host remains errdisabled before watchdog recovery. Used when `reset_failed_hosts_before_task` is `false`. |
+| `reset_failed_hosts_before_task` | `false` | When `true`, reset all failed hosts before every Nornir task and disable persistent errdisabled-host behavior. |
+
+Recommended persistent errdisabled mode:
+
+```yaml
+service: nornir
+failed_hosts_recovery_timeout: 60
+reset_failed_hosts_before_task: false
+```
+
+Compatibility mode matching the earlier always-reset behavior:
+
+```yaml
+service: nornir
+reset_failed_hosts_before_task: true
+```
+
+In compatibility mode, `failed_hosts_recovery_timeout` is effectively ignored
+because failed hosts are made eligible before every task. Do not configure the
+two settings as if both recovery mechanisms will apply.
+
+With persistent errdisabled mode enabled, Nornir tasks skip failed hosts by
+default. Use the Python argument `on_failed=True`, or the NFCLI argument
+`on-failed`, to include them for one run without clearing their failed state.
+See [Nornir Errdisabled Hosts Tasks](workers/nornir/services_nornir_service_tasks_errdisabled_hosts.md)
+for inspection and recovery commands.
 
 In above example, `data` dictionary contains complete NorFab inventory and passed onto `NorFab` object together with `base_dir` argument to inform NorFab where to search for inventory YAML files, for example `"nornir/nornir-worker-2.yaml"` file will be searched within this path ``"./norfab/nornir/nornir-worker-2.yaml"`` since `./norfab/` is a base directory. Base directory argument is optional and will be automatically set by NorFab to current directory.

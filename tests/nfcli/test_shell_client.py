@@ -40,6 +40,22 @@ class TestNornirShowCommands:
     def test_show_version(self):
         pass
 
+    def test_show_errdisabled_hosts(self, picle_shell, capsys):
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd("show nornir errdisabled-hosts")
+
+        captured = capsys.readouterr()
+        assert "nornir-worker" in captured.out
+
+    def test_clear_errdisabled_hosts(self, picle_shell, capsys):
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd("nornir clear errdisabled-hosts")
+
+        captured = capsys.readouterr()
+        assert "nornir-worker" in captured.out
+
 
 class TestNornirCli:
     @pytest.mark.skip(reason="TBD")

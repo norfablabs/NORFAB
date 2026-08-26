@@ -95,6 +95,7 @@ class SnmpTask:
 
         with self.connections_lock:
             result = nr.run(task=puresnmp_call, call=call, **kwargs)
+        self.update_nornir_result(result, ret)
 
         ret.failed = result.failed
         ret.result = ResultSerializer(

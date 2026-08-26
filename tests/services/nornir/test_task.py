@@ -1,4 +1,5 @@
 import pprint
+
 import pytest
 
 pytestmark = [
@@ -13,7 +14,11 @@ class TestNornirTask:
             "nornir",
             "task",
             workers=["nornir-worker-1"],
-            kwargs={"plugin": "nornir_salt.plugins.tasks.nr_test", "foo": "bar"},
+            kwargs={
+                "on_failed": True,
+                "plugin": "nornir_salt.plugins.tasks.nr_test",
+                "foo": "bar",
+            },
         )
         pprint.pprint(ret)
 
@@ -27,6 +32,7 @@ class TestNornirTask:
             "task",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "plugin": "nornir_salt.plugins.tasks.nr_test",
                 "foo": "bar",
                 "add_details": True,
@@ -52,7 +58,7 @@ class TestNornirTask:
             "nornir",
             "task",
             workers=["nornir-worker-1"],
-            kwargs={"plugin": "nf://nornir_tasks/dummy.py"},
+            kwargs={"on_failed": True, "plugin": "nf://nornir_tasks/dummy.py"},
         )
         pprint.pprint(ret)
 
@@ -65,7 +71,7 @@ class TestNornirTask:
             "nornir",
             "task",
             workers=["nornir-worker-1"],
-            kwargs={"plugin": "nf://nornir_tasks/_non_existing_.py"},
+            kwargs={"on_failed": True, "plugin": "nf://nornir_tasks/_non_existing_.py"},
         )
         pprint.pprint(ret, width=150)
 
@@ -86,6 +92,7 @@ class TestNornirTask:
             "task",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "plugin": "nornir_salt.plugins.tasks.non_existing_module",
                 "foo": "bar",
             },
@@ -108,11 +115,20 @@ class TestNornirTask:
             "nornir",
             "task",
             workers=["nornir-worker-1"],
-            kwargs={"plugin": "nf://nornir_tasks/dummy_with_error.py"},
+            kwargs={
+                "on_failed": True,
+                "plugin": "nf://nornir_tasks/dummy_with_error.py",
+            },
         )
         pprint.pprint(ret, width=150)
 
         for worker_name, worker_results in ret.items():
+            assert sorted(worker_results["resources"]) == sorted(
+                worker_results["result"]
+            )
+            assert sorted(worker_results["resources_failed"]) == sorted(
+                worker_results["result"]
+            )
             for hostname, host_results in worker_results["result"].items():
                 assert (
                     "Traceback" in host_results["dummy"]
@@ -124,7 +140,10 @@ class TestNornirTask:
             "nornir",
             "task",
             workers=["nornir-worker-1"],
-            kwargs={"plugin": "nf://nornir_tasks/dummy_with_subtasks.py"},
+            kwargs={
+                "on_failed": True,
+                "plugin": "nf://nornir_tasks/dummy_with_subtasks.py",
+            },
         )
         pprint.pprint(ret)
 
@@ -141,6 +160,7 @@ class TestNornirTask:
             "task",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "plugin": "nornir_netmiko.tasks.netmiko_send_command",
                 "FC": "spine",
                 "command_string": "show clock",
@@ -161,6 +181,7 @@ class TestNornirTask:
             "task",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "plugin": "nornir_netmiko.tasks.netmiko_send_command.netmiko_send_command",
                 "FC": "spine",
                 "command_string": "show clock",

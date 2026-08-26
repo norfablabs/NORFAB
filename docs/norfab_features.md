@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 24 August 2026*
+*Last updated: 26 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -558,10 +558,20 @@ session limits, latency, and task timeouts.
 
 Reuses connections across jobs and tracks them by host/plugin; idle connections
 can be retained indefinitely, closed immediately, or expired after a configured
-timeout, with client-visible connection state and statistics. **Use cases:**
+timeout, with client-visible connection state and statistics. Failed hosts remain
+errdisabled until the recovery timeout expires, can be included explicitly with
+`on_failed` (`on-failed` in NFCLI), and can be inspected or recovered on demand
+through NFCLI. Optional pre-task reset mode preserves the earlier always-recover
+behavior and disables persistent errdisabled-host handling; it is mutually
+exclusive with watchdog timeout recovery. Task results identify executed hosts
+in `resources` and current failures in
+`resources_failed`. **Use cases:**
 low-latency repeated polling, limiting login churn, releasing scarce sessions,
-and diagnosing connection leaks. **Limitations:** long-lived sessions must align
-with device timeout and credential-rotation policy.
+diagnosing connection leaks, and suppressing repeated work against unreachable
+devices. **Limitations:** long-lived sessions must align with device timeout and
+credential-rotation policy; failed-host reasons are available only when captured
+from the originating task result.
+[Errdisabled-host task details](workers/nornir/services_nornir_service_tasks_errdisabled_hosts.md)
 
 ## NetBox service
 

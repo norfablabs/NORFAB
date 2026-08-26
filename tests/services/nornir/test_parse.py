@@ -14,7 +14,7 @@ class TestNornirParseTasks:
             "nornir",
             "parse_napalm",
             workers=["nornir-worker-1"],
-            kwargs={"getters": "get_facts"},
+            kwargs={"on_failed": True, "getters": "get_facts"},
         )
         pprint.pprint(ret)
 
@@ -34,7 +34,7 @@ class TestNornirParseTasks:
             "nornir",
             "parse_napalm",
             workers=["nornir-worker-1"],
-            kwargs={"getters": "get_ntp_peers"},
+            kwargs={"on_failed": True, "getters": "get_ntp_peers"},
         )
         pprint.pprint(ret)
 
@@ -51,7 +51,7 @@ class TestNornirParseTasks:
             "nornir",
             "parse_napalm",
             workers=["nornir-worker-1"],
-            kwargs={"getters": ["get_facts", "get_interfaces"]},
+            kwargs={"on_failed": True, "getters": ["get_facts", "get_interfaces"]},
         )
         pprint.pprint(ret)
 
@@ -75,6 +75,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "ttp://platform/arista_eos_show_hostname.txt",
                 "commands": "show hostname",
                 "enable": True,
@@ -96,6 +97,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "ttp://misc/Netbox/parse_arista_eos_config.txt",
                 "enable": True,
             },
@@ -114,6 +116,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "nf://ttp/parse_eos_intf.txt",
                 "enable": True,
             },
@@ -132,6 +135,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "nf://ttp/parse_eos_intf.txt",
                 "enable": True,
                 "plugin": "netmiko",
@@ -152,6 +156,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "nf://ttp/parse_eos_intf.txt",
                 "plugin": "scrapli",
             },
@@ -170,6 +175,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
                 "plugin": "napalm",
@@ -189,6 +195,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
             },
@@ -208,7 +215,12 @@ class TestNornirParseTasks:
             "nornir",
             "parse_ttp",
             workers=["nornir-worker-1"],
-            kwargs={"get": "inventory", "FC": "spine", "enable": True},
+            kwargs={
+                "on_failed": True,
+                "get": "inventory",
+                "FC": "spine",
+                "enable": True,
+            },
         )
         pprint.pprint(ret)
 
@@ -221,7 +233,7 @@ class TestNornirParseTasks:
             "nornir",
             "parse_ttp",
             workers=["nornir-worker-1"],
-            kwargs={"commands": "show clock"},
+            kwargs={"on_failed": True, "commands": "show clock"},
         )
         pprint.pprint(ret)
 
@@ -241,7 +253,7 @@ class TestNornirParseTasks:
             "nornir",
             "parse_napalm",
             workers=["nornir-worker-1"],
-            kwargs={"getters": "get_facts", "to_dict": False},
+            kwargs={"on_failed": True, "getters": "get_facts", "to_dict": False},
         )
         pprint.pprint(ret)
 
@@ -257,7 +269,7 @@ class TestNornirParseTasks:
             "nornir",
             "parse_napalm",
             workers=["nornir-worker-1"],
-            kwargs={"getters": "get_facts", "add_details": True},
+            kwargs={"on_failed": True, "getters": "get_facts", "add_details": True},
         )
         pprint.pprint(ret)
 
@@ -276,7 +288,7 @@ class TestNornirParseTasks:
             "nornir",
             "parse_napalm",
             workers=["nornir-worker-1"],
-            kwargs={"getters": "get_facts", "FC": "spine"},
+            kwargs={"on_failed": True, "getters": "get_facts", "FC": "spine"},
         )
         pprint.pprint(ret)
 
@@ -291,7 +303,11 @@ class TestNornirParseTasks:
             "nornir",
             "parse_napalm",
             workers=["nornir-worker-1"],
-            kwargs={"getters": "get_facts", "FC": "nonexistent_host_xyz"},
+            kwargs={
+                "on_failed": True,
+                "getters": "get_facts",
+                "FC": "nonexistent_host_xyz",
+            },
         )
         pprint.pprint(ret)
 
@@ -309,6 +325,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
                 "structure": "flat_list",
@@ -331,6 +348,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
                 "structure": "list",
@@ -353,6 +371,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
                 "structure": "dictionary",
@@ -374,6 +393,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "NONMATCHING_PATTERN_XYZ {{ field }}",
                 "commands": "show clock",
                 "strict": False,
@@ -393,6 +413,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "NONMATCHING_PATTERN_XYZ {{ field }}",
                 "commands": "show clock",
                 "strict": True,
@@ -412,6 +433,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": ["show clock"],
                 "strict": True,
@@ -431,6 +453,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
                 "FC": "spine",
@@ -450,6 +473,7 @@ class TestNornirParseTasks:
             "parse_ttp",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "template": "Clock source: {{ source }}",
                 "commands": "show clock",
                 "FC": "nonexistent_host_xyz",
@@ -467,6 +491,7 @@ class TestNornirParseTasks:
             "parse_textfsm",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "show hostname",
                 "FC": "spine",
             },
@@ -487,6 +512,7 @@ class TestNornirParseTasks:
             "parse_textfsm",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show hostname", "show version"],
                 "FC": "spine",
             },
@@ -507,6 +533,7 @@ class TestNornirParseTasks:
             "parse_textfsm",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "show hostname",
                 "FC": "spine",
                 "to_dict": False,
@@ -527,6 +554,7 @@ class TestNornirParseTasks:
             "parse_textfsm",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "show hostname",
                 "FC": "spine",
                 "add_details": True,
@@ -552,6 +580,7 @@ class TestNornirParseTasks:
             "parse_textfsm",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "show hostname",
                 "FC": "spine",
             },
@@ -570,6 +599,7 @@ class TestNornirParseTasks:
             "parse_textfsm",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "show hostname",
                 "FC": "nonexistent_host_xyz",
             },
@@ -586,6 +616,7 @@ class TestNornirParseTasks:
             "parse_textfsm",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "show hostname",
                 "template": "nf://textfsm/arista_eos_show_hostname.textfsm",
                 "FC": "spine",

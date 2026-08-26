@@ -16,7 +16,7 @@ class TestSnmpWorker:
             "nornir",
             "snmp_get",
             workers=["nornir-worker-1", "nornir-worker-2"],
-            kwargs={"oid": "1.3.6.1.2.1.1.5.0"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.1.5.0"},
         )
         pprint.pprint(ret)
 
@@ -35,7 +35,7 @@ class TestSnmpWorker:
             "nornir",
             "snmp_getnext",
             workers=["nornir-worker-1"],
-            kwargs={"oid": "1.3.6.1.2.1.1.5.0"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.1.5.0"},
         )
         pprint.pprint(ret)
 
@@ -51,6 +51,7 @@ class TestSnmpWorker:
             "snmp_multiget",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "oids": ["1.3.6.1.2.1.1.1.0", "1.3.6.1.2.1.1.5.0"],
             },
         )
@@ -67,7 +68,7 @@ class TestSnmpWorker:
             "nornir",
             "snmp_walk",
             workers=["nornir-worker-1"],
-            kwargs={"oid": "1.3.6.1.2.1.1"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.1"},
         )
         pprint.pprint(ret)
 
@@ -87,6 +88,7 @@ class TestSnmpWorker:
             "snmp_multiwalk",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "oids": ["1.3.6.1.2.1.1", "1.3.6.1.2.1.2.2"],
             },
         )
@@ -104,6 +106,7 @@ class TestSnmpWorker:
             "snmp_bulkget",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "scalar_oids": ["1.3.6.1.2.1.1.5.0"],
                 "repeating_oids": ["1.3.6.1.2.1.2.2.1.2"],
             },
@@ -121,7 +124,7 @@ class TestSnmpWorker:
             "nornir",
             "snmp_bulkwalk",
             workers=["nornir-worker-1"],
-            kwargs={"oids": ["1.3.6.1.2.1.2.2.1.2"]},
+            kwargs={"on_failed": True, "oids": ["1.3.6.1.2.1.2.2.1.2"]},
         )
         pprint.pprint(ret)
 
@@ -136,7 +139,7 @@ class TestSnmpWorker:
             "nornir",
             "snmp_table",
             workers=["nornir-worker-1"],
-            kwargs={"oid": "1.3.6.1.2.1.2.2"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.2.2"},
         )
         pprint.pprint(ret)
 
@@ -151,7 +154,7 @@ class TestSnmpWorker:
             "nornir",
             "snmp_bulktable",
             workers=["nornir-worker-1"],
-            kwargs={"oid": "1.3.6.1.2.1.2.2"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.2.2"},
         )
         pprint.pprint(ret)
 
@@ -165,7 +168,7 @@ class TestSnmpWorker:
         ret = nfclient.run_job(
             "nornir",
             "snmp_get",
-            kwargs={"oid": "1.3.6.1.2.1.1.5.0", "FC": "spine"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.1.5.0", "FC": "spine"},
         )
         pprint.pprint(ret)
 
@@ -179,7 +182,7 @@ class TestSnmpWorker:
         ret = nfclient.run_job(
             "nornir",
             "snmp_get",
-            kwargs={"oid": "1.3.6.1.2.1.1.5.0", "FC": "nonexistent"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.1.5.0", "FC": "nonexistent"},
         )
         pprint.pprint(ret)
 
@@ -193,7 +196,9 @@ class TestSnmpWorker:
         ret = nfclient.run_job(
             "nornir",
             "snmp_get",
-            kwargs={},
+            kwargs={
+                "on_failed": True,
+            },
         )
         pprint.pprint(ret)
 
@@ -208,7 +213,7 @@ class TestSnmpWorker:
             "nornir",
             "snmp_get",
             workers=["nornir-worker-1"],
-            kwargs={"oid": "1.3.6.1.2.1.1.6.0", "FC": "spine"},
+            kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.1.6.0", "FC": "spine"},
         )
         pprint.pprint(ret)
 
@@ -226,6 +231,7 @@ class TestSnmpWorker:
                 "snmp_set",
                 workers=["nornir-worker-1"],
                 kwargs={
+                    "on_failed": True,
                     "oid": "1.3.6.1.2.1.1.6.0",
                     "value": test_value,
                     "FC": "spine",
@@ -241,7 +247,7 @@ class TestSnmpWorker:
                 "nornir",
                 "snmp_get",
                 workers=["nornir-worker-1"],
-                kwargs={"oid": "1.3.6.1.2.1.1.6.0", "FC": "spine"},
+                kwargs={"on_failed": True, "oid": "1.3.6.1.2.1.1.6.0", "FC": "spine"},
             )
             pprint.pprint(ret)
 
@@ -260,6 +266,7 @@ class TestSnmpWorker:
                         "snmp_set",
                         workers=["nornir-worker-1"],
                         kwargs={
+                            "on_failed": True,
                             "oid": "1.3.6.1.2.1.1.6.0",
                             "value": orig_val,
                             "FL": [host],
@@ -274,6 +281,7 @@ class TestSnmpWorker:
             "snmp_multiget",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "oids": ["1.3.6.1.2.1.1.6.0", "1.3.6.1.2.1.1.4.0"],
                 "FC": "spine",
             },
@@ -296,6 +304,7 @@ class TestSnmpWorker:
                 "snmp_multiset",
                 workers=["nornir-worker-1"],
                 kwargs={
+                    "on_failed": True,
                     "mappings": {
                         "1.3.6.1.2.1.1.6.0": "NorFab test location",
                         "1.3.6.1.2.1.1.4.0": "norfab@test.local",
@@ -314,6 +323,7 @@ class TestSnmpWorker:
                 "snmp_multiget",
                 workers=["nornir-worker-1"],
                 kwargs={
+                    "on_failed": True,
                     "oids": ["1.3.6.1.2.1.1.6.0", "1.3.6.1.2.1.1.4.0"],
                     "FC": "spine",
                 },
@@ -343,6 +353,7 @@ class TestSnmpWorker:
                         "snmp_multiset",
                         workers=["nornir-worker-1"],
                         kwargs={
+                            "on_failed": True,
                             "mappings": restore_mappings,
                             "FL": [host],
                         },

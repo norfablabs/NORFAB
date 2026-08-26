@@ -12,6 +12,7 @@ class TestNornirJinja2Filters:
             "cli",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "nf://cli/test_network_hosts.txt",
                 "dry_run": True,
             },
@@ -31,6 +32,7 @@ class TestNornirJinja2Filters:
             "cli",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "nf://cli/test_network_hosts_with_prefixlen.txt",
                 "dry_run": True,
             },
@@ -51,6 +53,7 @@ class TestNornirJinja2Filters:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_netbox_filter_interface.txt",
                 "FL": ["ceos-spine-1"],
                 "dry_run": True,
@@ -72,6 +75,7 @@ class TestNornirJinja2Filters:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_suite_netbox_filter_interfaces.txt",
                 "FL": ["ceos-spine-1"],
                 "dry_run": True,

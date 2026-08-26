@@ -36,12 +36,140 @@ def _assert_cli_details(details):
 
 class TestNornirCli:
     @pytest.mark.nornir_fakenos
+    def test_commands_stop_after_nonexistent_host_failure(self, nfclient):
+        host_name = "non-existent-host"
+        healthy_host_name = "fn-ceos-sp-1"
+        commands = ["show version", "show clock", "show hostname"]
+
+        nfclient.run_job(
+            "nornir",
+            "runtime_inventory",
+            workers=["nornir-worker-4"],
+            kwargs={
+                "action": "create_host",
+                "name": host_name,
+                "hostname": "non-existent.invalid",
+                "platform": "arista_eos",
+                "username": "admin",
+                "password": "admin",
+            },
+        )
+
+        try:
+            ret = nfclient.run_job(
+                "nornir",
+                "cli",
+                workers=["nornir-worker-4"],
+                kwargs={
+                    "on_failed": True,
+                    "commands": commands,
+                    "FL": [host_name, healthy_host_name],
+                    "run_connect_retry": 0,
+                    "run_connect_timeout": 2,
+                },
+            )
+            pprint.pprint(ret)
+
+            result = ret["nornir-worker-4"]
+            host_result = result["result"][host_name]
+            healthy_host_result = result["result"][healthy_host_name]
+
+            assert result["failed"] is True
+            assert result["resources"] == sorted([host_name, healthy_host_name])
+            assert result["resources_failed"] == [host_name]
+            assert list(host_result) == ["netmiko_send_commands"]
+            assert all(command not in host_result for command in commands)
+            assert "connection to device failed" in host_result["netmiko_send_commands"]
+            assert all(
+                command in healthy_host_result
+                and "Traceback" not in healthy_host_result[command]
+                for command in commands
+            )
+
+            errdisabled = nfclient.run_job(
+                "nornir",
+                "errdisabled_hosts_list",
+                workers=["nornir-worker-4"],
+            )["nornir-worker-4"]["result"]
+            errdisabled_host = next(
+                item for item in errdisabled if item["host"] == host_name
+            )
+
+            assert errdisabled_host["errdisabled_at"]
+            assert 0 < errdisabled_host["recovery_time_left"] <= 60
+            assert "connection to device failed" in errdisabled_host["reason"]
+
+            skipped_ret = nfclient.run_job(
+                "nornir",
+                "cli",
+                workers=["nornir-worker-4"],
+                kwargs={
+                    "on_failed": False,
+                    "commands": commands,
+                    "dry_run": True,
+                    "FL": [host_name, healthy_host_name],
+                },
+            )["nornir-worker-4"]
+
+            assert skipped_ret["failed"] is False
+            assert skipped_ret["resources"] == [healthy_host_name]
+            assert list(skipped_ret["result"]) == [healthy_host_name]
+
+            clear_ret = nfclient.run_job(
+                "nornir",
+                "errdisabled_hosts_clear",
+                workers=["nornir-worker-4"],
+            )["nornir-worker-4"]
+
+            assert clear_ret["failed"] is False
+            assert clear_ret["result"] == [host_name]
+
+            errdisabled = nfclient.run_job(
+                "nornir",
+                "errdisabled_hosts_list",
+                workers=["nornir-worker-4"],
+            )["nornir-worker-4"]["result"]
+            assert all(item["host"] != host_name for item in errdisabled)
+
+            recovered_ret = nfclient.run_job(
+                "nornir",
+                "cli",
+                workers=["nornir-worker-4"],
+                kwargs={
+                    "on_failed": False,
+                    "commands": commands,
+                    "dry_run": True,
+                    "FL": [host_name, healthy_host_name],
+                },
+            )["nornir-worker-4"]
+
+            assert recovered_ret["failed"] is False
+            assert recovered_ret["resources"] == sorted([host_name, healthy_host_name])
+            assert set(recovered_ret["result"]) == {
+                host_name,
+                healthy_host_name,
+            }
+        finally:
+            nfclient.run_job(
+                "nornir",
+                "errdisabled_hosts_clear",
+                workers=["nornir-worker-4"],
+            )
+            nfclient.run_job(
+                "nornir",
+                "runtime_inventory",
+                workers=["nornir-worker-4"],
+                kwargs={"action": "delete_host", "name": host_name},
+            )
+
+    @pytest.mark.nornir_fakenos
     def test_commands_list(self, nfclient):
         ret = nfclient.run_job(
             "nornir",
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "FL": [
                     "fn-ceos-sp-1",
@@ -65,6 +193,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "dry_run": True,
                 "FL": ["fn-ceos-sp-1"],
@@ -85,6 +214,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "FC": "fn-ceos-sp",
             },
@@ -103,6 +233,7 @@ class TestNornirCli:
             "cli",
             workers="nornir-worker-4",
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "FL": ["fn-ceos-sp-1"],
             },
@@ -120,6 +251,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "FL": ["fn-ceos-sp-1"],
                 "add_details": True,
@@ -143,6 +275,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "FL": ["fn-ceos-sp-1"],
                 "to_dict": False,
@@ -171,6 +304,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "FL": ["fn-ceos-sp-1"],
                 "to_dict": False,
@@ -197,6 +331,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version"],
                 "FL": ["fn-ceos-sp-1"],
                 "plugin": "wrong_plugin",
@@ -217,6 +352,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "plugin": "scrapli",
                 "FL": ["fn-ceos-sp-1"],
@@ -233,7 +369,11 @@ class TestNornirCli:
             "nornir",
             "cli",
             workers="nornir-worker-1",
-            kwargs={"commands": ["show version", "show clock"], "plugin": "napalm"},
+            kwargs={
+                "on_failed": True,
+                "commands": ["show version", "show clock"],
+                "plugin": "napalm",
+            },
         )
         pprint.pprint(ret)
 
@@ -253,6 +393,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": "show hostname {{ host.name }}",
                 "dry_run": True,
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
@@ -273,6 +414,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": "nf://cli/commands.txt",
                 "dry_run": True,
                 "FL": ["fn-ceos-sp-1"],
@@ -294,7 +436,10 @@ class TestNornirCli:
             "nornir",
             "cli",
             workers="nornir-worker-4",
-            kwargs={"commands": "nf://cli/commands_non_existing.txt"},
+            kwargs={
+                "on_failed": True,
+                "commands": "nf://cli/commands_non_existing.txt",
+            },
         )
         pprint.pprint(ret)
 
@@ -308,6 +453,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": "nf://cli/show_interfaces.j2",
                 "dry_run": True,
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
@@ -339,6 +485,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": "nf://cli/{{ host.name }}_commands.j2",
                 "dry_run": True,
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
@@ -362,6 +509,7 @@ class TestNornirCli:
             "cli",
             workers="nornir-worker-4",
             kwargs={
+                "on_failed": True,
                 "run_ttp": "nf://ttp/parse_eos_intf.txt",
                 "FB": ["fn-ceos-sp-*"],
                 "enable": True,
@@ -384,6 +532,7 @@ class TestNornirCli:
             "cli",
             workers="nornir-worker-4",
             kwargs={
+                "on_failed": True,
                 "commands": "nf://cli/test_commands_template_with_norfab_call.j2",
                 "dry_run": True,
                 "FL": ["fn-ceos-sp-1"],
@@ -411,6 +560,7 @@ class TestNornirCli:
             "cli",
             workers="nornir-worker-4",
             kwargs={
+                "on_failed": True,
                 "commands": "nf://cli/test_commands_template_with_nornir_worker_call.j2",
                 "dry_run": True,
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
@@ -436,6 +586,7 @@ class TestNornirCli:
             "cli",
             workers="nornir-worker-4",
             kwargs={
+                "on_failed": True,
                 "commands": ["show version", "show clock"],
                 "tests": [
                     ["show version", "contains", "cEOS"],
@@ -467,6 +618,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version"],
                 "FL": ["fn-ceos-sp-1"],
                 "tf": tf,
@@ -503,6 +655,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version"],
                 "FL": ["fn-ceos-sp-1"],
                 "tf": diff,
@@ -514,6 +667,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version"],
                 "FL": ["fn-ceos-sp-1"],
                 "diff": diff,
@@ -537,6 +691,7 @@ class TestNornirCli:
                 "cli",
                 workers=["nornir-worker-4"],
                 kwargs={
+                    "on_failed": True,
                     "commands": ["show version"],
                     "FL": ["fn-ceos-sp-1"],
                     "tf": diff,
@@ -548,6 +703,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "commands": ["show version"],
                 "FL": ["fn-ceos-sp-1"],
                 "diff": diff,
@@ -570,6 +726,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "job_data": {"commands": ["show version", "show clock"]},
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
                 "dry_run": True,
@@ -591,6 +748,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "job_data": "nf://cli/job_data_1.txt",
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
                 "dry_run": True,
@@ -612,6 +770,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "job_data": "nf://cli/job_data_non_exist.txt",
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
                 "dry_run": True,
@@ -631,6 +790,7 @@ class TestNornirCli:
             "cli",
             workers=["nornir-worker-4"],
             kwargs={
+                "on_failed": True,
                 "job_data": "nf://cli/job_data_wrong_yaml.txt",
                 "FL": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
                 "dry_run": True,

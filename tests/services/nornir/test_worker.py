@@ -44,6 +44,20 @@ class TestNornirWorker:
             for package, version in version_report["result"].items():
                 assert version != "", f"{worker_name}:{package} version is empty"
 
+    def test_errdisabled_hosts_list(self, nfclient):
+        ret = nfclient.run_job("nornir", "errdisabled_hosts_list")
+
+        for worker_name, data in ret.items():
+            assert data["failed"] is False, worker_name
+            assert isinstance(data["result"], list), worker_name
+
+    def test_errdisabled_hosts_clear(self, nfclient):
+        ret = nfclient.run_job("nornir", "errdisabled_hosts_clear")
+
+        for worker_name, data in ret.items():
+            assert data["failed"] is False, worker_name
+            assert isinstance(data["result"], list), worker_name
+
     @pytest.mark.skip(reason="TBD")
     def test_get_watchdog_stats(self, nfclient):
         pass
