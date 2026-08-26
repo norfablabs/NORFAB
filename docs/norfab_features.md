@@ -722,8 +722,10 @@ inputs must match the NetBox model.
 
 ### Live interface reconciliation
 
-Collects live interface data through Nornir, computes a desired/current diff,
-optionally maps live interface names through ordered device- and model-aware
+Collects live interface configuration and operational data through Nornir.
+Operational state fills MTU, duplex, and speed when absent from configuration
+parsing. The task computes a desired/current diff, optionally maps live
+interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions. **Use cases:**
 source-of-truth maintenance and drift remediation. **Limitations:** parser
 coverage determines live-state quality; deletion is opt-in and should be

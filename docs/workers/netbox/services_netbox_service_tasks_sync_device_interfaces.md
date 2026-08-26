@@ -14,7 +14,7 @@ The Netbox Sync Device Interfaces Task synchronizes device interface configurati
 The task follows a four-step pipeline:
 
 1. **Fetch** — Pull current interface state from NetBox for the target devices.
-2. **Collect live state** — Run a Nornir [`parse_ttp`](../nornir/services_nornir_service_tasks_parse.md) job against the devices to collect real interface attributes (type, enabled, MTU, VLANs, VRF, mode, parent, LAG membership, etc.).
+2. **Collect live state** — Run Nornir [`parse_ttp`](../nornir/services_nornir_service_tasks_parse.md) jobs using the `interfaces` configuration getter first, followed by the `interfaces_status` operational getter. Configuration remains authoritative; operational state fills only MTU, duplex, and speed values that configuration parsing returned as `null`. Operational `speed_bps` is converted to the Kbit/s value expected by NetBox.
 3. **Diff** — Normalize both sides to a common schema, apply `interface_map` to live interface names, and compare using DeepDiff to classify each interface as `create`, `update`, `delete`, or `in_sync`.
 4. **Reconcile** — Apply changes to NetBox in dependency order to avoid constraint errors:
     1. Create LAG interfaces first

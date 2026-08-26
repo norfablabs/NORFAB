@@ -14,6 +14,7 @@
 
 1. Improved long-running broker, client, and worker reliability by serializing ZeroMQ socket polling and receiving with concurrent keepalive, dispatcher, API, and job-thread sends, using short non-blocking poll cycles to avoid delaying outbound traffic.
 2. Made worker broker reconnection thread-safe by serializing socket shutdown, replacement, registration, and keepalive retargeting so background threads cannot use a socket while it is being replaced.
+3. Enhanced NetBox `sync_device_interfaces` to supplement interface configuration parsing with operational interface status, filling MTU, duplex, and speed only when configuration parsing returns no value.
 
 ---
 
