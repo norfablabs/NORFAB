@@ -1,5 +1,9 @@
 # 0.21.1
 
+## FEATURES
+
+1. Added broker `ip_allowlist` inventory support using PyZMQ's native source-IP authentication filter. The allowlist accepts exact IP addresses only, applies when `zmq_auth` is enabled, and defaults to `["*"]` to allow connections from any source.
+
 ## ENHANCEMENTS
 
 1. Improved long-running broker, client, and worker reliability by serializing ZeroMQ socket polling and receiving with concurrent keepalive, dispatcher, API, and job-thread sends, using short non-blocking poll cycles to avoid delaying outbound traffic.

@@ -48,6 +48,9 @@ broker:
   endpoint: "tcp://127.0.0.1:5555"
   shared_key: "5z1:yW}]n?UXhGmz+5CeHN1>:S9k!eCh6JyIhJqO"
   zmq_auth: True
+  ip_allowlist:
+    - "192.0.2.10"
+    - "192.0.2.11"
 ```
 
 In addition these parameters are supported
@@ -55,6 +58,8 @@ In addition these parameters are supported
 1. `shared_key` - broker encryption shared key may or may not be needed depending of type of the setup you are running, in case if all components - broker, client and workers run on same machine, configuring `shared_key` parameter is options, as `nfapi` is smart enough to auto-configure all workers and client with correct broker shared key. In case if broker and workers with clients are distributed i.e. running in separate containers or on separate machines, `share_key` parameter **must** be configured on all workers and clients to match shared key used by broker.
 
 2. `zmq_auth` - flag to enable or disable ZeroMQ authentication, `False` - disable authentication and encryption, by default set to `True` - ZeroMQ authentication and encryption enabled.
+
+3. `ip_allowlist` - exact source IP addresses allowed by the ZeroMQ authenticator. Connections from other addresses are rejected before CURVE client authentication. Defaults to `["*"]`, which allows connections from any source IP. This setting applies only when `zmq_auth` is enabled; CIDR ranges are not supported by the native PyZMQ allowlist.
 
 ## Workers Inventory Section
 

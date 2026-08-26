@@ -228,6 +228,13 @@ class NFPBroker:
         self.build_message = NFP.MessageBuilder()
         self.exit_event = exit_event
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
+        self.ip_allowlist = self.inventory.broker.get("ip_allowlist", ["*"])
+        if (
+            not isinstance(self.ip_allowlist, list)
+            or not self.ip_allowlist
+            or not all(isinstance(address, str) for address in self.ip_allowlist)
+        ):
+            raise ValueError("broker.ip_allowlist must be a non-empty list of strings")
 
         self.base_dir = self.inventory.base_dir
         self.broker_base_dir = os.path.join(
@@ -265,7 +272,8 @@ class NFPBroker:
             # Start an authenticator for this context.
             self.auth = ThreadAuthenticator(self.ctx)
             self.auth.start()
-            # self.auth.allow("0.0.0.0")
+            if "*" not in self.ip_allowlist:
+                self.auth.allow(*self.ip_allowlist)
             self.auth.allow_any = True
             # Tell the authenticator how to handle CURVE requests
             self.auth.configure_curve(location=zmq.auth.CURVE_ALLOW_ANY)
@@ -874,6 +882,7 @@ class NFPBroker:
                     "broker-private-key-file": self.broker_private_key_file,
                     "broker-public-key-file": self.broker_public_key_file,
                     "zmq-auth": self.zmq_auth,
+                    "ip-allowlist": self.ip_allowlist,
                 },
             }
         elif task == "show_broker_version":
