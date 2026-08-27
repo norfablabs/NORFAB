@@ -1,0 +1,8075 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Network Automations Fabric documentation">
+      
+      
+        <meta name="author" content="Denis Mulyalin">
+      
+      
+        <link rel="canonical" href="https://docs.norfablabs.com/development/adr_extensible_data_sources_and_git_sync/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/logo.jpg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>ADR - Extensible Data Sources, GitHub API, and Git Synchronization - Network Automations Fabric [NORFAB]</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="brown" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-extensible-data-sources-github-api-and-git-synchronization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-header__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+      
+  <img src="../../images/logo.jpg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Network Automations Fabric [NORFAB]
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR - Extensible Data Sources, GitHub API, and Git Synchronization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="brown" data-md-color-accent="deep-orange"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/norfablabs/NORFAB" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+  </div>
+  <div class="md-source__repository">
+    norfablabs/norfab
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Network Automations Fabric [NORFAB]" class="md-nav__button md-logo" aria-label="Network Automations Fabric [NORFAB]" data-md-component="logo">
+      
+  <img src="../../images/logo.jpg" alt="logo">
+
+    </a>
+    Network Automations Fabric [NORFAB]
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/norfablabs/NORFAB" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+  </div>
+  <div class="md-source__repository">
+    norfablabs/norfab
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_why_use_norfab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why use NORFAB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/norfab_docker_deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/norfab_distributed_deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distributed Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/norfab_vscode_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VSCode MCP Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containerlab
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Containerlab
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_3" id="__nav_4_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_deploy_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy Netbox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_destroy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Destroy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_save/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Save
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_restart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_inspect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inspect
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/services_containerlab_service_tasks_nornir_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Nornir Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FakeNOS
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FakeNOS
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_3" id="__nav_4_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_stop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_restart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Restart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_inspect_networks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inspect Networks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/services_fakenos_service_tasks_get_nornir_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Nornir Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Nornir
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4_3" id="__nav_4_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_task/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_cfg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CFG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_parse/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagram
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_file_copy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Copy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_runtime_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_create_host_from_netbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Host from NetBox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_snmp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SNMP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_tasks_errdisabled_hosts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errdisabled Hosts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/services_nornir_service_jinja2_filters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jinja2 Filters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Netbox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_3" id="__nav_4_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_graphql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GraphQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_rest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_connections/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Connections
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_circuits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Circuits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_bgp_peerings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get BGP Peerings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_nornir_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Nornir Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Containerlab Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_get_topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Topology Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_ip_bulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create IP Bulk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_prefix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Prefix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Device Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_vlans/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VLANs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_vrfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRFs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync MAC Addresses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_ip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device IP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_device_prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync Device Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Peerings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_check_device_sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Check Device Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_all/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync All
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_create_bgp_peering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_bgp_peering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update BGP Peering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_update_interfaces_description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update Interfaces Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_crud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agent
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/services_agent_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/services_agent_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_3" id="__nav_4_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/services_agent_service_tasks_chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chat
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_7" id="__nav_4_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FastAPI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/services_fastapi_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/services_fastapi_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_7_3" id="__nav_4_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/services_fastapi_service_task_auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_8" id="__nav_4_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FastMCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_8_3" id="__nav_4_8_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_8_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_8_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/services_fastmcp_service_task_get_prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_9" id="__nav_4_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflow
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/services_workflow_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/services_workflow_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_9_3" id="__nav_4_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/services_workflow_service_tasks_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_10" id="__nav_4_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filesharing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Filesharing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_10_3" id="__nav_4_10_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_10_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_10_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tasks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_list_files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    List Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_walk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_file_details/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_fetch_file/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fetch File
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Clients
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clients Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Local Web Client
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    NFWeb Local Web Client
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_nfweb_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_nfweb_topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3D Network Topology Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_nfcli_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFCLI Shell Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_python_api_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_robot_client_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ROBOT Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Customization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Customization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/norfab_hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Hooks System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Plugins
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service Plugins
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/service_plugin_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/service_plugin_local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../customization/service_plugin_module/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python Module Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_architecture_norfab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_architecture_nfp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Protocol (NFP) RFC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4_1" id="__nav_7_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_nfapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI (Python API)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_broker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Worker Base
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_simple_inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simple Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_core_norfab_exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4_2" id="__nav_7_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Workers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Built-in Workers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/containerlab/api_reference_workers_containerlab_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Containerlab Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fakenos/api_reference_workers_fakenos_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FakeNOS Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/nornir/api_reference_workers_nornir_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/netbox/api_reference_workers_netbox_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastapi/api_reference_workers_fastapi_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/fastmcp/api_reference_workers_fastmcp_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/agent/api_reference_workers_agent_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/workflow/api_reference_workers_workflow_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/api_reference_workers_filesharing_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filesharing Worker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4_3" id="__nav_7_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Built-in Clients
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Built-in Clients
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_clients_nfcli_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFCLI Client API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference_clients_robot_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ROBOT Client API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Subsystems
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    NORFAB Subsystems
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_mmi_subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MMI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_jobs_subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jobs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference_norfab_events_subsystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nfweb_developer_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../norfab_docker_development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documentation_style_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Style Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_tasks_pydantic_models_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task Pydantic Models Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file_streaming_fetch_file/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Streaming (fetch_file)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Design Records
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Design Records
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox BGP Create/Update Tasks Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_sync_device_interfaces_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Sync devices interfaces Task plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_check_sync_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Device Check Sync Task Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_fastmcp_bearer_authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Bearer Auth plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_mcp_tool_annotations_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Tools Annotations plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_fastmcp_task_call_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Call Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_fastmcp_task_result_guardrails/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastMCP Task Result Guardrails
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_netbox_sync_device_inventory_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Sync Devices Inventory plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_norfab_interactive_client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Interactive Client Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_nfapi_client_first_startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFAPI Client First Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_mcp_task_prompts_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Task Prompt Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_norfab_aaa_security_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab AAA Security Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_norfab_logging_isolation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Norfab Logging Isolation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_invoke_developer_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Invoke Developer Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_web_ui_topology_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Platform and First 3D Topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_nornir_snmp_tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir SNMP Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_nornir_create_hosts_from_netbox_devices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nornir Create Hosts from NetBox Devices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_norfab_single_owner_zeromq_socket_io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Single-Owner ZeroMQ Socket I/O
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/norfab_testing_framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NORFAB Testing Framework
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/netbox_service_tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Netbox Service Tests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../norfab_help_with_norfab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact Us
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#date" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Date
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-separate-the-facade-provider-contract-and-synchronization-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Separate the facade, provider contract, and synchronization policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-adopt-data-source-and-data-file-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Adopt Data Source and Data File concepts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-add-a-capability-based-data-source-provider-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Add a capability-based data-source provider registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-keep-nfpclient-as-a-thin-compatibility-facade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Keep NFPClient as a thin compatibility facade
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-define-unambiguous-github-and-git-urls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Define unambiguous GitHub and Git URLs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-implement-first-class-github-api-and-generic-git-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Implement first-class GitHub API and generic Git providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Implement first-class GitHub API and generic Git providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-api-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub API provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generic-git-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generic Git provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-configure-named-data-sources-and-file-sharing-publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Configure named Data Sources and File Sharing publication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-add-file-sharing-data-source-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Add File Sharing Data Source tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-keep-provider-state-private-and-publish-clean-trees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Keep provider state private and publish clean trees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-use-conservative-git-push-and-bidirectional-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Use conservative Git push and bidirectional rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-use-one-lightweight-file-sharing-synchronization-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Use one lightweight File Sharing synchronization loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-harden-local-path-handling-before-publishing-data-source-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Harden local path handling before publishing data-source content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-make-external-data-source-access-policy-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Make external data-source access policy explicit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#minimal-code-change-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal Code Change Boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Sequence
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Sequence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-provider-boundary-and-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1 - Provider boundary and compatibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-github-api-and-generic-git-pull" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2 - GitHub API and generic Git pull
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-github-api-and-generic-git-push" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3 - GitHub API and generic Git push
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-continuous-synchronization-and-additional-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4 - Continuous synchronization and additional providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing and Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing and Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compatibility-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compatibility tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-api-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub API tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generic-git-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generic Git tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-sharing-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Sharing tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives Considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alternatives Considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implement-every-scheme-directly-in-nfpclientfetch_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implement every scheme directly in NFPClient.fetch_file()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#route-every-data-source-through-file-sharing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Route every Data Source through File Sharing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#let-every-worker-implement-its-own-data-source-downloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Let every worker implement its own Data Source downloads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clone-git-repositories-directly-into-base_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clone Git repositories directly into base_dir
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#treat-github-only-as-a-generic-git-remote" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Treat GitHub only as a generic Git remote
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-only-the-github-api-and-omit-generic-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use only the GitHub API and omit generic Git
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatically-merge-bidirectional-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatically merge bidirectional changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-data-source-operations-to-the-nfp-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Data Source operations to the NFP protocol
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acceptance-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acceptance Criteria
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#approval-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approval Boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adr-extensible-data-sources-github-api-and-git-synchronization">ADR - Extensible Data Sources, GitHub API, and Git Synchronization<a class="headerlink" href="#adr-extensible-data-sources-github-api-and-git-synchronization" title="Permanent link">¤</a></h1>
+<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">¤</a></h2>
+<p>Proposed.</p>
+<h2 id="date">Date<a class="headerlink" href="#date" title="Permanent link">¤</a></h2>
+<p>2026-08-27.</p>
+<h2 id="decision-summary">Decision Summary<a class="headerlink" href="#decision-summary" title="Permanent link">¤</a></h2>
+<p>Extend file retrieval through a small provider registry used by <code>NFPClient</code>.
+Keep <code>NFPClient.fetch_file()</code> as the public compatibility facade, preserve the
+existing <code>nf://</code> behavior, and dispatch other enabled URI schemes to providers
+that run in the client's process.</p>
+<p>Add tree-level pull and push operations to the same facade. The File Sharing
+worker will use these operations to synchronize configured data sources into
+clean local publication folders. Files published there remain available to all
+workers through the existing <code>nf://</code> service.</p>
+<p>GitHub and generic Git are the first bidirectional tree providers. The GitHub
+provider integrates directly with the versioned GitHub REST API for repository
+metadata, references, trees, blobs, commits, and branch updates. A separate Git
+provider supports GitHub-compatible and non-GitHub Git remotes through normal
+Git transports. The provider model must allow later HTTP, FTP, TFTP, SFTP/SCP,
+S3, and other implementations without adding scheme branches to the client or
+worker.</p>
+<p>External data-source access is opt-in. Arbitrary external URLs supplied to
+remotely callable worker tasks must not become an unrestricted SSRF or
+credential-exfiltration path. File Sharing synchronization therefore uses
+named data sources, and direct client/worker retrieval is constrained by
+configured schemes and hosts.</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">¤</a></h2>
+<p>The current implementation has two tightly connected pieces:</p>
+<ul>
+<li><code>NFPClient.fetch_file()</code> accepts only <code>nf://</code>, calls
+  <code>filesharing.file_details</code>, streams bytes from <code>filesharing.fetch_file</code>, and
+  caches the result below the client's <code>fetchedfiles</code> directory.</li>
+<li><code>NFPWorker.is_url()</code> recognizes only <code>nf://</code>, while
+  <code>NFPWorker.fetch_file()</code> delegates to its embedded <code>NFPClient</code>.</li>
+</ul>
+<p>The File Sharing worker maps <code>nf://</code> paths to <code>base_dir</code>, validates lexical
+containment, and provides list, walk, details, and streaming tasks. NFAPI adds
+one built-in File Sharing worker whose <code>base_dir</code> is the NorFab inventory base
+directory.</p>
+<p>This is a useful distribution mechanism but it assumes that every shared file
+already exists below one File Sharing worker's <code>base_dir</code>. Users also need to:</p>
+<ul>
+<li>fetch an individual file directly from an external Data Source;</li>
+<li>pull a Git repository or subdirectory into a local shared folder;</li>
+<li>publish local changes back to a GitHub repository;</li>
+<li>keep a local shared folder synchronized with a branch;</li>
+<li>add other data-source types without repeatedly changing <code>NFPClient</code>,
+  <code>NFPWorker</code>, and the File Sharing worker.</li>
+</ul>
+<p>Adding a list of <code>if url.startswith(...)</code> branches to the existing client would
+meet the first use case but would couple protocol parsing, authentication,
+transfer behavior, caching, and synchronization policy to the NFP transport
+client. It would also incorrectly treat byte-oriented protocols and
+revisioned tree stores as equivalent.</p>
+<h2 id="goals">Goals<a class="headerlink" href="#goals" title="Permanent link">¤</a></h2>
+<ul>
+<li>Preserve all existing <code>nf://</code> URLs and return behavior.</li>
+<li>Let all workers fetch from explicitly enabled data-source schemes through their
+  existing <code>self.fetch_file()</code> helper.</li>
+<li>Let normal Python clients fetch Data Source files directly without routing the
+  bytes through the broker.</li>
+<li>Let File Sharing pull source content into a local folder and expose it as
+  <code>nf://...</code>.</li>
+<li>Let File Sharing push local folder content to GitHub and safely reconcile
+  bidirectional changes.</li>
+<li>Make first-class GitHub API and generic Git support the first implementations
+  of a general data-source provider contract.</li>
+<li>Keep broker, NFP message framing, and existing File Sharing streaming tasks
+  unchanged.</li>
+<li>Avoid a mandatory GitHub SDK, Git, S3, or SSH dependency in NorFab core.</li>
+<li>Define safe failure, authentication, conflict, and publication behavior.</li>
+</ul>
+<h2 id="non-goals">Non-Goals<a class="headerlink" href="#non-goals" title="Permanent link">¤</a></h2>
+<ul>
+<li>Do not turn NFP into a general data-source filesystem protocol.</li>
+<li>Do not proxy every external Data Source download through the File Sharing worker.</li>
+<li>Do not add NFP client-to-worker file upload streaming in the first phase.</li>
+<li>Do not implement Git merges, rebases, force pushes, or automatic conflict
+  resolution.</li>
+<li>Do not add GitHub pull request, issue, release, webhook management, or
+  repository administration APIs in the first phase. Repository contents and
+  Git database APIs are in scope.</li>
+<li>Do not promise identical semantics across Git, HTTP, TFTP, and object stores.
+  Providers advertise capabilities instead.</li>
+<li>Do not support multiple File Sharing worker processes writing the same local
+  publication folder. A Data Source has one writer.</li>
+</ul>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">¤</a></h2>
+<h3 id="1-separate-the-facade-provider-contract-and-synchronization-policy">1. Separate the facade, provider contract, and synchronization policy<a class="headerlink" href="#1-separate-the-facade-provider-contract-and-synchronization-policy" title="Permanent link">¤</a></h3>
+<p>Use three layers:</p>
+<div class="mermaid">flowchart LR
+  Consumer[Client or worker code] --&gt; Facade[NFPClient file facade]
+  Facade --&gt; Registry[Data-source provider registry]
+  Registry --&gt; NF[nf provider]
+  Registry --&gt; GitHub[GitHub API provider]
+  Registry --&gt; Git[Generic Git provider]
+  Registry --&gt; HTTP[HTTP provider]
+  Registry -. future .-&gt; FTP[FTP / TFTP / SFTP providers]
+  Registry -. future .-&gt; S3[S3 provider]
+
+  NF --&gt; Broker[NFP broker]
+  Broker --&gt; FS[File Sharing worker]
+
+  FS --&gt; Sync[File Sharing sync manager]
+  Sync --&gt; Facade
+  Sync --&gt; Stage[Private staging and state]
+  Stage --&gt; Publish[Published local folder]
+  Publish --&gt; NFURL[nf:// files]</div>
+<p>The responsibilities are:</p>
+<ul>
+<li><code>NFPClient</code> provides stable methods, selects a provider, applies common local
+  destination and error handling, and preserves the current result shape.</li>
+<li>A data-source provider owns URI parsing and external protocol behavior.</li>
+<li>The File Sharing sync manager owns configured Data Sources, scheduling, locks,
+  manifests, conflict policy, staging, and publication.</li>
+</ul>
+<p>No data-source provider should know about File Sharing task models or the NFP
+wire protocol. No File Sharing task should contain Git subprocess logic.</p>
+<h3 id="2-adopt-data-source-and-data-file-concepts">2. Adopt Data Source and Data File concepts<a class="headerlink" href="#2-adopt-data-source-and-data-file-concepts" title="Permanent link">¤</a></h3>
+<p>Borrow NetBox's separation between a configured Data Source and the Data Files
+materialized from it. These are NorFab concepts and state records, not NetBox
+model dependencies.</p>
+<p>A NorFab Data Source contains:</p>
+<ul>
+<li><code>name</code>: stable identifier used in <code>github://&lt;name&gt;/...</code> and
+  <code>git://&lt;name&gt;/...</code> URLs;</li>
+<li><code>type</code>: provider name such as <code>github</code>, <code>git</code>, or later <code>s3</code>;</li>
+<li><code>url</code> and provider-specific configuration;</li>
+<li><code>enabled</code>: whether manual or scheduled synchronization is permitted;</li>
+<li><code>status</code>: maintained by synchronization, not manually configured;</li>
+<li><code>ignore_rules</code>: <code>fnmatch</code>-style relative-path and basename patterns;</li>
+<li><code>sync_interval</code>: optional automatic synchronization interval, with no value
+  meaning manual synchronization only;</li>
+<li><code>last_synced</code>: time of the last successful source synchronization;</li>
+<li>NorFab extensions for <code>direction</code>, <code>source_revision</code>, conflict policy,
+  publication behavior, and sanitized last error.</li>
+</ul>
+<p>A NorFab Data File record belongs to one Data Source and contains:</p>
+<ul>
+<li>source-relative <code>path</code>;</li>
+<li><code>size_bytes</code>;</li>
+<li><code>sha256</code> content hash;</li>
+<li><code>last_updated</code>, changed only when file content changes;</li>
+<li>source revision and publication generation.</li>
+</ul>
+<p>The initial implementation persists these records as the data source's atomic
+manifest below <code>__norfab__</code>; it does not require a new central database. SHA256
+is used for new Data File manifests even though the existing <code>nf://</code>
+file-details compatibility contract currently reports MD5.</p>
+<p>Synchronization and publication are distinct stages. A source sync builds a
+validated private snapshot and its Data File manifest. <code>auto_publish: true</code>
+atomically publishes that snapshot immediately. With <code>auto_publish: false</code>,
+status becomes <code>pending_publication</code> until an explicit publication task applies
+the snapshot. This borrows the safety of NetBox's two-stage synchronized-data
+flow so external changes need not affect active automation immediately.</p>
+<p>NorFab intentionally extends NetBox's consumption-oriented model:</p>
+<ul>
+<li><code>pull</code> sources replicate external data locally; local drift is reported and
+  is replaced by the next published source generation;</li>
+<li><code>push</code> sources publish the local tree upstream;</li>
+<li><code>bidirectional</code> sources use revision and manifest conflict detection before
+  selecting pull or push.</li>
+</ul>
+<p>Use the following source statuses initially: <code>never_synced</code>, <code>syncing</code>,
+<code>pending_publication</code>, <code>current</code>, <code>failed</code>, <code>conflicted</code>, and <code>disabled</code>.</p>
+<p>Public configuration keys, Python methods, File Sharing tasks, result fields,
+state paths, logs, and documentation use <code>data_source</code> or <code>data_sources</code>.
+Reserve "remote" for an actual protocol endpoint or the established Git term
+"Git remote"; it is not the NorFab domain-object name.</p>
+<h3 id="3-add-a-capability-based-data-source-provider-registry">3. Add a capability-based data-source provider registry<a class="headerlink" href="#3-add-a-capability-based-data-source-provider-registry" title="Permanent link">¤</a></h3>
+<p>Add a small module such as <code>norfab/core/file_transfer.py</code> containing request
+and result data classes, provider errors, capability names, and a registry.
+Providers are selected with <code>urllib.parse.urlsplit(url).scheme</code>; prefix tests
+must not be used.</p>
+<p>The conceptual provider contract is:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DataSourceProvider</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">schemes</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">capabilities</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">FetchRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransferResult</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">push_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">PushRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransferResult</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pull_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">PullTreeRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransferResult</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">push_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">PushTreeRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransferResult</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_revision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">RevisionRequest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RevisionResult</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<p>The concrete implementation may use an abstract base class instead of a
+typing protocol. An operation not present in <code>capabilities</code> fails with a clear
+<code>UnsupportedOperation</code> error. This matters because, for example:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Fetch file</th>
+<th>Push file</th>
+<th>Pull tree</th>
+<th>Push tree</th>
+<th>Stable revision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nf</code></td>
+<td>yes</td>
+<td>later</td>
+<td>no</td>
+<td>no</td>
+<td>MD5 only</td>
+</tr>
+<tr>
+<td>GitHub API</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>commit SHA</td>
+</tr>
+<tr>
+<td>Generic Git</td>
+<td>yes</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+<td>commit ID</td>
+</tr>
+<tr>
+<td>HTTP/HTTPS</td>
+<td>yes</td>
+<td>optional PUT</td>
+<td>no</td>
+<td>no</td>
+<td>ETag when present</td>
+</tr>
+<tr>
+<td>FTP/SFTP</td>
+<td>yes</td>
+<td>yes</td>
+<td>adapter-dependent</td>
+<td>adapter-dependent</td>
+<td>usually no</td>
+</tr>
+<tr>
+<td>TFTP</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>yes</td>
+<td>yes</td>
+<td>prefix pull</td>
+<td>prefix push</td>
+<td>version ID/ETag</td>
+</tr>
+</tbody>
+</table>
+<p>Built-in providers are registered directly. Third-party providers use a new
+Python entry-point group, for example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[project.entry-points.</span><span class="s2">&quot;norfab.data_source_providers&quot;</span><span class="k">]</span>
+<span class="n">my_source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_package.provider:MyDataSourceProvider&quot;</span>
+</code></pre></div>
+<p>Entry points are loaded lazily when their scheme is first requested. A broken
+optional provider must not prevent the client from starting or affect
+<code>nf://</code>.</p>
+<p>The registry rejects duplicate schemes unless inventory explicitly selects a
+provider. This avoids installation order changing URL behavior.</p>
+<h3 id="4-keep-nfpclient-as-a-thin-compatibility-facade">4. Keep <code>NFPClient</code> as a thin compatibility facade<a class="headerlink" href="#4-keep-nfpclient-as-a-thin-compatibility-facade" title="Permanent link">¤</a></h3>
+<p>Retain the existing method and add an optional destination:</p>
+<div class="highlight"><pre><span></span><code><span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">,</span>
+    <span class="n">destination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">256000</span><span class="p">,</span>
+    <span class="n">pipeline</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
+    <span class="n">read</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">provider_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Dispatch behavior is:</p>
+<ul>
+<li><code>nf://</code> calls the current NFP streaming implementation, extracted into a
+  private helper with no protocol changes.</li>
+<li>Other schemes call their local provider. Bytes travel directly between the
+  external source and the client or worker process.</li>
+<li><code>destination=None</code> keeps the exact current cache path for <code>nf://</code>. Other
+  providers use a collision-safe cache path containing the scheme, a digest of
+  the normalized credential-free source, and the safe basename.</li>
+<li><code>destination</code> is intended for trusted local Python callers and for File
+  Sharing's private staging path. It is not accepted verbatim from a task
+  request.</li>
+<li><code>read=True</code> retains current UTF-8 text behavior. Binary callers use
+  <code>read=False</code>.</li>
+</ul>
+<p>Keep the current result keys during migration:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;200&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;path or text&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="s2">&quot;git&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;revision&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;commit-id&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cached&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>metadata</code> is additive. Existing callers that read <code>status</code>, <code>content</code>, and
+<code>error</code> continue to work.</p>
+<p>Add facade methods for tree operations rather than overloading
+<code>fetch_file()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">client</span><span class="o">.</span><span class="n">pull_tree</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">provider_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">push_tree</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">provider_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">push_file</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">provider_options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">supports_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">capability</span><span class="o">=</span><span class="s2">&quot;fetch_file&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><code>NFPWorker.is_url()</code> delegates to <code>self.client.supports_url()</code>, and
+<code>NFPWorker.fetch_file()</code> otherwise remains unchanged. This is the only
+required generic worker change.</p>
+<p>The facade does not imply that all schemes are enabled. The default remains
+<code>nf</code> only, preserving the current security boundary and dependency footprint.</p>
+<h3 id="5-define-unambiguous-github-and-git-urls">5. Define unambiguous GitHub and Git URLs<a class="headerlink" href="#5-define-unambiguous-github-and-git-urls" title="Permanent link">¤</a></h3>
+<p>GitHub and Git identify repositories, while NorFab consumers often need one
+file or a subdirectory at a revision. Do not infer a repository boundary from
+arbitrary path segments.</p>
+<p>Support these forms:</p>
+<div class="highlight"><pre><span></span><code>github://&lt;source&gt;/&lt;path&gt;?ref=&lt;branch-tag-or-commit&gt;
+git://&lt;source&gt;/&lt;path&gt;?ref=&lt;branch-tag-or-commit&gt;
+git+https://&lt;host&gt;/&lt;owner&gt;/&lt;repo&gt;.git?ref=main&amp;path=&lt;path&gt;
+git+ssh://git@github.com/&lt;owner&gt;/&lt;repo&gt;.git?ref=main&amp;path=&lt;path&gt;
+</code></pre></div>
+<p><code>github://&lt;source&gt;/...</code> is the recommended GitHub form. The Data Source contains
+the GitHub API base URL, repository owner/name, authentication reference, and
+default ref. This supports both GitHub.com and GitHub Enterprise Server without
+putting API tokens or repository administration details into job arguments.</p>
+<p><code>git://&lt;source&gt;/...</code> is the recommended NorFab logical form. The authority is
+a named, locally configured Data Source; it is not the unauthenticated
+native Git wire protocol. This keeps credentials and repository URLs out of
+task arguments and logs.</p>
+<p><code>git+https</code> and <code>git+ssh</code> are explicit direct forms for trusted local callers.
+They remain disabled until allowed by inventory policy. Query fields are
+parsed as structured data, removed before invoking Git, and never interpolated
+into a shell command. A direct form is an ephemeral Data Source request: it is
+not persisted, scheduled, or accepted by remotely callable File Sharing tasks.</p>
+<p><code>ref</code> defaults only when the Data Source declares a default branch. A caller
+must not silently fall back from an unknown ref to the source default. For a
+reproducible fetch, use a full commit ID.</p>
+<h3 id="6-implement-first-class-github-api-and-generic-git-providers">6. Implement first-class GitHub API and generic Git providers<a class="headerlink" href="#6-implement-first-class-github-api-and-generic-git-providers" title="Permanent link">¤</a></h3>
+<h4 id="github-api-provider">GitHub API provider<a class="headerlink" href="#github-api-provider" title="Permanent link">¤</a></h4>
+<p>The first iteration includes a dedicated provider for the versioned GitHub REST
+API. It does not shell out to Git for normal GitHub operations.</p>
+<p>Pull uses GitHub repository and Git database endpoints to:</p>
+<ol>
+<li>Resolve the configured branch, tag, or commit to an immutable commit SHA.</li>
+<li>Read the commit and root tree.</li>
+<li>Traverse the configured <code>source_path</code>, handling a truncated recursive-tree
+   response by walking subtrees rather than accepting incomplete content.</li>
+<li>Fetch blobs, validate their declared sizes and modes, and materialize the
+   clean staging tree.</li>
+</ol>
+<p>Push uses the Git database endpoints to:</p>
+<ol>
+<li>Read the current branch reference and compare it with the expected SHA.</li>
+<li>Create blobs for added or changed files.</li>
+<li>Create a tree based on the current source tree, including explicit deletion
+   entries for removed files.</li>
+<li>Create a commit whose parent is the expected source commit.</li>
+<li>Update the branch reference with <code>force=false</code>.</li>
+</ol>
+<p>The final reference update is the optimistic concurrency boundary. If the
+branch moved after the initial read, or GitHub rejects the update because of
+branch rules, the operation fails without force and the synchronization state
+is not advanced.</p>
+<p>The provider must send an explicit supported <code>X-GitHub-Api-Version</code>, GitHub's
+JSON media type, a stable <code>User-Agent</code>, and bounded request timeouts. The API
+version is a tested provider default with an optional Data Source override; it is
+not silently changed at runtime.</p>
+<p>Use a small HTTP client rather than a GitHub SDK. GitHub App JWT signing should
+use a maintained cryptographic/JWT library supplied through an optional
+<code>githubdatasource</code> installation extra; do not hand-roll RSA signing. The provider
+is loaded lazily, so this optional dependency does not enlarge NorFab core or
+affect <code>nf://</code> users.</p>
+<p>GitHub App installation authentication is the recommended automation mode.
+The provider creates and refreshes short-lived installation access tokens from
+an App ID, installation ID, and private-key reference. A fine-grained personal
+access token referenced through an environment variable is supported for
+simpler deployments. Data Sources declare required repository <code>Contents</code> access:
+read for pulls and write for pushes. Tokens are never accepted in a URL.</p>
+<p>The provider records rate-limit headers in sanitized status metadata, uses
+conditional requests where useful, honors <code>Retry-After</code> and rate-limit reset
+times, and never retries mutating requests blindly. It uploads only changed
+blobs and enforces a configured changed-file ceiling per push; large bulk
+repositories can select the generic Git provider instead. GitHub Enterprise
+Server is supported through an explicit HTTPS API base URL and the same host
+policy.</p>
+<h4 id="generic-git-provider">Generic Git provider<a class="headerlink" href="#generic-git-provider" title="Permanent link">¤</a></h4>
+<p>The generic Git provider is also included in the first iteration. It supports
+GitHub repositories when users explicitly choose Git transport, as well as
+GitLab, Bitbucket, self-hosted servers, and filesystem remotes supported by the
+local Git installation.</p>
+<p>It uses the installed Git executable through <code>subprocess.run()</code> with an
+argument list, <code>shell=False</code>, bounded timeouts, and captured/redacted output.
+If Git is unavailable, provider discovery still succeeds but status reports
+the missing executable and Git operations fail clearly. A future pure-Python
+provider can claim the same capabilities without changing callers.</p>
+<p>Generic Git authentication options are references, not secret values:</p>
+<ul>
+<li>HTTPS token through a named environment variable and a non-interactive
+  ask-pass helper;</li>
+<li>SSH key path, known-hosts path, and strict host-key checking;</li>
+<li>ambient credential helper only when explicitly enabled.</li>
+</ul>
+<p>Never place a GitHub or Git token in a URL, command argument, result, persistent
+state file, or log. Never disable SSH host-key validation by default. File
+Sharing's <code>get_inventory</code> result must redact literal credential fields if
+legacy configuration permits them at all.</p>
+<p>Neither first-iteration provider initializes submodules or Git LFS. Both can
+contact additional endpoints and must be separate opt-in capabilities with the
+same host policy.</p>
+<h3 id="7-configure-named-data-sources-and-file-sharing-publication">7. Configure named Data Sources and File Sharing publication<a class="headerlink" href="#7-configure-named-data-sources-and-file-sharing-publication" title="Permanent link">¤</a></h3>
+<p>Put Data Source connection definitions and direct-fetch policy in the existing
+top-level <code>client</code> inventory section. Every normal client and every worker's
+embedded client already receives this configuration object:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">client</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">data_source_policy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">allowed_schemes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">github</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">git</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">git+https</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">git+ssh</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">allowed_hosts</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">api.github.com</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">github.com</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">git.example.com</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">max_file_bytes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">104857600</span>
+<span class="w">    </span><span class="nt">max_tree_bytes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1073741824</span>
+<span class="w">    </span><span class="nt">max_tree_files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">    </span><span class="nt">max_changed_files_per_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+
+<span class="w">  </span><span class="nt">data_sources</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">github-configs</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github</span>
+<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/example/network-configs&quot;</span>
+<span class="w">      </span><span class="nt">api_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://api.github.com&quot;</span>
+<span class="w">      </span><span class="nt">repository</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example/network-configs&quot;</span>
+<span class="w">      </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+<span class="w">      </span><span class="nt">ignore_rules</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;.git*&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;private/*&quot;</span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github_app</span>
+<span class="w">        </span><span class="nt">app_id_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GITHUB_APP_ID</span>
+<span class="w">        </span><span class="nt">installation_id_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GITHUB_INSTALLATION_ID</span>
+<span class="w">        </span><span class="nt">private_key_file_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GITHUB_PRIVATE_KEY_FILE</span>
+
+<span class="w">    </span><span class="nt">vendor-git</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
+<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;git+ssh://git@git.example.com/network/templates.git&quot;</span>
+<span class="w">      </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ssh_key_file_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GIT_SSH_KEY_FILE</span>
+<span class="w">        </span><span class="nt">known_hosts_file_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GIT_KNOWN_HOSTS_FILE</span>
+</code></pre></div>
+<p>File Sharing inventory then maps those client Data Sources into published folders
+and adds synchronization policy:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesharing</span>
+<span class="nt">base_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./&quot;</span>
+
+<span class="nt">data_sources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">github-configs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;norfab&quot;</span>
+<span class="w">    </span><span class="nt">local_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;shared/configs&quot;</span>
+<span class="w">    </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bidirectional</span>
+<span class="w">    </span><span class="nt">conflict_policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fail</span>
+<span class="w">    </span><span class="nt">auto_publish</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">commit</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">author_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NorFab</span><span class="nv"> </span><span class="s">File</span><span class="nv"> </span><span class="s">Sharing&quot;</span>
+<span class="w">      </span><span class="nt">author_email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;norfab@example.invalid&quot;</span>
+
+<span class="w">  </span><span class="nt">vendor-git</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;templates&quot;</span>
+<span class="w">    </span><span class="nt">local_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;shared/vendor-templates&quot;</span>
+<span class="w">    </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pull</span>
+<span class="w">    </span><span class="nt">auto_publish</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Rules for Data Sources:</p>
+<ul>
+<li><code>client.data_sources</code> is loaded once by <code>NFPClient</code>; a source name resolves
+  <code>github://&lt;source&gt;/...</code> or <code>git://&lt;source&gt;/...</code> locally without exposing its
+  endpoint or authentication details to the job argument.</li>
+<li>A File Sharing <code>data_sources</code> entry has the same name as one configured
+  <code>client.data_sources</code> entry and extends it with publication and
+  synchronization settings. The sync manager passes that source plus its
+  private staging destination to <code>self.client.pull_tree()</code> or
+  <code>self.client.push_tree()</code>.</li>
+<li><code>local_path</code> is relative to <code>base_dir</code>, cannot overlap another managed
+  Data Source, and cannot resolve through a symlink outside <code>base_dir</code>.</li>
+<li><code>source_path</code> is relative to the repository root.</li>
+<li><code>direction</code> is <code>pull</code>, <code>push</code>, or <code>bidirectional</code>.</li>
+<li><code>conflict_policy</code> is only <code>fail</code> in the first implementation.</li>
+<li><code>sync_interval: 0</code> disables background synchronization. Explicit tasks
+  remain available.</li>
+<li>Data Sources are validated during File Sharing worker initialization. Invalid
+  sources do not become partially active.</li>
+<li>A remotely callable task accepts a Data Source name, not an arbitrary source URL
+  or local destination.</li>
+</ul>
+<p>The default <code>client</code> configuration has no enabled external schemes or Data Sources,
+and the built-in File Sharing inventory continues to contain only <code>service</code>
+and <code>base_dir</code>; external data-source access is not enabled accidentally.</p>
+<h3 id="8-add-file-sharing-data-source-tasks">8. Add File Sharing Data Source tasks<a class="headerlink" href="#8-add-file-sharing-data-source-tasks" title="Permanent link">¤</a></h3>
+<p>Add typed tasks with consistent result metadata:</p>
+<ul>
+<li><code>data_source_list()</code> lists configured Data Sources and provider capabilities
+  without returning credentials.</li>
+<li><code>data_source_status(name)</code> returns enabled state, synchronization status,
+  direction, source revision, local publication generation, last attempt,
+  <code>last_synced</code>, next scheduled attempt, and the last sanitized error. For
+  GitHub it also returns sanitized API version and rate-limit remaining/reset
+  metadata from the most recent response.</li>
+<li><code>data_source_files(name, path=None)</code> lists Data File metadata without reading
+  entire file contents into the task result.</li>
+<li><code>data_source_pull(name, dry_run=False, publish=None)</code> retrieves source content
+  into a validated snapshot. <code>publish</code> overrides <code>auto_publish</code> for that call.</li>
+<li><code>data_source_publish(name, generation=None, dry_run=False)</code> atomically makes
+  a synchronized snapshot available below <code>local_path</code> and therefore through
+  <code>nf://</code>.</li>
+<li><code>data_source_push(name, message=None, dry_run=False)</code> publishes local changes
+  to the external source.</li>
+<li><code>data_source_sync(name, dry_run=False)</code> applies the configured direction,
+  conflict, and publication rules.</li>
+</ul>
+<p>Tasks should report the resolved Git commit or equivalent source revision,
+whether local or source content changed, file counts, byte counts, and elapsed
+time. Events and logs must not contain credentials or credential-bearing URLs.</p>
+<p>The worker implements these tasks by calling its existing embedded client,
+using <code>self.client.pull_tree()</code> and <code>self.client.push_tree()</code> with private
+staging paths. This keeps the File Sharing service on the same provider facade
+as every other worker and avoids a second provider-loading implementation.</p>
+<p>Task calls that mutate an external source are explicitly marked destructive in
+MCP task annotations. Pull without publication changes only private managed
+state. Publication is locally destructive when it replaces published content
+and must not be marked read-only.</p>
+<h3 id="9-keep-provider-state-private-and-publish-clean-trees">9. Keep provider state private and publish clean trees<a class="headerlink" href="#9-keep-provider-state-private-and-publish-clean-trees" title="Permanent link">¤</a></h3>
+<p>Do not clone a repository directly into a folder served by <code>nf://</code>. A direct
+clone would expose or traverse <code>.git</code> content, mix partial updates with reads,
+and make rollback difficult.</p>
+<p>Use two roots:</p>
+<div class="highlight"><pre><span></span><code>&lt;inventory-base&gt;/__norfab__/files/data_sources/&lt;worker&gt;/&lt;source&gt;/
+  provider/         # API object cache or private Git metadata/worktree
+  staging/          # next clean publication
+  state.json        # revision and manifest, no secrets
+
+&lt;filesharing-base&gt;/&lt;local_path&gt;/
+  ...               # clean published data available via nf://
+</code></pre></div>
+<p>Pull synchronization and optional publication follow this sequence:</p>
+<ol>
+<li>Acquire the Data Source lock and set status to <code>syncing</code>.</li>
+<li>Fetch GitHub API objects or clone/fetch Git into private provider state.</li>
+<li>Resolve the requested ref to an immutable commit ID.</li>
+<li>Export only <code>source_path</code> into a fresh staging directory.</li>
+<li>Reject forbidden file types, unsafe symlinks, path escapes, and configured
+   count or size limit violations.</li>
+<li>Build the Data File manifest, preserve <code>last_updated</code> for unchanged SHA256
+   entries, and compare it with both the previous synchronized manifest and
+   the last published manifest.</li>
+<li>Persist the new source revision, Data File manifest, and snapshot generation
+   atomically.</li>
+<li>If publication is enabled, replace the publication directory using
+   same-filesystem renames, retaining a temporary backup until the new tree is
+   in place and set status to <code>current</code>. Otherwise set status to
+   <code>pending_publication</code>.</li>
+</ol>
+<p>Readers therefore see the old complete tree or the new complete tree, not a
+partially copied tree. If replacement fails, restore the previous publication
+and report failure.</p>
+<p>The implementation must account for Windows rename behavior, open handles,
+read-only Git files, and antivirus races. Retry only bounded transient rename
+failures and preserve a recoverable backup when rollback cannot complete.</p>
+<h3 id="10-use-conservative-git-push-and-bidirectional-rules">10. Use conservative Git push and bidirectional rules<a class="headerlink" href="#10-use-conservative-git-push-and-bidirectional-rules" title="Permanent link">¤</a></h3>
+<p>For push, the synchronization manager uses the selected provider's tree
+operations:</p>
+<ol>
+<li>Lock the Data Source and snapshot the clean published folder.</li>
+<li>Fetch the source ref.</li>
+<li>Compare the source revision, last synchronized revision, and local
+   manifest.</li>
+<li>Materialize the snapshot as GitHub blobs/tree objects or in the private Git
+   worktree.</li>
+<li>Create a commit only when there is a content change.</li>
+<li>Update the GitHub ref with <code>force=false</code> or push Git normally; never force
+   push.</li>
+<li>Persist the accepted source commit and local manifest.</li>
+</ol>
+<p>For <code>bidirectional</code>, track both the immutable source revision and local content
+manifest from the last successful synchronization:</p>
+<table>
+<thead>
+<tr>
+<th>Source changed</th>
+<th>Local changed</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>no</td>
+<td>no</td>
+<td>no-op</td>
+</tr>
+<tr>
+<td>yes</td>
+<td>no</td>
+<td>pull; publish according to <code>auto_publish</code></td>
+</tr>
+<tr>
+<td>no</td>
+<td>yes</td>
+<td>commit and push</td>
+</tr>
+<tr>
+<td>yes</td>
+<td>yes</td>
+<td>fail with conflict details</td>
+</tr>
+</tbody>
+</table>
+<p>The first implementation deliberately fails even when Git could automatically
+merge both changes. An operator resolves the conflict in Git or locally and
+retries. This avoids an automation service silently choosing content.</p>
+<p>Source deletion is propagated on pull. Local deletion is included in a push.
+<code>dry_run</code> reports these changes without modifying either side.</p>
+<p>GitHub branch protection/rulesets, required reviews, and server-side hooks
+remain authoritative; a rejected GitHub reference update or Git push is a
+normal failed result and does not trigger a force push or API bypass.</p>
+<h3 id="11-use-one-lightweight-file-sharing-synchronization-loop">11. Use one lightweight File Sharing synchronization loop<a class="headerlink" href="#11-use-one-lightweight-file-sharing-synchronization-loop" title="Permanent link">¤</a></h3>
+<p>File Sharing may start one daemon synchronization loop when at least one Data
+Source has <code>sync_interval &gt; 0</code>. The loop:</p>
+<ul>
+<li>uses the worker exit event;</li>
+<li>wakes for the next due Data Source rather than polling continuously;</li>
+<li>calls the same sync-manager methods as explicit tasks;</li>
+<li>has a per-source lock so scheduled and manual runs cannot overlap;</li>
+<li>applies bounded operation timeouts;</li>
+<li>records failure and schedules the next normal interval without a tight retry
+  loop.</li>
+</ul>
+<p>Do not put external data-source operations in <code>WorkerWatchDog.watchdog_tasks</code>.
+Watchdog callbacks run inline with worker health checks, and a slow Git or S3
+operation should not delay those checks.</p>
+<p>The first implementation may deliver explicit tasks before enabling the loop,
+but the state, locking, and task contracts must be shared so scheduling does
+not require an architectural change.</p>
+<h3 id="12-harden-local-path-handling-before-publishing-data-source-content">12. Harden local path handling before publishing data-source content<a class="headerlink" href="#12-harden-local-path-handling-before-publishing-data-source-content" title="Permanent link">¤</a></h3>
+<p>The current File Sharing path check uses <code>abspath</code> and <code>commonpath</code>. That blocks
+lexical <code>..</code> traversal but does not by itself prevent an existing symlink below
+<code>base_dir</code> from resolving outside it.</p>
+<p>Before publication from any external Data Source is enabled:</p>
+<ul>
+<li>resolve the base and candidate with <code>realpath</code>/<code>Path.resolve()</code> and verify
+  containment;</li>
+<li>define and test Windows drive, UNC, separator, and case-normalization cases;</li>
+<li>do not follow directory symlinks in <code>walk()</code>;</li>
+<li>exclude provider state, <code>.git</code>, temporary, backup, and internal
+  <code>__norfab__</code> directories explicitly;</li>
+<li>reject special files such as devices, sockets, and named pipes;</li>
+<li>reject symlinks in externally sourced trees in the first implementation;</li>
+<li>apply the same rules after URI percent-decoding.</li>
+</ul>
+<p>This hardening is required even though provider-private state sits outside the
+published directory, because an external repository can contain malicious paths
+or symlinks.</p>
+<h3 id="13-make-external-data-source-access-policy-explicit">13. Make external data-source access policy explicit<a class="headerlink" href="#13-make-external-data-source-access-policy-explicit" title="Permanent link">¤</a></h3>
+<p>Expanding <code>NFPWorker.is_url()</code> can turn existing remotely callable tasks into
+external Data Source fetchers. Therefore:</p>
+<ul>
+<li>only <code>nf</code> is enabled by default;</li>
+<li>every additional direct scheme is opt-in per process inventory;</li>
+<li>host allowlists are checked after DNS resolution and again on redirects;</li>
+<li>loopback, link-local, and private destinations are denied by default for
+  HTTP-like providers unless explicitly allowed;</li>
+<li>redirects cannot change to a disallowed scheme or host;</li>
+<li>providers use connection, read, and total timeouts plus byte limits;</li>
+<li>the GitHub provider accepts only configured HTTPS API base URLs, pins an API
+  version, validates response content types, and applies rate-limit responses;</li>
+<li>HTTP(S) user-info and all password-bearing user-info are rejected so
+  credentials cannot arrive in task arguments; <code>git+ssh</code> may contain a
+  username such as <code>git</code> but never a password;</li>
+<li>errors and metadata use sanitized source identifiers;</li>
+<li>File Sharing Data Source tasks use preconfigured source names only.</li>
+</ul>
+<p>TFTP and native unencrypted FTP or Git transports must be disabled by default
+and documented as insecure when an adapter is added. Prefer HTTPS, SSH/SFTP,
+and authenticated object-store APIs.</p>
+<h2 id="minimal-code-change-boundary">Minimal Code Change Boundary<a class="headerlink" href="#minimal-code-change-boundary" title="Permanent link">¤</a></h2>
+<p>The first implementation should be limited to:</p>
+<ol>
+<li>Add provider contracts and registry in one core module.</li>
+<li>Extract the existing <code>nf://</code> body of <code>NFPClient.fetch_file()</code> into the
+   built-in NF provider or a private NF adapter, add <code>destination</code>, and add the
+   small tree facade methods.</li>
+<li>Change <code>NFPWorker.is_url()</code> to consult client capabilities. Keep
+   <code>NFPWorker.fetch_file()</code> call sites intact.</li>
+<li>Add one GitHub REST API provider module and one generic Git provider module.</li>
+<li>Add File Sharing Data Source models and one synchronization manager module.</li>
+<li>Add the seven File Sharing Data Source tasks and, after task behavior is stable,
+   the optional synchronization loop.</li>
+<li>Harden File Sharing path resolution and walking.</li>
+<li>Add one entry-point group for external providers. Use a small HTTP client
+   rather than a GitHub-specific SDK, and place the maintained JWT/cryptographic
+   dependency needed for GitHub App authentication in an optional
+   <code>githubdatasource</code> installation extra.</li>
+</ol>
+<p>No change is required in the broker, NFP constants, message builder, worker
+job database, or existing stream/PUT flow.</p>
+<h2 id="implementation-sequence">Implementation Sequence<a class="headerlink" href="#implementation-sequence" title="Permanent link">¤</a></h2>
+<h3 id="phase-1-provider-boundary-and-compatibility">Phase 1 - Provider boundary and compatibility<a class="headerlink" href="#phase-1-provider-boundary-and-compatibility" title="Permanent link">¤</a></h3>
+<ul>
+<li>Add provider contracts, registry, normalized results, and policy checks.</li>
+<li>Wrap the current NF transfer code without changing behavior.</li>
+<li>Add <code>destination</code> and collision-safe paths for non-NF sources.</li>
+<li>Delegate worker URL recognition to the client.</li>
+<li>Add unit tests using a fake provider loaded directly and through an entry
+  point.</li>
+</ul>
+<h3 id="phase-2-github-api-and-generic-git-pull">Phase 2 - GitHub API and generic Git pull<a class="headerlink" href="#phase-2-github-api-and-generic-git-pull" title="Permanent link">¤</a></h3>
+<ul>
+<li>Add GitHub and Git Data Source parsing and authentication references.</li>
+<li>Implement the GitHub API client with explicit versioning, GitHub App token
+  refresh, fine-grained PAT support, rate-limit handling, ref/tree/blob reads,
+  and GitHub Enterprise API base URLs.</li>
+<li>Implement generic Git immutable-ref resolution and private clone/fetch.</li>
+<li>Implement shared clean export, validation, manifest generation, and atomic
+  publication for both providers.</li>
+<li>Add <code>data_source_list</code>, <code>data_source_status</code>, <code>data_source_files</code>,
+  <code>data_source_pull</code>, and <code>data_source_publish</code>.</li>
+<li>Verify that published files are immediately retrievable with their expected
+  <code>nf://</code> paths.</li>
+</ul>
+<h3 id="phase-3-github-api-and-generic-git-push">Phase 3 - GitHub API and generic Git push<a class="headerlink" href="#phase-3-github-api-and-generic-git-push" title="Permanent link">¤</a></h3>
+<ul>
+<li>Add GitHub blob/tree/commit creation and non-force reference updates.</li>
+<li>Add generic Git snapshot, commit, non-force push, expected-revision checks,
+  and dry run.</li>
+<li>Add <code>data_source_push</code> and <code>data_source_sync</code>.</li>
+<li>Implement the fail-on-both-changed conflict matrix.</li>
+<li>Test rejected GitHub reference updates, rejected Git pushes, and recovery
+  without losing the local publication.</li>
+</ul>
+<h3 id="phase-4-continuous-synchronization-and-additional-providers">Phase 4 - Continuous synchronization and additional providers<a class="headerlink" href="#phase-4-continuous-synchronization-and-additional-providers" title="Permanent link">¤</a></h3>
+<ul>
+<li>Add the optional File Sharing synchronization loop.</li>
+<li>Implement HTTP/HTTPS file fetch as an additional provider to prove that the
+  contract is not Git-specific.</li>
+<li>Add FTP, TFTP, SFTP/SCP, and S3 only as separately tested providers with
+  capability-appropriate semantics and optional dependencies.</li>
+</ul>
+<h2 id="testing-and-validation">Testing and Validation<a class="headerlink" href="#testing-and-validation" title="Permanent link">¤</a></h2>
+<h3 id="compatibility-tests">Compatibility tests<a class="headerlink" href="#compatibility-tests" title="Permanent link">¤</a></h3>
+<ul>
+<li>All current File Sharing and <code>nf://</code> tests pass unchanged.</li>
+<li>Existing Nornir, workflow, agent, and Containerlab URL call sites continue to
+  work.</li>
+<li>Unknown or disabled schemes return a deterministic unsupported-scheme error.</li>
+<li>The legacy result keys and default NF cache location remain unchanged.</li>
+</ul>
+<h3 id="provider-tests">Provider tests<a class="headerlink" href="#provider-tests" title="Permanent link">¤</a></h3>
+<ul>
+<li>Registry selection uses the parsed scheme and detects duplicate providers.</li>
+<li>Optional-provider import failure does not break client startup.</li>
+<li>Capability checks reject unsupported push or tree operations before doing
+  local or external source work.</li>
+<li>Destination traversal, URL user-info, unsafe redirects, and sanitized errors
+  are covered.</li>
+</ul>
+<h3 id="github-api-tests">GitHub API tests<a class="headerlink" href="#github-api-tests" title="Permanent link">¤</a></h3>
+<ul>
+<li>Use a fake HTTP transport for deterministic ref, commit, tree, blob,
+  authentication, pagination/truncation, API-version, and rate-limit tests.</li>
+<li>Test GitHub App installation token refresh and fine-grained PAT header
+  construction without placing token values in recorded requests or output.</li>
+<li>Test the complete write sequence: compare ref, create blobs, create tree,
+  create commit, and update ref with <code>force=false</code>.</li>
+<li>Test a reference race, branch-rule rejection, API timeout, malformed response,
+  exhausted rate limit, and GitHub Enterprise API base URL.</li>
+<li>Keep one credential-gated GitHub repository integration test in CI for API
+  contract validation; it may be skipped when credentials are unavailable.</li>
+</ul>
+<h3 id="generic-git-tests">Generic Git tests<a class="headerlink" href="#generic-git-tests" title="Permanent link">¤</a></h3>
+<ul>
+<li>Use local bare repositories for clone, pull, push, deletion, tag, branch, and
+  pinned-commit tests.</li>
+<li>Test a source-only change, local-only change, both-sides conflict, no-op,
+  non-fast-forward rejection, and branch-protection-like rejection.</li>
+<li>Test credentials never appear in command arguments, logs, state, events, or
+  results.</li>
+<li>Test missing Git executable and operation timeout behavior.</li>
+<li>Run filesystem cases on Windows and POSIX.</li>
+</ul>
+<h3 id="file-sharing-tests">File Sharing tests<a class="headerlink" href="#file-sharing-tests" title="Permanent link">¤</a></h3>
+<ul>
+<li>Pulled content is visible at the configured <code>nf://</code> path only after complete
+  publication.</li>
+<li>A source with <code>auto_publish: false</code> reaches <code>pending_publication</code> without
+  changing the live <code>nf://</code> tree; <code>data_source_publish</code> then promotes the
+  selected generation and changes status to <code>current</code>.</li>
+<li>Data File records contain source-relative path, size, SHA256, source revision,
+  and <code>last_updated</code>; an unchanged resynchronization does not change
+  <code>last_updated</code>.</li>
+<li>Disabled Data Sources cannot be synchronized manually or by the scheduler,
+  and absent/zero <code>sync_interval</code> sources remain manual-only.</li>
+<li>Ignore rules match both source-relative paths and bare filenames.</li>
+<li>Concurrent manual and scheduled sync attempts for one Data Source do not
+  overlap.</li>
+<li>Failed export or rename preserves or restores the last good publication.</li>
+<li>Overlapping Data Source paths, symlinks, special files, <code>.git</code>, internal folders,
+  file-count limits, and byte limits are rejected.</li>
+<li><code>data_source_status</code> survives worker restart and contains no secrets.</li>
+</ul>
+<p>The default local suite must not require GitHub access. The credential-gated
+GitHub integration test verifies the first-class integration in an integration
+CI job and is not replaced by generic Git tests.</p>
+<h2 id="alternatives-considered">Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Permanent link">¤</a></h2>
+<h3 id="implement-every-scheme-directly-in-nfpclientfetch_file">Implement every scheme directly in <code>NFPClient.fetch_file()</code><a class="headerlink" href="#implement-every-scheme-directly-in-nfpclientfetch_file" title="Permanent link">¤</a></h3>
+<p>Rejected because the client would accumulate protocol dependencies and
+scheme-specific policy. Tree synchronization and revision conflicts also do
+not fit a single-file method.</p>
+<h3 id="route-every-data-source-through-file-sharing">Route every Data Source through File Sharing<a class="headerlink" href="#route-every-data-source-through-file-sharing" title="Permanent link">¤</a></h3>
+<p>Rejected as the only mode because workers and local clients sometimes need a
+direct, short-lived fetch and should not incur broker streaming or require a
+shared cache. File Sharing remains the correct mode for controlled,
+persistent, fan-out distribution through <code>nf://</code>.</p>
+<h3 id="let-every-worker-implement-its-own-data-source-downloads">Let every worker implement its own Data Source downloads<a class="headerlink" href="#let-every-worker-implement-its-own-data-source-downloads" title="Permanent link">¤</a></h3>
+<p>Rejected because URL parsing, authentication, policy, caching, and error
+behavior would diverge. All workers already have an embedded client that can
+provide one facade.</p>
+<h3 id="clone-git-repositories-directly-into-base_dir">Clone Git repositories directly into <code>base_dir</code><a class="headerlink" href="#clone-git-repositories-directly-into-base_dir" title="Permanent link">¤</a></h3>
+<p>Rejected because it exposes metadata, makes partial updates observable, risks
+following externally supplied symlinks, and complicates rollback.</p>
+<h3 id="treat-github-only-as-a-generic-git-remote">Treat GitHub only as a generic Git remote<a class="headerlink" href="#treat-github-only-as-a-generic-git-remote" title="Permanent link">¤</a></h3>
+<p>Rejected because GitHub is explicitly a first-iteration integration target.
+Using only Git transport would omit GitHub App authentication, API versioning,
+rate-limit visibility, GitHub Enterprise API configuration, structured
+repository errors, and direct enforcement feedback from branch rules.</p>
+<h3 id="use-only-the-github-api-and-omit-generic-git">Use only the GitHub API and omit generic Git<a class="headerlink" href="#use-only-the-github-api-and-omit-generic-git" title="Permanent link">¤</a></h3>
+<p>Rejected because the design must also work with non-GitHub remotes. GitHub and
+generic Git share the provider contract and synchronization manager, but keep
+their authentication and transport implementations separate.</p>
+<h3 id="automatically-merge-bidirectional-changes">Automatically merge bidirectional changes<a class="headerlink" href="#automatically-merge-bidirectional-changes" title="Permanent link">¤</a></h3>
+<p>Rejected for the first implementation because file automation should not
+silently choose merge results. Explicit conflict failure is deterministic and
+recoverable.</p>
+<h3 id="add-data-source-operations-to-the-nfp-protocol">Add Data Source operations to the NFP protocol<a class="headerlink" href="#add-data-source-operations-to-the-nfp-protocol" title="Permanent link">¤</a></h3>
+<p>Rejected because existing NFP jobs already invoke File Sharing tasks, and
+direct providers do not need broker participation. The current streaming flow
+remains suitable for <code>nf://</code> distribution.</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">¤</a></h2>
+<p>Positive consequences:</p>
+<ul>
+<li>Existing <code>nf://</code> consumers remain compatible.</li>
+<li>GitHub is a first-class API integration, including GitHub App authentication,
+  revision-aware reads/writes, rate-limit status, and branch-rule failures.</li>
+<li>GitHub and non-GitHub Git repositories can become centrally managed sources
+  and destinations for files distributed through NorFab.</li>
+<li>Individual workers can fetch from approved Data Sources without service-specific
+  implementations.</li>
+<li>Later providers are isolated and can carry optional dependencies.</li>
+<li>Revision and manifest state make synchronization observable and conflicts
+  explicit.</li>
+<li>Named Data Sources and Data File manifests give operators stable status,
+  provenance, hashes, and content-change timestamps.</li>
+<li>Optional two-stage publication can keep synchronized changes out of active
+  automation until they are explicitly approved.</li>
+<li>Broker and NFP transport code remain untouched.</li>
+</ul>
+<p>Costs and tradeoffs:</p>
+<ul>
+<li><code>NFPClient</code> gains a facade responsibility beyond NFP, although provider
+  behavior remains outside the class.</li>
+<li>Generic Git support depends on a local Git executable; GitHub API support
+  does not.</li>
+<li>Safe tree publication requires staging disk space, generally up to the size
+  of the current and next trees plus private provider state.</li>
+<li>Continuous synchronization adds one File Sharing background thread.</li>
+<li>Bidirectional conflicts require operator intervention.</li>
+<li>Multi-writer shared publication folders remain unsupported.</li>
+</ul>
+<h2 id="acceptance-criteria">Acceptance Criteria<a class="headerlink" href="#acceptance-criteria" title="Permanent link">¤</a></h2>
+<ul>
+<li><code>nf://</code> behavior and tests remain backward compatible.</li>
+<li>A provider can be added through <code>norfab.data_source_providers</code> without editing
+  <code>NFPClient</code>, <code>NFPWorker</code>, or File Sharing scheme dispatch.</li>
+<li>Enabled workers can fetch a file through at least one non-NF provider using
+  the existing worker helper.</li>
+<li>A configured GitHub repository path can be pulled, atomically published, and
+  fetched by another worker through <code>nf://</code>.</li>
+<li>GitHub pull and push use the versioned GitHub REST API and support GitHub App
+  installation authentication plus fine-grained PAT authentication.</li>
+<li>A configured generic Git remote can perform the same pull, push, and
+  conflict-safe synchronization through the Git provider.</li>
+<li>Local-only changes can be committed and pushed without force.</li>
+<li>Simultaneous local and source changes fail safely and preserve both the last
+  published local tree and the source branch.</li>
+<li>Credentials are referenced indirectly and do not appear in URLs, logs,
+  events, task results, or persisted sync state.</li>
+<li>Data Sources are disabled by default and constrained by scheme, host,
+  timeout, path, file-count, and byte policies.</li>
+<li>Public inventory, task, state, and result vocabulary uses <code>data_source</code> and
+  <code>data_sources</code>; no second "remote profile" object is introduced.</li>
+<li>Each synchronized file has Data File metadata containing source-relative
+  path, size, SHA256, content-change time, source revision, and publication
+  generation.</li>
+<li><code>auto_publish: false</code> supports synchronization into a pending generation
+  without modifying the live <code>nf://</code> tree.</li>
+<li>Symlink escape and traversal tests pass on Windows and POSIX.</li>
+<li>No broker or NFP protocol change is needed.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">¤</a></h2>
+<ul>
+<li><a href="https://netboxlabs.com/docs/netbox/features/synchronized-data/">NetBox synchronized data</a></li>
+<li><a href="https://netboxlabs.com/docs/netbox/models/core/datasource/">NetBox Data Source model</a></li>
+<li><a href="https://netboxlabs.com/docs/netbox/models/core/datafile/">NetBox Data File model</a></li>
+<li><a href="https://docs.github.com/en/rest/about-the-rest-api/api-versions">GitHub REST API versions</a></li>
+<li><a href="https://docs.github.com/en/rest/authentication">Authenticating to the GitHub REST API</a></li>
+<li><a href="https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app">GitHub App installation access tokens</a></li>
+<li><a href="https://docs.github.com/en/rest/git">GitHub Git database REST API</a></li>
+<li><a href="https://docs.github.com/en/rest/git/trees">Git tree endpoints</a></li>
+<li><a href="https://docs.github.com/en/rest/git/commits">Git commit endpoints</a></li>
+<li><a href="https://docs.github.com/en/rest/git/refs">Git reference endpoints</a></li>
+<li><a href="https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api">GitHub REST API rate limits</a></li>
+<li><a href="https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api">GitHub REST API best practices</a></li>
+</ul>
+<h2 id="approval-boundary">Approval Boundary<a class="headerlink" href="#approval-boundary" title="Permanent link">¤</a></h2>
+<p>This ADR proposes architecture and sequencing only. It does not authorize
+implementation, dependency changes, GitHub repository writes, or enabling any
+Data Source. Those changes should follow approval of the provider contract,
+URL forms, security policy, and conflict behavior described here.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/dmulyalin" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M202.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M496 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/DMulyalin" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
