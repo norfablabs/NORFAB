@@ -273,6 +273,7 @@ nav:
     - NFWeb Platform and First 3D Topology: development/adr_web_ui_topology_architecture.md
     - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
     - Nornir Create Hosts from NetBox Devices: development/adr_nornir_create_hosts_from_netbox_devices.md
+    - Single-Owner ZeroMQ Socket I/O: development/adr_norfab_single_owner_zeromq_socket_io.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
     - Netbox Service Tests: testing/netbox_service_tests.md

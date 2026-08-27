@@ -1,3 +1,16 @@
+# 0.21.2
+
+## BUGS
+
+1. Fixed a client job result collection race that could return `None` to callers, including FastAPI endpoints, after a worker had completed successfully. Final job snapshots now take precedence over mutable database state, terminal job statuses (`COMPLETED`, `FAILED`, and `STALE`) cannot transition to another status, and late polling responses are ignored for finished jobs.
+2. Fixed ZeroMQ socket lock starvation introduced by the 0.21.1 keepalive scheduling changes.
+
+## ENHANCEMENTS
+
+1. Refactored broker socket I/O so each ZeroMQ socket is owned by one loop, with bounded client and worker outbound queues drained by `zmq_send_recv`.
+
+---
+
 # 0.21.1
 
 ## FEATURES

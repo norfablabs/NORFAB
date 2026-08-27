@@ -48,7 +48,6 @@ except Exception:
 
 log = logging.getLogger(__name__)
 
-
 # --------------------------------------------------------------------------------------------
 # NORFAB Worker Job Object
 # --------------------------------------------------------------------------------------------
@@ -1506,14 +1505,14 @@ def _event(worker, event_queue, destroy_event) -> None:
         event_queue.task_done()
 
 
-def recv(worker, destroy_event) -> None:
+def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
     """
-    Thread to process receive messages from broker.
+    ZeroMQ send/receive thread.
 
-    This function runs in a loop, polling the worker's broker socket for messages every second.
-    When a message is received, it processes the message based on the command type and places
-    it into the appropriate queue or handles it accordingly. If the keepaliver thread is not
-    alive, it logs a warning and attempts to reconnect to the broker.
+    This function owns the worker's broker socket. Other threads submit prepared
+    messages to the outbound queue instead of touching the socket directly.
+    It drains outbound messages, sends due keepalives, polls the socket, and
+    processes received messages.
 
     Args:
         worker (Worker): The worker instance that contains the broker socket and queues.
@@ -1528,19 +1527,41 @@ def recv(worker, destroy_event) -> None:
         - Other: Logs an invalid input message.
     """
     while not destroy_event.is_set():
+        for _ in range(NFP.ZMQ_SEND_RECV_DRAIN_LIMIT):
+            try:
+                outbound = worker.outbound_queue.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                if not worker.destroy_event.is_set():
+                    worker.broker_socket.send_multipart(outbound)
+            except Exception as e:
+                log.error(
+                    f"{worker.name} - failed to send queued message to broker, "
+                    f"error '{e}'",
+                    exc_info=True,
+                )
+
+        if worker.keepaliver and worker.keepaliver.due():
+            try:
+                if not worker.destroy_event.is_set():
+                    worker.broker_socket.send_multipart(
+                        worker.keepaliver.make_message()
+                    )
+            except Exception as e:
+                log.error(
+                    f"{worker.name} - failed to send keepalive to broker, error '{e}'"
+                )
+
         msg = None
         try:
-            # Serialize polling and receiving with keepalive and job-thread
-            # sends. ZeroMQ sockets are not thread-safe.
-            with worker.socket_lock:
-                items = worker.poller.poll(100)
-                if items:
-                    try:
-                        msg = worker.broker_socket.recv_multipart(zmq.NOBLOCK)
-                    except zmq.Again:
-                        # Readiness can become stale; resume polling instead of
-                        # blocking while holding the socket lock.
-                        pass
+            items = worker.poller.poll(NFP.ZMQ_SEND_RECV_POLL_TIMEOUT_MS)
+            if items:
+                try:
+                    msg = worker.broker_socket.recv_multipart(zmq.NOBLOCK)
+                except zmq.Again:
+                    # Readiness can become stale; resume polling instead of blocking.
+                    pass
         except KeyboardInterrupt:
             break  # Interrupted
 
@@ -1561,7 +1582,15 @@ def recv(worker, destroy_event) -> None:
             elif command == NFP.KEEPALIVE:
                 worker.keepaliver.received_heartbeat([header] + msg)
             elif command == NFP.DISCONNECT:
-                worker.reconnect_to_broker()
+                ready_msg = worker.reconnect_to_broker(queue_ready=False)
+                if ready_msg and not worker.destroy_event.is_set():
+                    try:
+                        worker.broker_socket.send_multipart(ready_msg)
+                    except Exception as e:
+                        log.error(
+                            f"{worker.name} - failed to send ready to broker, "
+                            f"error '{e}'"
+                        )
             else:
                 log.debug(
                     f"{worker.name} - invalid input, header '{header}', command '{command}', message '{msg}'"
@@ -1569,7 +1598,25 @@ def recv(worker, destroy_event) -> None:
 
         if not worker.keepaliver.is_alive():
             log.warning(f"{worker.name} - '{worker.broker}' broker keepalive expired")
-            worker.reconnect_to_broker()
+            if not worker.destroy_event.is_set():
+                disconnect_msg = worker.build_message.worker_to_broker_disconnect(
+                    service=worker.service
+                )
+                try:
+                    worker.broker_socket.send_multipart(disconnect_msg)
+                except Exception as e:
+                    log.error(
+                        f"{worker.name} - failed to send disconnect to broker, "
+                        f"error '{e}'"
+                    )
+            ready_msg = worker.reconnect_to_broker(queue_ready=False)
+            if ready_msg and not worker.destroy_event.is_set():
+                try:
+                    worker.broker_socket.send_multipart(ready_msg)
+                except Exception as e:
+                    log.error(
+                        f"{worker.name} - failed to send ready to broker, error '{e}'"
+                    )
 
 
 class NFPWorker:
@@ -1616,9 +1663,6 @@ class NFPWorker:
         self.broker_socket = None
         self.multiplier = multiplier
         self.keepalive = keepalive
-        # Re-entrant because reconnect holds this lock while using the normal
-        # send path to emit DISCONNECT and READY messages.
-        self.socket_lock = threading.RLock()
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.build_message = NFP.MessageBuilder()
 
@@ -1651,6 +1695,7 @@ class NFPWorker:
         self.delete_queue = queue.Queue(maxsize=0)
         self.event_queue = queue.Queue(maxsize=0)
         self.put_queue = queue.Queue(maxsize=0)
+        self.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
 
         # generate certificates and create directories
         if self.zmq_auth is not False:
@@ -1709,82 +1754,85 @@ class NFPWorker:
             inventory_logging=self.inventory.logging,
         )
 
-    def reconnect_to_broker(self) -> None:
+    def reconnect_to_broker(self, queue_ready: bool = True) -> list | None:
         """
         Connect or reconnect to the broker.
 
         This method handles the connection or reconnection process to the broker.
         It performs the following steps:
 
-        1. If there is an existing broker socket, it sends a disconnect message,
-           unregisters the socket from the poller, and closes the socket.
+        1. If there is an existing broker socket, unregisters it from the poller
+           and closes it.
         2. Creates a new DEALER socket and sets its identity.
         3. Loads the client's secret and public keys for CURVE authentication.
         4. Loads the server's public key for CURVE authentication.
         5. Connects the socket to the broker.
         6. Registers the socket with the poller for incoming messages.
-        7. Sends a READY message to the broker to register the service.
+        7. Builds a READY message to register the service.
         8. Starts or restarts the keepalive mechanism to maintain the connection.
         9. Increments the reconnect statistics counter.
         10. Logs the successful registration to the broker.
+
+        Args:
+            queue_ready: If True, queue the READY frame. If False, return the
+                READY frame so the socket owner can send it immediately before
+                any queued worker messages.
         """
-        with self.socket_lock:
-            if self.broker_socket:
-                self.send_to_broker(NFP.DISCONNECT)
-                self.poller.unregister(self.broker_socket)
-                self.broker_socket.close()
+        if self.broker_socket:
+            self.poller.unregister(self.broker_socket)
+            self.broker_socket.close()
 
-            self.broker_socket = self.ctx.socket(zmq.DEALER)
-            self.broker_socket.setsockopt_unicode(zmq.IDENTITY, self.name, "utf8")
-            self.broker_socket.linger = 0
+        self.broker_socket = self.ctx.socket(zmq.DEALER)
+        self.broker_socket.setsockopt_unicode(zmq.IDENTITY, self.name, "utf8")
+        self.broker_socket.linger = 0
 
-            if self.zmq_auth is not False:
-                # We need two certificates, one for the client and one for
-                # the server. The client must know the server's public key
-                # to make a CURVE connection.
-                client_secret_file = os.path.join(
-                    self.secret_keys_dir, f"{self.name}.key_secret"
-                )
-                client_public, client_secret = zmq.auth.load_certificate(
-                    client_secret_file
-                )
-                self.broker_socket.curve_secretkey = client_secret
-                self.broker_socket.curve_publickey = client_public
+        if self.zmq_auth is not False:
+            # We need two certificates, one for the client and one for
+            # the server. The client must know the server's public key
+            # to make a CURVE connection.
+            client_secret_file = os.path.join(
+                self.secret_keys_dir, f"{self.name}.key_secret"
+            )
+            client_public, client_secret = zmq.auth.load_certificate(client_secret_file)
+            self.broker_socket.curve_secretkey = client_secret
+            self.broker_socket.curve_publickey = client_public
 
-                # The client must know the server's public key to make a CURVE connection.
-                server_public_file = os.path.join(self.public_keys_dir, "broker.key")
-                server_public, _ = zmq.auth.load_certificate(server_public_file)
-                self.broker_socket.curve_serverkey = server_public
+            # The client must know the server's public key to make a CURVE connection.
+            server_public_file = os.path.join(self.public_keys_dir, "broker.key")
+            server_public, _ = zmq.auth.load_certificate(server_public_file)
+            self.broker_socket.curve_serverkey = server_public
 
-            self.broker_socket.connect(self.broker)
-            self.poller.register(self.broker_socket, zmq.POLLIN)
+        self.broker_socket.connect(self.broker)
+        self.poller.register(self.broker_socket, zmq.POLLIN)
 
-            # Register service with broker
-            self.send_to_broker(NFP.READY)
-            log.debug(f"{self.name} - NFP.READY sent to broker '{self.broker}'")
+        # Register service with broker
+        ready_msg = self.build_message.worker_to_broker_ready(service=self.service)
+        if queue_ready:
+            self.outbound_queue.put(
+                ready_msg, block=True, timeout=NFP.OUTBOUND_QUEUE_TIMEOUT
+            )
+        log.debug(f"{self.name} - NFP.READY prepared for broker '{self.broker}'")
 
-            # Start or retarget keepalives while socket replacement is locked.
-            if self.keepaliver is not None:
-                self.keepaliver.restart(self.broker_socket)
-            else:
-                self.keepaliver = KeepAliver(
-                    address=None,
-                    socket=self.broker_socket,
-                    multiplier=self.multiplier,
-                    keepalive=self.keepalive,
-                    exit_event=self.destroy_event,
-                    service=self.service,
-                    whoami=NFP.WORKER,
-                    name=self.name,
-                    socket_lock=self.socket_lock,
-                )
-                self.keepaliver.start()
+        if self.keepaliver is not None:
+            self.keepaliver.restart()
+        else:
+            self.keepaliver = KeepAliver(
+                address=None,
+                multiplier=self.multiplier,
+                keepalive=self.keepalive,
+                exit_event=self.destroy_event,
+                service=self.service,
+                whoami=NFP.WORKER,
+                name=self.name,
+            )
+            self.keepaliver.start()
 
         self.stats_reconnect_to_broker += 1
         log.info(
             f"{self.name} - registered to broker at '{self.broker}', "
             f"service '{self.service.decode('utf-8')}'"
         )
+        return None if queue_ready else ready_msg
 
     def send_to_broker(self, command: str, msg: list = None) -> None:
         """
@@ -1799,7 +1847,9 @@ class NFPWorker:
             Logs a debug message with the message being sent.
 
         Thread Safety:
-            This method is thread-safe and uses a lock to ensure that the broker socket is accessed by only one thread at a time.
+            This method is thread-safe because non-owner threads only submit
+            prepared messages to the outbound queue. The zmq_send_recv thread
+            owns the ZeroMQ socket.
         """
         if command == NFP.READY:
             msg = self.build_message.worker_to_broker_ready(service=self.service)
@@ -1817,10 +1867,18 @@ class NFPWorker:
             )
             return
 
-        log.debug(f"{self.name} - sending '{msg}'")
+        log.debug(f"{self.name} - queueing '{msg}'")
 
-        with self.socket_lock:
-            self.broker_socket.send_multipart(msg)
+        if self.destroy_event.is_set():
+            return
+
+        try:
+            self.outbound_queue.put_nowait(msg)
+        except queue.Full:
+            log.warning(
+                f"{self.name} - outbound queue is full, dropping '{command}' "
+                f"message to broker"
+            )
 
     def load_inventory(self) -> dict:
         """
@@ -2410,7 +2468,7 @@ class NFPWorker:
             - request_thread: Handles posting requests using the _post function.
             - reply_thread: Handles receiving replies using the _get function.
             - event_thread: Handles event processing using the _event function.
-            - recv_thread: Handles receiving data using the recv function.
+            - recv_thread: Handles ZeroMQ send/receive using the zmq_send_recv function.
 
         Each thread is started as a daemon and is provided with the necessary arguments,
         including queues and events as required.
@@ -2457,9 +2515,9 @@ class NFPWorker:
         self.put_thread.start()
         # start receive thread after other threads
         self.recv_thread = threading.Thread(
-            target=recv,
+            target=zmq_send_recv,
             daemon=True,
-            name=f"{self.name}_recv_thread",
+            name=f"{self.name}_zmq_send_recv_thread",
             args=(
                 self,
                 self.destroy_event,

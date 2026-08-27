@@ -77,6 +77,12 @@ FRAME_COUNTS = {
     "worker_response_min": 3,  # empty, header, command + response data
 }
 
+# ZeroMQ socket owner loop defaults
+OUTBOUND_QUEUE_SIZE = 1000
+OUTBOUND_QUEUE_TIMEOUT = 0.1
+ZMQ_SEND_RECV_POLL_TIMEOUT_MS = 10
+ZMQ_SEND_RECV_DRAIN_LIMIT = 100
+
 
 class MessageBuilder:
     """Builder class for constructing NFP protocol messages."""
